@@ -51,7 +51,11 @@ source env/bin/activate
  - **Install Golem from source**
 
 ```
-golem\setup.py develop
+cd golem
+```
+
+```
+python setup.py develop
 ```
 
 QuickStart
