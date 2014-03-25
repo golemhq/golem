@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>golem.core.core &mdash; golem 0.01 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.01',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="golem 0.01 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">golem 0.01 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for golem.core.core</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">argparse</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">importlib</span>
+
+<span class="kn">import</span> <span class="nn">utils</span>
+
+
+<div class="viewcode-block" id="execute_test_case"><a class="viewcode-back" href="../../../golem.core.html#golem.core.core.execute_test_case">[docs]</a><span class="k">def</span> <span class="nf">execute_test_case</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">test_case</span><span class="p">,</span> <span class="n">driver_selected</span><span class="p">):</span>
+
+    <span class="k">print</span> <span class="s">&#39;Executing test case </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">test_case</span>
+
+    <span class="c">#exec(&#39;import %s.test_cases.%s&#39; % (args.project, test_case_selected)) #module = __import__(module_name) #class_ = getattr(module, class_name) #instance = class_()</span>
+    <span class="c">#get test data</span>
+    <span class="n">data_dict_list</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_test_data</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">test_case</span><span class="p">)</span>
+
+    <span class="c">#run test case for each row in test data</span>
+    <span class="k">for</span> <span class="n">data_dict</span> <span class="ow">in</span> <span class="n">data_dict_list</span><span class="p">:</span>
+
+        <span class="c">#pre operations</span>
+        <span class="n">driver</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c">#get driver browser instance</span>
+        <span class="n">driver</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_driver</span><span class="p">(</span><span class="n">driver_selected</span><span class="p">)</span>
+
+        <span class="n">modulex</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s">&#39;projects.</span><span class="si">%s</span><span class="s">.test_cases.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">test_case</span><span class="p">),</span> <span class="n">package</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="n">test_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">modulex</span><span class="p">,</span> <span class="s">&#39;Testclass&#39;</span><span class="p">)</span>
+
+        <span class="c">#instance = test_class(driver, data_dict)</span>
+        <span class="n">test_class</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">)</span>
+        <span class="c">#post operation</span>
+        <span class="n">driver</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="execute_test_suite"><a class="viewcode-back" href="../../../golem.core.html#golem.core.core.execute_test_suite">[docs]</a><span class="k">def</span> <span class="nf">execute_test_suite</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">test_suite</span><span class="p">,</span> <span class="n">driver</span><span class="p">):</span>
+    <span class="n">suite_module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s">&#39;projects.</span><span class="si">%s</span><span class="s">.test_suites.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">test_suite</span><span class="p">),</span> <span class="n">package</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&#39;Executing suite </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s"> (</span><span class="si">%i</span><span class="s"> test cases)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">test_suite</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">suite_module</span><span class="o">.</span><span class="n">test_case_list</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">test_case</span> <span class="ow">in</span> <span class="n">suite_module</span><span class="o">.</span><span class="n">test_case_list</span><span class="p">:</span>
+        <span class="n">execute_test_case</span><span class="p">(</span><span class="n">project</span><span class="p">,</span><span class="n">test_case</span><span class="p">,</span><span class="n">driver</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="execute_from_command_line"><a class="viewcode-back" href="../../../golem.core.html#golem.core.core.execute_from_command_line">[docs]</a><span class="k">def</span> <span class="nf">execute_from_command_line</span><span class="p">():</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">dont_write_bytecode</span> <span class="o">=</span> <span class="bp">True</span> <span class="c">#remove for performance</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s">&#39;description&#39;</span><span class="p">,</span>
+        <span class="n">usage</span><span class="o">=</span><span class="s">&#39;golem project_name test_case|test_suite [-d driver] [-r repeat]&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;project&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">&#39;project&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s">&#39;?&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;project name&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;test&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">&#39;test&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s">&#39;?&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;test case or test suite to execute&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-d&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">&#39;driver&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;firefox&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;firefox&#39;</span><span class="p">,</span> <span class="s">&#39;chrome&#39;</span><span class="p">,</span> <span class="s">&#39;ie&#39;</span><span class="p">],</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;driver name, options: [&#39;firefox&#39;, &#39;chrome&#39;, &#39;ie&#39;]&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-r&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s">&#39;repeat&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;times to repeat test&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+
+    <span class="c">#current working directory</span>
+    <span class="c">#os.path.dirname(os.path.abspath(__file__))</span>
+    <span class="c">#cwd = os.getcwd()</span>
+
+    <span class="c">#check if project parameteris not present</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">project</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&#39;Usage:&#39;</span><span class="p">,</span><span class="n">parser</span><span class="o">.</span><span class="n">usage</span>
+        <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">Project List:&#39;</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+    <span class="c">#check if project does not exists</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="s">&#39;projects</span><span class="se">\\</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">args</span><span class="o">.</span><span class="n">project</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s">&quot;ERROR: the project </span><span class="si">%s</span><span class="s"> does not exist&quot;</span> <span class="o">%</span> <span class="n">args</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+
+    <span class="c">#check if test parameter is not present</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">test</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&#39;Usage:&#39;</span><span class="p">,</span><span class="n">parser</span><span class="o">.</span><span class="n">usage</span>
+        <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">Test Case List:&#39;</span>
+        <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">Test Suite List:&#39;</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+    <span class="c">#check if test case or test suite exists</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s">&#39;projects</span><span class="se">\\</span><span class="si">%s</span><span class="se">\\</span><span class="s">test_cases</span><span class="se">\\</span><span class="si">%s</span><span class="s">.py&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">test</span><span class="p">)):</span>
+        <span class="n">execute_test_case</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">test</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s">&#39;projects</span><span class="se">\\</span><span class="si">%s</span><span class="se">\\</span><span class="s">test_suites</span><span class="se">\\</span><span class="si">%s</span><span class="s">.py&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">test</span><span class="p">)):</span>
+        <span class="c">#test_suite = &#39;%s\\test_suites\\%s.py&#39; % (args.project, args.test)</span>
+        <span class="n">execute_test_suite</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">test</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s">&quot;ERROR: no test case or suite named </span><span class="si">%s</span><span class="s"> exists&quot;</span> <span class="o">%</span> <span class="n">args</span><span class="o">.</span><span class="n">test</span><span class="p">)</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">golem 0.01 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>
