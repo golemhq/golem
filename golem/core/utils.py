@@ -209,6 +209,17 @@ def get_current_time():
         return datetime.datetime.today().strftime(time_format)
 
 
-def create(action):
-    print 'demo location'
-    print 'destination'
+def create(name, source, destination):
+
+    import shutil
+
+    src = source
+    dst = destination
+    
+    
+    if name == 'demo':
+        for file in os.listdir(src):
+            path = os.path.join(src, file)
+            shutil.move(path, dst)
+    else:
+        print

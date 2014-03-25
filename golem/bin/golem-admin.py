@@ -6,18 +6,26 @@ import sys, os
 def execute_from_command_line():
 
     #set global variable values
-    action = sys.argv[0]
-    name = sys.argv[1]
+   
     
-     if action == 'create':
-        if test == 'demo':
-            print 'create demo'
-            utils.create('demo')
-            sys.exit()
-        elif test != '':
-            print 'create', test
-            utils.create(test)
-            sys.exit()
+    destination = os.getcwd()
+
+    import golem as a
+    source = os.path.dirname(a.__file__) + '\\demo\\.'
+
+    action = sys.argv[1]
+    name = sys.argv[2]
+    
+    if action == 'create':
+        if name != '':
+            if name == 'demo':
+                print 'Creating project: demo'
+                utils.create('demo', source, destination)
+                sys.exit()
+            else:
+                print 'Creating project:', name
+                utils.create(name, source, destination)
+                sys.exit()
         else:   
             print 'Select new project name'
             sys.exit()
