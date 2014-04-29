@@ -1,4 +1,4 @@
-[Golem](https://github.com/lucianopuccio/Golem/) - Test Automation Framework
+Golem - Test Automation Framework
 ==================================================
 
 Intro
@@ -6,7 +6,7 @@ Intro
 
 Golem is a test automation framework for functional tests, with keyworddriven and datadriven aproaches built in, multiplatform, written in python and currently using Selenium-Webdriver tool to fuel the automation engine.
 
-**Important!** Golem is currently in ultra-alpha stage, so handle with care. Test case scripts are designed to be resilient to future changes in the engine itself. Test it if you may, and every issue/improvement that you could submit would be highly appreciated. You may contact me here: mail at lucianopuccio.com. Thanks!
+**Important!** Golem is currently in alpha stage, so handle with care. Test it if you may, and feel free to submit any issue/improvement.
 
 
 Installation
@@ -30,19 +30,19 @@ git clone https://github.com/lucianopuccio/Golem.git
 
  - **Using virtualenv**
 
-It is optional but recommended to install Golem inside a virtual environment instead of globally (in not, just sip this step)
+It is optional but recommended to install Golem and it's dependencies in a [virtual environment](http://www.virtualenv.org/en/latest/) instead of globally.
 
 ```
 virtualenv env
 ```
 
-When using **Windows**:
+With **Windows**:
 
 ```
 env\scripts\activate
 ```
 
-When using **Unix**:
+With **Unix**:
 
 ```
 source env/bin/activate
