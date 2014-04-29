@@ -1,4 +1,4 @@
-improve the way django is launched
+migrate django to flask
 
 add global settings to home page
 add project settings to /project page
