@@ -55,7 +55,7 @@ cd golem
 ```
 
 ```
-python setup.py develop
+python setup.py install
 ```
 
 QuickStart
@@ -71,7 +71,7 @@ mkdir testroot && cd testroot
 Create a **new** test project inside the test projects root
 
 ```
-python golem-admin.py create <project name>
+golem-admin.py create <project name>
 ```
 
 This will create a folder structure for the selected project name.
