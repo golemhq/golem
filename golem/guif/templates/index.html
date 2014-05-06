@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div>
+<h4>Projects:</h4>
+
+<ul>
+{% for project in projects  %}
+    <li><a href="{{project}}">{{project}}</a> </li>
+{% endfor %}
+</ul>
+
+</div>
+
+
+<div>
+<h4>Global Settings: </h4>
+<ul>
+{% for setting, values in global_settings.items %}
+    <li>{{setting}}: {{ values }} </li>
+{% endfor %}
+</ul>
+</div>
+
+
+{% endblock %}

@@ -13,8 +13,6 @@ def execute_from_command_line():
     test = args.test
     driver_selected = args.d
 
-    settings = dict()
-
     #get global settings
     settings = utils.get_global_settings()
 

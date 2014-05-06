@@ -124,8 +124,6 @@ def get_test_case_class(project, test):
 
 def get_parser():
     '''parser of comand line arguments'''
-
-
     parser = argparse.ArgumentParser(
         description = 'description',
         usage = 'golem project_name test_case|test_suite [-d driver] [-r repeat]')
@@ -183,7 +181,7 @@ def get_project_settings(project):
     return settings
 
 
-def run_gui():
+def run_guiDEPRECATED():
     import webbrowser
     from multiprocessing import Pool
 
@@ -198,6 +196,19 @@ def run_gui():
     webbrowser.open('http://localhost:8000')
 
     raw_input()
+    
+def run_gui():
+    import webbrowser
+    
+    a = os.path.dirname(os.path.abspath(__file__))
+    
+    b = os.path.abspath(os.path.join(a, os.pardir)) + '\\guif\\golem-gui.py'
+    
+    os.system(b)
+    
+    #exec(b)
+    
+    #import file
 
 
 

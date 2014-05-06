@@ -16,6 +16,7 @@ def execute_test_case(project, test_case, driver_selected, settings):
 
         ###SETUP
         #get driver browser instance
+        
         driver = utils.get_driver(driver_selected)
 
         driver.maximize_window() #improve parameterize?
@@ -38,6 +39,9 @@ def execute_test_case(project, test_case, driver_selected, settings):
 
         try:
             instance = test_class(driver, data_dict)
+            
+            instance.run(driver, data_dict)
+            
             print 'Test result: PASS'
             logf.write(utils.get_current_time() + ': Test Result: PASSED\n')
         except Exception as ex:
