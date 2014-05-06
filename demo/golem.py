@@ -2,7 +2,7 @@
 import os
 import sys
 
-sys.dont_write_bytecode = True #remove for performance
+sys.dont_write_bytecode = True #do not create .pyc for projects folder files
 
 if __name__ == "__main__":
     del sys.path[0]

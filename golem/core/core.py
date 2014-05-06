@@ -3,8 +3,6 @@ from golem.core import utils
 
 def execute_test_case(project, test_case, driver_selected, settings):
 
-    #exec('import %s.test_cases.%s' % (args.project, test_case_selected)) #module = __import__(module_name) #class_ = getattr(module, class_name) #instance = class_()
-
     #get test data
     data_dict_list = utils.get_test_data(project, test_case)
 

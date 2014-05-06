@@ -1,4 +1,5 @@
+import selenium
 
-
-def click():
-    'hey, clicked'
+def click(obj):
+    #obj.click()
+    print 'hey i can click ', obj
