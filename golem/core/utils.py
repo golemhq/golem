@@ -1,5 +1,6 @@
 from selenium import webdriver
-import os, sys, csv, warnings, argparse, importlib
+import os, sys, csv, logging, argparse, importlib, datetime
+
 
 def get_driver(driver_selected):
     driver = None
@@ -85,25 +86,30 @@ def get_selected_test_case(selected_project, selected_test_case):
     t = list()
 
     #read test_case file
-    with file('projects\\%s\\test_cases\\%s.py' % (selected_project, selected_test_case)) as f:
+    with file('projects\\%s\\test_cases\\%s.py' % (selected_project, selected_test_case)) as f: #fix use os.path.join
         for line in f:
             t.append(line.strip())
-    #get all the steps into a dict
-    test_case_raw = t[t.index('#steps')+1:t.index('#/steps')]
-    #parse lines and separate each line into a sub-dict
-    for line in test_case_raw:
-        #assert lines do not have 4 columns,
-        if 'assert' in line:
-            new_line = [line.partition(' ')[0],line.partition(' ')[2],'','']
-        else:
-            new_line = [
-                line.split('.')[0],
-                line.split('.')[1],
-                line.split('.')[2].split('(')[0],
-                line.split('(')[1].replace(')','').replace('"','')] #magic for getting the argument without "" if there is any, * magic *
-        test_case.append(new_line)
+    
+    #fix test step format will change
 
-    return test_case
+    #get all the steps into a dict
+    ###test_case_raw = t[t.index('#steps')+1:t.index('#/steps')]
+    
+    #parse lines and separate each line into a sub-dict
+    # for line in test_case_raw:
+    #     #assert lines do not have 4 columns,
+    #     if 'assert' in line:
+    #         new_line = [line.partition(' ')[0],line.partition(' ')[2],'','']
+    #     else:
+    #         new_line = [
+    #             line.split('.')[0],
+    #             line.split('.')[1],
+    #             line.split('.')[2].split('(')[0],
+    #             line.split('(')[1].replace(')','').replace('"','')] #magic for getting the argument without "" if there is any, * magic *
+    #     test_case.append(new_line)
+
+    #return test_case
+    return t
 
 
 def get_suite_test_cases(project,suite):
@@ -117,17 +123,23 @@ def get_suite_test_cases(project,suite):
 
 
 def get_test_case_class(project, test):
-    ''''''
-    modulex = importlib.import_module('projects.%s.test_cases.%s' % (project, test), package=None)
-    return getattr(modulex, 'Testclass')
+    '''returns the test case class (located in
+        root\\projects\\{project_name}\\test_cases\\{test_case_name.py}'''
+
+    modulex = importlib.import_module('projects.{0}.test_cases.{1}'.format(project, test), package=None)
+    return getattr(modulex, test)
 
 
 def get_parser():
     '''parser of comand line arguments'''
     parser = argparse.ArgumentParser(
-        description = 'description',
-        usage = 'golem project_name test_case|test_suite [-d driver] [-r repeat]')
+        description = 'run a test case, a test suite or start the Golem GUI tool',
+        usage = 'golem run project_name test_case|test_suite [-d driver]')
 
+    parser.add_argument(
+        'action',
+        metavar='action',
+        help="main action")
     parser.add_argument(
         'project',
         metavar='project',
@@ -142,16 +154,17 @@ def get_parser():
         default='')
     parser.add_argument(
         '-d',
+        '--driver',
         metavar='driver',
         default='firefox',
         choices=['firefox', 'chrome', 'ie', 'phantomjs'],
         help="driver name, options: ['firefox', 'chrome', 'ie', 'phantomjs']")
     parser.add_argument(
-        '-r',
-        metavar='repeat',
-        default=0,
-        help='times to repeat test',
-        type=int)
+        '-e',
+        '--engine',
+        metavar='engine',
+        default='selenium',
+        help='automation engine')
 
     return parser
 
@@ -160,25 +173,32 @@ def get_global_settings():
     '''get global settings from root folder'''
 
     settings = {}
-    if os.path.exists('global_settings.conf'):
-        execfile("global_settings.conf", settings)
+    if os.path.exists('settings.conf'):
+        execfile("settings.conf", settings)
         settings.pop("__builtins__", None) #remove __builtins__ key, not necesary
     else:
-        warnings.warn('Global Settings file is not present')
+        logging.warning('Global Settings file is not present')
 
     return settings
 
 
-def get_project_settings(project):
-    '''get project level settings from selected project folder'''
+def get_project_settings(project, global_settings):
+    '''get project level settings from selected project folder,
+    overrides any global settings'''
 
-    settings = {}
-    if os.path.exists('project\\%s\\project_settings.confconf' % project):
-        execfile('project\\%s\\project_settings.confconf' % project, settings)
+    project_settings = {}
+    if os.path.exists('projects\\{0}\\project_settings.conf'.format(project)):
+        execfile('projects\\{0}\\project_settings.conf'.format(project), project_settings)
+        project_settings.pop("__builtins__", None) #remove __builtins__ key, not necesary
     else:
-        warnings.warn('Project Settings file is not present')
+        logging.warning('Project Settings file is not present')
+    for setting in project_settings:
+        if setting in global_settings:
+            global_settings[setting] = project_settings[setting]
+        else:
+            global_settings[setting] = project_settings[setting]
 
-    return settings
+    return global_settings
 
 
 def run_guiDEPRECATED():
@@ -200,22 +220,22 @@ def run_guiDEPRECATED():
 def run_gui():
     import webbrowser
     
-    a = os.path.dirname(os.path.abspath(__file__))
-    
-    b = os.path.abspath(os.path.join(a, os.pardir)) + '\\guif\\golem-gui.py'
-    
-    os.system(b)
+    # a = os.path.dirname(os.path.abspath(__file__))
+    # print a
+    # print
+    # b = os.path.abspath(os.path.join(a, os.pardir)) + '\\guif\\golem-gui.py'
+    # print b
+    #os.system(b)
+
+    from golem.gui import app
+    app.run(debug=True)
     
     #exec(b)
     
     #import file
 
 
-
-
-
 def get_current_time():
-        import datetime
         time_format = "%Y-%m-%d-%H.%M.%S"
         return datetime.datetime.today().strftime(time_format)
 
@@ -304,3 +324,33 @@ class lazy_property(object):#deprecated use the above one
         value = self.fget(obj)
         setattr(obj,self.func_name,value)
         return value
+        
+
+def get_selenium_object(obj, driver):
+    if 'id' in obj:
+       test_object = driver.find_element_by_id(obj['id'])
+    else:
+        print 'Object could not be found' #(fix)
+    
+    return test_object
+
+
+class Test_context:
+    '''used to store all the data related to an execution instance'''
+
+    def __init__(self, 
+        root=None,
+        project=None, 
+        test_case=None, 
+        test_suite=None, 
+        settings=None, 
+        engine=None, 
+        selenium_driver=None):
+
+        self.root = root
+        self.project = project
+        self.test_case = test_case
+        self.test_suite = test_suite
+        self.settings = settings
+        self.engine = engine 
+        self.selenium_driver = selenium_driver 

@@ -8,14 +8,14 @@
 <div id="test_case_container" class="col-md-6">
     <label>Test Cases: </label>
     <ul>
-        {% for tc in test_cases %}
-        <li><a href="{{ tc }}">{{ tc }}</a></li>
+        {% for tc in data.test_cases %}
+        <li><a href="/project/{{data.project}}/test/{{tc}}/">{{tc}}</a></li>
         {% endfor %}
     </ul>
     <br>
      <label>Test Suites: </label>
     <ul>
-     {% for suite in suites %}
+     {% for suite in data.suites %}
         <li><a href="/{{ project }}/suite/{{ suite }}">{{ suite }}</a></li>
         {% endfor %}
     </ul>

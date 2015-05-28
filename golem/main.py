@@ -3,60 +3,72 @@ from golem.core import utils, core
 import sys, os
 
 
-def execute_from_command_line():
+def execute_from_command_line(root):
 
     parser = utils.get_parser()
     args = parser.parse_args()
 
-    #set global variable values
-    project = args.project
-    test = args.test
-    driver_selected = args.d
+    #set test context values
+    test_context = utils.Test_context(
+        root=root,
+        project=args.project,
+        test_case=args.test,
+        engine=args.engine,
+        selenium_driver=args.driver)
 
     #get global settings
-    settings = utils.get_global_settings()
+    test_context.settings = utils.get_global_settings()
 
     #if action is gui, launch golem gui
-    if project == 'gui':
+    if args.action == 'gui':
         utils.run_gui()
         sys.exit()
 
-    #check if project parameter is not present
-    if project == '':
-        print 'Usage:',parser.usage
+    #check if project parameter is not present      ##this cannot happen
+    if not test_context.project:
+        print 'Usage:', parser.usage
         print '\nProject List:'
         for proj in utils.get_projects():
             print '> ' + proj
         sys.exit()
 
+    if args.action == 'run':
+        #check if selected project does not exists
+        if not os.path.isdir('projects\\{0}'.format(test_context.project)):
+            sys.exit('ERROR: the project {0} does not exist'.format(test_context.project))
+        else:
+        #get project settings (override settings already present in global settings)
+            test_context.settings = utils.get_project_settings(
+                test_context.project, 
+                test_context.settings)
 
-    #check if selected project does not exists
-    if not os.path.isdir('projects\\%s' % project):
-        sys.exit("ERROR: the project %s does not exist" % project)
-    #else:
-        #get project settings
-        #settings = get_project_settings(project)
+        #check if test parameter is not present
+        if test_context.test_case == '':
+            print 'Usage:', parser.usage
+            print
+            print 'Test Case List:'
+            for tc in utils.get_test_cases(test_context.project):
+                print '> ' + tc
+            print
+            print 'Test Suite List:'
+            for ts in utils.get_suites(test_context.project):
+                print '> ' + ts
+            sys.exit()
 
-    #check if test parameter is not present
-    if test == '':
-        print 'Usage:',parser.usage
-        print '\nTest Case List:'
-        for tc in utils.get_test_cases(project):
-            print '> ' + tc
-        print '\nTest Suite List:'
-        for ts in utils.get_suites(project):
-            print '> ' + ts
-        sys.exit()
-
-    #check if test case or test suite exists
-    if os.path.exists('projects\\%s\\test_cases\\%s.py' % (project, test)):
-        core.execute_test_case(project, test, driver_selected, settings)
-
-    elif os.path.exists('projects\\%s\\test_suites\\%s.py' % (project, test)):
-        #test_suite = '%s\\test_suites\\%s.py' % (args.project, args.test)
-        core.execute_test_suite(project, test, driver_selected, settings)
-    else:
-        sys.exit("ERROR: no test case or suite named %s exists" % test)
+        #check if test case exists and run it
+        if os.path.exists('projects\\{0}\\test_cases\\{1}.py'.format(test_context.project, test_context.test_case)):
+            core.execute_test_case( 
+                test_context.test_case,
+                test_context)
+        #check if test suite exists and run it
+        elif os.path.exists('projects\\{0}\\test_suites\\{1}.py'.format(test_context.project, test_context.test_case)):
+            core.execute_test_suite(
+                test_context.project,
+                test_context.test_case,
+                test_context.selenium_driver,
+                test_context.settings)
+        else:
+            sys.exit("ERROR: no test case or suite named %s exists" % test)
 
 
 if __name__ == "__main__":

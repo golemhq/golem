@@ -2,27 +2,22 @@ from golem.core.base_test import Base_test
 
 from golem.core.actions import *
 
-class Testclass(Base_test):
-
-    def run(self, driver, data):
+class search_article(Base_test):	
+	
+	
+    def run(self):
         #setup
-        from ..pages import home, article
-        home = home.Home()
-        article = article.Article(driver)
-
-        driver.get("http://en.wikipedia.org/wiki/Main_Page")
-
-        print 'llegue aca'
-        
-        a = home.search_button
-
-        print a
-        
+        from ..pages import *		
+		home = home.Home()
+        article = article.Article()
+		
+		#test
+		goto("http://en.wikipedia.org/wiki/Main_Page")        
         click(home.search_button)
-
-        
-        #steps
-        #home.search_input.send_keys(data['article_name'])
-        #home.search_button.click()
+        #home.search_input.send_keys(data['article_name']) 		
         assert article.article_title.text != data['article_name']
-        #/steps
+		
+		#tear down
+		
+		
+		close()

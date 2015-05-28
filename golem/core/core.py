@@ -1,45 +1,45 @@
 from golem.core import utils
 
+import traceback
 
-def execute_test_case(project, test_case, driver_selected, settings):
 
-    #get test data
-    data_dict_list = utils.get_test_data(project, test_case)
+def execute_test_case(test_case, context):
+
+    #get test case data
+    test_case_data = utils.get_test_data(context.project, test_case)
 
     #Create log file
-    logf = open('projects\\%s\\logs\\%s - %s.txt' % (project, test_case, utils.get_current_time()), 'w')
+    logf = open('projects\\{0}\\logs\\{1}_{2}.txt'.format(context.project, test_case, utils.get_current_time()), 'w')
 
     #run test case for each row in test data
-    for data_dict in data_dict_list:
+    for data_row in test_case_data:
 
         ###SETUP
-        #get driver browser instance
-        
-        driver = utils.get_driver(driver_selected)
-
-        driver.maximize_window() #improve parameterize?
-
-
-
-
 
         logf.write(utils.get_current_time() + ': Test Start\n')
-        logf.write(utils.get_current_time() + ': Test Data: ' + str(data_dict) + '\n')
-        print 'Executing test case \'%s\'' % test_case
-
-        #set implicit wait
-        if 'implicit_wait' in settings: driver.implicitly_wait(settings['implicit_wait']) #default is 0
+        logf.write(utils.get_current_time() + ': Test Data: ' + str(data_row) + '\n')
+        print 'Executing test case \'%s\'' % test_case       
 
         #get test case class
-        test_class = utils.get_test_case_class(project, test_case)
+        test_class = utils.get_test_case_class(context.project, test_case)
 
         ###EXECUTE TEST
-
         try:
-            instance = test_class(driver, data_dict)
-            
-            instance.run(driver, data_dict)
-            
+            instance = test_class(data_row, context)
+        except Exception as ex:
+            print ex 
+
+        #check if instance has setup method
+        if setup in instance:
+            print "instance has setup"
+
+        #check if instance has test method
+        if test in instance:
+            print "instance has test"
+            #instance.run()
+        
+        try:
+            #instance.test()
             print 'Test result: PASS'
             logf.write(utils.get_current_time() + ': Test Result: PASSED\n')
         except Exception as ex:
@@ -47,12 +47,16 @@ def execute_test_case(project, test_case, driver_selected, settings):
             message = template.format(type(ex).__name__, ex.args)
             print message
             print 'Test result: FAILED'
+            print traceback.format_exc()
             logf.write(utils.get_current_time() + ': Test Result: FAILED\n')
 
+        #check if instance has teardown method
+        if teardown in instance:
+            print "instnace has teardown"
 
         ###TEAR DOWN
 
-        driver.quit()
+       
 
     #Close log file
     logf.close()

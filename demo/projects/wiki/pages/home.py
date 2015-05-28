@@ -4,13 +4,17 @@ from golem.core.utils import cached_property, _missing
 
 class Home(object):
 
-    def __init__(self, driver):
-        self.driver = driver
+    def __init__(self):
+        self.driver = globals.driver
 
+	search_input = {'id':"searchInput"}
+	
+	
     @cached_property
-    def search_input(self):
-        search_input = self.driver.find_element_by_id("searchInput")
-        return search_input
+    def search_inputdeprecated(self):
+        if globals.engine == 'selenium':
+			search_input = self.driver.find_element_by_id("searchInput")
+			return search_input
 
     @cached_property
     def search_button(self):

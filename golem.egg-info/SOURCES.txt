@@ -1,3 +1,4 @@
+setup.cfg
 setup.py
 golem/__init__.py
 golem/main.py
@@ -6,4 +7,5 @@ golem.egg-info/SOURCES.txt
 golem.egg-info/dependency_links.txt
 golem.egg-info/requires.txt
 golem.egg-info/top_level.txt
+golem/bin/golem-admin.py
 golem/bin/golem-admin.py
