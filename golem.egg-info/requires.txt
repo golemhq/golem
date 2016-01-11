@@ -1,7 +1,5 @@
-Jinja2==2.7.2
 Flask==0.10.1
-Werkzeug==0.9.4
-selenium==2.40.0
+selenium==2.48.0
 
 [testing]
 pytest

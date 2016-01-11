@@ -1,0 +1,30 @@
+{% extends "layout.html" %} 
+
+{% block title %}
+New Test Case List
+{% endblock %} 
+
+{% block head %}
+{{ super() }}
+{% endblock %} 
+
+{% block content %}
+
+<div class="row">
+	<div class="col-md-4 col-md-offset-4">
+		<h4>Create New Project:</h4>
+		<br>
+
+		<form action="/new_project/" method="POST">
+			<div class="form-group">
+				<label for="projectname">Project Name</label>
+				<input type="text" class="form-control" id="projectname" name="projectname" placeholder="Project Name">
+			</div>
+			<button type="submit" class="btn btn-default">Create</button>
+		</form>
+
+
+	</div>
+</div>
+
+{% endblock %}

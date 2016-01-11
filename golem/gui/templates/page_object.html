@@ -1,0 +1,128 @@
+{% extends "layout.html" %} 
+
+{% block head %} 
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/page_object.css') }}">
+
+{% endblock %} 
+
+{% block content %}
+
+<div>
+	
+
+    <!--
+    <div id="tc_toolbar">
+
+        <button name="save" id="save" onclick="saveTestCase();">Save</button>
+        <label>
+            <input type="checkbox" name="autosave" id="autosave" checked="checked" autocomplete="off">Autosave
+        </label>
+        <span>|</span>
+        <span id="changesSavedNotification">All changes saved</span>
+
+
+    </div>-->
+
+
+    <div class="col-sm-10 col-sm-offset-1" id="datosContainerContainer">
+
+        <div class="col-sm-6">
+            <h3 id="pageObjectName">{{page_name}}</h3>
+        </div>
+        <div class="col-sm-6 text-right">
+            <button name="save" id="save" onclick="savePageObject();">Save</button>
+        </div>
+
+        <div class="clearfix"></div>
+
+        <div class="col-sm-3">
+            <strong>Name</strong>
+        </div>
+        <div class="col-sm-3">
+            <strong>Selector</strong>
+        </div>
+        <div class="col-sm-3">
+            <strong>Value</strong>
+        </div>
+        <div class="col-sm-3">
+            <strong>Display Name</strong>
+        </div>
+        
+        <div class="clearfix"></div>        
+
+        <div id="datosContainer">
+            <div id="elements">
+                {% for element in page_object_data %}
+                    <div class="element">
+
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <input type="text" class="form-control element-name" value="{{element.element_name}}" placeholder="name">
+                            </div> 
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <input type="text" class="form-control element-selector" value="{{element.element_selector}}" placeholder="selector">
+                            </div> 
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <input type="text" class="form-control element-value" value="{{element.element_value}}" placeholder="value">
+                            </div> 
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <input type="text" class="form-control element-display-name" value="{{element.element_display_name}}" placeholder="display name">
+                            </div> 
+                        </div>
+                    </div>
+                {% endfor %}
+                {% if not page_object_data %}
+                    <div class="element">
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <input type="text" class="form-control element-name" value="" placeholder="name">
+                            </div> 
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <input type="text" class="form-control element-selector" value="" placeholder="selector">
+                            </div> 
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <input type="text" class="form-control element-value" value="" placeholder="value">
+                            </div> 
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <input type="text" class="form-control element-display-name" value="" placeholder="display name">
+                            </div> 
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <button onclick="addPageObjectInput();">New</button>
+        </div>
+
+    </div>
+
+    
+
+
+</div>
+
+
+
+<script src="{{ url_for('static', filename='js/page_object.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/jquery-autocomplete/jquery.autocomplete.min.js') }}"></script>
+
+<script>
+    var project = "{{project}}";
+    var pageObjectName = "{{page_name}}";
+</script>
+
+{% endblock %}
