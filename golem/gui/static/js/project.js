@@ -36,10 +36,16 @@ function startAddNewTestCase(elem){
 
     parent.html('');
     parent.append(input);
+
+    input.focus();
 }
 
 
 function addNewTestCase(testCaseName){
+
+    if(testCaseName.length == 0){
+        return
+    }
 
     if(testCaseName.indexOf('/') > -1){
         // is a new directory

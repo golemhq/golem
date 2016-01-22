@@ -40,6 +40,7 @@ def project(project):
         test_cases=test_cases,
         project=project,
         page_objects=page_objects)
+    
 
 @app.route("/p/<project>/tc/<test_case_name>/")
 def test_case_view(project, test_case_name):
@@ -126,7 +127,7 @@ def get_page_objects():
     if request.method == 'POST':
         projectname = request.form['project']
 
-        page_objects = gui_utils.get_page_objects(
+        page_objects = gui_utils.get_page_objects__DEPRECADO(
                             root_path, 
                             projectname)
 

@@ -9,7 +9,7 @@ import traceback
 
 
 
-def test_runner(project, test_case_name):
+def test_runner(project, test_case_name, suite_name):
     ''' runs a single test case by name.
     test_case_name may include unfixed number of subpackages
     separated by dots '''
@@ -33,11 +33,10 @@ def test_runner(project, test_case_name):
         else:
             raise Exception
 
-        test_data = selenium_utils.get_test_data(
-                            '',
+        test_data = selenium_utils.get_suite_or_test_data(
                             project,
-                            '', 
-                            test_case_name)
+                            test_case_name,
+                            suite_name)
         
         if hasattr(instance, 'test'):
             instance.test(test_data)
@@ -59,7 +58,7 @@ def test_runner(project, test_case_name):
     return result
 
 
-def multiprocess_executor(test_case_list=[], processes=1):
+def multiprocess_executor(test_case_list=[], processes=1, suite_name=None):
 
     pool = Pool(processes=processes) 
 
@@ -67,7 +66,7 @@ def multiprocess_executor(test_case_list=[], processes=1):
 
     results = [pool.apply_async(
             test_runner,
-            args=(test_execution.project_name, x, ),
+            args=(test_execution.project_name, x, suite_name),
             callback = logger.log_result) for x in test_case_list]
 
     map(ApplyResult.wait, results)
@@ -95,13 +94,9 @@ def run_single_test_case(project_name, test_case_name):
 
 
 def run_suite(project_name, suite_name):
-    ''' a suite can be python file that includes a test list or
-    a directory that contains test cases '''
+    ''' a suite '''
 
     # TO DO implement directory suites
-
-    print "INSIDE RUN SUITE"
-    print test_execution.project_name
     
     path = os.path.join(
                 'projects',
@@ -112,6 +107,5 @@ def run_suite(project_name, suite_name):
     if os.path.exists(path):
 
         test_case_list = utils.get_suite_test_cases(project_name, suite_name)
-        print test_case_list
 
-        multiprocess_executor(test_case_list, 3)
+        multiprocess_executor(test_case_list, 1, suite_name=suite_name)

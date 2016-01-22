@@ -139,15 +139,15 @@
                     <div class='col-sm-3'>
                         <div class='input-group'>
                             <input type='text' class='form-control step-first-input'
-                                placeholder='action' onchange='stepFirstInputChange(this);' value="{{step.method_name}}">
+                                placeholder='action' value="{{step.method_name}}">
                         </div>
                     </div>
 
                     {% for parameter in step.parameters %}
-                        <div class='col-sm-3'>
+                        <div class='col-sm-3 parameter-container'>
                             <div class='input-group'>
                                 <input type='text' class='form-control parameter-input'
-                                    placeholder='' onchange='stepFirstInputChange(this);' value='{{ parameter }}'>
+                                    placeholder='' value='{{ parameter }}'>
                             </div>
                         </div>
                     {% endfor %}
@@ -161,7 +161,7 @@
                     <div class='col-sm-3'>
                         <div class='input-group'>
                             <input type='text' class='form-control step-first-input'
-                                placeholder='action' onchange='stepFirstInputChange(this);' value="">
+                                placeholder='action' value="">
                         </div>
                     </div>
                 </div>

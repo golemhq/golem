@@ -50,8 +50,8 @@ def save_page_object(root_path, project, page_name, elements):
 
 def is_page_object(parameter, root_path, project):
     # identify if a parameter is a page object
-    page_objects = gui_utils.get_page_objects(root_path, project)
-
+    page_objects = gui_utils.get_page_objects__DEPRECADO(root_path, project)
+    print parameter
     if len(parameter.split('.')) <= 1:
         return False
     else:

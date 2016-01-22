@@ -104,6 +104,9 @@ function addFirstStepInput(){
             </div> \
         </div>");
 
+
+    //onchange='stepFirstInputChange(this);'> \
+
     startStepFirstInputAutocomplete();
 }
 
@@ -172,6 +175,7 @@ function startStepFirstInputAutocomplete(){
     autocomplete = $(".step-first-input").autocomplete({
         lookup: lookup,
         minChars: 0,
+        //triggerSelectOnValidInput: false,
         onSelect: function (suggestion) {
             stepFirstInputChange($(this));
         },
@@ -186,13 +190,14 @@ function startStepFirstInputAutocomplete(){
 
 function stepFirstInputChange(elem){
     var step = $(elem).parent().parent().parent();
-    var hasValueInput = step.find(".value-input").length > 0;
-    var hasElementInput= step.find(".element-input").length > 0;
+    //var hasValueInput = step.find(".value-input").length > 0;
+    //var hasElementInput= step.find(".element-input").length > 0;
+    var hasParameter = step.find('.parameter-input').length > 0
     var placeholder = ''
     var elemValue = $(elem).val();
     //var isPageObject = isInPageObjectArray(elemValue);
     
-    if(!hasValueInput && !hasElementInput){     
+    if(!hasParameter){     
 
         var pageObjects = getSelectedPageObjects();
 
@@ -213,7 +218,7 @@ function stepFirstInputChange(elem){
                 var customClass = 'element-input';
             }
             
-            var newInput = $("<div class='col-sm-3'> \
+            var newInput = $("<div class='col-sm-3 parameter-container'> \
                                 <div class='input-group'> \
                                     <input type='text' class='form-control \
                                         parameter-input "+customClass+"' \
@@ -231,7 +236,7 @@ function stepFirstInputChange(elem){
         }
     }
     else{
-        console.log("remove second input");
+        step.find('.parameter-container').remove();
     }
 }
 
