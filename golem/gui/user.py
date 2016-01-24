@@ -52,4 +52,12 @@ def get_user(user_id, root_path):
             if user['id'] == user_id:
                 new_user = User
                 new_user.username = user['username']
+                new_user.id = user['id']
                 return new_user
+
+def has_permissions_to_project(user_id, project, root_path):
+    with open(os.path.join(root_path, 'users.json')) as users_file:    
+        user_data = json.load(users_file)
+        for user in user_data:
+            if user['id'] == user_id:
+                return project in user['projects']

@@ -70,9 +70,7 @@ def get_test_cases(workspace, project):
 def get_page_objects(workspace, project):
     # find page objects directory
 
-<<<<<<< HEAD
     page_objects_directory = ''
-=======
     #page_objects = []
 
     path = os.path.join(workspace, 'projects', project, 'pages')
@@ -110,19 +108,15 @@ def get_page_objects(workspace, project):
 def get_page_objects__DEPRECADO(workspace, project):
     # find page objects directory
 
->>>>>>> 5b0994a4f56709128e23d78d2a054e42a8c0105e
     page_objects = []
 
     path = os.path.join(workspace, 'projects', project, 'pages')
 
-<<<<<<< HEAD
-=======
     file_structure = {
         'name': '',
         'files': [],
         'childirs': {} }
 
->>>>>>> 5b0994a4f56709128e23d78d2a054e42a8c0105e
     for root, dirs, files in os.walk(path):
         current_directory = os.path.basename(root)
         for f in files:

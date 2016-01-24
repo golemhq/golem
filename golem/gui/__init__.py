@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from flask import Flask, render_template, request, redirect, jsonify, g
 from flask.ext.login import LoginManager, login_user, logout_user, current_user, login_required
 import os, json
@@ -83,6 +82,8 @@ def index():
 @app.route("/p/<project>/")
 @login_required
 def project(project):
+    if not user.has_permissions_to_project(g.user.id, project, root_path):
+        return render_template('not_permission.html')
 
     test_cases = gui_utils.get_test_cases(
                     root_path,
@@ -99,9 +100,13 @@ def project(project):
         page_objects=page_objects)
 
 
+# TEST CASE VIEW
 @app.route("/p/<project>/tc/<test_case_name>/")
 @login_required
 def test_case_view(project, test_case_name):
+    if not user.has_permissions_to_project(g.user.id, project, root_path):
+        return render_template('not_permission.html')
+
     parents = []
 
     test_case_data = test_case.parse_test_case(
@@ -127,6 +132,8 @@ def test_case_view(project, test_case_name):
 @app.route("/p/<project>/tc/<dir1>/<dir2>/<dir3>/<filename>/")
 @login_required
 def file_from_project_dir_dir_dir(project, dir1, dir2, dir3, filename):
+    if not user.has_permissions_to_project(g.user.id, project, root_path):
+        return render_template('not_permission.html')
 
     parents = [dir1, dir2, dir3]
 
@@ -152,6 +159,8 @@ def file_from_project_dir_dir_dir(project, dir1, dir2, dir3, filename):
 @app.route("/p/<project>/tc/<dir1>/<dir2>/<filename>/")
 @login_required
 def file_from_project_dir_dir(project, dir1, dir2, filename):
+    if not user.has_permissions_to_project(g.user.id, project, root_path):
+        return render_template('not_permission.html')
 
     parents = [dir1, dir2]
 
@@ -337,6 +346,9 @@ def get_global_actions():
 @app.route("/p/<project>/page/<page_name>/")
 @login_required
 def page_view(project, page_name):
+    if not user.has_permissions_to_project(g.user.id, project, root_path):
+        return render_template('not_permission.html')
+
     parents = []
 
     page_object_data = page_object.get_page_object_elements(
