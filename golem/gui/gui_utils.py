@@ -70,11 +70,59 @@ def get_test_cases(workspace, project):
 def get_page_objects(workspace, project):
     # find page objects directory
 
+<<<<<<< HEAD
     page_objects_directory = ''
+=======
+    #page_objects = []
+
+    path = os.path.join(workspace, 'projects', project, 'pages')
+
+    file_structure = {
+        'name': '',
+        'files': [],
+        'childirs': {} }
+        
+    for root, dirs, files in os.walk(path):
+        parents = root.replace(path, '').split(os.sep)
+        parents.pop(0)
+        current_directory = os.path.basename(root)
+        files = [x[:-3] for x in files]
+        if '__init__' in files: files.remove('__init__')
+
+        this_dir_file_structure = {
+                    'name': current_directory,
+                    'files': files,
+                    'childirs': {} }
+
+        if len(parents) == 0:
+            file_structure = this_dir_file_structure
+        else:
+            file_structure = go_one_level_deeper(
+                                        file_structure, 
+                                        this_dir_file_structure, 
+                                        current_directory,
+                                        parents)
+
+    return file_structure
+
+
+
+def get_page_objects__DEPRECADO(workspace, project):
+    # find page objects directory
+
+>>>>>>> 5b0994a4f56709128e23d78d2a054e42a8c0105e
     page_objects = []
 
     path = os.path.join(workspace, 'projects', project, 'pages')
 
+<<<<<<< HEAD
+=======
+    file_structure = {
+        'name': '',
+        'files': [],
+        'childirs': {} }
+
+>>>>>>> 5b0994a4f56709128e23d78d2a054e42a8c0105e
     for root, dirs, files in os.walk(path):
         current_directory = os.path.basename(root)
         for f in files:
@@ -104,10 +152,7 @@ def new_directory(root_path, project, directory_name):
 
 
 def run_test_case(project, test_case_name):
-    os.system('golem run {0} {1}'.format(project, test_case_name))
-
-
-
+    os.system('python golem.py run {0} {1}'.format(project, test_case_name))
 
 
 

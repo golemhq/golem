@@ -104,6 +104,7 @@ function addFirstStepInput(){
             </div> \
         </div>");
 
+    //onchange='stepFirstInputChange(this);'> \
     startStepFirstInputAutocomplete();
 }
 
@@ -167,11 +168,12 @@ function startStepFirstInputAutocomplete(){
         })        
     }
 
-    alert("get page object actions");
+    console.log("get page object actions");
 
     autocomplete = $(".step-first-input").autocomplete({
         lookup: lookup,
         minChars: 0,
+        //triggerSelectOnValidInput: false,
         onSelect: function (suggestion) {
             stepFirstInputChange($(this));
         },
@@ -186,13 +188,14 @@ function startStepFirstInputAutocomplete(){
 
 function stepFirstInputChange(elem){
     var step = $(elem).parent().parent().parent();
-    var hasValueInput = step.find(".value-input").length > 0;
-    var hasElementInput= step.find(".element-input").length > 0;
+    //var hasValueInput = step.find(".value-input").length > 0;
+    //var hasElementInput= step.find(".element-input").length > 0;
+    var hasParameter = step.find('.parameter-input').length > 0
     var placeholder = ''
     var elemValue = $(elem).val();
     //var isPageObject = isInPageObjectArray(elemValue);
     
-    if(!hasValueInput && !hasElementInput){     
+    if(!hasParameter){     
 
         var pageObjects = getSelectedPageObjects();
 
@@ -200,7 +203,7 @@ function stepFirstInputChange(elem){
 
         if(!actionParameters){
             //is not a global action
-            alert("search in page object actions");
+            console.log("search in page object actions");
         }
 
         for(p in actionParameters){
@@ -213,7 +216,7 @@ function stepFirstInputChange(elem){
                 var customClass = 'element-input';
             }
             
-            var newInput = $("<div class='col-sm-3'> \
+            var newInput = $("<div class='col-sm-3 parameter-container'> \
                                 <div class='input-group'> \
                                     <input type='text' class='form-control \
                                         parameter-input "+customClass+"' \
@@ -231,7 +234,7 @@ function stepFirstInputChange(elem){
         }
     }
     else{
-        alert("remove second input");
+        step.find('.parameter-container').remove();
     }
 }
 
@@ -568,8 +571,13 @@ function getSelectedPageObjectElements(){
              dataType: 'json',
              type: 'POST',
              success: function(data) {
-                selectedPageObjectsElements = selectedPageObjectsElements.concat(data);
-                startAllElementInputAutocomplete();
+                // check if element does no already exist in selected ...
+                if(! checkIfElementIsInSelectedPageObjectElements(
+                            selectedPageObjectsElements,
+                            data[0].element_full_name)){
+                    selectedPageObjectsElements = selectedPageObjectsElements.concat(data);
+                    startAllElementInputAutocomplete();
+                }
              },
              error: function() {
              }
@@ -680,4 +688,13 @@ function getSelectedPageObjects(){
     })
 
     return selectedPageObjects
+}
+
+function checkIfElementIsInSelectedPageObjectElements(selectedElements, elementName){
+    for(elem in selectedPageObjectsElements){
+        if(selectedPageObjectsElements[elem].element_full_name == elementName){
+            return true
+        }
+    }
+    return false
 }

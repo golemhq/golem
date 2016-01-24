@@ -7,6 +7,9 @@ from golem.core.selenium_utils import get_selenium_object
 from golem.core import execution_logger as logger
 
 
+import time
+
+
 def click(obj):
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(obj, driver)

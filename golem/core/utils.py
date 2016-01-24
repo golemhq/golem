@@ -1,10 +1,9 @@
 from selenium import webdriver
 import os, sys, csv, logging, importlib, datetime
-
 from golem.core import test_execution
 
 
-def get_driver(driver_selected):
+def get_driver_DEPRECADO(driver_selected):
     driver = None
 
     if driver_selected == 'firefox':
@@ -188,7 +187,7 @@ def run_gui():
 
     gui.root_path = test_execution.root_path
 
-    gui.app.run(debug=True)
+    gui.app.run(debug=True, host='0.0.0.0', port=5000)
 
 
 def get_current_time():

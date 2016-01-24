@@ -144,10 +144,10 @@
                     </div>
 
                     {% for parameter in step.parameters %}
-                        <div class='col-sm-3'>
+                        <div class='col-sm-3 parameter-container'>
                             <div class='input-group'>
                                 <input type='text' class='form-control parameter-input'
-                                    placeholder='' onchange='stepFirstInputChange(this);' value='{{ parameter }}'>
+                                    placeholder='' value='{{ parameter }}'>
                             </div>
                         </div>
                     {% endfor %}

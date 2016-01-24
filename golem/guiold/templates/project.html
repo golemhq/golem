@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block title %}{{ section.title }}{% endblock %}
+
+{% block content %}
+
+<div class="row">
+
+<div id="test_case_container" class="col-md-6">
+    <label>Test Cases: </label>
+    <ul>
+        {% for tc in data.test_cases %}
+        <li><a href="/project/{{data.project}}/test/{{tc}}/">{{tc}}</a></li>
+        {% endfor %}
+    </ul>
+    <br>
+     <label>Test Suites: </label>
+    <ul>
+     {% for suite in data.suites %}
+        <li><a href="/{{ project }}/suite/{{ suite }}">{{ suite }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+
+
+
+
+</div>
+<div id="page_object_container" class="col-md-6">
+    <label>Page Object:</label>
+</div>
+<div id="project_settings_container" class="col-md-12">
+    <label>Project Settings:</label>
+    <table>
+        {% for line in test_data %}
+        <tr>
+            {% for row in line %}
+            <td>{{ row }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+
+</div>
+{% endblock %}

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from flask import Flask, render_template, request, redirect, jsonify, g
 from flask.ext.login import LoginManager, login_user, logout_user, current_user, login_required
 import os, json
@@ -184,7 +185,7 @@ def get_page_objects():
     if request.method == 'POST':
         projectname = request.form['project']
 
-        page_objects = gui_utils.get_page_objects(
+        page_objects = gui_utils.get_page_objects__DEPRECADO(
                             root_path, 
                             projectname)
 

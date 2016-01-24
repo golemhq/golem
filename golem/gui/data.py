@@ -33,7 +33,7 @@ def save_test_data(root_path, project, test_case_name, test_data):
     with open(test_case_path, 'w') as f:
         for data in test_data:
             print data
-            f.write('{} = \'{}\'\n'.format(data['variable'], data['value']))
+            f.write('{} = \'{}\'\n'.format(data['variable'], data['value'].encode("UTF-8")))
 
 def is_data_variable(root_path, project, parents, test_case_name, parameter_name):
     test_data_variables = parse_test_data(root_path, project, parents, test_case_name)

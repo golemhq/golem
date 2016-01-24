@@ -78,8 +78,21 @@
 	<div class="col-sm-6">
 		<span><strong>Pages</strong></span>
 		<ul id="pagesTree">
-			{% for page in page_objects %}
-				<li><a href="/p/{{project}}/page/{{page.name}}/">{{ page.name }}</a></li>
+			{% for dir1 in page_objects['childirs'] %}
+				<li><a href="#">{{ dir1 }}</a>
+					<ul>
+						{% for dir2 in page_objects['childirs'][dir1]['childirs'] %}
+							<li>{{ dir2 }}</li>
+						{% endfor %}
+						{% for file2 in page_objects['childirs'][dir1]['files'] %}
+							<li>{{ file2 }}</li>
+						{% endfor %}
+						<li><i class="glyphicon glyphicon-plus-sign"></i><a href="#" onclick="addNewTestCase()"> Add New</a></li>
+					</ul>
+				</li>
+			{% endfor %}
+			{% for file1 in page_objects['files'] %}
+				<li><a href="/p/{{project}}/page/{{file1}}/">{{ file1 }}</a></li>
 			{% endfor %}
 			<li><i class="glyphicon glyphicon-plus-sign"></i><a href="#" onclick="startAddNewPageObject(this)"> Add New</a></li>
 		</ul>

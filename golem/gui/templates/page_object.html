@@ -28,7 +28,13 @@
     <div class="col-sm-10 col-sm-offset-1" id="datosContainerContainer">
 
         <div class="col-sm-6">
-            <h3 id="pageObjectName">{{page_name}}</h3>
+            <h3 id="pageObjectName">
+                <small>
+                    <a href="/p/{{project}}/">
+                        <span class="glyphicon glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+                    </a>
+                </small>
+            {{page_name}}</h3>
         </div>
         <div class="col-sm-6 text-right">
             <button name="save" id="save" onclick="savePageObject();">Save</button>
