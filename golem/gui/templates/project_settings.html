@@ -1,0 +1,28 @@
+{% extends "layout.html" %} 
+
+{% block title %}
+New Test Case List
+{% endblock %} 
+
+{% block head %}
+{{ super() }}
+{% endblock %} 
+
+{% block content %}
+
+<div class="row">
+	<div class="col-md-6 col-md-offset-3">
+		<h4>Projet Settings:</h4>
+	
+		<p>
+			{% for line in project_settings %}
+				{{line}}
+				<br>
+			{% endfor %}
+		</p>
+		
+
+	</div>
+</div>
+
+{% endblock %}

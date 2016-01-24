@@ -1,23 +1,36 @@
 from golem.core import utils
+from golem.core import test_execution as test_exec
 
 import traceback
 
 
-def execute_test_case(test_case, context):
+
+import sys
+
+
+#D E P R E C A D O
+
+def execute_test_case(test_case):
+
+    test_execution = test_exec.get_or_create_test_execution()
+
+    print test_execution.project_name
+
+    sys.exit()
 
     #get test case data
     test_case_data = utils.get_test_data(context.project, test_case)
 
     #Create log file
-    logf = open('projects\\{0}\\logs\\{1}_{2}.txt'.format(context.project, test_case, utils.get_current_time()), 'w')
+    #####logf = open('projects\\{0}\\logs\\{1}_{2}.txt'.format(context.project, test_case, utils.get_current_time()), 'w')
 
     #run test case for each row in test data
     for data_row in test_case_data:
 
         ###SETUP
 
-        logf.write(utils.get_current_time() + ': Test Start\n')
-        logf.write(utils.get_current_time() + ': Test Data: ' + str(data_row) + '\n')
+        ##logf.write(utils.get_current_time() + ': Test Start\n')
+        ##logf.write(utils.get_current_time() + ': Test Data: ' + str(data_row) + '\n')
         print 'Executing test case \'%s\'' % test_case       
 
         #get test case class
@@ -41,14 +54,14 @@ def execute_test_case(test_case, context):
         try:
             #instance.test()
             print 'Test result: PASS'
-            logf.write(utils.get_current_time() + ': Test Result: PASSED\n')
+            ##logf.write(utils.get_current_time() + ': Test Result: PASSED\n')
         except Exception as ex:
             template = "An exception of type {0} occured. Arguments:\n{1!r}"
             message = template.format(type(ex).__name__, ex.args)
             print message
             print 'Test result: FAILED'
             print traceback.format_exc()
-            logf.write(utils.get_current_time() + ': Test Result: FAILED\n')
+            ##logf.write(utils.get_current_time() + ': Test Result: FAILED\n')
 
         #check if instance has teardown method
         if teardown in instance:
@@ -59,7 +72,7 @@ def execute_test_case(test_case, context):
        
 
     #Close log file
-    logf.close()
+    ##logf.close()
 
 def execute_test_suite(project, suite, driver, settings):
 

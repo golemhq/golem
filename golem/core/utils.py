@@ -1,5 +1,7 @@
 from selenium import webdriver
-import os, sys, csv, logging, argparse, importlib, datetime
+import os, sys, csv, logging, importlib, datetime
+
+from golem.core import test_execution
 
 
 def get_driver(driver_selected):
@@ -112,61 +114,41 @@ def get_selected_test_case(selected_project, selected_test_case):
     return t
 
 
-def get_suite_test_cases(project,suite):
+def get_suite_test_cases(project, suite):
     ''''''
     tests = list()
 
-    suite_module = importlib.import_module('projects.%s.test_suites.%s' % (project, suite), package=None)
+    suite_module = importlib.import_module('projects.{0}.test_suites.{1}'.
+        format(project, suite), package=None)
     tests = suite_module.test_case_list
 
     return tests
 
 
-def get_test_case_class(project, test):
-    '''returns the test case class (located in
-        root\\projects\\{project_name}\\test_cases\\{test_case_name.py}'''
-
-    modulex = importlib.import_module('projects.{0}.test_cases.{1}'.format(project, test), package=None)
-    return getattr(modulex, test)
 
 
-def get_parser():
-    '''parser of comand line arguments'''
-    parser = argparse.ArgumentParser(
-        description = 'run a test case, a test suite or start the Golem GUI tool',
-        usage = 'golem run project_name test_case|test_suite [-d driver]')
 
-    parser.add_argument(
-        'action',
-        metavar='action',
-        help="main action")
-    parser.add_argument(
-        'project',
-        metavar='project',
-        nargs='?',
-        help="project name",
-        default='')
-    parser.add_argument(
-        'test',
-        metavar='test',
-        nargs='?',
-        help="test case or test suite to execute",
-        default='')
-    parser.add_argument(
-        '-d',
-        '--driver',
-        metavar='driver',
-        default='firefox',
-        choices=['firefox', 'chrome', 'ie', 'phantomjs'],
-        help="driver name, options: ['firefox', 'chrome', 'ie', 'phantomjs']")
-    parser.add_argument(
-        '-e',
-        '--engine',
-        metavar='engine',
-        default='selenium',
-        help='automation engine')
+# def get_test_case_class(project, test):
+#     '''returns the test case class (located in
+#         root\\projects\\{project_name}\\test_cases\\{test_case_name.py}'''
 
-    return parser
+#     modulex = importlib.import_module('projects.{0}.test_cases.{1}'.format(project, test), package=None)
+#     return getattr(modulex, test)
+
+def get_test_case_class(project_name, test_case_name):
+    ''' returns the class of a module with unfixed amount of 
+    dot separations '''
+
+    # TODO verify the file exists before trying to import
+
+    modulex = importlib.import_module(
+        'projects.{}.test_cases.{}'.format(project_name, test_case_name),
+        package=None)
+
+    return getattr(modulex, test_case_name)
+
+
+
 
 
 def get_global_settings():
@@ -200,44 +182,18 @@ def get_project_settings(project, global_settings):
 
     return global_settings
 
-
-def run_guiDEPRECATED():
-    import webbrowser
-    from multiprocessing import Pool
-
-    os.environ["DJANGO_SETTINGS_MODULE"] = "golem.gui.golem-gui.settings"
-
-    from django.core.management import execute_from_command_line
-
-    pool = Pool(processes=1)
-
-    result = pool.apply_async(execute_from_command_line, [['','runserver']])
-
-    webbrowser.open('http://localhost:8000')
-
-    raw_input()
     
 def run_gui():
-    import webbrowser
-    
-    # a = os.path.dirname(os.path.abspath(__file__))
-    # print a
-    # print
-    # b = os.path.abspath(os.path.join(a, os.pardir)) + '\\guif\\golem-gui.py'
-    # print b
-    #os.system(b)
+    from golem import gui
 
-    from golem.gui import app
-    app.run(debug=True)
-    
-    #exec(b)
-    
-    #import file
+    gui.root_path = test_execution.root_path
+
+    gui.app.run(debug=True)
 
 
 def get_current_time():
-        time_format = "%Y-%m-%d-%H.%M.%S"
-        return datetime.datetime.today().strftime(time_format)
+    time_format = "%Y-%m-%d-%H.%M.%S"
+    return datetime.datetime.today().strftime(time_format)
 
 
 def create(name, source, destination):
@@ -256,101 +212,9 @@ def create(name, source, destination):
         print
 
 
-class _Missing(object):
-
-    def __repr__(self):
-        return 'no value'
-
-    def __reduce__(self):
-        return '_missing'
-
-_missing = _Missing()
-    
-class cached_property(object):
-    """A decorator that converts a function into a lazy property. The
-function wrapped is called the first time to retrieve the result
-and then that calculated result is used the next time you access
-the value::
-
-class Foo(object):
-
-@cached_property
-def foo(self):
-# calculate something important here
-return 42
-
-The class has to have a `__dict__` in order for this property to
-work.
-"""
-
-    # implementation detail: this property is implemented as non-data
-    # descriptor. non-data descriptors are only invoked if there is
-    # no entry with the same name in the instance's __dict__.
-    # this allows us to completely get rid of the access function call
-    # overhead. If one choses to invoke __get__ by hand the property
-    # will still work as expected because the lookup logic is replicated
-    # in __get__ for manual invocation.
-
-    def __init__(self, func, name=None, doc=None):
-        self.__name__ = name or func.__name__
-        self.__module__ = func.__module__
-        self.__doc__ = doc or func.__doc__
-        self.func = func
-
-    def __get__(self, obj, type=None):
-        if obj is None:
-            return self
-        value = obj.__dict__.get(self.__name__, _missing)
-        if value is _missing:
-            value = self.func(obj)
-            obj.__dict__[self.__name__] = value
-        return value
-    
-    
-class lazy_property(object):#deprecated use the above one
-    '''
-    meant to be used for lazy evaluation of an object attribute.
-    property should represent non-mutable data, as it replaces itself.
-    '''
-
-    def __init__(self,fget):
-        self.fget = fget
-        self.func_name = fget.__name__
-
-
-    def __get__(self,obj,cls):
-        if obj is None:
-            return None
-        value = self.fget(obj)
-        setattr(obj,self.func_name,value)
-        return value
-        
-
-def get_selenium_object(obj, driver):
-    if 'id' in obj:
-       test_object = driver.find_element_by_id(obj['id'])
+def is_test_suite(project, test_case_or_suite):
+    suites = get_suites(project)
+    if test_case_or_suite in suites:
+        return True
     else:
-        print 'Object could not be found' #(fix)
-    
-    return test_object
-
-
-class Test_context:
-    '''used to store all the data related to an execution instance'''
-
-    def __init__(self, 
-        root=None,
-        project=None, 
-        test_case=None, 
-        test_suite=None, 
-        settings=None, 
-        engine=None, 
-        selenium_driver=None):
-
-        self.root = root
-        self.project = project
-        self.test_case = test_case
-        self.test_suite = test_suite
-        self.settings = settings
-        self.engine = engine 
-        self.selenium_driver = selenium_driver 
+        return False

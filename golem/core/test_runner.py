@@ -1,0 +1,117 @@
+from golem.core import utils, test_execution, logger, selenium_utils
+
+from multiprocessing import Pool
+from multiprocessing.pool import ApplyResult
+
+import os, sys
+
+import traceback
+
+
+
+def test_runner(project, test_case_name):
+    ''' runs a single test case by name.
+    test_case_name may include unfixed number of subpackages
+    separated by dots '''
+
+    result = {
+        'result': 'pass',
+        'error': None,
+        'description': None,
+        'steps': None}
+
+    import execution_logger
+    instance = None
+    try:
+        test_class = utils.get_test_case_class(
+                        project,
+                        test_case_name)
+        instance = test_class()
+        
+        if hasattr(instance, 'setup'):
+            instance.setup()
+        else:
+            raise Exception
+
+        test_data = selenium_utils.get_test_data(
+                            '',
+                            project,
+                            '', 
+                            test_case_name)
+        
+        if hasattr(instance, 'test'):
+            instance.test(test_data)
+        else:
+            raise Exception
+        
+    except:
+        result['result'] = 'fail'
+        result['error'] = traceback.format_exc()
+        print dir(traceback)
+        print traceback.print_exc()
+
+    if hasattr(instance, 'teardown'):
+        instance.teardown()     
+
+    result['description'] = execution_logger.description
+    result['steps'] = execution_logger.steps
+
+    return result
+
+
+def multiprocess_executor(test_case_list=[], processes=1):
+
+    pool = Pool(processes=processes) 
+
+    results = []
+
+    results = [pool.apply_async(
+            test_runner,
+            args=(test_execution.project_name, x, ),
+            callback = logger.log_result) for x in test_case_list]
+
+    map(ApplyResult.wait, results)
+    lst_results=[r.get() for r in results]
+    print lst_results
+
+    pool.close()
+    pool.join()
+
+
+
+
+def run_single_test_case(project_name, test_case_name):
+
+    #check if test case exists and run it
+    full_path = os.path.join(
+                    'projects',
+                    project_name,
+                    'test_cases',
+                    '{0}.py'.format(test_case_name))
+    if not os.path.exists(full_path):
+        sys.exit("ERROR: no test case named {0} exists".format(test_case_name))
+    else:
+        multiprocess_executor([test_case_name], 1)
+
+
+def run_suite(project_name, suite_name):
+    ''' a suite can be python file that includes a test list or
+    a directory that contains test cases '''
+
+    # TO DO implement directory suites
+
+    print "INSIDE RUN SUITE"
+    print test_execution.project_name
+    
+    path = os.path.join(
+                'projects',
+                project_name,
+                'test_suites',
+                '{0}.py'.format(suite_name))
+
+    if os.path.exists(path):
+
+        test_case_list = utils.get_suite_test_cases(project_name, suite_name)
+        print test_case_list
+
+        multiprocess_executor(test_case_list, 3)

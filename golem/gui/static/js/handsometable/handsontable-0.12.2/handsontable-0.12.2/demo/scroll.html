@@ -1,0 +1,325 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title>Scroll - Handsontable</title>
+
+  <!--
+  Loading Handsontable (full distribution that includes all dependencies)
+  -->
+  <script data-jsfiddle="common" src="../dist/handsontable.full.js"></script>
+  <link data-jsfiddle="common" rel="stylesheet" media="screen" href="../dist/handsontable.full.css">
+
+  <!--
+  Loading demo dependencies. They are used here only to enhance the examples on this page
+  -->
+  <link data-jsfiddle="common" rel="stylesheet" media="screen" href="css/samples.css?20140331">
+  <script src="js/samples.js"></script>
+  <script src="js/highlight/highlight.pack.js"></script>
+  <link rel="stylesheet" media="screen" href="js/highlight/styles/github.css">
+  <link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+
+  <!--
+  Facebook open graph. Don't copy this to your project :)
+  -->
+  <meta property="og:title" content="Scroll">
+  <meta property="og:description"
+        content="If you want scrollbars, just set it in the container CSS.">
+  <meta property="og:url" content="http://handsontable.com/demo/scroll.html">
+  <meta property="og:image" content="http://handsontable.com/demo/image/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="409">
+  <meta property="og:image:height" content="164">
+  <link rel="canonical" href="http://handsontable.com/demo/scroll.html">
+
+  <!--
+  Google Analytics for GitHub Page. Don't copy this to your project :)
+  -->
+  <script src="js/ga.js"></script>
+
+  <script data-jsfiddle="common">
+    function createBigData() {
+      var rows = []
+        , i
+        , j;
+
+      for (i = 0; i < 1000; i++) {
+        var row = [];
+        for (j = 0; j < 6; j++) {
+          row.push(Handsontable.helper.spreadsheetColumnLabel(j) + (i + 1));
+        }
+        rows.push(row);
+      }
+
+      return rows;
+    }
+  </script>
+</head>
+
+<body>
+
+
+<div class="wrapper">
+<div class="wrapper-row">
+<div id="global-menu-clone">
+  <h1><a href="../index.html">Handsontable</a></h1>
+
+</div>
+
+<div id="container">
+<div class="columnLayout">
+
+<div class="rowLayout">
+  <div class="descLayout">
+    <div class="pad">
+      <h2>Scrollbars</h2>
+
+      <p>This page shows how to configure Handsontable scrollbars:</p>
+
+      <ul>
+        <li><a href="#both">Vertical and horizontal scrollbars</a></li>
+        <li><a href="#last">Single scrollbar (stretchH <code>last</code> column)</a></li>
+        <li><a href="#stretch">Single scrollbar (stretchH <code>all</code> columns)</a></li>
+        <li><a href="#none">Single scrollbar (stretchH <code>none</code> - default)</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="rowLayout">
+  <div class="descLayout">
+    <div class="pad" data-jsfiddle="example1">
+      <a name="both"></a>
+
+      <h2>Vertical and horizontal scrollbars</h2>
+
+      <p>If you want scrollbars, just set container width, height and <code>overflow: scroll</code> in CSS.</p>
+
+      <p>
+        <button class="maximize">Maximize HOT table</button>
+      </p>
+
+      <div id="example1" style="width: 400px; height: 200px; overflow: auto"></div>
+
+      <p>
+        <button name="dump" data-dump="#example1" data-instance="hot1" title="Prints current data source to Firebug/Chrome Dev Tools">Dump
+          data to console
+        </button>
+      </p>
+    </div>
+  </div>
+
+  <div class="codeLayout">
+    <div class="pad">
+      <div class="jsFiddle">
+        <button class="jsFiddleLink" data-runfiddle="example1">Edit in jsFiddle</button>
+      </div>
+
+      <script data-jsfiddle="example1">
+
+
+        var maxed = false
+          , resizeTimeout
+          , availableWidth
+          , availableHeight
+          , example = document.getElementById('example1');
+
+        var calculateSize = function () {
+          if(maxed) {
+            var offset = Handsontable.Dom.offset(example);
+            availableWidth = Handsontable.Dom.innerWidth(document.body) - offset.left + window.scrollX;
+            availableHeight = Handsontable.Dom.innerHeight(document.body) - offset.top + window.scrollY;
+
+            example.style.width = availableWidth + 'px';
+            example.style.height = availableHeight + 'px';
+          }
+        };
+
+        Handsontable.Dom.addEvent(window, 'resize', calculateSize);
+        var hot1 = new Handsontable(example,{
+          data: createBigData(),
+          colWidths: [55, 80, 80, 80, 80, 80, 80], //can also be a number or a function
+          rowHeaders: true,
+          colHeaders: true,
+          fixedColumnsLeft: 2,
+          fixedRowsTop: 2,
+          minSpareRows: 1,
+          stretchH: 'all',
+          contextMenu: true
+        });
+
+        var maximize = document.querySelector('.maximize');
+        Handsontable.Dom.addEvent(maximize, 'click', function () {
+          maxed = !maxed;
+          if(maxed) {
+            calculateSize();
+          }
+          else {
+            example.style.width = 400 + 'px';
+            example.style.height = 400 + 'px';
+          }
+          hot1.render();
+
+        });
+
+      </script>
+    </div>
+  </div>
+</div>
+
+<div class="rowLayout">
+  <div class="descLayout">
+    <div class="pad" data-jsfiddle="example2">
+      <a name="last"></a>
+
+      <h2>Single scrollbar (stretchH <code>last</code> column)</h2>
+
+      <p>It is also possible to configure only a single scrollbar. The following example creates one by specifying
+        only the container height and <code>overflow: auto</code> in CSS.</p>
+
+      <div id="example2" style="height: 300px; overflow: auto"></div>
+
+      <p>
+        <button name="dump" data-dump="#example2" data-instance="hot2" title="Prints current data source to Firebug/Chrome Dev Tools">Dump
+          data to console
+        </button>
+      </p>
+    </div>
+  </div>
+
+  <div class="codeLayout">
+    <div class="pad">
+      <div class="jsFiddle">
+        <button class="jsFiddleLink" data-runfiddle="example2">Edit in jsFiddle</button>
+      </div>
+
+      <script data-jsfiddle="example2">
+        /*
+         Container looks like this:
+
+         <div id="example2" style="width: height: 300px; overflow: auto"></div>
+         */
+        var container2 = document.getElementById('example2');
+        var hot2 = new Handsontable(container2,{
+          data: createBigData(),
+          colWidths: [55, 47, 47, 47, 47, 47, 47], //can also be a number or a function
+          rowHeaders: true,
+          colHeaders: true,
+          stretchH: 'last',
+          minSpareRows: 1,
+          contextMenu: true
+        });
+      </script>
+    </div>
+  </div>
+</div>
+
+<div class="rowLayout">
+  <div class="descLayout">
+    <div class="pad" data-jsfiddle="example3">
+      <a name="stretch"></a>
+
+      <h2>Single scrollbar (stretchH <code>all</code> columns)</h2>
+
+      <p>If the table content is not as wide as the container width, the table will be stretched to the container
+        width. The default horizontal stretch model is to stretch the last column only (by using <code>stretchH:
+          'last'</code> option).</p>
+
+      <p>Other possible stretch modes are <code>all</code> (stretches all columns equally, used in the below example)
+        and <code>none</code> (not stretching).</p>
+
+      <div id="example3" style="height: 300px; overflow: auto"></div>
+
+      <p>
+        <button name="dump" data-dump="#example3" data-instance="hot3" title="Prints current data source to Firebug/Chrome Dev Tools">Dump
+          data to console
+        </button>
+      </p>
+    </div>
+  </div>
+
+  <div class="codeLayout">
+    <div class="pad">
+      <div class="jsFiddle">
+        <button class="jsFiddleLink" data-runfiddle="example3">Edit in jsFiddle</button>
+      </div>
+
+      <script data-jsfiddle="example3">
+        /*
+         Container looks like this:
+
+         <div id="example3" style="width: height: 300px; overflow: auto"></div>
+         */
+        var container3 = document.getElementById('example3');
+        var hot3 = new Handsontable(container3,{
+          data: createBigData(),
+          colWidths: [55, 47, 47, 47, 47, 47, 47], //can also be a number or a function
+          rowHeaders: true,
+          colHeaders: true,
+          stretchH: 'all',
+          minSpareRows: 1,
+          contextMenu: true
+        });
+      </script>
+    </div>
+  </div>
+</div>
+
+<div class="rowLayout">
+  <div class="descLayout">
+    <div class="pad" data-jsfiddle="example4">
+      <a name="none"></a>
+
+      <h2>Single scrollbar (stretchH <code>none</code> - default)</h2>
+
+      <div id="example4" style="height: 300px; overflow: auto"></div>
+
+      <p>
+        <button name="dump" data-dump="#example4" data-instance="hot4" title="Prints current data source to Firebug/Chrome Dev Tools">Dump
+          data to console
+        </button>
+      </p>
+    </div>
+  </div>
+
+  <div class="codeLayout">
+    <div class="pad">
+      <div class="jsFiddle">
+        <button class="jsFiddleLink" data-runfiddle="example4">Edit in jsFiddle</button>
+      </div>
+
+      <script data-jsfiddle="example4">
+        /*
+         Container looks like this:
+
+         <div id="example4" style="width: height: 300px; overflow: auto"></div>
+         */
+        var container4 = document.getElementById('example4');
+        var hot4 = new Handsontable(container4,{
+          data: createBigData(),
+          colWidths: [55, 47, 47, 47, 47, 47, 47], //can also be a number or a function
+          rowHeaders: true,
+          colHeaders: true,
+          stretchH: 'none', //actually you don't have to declare it because it is default
+          minSpareRows: 1,
+          contextMenu: true
+        });
+      </script>
+    </div>
+  </div>
+</div>
+
+<div class="footer-text">Handsontable &copy; 2012-2014 Marcin Warpechowski and contributors.<br> Code and documentation
+  licensed under the The MIT License.
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+<div id="outside-links-wrapper"></div>
+
+</body>
+</html>

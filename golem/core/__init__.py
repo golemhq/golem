@@ -9,9 +9,8 @@ def getOrCreateWebdriver(*args):
     #driver = driver or utils.get_driver(args[0])
 
     if not driver:
-        if args:
-            driver = utils.get_driver(args[0])
-            #maximize driver window by default (fix)
-            driver.maximize_window()
+        driver = utils.get_driver('firefox')
+        #maximize driver window by default (fix)
+        driver.maximize_window()
 
     return driver

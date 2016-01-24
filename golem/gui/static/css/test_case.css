@@ -1,0 +1,44 @@
+
+
+
+.input-group {
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+.custom-input {
+
+}
+
+
+
+#stepsContainerContainer {
+	background-color: lightcyan;
+	padding-bottom: 10px;
+}
+
+#datosContainerContainer {
+	background-color: lightgoldenrodyellow;
+	padding-bottom: 10px;
+}
+
+#pageObjectsContainerContainer {
+	background-color: beige;
+	padding-bottom: 10px;
+}
+
+#descriptionContainer {
+	background-color: seashell;
+	padding-bottom: 10px;
+}
+
+.step {
+	clear: both;
+}
+
+.autocomplete-suggestions {
+	background-color: white;
+	border-left: 1px solid #CCCCCC;
+	border-bottom: 1px solid #CCCCCC;
+	border-right: 1px solid #CCCCCC;
+}

@@ -1,4 +1,8 @@
-Flask==0.10.1
-Jinja2==2.7.2
-Werkzeug==0.9.4
-selenium==2.40.0
+Flask-Login==0.3.2
+flask==0.10.1
+-e git+https://github.com/lucianopuccio/Golem.git@250e3617f56353273805db3cc9d5d0eea8ad1a08#egg=golem-master
+itsdangerous==0.24
+jinja2==2.7.2
+markupsafe==0.23
+selenium==2.48.0
+werkzeug==0.9.4

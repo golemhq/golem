@@ -1,0 +1,3 @@
+describe('Handsontable.helpers', function () {
+
+});

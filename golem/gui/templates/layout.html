@@ -1,69 +1,69 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href="../../docs-assets/ico/favicon.png">
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+
+    <!--CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap-theme.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <!--
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/switch.css') }}">
+    -->
+
+    <!-- JQUERY -->
+    <script src="{{ url_for('static', filename='js/jquery/jquery.min.js') }}"></script>
 
     <title>Golem</title>
-
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}" />
-
-    <!-- Custom styles for this template -->
-   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-
-
-   <script src="{{ url_for( 'static', filename='js/jquery.js') }}"></script>
-    <script src="{{ url_for( 'static', filename='js/bootstrap.min.js') }}"></script>
-
-    <!-- Just for debugging purposes. Don't actually copy this line! -->
-    <!--[if lt IE 9]><script src="../../docs-assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
-    <![endif]-->
-  </head>
+    
+    {% block head %}
+    {% endblock %} 
+		
+		
+</head>
 
 <body>
-    <div id="header">
+    <div class="container">
+        
+        <div class="header clearfix">
+        <nav>
+          <ul class="nav nav-pills pull-right">
+            {% if g.user %}
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ g.user.username }} <span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="/logout/">Log out</a></li>
+                  </ul>
+                </li>
+            {% else %}
+                <li role="presentation"><a href="/login/">Log in</a></li>
+            {% endif %}
+          </ul>
+        </nav>
+        <h3 class="text-muted"><a href="/">Golem <small>Test Automation</small></a></h3>
+      </div>
 
+        {% block content %}
+        {% endblock %}
 
-        <div id="header_left">
-        <h1><a href='/'>Golem</a></h1>
-        <h3>Test Automation Framework</h3>
-        </div>
-    <div id="select_toolbar">
-
-            <label>Project: </label>
-            <select id="project_dropdown" name="project_dropdown">
-            {% for project in data.projects %}
-                <option {% if proj == project %} selected {% endif %} value="{{project}}">{{ project }}</option>
-            {% endfor %}
-            </select>
-
-    </div>
-    <script>
-       $(function(){
-            $('#project_dropdown').change(function(){
-                var project_dropdown = document.getElementById('project_dropdown');
-                window.location = ""+ project_dropdown.options[project_dropdown.selectedIndex].value;
-
-        });
-        });
-    </script>
-
-
-    </div>
-    <div id="content" style="clear: both;">
-        {% block content %}{% endblock %}
+        <!--
+        <footer class="footer">
+            <p>&copy; Casey 2015</p>
+        </footer>
+        -->
     </div>
 
-		
+
+    
+<script src="{{ url_for('static', filename='js/bootstrap/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+
 </body>
+
 </html>

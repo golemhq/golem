@@ -1,0 +1,303 @@
+{% extends "layout.html" %} {% block head %} {% endblock %} {% block content %}
+
+
+
+
+
+<div>
+    <ol class="breadcrumb">
+  <li><a href="/{{project}}/">{{ project }}</a></li>
+  <li class="active">{{testcase}}</li>
+</ol>
+	
+    <div id="tc_toolbar">
+    
+        <button id="Save">Save</button>
+        <span>All changes saved</span>
+        <span>     </span>
+        <label>Detailed View</label>
+	
+    <div class="onoffswitch">
+    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch">
+    <label class="onoffswitch-label" for="myonoffswitch">
+        <div class="onoffswitch-inner"></div>
+        <div class="onoffswitch-switch"></div>
+    </label>
+</div>
+
+    
+      
+        
+        </div>
+        
+
+    <div id="dataTable"></div>
+
+    <div id="formContainer" style="display: none;">
+
+
+        <div id="accordion">
+            <!--<h3>Section 4</h3>
+            <div>                             
+                    <div class="col-md-12">
+                    <label>Email address</label>
+                    <input type="email" class="form-control" id="">
+                    </div>
+                    
+                     <div class="col-md-12">
+                    <label>Email address</label>
+                    <input type="email" class="form-control" id="">
+                    </div>
+                        
+                    <div class="col-md-6">
+                        <label>Email address</label>
+                        <input type="email" class="form-control" id="">
+                    </div>
+                    <div class="col-md-6">
+                        <label>Email address</label>
+                        <select class="form-control">
+                          <option>1</option>
+                          <option>2</option>
+                          <option>3</option>
+                          <option>4</option>
+                          <option>5</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label>Email address</label>
+                        >
+                    </div>-->                
+                
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+  
+
+
+
+    <script>
+        var handsontable;
+
+        var field_placement = {{ field_placement | tojson }};
+		
+		var field_definition = {{ field_definition | tojson }};
+        
+
+        var tc_data = {{ tc_data | tojson}};
+		
+        
+        
+        
+        
+		var headers = tc_data[0];
+		//remove first element
+        tc_data.shift()
+        
+        //add execution columns
+        for(row in tc_data){
+            tc_data[row].push('READY');//Result cell
+            tc_data[row].push('');//Comment cell
+            tc_data[row].push('');//Related Issue Cell
+        }
+        
+        //Add execution colum headers
+            headers.push('Result');//Result cell
+            headers.push('Comments');//Comment cell
+            headers.push('Related Issues');//Related Issue Cell
+          
+        
+		//array of objects to define each column type
+        var execColumns = [];
+        for(e in headers){
+            execColumns.push({});//fill columns with empty objects then edit as necessary
+        }
+        
+        
+        
+        //set the settings for the Result column
+        execColumns[headers.length -3] = {
+            type: 'dropdown',
+            source: ["READY", "PASS", "FAIL", "N/A", "BLOCKED"],
+            }
+        
+        
+
+        $(document).ready(function() {            
+			handsontable = startTable($("#dataTable"), tc_data, headers, execColumns);
+
+            createFormView();
+        });
+
+
+        function loadData() {
+            $.ajax({
+                url: "/gettestcase/",
+                data: {
+                    "testcasename": testcasename
+                },
+                dataType: 'json',
+                type: 'GET',
+                success: function(res) {
+                    handsontable.loadData(res.data);
+                    //$console.text('Data loaded');
+                }
+            });
+        };
+
+         //Save data
+        $("#Save").click(function() {
+            $.ajax({
+                url: "/save/",
+                data: {
+                    "data": handsontable.getData()
+                }, //returns all cells' data
+                dataType: 'json',
+                type: 'POST',
+                success: function(res) {
+                    if (res.result === 'ok') {
+                        alert('Data saved');
+                    } else {
+                        alert('Save error');
+                    }
+                },
+                error: function() {
+                    alert('Save error. POST method is not allowed on GitHub Pages. Run this example on your own server to see the success message.');
+                }
+            });
+        });
+        
+        
+        $("#myonoffswitch").change(function() {
+            if(this.checked) {
+                displayForm();
+            }
+            else{
+                displayGrid();
+            }
+        });
+
+
+		
+        function createFormView(){
+            for (row in tc_data) {
+                var tc = tc_data[row];
+                
+                $( "#accordion" ).append('<h3></h3>');
+                var newDiv = document.createElement('div');
+                
+                var TCTitle;          
+
+                for (j in field_placement) {
+                    var line = field_placement[j]; //a row in the tc form
+                    //how many fields does the line has?
+                    for (f in line) {
+                        var field = line[f]; //this is a field, match thid with each of the tc headers
+                        for (var i = 0; i <= headers.length; i++) {
+                            if (field == headers[i]) {                            
+                               
+                                var newInnerDiv = document.createElement('div');
+                                
+                                if(line.length == 1){
+                                    newInnerDiv.setAttribute("class", "col-md-12");
+                                }
+                                else{ 
+                                        newInnerDiv.setAttribute("class", "col-md-6");
+                                }
+                                newInnerDiv.innerHTML += "<label>"+field+"</label>";
+                                
+                                
+                                var field_type;
+                                if(field_definition.hasOwnProperty(field)) {
+                                       field_type = field_definition[field][0];                                
+                                }
+                                else{
+                                    field_type = 'text';
+                                }
+                                
+                                
+                                switch(field_type)
+                                {
+                                case "text":
+                                  var newNode = document.createElement('input');
+                                    newNode.setAttribute("type", 'text');
+                                    newNode.setAttribute("class", 'form-control');
+                                    newNode.setAttribute("disabled", 'true');
+                                    newNode.setAttribute("value", tc[i]);
+                                  break;
+                                case "textarea":
+                                  var newNode = document.createElement('textarea');
+                                    newNode.setAttribute("class", 'form-control');
+                                    newNode.setAttribute("disabled", 'true');
+                                    newNode.setAttribute("rows", '3');
+                                    newNode.innerHTML= tc[i];
+                                  break;
+                                case "select":
+                                  var newNode = document.createElement('input');
+                                    newNode.setAttribute("type", 'text');
+                                    newNode.setAttribute("class", 'form-control');
+                                    newNode.setAttribute("disabled", 'true');
+                                    newNode.setAttribute("value", tc[i]);   
+                                  break;
+                                default:
+                                  //
+                                }
+                                
+                                if(field == 'Id' || field == 'Title'){
+                                    $( "#accordion h3:last-child" ).append(tc[i]);
+                                }
+                                newInnerDiv.appendChild(newNode);
+                                newDiv.appendChild(newInnerDiv);
+                            }
+                        }
+                    }
+                }
+                // a tc is ready, add tc container to form container   
+                 $( "#accordion" ).append(newDiv);
+            }
+                createAccordion($("#accordion"));
+        }
+        
+        
+        
+        
+        
+        $('#dataTable').handsontable({
+            afterChange: function(changes, source) {
+               //console.log(changes);
+                //console.log(source);
+                //check if edit was on Result column
+                if(source == 'edit'){
+                    if(headers[changes[0][1]] == 'Result'){
+                        var ht = $('#dataTable').handsontable('getInstance');
+                        var cell = ht.getCell(changes[0][0], changes[0][1]);
+                        switch(changes[0][3])
+                        {
+                        case 'FAIL':
+                          cell.style.backgroundColor = 'red';
+                          break;
+                        case 'PASS':
+                          cell.style.backgroundColor = 'green';
+                          break;
+                        default:
+                          cell.style.backgroundColor = 'white';
+                        }
+                        
+                        
+                        
+                    }
+                }
+            }
+        });
+        
+        
+        
+        
+        
+    </script>
+
+    {% endblock %}

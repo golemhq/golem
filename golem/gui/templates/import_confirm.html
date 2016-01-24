@@ -1,0 +1,66 @@
+{% extends "layout.html" %} 
+
+
+{% block title %}Index{% endblock %}
+
+{% block head %} {{ super() }} {% endblock %} 
+
+
+{% block content %}
+<div class="row">
+
+    <div class="col-md-12" id="confirm_import">
+    <h4> Importar <i>{{ filename }} </i></h4>
+        <table class="table table-bordered">
+
+            {% for row in rows %}
+            <tr>
+                {% for cell in row %}
+                <td>{{cell}}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+
+        <button id="go_back_button">Back</button>
+        <button id="confirm_import_button">Confirm Import</button>
+        
+
+    </div>
+
+</div>
+
+<script>
+    var import_data = {{ rows | tojson}};
+
+    $("#confirm_import_button").click(function(){
+        confirmImport();
+    });
+
+    $("#go_back_button").click(function(){
+        document.location.pathname = '/{{project}}/import/';
+    });
+
+    function confirmImport(){
+        $.ajax({
+            type: "POST",
+            dataType: 'json',
+            contentType: "application/json",
+            url: '/{{project}}/import/confirm/',
+            data: JSON.stringify({                         //JSON.stringify(
+                "import_data": import_data,
+                "filename": '{{filename}}',
+            }),
+            success: function(data) {
+                if(data.result == 'ok'){
+                    document.location.pathname = '/{{project}}/';
+                }
+                else{
+                    //alert('nocomments');
+                }
+            }
+        });
+    }
+</script>
+
+{% endblock %}
