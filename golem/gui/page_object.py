@@ -22,9 +22,11 @@ def get_web_elements(content, po_name):
     return elements
 
 
-def get_page_object_elements(root_path, project, po_name):
+def get_page_object_elements(root_path, project, parents, po_name):
+    parents_joined = os.sep.join(parents)
+
     path = os.path.join(
-        root_path, 'projects', project, 'pages', po_name + '.py')
+        root_path, 'projects', project, 'pages', parents_joined, po_name + '.py')
 
     with open(path) as f:
         content = f.readlines()
@@ -62,9 +64,14 @@ def is_page_object(parameter, root_path, project):
     return False
 
 
-def new_page_object(root_path, project, page_object_name):
+def new_page_object(root_path, project, parents, page_object_name):
+    parents_joined = os.sep.join(parents)
+
     page_object_path = os.path.join(
-        root_path, 'projects', project, 'pages', page_object_name + '.py')
+        root_path, 'projects', project, 'pages', parents_joined)
+    if not os.path.exists(page_object_path):
+        os.makedirs(page_object_path)
+    page_object_full_path = os.path.join(page_object_path, page_object_name + '.py')
     
-    with open(page_object_path, 'w') as f:
+    with open(page_object_full_path, 'w') as f:
         f.write('')

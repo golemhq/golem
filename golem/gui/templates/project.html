@@ -12,99 +12,76 @@
 
 	<h3>{{project}}</h3>
 
-	<!--
-	<div class="accordion">
-		{% for dir in test_cases['childirs'] %}
-			<h3>{{dir}}</h3>
-			<div>
-				<div class="accordion">
-					{% for dir2 in test_cases['childirs'][dir]['childirs'] %}
-						<h3>{{dir2}}</h3>
-						<div>
-							<div class="accordion">
-								{% for dir3 in test_cases['childirs'][dir]['childirs'][dir2]['childirs'] %}
-									<h3>{{dir3}}</h3>
-									<div>
-										<a href="/p/{{project}}/nuevo/{{dir}}/{{dir2}}/{{dir3}}/" class="btn btn-default">Nuevo</a><br>
-										{% for f4 in test_cases['childirs'][dir]['childirs'][dir2]['childirs'][dir3]['files']%}
-											<a href="/p/{{project}}/tc/{{dir}}/{{dir2}}/{{dir3}}/{{f4}}/">{{f4}}</a> <br>
-										{% endfor %}
-									</div>
-
-								{% endfor %}	
-							</div>
-							{% for f3 in test_cases['childirs'][dir]['childirs'][dir2]['files'] %}
-								<a href="/p/{{project}}/tc/{{dir}}/{{dir2}}/{{f3}}/">{{f3}}</a> <br>
-							{% endfor %}
-						</div>
-					{% endfor %}
-				</div>
-				{% for file2 in test_cases['childirs'][dir]['files'] %}
-					{{ file2 }}<br>
-				{% endfor %}
-			</div>
-		{% endfor %}
-	</div>
-
-	{% for file in test_cases['files'] %}
-		<a href="/p/{{project}}/tc/{{file}}/">{{ file}}</a> <br>
-	{% endfor %}
-
-	<br><br>
-
-	-->
 	<div class="col-sm-6">
+
 		<span><strong>Test Cases</strong></span>
 		<ul id="testCasesTree">
-			{% for dir1 in test_cases['childirs'] %}
-				<li><a href="#">{{ dir1 }}</a>
-					<ul>
-						{% for dir2 in test_cases['childirs'][dir1]['childirs'] %}
-							<li>{{ dir2 }}</li>
-						{% endfor %}
-						{% for file2 in test_cases['childirs'][dir1]['files'] %}
-							<li>{{ file2 }}</li>
-						{% endfor %}
-						<li><i class="glyphicon glyphicon-plus-sign"></i><a href="#" onclick="addNewTestCase()"> Add New</a></li>
-					</ul>
-				</li>
-			{% endfor %}
-			{% for file1 in test_cases['files'] %}
-				<li><a href="/p/{{project}}/tc/{{file1}}/">{{ file1 }}</a></li>
-			{% endfor %}
+		
+			{%- for key, value in test_cases.items() recursive %}
+				
+				{%- if value is mapping -%}
+					<li>
+						<a href="#">{{key}}</a>
+			        	<ul>{{ loop(value.items()) }}
+			        		<li><i class="glyphicon glyphicon-plus-sign"></i><a href="#" onclick="startAddNewTestCase(this)"> Add New</a></li>
+			        	</ul>
+			        </li>
+			    {%- else %}
+			    	<li><a href="/p/{{project}}/tc/{{key.1}}/">{{ key.0 }}</a></li>
+			    {%- endif %}
+			{%- endfor %}
 			<li><i class="glyphicon glyphicon-plus-sign"></i><a href="#" onclick="startAddNewTestCase(this)"> Add New</a></li>
 		</ul>
+
 	</div>
+
 	<div class="col-sm-6">
 		<span><strong>Pages</strong></span>
+
 		<ul id="pagesTree">
-			{% for dir1 in page_objects['childirs'] %}
-				<li><a href="#">{{ dir1 }}</a>
-					<ul>
-						{% for dir2 in page_objects['childirs'][dir1]['childirs'] %}
-							<li>{{ dir2 }}</li>
-						{% endfor %}
-						{% for file2 in page_objects['childirs'][dir1]['files'] %}
-							<li>{{ file2 }}</li>
-						{% endfor %}
-						<li><i class="glyphicon glyphicon-plus-sign"></i><a href="#" onclick="addNewTestCase()"> Add New</a></li>
-					</ul>
-				</li>
-			{% endfor %}
-			{% for file1 in page_objects['files'] %}
-				<li><a href="/p/{{project}}/page/{{file1}}/">{{ file1 }}</a></li>
-			{% endfor %}
+			{%- for key, value in page_objects.items() recursive %}
+				{%- if value is mapping -%}
+					<li>
+						<a href="#">{{key}}</a>
+			        	<ul>{{ loop(value.items()) }}
+			        		<li><i class="glyphicon glyphicon-plus-sign"></i><a href="#" onclick="startAddNewPageObject(this)"> Add New</a></li>
+			        	</ul>
+			        </li>
+			    {%- else %}
+			    	<li><a href="/p/{{project}}/page/{{key.1}}/">{{ key.0 }}</a></li>
+			    {%- endif %}
+			{%- endfor %}
 			<li><i class="glyphicon glyphicon-plus-sign"></i><a href="#" onclick="startAddNewPageObject(this)"> Add New</a></li>
 		</ul>
+
 	</div>
+
+
+	<div class="modal fade" id="errorModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Error</h4>
+      </div>
+      <div class="modal-body">
+        <ul id="errorList">
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Continue</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 
 </div>
 </div>
 
     <!--Jquery UI (for accordion -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui/jquery-ui.css') }}">
-    <script src="{{ url_for('static', filename='js/jquery-ui/jquery-ui.js') }}"></script>
+    <!--<link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui/jquery-ui.css') }}"> -->
+    <!-- <script src="{{ url_for('static', filename='js/jquery-ui/jquery-ui.js') }}"></script> -->
 
     <script src="{{ url_for('static', filename='js/treeview.js') }}"></script>
 

@@ -85,13 +85,15 @@ def project(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path):
         return render_template('not_permission.html')
 
-    test_cases = gui_utils.get_test_cases(
+    test_cases = gui_utils.get_test_cases_or_page_objects(
                     root_path,
-                    project)
+                    project,
+                    'test_cases')
 
-    page_objects = gui_utils.get_page_objects(
+    page_objects = gui_utils.get_test_cases_or_page_objects(
                             root_path, 
-                            project)
+                            project,
+                            'pages')
 
     return render_template(
         'project.html',
@@ -104,22 +106,28 @@ def project(project):
 @app.route("/p/<project>/tc/<test_case_name>/")
 @login_required
 def test_case_view(project, test_case_name):
+    # check if user has permissions for this project
     if not user.has_permissions_to_project(g.user.id, project, root_path):
         return render_template('not_permission.html')
 
-    parents = []
+    if '.' in test_case_name:
+        tc_name = test_case_name.split('.')[-1]
+        parents = test_case_name.split('.')[0:-1]
+    else:
+        tc_name = test_case_name
+        parents = []
 
     test_case_data = test_case.parse_test_case(
                                         root_path, 
                                         project, 
                                         parents, 
-                                        test_case_name)
+                                        tc_name)
 
     test_data = data.parse_test_data(
                             root_path,
                             project,
                             parents,
-                            test_case_name)
+                            tc_name)
 
     return render_template(
                     'test_case.html', 
@@ -127,65 +135,6 @@ def test_case_view(project, test_case_name):
                     test_case_data=test_case_data,
                     test_case_name=test_case_name,
                     test_data=test_data)
-
-
-@app.route("/p/<project>/tc/<dir1>/<dir2>/<dir3>/<filename>/")
-@login_required
-def file_from_project_dir_dir_dir(project, dir1, dir2, dir3, filename):
-    if not user.has_permissions_to_project(g.user.id, project, root_path):
-        return render_template('not_permission.html')
-
-    parents = [dir1, dir2, dir3]
-
-    if 'pageObjects' in parents:
-        # redirect to page object editor
-        print 'redirect'
-    else:
-        # redirect to test case editor
-
-        test_case_data = test_case.parse_test_case(
-                                        global_settings['workspace'], 
-                                        project, 
-                                        parents, 
-                                        filename)
-
-        return render_template(
-                        'test_case.html', 
-                        project=project, 
-                        test_case_data=test_case_data,
-                        test_case_name=filename,
-                        canal=parents[0])
-
-@app.route("/p/<project>/tc/<dir1>/<dir2>/<filename>/")
-@login_required
-def file_from_project_dir_dir(project, dir1, dir2, filename):
-    if not user.has_permissions_to_project(g.user.id, project, root_path):
-        return render_template('not_permission.html')
-
-    parents = [dir1, dir2]
-
-    if 'pageObjects' in parents:
-        # redirect to page object editor
-        print 'redirect'
-    else:
-        # redirect to test case editor
-
-        test_case_data = test_case.parse_test_case(
-                                        global_settings['workspace'], 
-                                        project, 
-                                        parents, 
-                                        filename)
-
-        return render_template(
-                        'test_case.html', 
-                        project=project, 
-                        test_case_data=test_case_data,
-                        test_case_name=filename,
-                        canal=parents[0])  
-
-
-
-
 
 
 @app.route("/get_page_objects/", methods=['POST'])
@@ -239,12 +188,13 @@ def nuevo_test_case():
 
     if request.method == 'POST':
         projectname = request.form['project']
-        #parents = request.form['parents']
+        parents = request.form['parents'].split('.')
         tc_name = request.form['testCaseName']
 
         test_case.new_test_case(
                             root_path,
                             projectname,
+                            parents,
                             tc_name)
 
         return json.dumps({
@@ -253,20 +203,34 @@ def nuevo_test_case():
             'tc_name': tc_name})
 
 
-@app.route("/new_directory/", methods=['POST'])
-def new_directory():
+@app.route("/new_directory_test_case/", methods=['POST'])
+def new_directory_test_case():
 
     if request.method == 'POST':
         projectname = request.form['project']
+        parents = request.form['parents'].split('.')
         directory_name = request.form['directoryName'].replace('/', '')
 
-        gui_utils.new_directory(
+        errors = []
+
+        # check if a directory already exists
+        if gui_utils.directory_already_exists(
+                        root_path,
+                        projectname,
+                        'test_cases',
+                        parents,
+                        directory_name):
+            errors.append('A directory with that name already exists')
+
+        if not errors:
+            gui_utils.new_directory(
                     root_path,
                     projectname,
+                    parents,
                     directory_name)
 
         return json.dumps({
-            'result':'ok',
+            'errors': errors,
             'project_name': projectname,
             'directory_name': directory_name})
 
@@ -276,18 +240,51 @@ def new_page_object():
 
     if request.method == 'POST':
         projectname = request.form['project']
-        #parents = request.form['parents']
+        parents = request.form['parents'].split('.')
         page_object_name = request.form['pageObjectName']
 
         page_object.new_page_object(
                             root_path,
                             projectname,
+                            parents,
                             page_object_name)
 
         return json.dumps({
             'result':'ok',
             'project_name': projectname,
             'page_object_name': page_object_name})
+
+
+@app.route("/new_directory_page_object/", methods=['POST'])
+def new_directory_page_object():
+
+    if request.method == 'POST':
+        projectname = request.form['project']
+        parents = request.form['parents'].split('.')
+        directory_name = request.form['directoryName'].replace('/', '')
+
+        errors = []
+
+        # check if a directory already exists
+        if gui_utils.directory_already_exists(
+                        root_path,
+                        projectname,
+                        'pages',
+                        parents,
+                        directory_name):
+            errors.append('A directory with that name already exists')
+
+        if not errors:
+            gui_utils.new_directory_page_object(
+                    root_path,
+                    projectname,
+                    parents,
+                    directory_name)
+
+        return json.dumps({
+            'errors': errors,
+            'project_name': projectname,
+            'directory_name': directory_name})
 
 
 @app.route("/get_global_actions/", methods=['POST'])
@@ -349,12 +346,18 @@ def page_view(project, page_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path):
         return render_template('not_permission.html')
 
-    parents = []
+    if '.' in page_name:
+        p_name = page_name.split('.')[-1]
+        parents = page_name.split('.')[0:-1]
+    else:
+        p_name = page_name
+        parents = []
 
     page_object_data = page_object.get_page_object_elements(
                                         root_path, 
-                                        project, 
-                                        page_name)
+                                        project,
+                                        parents, 
+                                        p_name)
 
     return render_template(
                     'page_object.html', 

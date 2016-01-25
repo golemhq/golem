@@ -21,50 +21,76 @@ def get_projects(path):
     return projects
 
 
-def go_one_level_deeper(file_structure, this_dir_file_structure, current_directory, parents):
-    first_parent = parents[0]
-    parents.pop(0)
-    if len(parents) == 0:
+# def go_one_level_deeper__DEPRECADO(file_structure, this_dir_file_structure, current_directory, parents):
+#     first_parent = parents[0]
+#     parents.pop(0)
+#     if len(parents) == 0:
 
-        file_structure['childirs'][current_directory] = this_dir_file_structure
-    else: 
-        file_structure['childirs'][first_parent] = go_one_level_deeper(
-                                    file_structure['childirs'][first_parent],
-                                    this_dir_file_structure,
-                                    current_directory,
-                                    parents)
-    return file_structure
+#         file_structure['childirs'][current_directory] = this_dir_file_structure
+#     else: 
+#         file_structure['childirs'][first_parent] = go_one_level_deeper(
+#                                     file_structure['childirs'][first_parent],
+#                                     this_dir_file_structure,
+#                                     current_directory,
+#                                     parents)
+#     return file_structure
 
 
-def get_test_cases(workspace, project):
-    path = os.path.join(workspace, 'projects', project, 'test_cases')
+# def get_test_cases__DEPRECADO(workspace, project):
+#     path = os.path.join(workspace, 'projects', project, 'test_cases')
 
-    file_structure = {
-        'name': '',
-        'files': [],
-        'childirs': {} }
+#     file_structure = {
+#         'name': '',
+#         'files': [],
+#         'childirs': {} }
 
-    for root, dirs, files in os.walk(path):
-        parents = root.replace(path, '').split(os.sep)
-        parents.pop(0)
-        current_directory = os.path.basename(root)
-        files = [x[:-3] for x in files]
-        if '__init__' in files: files.remove('__init__')
-        this_dir_file_structure = {
-                                    'name': current_directory,
-                                    'files': files,
-                                    'childirs': {} }
-        if len(parents) == 0:
-            file_structure = this_dir_file_structure
-        else:
-            file_structure = go_one_level_deeper(
-                                        file_structure, 
-                                        this_dir_file_structure, 
-                                        current_directory,
-                                        parents)
+#     for root, dirs, files in os.walk(path):
+#         parents = root.replace(path, '').split(os.sep)
+#         parents.pop(0)
+#         current_directory = os.path.basename(root)
+#         files = [x[:-3] for x in files]
+#         if '__init__' in files: files.remove('__init__')
+#         this_dir_file_structure = {
+#                                     'name': current_directory,
+#                                     'files': files,
+#                                     'childirs': {} }
+#         if len(parents) == 0:
+#             file_structure = this_dir_file_structure
+#         else:
+#             file_structure = go_one_level_deeper(
+#                                         file_structure, 
+#                                         this_dir_file_structure, 
+#                                         current_directory,
+#                                         parents)
 
-    return file_structure
+#     return file_structure
 
+
+def get_test_cases_or_page_objects(workspace, project, root_dir):
+    path = os.path.join(workspace, 'projects', project, root_dir)
+
+    dir = {}
+    rootdir = path.rstrip(os.sep)
+    start = rootdir.rfind(os.sep) + 1
+    for path, dirs, files in os.walk(rootdir):
+        folders = path[start:].split(os.sep)
+        # remove __init__.py
+        if '__init__.py' in files: files.remove('__init__.py')
+        # remove file extentions
+        files_without_ext = [x[:-3] for x in files]
+        # append all parents with dots to files: "folder.subfolder.file1"
+        file_parent_pairs = []
+        folders_without_root_dir = [x for x in folders if x != root_dir]
+        print folders_without_root_dir
+        for f in files_without_ext:
+            file_with_parents = '.'.join(folders_without_root_dir + [f])
+            file_parent_pairs.append((f, file_with_parents))
+
+        subdir = dict.fromkeys(file_parent_pairs)
+        parent = reduce(dict.get, folders[:-1], dir)
+        parent[folders[-1]] = subdir
+    dir = dir[root_dir]
+    return dir
 
 
 def get_page_objects(workspace, project):
@@ -105,38 +131,22 @@ def get_page_objects(workspace, project):
 
 
 
-def get_page_objects__DEPRECADO(workspace, project):
-    # find page objects directory
+def new_directory(root_path, project, parents, directory_name):
+    parents_joined = os.sep.join(parents)
 
-    page_objects = []
-
-    path = os.path.join(workspace, 'projects', project, 'pages')
-
-    file_structure = {
-        'name': '',
-        'files': [],
-        'childirs': {} }
-
-    for root, dirs, files in os.walk(path):
-        current_directory = os.path.basename(root)
-        for f in files:
-            if not f == '__init__.py':
-                page_objects.append({
-                    'name': f[:-3],
-                    'path': root})
-
-    return page_objects
-
-
-
-
-
-
-def new_directory(root_path, project, directory_name):
     directory_path = os.path.join(
-        root_path, 'projects', project, 'test_cases', directory_name)
+        root_path, 'projects', project, 'test_cases', parents_joined, directory_name)
 
-    print directory_path
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
+
+
+def new_directory_page_object(root_path, project, parents, directory_name):
+    parents_joined = os.sep.join(parents)
+
+    directory_path = os.path.join(
+        root_path, 'projects', project, 'pages', parents_joined, directory_name)
+
     if not os.path.exists(directory_path):
         os.makedirs(directory_path)
 
@@ -167,6 +177,16 @@ def get_time_span(task_id):
             return total_seconds
 
 
+def directory_already_exists(root_path, project, root_dir, parents, dir_name):
+    parents_joined = os.sep.join(parents)
+
+    directory_path = os.path.join(
+        root_path, 'projects', project, root_dir, parents_joined, dir_name)    
+
+    if os.path.exists(directory_path):
+        return True
+    else:
+        return False
 
 def log_to_file(string):
     print string

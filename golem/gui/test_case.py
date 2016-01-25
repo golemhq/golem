@@ -155,17 +155,25 @@ def parse_test_case(workspace, project, parents, test_case_name):
     return test_case
 
 
-def new_test_case(root_path, project, tc_name):
+def new_test_case(root_path, project, parents, tc_name):
+    parents_joined = os.sep.join(parents)
+
     test_case_path = os.path.join(
-        root_path, 'projects', project, 'test_cases', tc_name + '.py')
+        root_path, 'projects', project, 'test_cases', parents_joined)
+    if not os.path.exists(test_case_path):
+        os.makedirs(test_case_path)
+    test_case_full_path = os.path.join(test_case_path, tc_name + '.py')
 
     data_path = os.path.join(
-        root_path, 'projects', project, 'data', tc_name + '.py')
+        root_path, 'projects', project, 'data', parents_joined)
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
+    data_full_path = os.path.join(data_path, tc_name + '.py')
 
-    with open(test_case_path, 'w') as f:
+    with open(test_case_full_path, 'w') as f:
         f.write(test_case_content)
 
-    with open(data_path, 'w') as f:
+    with open(data_full_path, 'w') as f:
         f.write('')
 
 
