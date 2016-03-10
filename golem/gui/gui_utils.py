@@ -81,7 +81,6 @@ def get_test_cases_or_page_objects(workspace, project, root_dir):
         # append all parents with dots to files: "folder.subfolder.file1"
         file_parent_pairs = []
         folders_without_root_dir = [x for x in folders if x != root_dir]
-        print folders_without_root_dir
         for f in files_without_ext:
             file_with_parents = '.'.join(folders_without_root_dir + [f])
             file_parent_pairs.append((f, file_with_parents))
@@ -184,6 +183,18 @@ def directory_already_exists(root_path, project, root_dir, parents, dir_name):
         root_path, 'projects', project, root_dir, parents_joined, dir_name)    
 
     if os.path.exists(directory_path):
+        return True
+    else:
+        return False
+
+
+def file_already_exists(root_path, project, root_dir, parents, filename):
+    parents_joined = os.sep.join(parents)
+
+    directory_path = os.path.join(
+        root_path, 'projects', project, root_dir, parents_joined, filename + '.py')    
+
+    if os.path.isfile(directory_path):
         return True
     else:
         return False

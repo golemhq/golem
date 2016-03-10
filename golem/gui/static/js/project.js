@@ -95,7 +95,7 @@ function addNewTestCase(input){
             dataType: 'json',
             type: 'POST',
             success: function(data) {
-                if(data.result == 'ok'){
+                if(data.errors.length == 0){
                     var li = $(".new-test-case-input").parent();
                     var ul = $(".new-test-case-input").parent().parent();
                     if(dottedBranches.length > 0){
@@ -109,6 +109,9 @@ function addNewTestCase(input){
                     ul.append(
                         "<li><i class='glyphicon glyphicon-plus-sign'></i><a href='#' \
                             onclick='startAddNewTestCase(this)'> Add New</a></li>");
+                }
+                else{
+                    displayErrorModal(data.errors);
                 }
             },
             error: function() {               
@@ -210,7 +213,7 @@ function addNewPageObject(input){
             dataType: 'json',
             type: 'POST',
             success: function(data) {
-                if(data.result == 'ok'){
+                if(data.errors.length == 0){
                     var li = $(".new-page-object-input").parent();
                     var ul = $(".new-page-object-input").parent().parent();
                     if(dottedBranches.length > 0){
@@ -223,6 +226,9 @@ function addNewPageObject(input){
                     ul.append(
                         "<li><i class='glyphicon glyphicon-plus-sign'></i><a href='#' \
                             onclick='startAddNewPageObject(this)'> Add New</a></li>");
+                }
+                else{
+                    displayErrorModal(data.errors);
                 }
 
             },

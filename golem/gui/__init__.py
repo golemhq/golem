@@ -95,6 +95,8 @@ def project(project):
                             project,
                             'pages')
 
+    print page_objects
+
     return render_template(
         'project.html',
         test_cases=test_cases,
@@ -133,7 +135,8 @@ def test_case_view(project, test_case_name):
                     'test_case.html', 
                     project=project, 
                     test_case_data=test_case_data,
-                    test_case_name=test_case_name,
+                    test_case_name=tc_name,
+                    full_test_case_name=test_case_name,
                     test_data=test_data)
 
 
@@ -143,9 +146,10 @@ def get_page_objects():
     if request.method == 'POST':
         projectname = request.form['project']
 
-        page_objects = gui_utils.get_page_objects__DEPRECADO(
+        page_objects = gui_utils.get_test_cases_or_page_objects(
                             root_path, 
-                            projectname)
+                            projectname,
+                            'pages')
 
         return json.dumps(page_objects)
 
@@ -191,14 +195,26 @@ def nuevo_test_case():
         parents = request.form['parents'].split('.')
         tc_name = request.form['testCaseName']
 
-        test_case.new_test_case(
+        errors = []
+
+        # check if a file already exists
+        if gui_utils.file_already_exists(
+                        root_path,
+                        projectname,
+                        'test_cases',
+                        parents,
+                        tc_name):
+            errors.append('A file with that name already exists')
+
+        if not errors:
+            test_case.new_test_case(
                             root_path,
                             projectname,
                             parents,
                             tc_name)
 
         return json.dumps({
-            'result':'ok',
+            'errors': errors,
             'project_name': projectname,
             'tc_name': tc_name})
 
@@ -243,14 +259,26 @@ def new_page_object():
         parents = request.form['parents'].split('.')
         page_object_name = request.form['pageObjectName']
 
-        page_object.new_page_object(
+        errors = []
+
+        # check if a file already exists
+        if gui_utils.file_already_exists(
+                        root_path,
+                        projectname,
+                        'pages',
+                        parents,
+                        page_object_name):
+            errors.append('A file with that name already exists')
+
+        if not errors:
+            page_object.new_page_object(
                             root_path,
                             projectname,
                             parents,
                             page_object_name)
 
         return json.dumps({
-            'result':'ok',
+            'errors': errors,
             'project_name': projectname,
             'page_object_name': page_object_name})
 
