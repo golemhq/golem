@@ -195,20 +195,20 @@ def get_current_time():
     return datetime.datetime.today().strftime(time_format)
 
 
-def create(name, source, destination):
+# def create(name, source, destination):
 
-    import shutil
+#     import shutil
 
-    src = source
-    dst = destination
+#     src = source
+#     dst = destination
     
     
-    if name == 'demo':
-        for file in os.listdir(src):
-            path = os.path.join(src, file)
-            shutil.move(path, dst)
-    else:
-        print
+#     if name == 'demo':
+#         for file in os.listdir(src):
+#             path = os.path.join(src, file)
+#             shutil.move(path, dst)
+#     else:
+#         print
 
 
 def is_test_suite(project, test_case_or_suite):

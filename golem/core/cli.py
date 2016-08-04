@@ -1,12 +1,13 @@
 import argparse
 
 
-def get_parser():
-    '''parser of comand line arguments'''
+def get_golem_parser():
+    '''parser of comand line arguments for golem (main program)'''
     
     parser = argparse.ArgumentParser(
         description = 'run a test case, a test suite or start the Golem GUI tool',
-        usage = 'golem run project_name test_case|test_suite [-d driver]')
+        usage = 'golem run project_name test_case|test_suite [-d driver]',
+        add_help=False)
 
     parser.add_argument(
         'action',
@@ -42,5 +43,25 @@ def get_parser():
         '--suite',
         action='store_true',
         help='is suite rather than single test')
+
+    return parser
+
+
+def get_golem_admin_parser():
+    '''parser of comand line arguments for golem-admin script'''
+    
+    parser = argparse.ArgumentParser(add_help=False)
+
+    parser.add_argument(
+        'action',
+        metavar='action',
+        choices=['start'],
+        help="action"
+    )
+    parser.add_argument(
+        'name',
+        metavar='name',
+        help="directory name"
+    )
 
     return parser

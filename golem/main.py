@@ -1,11 +1,11 @@
-from golem.core import utils, core, cli, test_runner, test_execution
+from golem.core import utils, cli, test_runner, test_execution
 
 import sys, os
 
 
 def execute_from_command_line(root_path):
 
-    parser = cli.get_parser()
+    parser = cli.get_golem_parser()
     args = parser.parse_args()
 
     #set test context values

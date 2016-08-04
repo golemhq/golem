@@ -1,36 +1,35 @@
-from golem.core import utils, core
+"""A CLI admin script used to generate the initial directory that
+contains the projects and all the required fields for Golem to
+work. This is a is directory independent script.
+"""
 
-import sys, os
+import os
+import shutil
+import sys
+
+import golem
+from golem.core import cli, utils
 
 
 def execute_from_command_line():
 
-    #set global variable values
-   
-    
-    destination = os.getcwd()
+    current_directory = os.getcwd()
 
-    import golem as a
-    source = os.path.dirname(a.__file__) + '\\demo\\.'
+    parser = cli.get_golem_admin_parser()
+    args = parser.parse_args()
 
-    action = sys.argv[1]
-    name = sys.argv[2]
-    
-    if action == 'create':
-        if name != '':
-            if name == 'demo':
-                print 'Creating project: demo'
-                utils.create('demo', source, destination)
-                sys.exit()
-            else:
-                print 'Creating project:', name
-                utils.create(name, source, destination)
-                sys.exit()
-        else:   
-            print 'Select new project name'
-            sys.exit()
+    if args.action == 'start':
+        # Generate a new 'golem' directory
+        dir_name = args.name
+        if os.path.exists(dir_name):
+            print 'Error: the directory {} already exists'.format(dir_name)
+        else:
+            # move template directory to new directory
+            source = os.path.join(golem.__path__[0], 'template')
+            destination = os.path.join(os.getcwd(), dir_name)
+            shutil.copytree(source, destination)
+    return
 
-            
 
 if __name__ == "__main__":
 
