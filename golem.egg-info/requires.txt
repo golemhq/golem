@@ -1,5 +1,0 @@
-Flask==0.10.1
-selenium==2.48.0
-
-[testing]
-pytest
