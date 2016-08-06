@@ -9,6 +9,8 @@ test_name = None
 
 suite_name = None
 
+settings = None
+
 '''
 root=None,
 project=None, 

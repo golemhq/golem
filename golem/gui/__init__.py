@@ -1,7 +1,17 @@
+import json
+import os
+
 from flask import Flask, render_template, request, redirect, jsonify, g
-from flask.ext.login import LoginManager, login_user, logout_user, current_user, login_required
-import os, json
-import gui_utils, test_case, page_object, data, user
+from flask.ext.login import (
+                        LoginManager, 
+                        login_user, 
+                        logout_user, 
+                        current_user, 
+                        login_required)
+
+from golem.core import utils
+from . import gui_utils, test_case, page_object, data, user
+
 
 app = Flask(__name__)
 
@@ -73,7 +83,7 @@ def login():
 @login_required
 def index():
 
-    projects = gui_utils.get_projects(root_path)
+    projects = utils.get_projects(root_path)
 
     return render_template('index.html', projects=projects)
 
@@ -85,17 +95,13 @@ def project(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path):
         return render_template('not_permission.html')
 
-    test_cases = gui_utils.get_test_cases_or_page_objects(
+    test_cases = utils.get_test_cases(
                     root_path,
-                    project,
-                    'test_cases')
+                    project)
 
-    page_objects = gui_utils.get_test_cases_or_page_objects(
+    page_objects = utils.get_page_objects(
                             root_path, 
-                            project,
-                            'pages')
-
-    print page_objects
+                            project)
 
     return render_template(
         'project.html',

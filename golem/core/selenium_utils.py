@@ -1,6 +1,8 @@
-from golem.core.exceptions import IncorrectSelectorType, ElementNotFound
+from selenium import webdriver
 
 from golem.gui import data
+from golem.core.exceptions import IncorrectSelectorType, ElementNotFound
+
 
 def get_selenium_object(obj, driver):
 	if obj[0] == 'id':
@@ -37,3 +39,24 @@ def get_selenium_object(obj, driver):
 def get_test_or_suite_data(root_path, project, parents, test_case_name):
 	test_data = data.parse_test_data(root_path, project, parents, test_case_name)
 	return test_data
+
+
+def get_driver(driver_selected):
+    driver = None
+
+    if driver_selected == 'firefox':
+        driver = webdriver.Firefox()
+    if driver_selected == 'chrome':
+        driver = webdriver.Chrome()
+    if driver_selected == 'ie':
+        driver = webdriver.Ie()
+    if driver_selected == 'phantomjs':
+        if os.name == 'nt':
+            a = os.path.dirname(os.path.abspath(__file__))
+            b = os.path.abspath(os.path.join( a , os.pardir))
+            driver = webdriver.PhantomJS(executable_path= b + '\\lib\\phantom\\phantomjs.exe')
+        else:
+            print 'not implemented yet'
+            sys.exit()
+
+    return driver

@@ -1,6 +1,9 @@
-from golem.core import utils, cli, test_runner, test_execution
+"""Main point of entrance to the application"""
 
-import sys, os
+import os
+import sys
+
+from golem.core import utils, cli, test_runner, test_execution
 
 
 def execute_from_command_line(root_path):
@@ -13,18 +16,10 @@ def execute_from_command_line(root_path):
     test_execution.root_path = root_path
     test_execution.project_name = args.project
 
-    '''
-    test_context = utils.Test_context(
-        root_path=root_path,
-        project=args.project,
-        test_case=args.test,
-        engine=args.engine,
-        selenium_driver=args.driver) '''
+    # get global settings
+    test_execution.settings = utils.get_global_settings()
 
-    #get global settings
-    #test_context.settings = utils.get_global_settings()
-
-    #if action is gui, launch golem gui
+    # if action is gui, launch golem gui
     if args.action == 'gui':
         utils.run_gui()
         sys.exit()
@@ -35,7 +30,6 @@ def execute_from_command_line(root_path):
         for proj in utils.get_projects():
             print '> {}'.format(proj)
         sys.exit()
-
 
     if args.action == 'run':
         #check if selected project does not exist
@@ -57,12 +51,12 @@ def execute_from_command_line(root_path):
             #check if test parameter is not present
             if not test_execution.suite_name and not test_execution.test_name:
                 print 'Usage:', parser.usage
-                print
-                print 'Test Case List:'
-                for tc in utils.get_test_cases(test_execution.project_name):
-                    print '> ' + tc
-                print
-                print 'Test Suite List:'
+                print '\nTest Case List:'
+                test_cases = utils.get_test_cases(
+                                    root_path, 
+                                    test_execution.project_name)
+                utils.display_tree_structure_command_line(test_cases)
+                print '\nTest Suite List:'
                 for ts in utils.get_suites(test_execution.project_name):
                     print '> ' + ts
                 sys.exit()
@@ -78,7 +72,3 @@ def execute_from_command_line(root_path):
                 test_runner.run_single_test_case(
                     test_execution.project_name,
                     test_execution.test_name)
-
-if __name__ == "__main__":
-
-    execute_from_command_line()

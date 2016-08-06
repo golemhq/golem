@@ -1,24 +1,6 @@
 import csv
-import os
 import datetime
-
-
-def read_global_settings():
-    settings = {}
-    settings_file = 'settings.ini'
-    if os.path.exists(settings_file):
-        execfile(settings_file, settings)
-        settings.pop("__builtins__", None)
-    else:
-        raise Exception('File {} does not exist'.format(settings_file))
-    return settings
-
-
-def get_projects(path):
-    projects = os.walk(os.path.join(path,'projects')).next()[1]
-    if '.metadata' in projects: projects.remove('.metadata')
-    if '.recommenders' in projects: projects.remove('.recommenders')
-    return projects
+import os
 
 
 # def go_one_level_deeper__DEPRECADO(file_structure, this_dir_file_structure, current_directory, parents):
@@ -65,34 +47,7 @@ def get_projects(path):
 
 #     return file_structure
 
-
-def get_test_cases_or_page_objects(workspace, project, root_dir):
-    path = os.path.join(workspace, 'projects', project, root_dir)
-
-    dir = {}
-    rootdir = path.rstrip(os.sep)
-    start = rootdir.rfind(os.sep) + 1
-    for path, dirs, files in os.walk(rootdir):
-        folders = path[start:].split(os.sep)
-        # remove __init__.py
-        if '__init__.py' in files: files.remove('__init__.py')
-        # remove file extentions
-        files_without_ext = [x[:-3] for x in files]
-        # append all parents with dots to files: "folder.subfolder.file1"
-        file_parent_pairs = []
-        folders_without_root_dir = [x for x in folders if x != root_dir]
-        for f in files_without_ext:
-            file_with_parents = '.'.join(folders_without_root_dir + [f])
-            file_parent_pairs.append((f, file_with_parents))
-
-        subdir = dict.fromkeys(file_parent_pairs)
-        parent = reduce(dict.get, folders[:-1], dir)
-        parent[folders[-1]] = subdir
-    dir = dir[root_dir]
-    return dir
-
-
-def get_page_objects(workspace, project):
+def get_page_objects_DEPRECADO(workspace, project):
     # find page objects directory
 
     page_objects_directory = ''

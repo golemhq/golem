@@ -1,18 +1,15 @@
-from golem.core import utils, test_execution, logger, selenium_utils
+import os
+import sys
+import traceback
 
 from multiprocessing import Pool
 from multiprocessing.pool import ApplyResult
 
-import os, sys
-
-import traceback
+from golem.core import utils, test_execution, logger, selenium_utils
 
 
-
-def test_runner(project, test_case_name, suite_name):
-    ''' runs a single test case by name.
-    test_case_name may include unfixed number of subpackages
-    separated by dots '''
+def test_runner(project, test_case_name, suite_name, suite_data):
+    ''' runs a single test case by name'''
 
     result = {
         'result': 'pass',
@@ -33,15 +30,11 @@ def test_runner(project, test_case_name, suite_name):
         else:
             raise Exception
 
-        test_data = selenium_utils.get_test_data(
-                            '',
-                            project,
-                            '', 
-                            test_case_name)
-        test_data = selenium_utils.get_suite_or_test_data(
-                            project,
-                            test_case_name,
-                            suite_name)
+        test_data = utils.get_test_data(project, test_case_name)
+        # test_data = selenium_utils.get_suite_or_test_data(
+        #                     project,
+        #                     test_case_name,
+        #                     suite_name)
         
         if hasattr(instance, 'test'):
             instance.test(test_data)
@@ -63,16 +56,19 @@ def test_runner(project, test_case_name, suite_name):
     return result
 
 
-def multiprocess_executor(test_case_list=[], processes=1, suite_name=None):
+def multiprocess_executor(
+        test_case_list=[], processes=1, suite_name=None, suite_data=None):
 
     pool = Pool(processes=processes) 
 
-    results = []
-
     results = [pool.apply_async(
-            test_runner,
-            args=(test_execution.project_name, x, suite_name),
-            callback = logger.log_result) for x in test_case_list]
+                    test_runner,
+                    args=(test_execution.project_name, 
+                            tc, 
+                            suite_name, 
+                            suite_data),
+                    callback=logger.log_result) 
+                for tc in test_case_list]
 
     map(ApplyResult.wait, results)
     lst_results=[r.get() for r in results]
