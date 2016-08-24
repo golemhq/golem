@@ -3,10 +3,10 @@ import argparse
 
 def get_golem_parser():
     '''parser of comand line arguments for golem (main program)'''
-    
+
     parser = argparse.ArgumentParser(
-        description = 'run a test case, a test suite or start the Golem GUI tool',
-        usage = 'golem run project_name test_case|test_suite',
+        description='run test case, test suite or start the Golem GUI tool',
+        usage='golem run project_name test_case|test_suite',
         add_help=False)
 
     parser.add_argument(
@@ -30,20 +30,13 @@ def get_golem_parser():
         '--suite',
         action='store_true',
         help='is suite rather than single test')
-    # parser.add_argument(
-    #     '-d',
-    #     '--driver',
-    #     metavar='driver',
-    #     default='firefox',
-    #     choices=['firefox', 'chrome', 'ie', 'phantomjs'],
-    #     help="driver name, options: ['firefox', 'chrome', 'ie', 'phantomjs']")
 
     return parser
 
 
 def get_golem_admin_parser():
     '''parser of comand line arguments for golem-admin script'''
-    
+
     parser = argparse.ArgumentParser(add_help=False)
 
     parser.add_argument(

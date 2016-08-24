@@ -2,6 +2,7 @@ import os
 
 from golem.gui import gui_utils
 
+
 def get_web_elements(content, po_name):
     elements = []
 

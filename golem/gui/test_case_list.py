@@ -1,5 +1,7 @@
 
-import uuid, json, os
+import json
+import os
+import uuid
 
 
 class TestCaseList:

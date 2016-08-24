@@ -3,10 +3,10 @@ import os
 
 from flask import Flask, render_template, request, redirect, jsonify, g
 from flask.ext.login import (
-                        LoginManager, 
-                        login_user, 
-                        logout_user, 
-                        current_user, 
+                        LoginManager,
+                        login_user,
+                        logout_user,
+                        current_user,
                         login_required)
 
 from golem.core import utils
@@ -46,16 +46,18 @@ def login():
                 result['errors'].append('Username does not exists')
             else:
                 if not password:
-                    result['errors'].append('Password is required')        
+                    result['errors'].append('Password is required')
                 else:
-                    if not user.password_is_correct(username, password, root_path):
-                        result['errors'].append('Username and password do not match')
+                    if not user.password_is_correct(
+                                    username, password, root_path):
+                        result['errors'].append(
+                                          'Username and password do not match')
         if not next_url:
             next_url = '/'
 
         if len(result['errors']) > 0:
             return render_template(
-                'login.html', 
+                'login.html',
                 next_url=next_url,
                 errors=result['errors'])
         else:
@@ -68,27 +70,23 @@ def login():
             else:
                 login_user(new_user)
                 return redirect(next_url)
-
-            
     else:
         next_url = request.args.get('next')
         return render_template(
-            'login.html', 
+            'login.html',
             next_url=next_url,
-            errors=[])    
+            errors=[])
 
 
-#INDEX
+# INDEX
 @app.route("/")
 @login_required
 def index():
-
     projects = utils.get_projects(root_path)
-
     return render_template('index.html', projects=projects)
 
 
-#PROJECT VIEW
+# PROJECT VIEW
 @app.route("/p/<project>/")
 @login_required
 def project(project):
@@ -100,14 +98,14 @@ def project(project):
                     project)
 
     page_objects = utils.get_page_objects(
-                            root_path, 
+                            root_path,
                             project)
 
     return render_template(
-        'project.html',
-        test_cases=test_cases,
-        project=project,
-        page_objects=page_objects)
+                           'project.html',
+                           test_cases=test_cases,
+                           project=project,
+                           page_objects=page_objects)
 
 
 # TEST CASE VIEW
@@ -126,9 +124,9 @@ def test_case_view(project, test_case_name):
         parents = []
 
     test_case_data = test_case.parse_test_case(
-                                        root_path, 
-                                        project, 
-                                        parents, 
+                                        root_path,
+                                        project,
+                                        parents,
                                         tc_name)
 
     test_data = data.parse_test_data(
@@ -138,8 +136,8 @@ def test_case_view(project, test_case_name):
                             tc_name)
 
     return render_template(
-                    'test_case.html', 
-                    project=project, 
+                    'test_case.html',
+                    project=project,
                     test_case_data=test_case_data,
                     test_case_name=tc_name,
                     full_test_case_name=test_case_name,
@@ -153,7 +151,7 @@ def get_page_objects():
         projectname = request.form['project']
 
         page_objects = gui_utils.get_test_cases_or_page_objects(
-                            root_path, 
+                            root_path,
                             projectname,
                             'pages')
 
@@ -168,8 +166,8 @@ def get_selected_page_object_elements():
         page_object_name = request.form['pageObject']
 
         po_elements = page_object.get_page_object_elements(
-                            root_path, 
-                            projectname, 
+                            root_path,
+                            projectname,
                             page_object_name)
 
         return json.dumps(po_elements)
@@ -184,8 +182,8 @@ def get_datos_values():
         test_case_name = request.form['testCaseName']
 
         datos_values = worksheet.get_datos_values(
-                            global_settings['workspace'], 
-                            projectname, 
+                            global_settings['workspace'],
+                            projectname,
                             canal,
                             test_case_name,
                             global_settings['planilla_datos'])
@@ -327,48 +325,51 @@ def get_global_actions():
     if request.method == 'POST':
         global_actions = [
             {
-                'name' : 'click',
-                'parameters' : [ {'name':'element', 'type': 'element'} ]
+                'name': 'click',
+                'parameters': [{'name': 'element', 'type': 'element'}]
             },
             {
-                'name' : 'send keys',
-                'parameters' : [ {'name':'element', 'type': 'element'}, {'name':'value', 'type': 'value'}]
+                'name': 'send keys',
+                'parameters': [{'name': 'element', 'type': 'element'},
+                               {'name': 'value', 'type': 'value'}]
             },
             {
-                'name' : 'select',
-                'parameters' : [ {'name':'option', 'type': 'value'}, {'name':'from element', 'type': 'element'}]
+                'name': 'select',
+                'parameters': [{'name': 'option', 'type': 'value'},
+                               {'name': 'from element', 'type': 'element'}]
             },
             {
-                'name' : 'go to',
-                'parameters' : [ {'name':'url', 'type': 'value'}]
+                'name': 'go to',
+                'parameters': [{'name': 'url', 'type': 'value'}]
             },
             {
-                'name' : 'verify text',
-                'parameters' : [ {'name':'text', 'type': 'value'}]
+                'name': 'verify text',
+                'parameters': [{'name': 'text', 'type': 'value'}]
             },
             {
-                'name' : 'verify text in element',
-                'parameters' : [ {'name':'text', 'type': 'value'}, {'name': 'element', 'type': 'element'}]
+                'name': 'verify text in element',
+                'parameters': [{'name': 'text', 'type': 'value'},
+                               {'name': 'element', 'type': 'element'}]
             },
             {
-                'name' : 'verify exists',
-                'parameters' : [ {'name':'element', 'type': 'element'}]
+                'name': 'verify exists',
+                'parameters': [{'name': 'element', 'type': 'element'}]
             },
             {
-                'name' : 'verify not exists',
-                'parameters' : [ {'name':'element', 'type': 'element'}]
+                'name': 'verify not exists',
+                'parameters': [{'name': 'element', 'type': 'element'}]
             },
             {
-                'name' : 'verify is enabled',
-                'parameters' : [ {'name':'element', 'type': 'element'}]
+                'name': 'verify is enabled',
+                'parameters': [{'name': 'element', 'type': 'element'}]
             },
             {
-                'name' : 'verify is not enabled',
-                'parameters' : [ {'name':'element', 'type': 'element'}]
+                'name': 'verify is not enabled',
+                'parameters': [{'name': 'element', 'type': 'element'}]
             },
             {
-                'name' : 'screenshot',
-                'parameters' : [ {'name':'message (optional)', 'type': 'value'}]
+                'name': 'screenshot',
+                'parameters': [{'name': 'message (optional)', 'type': 'value'}]
             },
         ]
         return json.dumps(global_actions)
@@ -388,14 +389,14 @@ def page_view(project, page_name):
         parents = []
 
     page_object_data = page_object.get_page_object_elements(
-                                        root_path, 
+                                        root_path,
                                         project,
-                                        parents, 
+                                        parents,
                                         p_name)
 
     return render_template(
-                    'page_object.html', 
-                    project=project, 
+                    'page_object.html',
+                    project=project,
                     page_object_data=page_object_data,
                     page_name=page_name)
 
@@ -456,11 +457,13 @@ def run_test_case():
 
         return json.dumps('ok')
 
+
 @app.route("/logout/")
 @login_required
 def logout():
     logout_user()
     return redirect('/')
+
 
 @login_manager.user_loader
 def load_user(user_id):

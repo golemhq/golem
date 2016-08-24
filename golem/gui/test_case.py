@@ -1,10 +1,10 @@
-import os, re
+import os
+import re
 
-from golem.gui import data, page_object
+from golem.gui import data, page_object, gui_utils
 
-from golem.gui import gui_utils
 
-def get_steps(content):
+def _get_steps(content):
 
     index = -1
     steps = []
@@ -39,6 +39,7 @@ def get_steps(content):
             index += 1
     return steps
 
+
 def get_datos(content):
     save_content = False
     datos_lines = []
@@ -62,7 +63,7 @@ def get_page_objects(content):
 
     page_objects = []
     index = -1
-    for i, line in enumerate(content): 
+    for i, line in enumerate(content):
         if 'page objects' in line:
             index = i + 1
             break
@@ -79,27 +80,12 @@ def get_description(content):
     contentString = ''.join(content)
     description = ''
     index = 0
-    description = re.search(".*description = \'\'\'(.*\n*.*)\'\'\'", contentString).group(1)
+    description = re.search(
+                            ".*description = \'\'\'(.*\n*.*)\'\'\'",
+                            contentString)
+                            .group(1)
     description = re.sub("\s\s+", " ", description)
-    # for i, line in enumerate(content): 
-    #     # if 'description' in line:
-    #     #     index = i
-    #     if re.match("(.*)description(.*)", line):
-    #         print line
-    #         print re.search("\'\'\'(.*)\'\'\'", line).group(1)
-    # if index != 0:
-    #     description += content[index].split('\'\'\'')[1]
-    #     keep_reading = False
-    #     print content[index][-3:-1]
-    #     if content[index][-3:-1] != '\'\'\'':
-    #         keep_reading = True
-    #     while keep_reading:
-    #         index += 1
-    #         description += content[index].split('\'\'\'')[0]
-    #         if content[index][-3:-1] == '\'\'\'':
-    #             keep_reading = False
     return description
-
 
 
 def get_execute_script_content(content):
@@ -123,14 +109,17 @@ def get_execute_script_content(content):
     return execute_script_content
 
 
-
-
 def parse_test_case(workspace, project, parents, test_case_name):
 
     parents_joined = os.sep.join(parents)
 
     path = os.path.join(
-        workspace, 'projects', project, 'test_cases', parents_joined, test_case_name + '.py')
+                        workspace,
+                        'projects',
+                        project,
+                        'test_cases',
+                        parents_joined,
+                        test_case_name + '.py')
 
     with open(path) as f:
         content = f.readlines()
@@ -143,7 +132,7 @@ def parse_test_case(workspace, project, parents, test_case_name):
 
     #datos = get_datos(content)
 
-    steps = get_steps(content)
+    steps = _get_steps(content)
 
     test_case = {
         'description': description,
@@ -207,7 +196,11 @@ def format_parameters(parameters, root_path, project, parents, test_case_name):
         else:
             # is not a page object,
             # identify if its a value or element parameter
-            if data.is_data_variable(root_path, project, parents, test_case_name, parameter):
+            if data.is_data_variable(root_path,
+                                     project,
+                                     parents,
+                                     test_case_name,
+                                     parameter):
                 this_parameter_string = 'data[\'{}\']'.format(parameter)
             else:
                 this_parameter_string = '\'' + parameter + '\''
@@ -217,7 +210,12 @@ def format_parameters(parameters, root_path, project, parents, test_case_name):
     return all_parameters_string
 
 
-def save_test_case(root_path, project, test_case_name, description, page_objects, test_steps):
+def save_test_case(root_path,
+                   project,
+                   test_case_name,
+                   description,
+                   page_objects,
+                   test_steps):
     test_case_path = os.path.join(
         root_path, 'projects', project, 'test_cases', test_case_name + '.py')
 

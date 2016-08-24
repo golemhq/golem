@@ -1,4 +1,5 @@
-import os, json
+import json
+import os
 
 
 class User: 
@@ -54,6 +55,7 @@ def get_user(user_id, root_path):
                 new_user.username = user['username']
                 new_user.id = user['id']
                 return new_user
+
 
 def has_permissions_to_project(user_id, project, root_path):
     with open(os.path.join(root_path, 'users.json')) as users_file:    

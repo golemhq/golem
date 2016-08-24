@@ -13,8 +13,6 @@ from golem.core import cli, utils
 
 def execute_from_command_line():
 
-    current_directory = os.getcwd()
-
     parser = cli.get_golem_admin_parser()
     args = parser.parse_args()
 

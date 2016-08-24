@@ -3,20 +3,20 @@ import datetime
 import importlib
 import logging
 import os
-import sys 
+import sys
 
+from golem import gui
 from golem.core import test_execution
 
 
-#TODO clean
 def _generate_dict_from_file_structure(full_path):
-    """Generates a dictionary with the preserved structure of a given 
-    directory (with its files and subdirectories). 
+    """Generates a dictionary with the preserved structure of a given
+    directory (with its files and subdirectories).
     Files are stored in tuples, with the first element being the name
-    of the file without its extention and the second element 
+    of the file without its extention and the second element
     the dotted path to the file.
 
-    For example, given the directory:
+    For example, given the following directory:
     test/
          subdir1/
                  subdir2/
@@ -28,15 +28,15 @@ def _generate_dict_from_file_structure(full_path):
          file2
 
     The result will be:
-    test = {   
+    test = {
         'subdir1': {
             'subdir2': {
                 'subdir2': {
-                    ('file5', 'subdir1.subdir2.file5'): None,    
+                    ('file5', 'subdir1.subdir2.file5'): None,
                 },
                 ('file3', 'subdir1.file3'): None,
                 ('file4', 'subdir1.file4'): None,
-        },      
+        },
         ('file1', 'file1'): None,
         ('file2', 'file2'): None,
     }
@@ -50,7 +50,7 @@ def _generate_dict_from_file_structure(full_path):
     for path, dirs, files in os.walk(full_path):
         folders = path[start:].split(os.sep)
         # remove __init__.py from list of files
-        if '__init__.py' in files: 
+        if '__init__.py' in files:
             files.remove('__init__.py')
         # remove file extentions
         filenames = [x[:-3] for x in files]
@@ -67,36 +67,6 @@ def _generate_dict_from_file_structure(full_path):
     return dir_tree
 
 
-def get_test_data(project, test_case):
-    ''''''
-    data_dict_list = list()
-
-    # check if CSV file == test case name exists
-    parents_joined = os.sep.join(parents)
-    data_file_path = os.path.join(
-                        'projects', 
-                        project, 
-                        parents,
-                        'data', 
-                        test_case + '.csv')
-    if os.path.exists(data_file_path):
-        with open(data_file_path, 'rb') as csv_file:
-            dict_reader = csv.DictReader(csv_file)
-            for row in dict_reader:
-                data_dict_list.append(row)
-    else:
-        print 'Warning: No data file found'
-    print data_dict_list
-    return data_dict_list
-
-
-def get_projects(workspace):
-    projects = list()
-    path = os.path.join(workspace, 'projects')
-    projects = os.walk(path).next()[1]
-    return projects
-
-
 def get_test_cases(workspace, project):
     path = os.path.join(workspace, 'projects', project, 'test_cases')
     test_cases = _generate_dict_from_file_structure(path)
@@ -109,76 +79,74 @@ def get_page_objects(workspace, project):
     return page_objects
 
 
+def get_projects(workspace):
+    projects = []
+    path = os.path.join(workspace, 'projects')
+    projects = os.walk(path).next()[1]
+
+
+def get_test_data(project, parents, test_case):
+    ''''''
+    data_dict_list = list()
+
+    # check if CSV file == test case name exists
+    parents_joined = os.sep.join(parents)
+    data_file_path = os.path.join(
+                                'projects',
+                                project,
+                                parents_joined,
+                                'data',
+                                test_case + '.csv')
+    if os.path.exists(data_file_path):
+        with open(data_file_path, 'rb') as csv_file:
+            dict_reader = csv.DictReader(csv_file)
+            for row in dict_reader:
+                data_dict_list.append(row)
+    else:
+        print 'Warning: No data file found'
+    return data_dict_list
+
+
 # TODO
 def get_suites(selected_project):
-    test_suites = list()
+    # test_suites = list()
 
-    for (dirpath, dirnames, filenames) in os.walk('projects\\%s\\test_suites' % selected_project):
-        test_suites.extend(filenames)
-        break
-    test_suites.remove('__init__.py')
+    # for (dirpath, dirnames, filenames) in os.walk(
+    #     'projects\\%s\\test_suites' % selected_project):
+    #     test_suites.extend(filenames)
+    #     break
+    # test_suites.remove('__init__.py')
 
-    for (i, tc) in enumerate(test_suites):
-        test_suites[i] = tc[:-3]
+    # for (i, tc) in enumerate(test_suites):
+    #     test_suites[i] = tc[:-3]
 
-    return test_suites
-
-
-def get_selected_test_case(selected_project, selected_test_case):
-    '''retrieves the selected test case of the selected project, returns a list
-    of lists, where each list is a test case step, and each sublist element is
-    a step component ('page','test_object', 'action', etc) '''
-
-    test_case = list()
-    test_case_raw = list()
-    t = list()
-
-    #read test_case file
-    with file('projects\\%s\\test_cases\\%s.py' % (selected_project, selected_test_case)) as f: #fix use os.path.join
-        for line in f:
-            t.append(line.strip())
-    
-    #fix test step format will change
-
-    #get all the steps into a dict
-    ###test_case_raw = t[t.index('#steps')+1:t.index('#/steps')]
-    
-    #parse lines and separate each line into a sub-dict
-    # for line in test_case_raw:
-    #     #assert lines do not have 4 columns,
-    #     if 'assert' in line:
-    #         new_line = [line.partition(' ')[0],line.partition(' ')[2],'','']
-    #     else:
-    #         new_line = [
-    #             line.split('.')[0],
-    #             line.split('.')[1],
-    #             line.split('.')[2].split('(')[0],
-    #             line.split('(')[1].replace(')','').replace('"','')] #magic for getting the argument without "" if there is any, * magic *
-    #     test_case.append(new_line)
-
-    #return test_case
-    return t
+    # return test_suites
+    pass
 
 
 def get_suite_test_cases(project, suite):
-    ''''''
+    '''Return a list with all the test cases of a given suite'''
     tests = list()
 
-    suite_module = importlib.import_module('projects.{0}.test_suites.{1}'.
-        format(project, suite), package=None)
+    suite_module = importlib.import_module(
+                                'projects.{0}.test_suites.{1}'
+                                .format(project, suite), package=None)
     tests = suite_module.test_case_list
 
     return tests
 
 
 def get_test_case_class(project_name, test_case_name):
-    '''Returns the class of a module of the same name.
-    The class name might be a package/module path separated by dots'''
+    '''Returns the class present in a module of the same name.
+    'test_case_name' might be the full path to the module,
+    separeted by dots'''
 
     # TODO verify the file exists before trying to import
     modulex = importlib.import_module(
-        'projects.{0}.test_cases.{1}'.format(project_name, test_case_name))
-    test_case_class = getattr(modulex, test_case_name)
+                                      'projects.{0}.test_cases.{1}'
+                                      .format(project_name, test_case_name))
+    test_case_only = test_case_name.split('.')[-1]
+    test_case_class = getattr(modulex, test_case_only)
     return test_case_class
 
 
@@ -188,7 +156,8 @@ def get_global_settings():
     settings = {}
     if os.path.exists('settings.conf'):
         execfile("settings.conf", settings)
-        settings.pop("__builtins__", None) # remove __builtins__ key, not used
+        # remove __builtins__ key, not used
+        settings.pop("__builtins__", None)
     else:
         print 'Warning: global Settings file is not present'
 
@@ -197,17 +166,20 @@ def get_global_settings():
 
 def get_project_settings(project, global_settings):
     '''get project level settings from selected project folder,
-    overrides any global settings'''
+    this overrides any global settings'''
 
     project_settings = {}
-    project_settings_path = os.path.join('projects', project, project_settings.conf)
+    project_settings_path = os.path.join(
+                                         'projects',
+                                         project,
+                                         project_settings.conf)
     if os.path.exists(project_settings_path):
         execfile(project_settings_path, project_settings)
-        project_settings.pop("__builtins__", None) # remove __builtins__ key, not used
+        # remove __builtins__ key, not used
+        project_settings.pop("__builtins__", None)
     else:
         print 'Warning: project Settings file is not present'
     # merge global and project settings
-    # TODO
     for setting in project_settings:
         if setting in global_settings:
             global_settings[setting] = project_settings[setting]
@@ -216,10 +188,8 @@ def get_project_settings(project, global_settings):
 
     return global_settings
 
-    
-def run_gui():
-    from golem import gui
 
+def run_gui():
     gui.root_path = test_execution.root_path
 
     gui.app.run(debug=True, host='0.0.0.0', port=5000)
@@ -232,10 +202,7 @@ def get_current_time():
 
 def is_test_suite(project, test_case_or_suite):
     suites = get_suites(project)
-    if test_case_or_suite in suites:
-        return True
-    else:
-        return False
+    return test_case_or_suite in suites
 
 
 def display_tree_structure_command_line(structure, lvl=0):

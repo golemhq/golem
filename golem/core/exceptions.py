@@ -1,4 +1,4 @@
-
+"""This module defines the exceptions used by the test cases"""
 
 
 class IncorrectSelectorType(Exception):
@@ -10,4 +10,4 @@ class ElementNotFound(Exception):
 
 
 class TextNotPresent(Exception):
-	pass
+    pass

@@ -1,12 +1,7 @@
-from golem.core import utils
-
-from golem.core import actions
-
 from golem import core
+from golem.core import utils, actions, execution_logger
 
-from golem.core import execution_logger
-
-
+# DEPRECATED
 class Test:    
     ''' baste test class '''
 

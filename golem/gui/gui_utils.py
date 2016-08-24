@@ -105,14 +105,8 @@ def new_directory_page_object(root_path, project, parents, directory_name):
         os.makedirs(directory_path)
 
 
-
-
-
-
 def run_test_case(project, test_case_name):
     os.system('python golem.py run {0} {1}'.format(project, test_case_name))
-
-
 
 
 def get_time_span(task_id):
@@ -154,6 +148,7 @@ def file_already_exists(root_path, project, root_dir, parents, filename):
     else:
         return False
 
+
 def log_to_file(string):
     print string
 
@@ -162,7 +157,6 @@ def time_to_string():
     time_format = '%Y-%m-%d-%H-%M-%S-%f'
     return datetime.datetime.now().strftime(time_format)
 
+
 def string_to_time(time_string):
     return datetime.datetime.strptime(time_string, '%Y-%m-%d-%H-%M-%S-%f')
-
-
