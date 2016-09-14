@@ -78,6 +78,12 @@ def get_page_objects(workspace, project):
     return page_objects
 
 
+def get_suites(workspace, project):
+    path = os.path.join(workspace, 'projects', project, 'test_suites')
+    suites = _generate_dict_from_file_structure(path)
+    return suites
+
+
 def get_projects(workspace):
     projects = []
     path = os.path.join(workspace, 'projects')
@@ -104,23 +110,6 @@ def get_test_data(project, parents, test_case):
     else:
         print 'Warning: No data file found'
     return data_dict_list
-
-
-# TODO
-def get_suites(selected_project):
-    # test_suites = list()
-
-    # for (dirpath, dirnames, filenames) in os.walk(
-    #     'projects\\%s\\test_suites' % selected_project):
-    #     test_suites.extend(filenames)
-    #     break
-    # test_suites.remove('__init__.py')
-
-    # for (i, tc) in enumerate(test_suites):
-    #     test_suites[i] = tc[:-3]
-
-    # return test_suites
-    pass
 
 
 def get_suite_test_cases(project, suite):
@@ -193,9 +182,15 @@ def get_current_time():
     return datetime.datetime.today().strftime(time_format)
 
 
-def is_test_suite(project, test_case_or_suite):
-    suites = get_suites(project)
-    return test_case_or_suite in suites
+def is_test_suite(workspace, project, test_case_or_suite):
+    suite, parents = separate_file_from_parents(test_case_or_suite)
+    path = os.path.join(workspace,
+                        'projects',
+                        project,
+                        os.sep.join(parents),
+                        suite)
+    suite_exists = os.path.isfile(path)
+    return suite_exists
 
 
 def display_tree_structure_command_line(structure, lvl=0):
@@ -206,3 +201,13 @@ def display_tree_structure_command_line(structure, lvl=0):
         else:
             print '{}{}/'.format(' '*lvl*4, key)
             display_tree_structure_command_line(value, lvl+1)
+
+
+def separate_file_from_parents(full_filename):
+    """Receives a full filename with parents (separated by dots)
+    Returns a duple, first element is the filename and second element
+    is the list of parents that might be empty"""
+    splitted = full_filename.split('.')
+    file = splitted.pop()
+    parents = splitted
+    return (file, parents)

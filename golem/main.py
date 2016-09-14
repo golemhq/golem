@@ -34,12 +34,13 @@ def execute_from_command_line(root_path):
 
     if args.action == 'run':
         # check if selected project does not exist
-        if not test_execution.project_name in utils.get_projects():
+        if not test_execution.project_name in utils.get_projects(root_path):
             sys.exit(
                 'ERROR: the project {0} does not exist'
                 .format(test_execution.project_name))
         else:
-            if utils.is_test_suite(test_execution.project_name,
+            if utils.is_test_suite(root_path,
+                                   test_execution.project_name,
                                    args.test_or_suite):
                 test_execution.suite_name = args.test_or_suite
             else:
@@ -48,14 +49,14 @@ def execute_from_command_line(root_path):
             # check if test parameter is not present
             if not test_execution.suite_name and not test_execution.test_name:
                 print 'Usage:', parser.usage
-                print '\nTest Case List:'
-                test_cases = utils.get_test_cases(
-                                    root_path,
-                                    test_execution.project_name)
+                print '\nTest Cases:'
+                test_cases = utils.get_test_cases(root_path,
+                                                  test_execution.project_name)
                 utils.display_tree_structure_command_line(test_cases)
-                print '\nTest Suite List:'
-                for ts in utils.get_suites(test_execution.project_name):
-                    print '> ' + ts
+                print '\nTest Suites:'
+                test_suites = utils.get_suites(root_path,
+                                               test_execution.project_name)
+                utils.display_tree_structure_command_line(test_suites)
                 sys.exit()
 
             if test_execution.suite_name:
