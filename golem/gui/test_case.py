@@ -82,8 +82,8 @@ def get_description(content):
     index = 0
     description = re.search(
                             ".*description = \'\'\'(.*\n*.*)\'\'\'",
-                            contentString)
-                            .group(1)
+                            contentString
+                            ).group(1)
     description = re.sub("\s\s+", " ", description)
     return description
 

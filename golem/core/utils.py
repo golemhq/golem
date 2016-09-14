@@ -5,7 +5,6 @@ import logging
 import os
 import sys
 
-from golem import gui
 from golem.core import test_execution
 
 
@@ -83,6 +82,7 @@ def get_projects(workspace):
     projects = []
     path = os.path.join(workspace, 'projects')
     projects = os.walk(path).next()[1]
+    return projects
 
 
 def get_test_data(project, parents, test_case):
@@ -100,8 +100,7 @@ def get_test_data(project, parents, test_case):
     if os.path.exists(data_file_path):
         with open(data_file_path, 'rb') as csv_file:
             dict_reader = csv.DictReader(csv_file)
-            for row in dict_reader:
-                data_dict_list.append(row)
+            print dict_reader
     else:
         print 'Warning: No data file found'
     return data_dict_list
@@ -187,12 +186,6 @@ def get_project_settings(project, global_settings):
             global_settings[setting] = project_settings[setting]
 
     return global_settings
-
-
-def run_gui():
-    gui.root_path = test_execution.root_path
-
-    gui.app.run(debug=True, host='0.0.0.0', port=5000)
 
 
 def get_current_time():

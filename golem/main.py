@@ -4,6 +4,7 @@ import os
 import sys
 
 from golem.core import utils, cli, test_runner, test_execution
+from golem.gui import gui_start
 
 
 def execute_from_command_line(root_path):
@@ -21,7 +22,7 @@ def execute_from_command_line(root_path):
 
     # if action is gui, launch golem gui
     if args.action == 'gui':
-        utils.run_gui()
+        gui_start.run_gui()
         sys.exit()
 
     # check if project parameter is not present      ##this cannot happen
@@ -33,16 +34,11 @@ def execute_from_command_line(root_path):
 
     if args.action == 'run':
         # check if selected project does not exist
-        if not os.path.isdir(
-                os.path.join('projects', test_execution.project_name)):
+        if not test_execution.project_name in utils.get_projects():
             sys.exit(
                 'ERROR: the project {0} does not exist'
                 .format(test_execution.project_name))
         else:
-            '''test_context.settings = utils.get_project_settings(
-                test_context.project,
-                test_context.settings) '''
-
             if utils.is_test_suite(test_execution.project_name,
                                    args.test_or_suite):
                 test_execution.suite_name = args.test_or_suite
@@ -63,13 +59,10 @@ def execute_from_command_line(root_path):
                 sys.exit()
 
             if test_execution.suite_name:
-                print "is suite!!!"
                 test_runner.run_suite(
-                    test_execution.project_name,
-                    test_execution.suite_name)
+                                test_execution.project_name,
+                                test_execution.suite_name)
             else:
-                print "is not suite!!!"
-
                 test_runner.run_single_test_case(
-                    test_execution.project_name,
-                    test_execution.test_name)
+                                test_execution.project_name,
+                                test_execution.test_name)
