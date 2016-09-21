@@ -1,5 +1,6 @@
-import selenium
 import time
+
+import selenium
 
 from golem import core
 from golem.core import execution_logger as logger

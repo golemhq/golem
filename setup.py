@@ -43,7 +43,7 @@ setup(
                       'Flask==0.10.1',
                       'Flask-login==0.3.2',
                       'Werkzeug==0.9.4',
-                      'selenium==2.40.0'],
+                      'selenium==2.53.6'],
     scripts=['golem/bin/golem-admin.py'],
     cmdclass={'test': PyTest},
     author_email='mail@lucianopuccio.com',

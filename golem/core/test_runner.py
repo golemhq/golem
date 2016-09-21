@@ -11,17 +11,22 @@ import traceback
 from multiprocessing import Pool
 from multiprocessing.pool import ApplyResult
 
-from golem.core import utils, test_execution, logger, selenium_utils
+from golem.core import utils, test_execution, logger, selenium_utils, report
 
 
-def test_runner(project, test_case_name, suite_name, suite_data):
+def test_runner(project,
+                test_case_name,
+                test_data,
+                suite_name,
+                suite_data,
+                timestamp):
     ''' runs a single test case by name'''
 
     result = {
         'result': 'pass',
         'error': None,
         'description': None,
-        'steps': None}
+        'steps': None,}
 
     import execution_logger
     instance = None
@@ -35,8 +40,6 @@ def test_runner(project, test_case_name, suite_name, suite_data):
             instance.setup()
         else:
             raise Exception
-
-        test_data = utils.get_test_data(project, test_case_name)
 
         if hasattr(instance, 'test'):
             instance.test(test_data)
@@ -55,66 +58,85 @@ def test_runner(project, test_case_name, suite_name, suite_data):
     result['description'] = execution_logger.description
     result['steps'] = execution_logger.steps
 
+    report.generate_report(result,
+                           test_execution.root_path,
+                           project,
+                           test_case_name,
+                           test_data, suite_name,
+                           timestamp)
+
     return result
 
 
-def multiprocess_executor(
-        test_case_list=[], processes=1, suite_name=None, suite_data=None):
+def multiprocess_executor(execution_list, processes=1,
+                          suite_name=None, suite_data=None):
+    
+    timestamp = utils.get_timestamp()
 
     pool = Pool(processes=processes)
 
-    results = [pool.apply_async(
-                    test_runner,
-                    args=(test_execution.project_name,
-                          tc,
-                          suite_name,
-                          suite_data),
-                    callback=logger.log_result)
-               for tc in test_case_list]
+    results = []
+    for test in execution_list:
+        apply_async = pool.apply_async(test_runner,
+                                       args=(test_execution.project_name,
+                                             test[0],
+                                             test[1],
+                                             suite_name,
+                                             suite_data,
+                                             timestamp),
+                                       callback=logger.log_result)
+        results.append(apply_async)
 
     map(ApplyResult.wait, results)
 
     lst_results = [r.get() for r in results]
 
-    print lst_results
+    #for res in lst_results:
+    #    print '\none result\n',res
 
     pool.close()
     pool.join()
 
 
-def run_single_test_case(project_name, full_test_case_name):
+def run_single_test_case(workspace, project, full_test_case_name):
 
-    # check if test case exists and run it
-    parents = full_test_case_name.split('.')[0:-1]
-    parents_joined = os.sep.join(parents)
-    test_case_name = full_test_case_name.split('.')[-1]
-
-    full_path = os.path.join(
-                    'projects',
-                    project_name,
-                    'test_cases',
-                    parents_joined,
-                    '{0}.py'.format(test_case_name))
-
-    if not os.path.exists(full_path):
-        sys.exit("ERROR: no test case named {0} exists".format(test_case_name))
+    # check if test case exists
+    if not utils.test_case_exists(workspace, project, full_test_case_name):
+        sys.exit(
+            "ERROR: no test case named {} exists".format(full_test_case_name))
     else:
-        multiprocess_executor([full_test_case_name], 1)
+        # get test data
+        data_sets = utils.get_test_data(workspace,
+                                        project,
+                                        full_test_case_name)
+        execution_list = []
+        for data_set in data_sets:
+            execution_list.append((full_test_case_name, data_set))
+        # run the single test, once for each data set
+        multiprocess_executor(execution_list, 2)
 
 
-def run_suite(project_name, suite_name):
+def run_suite(workspace, project, full_suite_name):
     ''' a suite '''
 
     # TO DO implement directory suites
 
-    path = os.path.join(
-                'projects',
-                project_name,
-                'test_suites',
-                '{0}.py'.format(suite_name))
+    if not utils.test_suite_exists(workspace, project, full_suite_name):
+        sys.exit(
+            "ERROR: no test suite named {} exists".format(full_suite_name))
+    else:
+        # get test case list
+        test_case_list = utils.get_suite_test_cases(project,
+                                                    full_suite_name)
 
-    if os.path.exists(path):
+        # get test data for each test case and append tc/data pairs to
+        # execution list
+        execution_list = []
+        for test_case in test_case_list:
+            data_sets = utils.get_test_data(workspace,
+                                            project,
+                                            test_case)
+            for data_set in data_sets:
+                execution_list.append((test_case, data_set))
 
-        test_case_list = utils.get_suite_test_cases(project_name, suite_name)
-
-        multiprocess_executor(test_case_list, 1, suite_name=suite_name)
+    multiprocess_executor(execution_list, 1, suite_name=full_suite_name)

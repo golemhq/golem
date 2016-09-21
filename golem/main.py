@@ -39,9 +39,9 @@ def execute_from_command_line(root_path):
                 'ERROR: the project {0} does not exist'
                 .format(test_execution.project_name))
         else:
-            if utils.is_test_suite(root_path,
-                                   test_execution.project_name,
-                                   args.test_or_suite):
+            if utils.test_suite_exists(root_path,
+                                       test_execution.project_name,
+                                       args.test_or_suite):
                 test_execution.suite_name = args.test_or_suite
             else:
                 test_execution.test_name = args.test_or_suite
@@ -60,10 +60,10 @@ def execute_from_command_line(root_path):
                 sys.exit()
 
             if test_execution.suite_name:
-                test_runner.run_suite(
-                                test_execution.project_name,
-                                test_execution.suite_name)
+                test_runner.run_suite(root_path,
+                                      test_execution.project_name,
+                                      test_execution.suite_name)
             else:
-                test_runner.run_single_test_case(
-                                test_execution.project_name,
-                                test_execution.test_name)
+                test_runner.run_single_test_case(root_path,
+                                                 test_execution.project_name,
+                                                 test_execution.test_name)

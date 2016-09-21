@@ -91,24 +91,29 @@ def get_projects(workspace):
     return projects
 
 
-def get_test_data(project, parents, test_case):
-    ''''''
-    data_dict_list = list()
+def get_test_data(workspace, project, full_test_case_name):
+    '''Test cases can have multiple sets of data
+    This method generates a dict for each set and returns
+    a list of dicts'''
+    data_dict_list = []
 
     # check if CSV file == test case name exists
-    parents_joined = os.sep.join(parents)
+    test, parents = separate_file_from_parents(full_test_case_name)
     data_file_path = os.path.join(
+                                workspace,
                                 'projects',
                                 project,
-                                parents_joined,
+                                os.sep.join(parents),
                                 'data',
-                                test_case + '.csv')
-    if os.path.exists(data_file_path):
+                                '{}.csv'.format(test))
+    if not os.path.exists(data_file_path):
+        print 'Warning: No data file found'
+        data_dict_list = [{}]
+    else:
         with open(data_file_path, 'rb') as csv_file:
             dict_reader = csv.DictReader(csv_file)
-            print dict_reader
-    else:
-        print 'Warning: No data file found'
+            for data_set in dict_reader:
+                data_dict_list.append(data_set)
     return data_dict_list
 
 
@@ -177,18 +182,32 @@ def get_project_settings(project, global_settings):
     return global_settings
 
 
-def get_current_time():
-    time_format = "%Y-%m-%d-%H.%M.%S"
-    return datetime.datetime.today().strftime(time_format)
+def get_timestamp():
+    time_format = "%Y%m%d%H%M%S%f"
+    timestamp = datetime.datetime.today().strftime(time_format)
+    return timestamp
 
 
-def is_test_suite(workspace, project, test_case_or_suite):
-    suite, parents = separate_file_from_parents(test_case_or_suite)
+def test_case_exists(workspace, project, full_test_case_name):
+    test, parents = separate_file_from_parents(full_test_case_name)
     path = os.path.join(workspace,
                         'projects',
                         project,
+                        'test_cases',
                         os.sep.join(parents),
-                        suite)
+                        '{}.py'.format(test))
+    test_exists = os.path.isfile(path)
+    return test_exists
+
+
+def test_suite_exists(workspace, project, full_test_suite_name):
+    suite, parents = separate_file_from_parents(full_test_suite_name)
+    path = os.path.join(workspace,
+                        'projects',
+                        project,
+                        'test_suites',
+                        os.sep.join(parents),
+                        '{}.py'.format(suite))
     suite_exists = os.path.isfile(path)
     return suite_exists
 
