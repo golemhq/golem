@@ -44,7 +44,10 @@ setup(
                       'Flask-login==0.3.2',
                       'Werkzeug==0.9.4',
                       'selenium==2.53.6'],
-    scripts=['golem/bin/golem-admin.py'],
+    #scripts=['golem/bin/golem-admin.py'],
+    entry_points={
+        'console_scripts': ['golem-admin = golem.bin.golem_admin:main']
+    },
     cmdclass={'test': PyTest},
     author_email='mail@lucianopuccio.com',
     description='Test automation framework for functional test automation written in python and using Selenium as automation engine tool',

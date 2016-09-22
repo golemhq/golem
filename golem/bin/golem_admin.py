@@ -11,12 +11,12 @@ import golem
 from golem.core import cli, utils
 
 
-def execute_from_command_line():
+def main():
 
     parser = cli.get_golem_admin_parser()
     args = parser.parse_args()
 
-    if args.action == 'start':
+    if args.action == 'startdirectory':
         # Generate a new 'golem' directory
         dir_name = args.name
         if os.path.exists(dir_name):
@@ -27,8 +27,3 @@ def execute_from_command_line():
             destination = os.path.join(os.getcwd(), dir_name)
             shutil.copytree(source, destination)
     return
-
-
-if __name__ == "__main__":
-
-    execute_from_command_line()
