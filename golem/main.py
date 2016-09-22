@@ -12,58 +12,73 @@ def execute_from_command_line(root_path):
     parser = cli.get_golem_parser()
     args = parser.parse_args()
 
-    # set test context values
-
+    # set test_execution values
     test_execution.root_path = root_path
-    test_execution.project_name = args.project
-
-    # get global settings
     test_execution.settings = utils.get_global_settings()
 
-    # if action is gui, launch golem gui
-    if args.action == 'gui':
+    # main action == gui
+    if args.main_action == 'gui':
         gui_start.run_gui()
         sys.exit()
 
-    # check if project parameter is not present      ##this cannot happen
-    if not test_execution.project_name:
-        print 'Usage:', parser.usage, '\n\n', 'Project List:'
-        for proj in utils.get_projects(root_path):
-            print '> {}'.format(proj)
-        sys.exit()
-
-    if args.action == 'run':
+    # main action == run
+    if args.main_action == 'run':
+        if not args.project:
+            print 'Usage:', parser.usage, '\n\n', 'Project List:'
+            for proj in utils.get_projects(root_path):
+                print '> {}'.format(proj)
+            sys.exit()
         # check if selected project does not exist
-        if not test_execution.project_name in utils.get_projects(root_path):
-            sys.exit(
-                'ERROR: the project {0} does not exist'
-                .format(test_execution.project_name))
+        elif not args.project in utils.get_projects(root_path):
+            sys.exit('Error: the project {0} does not exist'
+                     .format(test_execution.project))
         else:
-            if utils.test_suite_exists(root_path,
-                                       test_execution.project_name,
-                                       args.test_or_suite):
-                test_execution.suite_name = args.test_or_suite
-            else:
-                test_execution.test_name = args.test_or_suite
+            test_execution.project = args.project
 
-            # check if test parameter is not present
-            if not test_execution.suite_name and not test_execution.test_name:
+            # check if test_or_suite value is present
+            if not args.test_or_suite:
                 print 'Usage:', parser.usage
                 print '\nTest Cases:'
                 test_cases = utils.get_test_cases(root_path,
-                                                  test_execution.project_name)
+                                                  test_execution.project)
                 utils.display_tree_structure_command_line(test_cases)
                 print '\nTest Suites:'
                 test_suites = utils.get_suites(root_path,
-                                               test_execution.project_name)
+                                               test_execution.project)
                 utils.display_tree_structure_command_line(test_suites)
                 sys.exit()
 
-            if test_execution.suite_name:
+            # check if test_or_suite value matches an existing test suite
+            elif utils.test_suite_exists(root_path,
+                                       test_execution.project,
+                                       args.test_or_suite):
+                test_execution.suite = args.test_or_suite
+                # execute test suite
                 test_runner.run_suite(root_path,
-                                      test_execution.project_name,
-                                      test_execution.suite_name)
-            else:
+                                      test_execution.project,
+                                      test_execution.suite)
+
+            # check if test_or_suite value matches an existing test case
+            elif utils.test_case_exists(root_path,
+                                        test_execution.project,
+                                        args.test_or_suite):
+                test_execution.test = args.test_or_suite
+                # execute test case
                 test_runner.run_single_test_case(root_path,
-                                                 test_execution.project_name,
-                                                 test_execution.test_name)
+                                                 test_execution.project,
+                                                 test_execution.test)
+            
+            else:
+                # test_or_suite does not match any existing suite or test
+                sys.exit('Error: the value {0} does not match an existing '
+                         'suite or test'
+                         .format(args.test_or_suite))
+
+    # main action == startproject
+    if args.main_action == 'startproject':
+        sys.exit('To be defined')
+
+    # main action == createuser
+    if args.main_action == 'createuser':
+        sys.exit('To be defined')
+        

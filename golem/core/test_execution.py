@@ -3,10 +3,10 @@
 
 root_path = None
 
-project_name = None
+project = None
 
-test_name = None
+test = None
 
-suite_name = None
+suite = None
 
 settings = None

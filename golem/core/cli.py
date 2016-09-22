@@ -9,27 +9,24 @@ def get_golem_parser():
         usage='golem run project_name test_case|test_suite',
         add_help=False)
 
-    parser.add_argument(
-        'action',
-        metavar='action',
-        help="main action")
-    parser.add_argument(
-        'project',
-        metavar='project',
-        nargs='?',
-        help="project name",
-        default='')
-    parser.add_argument(
-        'test_or_suite',
-        metavar='test_or_suite',
-        nargs='?',
-        help="test case or test suite to execute",
-        default='')
-    parser.add_argument(
-        '-s',
-        '--suite',
-        action='store_true',
-        help='is suite rather than single test')
+    sub_parsers = parser.add_subparsers(dest="main_action")
+
+    run_parser = sub_parsers.add_parser('run')
+    run_parser.add_argument('project',
+                            default='',
+                            nargs='?',
+                            help="project name")
+    run_parser.add_argument('test_or_suite',
+                            nargs='?',
+                            default='',
+                            metavar='test case or suite',
+                            help="test case or test suite to run")
+
+    gui_parser = sub_parsers.add_parser('gui')
+
+    start_project_parser = sub_parsers.add_parser('startproject')
+
+    createuser_parser = sub_parsers.add_parser('createuser')
 
     return parser
 
