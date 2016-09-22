@@ -60,6 +60,10 @@ def get_user(user_id, root_path):
 def has_permissions_to_project(user_id, project, root_path):
     with open(os.path.join(root_path, 'users.json')) as users_file:    
         user_data = json.load(users_file)
+        has_permission = False
         for user in user_data:
             if user['id'] == user_id:
-                return project in user['projects']
+                if project in user['projects'] or '*' in user['projects']:
+                    has_permission = True
+        return has_permission
+
