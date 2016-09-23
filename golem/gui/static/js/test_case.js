@@ -124,9 +124,12 @@ function getPageObjects(){
         type: 'POST',
         success: function(data) {
             for(po in data){
+                console.log(data)
                 var po = data[po];
                 pageObjects.push({
-                    'value': po.name.split('.')[0],
+                    // 'value': po.name.split('.')[0],
+                    // 'data': po,
+                    'value': po,
                     'data': po,
                 });
             }
@@ -466,12 +469,12 @@ function startFourthStepAutocomplete(elem){
 
 
 
-function saveTestCase(){
-    var testCaseName = $("#testCaseName").html();
-    var pageObjects = getSelectedPageObjects();
-    var datos = getLoadedDatosWihValues();
-    var steps;
-}
+// function saveTestCase(){
+//     var testCaseName = $("#testCaseName").html();
+//     var pageObjects = getSelectedPageObjects();
+//     var datos = getLoadedDatosWihValues();
+//     var steps;
+// }
 
 
 

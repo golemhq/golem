@@ -127,7 +127,7 @@ def test_case_view(project, test_case_name):
     test_data = utils.get_test_data(root_path,
                                    project,
                                    test_case_name)
-
+    print test_data
     return render_template(
                     'test_case.html',
                     project=project,
@@ -143,10 +143,9 @@ def get_page_objects():
     if request.method == 'POST':
         projectname = request.form['project']
 
-        page_objects = gui_utils.get_test_cases_or_page_objects(
+        page_objects = utils.get_page_objects_as_list(
                             root_path,
-                            projectname,
-                            'pages')
+                            projectname)
 
         return json.dumps(page_objects)
 
@@ -158,10 +157,9 @@ def get_selected_page_object_elements():
         projectname = request.form['project']
         page_object_name = request.form['pageObject']
 
-        po_elements = page_object.get_page_object_elements(
-                            root_path,
-                            projectname,
-                            page_object_name)
+        po_elements = page_object.get_page_object_elements(root_path,
+                                                           projectname,
+                                                           page_object_name)
 
         return json.dumps(po_elements)
 

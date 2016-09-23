@@ -91,6 +91,22 @@ def get_projects(workspace):
     return projects
 
 
+def get_page_objects_as_list(workspace, project):
+    pages_path = os.path.join(workspace, 'projects', project, 'pages')
+    page_object_path_list = []
+    page_object_list = []
+    for path, subdirs, files in os.walk(pages_path):
+        for name in files:
+            if name != '__init__.py':
+                filepath = os.path.join(path, os.path.splitext(name)[0])
+                page_object_path_list.append(filepath)
+    for file in page_object_path_list:
+        rel_path_as_list = file.replace(pages_path, '').split(os.sep)
+        rel_path_as_list = [x for x in rel_path_as_list if x != '']
+        page_object_list.append('.'.join(rel_path_as_list))
+    return page_object_list
+
+
 def get_test_data(workspace, project, full_test_case_name):
     '''Test cases can have multiple sets of data
     This method generates a dict for each set and returns

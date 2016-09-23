@@ -10,8 +10,6 @@
 
 }
 
-
-
 #stepsContainerContainer {
 	background-color: lightcyan;
 	padding-bottom: 10px;
@@ -41,4 +39,27 @@
 	border-left: 1px solid #CCCCCC;
 	border-bottom: 1px solid #CCCCCC;
 	border-right: 1px solid #CCCCCC;
+}
+
+#dataTable {
+	background-color: white;
+}
+
+#dataTable td, #dataTable th {
+	padding: 0px;
+}
+
+#dataTable th.index {
+	width: 30px;
+	text-align: center;
+}
+
+#dataTable .input-group {
+	margin-bottom: 0px;
+}
+
+#dataTable input {
+	border: 0px;
+	padding: 4px 4px;
+	height: 25px;
 }

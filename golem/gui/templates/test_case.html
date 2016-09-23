@@ -9,8 +9,6 @@
 {% block content %}
 
 <div>
-	
-
     <!--
     <div id="tc_toolbar">
 
@@ -20,111 +18,60 @@
         </label>
         <span>|</span>
         <span id="changesSavedNotification">All changes saved</span>
-
-
     </div>-->
-
-
-    <div class="col-sm-6">
-        <h3 id="testCaseName">
-            <small>
-                <a href="/p/{{project}}/">
-                    <span class="glyphicon glyphicon glyphicon-menu-left" aria-hidden="true"></span>
-                </a>
-            </small>
-            {{test_case_name}}</h3>
-    </div>
-    <div class="col-sm-6 text-right" style="padding-top: 20px">
-        <button id="runTest" onclick="runTestCase()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Test Case</button>
-        <button id="save" onclick="saveTestCase();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
-    </div>
-
-    <div class="col-sm-12" id="descriptionContainer">
-        <h4>Description</h4>
-        <textarea id="description" class="form-control" rows="2">{{test_case_data.description }}</textarea>
+    <div>
+        <div class="col-sm-6">
+            <h3 id="testCaseName">
+                <small>
+                    <a href="/p/{{project}}/">
+                        <span class="glyphicon glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+                    </a>
+                </small>
+                {{test_case_name}}
+            </h3>
+        </div>
+        <div class="col-sm-6 text-right" style="padding-top: 20px">
+            <button id="runTest" onclick="runTestCase()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Test Case</button>
+            <button id="save" onclick="saveTestCase();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+        </div>
     </div>
 
-<div class="">
+    <div class="clearfix"></div>
 
-    <div class="col-sm-6" id="pageObjectsContainerContainer">
+    <div id="descriptionPageObjectsContainer">
+        <div class="col-sm-6" id="descriptionContainer">
+            <h4>Description</h4>
+            <textarea id="description" class="form-control" rows="2">{{test_case_data.description }}</textarea>
+        </div>
 
-        <h4>Pages</h4>
-        <div id="pageObjectsContainer">
-            <div id="pageObjects">
-                {% for po in test_case_data.page_objects %}  
+        <div class="col-sm-6" id="pageObjectsContainerContainer">
+
+            <h4>Pages</h4>
+            <div id="pageObjectsContainer">
+                <div id="pageObjects">
+                    {% for po in test_case_data.page_objects %}  
                     <div class="input-group">
                         <input type="text" class="form-control custom-input page-objects-input page-objects-autocomplete" value="{{ po }}">
                         <span class="input-group-btn">
                             <button class="btn btn-default" type="button" onclick="deleteInput(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
                         </span>
                     </div>
-                {% endfor %}
-                {% if not test_case_data.page_objects %}
+                    {% endfor %}
+                    {% if not test_case_data.page_objects %}
                     <div class="input-group">
                         <input type="text" class="form-control custom-input page-objects-input page-objects-autocomplete" value="{{ po }}">
                         <span class="input-group-btn">
                             <button class="btn btn-default" type="button" onclick="deleteInput(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
                         </span>
                     </div>
-                {% endif %}
+                    {% endif %}
+                </div>
+                <button onclick="addPOInput();">New</button>
             </div>
-            <button onclick="addPOInput();">New</button>
+
         </div>
 
     </div>
-
-    <div class="col-sm-6" id="datosContainerContainer">
-
-        <h4>Data</h4>
-        <div id="datosContainer">
-            <div id="datos">
-                {% for key, value in test_data.items() %}
-                    <div class="dato">
-                        <div class="col-sm-5">
-                            <div class="input-group">
-                                <input type="text" class="form-control dato-variable" value="{{key}}" placeholder="name">
-                            </div> 
-                        </div>
-                        <div class="col-sm-1">
-                            <label>=</label>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="input-group">
-                                <input type="text" class="form-control dato-value" value="{{value}}" placeholder="value">
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" type="button" onclick="deleteInputDato(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-                {% if not test_data.items() %}
-                    <div class="dato">
-                        <div class="col-sm-5">
-                            <div class="input-group">
-                                <input type="text" class="form-control dato-variable" value="{{key}}" placeholder="name">
-                            </div> 
-                        </div>
-                        <div class="col-sm-1">
-                            <label>=</label>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="input-group">
-                                <input type="text" class="form-control dato-value" value="{{value}}" placeholder="value">
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" type="button" onclick="deleteInputDato(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
-            <button onclick="addDatoInput();">New</button>
-        </div>
-
-    </div>
-
-</div>
 
     <div class="clearfix"></div>
 
@@ -132,39 +79,39 @@
 
         <h4>Steps</h4>
         <div id="steps">
-        
+
             {% for step in test_case_data.steps %}
 
-                <div class='step'>
-                    <div class='col-sm-3'>
-                        <div class='input-group'>
-                            <input type='text' class='form-control step-first-input'
-                                placeholder='action' onchange='stepFirstInputChange(this);' value="{{step.method_name}}">
-                        </div>
+            <div class='step'>
+                <div class='col-sm-3'>
+                    <div class='input-group'>
+                        <input type='text' class='form-control step-first-input'
+                        placeholder='action' onchange='stepFirstInputChange(this);' value="{{step.method_name}}">
                     </div>
-
-                    {% for parameter in step.parameters %}
-                        <div class='col-sm-3 parameter-container'>
-                            <div class='input-group'>
-                                <input type='text' class='form-control parameter-input'
-                                    placeholder='' value='{{ parameter }}'>
-                            </div>
-                        </div>
-                    {% endfor %}
-
                 </div>
+
+                {% for parameter in step.parameters %}
+                <div class='col-sm-3 parameter-container'>
+                    <div class='input-group'>
+                        <input type='text' class='form-control parameter-input'
+                        placeholder='' value='{{ parameter }}'>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
 
             {% endfor %}
 
             {% if not test_case_data.steps %}
-                <div class='step'>
-                    <div class='col-sm-3'>
-                        <div class='input-group'>
-                            <input type='text' class='form-control step-first-input'
-                                placeholder='action' onchange='stepFirstInputChange(this);' value="">
-                        </div>
+            <div class='step'>
+                <div class='col-sm-3'>
+                    <div class='input-group'>
+                        <input type='text' class='form-control step-first-input'
+                        placeholder='action' onchange='stepFirstInputChange(this);' value="">
                     </div>
                 </div>
+            </div>
             {% endif %}
         </div>
 
@@ -174,7 +121,182 @@
 
     </div>
 
-    
+    <div class="clearfix"></div>
+
+    <div class="col-sm-12" id="datosContainerContainer">
+
+        <h4>Data</h4>
+        <div id="datosContainer">
+            <div id="datos">
+                {% for key, value in test_data[0].items() %}
+                <div class="dato">
+                    <div class="col-sm-5">
+                        <div class="input-group">
+                            <input type="text" class="form-control dato-variable" value="{{key}}" placeholder="name">
+                        </div> 
+                    </div>
+                    <div class="col-sm-1">
+                        <label>=</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group">
+                            <input type="text" class="form-control dato-value" value="{{value}}" placeholder="value">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" onclick="deleteInputDato(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if not test_data %}
+                <div class="dato">
+                    <div class="col-sm-5">
+                        <div class="input-group">
+                            <input type="text" class="form-control dato-variable" value="{{key}}" placeholder="name">
+                        </div> 
+                    </div>
+                    <div class="col-sm-1">
+                        <label>=</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group">
+                            <input type="text" class="form-control dato-value" value="{{value}}" placeholder="value">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" onclick="deleteInputDato(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+        <div id="datos">
+            
+            <table class="table table-bordered table-condensed" id="dataTable"> 
+                <thead> 
+                    <tr> 
+                        <th class="index">#</th> 
+                        <th>
+                            <div class="input-group">
+                                <input class="form-control" type="text">
+                            </div>
+                        </th>
+                        <th>
+                            <div class = "input-group">
+                                <input class="form-control" type="text">
+                            </div>
+                        </th> 
+                        <th>
+                            <div class = "input-group">
+                                <input class="form-control" type="text">
+                            </div>
+                        </th>
+                        <th>
+                            <div class = "input-group">
+                                <input class="form-control" type="text">
+                            </div>
+                        </th>
+                        <th>
+                            <div class = "input-group">
+                                <input class="form-control" type="text">
+                            </div>
+                        </th>
+                    </tr> 
+                </thead> 
+                    <tbody> 
+                        <tr> 
+                            <th scope="row" class="index">1</th> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr> 
+                            <th scope="row" class="index">1</th> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td>
+                        </tr> 
+                        <tr> 
+                            <th scope="row" class="index">1</th> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td> 
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td>
+                        </tr> 
+                    </tbody> 
+                </table>
+
+        </div>
+
+            <button onclick="addDatoInput();">New</button>
+        </div>
+
+    </div>
 
 
 </div>
