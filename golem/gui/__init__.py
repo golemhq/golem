@@ -116,12 +116,7 @@ def test_case_view(project, test_case_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path):
         return render_template('not_permission.html')
 
-    if '.' in test_case_name:
-        tc_name = test_case_name.split('.')[-1]
-        parents = test_case_name.split('.')[0:-1]
-    else:
-        tc_name = test_case_name
-        parents = []
+    tc_name, parents = utils.separate_file_from_parents(test_case_name)
 
     test_case_data = test_case.parse_test_case(
                                         root_path,
@@ -129,11 +124,9 @@ def test_case_view(project, test_case_name):
                                         parents,
                                         tc_name)
 
-    test_data = data.parse_test_data(
-                            root_path,
-                            project,
-                            parents,
-                            tc_name)
+    test_data = utils.get_test_data(root_path,
+                                   project,
+                                   test_case_name)
 
     return render_template(
                     'test_case.html',
