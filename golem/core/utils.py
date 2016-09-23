@@ -107,7 +107,7 @@ def get_test_data(workspace, project, full_test_case_name):
                                 'data',
                                 '{}.csv'.format(test))
     if not os.path.exists(data_file_path):
-        print 'Warning: No data file found'
+        print 'Warning: No data file found for {}'.format(full_test_case_name)
         data_dict_list = [{}]
     else:
         with open(data_file_path, 'rb') as csv_file:

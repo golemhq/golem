@@ -14,11 +14,7 @@ from multiprocessing.pool import ApplyResult
 from golem.core import utils, test_execution, logger, selenium_utils, report
 
 
-def test_runner(project,
-                test_case_name,
-                test_data,
-                suite_name,
-                suite_data,
+def test_runner(project, test_case_name, test_data, suite_name, suite_data,
                 timestamp):
     ''' runs a single test case by name'''
 
@@ -30,6 +26,7 @@ def test_runner(project,
 
     import execution_logger
     instance = None
+
     try:
         test_class = utils.get_test_case_class(
                         project,
@@ -46,14 +43,15 @@ def test_runner(project,
         else:
             raise Exception
 
+        if hasattr(instance, 'teardown'):
+            instance.teardown()
+        else:
+            raise Exception
     except:
         result['result'] = 'fail'
         result['error'] = traceback.format_exc()
         print dir(traceback)
         print traceback.print_exc()
-
-    if hasattr(instance, 'teardown'):
-        instance.teardown()
 
     result['description'] = execution_logger.description
     result['steps'] = execution_logger.steps
@@ -70,7 +68,7 @@ def test_runner(project,
 
 def multiprocess_executor(execution_list, processes=1,
                           suite_name=None, suite_data=None):
-    
+    print execution_list
     timestamp = utils.get_timestamp()
 
     pool = Pool(processes=processes)
@@ -78,7 +76,7 @@ def multiprocess_executor(execution_list, processes=1,
     results = []
     for test in execution_list:
         apply_async = pool.apply_async(test_runner,
-                                       args=(test_execution.project_name,
+                                       args=(test_execution.project,
                                              test[0],
                                              test[1],
                                              suite_name,

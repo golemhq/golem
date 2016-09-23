@@ -1,3 +1,4 @@
+import json
 import os
 
 
@@ -17,10 +18,23 @@ def generate_report(result,
                                   suite_name,
                                   timestamp,
                                   test_case_name)
+
     if not os.path.isdir(execution_path):
         try:
             os.makedirs(execution_path)
         except:
             pass
 
-    print test_case_name
+    report = {
+        'test_case': test_case_name,
+        'result': result['result'],
+        'steps': result['steps'],
+        'description': result['description'],
+        'error': result['error'],
+    }
+
+    report_path = os.path.join(execution_path, 'report.json')
+    
+    with open(report_path, 'w') as json_file:
+        json.dump(report, json_file, indent=4)
+

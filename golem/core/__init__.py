@@ -15,3 +15,8 @@ def getOrCreateWebdriver(*args):
         driver.maximize_window()
 
     return driver
+
+
+def reset_driver_object():
+	global driver 
+	driver = None

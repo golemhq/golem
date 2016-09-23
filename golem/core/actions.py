@@ -49,3 +49,4 @@ def verify_text_in_element(text, element):
 def close():
     driver = core.getOrCreateWebdriver()
     driver.quit()
+    core.reset_driver_object()
