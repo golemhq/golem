@@ -1,4 +1,8 @@
+import csv
 import os
+
+from golem.core import utils
+
 
 # def get_data(content):
 #     key_value_pairs = {}
@@ -31,19 +35,20 @@ import os
 #     return key_value_pairs
 
 
-def save_test_data(root_path, project, test_case_name, test_data):
-    test_case_path = os.path.join(
-                                root_path,
-                                'projects',
-                                project,
-                                'data',
-                                test_case_name + '.py')
-
-    with open(test_case_path, 'w') as f:
-        for data in test_data:
-            f.write(
-                '{0} = \'{1}\'\n'.format(data['variable'],
-                data['value'].encode("UTF-8")))
+def save_test_data(root_path, project, full_test_case_name, test_data):
+    if test_data[0]:
+        tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
+        data_path = os.path.join(root_path,
+                                 'projects',
+                                 project,
+                                 'data',
+                                 os.sep.join(parents),
+                                 '{}.csv'.format(tc_name))
+        with open(data_path, 'w') as f:
+            writer = csv.DictWriter(f, fieldnames=test_data[0].keys(), lineterminator='\n')
+            writer.writeheader()
+            for row in test_data:
+                writer.writerow(row)
 
 
 def is_data_variable(root_path, project, parents, test_case_name, parameter_name):

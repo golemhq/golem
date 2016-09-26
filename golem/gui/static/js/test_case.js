@@ -623,11 +623,24 @@ function saveTestCase(){
                 rowDict[$(headerInputs[i]).val()] = $(this).val();
             }
         });
-        testData.push(rowDict);
+        if(!jQuery.isEmptyObject(rowDict)){
+            testData.push(rowDict)
+        }
     });
-
-    console.log(testData);
-    return
+    // empty values are allowed but only for one row of data
+    var tempTestData = [testData[0]];
+    for(var i = 1; i <= testData.length - 1; i++){
+        var allEmpty = true;
+        for(key in testData[i]){
+            if(testData[i][key].length > 0){
+                allEmpty = false
+            }
+        }
+        if(!allEmpty){
+            tempTestData.push(testData[i])
+        }
+    }
+    testData = tempTestData;
 
     var testSteps = [];
     $(".step").each(function(){
@@ -653,8 +666,6 @@ function saveTestCase(){
         'project': project,
         'testCaseName': testCaseName
     }
-
-    console.log(data);
 
     $.ajax({
         url: "/save_test_case/",

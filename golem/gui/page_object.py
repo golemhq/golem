@@ -69,15 +69,16 @@ def save_page_object(root_path, project, page_name, elements):
 
 def is_page_object(parameter, root_path, project):
     # identify if a parameter is a page object
-    page_objects = gui_utils.get_page_objects__DEPRECADO(root_path, project)
+    page_objects = utils.get_page_objects_as_list(root_path, project)
+    print page_objects
     print parameter
-    if len(parameter.split('.')) <= 1:
-        return False
-    else:
-        page_object_chain = parameter.split('.')[0:-1]
-        for po in page_objects:
-            if po['name'] == page_object_chain[-1]:
-                return True
+    # if len(parameter.split('.')) <= 1:
+    #     return False
+    # else:
+    #     page_object_chain = parameter.split('.')[0:-1]
+    #     for po in page_objects:
+    #         if po['name'] == page_object_chain[-1]:
+    #             return True
     return False
 
 

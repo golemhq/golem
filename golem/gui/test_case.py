@@ -1,6 +1,7 @@
 import os
 import re
 
+from golem.core import utils
 from golem.gui import data, page_object, gui_utils
 
 
@@ -213,14 +214,16 @@ def format_parameters(parameters, root_path, project, parents, test_case_name):
     return all_parameters_string
 
 
-def save_test_case(root_path,
-                   project,
-                   test_case_name,
-                   description,
-                   page_objects,
-                   test_steps):
-    test_case_path = os.path.join(
-        root_path, 'projects', project, 'test_cases', test_case_name + '.py')
+def save_test_case(root_path, project, full_test_case_name, description, 
+                   page_objects, test_steps):
+    tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
+    
+    test_case_path = os.path.join(root_path,
+                                  'projects',
+                                  project,
+                                  'test_cases', 
+                                  os.sep.join(parents),
+                                  '{}.py'.format(tc_name))
 
     with open(test_case_path, 'w') as f:
 
@@ -230,7 +233,7 @@ def save_test_case(root_path,
         f.write('# page objects\n')
         f.write('from projects.'+project+'.pages import '+', '.join(page_objects) +'\n')
         f.write('\n')
-        f.write('class {}:\n'.format(test_case_name))
+        f.write('class {}:\n'.format(tc_name))
         f.write('\n')
         f.write('    description = \'\'\'{}\'\'\'\n'.format(description))
         f.write('\n')
@@ -247,7 +250,7 @@ def save_test_case(root_path,
                                                 root_path,
                                                 project,
                                                 [],
-                                                test_case_name)))
+                                                tc_name)))
         f.write('\n')
         f.write('    def teardown(self):\n')
         f.write('        close()\n')
