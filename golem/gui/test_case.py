@@ -153,11 +153,14 @@ def new_test_case(root_path, project, parents, tc_name):
         os.makedirs(test_case_path)
     test_case_full_path = os.path.join(test_case_path, tc_name + '.py')
 
-    data_path = os.path.join(
-        root_path, 'projects', project, 'data', parents_joined)
+    data_path = os.path.join(root_path,
+                             'projects',
+                             project,
+                             'data',
+                             parents_joined)
     if not os.path.exists(data_path):
         os.makedirs(data_path)
-    data_full_path = os.path.join(data_path, tc_name + '.py')
+    data_full_path = os.path.join(data_path, tc_name + '.csv')
 
     with open(test_case_full_path, 'w') as f:
         f.write(test_case_content)

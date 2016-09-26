@@ -128,7 +128,7 @@
         <h4>Data</h4>
         <div id="datosContainer">
             <div id="datos">
-                {% for key, value in test_data[0].items() %}
+                {% if False %}
                 <div class="dato">
                     <div class="col-sm-5">
                         <div class="input-group">
@@ -147,8 +147,7 @@
                         </div>
                     </div>
                 </div>
-                {% endfor %}
-                {% if not test_data %}
+
                 <div class="dato">
                     <div class="col-sm-5">
                         <div class="input-group">
@@ -170,128 +169,84 @@
                 {% endif %}
             </div>
 
-        <div id="datos">
-            
-            <table class="table table-bordered table-condensed" id="dataTable"> 
-                <thead> 
-                    <tr> 
-                        <th class="index">#</th> 
-                        <th>
-                            <div class="input-group">
-                                <input class="form-control" type="text">
-                            </div>
-                        </th>
-                        <th>
-                            <div class = "input-group">
-                                <input class="form-control" type="text">
-                            </div>
-                        </th> 
-                        <th>
-                            <div class = "input-group">
-                                <input class="form-control" type="text">
-                            </div>
-                        </th>
-                        <th>
-                            <div class = "input-group">
-                                <input class="form-control" type="text">
-                            </div>
-                        </th>
-                        <th>
-                            <div class = "input-group">
-                                <input class="form-control" type="text">
-                            </div>
-                        </th>
-                    </tr> 
-                </thead> 
-                    <tbody> 
+            <div id="datos">
+                <table class="table table-bordered table-condensed" id="dataTable"> 
+                    {% if test_data %}
+                    <thead> 
                         <tr> 
-                            <th scope="row" class="index">1</th> 
-                            <td>
+                            <th class="index">#</th> 
+                            {% for val, key in test_data[0].items() %}
+                            <th>
                                 <div class="input-group">
-                                    <input class="form-control" type="text">
+                                    <input class="form-control" type="text" value="{{key}}" onchange="dataTableHeaderInputChange()">
                                 </div>
-                            </td> 
-                            <td>
+                            </th>
+                            {% endfor %}
+                            <th>
                                 <div class="input-group">
-                                    <input class="form-control" type="text">
+                                    <input class="form-control" type="text" onchange="dataTableHeaderInputChange()">
                                 </div>
-                            </td> 
-                            <td>
-                                <div class="input-group">
-                                    <input class="form-control" type="text">
-                                </div>
-                            </td> 
-                            <td>
-                                <div class="input-group">
-                                    <input class="form-control" type="text">
-                                </div>
-                            </td> 
-                            <td>
-                                <div class="input-group">
-                                    <input class="form-control" type="text">
-                                </div>
-                            </td>
+                            </th>
                         </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in test_data %}
+                        <tr>
+                            <th scope="row" class="index">{{loop.index}}</th> 
+                            {% for key, value in row.items() %}
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text" value="{{value}}">
+                                </div>
+                            </td>
+                            {% endfor %}
+                            <td><div class="input-group"><input class="form-control" type="text"></div>
+                            </td> 
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <th scope="row" class="index">{{test_data|length + 1}}</th> 
+                            {% for item in test_data[0].items() %}
+                            <td><div class="input-group"><input class="form-control" type="text"></div>
+                            </td> 
+                            {% endfor %}
+                            <td><div class="input-group"><input class="form-control" type="text"></div>
+                            </td> 
+                        </tr>
+                    </tbody>
+
+                    {% else %}
+                    <thead> 
                         <tr> 
-                            <th scope="row" class="index">1</th> 
-                            <td>
+                            <th class="index">#</th> 
+                            {% for i in range(4) %}
+                            <th>
                                 <div class="input-group">
-                                    <input class="form-control" type="text">
+                                    <input class="form-control" type="text" onchange="dataTableHeaderInputChange()">
                                 </div>
-                            </td> 
-                            <td>
-                                <div class="input-group">
-                                    <input class="form-control" type="text">
-                                </div>
-                            </td> 
-                            <td>
-                                <div class="input-group">
-                                    <input class="form-control" type="text">
-                                </div>
-                            </td> 
-                            <td>
-                                <div class="input-group">
-                                    <input class="form-control" type="text">
-                                </div>
-                            </td> 
+                            </th>
+                            {% endfor %}
+                        </tr> 
+                    </thead> 
+                    <tbody>
+                        {% for i in range(3) %}
+                        <tr> 
+                            <th scope="row" class="index">{{i+1}}</th>
+                            {% for j in range(4) %}
                             <td>
                                 <div class="input-group">
                                     <input class="form-control" type="text">
                                 </div>
                             </td>
-                        </tr> 
-                        <tr> 
-                            <th scope="row" class="index">1</th> 
-                            <td>
-                                <div class="input-group">
-                                    <input class="form-control" type="text">
-                                </div>
-                            </td> 
-                            <td>
-                                <div class="input-group">
-                                    <input class="form-control" type="text">
-                                </div>
-                            </td> 
-                            <td>
-                                <div class="input-group">
-                                    <input class="form-control" type="text">
-                                </div>
-                            </td> 
-                            <td>
-                                <div class="input-group">
-                                    <input class="form-control" type="text">
-                                </div>
-                            </td> 
-                            <td>
-                                <div class="input-group">
-                                    <input class="form-control" type="text">
-                                </div>
-                            </td>
-                        </tr> 
-                    </tbody> 
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>     
+                    {% endif %}
+
                 </table>
 
-        </div>
+            </div>
 
             <button onclick="addDatoInput();">New</button>
         </div>

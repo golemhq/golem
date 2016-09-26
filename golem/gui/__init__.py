@@ -366,30 +366,21 @@ def get_global_actions():
         return json.dumps(global_actions)
 
 
-@app.route("/p/<project>/page/<page_name>/")
+@app.route("/p/<project>/page/<full_page_name>/")
 @login_required
-def page_view(project, page_name):
+def page_view(project, full_page_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path):
         return render_template('not_permission.html')
 
-    if '.' in page_name:
-        p_name = page_name.split('.')[-1]
-        parents = page_name.split('.')[0:-1]
-    else:
-        p_name = page_name
-        parents = []
-
-    page_object_data = page_object.get_page_object_elements(
-                                        root_path,
-                                        project,
-                                        parents,
-                                        p_name)
+    page_object_data = page_object.get_page_object_elements(root_path,
+                                                            project,
+                                                            full_page_name)
 
     return render_template(
                     'page_object.html',
                     project=project,
                     page_object_data=page_object_data,
-                    page_name=page_name)
+                    page_name=full_page_name)
 
 
 @app.route("/save_page_object/", methods=['POST'])

@@ -247,7 +247,7 @@ function startAllValueInputAutocomplete(){
 
     var lookup = []
 
-    var allValues = getLoadedDatosWihValues();
+    var allValues = getLoadedDatosWithValues();
 
     for(value in allValues){
         lookup.push({
@@ -518,13 +518,21 @@ function getLoadedDatos(){
     return datos;
 }
 
-function getLoadedDatosWihValues(){
+function getLoadedDatosWithValues(){
     var datos = [];
-    $(".dato").each(function(){
-        datos.push({
-            'name': $(this).find(".dato-variable").val(),
-            'value': $(this).find(".dato-value").val()
-        });
+    // $(".dato").each(function(){
+    //     datos.push({
+    //         'name': $(this).find(".dato-variable").val(),
+    //         'value': $(this).find(".dato-value").val()
+    //     });
+    // });
+    $("#dataTable thead input").each(function(){
+        if($(this).val() != ''){
+            datos.push({
+                'name': $(this).val(),
+                'value': $(this).val()
+            });
+        }
     });
     return datos;
 }
@@ -601,12 +609,25 @@ function saveTestCase(){
     });
 
     var testData = [];
-    $(".dato").each(function(){
-        testData.push({
-            'variable': $(this).find('.dato-variable').val(),
-            'value': $(this).find('.dato-value').val()
+    
+    var headerInputs = $("#dataTable thead input")    
+    var tableRows = $("#dataTable tbody tr");
+    
+    tableRows.each(function(){
+        var currentRow = $(this);
+        var rowCells = currentRow.find("td input");
+        var rowDict = {}
+        rowCells.each(function(i){
+            //console.log($(headerInputs[i]).val());
+            if($(headerInputs[i]).val().length > 0){
+                rowDict[$(headerInputs[i]).val()] = $(this).val();
+            }
         });
+        testData.push(rowDict);
     });
+
+    console.log(testData);
+    return
 
     var testSteps = [];
     $(".step").each(function(){
@@ -668,7 +689,9 @@ function runTestCase(){
 }
 
 
-
+function dataTableHeaderInputChange(){
+    startAllValueInputAutocomplete();
+}
 
 
 
