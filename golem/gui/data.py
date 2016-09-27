@@ -52,8 +52,9 @@ def save_test_data(root_path, project, full_test_case_name, test_data):
 
 
 def is_data_variable(root_path, project, parents, test_case_name, parameter_name):
-    test_data_variables = parse_test_data(root_path, project, parents, test_case_name)
-    if parameter_name in test_data_variables:
+    parents += [test_case_name]
+    test_data = utils.get_test_data(root_path, project, '.'.join(parents))
+    if parameter_name in test_data[0].keys():
         return True
     else: 
         return False

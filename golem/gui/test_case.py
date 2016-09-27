@@ -192,8 +192,8 @@ class search_article:
 
 def format_parameters(parameters, root_path, project, parents, test_case_name):
     all_parameters = []
-
     for parameter in parameters:
+        print 'PARAMETER', parameter
         if page_object.is_page_object(parameter, root_path, project):
             # it is a page object, leave as is
             this_parameter_string = parameter
@@ -210,8 +210,20 @@ def format_parameters(parameters, root_path, project, parents, test_case_name):
                 this_parameter_string = '\'' + parameter + '\''
         all_parameters.append(this_parameter_string)
 
-    all_parameters_string = ','.join(all_parameters)
+    all_parameters_string = ', '.join(all_parameters)
     return all_parameters_string
+
+
+def format_page_object_import_string(project, page_object):
+    po, parents = utils.separate_file_from_parents(page_object)
+    print 'parents', parents
+    if parents:
+        parents = '.' + '.'.join(parents)
+    else:
+        parents = ''
+    po_import_string = 'from projects.{0}.pages{1} ' \
+                       'import {2}\n'.format(project, parents, po)
+    return po_import_string
 
 
 def save_test_case(root_path, project, full_test_case_name, description, 
@@ -230,8 +242,11 @@ def save_test_case(root_path, project, full_test_case_name, description,
         f.write('from golem.core.test import Test\n')
         f.write('from golem.core.actions import *\n')
         f.write('from golem.core import execution_logger as logger\n')
+        f.write('\n')
         f.write('# page objects\n')
-        f.write('from projects.'+project+'.pages import '+', '.join(page_objects) +'\n')
+        for po in page_objects:
+            f.write(format_page_object_import_string(project, po))
+        f.write('\n')
         f.write('\n')
         f.write('class {}:\n'.format(tc_name))
         f.write('\n')
@@ -249,7 +264,7 @@ def save_test_case(root_path, project, full_test_case_name, description,
                                                 step['parameters'],
                                                 root_path,
                                                 project,
-                                                [],
+                                                parents,
                                                 tc_name)))
         f.write('\n')
         f.write('    def teardown(self):\n')

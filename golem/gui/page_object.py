@@ -28,13 +28,7 @@ def get_web_elements(content, po_name):
 def get_page_object_elements(root_path, project, full_po_name):
     po, parents = utils.separate_file_from_parents(full_po_name)
 
-    path = os.path.join(root_path,
-                        'projects',
-                        project, 
-                        'pages',
-                        os.sep.join(parents),
-                        '{}.py'.format(po))
-
+    print 'AAA', 'projects.{0}.pages.{1}'.format(project, full_po_name)
     modulex = importlib.import_module('projects.{0}.pages.{1}'
                                       .format(project, full_po_name))
     variable_list = [item for item in dir(modulex) if not item.startswith("__")]
@@ -70,16 +64,11 @@ def save_page_object(root_path, project, page_name, elements):
 def is_page_object(parameter, root_path, project):
     # identify if a parameter is a page object
     page_objects = utils.get_page_objects_as_list(root_path, project)
-    print page_objects
-    print parameter
-    # if len(parameter.split('.')) <= 1:
-    #     return False
-    # else:
-    #     page_object_chain = parameter.split('.')[0:-1]
-    #     for po in page_objects:
-    #         if po['name'] == page_object_chain[-1]:
-    #             return True
-    return False
+    page_object_chain = '.'.join(parameter.split('.')[:-1])
+    if page_object_chain in page_objects:
+        return True
+    else:
+        return False
 
 
 def new_page_object(root_path, project, parents, page_object_name):
