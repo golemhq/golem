@@ -14,10 +14,9 @@ from multiprocessing.pool import ApplyResult
 from golem.core import utils, test_execution, logger, selenium_utils, report
 
 
-def test_runner(project, test_case_name, test_data, suite_name, suite_data,
-                timestamp):
+def test_runner(workspace, project, test_case_name, test_data, suite_name,
+                suite_data, timestamp):
     ''' runs a single test case by name'''
-
     result = {
         'result': 'pass',
         'error': None,
@@ -26,7 +25,6 @@ def test_runner(project, test_case_name, test_data, suite_name, suite_data,
 
     import execution_logger
     instance = None
-
     try:
         test_class = utils.get_test_case_class(
                         project,
@@ -56,27 +54,31 @@ def test_runner(project, test_case_name, test_data, suite_name, suite_data,
     result['description'] = execution_logger.description
     result['steps'] = execution_logger.steps
 
-    report.generate_report(result,
-                           test_execution.root_path,
+    report.generate_report(workspace,
                            project,
                            test_case_name,
-                           test_data, suite_name,
+                           test_data,
+                           suite_name,
+                           result,
                            timestamp)
-
     return result
 
 
 def multiprocess_executor(execution_list, processes=1,
                           suite_name=None, suite_data=None):
-    print execution_list
+    print 'execution list', execution_list
     timestamp = utils.get_timestamp()
+
+    if not suite_name:
+        suite_name = '__single__'
 
     pool = Pool(processes=processes)
 
     results = []
     for test in execution_list:
         apply_async = pool.apply_async(test_runner,
-                                       args=(test_execution.project,
+                                       args=(test_execution.root_path,
+                                             test_execution.project,
                                              test[0],
                                              test[1],
                                              suite_name,

@@ -229,7 +229,7 @@ def format_page_object_import_string(project, page_object):
 def save_test_case(root_path, project, full_test_case_name, description, 
                    page_objects, test_steps):
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    
+    print 'pos', page_objects
     test_case_path = os.path.join(root_path,
                                   'projects',
                                   project,

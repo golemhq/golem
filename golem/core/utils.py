@@ -111,7 +111,7 @@ def get_test_data(workspace, project, full_test_case_name):
     '''Test cases can have multiple sets of data
     This method generates a dict for each set and returns
     a list of dicts'''
-    data_dict_list = []
+    data_dict_list = [{}]
 
     # check if CSV file == test case name exists
     test, parents = separate_file_from_parents(full_test_case_name)
@@ -124,7 +124,6 @@ def get_test_data(workspace, project, full_test_case_name):
                                 '{}.csv'.format(test))
     if not os.path.exists(data_file_path):
         print 'Warning: No data file found for {}'.format(full_test_case_name)
-        data_dict_list = [{}]
     else:
         with open(data_file_path, 'rb') as csv_file:
             dict_reader = csv.DictReader(csv_file)

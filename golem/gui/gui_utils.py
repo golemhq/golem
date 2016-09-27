@@ -163,3 +163,56 @@ def time_to_string():
 
 def string_to_time(time_string):
     return datetime.datetime.strptime(time_string, '%Y-%m-%d-%H-%M-%S-%f')
+
+
+def get_global_actions():
+    global_actions = [
+        {
+            'name': 'click',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
+            'name': 'send keys',
+            'parameters': [{'name': 'element', 'type': 'element'},
+                           {'name': 'value', 'type': 'value'}]
+        },
+        {
+            'name': 'select',
+            'parameters': [{'name': 'option', 'type': 'value'},
+                           {'name': 'from element', 'type': 'element'}]
+        },
+        {
+            'name': 'go to',
+            'parameters': [{'name': 'url', 'type': 'value'}]
+        },
+        {
+            'name': 'verify text',
+            'parameters': [{'name': 'text', 'type': 'value'}]
+        },
+        {
+            'name': 'verify text in element',
+            'parameters': [{'name': 'text', 'type': 'value'},
+                           {'name': 'element', 'type': 'element'}]
+        },
+        {
+            'name': 'verify exists',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
+            'name': 'verify not exists',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
+            'name': 'verify is enabled',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
+            'name': 'verify is not enabled',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
+            'name': 'screenshot',
+            'parameters': [{'name': 'message (optional)', 'type': 'value'}]
+        },
+    ]
+    return global_actions

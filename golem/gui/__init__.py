@@ -314,55 +314,7 @@ def new_directory_page_object():
 def get_global_actions():
 
     if request.method == 'POST':
-        global_actions = [
-            {
-                'name': 'click',
-                'parameters': [{'name': 'element', 'type': 'element'}]
-            },
-            {
-                'name': 'send keys',
-                'parameters': [{'name': 'element', 'type': 'element'},
-                               {'name': 'value', 'type': 'value'}]
-            },
-            {
-                'name': 'select',
-                'parameters': [{'name': 'option', 'type': 'value'},
-                               {'name': 'from element', 'type': 'element'}]
-            },
-            {
-                'name': 'go to',
-                'parameters': [{'name': 'url', 'type': 'value'}]
-            },
-            {
-                'name': 'verify text',
-                'parameters': [{'name': 'text', 'type': 'value'}]
-            },
-            {
-                'name': 'verify text in element',
-                'parameters': [{'name': 'text', 'type': 'value'},
-                               {'name': 'element', 'type': 'element'}]
-            },
-            {
-                'name': 'verify exists',
-                'parameters': [{'name': 'element', 'type': 'element'}]
-            },
-            {
-                'name': 'verify not exists',
-                'parameters': [{'name': 'element', 'type': 'element'}]
-            },
-            {
-                'name': 'verify is enabled',
-                'parameters': [{'name': 'element', 'type': 'element'}]
-            },
-            {
-                'name': 'verify is not enabled',
-                'parameters': [{'name': 'element', 'type': 'element'}]
-            },
-            {
-                'name': 'screenshot',
-                'parameters': [{'name': 'message (optional)', 'type': 'value'}]
-            },
-        ]
+        global_actions = gui_utils.get_global_actions()
         return json.dumps(global_actions)
 
 

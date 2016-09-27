@@ -96,7 +96,7 @@ function addFirstStepInput(){
     
     $("#steps").append(
         "<div class='step'> \
-            <div class='col-sm-3'> \
+            <div class='col-sm-3 step-input-container'> \
                 <div class='input-group'> \
                     <input type='text' class='form-control step-first-input' \
                         placeholder='action' onchange='stepFirstInputChange(this);'> \
@@ -176,8 +176,10 @@ function startStepFirstInputAutocomplete(){
     autocomplete = $(".step-first-input").autocomplete({
         lookup: lookup,
         minChars: 0,
-        //triggerSelectOnValidInput: false,
+        triggerSelectOnValidInput: false,
         onSelect: function (suggestion) {
+            console.log(suggestion);
+            console.log($(this));
             stepFirstInputChange($(this));
         },
         onSearchStart: function () {
@@ -219,7 +221,7 @@ function stepFirstInputChange(elem){
                 var customClass = 'element-input';
             }
             
-            var newInput = $("<div class='col-sm-3 parameter-container'> \
+            var newInput = $("<div class='col-sm-3 step-input-container parameter-container'> \
                                 <div class='input-group'> \
                                     <input type='text' class='form-control \
                                         parameter-input "+customClass+"' \
@@ -229,7 +231,7 @@ function stepFirstInputChange(elem){
 
             step.append(newInput);
 
-            //startAllElementInputAutocomplete();
+            //llElementInputAutocomplete();
             // start all elements input through getselectedpageobjectelements function()
             getSelectedPageObjectElements()
 
@@ -605,7 +607,9 @@ function saveTestCase(){
 
     var pageObjects = [];
     $(".page-objects-input").each(function(){
-        pageObjects.push($(this).val());
+        if($(this).val().length > 0){
+            pageObjects.push($(this).val());
+        }
     });
 
     var testData = [];
@@ -734,4 +738,43 @@ function checkIfElementIsInSelectedPageObjectElements(selectedElements, elementN
         }
     }
     return false
+}
+
+function addColumnToDataTable(){
+    $("#dataTable thead tr").append(
+        "<th> \
+            <div class='input-group'> \
+                <input class='form-control' type='text'> \
+            </div> \
+        </th>"
+    );
+
+    $("#dataTable tbody tr").each(function(){
+        $(this).append(
+            "<td> \
+                <div class='input-group'> \
+                    <input class='form-control' type='text'> \
+                </div> \
+            </td>"
+        );
+    });
+}
+
+function addRowToDataTable(){
+    var amountOfColumns = $("#dataTable thead tr th").length -1;
+    var amountOfRows = $("#dataTable tbody tr").length;
+    var newCells = "";
+    for(var i = 0; i < amountOfColumns; i++){
+        newCells += "<td> \
+                        <div class='input-group'> \
+                            <input class='form-control' type='text'> \
+                        </div> \
+                    </td>";
+    }
+    
+    $("#dataTable tbody").append(
+        "<tr> \
+            <th scope='row' class='index'>"+(amountOfRows+1)+"</th> \
+            " + newCells + " \
+        </tr>");
 }

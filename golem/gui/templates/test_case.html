@@ -23,7 +23,7 @@
         <div class="col-sm-6">
             <h3 id="testCaseName">
                 <small>
-                    <a href="/p/{{project}}/">
+                    <a href="/p/{{project}}/" class="link-without-underline">
                         <span class="glyphicon glyphicon glyphicon-menu-left" aria-hidden="true"></span>
                     </a>
                 </small>
@@ -38,13 +38,13 @@
 
     <div class="clearfix"></div>
 
-    <div id="descriptionPageObjectsContainer">
-        <div class="col-sm-6" id="descriptionContainer">
+    <div id="descriptionPageObjectsContainer" style="display: table; width: 100%">
+        <div class="col-sm-6 same-heigth-col" id="descriptionContainer">
             <h4>Description</h4>
             <textarea id="description" class="form-control" rows="2">{{test_case_data.description }}</textarea>
         </div>
 
-        <div class="col-sm-6" id="pageObjectsContainerContainer">
+        <div class="col-sm-6 same-heigth-col" id="pageObjectsContainerContainer">
 
             <h4>Pages</h4>
             <div id="pageObjectsContainer">
@@ -83,7 +83,7 @@
             {% for step in test_case_data.steps %}
 
             <div class='step'>
-                <div class='col-sm-3'>
+                <div class='col-sm-3 step-input-container'>
                     <div class='input-group'>
                         <input type='text' class='form-control step-first-input'
                         placeholder='action' onchange='stepFirstInputChange(this);' value="{{step.method_name}}">
@@ -91,7 +91,7 @@
                 </div>
 
                 {% for parameter in step.parameters %}
-                <div class='col-sm-3 parameter-container'>
+                <div class='col-sm-3 step-input-container parameter-container'>
                     <div class='input-group'>
                         <input type='text' class='form-control parameter-input'
                         placeholder='' value='{{ parameter }}'>
@@ -105,7 +105,7 @@
 
             {% if not test_case_data.steps %}
             <div class='step'>
-                <div class='col-sm-3'>
+                <div class='col-sm-3 step-input-container'>
                     <div class='input-group'>
                         <input type='text' class='form-control step-first-input'
                         placeholder='action' onchange='stepFirstInputChange(this);' value="">
@@ -127,47 +127,6 @@
 
         <h4>Data</h4>
         <div id="datosContainer">
-            <div id="datos">
-                {% if False %}
-                <div class="dato">
-                    <div class="col-sm-5">
-                        <div class="input-group">
-                            <input type="text" class="form-control dato-variable" value="{{key}}" placeholder="name">
-                        </div> 
-                    </div>
-                    <div class="col-sm-1">
-                        <label>=</label>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="input-group">
-                            <input type="text" class="form-control dato-value" value="{{value}}" placeholder="value">
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" type="button" onclick="deleteInputDato(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dato">
-                    <div class="col-sm-5">
-                        <div class="input-group">
-                            <input type="text" class="form-control dato-variable" value="{{key}}" placeholder="name">
-                        </div> 
-                    </div>
-                    <div class="col-sm-1">
-                        <label>=</label>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="input-group">
-                            <input type="text" class="form-control dato-value" value="{{value}}" placeholder="value">
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" type="button" onclick="deleteInputDato(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
 
             <div id="datos">
                 <table class="table table-bordered table-condensed" id="dataTable"> 
@@ -248,7 +207,17 @@
 
             </div>
 
-            <button onclick="addDatoInput();">New</button>
+            <div style="display: table-cell; position: relative;">
+                <a href="javascript:void(0)" onclick="addColumnToDataTable();">
+                    <img src="{{ url_for('static', filename='img/plus_sign.png') }}" class="add-new-icon" style="margin-left: 5px;">
+                </a>
+            </div>
+
+            <div class="text-right" style="width: 100%">
+                <a href="javascript:void(0)" onclick="addRowToDataTable();">
+                    <img src="{{ url_for('static', filename='img/plus_sign.png') }}" class="add-new-icon" style="margin-right: 30px;">
+                </a>
+            </div>
         </div>
 
     </div>

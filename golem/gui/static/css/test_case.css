@@ -10,14 +10,20 @@
 
 }
 
+.same-heigth-col {
+    float: none;
+    display: table-cell;
+    vertical-align: top;
+}
+
 #stepsContainerContainer {
 	background-color: lightcyan;
 	padding-bottom: 10px;
 }
 
-#datosContainerContainer {
-	background-color: lightgoldenrodyellow;
-	padding-bottom: 10px;
+.step-input-container {
+	padding-left: 0px;
+	padding-right: 10px;
 }
 
 #pageObjectsContainerContainer {
@@ -41,8 +47,24 @@
 	border-right: 1px solid #CCCCCC;
 }
 
+#datosContainerContainer {
+	background-color: lightgoldenrodyellow;
+	padding-bottom: 10px;
+}
+
+#datosContainer {
+
+}
+
+#datos {
+	display: table-cell;
+	width: 100%;
+	position: relative;
+}
+
 #dataTable {
 	background-color: white;
+	margin-bottom: 5px;
 }
 
 #dataTable td, #dataTable th {
@@ -62,4 +84,9 @@
 	border: 0px;
 	padding: 4px 4px;
 	height: 25px;
+}
+
+.add-new-icon {
+	width: 25px;
+	vertical-align: inherit;
 }

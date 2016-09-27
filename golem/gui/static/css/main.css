@@ -112,3 +112,8 @@ body {
         border-bottom: 0 none;
     }
 }
+
+
+.link-without-underline:hover {
+    text-decoration: none;
+}
