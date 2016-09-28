@@ -652,14 +652,15 @@ function saveTestCase(){
             'action': '',
             'parameters': []
         }
+        if($(this).find('.step-first-input').val().length > 0){
+            thisStep.action = $(this).find('.step-first-input').val();
 
-        thisStep.action = $(this).find('.step-first-input').val();
+            $(this).find('.parameter-input').each(function(){
+                thisStep.parameters.push($(this).val());
+            });
 
-        $(this).find('.parameter-input').each(function(){
-            thisStep.parameters.push($(this).val());
-        });
-
-        testSteps.push(thisStep);
+            testSteps.push(thisStep);
+        }
     });
 
     var data = {

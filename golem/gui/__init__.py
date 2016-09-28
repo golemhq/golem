@@ -127,7 +127,7 @@ def test_case_view(project, test_case_name):
     test_data = utils.get_test_data(root_path,
                                    project,
                                    test_case_name)
-    print test_data
+
     return render_template(
                     'test_case.html',
                     project=project,

@@ -19,7 +19,7 @@ def _get_steps(content):
             if 'def teardown' in current_line:
                 end_of_steps = True
                 break
-            if len(current_line.strip()) > 0:
+            if len(current_line.strip()) > 0 and current_line.strip() != 'pass':
                 #this is a step
                 method_name = current_line.split('(')[0].strip()
                 parameters = current_line.split('(')[1].split(')')[0]
@@ -173,7 +173,9 @@ def new_test_case(root_path, project, parents, tc_name):
 test_case_content = """from golem.core.test import Test
 from golem.core.actions import *
 from golem.core import execution_logger as logger
+
 # page objects
+
 
 class search_article:    
 
@@ -184,7 +186,8 @@ class search_article:
         pass
 
     def test(self):
-            
+        pass
+
     def teardown(self):
         close()
 """
@@ -257,15 +260,18 @@ def save_test_case(root_path, project, full_test_case_name, description,
         f.write('        pass\n')
         f.write('\n')
         f.write('    def test(self, data):\n')
-        for step in test_steps:
-            f.write('        {0}({1})\n'.format(
-                                            step['action'].replace(' ', '_'),
-                                            format_parameters(
-                                                step['parameters'],
-                                                root_path,
-                                                project,
-                                                parents,
-                                                tc_name)))
+        if test_steps:
+            for step in test_steps:
+                f.write('        {0}({1})\n'.format(
+                                                step['action'].replace(' ', '_'),
+                                                format_parameters(
+                                                    step['parameters'],
+                                                    root_path,
+                                                    project,
+                                                    parents,
+                                                    tc_name)))
+        else:
+            f.write('        pass\n')
         f.write('\n')
         f.write('    def teardown(self):\n')
         f.write('        close()\n')

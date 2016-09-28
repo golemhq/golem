@@ -24,6 +24,8 @@ def generate_report(workspace, project, test_case_name, test_data, suite_name,
         'steps': result['steps'],
         'description': result['description'],
         'error': result['error'],
+        'test_timelapse': result['test_timelapse'],
+        'test_timestamp': result['test_timestamp']
     }
     report_path = os.path.join(execution_path, 'report.json')
     

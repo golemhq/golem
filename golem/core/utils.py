@@ -111,7 +111,7 @@ def get_test_data(workspace, project, full_test_case_name):
     '''Test cases can have multiple sets of data
     This method generates a dict for each set and returns
     a list of dicts'''
-    data_dict_list = [{}]
+    data_dict_list = []
 
     # check if CSV file == test case name exists
     test, parents = separate_file_from_parents(full_test_case_name)
@@ -198,8 +198,10 @@ def get_project_settings(project, global_settings):
 
 
 def get_timestamp():
-    time_format = "%Y%m%d%H%M%S%f"
+    time_format = "%Y.%m.%d.%H.%M.%S.%f"
     timestamp = datetime.datetime.today().strftime(time_format)
+    # remove last 3 decimal places from microseconds
+    timestamp = timestamp[:-3]
     return timestamp
 
 

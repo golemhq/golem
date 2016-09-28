@@ -7,6 +7,7 @@ The test_runner method is in charge of executing a single test case.
 
 import os
 import sys
+import time
 import traceback
 from multiprocessing import Pool
 from multiprocessing.pool import ApplyResult
@@ -15,16 +16,21 @@ from golem.core import utils, test_execution, logger, selenium_utils, report
 
 
 def test_runner(workspace, project, test_case_name, test_data, suite_name,
-                suite_data, timestamp):
+                suite_data, suite_timestamp):
     ''' runs a single test case by name'''
     result = {
         'result': 'pass',
         'error': None,
         'description': None,
-        'steps': None,}
+        'steps': None,
+        'test_timelapse': None,
+        'test_timestamp': None}
 
     import execution_logger
     instance = None
+    test_timestamp = utils.get_timestamp()
+    test_start_time = time.time()
+
     try:
         test_class = utils.get_test_case_class(
                         project,
@@ -51,8 +57,13 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
         print dir(traceback)
         print traceback.print_exc()
 
+    test_end_time = time.time()
+    test_timelapse = round(test_end_time - test_start_time, 3)
+
     result['description'] = execution_logger.description
     result['steps'] = execution_logger.steps
+    result['test_timelapse'] = test_timelapse
+    result['test_timestamp'] = test_timestamp
 
     report.generate_report(workspace,
                            project,
@@ -60,7 +71,7 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
                            test_data,
                            suite_name,
                            result,
-                           timestamp)
+                           suite_timestamp)
     return result
 
 
@@ -110,8 +121,11 @@ def run_single_test_case(workspace, project, full_test_case_name):
                                         project,
                                         full_test_case_name)
         execution_list = []
-        for data_set in data_sets:
-            execution_list.append((full_test_case_name, data_set))
+        if data_sets:
+            for data_set in data_sets:
+                execution_list.append((full_test_case_name, data_set))
+        else:
+            execution_list.append((full_test_case_name, {}))
         # run the single test, once for each data set
         multiprocess_executor(execution_list, 2)
 
@@ -129,14 +143,20 @@ def run_suite(workspace, project, full_suite_name):
         test_case_list = utils.get_suite_test_cases(project,
                                                     full_suite_name)
 
-        # get test data for each test case and append tc/data pairs to
-        # execution list
+        # get test data for each test case present in the suite 
+        # and append tc/data pairs for each test case and for each data
+        # set to execution list.
+        # if there is no data for a test case, it is appended with an
+        # empty dict
         execution_list = []
         for test_case in test_case_list:
             data_sets = utils.get_test_data(workspace,
                                             project,
                                             test_case)
-            for data_set in data_sets:
-                execution_list.append((test_case, data_set))
+            if data_sets:
+                for data_set in data_sets:
+                    execution_list.append((test_case, data_set))
+            else:
+                execution_list.append((test_case, {}))
 
     multiprocess_executor(execution_list, 1, suite_name=full_suite_name)
