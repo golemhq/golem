@@ -23,7 +23,7 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
         'error': None,
         'description': None,
         'steps': None,
-        'test_timelapse': None,
+        'test_elapsed_time': None,
         'test_timestamp': None}
 
     import execution_logger
@@ -58,11 +58,11 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
         print traceback.print_exc()
 
     test_end_time = time.time()
-    test_timelapse = round(test_end_time - test_start_time, 3)
+    test_elapsed_time = round(test_end_time - test_start_time, 3)
 
     result['description'] = execution_logger.description
     result['steps'] = execution_logger.steps
-    result['test_timelapse'] = test_timelapse
+    result['test_elapsed_time'] = test_elapsed_time
     result['test_timestamp'] = test_timestamp
 
     report.generate_report(workspace,
