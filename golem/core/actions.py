@@ -46,6 +46,12 @@ def verify_text_in_element(text, element):
                              .format(text, element[2]))
 
 
+def capture(msg=''):
+    driver = core.getOrCreateWebdriver()
+    screenshot_name = 'test' + msg.replace(' ', '_')
+    driver.save_screenshot(screenshot_name + '.jpg')
+
+
 def close():
     driver = core.getOrCreateWebdriver()
     driver.quit()
