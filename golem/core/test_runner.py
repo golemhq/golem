@@ -31,6 +31,12 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
     test_timestamp = utils.get_timestamp()
     test_start_time = time.time()
 
+    # create a directory to store report.json and screenshots
+    report_directory = report.create_report_directory(workspace,
+                                                      project,
+                                                      test_case_name,
+                                                      suite_name,
+                                                      suite_timestamp)
     try:
         test_class = utils.get_test_case_class(
                         project,
@@ -46,7 +52,13 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
             instance.test(test_data)
         else:
             raise Exception
+    except:
+        result['result'] = 'fail'
+        result['error'] = traceback.format_exc()
+        print dir(traceback)
+        print traceback.print_exc()
 
+    try:
         if hasattr(instance, 'teardown'):
             instance.teardown()
         else:
@@ -64,14 +76,12 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
     result['steps'] = execution_logger.steps
     result['test_elapsed_time'] = test_elapsed_time
     result['test_timestamp'] = test_timestamp
+    result['screenshots'] = execution_logger.screenshots
 
-    report.generate_report(workspace,
-                           project,
+    report.generate_report(report_directory,
                            test_case_name,
                            test_data,
-                           suite_name,
-                           result,
-                           suite_timestamp)
+                           result)
     return result
 
 

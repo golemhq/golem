@@ -2,3 +2,5 @@
 description = None
 
 steps = []
+
+screenshots = {}

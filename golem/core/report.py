@@ -2,8 +2,12 @@ import json
 import os
 
 
-def generate_report(workspace, project, test_case_name, test_data, suite_name,
-                    result, timestamp):
+def create_report_directory(workspace,
+                            project,
+                            test_case_name,
+                            suite_name,
+                            timestamp):
+
     # create suite execution folder in reports directory
     execution_path = os.path.join(workspace,
                                   'projects',
@@ -18,6 +22,14 @@ def generate_report(workspace, project, test_case_name, test_data, suite_name,
             os.makedirs(execution_path)
         except:
             pass
+
+    return execution_path
+
+
+def generate_report(report_directory, test_case_name, test_data, result):
+    
+    json_report_path = os.path.join(report_directory, 'report.json')
+
     report = {
         'test_case': test_case_name,
         'result': result['result'],
@@ -27,7 +39,12 @@ def generate_report(workspace, project, test_case_name, test_data, suite_name,
         'test_elapsed_time': result['test_elapsed_time'],
         'test_timestamp': result['test_timestamp']
     }
-    report_path = os.path.join(execution_path, 'report.json')
     
-    with open(report_path, 'w') as json_file:
+    with open(json_report_path, 'w') as json_file:
         json.dump(report, json_file, indent=4)
+
+    # save screenshots
+    for scr in result['screenshots']:
+        img_filename = '{}.png'.format(scr)
+        result['screenshots'][scr].save(os.path.join(report_directory,
+                                                     img_filename))

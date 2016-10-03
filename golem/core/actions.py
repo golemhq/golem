@@ -1,11 +1,21 @@
+# -*- coding: utf-8 -*-
 import time
+import uuid
+import StringIO
 
 import selenium
+from PIL import Image
 
 from golem import core
 from golem.core import execution_logger as logger
 from golem.core.exceptions import TextNotPresent
 from golem.core.selenium_utils import get_selenium_object
+
+
+def _add_step(msg, screenshot=None):
+    if screenshot:
+        msg += '__{}'.format(screenshot)
+    logger.steps.append(msg)
 
 
 def click(obj):
@@ -48,8 +58,13 @@ def verify_text_in_element(text, element):
 
 def capture(msg=''):
     driver = core.getOrCreateWebdriver()
-    screenshot_name = 'test' + msg.replace(' ', '_')
-    driver.save_screenshot(screenshot_name + '.jpg')
+    #screenshot_name = 'test' + msg.replace(' ', '_')
+    #screenshot_filename = .format(len(logger.screenshots))
+    #driver.save_screenshot(screenshot_name + '.jpg')
+    img = Image.open(StringIO.StringIO(driver.get_screenshot_as_png()))
+    img_id = str(uuid.uuid4())
+    logger.screenshots[img_id] = img
+    _add_step(msg, img_id)
 
 
 def close():
