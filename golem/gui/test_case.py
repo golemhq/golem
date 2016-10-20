@@ -164,7 +164,7 @@ def new_test_case(root_path, project, parents, tc_name):
     data_full_path = os.path.join(data_path, tc_name + '.csv')
 
     with open(test_case_full_path, 'w') as f:
-        f.write(test_case_content)
+        f.write(test_case_content.format(tc_name))
 
     with open(data_full_path, 'w') as f:
         f.write('')
@@ -177,7 +177,7 @@ from golem.core import execution_logger as logger
 # page objects
 
 
-class search_article:    
+class {0}:    
 
     description = ''''''
     
@@ -185,7 +185,7 @@ class search_article:
         logger.description = self.description
         pass
 
-    def test(self):
+    def test(self, data):
         pass
 
     def teardown(self):

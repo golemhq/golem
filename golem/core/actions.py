@@ -62,7 +62,7 @@ def capture(msg=''):
     #screenshot_filename = .format(len(logger.screenshots))
     #driver.save_screenshot(screenshot_name + '.jpg')
     img = Image.open(StringIO.StringIO(driver.get_screenshot_as_png()))
-    img_id = str(uuid.uuid4())
+    img_id = str(uuid.uuid4())[:8]
     logger.screenshots[img_id] = img
     _add_step(msg, img_id)
 
