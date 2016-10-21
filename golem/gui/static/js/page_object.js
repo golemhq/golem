@@ -7,7 +7,8 @@ var selectors = [
     'link_text',
     'partial_link_text',
     'css',
-    'xpath'];
+    'xpath',
+    'tag_name',];
 
 $(document).ready(function() {      
 

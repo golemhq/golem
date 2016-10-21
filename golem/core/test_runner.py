@@ -12,11 +12,12 @@ import traceback
 from multiprocessing import Pool
 from multiprocessing.pool import ApplyResult
 
+import golem.core
 from golem.core import utils, test_execution, logger, selenium_utils, report
 
 
 def test_runner(workspace, project, test_case_name, test_data, suite_name,
-                suite_data, suite_timestamp):
+                suite_data, suite_timestamp, settings):
     ''' runs a single test case by name'''
     result = {
         'result': 'pass',
@@ -30,6 +31,8 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
     instance = None
     test_timestamp = utils.get_timestamp()
     test_start_time = time.time()
+
+    golem.core.set_settings(settings)
 
     # create a directory to store report.json and screenshots
     report_directory = report.create_report_directory(workspace,
@@ -104,7 +107,8 @@ def multiprocess_executor(execution_list, processes=1,
                                              test[1],
                                              suite_name,
                                              suite_data,
-                                             timestamp),
+                                             timestamp,
+                                             test_execution.settings),
                                        callback=logger.log_result)
         results.append(apply_async)
 

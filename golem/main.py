@@ -16,6 +16,9 @@ def execute_from_command_line(root_path):
     test_execution.root_path = root_path
     test_execution.settings = utils.get_global_settings()
 
+    import golem.core
+    golem.core.temp = test_execution.settings
+
     # main action == gui
     if args.main_action == 'gui':
         gui_start.run_gui()

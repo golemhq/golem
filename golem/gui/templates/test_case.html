@@ -134,7 +134,7 @@
                     <thead> 
                         <tr> 
                             <th class="index">#</th> 
-                            {% for val, key in test_data[0].items() %}
+                            {% for key, val in test_data[0].items() %}
                             <th>
                                 <div class="input-group">
                                     <input class="form-control" type="text" value="{{key}}" onchange="dataTableHeaderInputChange()">

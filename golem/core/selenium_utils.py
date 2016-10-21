@@ -1,43 +1,53 @@
+import time
+
 from selenium import webdriver
 
+from golem import core
 from golem.gui import data
 from golem.core.exceptions import IncorrectSelectorType, ElementNotFound
 
 
-def get_selenium_object(obj, driver):
-    if obj[0] == 'id':
-        try:
+def _find_selenium_object(obj, driver, remaining_time):
+    test_object = None
+    start_time = time.time()
+    try:
+        if obj[0] == 'id':
             test_object = driver.find_element_by_id(obj[1])
-        except:
-            raise ElementNotFound(
-                    'Element {0} not found using selector {1}:\'{2}\''
-                    .format(obj[2], obj[0], obj[1]))
-    elif obj[0] == 'css':
-        try:
+        elif obj[0] == 'css':
             test_object = driver.find_element_by_css_selector(obj[1])
-        except:
-            raise ElementNotFound(
-                    'Element {0} not found using selector {1}:\'{2}\''
-                    .format(obj[2], obj[0], obj[1]))
-    elif obj[0] == 'text':
-        try:
+        elif obj[0] == 'text':
             test_object = driver.find_element_by_css_selector(
-                                    "text[{}]".format(obj[1]))
-        except:
-            raise ElementNotFound(
-                    'Element {0} not found using selector {1}:\'{2}\''
-                    .format(obj[2], obj[0], obj[1]))
-    elif obj[0] == 'name':
-        try:
+                                "text[{}]".format(obj[1]))
+        elif obj[0] == 'link_text':
+            test_object = driver.find_element_by_link_text(obj[1])
+        elif obj[0] == 'partial_link_text':
+            test_object = driver.find_element_by_partial_link_text(obj[1])
+        elif obj[0] == 'name':
             test_object = driver.find_element_by_name(obj[1])
-        except:
+        elif obj[0] == 'xpath':
+            test_object = driver.find_element_by_xpath(obj[1])
+        elif obj[0] == 'tag_name':
+            test_object = driver.find_element_by_tag_name(obj[1])
+        else:
+            raise IncorrectSelectorType('Selector {0} is not a valid option'
+                                .format(obj[0]))
+    except:
+        end_time = time.time()
+        new_remaining_time = remaining_time - (end_time - start_time)
+        if new_remaining_time > 0:
+            time.sleep(0.1)
+            test_object = _find_selenium_object(obj, driver, new_remaining_time)
+        else:
             raise ElementNotFound(
                     'Element {0} not found using selector {1}:\'{2}\''
                     .format(obj[2], obj[0], obj[1]))
-    else:
-        raise IncorrectSelectorType('Selector {0} is not a valid option'
-                                    .format(obj[0]))
+    return test_object
 
+
+def get_selenium_object(obj, driver):
+    test_object = None
+    implicit_wait = core.get_setting('implicit_wait')
+    test_object = _find_selenium_object(obj, driver, implicit_wait)
     return test_object
 
 

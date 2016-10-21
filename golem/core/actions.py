@@ -71,3 +71,7 @@ def close():
     driver = core.getOrCreateWebdriver()
     driver.quit()
     core.reset_driver_object()
+
+
+def wait(seconds):
+    time.sleep(seconds)
