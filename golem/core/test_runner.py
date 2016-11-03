@@ -13,8 +13,12 @@ from multiprocessing import Pool
 from multiprocessing.pool import ApplyResult
 
 import golem.core
-from golem.core import utils, test_execution, logger, selenium_utils, report
-
+from golem.core import (utils,
+                        test_execution,
+                        logger,
+                        selenium_utils,
+                        report,
+                        actions)
 
 def test_runner(workspace, project, test_case_name, test_data, suite_name,
                 suite_data, suite_timestamp, settings):
@@ -55,9 +59,12 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
             instance.test(test_data)
         else:
             raise Exception
+
     except:
         result['result'] = 'fail'
         result['error'] = traceback.format_exc()
+        if settings['screenshot_on_error']:
+            actions.capture('error')
         print dir(traceback)
         print traceback.print_exc()
 
@@ -68,9 +75,7 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
             raise Exception
     except:
         result['result'] = 'fail'
-        result['error'] = traceback.format_exc()
-        print dir(traceback)
-        print traceback.print_exc()
+        result['error'] = 'teardown failed'
 
     test_end_time = time.time()
     test_elapsed_time = round(test_end_time - test_start_time, 2)

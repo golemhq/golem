@@ -17,7 +17,7 @@ def _find_selenium_object(obj, driver, remaining_time):
             test_object = driver.find_element_by_css_selector(obj[1])
         elif obj[0] == 'text':
             test_object = driver.find_element_by_css_selector(
-                                "text[{}]".format(obj[1]))
+                                        "text[{}]".format(obj[1]))
         elif obj[0] == 'link_text':
             test_object = driver.find_element_by_link_text(obj[1])
         elif obj[0] == 'partial_link_text':
