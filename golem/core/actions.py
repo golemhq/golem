@@ -38,6 +38,13 @@ def send_keys(obj, text):
     logger.steps.append('Write \'{0}\' in element {1}'.format(text, obj[2]))
 
 
+def select(obj, option):
+    driver = core.getOrCreateWebdriver()
+    test_object = get_selenium_object(obj, driver)
+    test_object.send_keys(text)
+    logger.steps.append('Write \'{0}\' in element {1}'.format(text, obj[2]))
+
+
 def verify_text(text):
     driver = core.getOrCreateWebdriver()
     logger.steps.append('Verify \'{0}\' is present in page'.format(text))

@@ -172,6 +172,10 @@ def get_global_actions():
             'parameters': [{'name': 'element', 'type': 'element'}]
         },
         {
+            'name': 'go to',
+            'parameters': [{'name': 'url', 'type': 'value'}]
+        },
+        {
             'name': 'send keys',
             'parameters': [{'name': 'element', 'type': 'element'},
                            {'name': 'value', 'type': 'value'}]
@@ -180,10 +184,6 @@ def get_global_actions():
             'name': 'select',
             'parameters': [{'name': 'option', 'type': 'value'},
                            {'name': 'from element', 'type': 'element'}]
-        },
-        {
-            'name': 'go to',
-            'parameters': [{'name': 'url', 'type': 'value'}]
         },
         {
             'name': 'verify text',
@@ -211,7 +211,7 @@ def get_global_actions():
             'parameters': [{'name': 'element', 'type': 'element'}]
         },
         {
-            'name': 'screenshot',
+            'name': 'capture',
             'parameters': [{'name': 'message (optional)', 'type': 'value'}]
         },
     ]

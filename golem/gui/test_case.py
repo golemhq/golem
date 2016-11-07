@@ -68,11 +68,14 @@ def get_page_objects(content):
         if 'page objects' in line:
             index = i + 1
             break
-    if index >= 0:
+    while not 'class' in content[index]:
         page_object_line = content[index]
         if 'import' in page_object_line:
-            page_objects = page_object_line.split('import')[1].split(',')
-            page_objects = [x.strip() for x in page_objects]
+            print 'PAGE OBJECT LINE', page_object_line
+            page_object = page_object_line.split('import')[1]
+            print 'PAGE', page_object
+            page_objects.append(page_object.strip())
+        index += 1
     return page_objects
 
 
