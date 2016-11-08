@@ -157,9 +157,10 @@ def get_selected_page_object_elements():
         projectname = request.form['project']
         page_object_name = request.form['pageObject']
 
-        po_elements = page_object.get_page_object_elements(root_path,
-                                                           projectname,
-                                                           page_object_name)
+        po_elements = page_object.get_page_object_elements_and_functions(
+                                                            root_path,
+                                                            projectname,
+                                                            page_object_name)
 
         return json.dumps(po_elements)
 
@@ -324,7 +325,8 @@ def page_view(project, full_page_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path):
         return render_template('not_permission.html')
 
-    page_object_data = page_object.get_page_object_elements(root_path,
+    page_object_data = page_object.get_page_object_elements_and_functions(
+                                                            root_path,
                                                             project,
                                                             full_page_name)
 

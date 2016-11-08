@@ -1,5 +1,7 @@
 import importlib
 import os
+import types
+import inspect
 
 from golem.core import utils
 from golem.gui import gui_utils
@@ -25,26 +27,43 @@ def get_web_elements(content, po_name):
     return elements
 
 
-def get_page_object_elements(root_path, project, full_po_name):
+def get_page_object_elements_and_functions(root_path, project, full_po_name):
     po, parents = utils.separate_file_from_parents(full_po_name)
 
-    print 'AAA', 'projects.{0}.pages.{1}'.format(project, full_po_name)
     modulex = importlib.import_module('projects.{0}.pages.{1}'
                                       .format(project, full_po_name))
     variable_list = [item for item in dir(modulex) if not item.startswith("__")]
     element_list = []
-    for var in variable_list:
-        var_values = getattr(modulex, var)
-        new_element = {
-            'element_name': var,
-            'element_selector': var_values[0],
-            'element_value': var_values[1],
-            'element_display_name': var_values[2],
-            'element_full_name': ''.join([full_po_name, '.', var])
-        }
-        element_list.append(new_element)
-
-    return element_list
+    function_list = []
+    for var_name in variable_list:
+        variable = getattr(modulex, var_name)
+        if isinstance(variable, types.FunctionType):
+            # this is a function
+            new_function = {
+                'function_name': var_name,
+                'full_function_name': ''.join([full_po_name, '.', var_name]),
+                'description': inspect.getdoc(variable),
+                'arguments': inspect.getargspec(variable).args
+            }
+            print new_function
+            function_list.append(new_function)
+        elif isinstance(variable, types.TupleType):
+            # this is a web element tuple
+            new_element = {
+                'element_name': var_name,
+                'element_selector': variable[0],
+                'element_value': variable[1],
+                'element_display_name': variable[2],
+                'element_full_name': ''.join([full_po_name, '.', var_name])
+            }
+            element_list.append(new_element)
+        else:
+            print 'ERROR'
+    page_object_data = {
+        'function_list': function_list,
+        'element_list': element_list
+    }
+    return page_object_data
 
 
 def save_page_object(root_path, project, page_name, elements):

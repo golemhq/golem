@@ -1,16 +1,10 @@
 
 var pageObjects = [];
 
-// var actions = [
-//         {
-//             'value': 'click',
-//             'data': 'click'
-//         },
-//     ];
-
 var globalActions = [];
 
 var selectedPageObjectsElements = [];
+var selectedPageObjectsFunctions = [];
 
 
 
@@ -171,6 +165,13 @@ function startStepFirstInputAutocomplete(){
         })        
     }
 
+    for(f in selectedPageObjectsFunctions){
+        lookup.push({
+            'value': selectedPageObjectsFunctions[f].full_function_name,
+            'data': 'data'
+        })        
+    }
+
     console.log("get page object actions");
 
     autocomplete = $(".step-first-input").autocomplete({
@@ -178,8 +179,8 @@ function startStepFirstInputAutocomplete(){
         minChars: 0,
         triggerSelectOnValidInput: false,
         onSelect: function (suggestion) {
-            console.log(suggestion);
-            console.log($(this));
+            // not this is not always called, 
+            // sometimes the onchange is called before
             stepFirstInputChange($(this));
         },
         onSearchStart: function () {
@@ -193,53 +194,51 @@ function startStepFirstInputAutocomplete(){
 
 function stepFirstInputChange(elem){
     var step = $(elem).parent().parent().parent();
-    //var hasValueInput = step.find(".value-input").length > 0;
-    //var hasElementInput= step.find(".element-input").length > 0;
     var hasParameter = step.find('.parameter-input').length > 0
     var placeholder = ''
     var elemValue = $(elem).val();
-    //var isPageObject = isInPageObjectArray(elemValue);
     
-    if(!hasParameter){     
+    if(hasParameter){     
+        // the step already has parameters, remove them and update
+        step.find('.parameter-container').remove();
+    }
 
-        var pageObjects = getSelectedPageObjects();
+    var pageObjects = getSelectedPageObjects();
 
+    if(isInGlobalActions(elemValue)){
+        // this is a global action
         var actionParameters = getGlobalActionParameters(elemValue);
-
-        if(!actionParameters){
-            //is not a global action
-            console.log("search in page object actions");
-        }
-
-        for(p in actionParameters){
-            var parameter = actionParameters[p];    
-
-            if(parameter.type == 'value'){
-                var customClass = 'value-input';
-            }
-            else if(parameter.type == 'element'){
-                var customClass = 'element-input';
-            }
-            
-            var newInput = $("<div class='col-sm-3 step-input-container parameter-container'> \
-                                <div class='input-group'> \
-                                    <input type='text' class='form-control \
-                                        parameter-input "+customClass+"' \
-                                        placeholder='"+parameter.name+"' onchange=''> \
-                                </div> \
-                            </div>");
-
-            step.append(newInput);
-
-            //llElementInputAutocomplete();
-            // start all elements input through getselectedpageobjectelements function()
-            getSelectedPageObjectElements()
-
-            startAllValueInputAutocomplete();    
-        }
     }
     else{
-        step.find('.parameter-container').remove();
+        // this is a page object function
+        var actionParameters = getPageObjectFunctionParameters(elemValue);
+        console.log('lalalala', actionParameters);
+    }
+
+    for(p in actionParameters){
+        var parameter = actionParameters[p];    
+
+        if(parameter.type == 'value'){
+            var customClass = 'value-input';
+        }
+        else if(parameter.type == 'element'){
+            var customClass = 'element-input';
+        }
+        
+        var newInput = $("<div class='col-sm-3 step-input-container parameter-container'> \
+                            <div class='input-group'> \
+                                <input type='text' class='form-control \
+                                    parameter-input "+customClass+"' \
+                                    placeholder='"+parameter.name+"' onchange=''> \
+                            </div> \
+                        </div>");
+
+        step.append(newInput);
+
+        // start all elements input through getselectedpageobjectelements function()
+        getSelectedPageObjectElements()
+
+        startAllValueInputAutocomplete();        
     }
 }
 
@@ -329,59 +328,20 @@ function startAllElementInputAutocomplete(){
 // }
 
 
-function startWebElementAutocomplete(data, input){
-    var lookup = []
-    for(we in data.web_elements){
-        lookup.push({
-            'value': data.web_elements[we],
-            'data': data.web_elements[we]
-        })
-    }
+// function startWebElementAutocomplete(data, input){
+//     var lookup = []
+//     for(we in data.web_elements){
+//         lookup.push({
+//             'value': data.web_elements[we],
+//             'data': data.web_elements[we]
+//         })
+//     }
 
-    autocomplete = input.autocomplete({
-        lookup: lookup,
-        minChars: 0,
-        onSelect: function (suggestion) {
-            addThirdStepTextBox($(this));
-        },
-        onSearchStart: function () {
-        },
-        beforeRender: function (container) {},
-        onSearchComplete: function (query, suggestions) {
-        }
-    });
-}
-
-
-function addThirdStepTextBox(elem){
-    var step = $(elem).parent().parent().parent();
-    var alreadyHasSecondStep = step.find(".third-second-input").length > 0;
-
-    if(!alreadyHasSecondStep){
-
-        var placeholder = 'acción';
-
-        step.append(
-            "<div class='col-sm-3'> \
-                <div class='input-group'> \
-                    <input type='text' class='form-control third-second-input' \
-                        placeholder='"+placeholder+"' onchange='stepThirdInputChange(this);'> \
-                </div> \
-            </div>");
-
-        startActionAutocomplete(step.find(".third-second-input"));
-    }
-}
-
-
-// function startActionAutocomplete(elem){
-//     autocomplete = elem.autocomplete({
-//         lookup: actions,
+//     autocomplete = input.autocomplete({
+//         lookup: lookup,
 //         minChars: 0,
 //         onSelect: function (suggestion) {
-//             if(suggestion.value != 'click'){
-//                 addFourthStepTextBox($(this));
-//             }
+//             addThirdStepTextBox($(this));
 //         },
 //         onSearchStart: function () {
 //         },
@@ -391,25 +351,47 @@ function addThirdStepTextBox(elem){
 //     });
 // }
 
-function addFourthStepTextBox(elem){
-    var step = $(elem).parent().parent().parent();
-    var alreadyHasFourthStep = step.find(".fourth-second-input").length > 0;
 
-    if(!alreadyHasFourthStep){
+// function addThirdStepTextBox(elem){
+//     var step = $(elem).parent().parent().parent();
+//     var alreadyHasSecondStep = step.find(".third-second-input").length > 0;
 
-        var placeholder = 'valor a utilizar';
+//     if(!alreadyHasSecondStep){
 
-        step.append(
-            "<div class='col-sm-3'> \
-                <div class='input-group'> \
-                    <input type='text' class='form-control fourth-second-input' \
-                        placeholder='"+placeholder+"' onchange='stepFourthInputChange(this);'> \
-                </div> \
-            </div>");
+//         var placeholder = 'acción';
 
-        startFourthStepAutocomplete(step.find(".fourth-second-input"));
-    }
-}
+//         step.append(
+//             "<div class='col-sm-3'> \
+//                 <div class='input-group'> \
+//                     <input type='text' class='form-control third-second-input' \
+//                         placeholder='"+placeholder+"' onchange='stepThirdInputChange(this);'> \
+//                 </div> \
+//             </div>");
+
+//         startActionAutocomplete(step.find(".third-second-input"));
+//     }
+// }
+
+
+// function addFourthStepTextBox(elem){
+//     var step = $(elem).parent().parent().parent();
+//     var alreadyHasFourthStep = step.find(".fourth-second-input").length > 0;
+
+//     if(!alreadyHasFourthStep){
+
+//         var placeholder = 'valor a utilizar';
+
+//         step.append(
+//             "<div class='col-sm-3'> \
+//                 <div class='input-group'> \
+//                     <input type='text' class='form-control fourth-second-input' \
+//                         placeholder='"+placeholder+"' onchange='stepFourthInputChange(this);'> \
+//                 </div> \
+//             </div>");
+
+//         startFourthStepAutocomplete(step.find(".fourth-second-input"));
+//     }
+// }
 
 
 function getDatosValues(){
@@ -439,30 +421,27 @@ function getDatosValues(){
 }
 
 
-function startFourthStepAutocomplete(elem){
-    var datos = getLoadedDatos();
-    var lookup = [];
-    for(d in datos){
-        lookup.push({
-            'value': datos[d],
-            'data': datos[d],
-        })
-    }
-    autocomplete = elem.autocomplete({
-        lookup: lookup,
-        minChars: 0,
-        onSelect: function (suggestion) {
-        },
-        onSearchStart: function () {
-        },
-        beforeRender: function (container) {},
-        onSearchComplete: function (query, suggestions) {
-        }
-    });
-}
-
-
-
+// function startFourthStepAutocomplete(elem){
+//     var datos = getLoadedDatos();
+//     var lookup = [];
+//     for(d in datos){
+//         lookup.push({
+//             'value': datos[d],
+//             'data': datos[d],
+//         })
+//     }
+//     autocomplete = elem.autocomplete({
+//         lookup: lookup,
+//         minChars: 0,
+//         onSelect: function (suggestion) {
+//         },
+//         onSearchStart: function () {
+//         },
+//         beforeRender: function (container) {},
+//         onSearchComplete: function (query, suggestions) {
+//         }
+//     });
+// }
 
 
 
@@ -488,15 +467,19 @@ function startFourthStepAutocomplete(elem){
 
 
 
-
-
-
-
-
 function isInPageObjectArray(value){
     for(po in pageObjects){
         if(value == pageObjects[po].value){
             return true;
+        }
+    }
+    return false
+}
+
+function isInGlobalActions(value){
+    for(ac in globalActions){
+        if(value == globalActions[ac].name){
+            return true
         }
     }
     return false
@@ -567,6 +550,23 @@ function getGlobalActionParameters(actionName){
     return false
 }
 
+function getPageObjectFunctionParameters(functionName){
+    for(a in selectedPageObjectsFunctions){
+        if(selectedPageObjectsFunctions[a].full_function_name == functionName){
+            var parameters = [];
+            for(p in selectedPageObjectsFunctions[a].arguments){
+                var thisArgument = selectedPageObjectsFunctions[a].arguments[p];
+                parameters.push({
+                    name: thisArgument,
+                    type: 'value'
+                })
+            }
+            return parameters
+        }
+    }
+    return false
+}
+
 
 function getSelectedPageObjectElements(){
     var selectedPageObjects = getSelectedPageObjects();
@@ -584,12 +584,21 @@ function getSelectedPageObjectElements(){
              dataType: 'json',
              type: 'POST',
              success: function(data) {
+                // TODO, add elements and functions one by one
+
                 // check if element does no already exist in selected ...
                 if(! checkIfElementIsInSelectedPageObjectElements(
                             selectedPageObjectsElements,
-                            data[0].element_full_name)){
-                    selectedPageObjectsElements = selectedPageObjectsElements.concat(data);
-                    startAllElementInputAutocomplete();
+                            data.element_list[0].element_full_name)){
+                    selectedPageObjectsElements = selectedPageObjectsElements.concat(data.element_list);
+                    startAllElementInputAutocomplete(); 
+                }
+
+                if(! checkIfFunctionIsInSelectedPageObjectFunctions(
+                            selectedPageObjectsFunctions,
+                            data.function_list[0].function_name)){
+                    selectedPageObjectsFunctions = selectedPageObjectsFunctions.concat(data.function_list);
+                    startStepFirstInputAutocomplete();
                 }
              },
              error: function() {
@@ -735,6 +744,15 @@ function getSelectedPageObjects(){
 function checkIfElementIsInSelectedPageObjectElements(selectedElements, elementName){
     for(elem in selectedPageObjectsElements){
         if(selectedPageObjectsElements[elem].element_full_name == elementName){
+            return true
+        }
+    }
+    return false
+}
+
+function checkIfFunctionIsInSelectedPageObjectFunctions(selectedFunctions, functionName){
+    for(func in selectedPageObjectsFunctions){
+        if(selectedPageObjectsFunctions[func].function_name == functionName){
             return true
         }
     }

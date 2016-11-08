@@ -71,9 +71,7 @@ def get_page_objects(content):
     while not 'class' in content[index]:
         page_object_line = content[index]
         if 'import' in page_object_line:
-            print 'PAGE OBJECT LINE', page_object_line
             page_object = page_object_line.split('import')[1]
-            print 'PAGE', page_object
             page_objects.append(page_object.strip())
         index += 1
     return page_objects
@@ -199,7 +197,6 @@ class {0}:
 def format_parameters(parameters, root_path, project, parents, test_case_name):
     all_parameters = []
     for parameter in parameters:
-        print 'PARAMETER', parameter
         if page_object.is_page_object(parameter, root_path, project):
             # it is a page object, leave as is
             this_parameter_string = parameter
@@ -222,7 +219,6 @@ def format_parameters(parameters, root_path, project, parents, test_case_name):
 
 def format_page_object_import_string(project, page_object):
     po, parents = utils.separate_file_from_parents(page_object)
-    print 'parents', parents
     if parents:
         parents = '.' + '.'.join(parents)
     else:
@@ -235,7 +231,6 @@ def format_page_object_import_string(project, page_object):
 def save_test_case(root_path, project, full_test_case_name, description, 
                    page_objects, test_steps):
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    print 'pos', page_objects
     test_case_path = os.path.join(root_path,
                                   'projects',
                                   project,
