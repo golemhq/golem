@@ -1,0 +1,9 @@
+[
+	{
+		"id": "000000001",
+		"username": "admin",
+		"password": "admin",
+		"is_admin": true,
+		"projects": ["*"]
+	}
+]

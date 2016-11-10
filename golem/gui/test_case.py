@@ -171,8 +171,7 @@ def new_test_case(root_path, project, parents, tc_name):
         f.write('')
 
 
-test_case_content = """from golem.core.test import Test
-from golem.core.actions import *
+test_case_content = """from golem.core.actions import *
 from golem.core import execution_logger as logger
 
 # page objects
@@ -184,7 +183,6 @@ class {0}:
     
     def setup(self):
         logger.description = self.description
-        pass
 
     def test(self, data):
         pass
@@ -240,7 +238,6 @@ def save_test_case(root_path, project, full_test_case_name, description,
 
     with open(test_case_path, 'w') as f:
 
-        f.write('from golem.core.test import Test\n')
         f.write('from golem.core.actions import *\n')
         f.write('from golem.core import execution_logger as logger\n')
         f.write('\n')
@@ -255,7 +252,6 @@ def save_test_case(root_path, project, full_test_case_name, description,
         f.write('\n')
         f.write('    def setup(self):\n')
         f.write('        logger.description = self.description\n')
-        f.write('        pass\n')
         f.write('\n')
         f.write('    def test(self, data):\n')
         if test_steps:

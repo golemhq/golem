@@ -39,7 +39,7 @@ def get_golem_admin_parser():
     parser.add_argument(
         'action',
         metavar='action',
-        choices=['start'],
+        choices=['startdirectory'],
         help="action"
     )
     parser.add_argument(
