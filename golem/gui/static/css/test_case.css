@@ -26,6 +26,19 @@
 	padding-right: 10px;
 }
 
+.step-numbering {
+	float: left;
+	height: 34px;
+	line-height: 34px;
+	font-weight: bold;
+	margin-right: 5px;
+	width: 16px;
+}
+
+#steps {
+	margin-bottom: 5px;
+}
+
 #pageObjectsContainerContainer {
 	background-color: beige;
 	padding-bottom: 10px;
@@ -40,12 +53,6 @@
 	clear: both;
 }
 
-.autocomplete-suggestions {
-	background-color: white;
-	border-left: 1px solid #CCCCCC;
-	border-bottom: 1px solid #CCCCCC;
-	border-right: 1px solid #CCCCCC;
-}
 
 #datosContainerContainer {
 	background-color: lightgoldenrodyellow;

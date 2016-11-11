@@ -114,6 +114,24 @@ body {
 }
 
 
-.link-without-underline:hover {
+.link-without-underline:hover, .link-without-underline:visited {
     text-decoration: none;
+}
+
+.autocomplete-suggestions {
+    background-color: white;
+    border-left: 1px solid #CCCCCC;
+    border-bottom: 1px solid #CCCCCC;
+    border-right: 1px solid #CCCCCC;
+}
+
+.autocomplete-suggestions {
+    background-color: white;
+    border-left: 1px solid #CCCCCC;
+    border-bottom: 1px solid #CCCCCC;
+    border-right: 1px solid #CCCCCC;
+}
+
+.autocomplete-suggestion {
+    cursor: pointer;
 }

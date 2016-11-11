@@ -51,7 +51,7 @@ function startAllSelectorInputAutocomplete(){
 
 function addPageObjectInput(){
     $("#elements").append(
-        "<div class='element'> \
+        "<div class='element col-md-12'> \
             <div class='col-sm-3'> \
                 <div class='input-group'> \
                     <input type='text' class='form-control element-name' value='' \

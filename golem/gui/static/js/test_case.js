@@ -91,8 +91,11 @@ function addDatoInput(){
 
 function addFirstStepInput(){
     
+    var nextStepNumber = $(".step-first-input").length + 1;
+
     $("#steps").append(
         "<div class='step'> \
+            <div class='step-numbering'>"+nextStepNumber+"</div> \
             <div class='col-sm-3 step-input-container'> \
                 <div class='input-group'> \
                     <input type='text' class='form-control step-first-input' \
@@ -218,7 +221,6 @@ function stepFirstInputChange(elem){
     else{
         // this is a page object function
         var actionParameters = getPageObjectFunctionParameters(elemValue);
-        console.log('lalalala', actionParameters);
     }
 
     for(p in actionParameters){
@@ -242,6 +244,10 @@ function stepFirstInputChange(elem){
         step.append(newInput);
 
         // start all elements input through getselectedpageobjectelements function()
+
+        // five focus to the first parameter input
+        step.find(".parameter-input").first().focus();
+
         getSelectedPageObjectElements()
 
         startAllValueInputAutocomplete();        

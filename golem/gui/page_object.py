@@ -39,11 +39,13 @@ def get_page_object_elements_and_functions(root_path, project, full_po_name):
         variable = getattr(modulex, var_name)
         if isinstance(variable, types.FunctionType):
             # this is a function
+            print 'DIR', inspect.getsource(variable)
             new_function = {
                 'function_name': var_name,
                 'full_function_name': ''.join([full_po_name, '.', var_name]),
                 'description': inspect.getdoc(variable),
-                'arguments': inspect.getargspec(variable).args
+                'arguments': inspect.getargspec(variable).args,
+                'code': inspect.getsource(variable)
             }
             print new_function
             function_list.append(new_function)
