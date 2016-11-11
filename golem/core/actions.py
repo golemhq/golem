@@ -38,11 +38,28 @@ def send_keys(obj, text):
     logger.steps.append('Write \'{0}\' in element {1}'.format(text, obj[2]))
 
 
-def select(obj, option):
+def select_by_text(obj, text):
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(obj, driver)
-    test_object.send_keys(text)
-    logger.steps.append('Write \'{0}\' in element {1}'.format(text, obj[2]))
+    select = selenium.webdriver.support.select.Select(test_object)
+    select.select_by_visible_text(text)
+    logger.steps.append('Select \'{0}\' from element {1}'.format(text, obj[2]))
+
+
+def select_by_index(obj, index):
+    driver = core.getOrCreateWebdriver()
+    test_object = get_selenium_object(obj, driver)
+    select = selenium.webdriver.support.select.Select(test_object)
+    select.select_by_index(index)
+    logger.steps.append('Select index \'{0}\' in element {1}'.format(index, obj[2]))
+
+
+def select_by_value(obj, value):
+    driver = core.getOrCreateWebdriver()
+    test_object = get_selenium_object(obj, driver)
+    select = selenium.webdriver.support.select.Select(test_object)
+    select.select_by_value(value)
+    logger.steps.append('Select \'{0}\' value in element {1}'.format(value, obj[2]))
 
 
 def verify_text(text):
@@ -81,4 +98,8 @@ def close():
 
 
 def wait(seconds):
-    time.sleep(seconds)
+    try:
+        to_int = int(seconds)
+    except:
+        raise Exception
+    time.sleep(to_int)

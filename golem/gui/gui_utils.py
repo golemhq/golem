@@ -181,9 +181,19 @@ def get_global_actions():
                            {'name': 'value', 'type': 'value'}]
         },
         {
-            'name': 'select',
-            'parameters': [{'name': 'option', 'type': 'value'},
-                           {'name': 'from element', 'type': 'element'}]
+            'name': 'select by text',
+            'parameters': [{'name': 'from element', 'type': 'element'},
+                           {'name': 'text', 'type': 'value'}]
+        },
+        {
+            'name': 'select by index',
+            'parameters': [{'name': 'from element', 'type': 'element'},
+                           {'name': 'index', 'type': 'value'}]
+        },
+        {
+            'name': 'select by value',
+            'parameters': [{'name': 'from element', 'type': 'element'},
+                           {'name': 'value', 'type': 'value'}]
         },
         {
             'name': 'verify text',
@@ -214,5 +224,9 @@ def get_global_actions():
             'name': 'capture',
             'parameters': [{'name': 'message (optional)', 'type': 'value'}]
         },
+        {
+            'name': 'wait',
+            'parameters': [{'name': 'seconds', 'type': 'value'}]
+        }
     ]
     return global_actions

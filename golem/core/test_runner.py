@@ -72,7 +72,7 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
         if hasattr(instance, 'teardown'):
             instance.teardown()
         else:
-            raise Exception
+            actions.close()
     except:
         result['result'] = 'fail'
         result['error'] = 'teardown failed'

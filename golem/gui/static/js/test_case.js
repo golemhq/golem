@@ -59,6 +59,9 @@ function addPOInput(){
             </span> \
         </div>");
 
+    // give focus to the last input
+    $(".page-objects-input").last().focus();
+
     startPageObjectsAutocomplete();
 }
 
@@ -97,6 +100,9 @@ function addFirstStepInput(){
                 </div> \
             </div> \
         </div>");
+
+    // give focus to the last step action input
+    $(".step-first-input").last().focus();
 
     //onchange='stepFirstInputChange(this);'> \
     startStepFirstInputAutocomplete();
@@ -593,12 +599,13 @@ function getSelectedPageObjectElements(){
                     selectedPageObjectsElements = selectedPageObjectsElements.concat(data.element_list);
                     startAllElementInputAutocomplete(); 
                 }
-
-                if(! checkIfFunctionIsInSelectedPageObjectFunctions(
-                            selectedPageObjectsFunctions,
-                            data.function_list[0].function_name)){
-                    selectedPageObjectsFunctions = selectedPageObjectsFunctions.concat(data.function_list);
-                    startStepFirstInputAutocomplete();
+                if(data.function_list.length > 0){
+                    if(! checkIfFunctionIsInSelectedPageObjectFunctions(
+                                                    selectedPageObjectsFunctions,
+                                                    data.function_list[0].function_name)){
+                        selectedPageObjectsFunctions = selectedPageObjectsFunctions.concat(data.function_list);
+                        startStepFirstInputAutocomplete();
+                    }
                 }
              },
              error: function() {

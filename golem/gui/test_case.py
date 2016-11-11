@@ -192,8 +192,10 @@ class {0}:
 """
 
 
-def format_parameters(parameters, root_path, project, parents, test_case_name):
-    all_parameters = []
+def format_parameters(step, root_path, project, parents, test_case_name):
+    parameters = step['parameters']
+    action = step['action'].replace(' ', '_')
+    formatted_parameters = []
     for parameter in parameters:
         if page_object.is_page_object(parameter, root_path, project):
             # it is a page object, leave as is
@@ -208,10 +210,14 @@ def format_parameters(parameters, root_path, project, parents, test_case_name):
                                      parameter):
                 this_parameter_string = 'data[\'{}\']'.format(parameter)
             else:
-                this_parameter_string = '\'' + parameter + '\''
-        all_parameters.append(this_parameter_string)
+                print 'ACTION', action
+                if action == 'wait':
+                    this_parameter_string = parameter
+                else:
+                    this_parameter_string = '\'' + parameter + '\''
+        formatted_parameters.append(this_parameter_string)
 
-    all_parameters_string = ', '.join(all_parameters)
+    all_parameters_string = ', '.join(formatted_parameters)
     return all_parameters_string
 
 
@@ -259,11 +265,13 @@ def save_test_case(root_path, project, full_test_case_name, description,
                 f.write('        {0}({1})\n'.format(
                                                 step['action'].replace(' ', '_'),
                                                 format_parameters(
-                                                    step['parameters'],
+                                                    step,
                                                     root_path,
                                                     project,
                                                     parents,
-                                                    tc_name)))
+                                                    tc_name
+                                                    )
+                                                ))
         else:
             f.write('        pass\n')
         f.write('\n')
