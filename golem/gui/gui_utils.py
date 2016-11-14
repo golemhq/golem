@@ -221,6 +221,11 @@ def get_global_actions():
             'parameters': [{'name': 'element', 'type': 'element'}]
         },
         {
+            'name': 'verify selected option',
+            'parameters': [{'name': 'select', 'type': 'element'},
+                           {'name': 'text option', 'type': 'value'}]
+        },
+        {
             'name': 'capture',
             'parameters': [{'name': 'message (optional)', 'type': 'value'}]
         },

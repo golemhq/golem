@@ -344,12 +344,14 @@ def save_page_object():
         projectname = request.json['project']
         page_object_name = request.json['pageObjectName']
         elements = request.json['elements']
+        functions = request.json['functions']
 
         page_object.save_page_object(
             root_path,
             projectname,
             page_object_name,
-            elements)
+            elements,
+            functions)
 
         return json.dumps('ok')
 

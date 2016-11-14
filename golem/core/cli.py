@@ -21,6 +21,14 @@ def get_golem_parser():
                             default='',
                             metavar='test case or suite',
                             help="test case or test suite to run")
+    run_parser.add_argument('-t',
+                            '--threads',
+                            action='store',
+                            nargs='?',
+                            default=1,
+                            type=int,
+                            metavar='amount of threads for parallel execution',
+                            help="amount of threads for parallel execution")
 
     gui_parser = sub_parsers.add_parser('gui')
 

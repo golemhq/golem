@@ -68,18 +68,22 @@ def get_page_object_elements_and_functions(root_path, project, full_po_name):
     return page_object_data
 
 
-def save_page_object(root_path, project, page_name, elements):
+def save_page_object(root_path, project, page_name, elements, functions):
     page_object_path = os.path.join(
         root_path, 'projects', project, 'pages', page_name + '.py')
 
+    print 'ELEMENTS', elements
+    print 'FUNCTIONS', functions
+
     with open(page_object_path, 'w') as f:
         for element in elements:
-            print element
-            f.write("{0} = ('{1}', '{2}', '{3}')\n".format(
+            f.write("{0} = ('{1}', '{2}', '{3}')\n\n".format(
                     element['name'],
                     element['selector'],
                     element['value'],
                     element['display_name']))
+        for func in functions:
+            f.write(func + '\n\n')
 
 
 def is_page_object(parameter, root_path, project):

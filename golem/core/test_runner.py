@@ -139,6 +139,7 @@ def run_single_test_case(workspace, project, full_test_case_name):
         data_sets = utils.get_test_data(workspace,
                                         project,
                                         full_test_case_name)
+        thread_amount = test_execution.settings['thread_amount']
         execution_list = []
         if data_sets:
             for data_set in data_sets:
@@ -146,7 +147,7 @@ def run_single_test_case(workspace, project, full_test_case_name):
         else:
             execution_list.append((full_test_case_name, {}))
         # run the single test, once for each data set
-        multiprocess_executor(execution_list, 2)
+        multiprocess_executor(execution_list, thread_amount)
 
 
 def run_suite(workspace, project, full_suite_name):
@@ -161,6 +162,8 @@ def run_suite(workspace, project, full_suite_name):
         # get test case list
         test_case_list = utils.get_suite_test_cases(project,
                                                     full_suite_name)
+
+        thread_amount = test_execution.settings['thread_amount']
 
         # get test data for each test case present in the suite 
         # and append tc/data pairs for each test case and for each data
@@ -178,4 +181,6 @@ def run_suite(workspace, project, full_suite_name):
             else:
                 execution_list.append((test_case, {}))
 
-    multiprocess_executor(execution_list, 1, suite_name=full_suite_name)
+    multiprocess_executor(execution_list,
+                          thread_amount,
+                          suite_name=full_suite_name)

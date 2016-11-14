@@ -42,7 +42,7 @@ setup(
     install_requires=['Flask==0.10.1',
                       'Flask-login==0.3.2',
                       'selenium==2.53.6',
-                      'Pillow==3.4.2'],
+                      'Pillow==3.3.1'],
     #scripts=['golem/bin/golem-admin.py'],
     entry_points={
         'console_scripts': ['golem-admin = golem.bin.golem_admin:main']

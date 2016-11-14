@@ -51,7 +51,15 @@ $(document).ready(function() {
 function addPOInput(){
     $("#pageObjects").append(
         "<div class='input-group'> \
-            <input type='text' class='form-control custom-input page-objects-input page-objects-autocomplete'> \
+            <input type='text' class='form-control custom-input \
+                page-objects-input page-objects-autocomplete'> \
+            <span class='input-group-btn input-middle-btn'> \
+                <button class='btn btn-default' type='button' \
+                    onclick='openPageObjectInNewWindow(this)'> \
+                        <span class='glyphicon glyphicon-new-window' aria-hidden='true'> \
+                        </span>\
+                </button> \
+            </span> \
             <span class='input-group-btn'> \
                 <button class='btn btn-default' type='button' onclick='deleteInput(this)'> \
                     <span class='glyphicon glyphicon-remove' aria-hidden='true'></span> \
@@ -809,4 +817,11 @@ function addRowToDataTable(){
             <th scope='row' class='index'>"+(amountOfRows+1)+"</th> \
             " + newCells + " \
         </tr>");
+}
+
+
+function openPageObjectInNewWindow(elem){
+    var inputVal = $(elem).parent().parent().find('input').val();
+    var url = "/p/wiki/page/"+inputVal+"/";
+    window.open(url, '_blank');
 }

@@ -99,12 +99,20 @@ function savePageObject(){
         });
     });
 
+    var functions = []
+
+    $(".function").each(function(){
+        functions.push($(this).find('.func-code').val());
+    });
+
+
     $.ajax({
         url: "/save_page_object/",
         data: JSON.stringify({
                 "project": project,
                 "pageObjectName": pageObjectName,
-                "elements": elements
+                "elements": elements,
+                "functions": functions
             }),
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',

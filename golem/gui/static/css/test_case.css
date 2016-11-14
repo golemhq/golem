@@ -97,3 +97,9 @@
 	width: 25px;
 	vertical-align: inherit;
 }
+
+.input-middle-btn button{
+	border-radius: 0px;
+	border-left: 0px;
+	border-right: 0px;
+}

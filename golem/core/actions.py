@@ -80,6 +80,20 @@ def verify_text_in_element(text, element):
                              .format(text, element[2]))
 
 
+def verify_selected_option(element, text):
+    driver = core.getOrCreateWebdriver()
+    test_object = get_selenium_object(element, driver)
+    select = selenium.webdriver.support.select.Select(test_object)
+    logger.steps.append('Verify selected option of element \'{0}\' '
+                        'is \'{1}\''
+                        .format(element[2], text))
+    print 'OPTION', select.first_selected_option.text
+    if not select.first_selected_option.text == text:
+        raise TextNotPresent('Option selected in element \'{0}\' '
+                             'is not {1}'
+                             .format(element[2], text))
+
+
 def capture(msg=''):
     driver = core.getOrCreateWebdriver()
     #screenshot_name = 'test' + msg.replace(' ', '_')

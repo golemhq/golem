@@ -52,6 +52,9 @@
                     {% for po in test_case_data.page_objects %}  
                     <div class="input-group">
                         <input type="text" class="form-control custom-input page-objects-input page-objects-autocomplete" value="{{ po }}">
+                        <span class="input-group-btn input-middle-btn">
+                            <button class="btn btn-default" type="button" onclick="openPageObjectInNewWindow(this)"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></button>
+                        </span>
                         <span class="input-group-btn">
                             <button class="btn btn-default" type="button" onclick="deleteInput(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
                         </span>
@@ -60,6 +63,9 @@
                     {% if not test_case_data.page_objects %}
                     <div class="input-group">
                         <input type="text" class="form-control custom-input page-objects-input page-objects-autocomplete" value="{{ po }}">
+                        <span class="input-group-btn input-middle-btn">
+                            <button class="btn btn-default" type="button" onclick="openPageObjectInNewWindow(this)"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></button>
+                        </span>
                         <span class="input-group-btn">
                             <button class="btn btn-default" type="button" onclick="deleteInput(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
                         </span>

@@ -44,7 +44,7 @@
 
         <h4>Elements</h4>
 
-        <div class="element col-md-12">
+        <div class="col-md-12" style="margin-bottom: 10px">
             <div class="col-sm-3">
                 <strong>Name</strong>
             </div>
@@ -116,49 +116,29 @@
             <button class="btn btn-default btn-sm" style="margin-left: 30px" onclick="addPageObjectInput();"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Element</button>
         </div>
 
-        <div id="datosContainer">
-            <h4>Functions</h4>
+        <div class="clearfix"></div>
 
-            <div id="elements">
+        <h4 style="margin-top: 20px">Functions</h4>
+
+        <div id="datosContainer">
+
+            <div id="functions">
                 {% for function in page_object_data.function_list %}
-                    <div class="element col-md-12">
+                    <div class="function col-md-12">
                         <div class="col-sm-3">
                             <div class="input-group" data-toggle="collapse" data-target="#{{function.function_name}}" aria-expanded="false" aria-controls="{{function.function_name}}">
                                 <input type="text" class="form-control element-name" value="{{function.function_name}}" placeholder="name" disabled>
+                                <input type="hidden" class="func-code" value="{{function.code}}"></div>
                             </div> 
                         </div>
 
                         <div class="clearfix"></div>
                         
                         <div class="collapse" id="{{function.function_name}}">
-                            <pre>{{function.code}}</pre>
+                            <pre style="margin-left: 15px">{{function.code}}</pre>
                         </div>
                     </div>
                 {% endfor %}
-                {% if not page_object_data %}
-                    <div class="element col-md-12">
-                        <div class="col-sm-3">
-                            <div class="input-group">
-                                <input type="text" class="form-control element-name" value="" placeholder="name">
-                            </div> 
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="input-group">
-                                <input type="text" class="form-control element-selector" value="" placeholder="selector">
-                            </div> 
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="input-group">
-                                <input type="text" class="form-control element-value" value="" placeholder="value">
-                            </div> 
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="input-group">
-                                <input type="text" class="form-control element-display-name" value="" placeholder="display name">
-                            </div> 
-                        </div>
-                    </div>
-                {% endif %}
             </div>
 
 
