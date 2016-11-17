@@ -150,8 +150,7 @@ def get_test_case_class(project_name, test_case_name):
     separeted by dots'''
 
     # TODO verify the file exists before trying to import
-    modulex = importlib.import_module(
-                                      'projects.{0}.test_cases.{1}'
+    modulex = importlib.import_module('projects.{0}.test_cases.{1}'
                                       .format(project_name, test_case_name))
     test_case_only = test_case_name.split('.')[-1]
     test_case_class = getattr(modulex, test_case_only)
@@ -177,10 +176,9 @@ def get_project_settings(project, global_settings):
     this overrides any global settings'''
 
     project_settings = {}
-    project_settings_path = os.path.join(
-                                         'projects',
+    project_settings_path = os.path.join('projects',
                                          project,
-                                         project_settings.conf)
+                                         'settings.conf')
     if os.path.exists(project_settings_path):
         execfile(project_settings_path, project_settings)
         # remove __builtins__ key, not used

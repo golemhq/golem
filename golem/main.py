@@ -18,7 +18,6 @@ def execute_from_command_line(root_path):
 
     import golem.core
     golem.core.temp = test_execution.settings
-    print 'ARGS', args
     # main action == gui
     if args.main_action == 'gui':
         gui_start.run_gui()
@@ -26,7 +25,7 @@ def execute_from_command_line(root_path):
 
     # main action == run
     if args.main_action == 'run':
-        test_execution.settings['thread_amount'] = args.threads
+        test_execution.thread_amount = args.threads
         if not args.project:
             print 'Usage:', parser.usage, '\n\n', 'Project List:'
             for proj in utils.get_projects(root_path):
@@ -38,6 +37,9 @@ def execute_from_command_line(root_path):
                      .format(test_execution.project))
         else:
             test_execution.project = args.project
+            test_execution.settings = utils.get_project_settings(
+                                                    args.project,
+                                                    test_execution.settings)
 
             # check if test_or_suite value is present
             if not args.test_or_suite:

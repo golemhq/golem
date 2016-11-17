@@ -36,6 +36,7 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
     test_timestamp = utils.get_timestamp()
     test_start_time = time.time()
 
+    golem.core.project = project
     golem.core.set_settings(settings)
 
     # create a directory to store report.json and screenshots
@@ -139,7 +140,7 @@ def run_single_test_case(workspace, project, full_test_case_name):
         data_sets = utils.get_test_data(workspace,
                                         project,
                                         full_test_case_name)
-        thread_amount = test_execution.settings['thread_amount']
+        thread_amount = test_execution.thread_amount
         execution_list = []
         if data_sets:
             for data_set in data_sets:
@@ -163,7 +164,7 @@ def run_suite(workspace, project, full_suite_name):
         test_case_list = utils.get_suite_test_cases(project,
                                                     full_suite_name)
 
-        thread_amount = test_execution.settings['thread_amount']
+        thread_amount = test_execution.thread_amount
 
         # get test data for each test case present in the suite 
         # and append tc/data pairs for each test case and for each data

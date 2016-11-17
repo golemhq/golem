@@ -5,6 +5,8 @@ driver = None
 
 settings = None
 
+project = None
+
 
 # will fail if driver name is not passed and driver not instantiated
 def getOrCreateWebdriver(*args):
@@ -48,4 +50,7 @@ def set_settings(settings_):
 
 
 def get_setting(setting):
-    return settings[setting]
+    if setting in settings:
+        return settings[setting]
+    else:
+        return False
