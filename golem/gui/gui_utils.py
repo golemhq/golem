@@ -3,88 +3,6 @@ import datetime
 import os
 
 
-# def go_one_level_deeper__DEPRECADO(file_structure, this_dir_file_structure, current_directory, parents):
-#     first_parent = parents[0]
-#     parents.pop(0)
-#     if len(parents) == 0:
-
-#         file_structure['childirs'][current_directory] = this_dir_file_structure
-#     else: 
-#         file_structure['childirs'][first_parent] = go_one_level_deeper(
-#                                     file_structure['childirs'][first_parent],
-#                                     this_dir_file_structure,
-#                                     current_directory,
-#                                     parents)
-#     return file_structure
-
-
-# def get_test_cases__DEPRECADO(workspace, project):
-#     path = os.path.join(workspace, 'projects', project, 'test_cases')
-
-#     file_structure = {
-#         'name': '',
-#         'files': [],
-#         'childirs': {} }
-
-#     for root, dirs, files in os.walk(path):
-#         parents = root.replace(path, '').split(os.sep)
-#         parents.pop(0)
-#         current_directory = os.path.basename(root)
-#         files = [x[:-3] for x in files]
-#         if '__init__' in files: files.remove('__init__')
-#         this_dir_file_structure = {
-#                                     'name': current_directory,
-#                                     'files': files,
-#                                     'childirs': {} }
-#         if len(parents) == 0:
-#             file_structure = this_dir_file_structure
-#         else:
-#             file_structure = go_one_level_deeper(
-#                                         file_structure, 
-#                                         this_dir_file_structure, 
-#                                         current_directory,
-#                                         parents)
-
-#     return file_structure
-
-def get_page_objects_DEPRECADO(workspace, project):
-    # find page objects directory
-
-    page_objects_directory = ''
-    #page_objects = []
-
-    path = os.path.join(workspace, 'projects', project, 'pages')
-
-    file_structure = {
-        'name': '',
-        'files': [],
-        'childirs': {} }
-        
-    for root, dirs, files in os.walk(path):
-        parents = root.replace(path, '').split(os.sep)
-        parents.pop(0)
-        current_directory = os.path.basename(root)
-        files = [x[:-3] for x in files]
-        if '__init__' in files: files.remove('__init__')
-
-        this_dir_file_structure = {
-                    'name': current_directory,
-                    'files': files,
-                    'childirs': {} }
-
-        if len(parents) == 0:
-            file_structure = this_dir_file_structure
-        else:
-            file_structure = go_one_level_deeper(
-                                        file_structure, 
-                                        this_dir_file_structure, 
-                                        current_directory,
-                                        parents)
-
-    return file_structure
-
-
-
 def new_directory(root_path, project, parents, directory_name):
     parents_joined = os.sep.join(parents)
 
@@ -152,10 +70,6 @@ def file_already_exists(root_path, project, root_dir, parents, filename):
         return False
 
 
-def log_to_file(string):
-    print string
-
-
 def time_to_string():
     time_format = '%Y-%m-%d-%H-%M-%S-%f'
     return datetime.datetime.now().strftime(time_format)
@@ -168,22 +82,20 @@ def string_to_time(time_string):
 def get_global_actions():
     global_actions = [
         {
+            'name': 'capture',
+            'parameters': [{'name': 'message (optional)', 'type': 'value'}]
+        },
+        {
             'name': 'click',
             'parameters': [{'name': 'element', 'type': 'element'}]
         },
         {
+            'name': 'close',
+            'parameters': []
+        },
+        {
             'name': 'go to',
             'parameters': [{'name': 'url', 'type': 'value'}]
-        },
-        {
-            'name': 'send keys',
-            'parameters': [{'name': 'element', 'type': 'element'},
-                           {'name': 'value', 'type': 'value'}]
-        },
-        {
-            'name': 'select by text',
-            'parameters': [{'name': 'from element', 'type': 'element'},
-                           {'name': 'text', 'type': 'value'}]
         },
         {
             'name': 'select by index',
@@ -191,25 +103,27 @@ def get_global_actions():
                            {'name': 'index', 'type': 'value'}]
         },
         {
+            'name': 'select by text',
+            'parameters': [{'name': 'from element', 'type': 'element'},
+                           {'name': 'text', 'type': 'value'}]
+        },
+        {
             'name': 'select by value',
             'parameters': [{'name': 'from element', 'type': 'element'},
                            {'name': 'value', 'type': 'value'}]
         },
         {
-            'name': 'verify text',
-            'parameters': [{'name': 'text', 'type': 'value'}]
+            'name': 'send keys',
+            'parameters': [{'name': 'element', 'type': 'element'},
+                           {'name': 'value', 'type': 'value'}]
         },
         {
-            'name': 'verify text in element',
-            'parameters': [{'name': 'text', 'type': 'value'},
-                           {'name': 'element', 'type': 'element'}]
+            'name': 'store',
+            'parameters': [{'name': 'key', 'type': 'value'},
+                           {'name': 'value', 'type': 'value'}]
         },
         {
             'name': 'verify exists',
-            'parameters': [{'name': 'element', 'type': 'element'}]
-        },
-        {
-            'name': 'verify not exists',
             'parameters': [{'name': 'element', 'type': 'element'}]
         },
         {
@@ -221,13 +135,22 @@ def get_global_actions():
             'parameters': [{'name': 'element', 'type': 'element'}]
         },
         {
+            'name': 'verify not exists',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
             'name': 'verify selected option',
             'parameters': [{'name': 'select', 'type': 'element'},
                            {'name': 'text option', 'type': 'value'}]
         },
         {
-            'name': 'capture',
-            'parameters': [{'name': 'message (optional)', 'type': 'value'}]
+            'name': 'verify text',
+            'parameters': [{'name': 'text', 'type': 'value'}]
+        },
+        {
+            'name': 'verify text in element',
+            'parameters': [{'name': 'text', 'type': 'value'},
+                           {'name': 'element', 'type': 'element'}]
         },
         {
             'name': 'wait',

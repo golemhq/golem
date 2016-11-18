@@ -40,20 +40,37 @@ def _wait_for_visible(element):
         visible = element.is_displayed()
 
 
-def force_click(css_selector):
+# def force_click(css_selector):
+#     driver = core.getOrCreateWebdriver()
+#     click_script = """$("{0}").click();""".format(css_selector)
+#     print click_script
+#     driver.execute_script(click_script)
+
+
+def capture(message=''):
     driver = core.getOrCreateWebdriver()
-    click_script = """$("{0}").click();""".format(css_selector)
-    print click_script
-    driver.execute_script(click_script)
+    #screenshot_name = 'test' + msg.replace(' ', '_')
+    #screenshot_filename = .format(len(logger.screenshots))
+    #driver.save_screenshot(screenshot_name + '.jpg')
+    img = Image.open(StringIO.StringIO(driver.get_screenshot_as_png()))
+    img_id = str(uuid.uuid4())[:8]
+    logger.screenshots[img_id] = img
+    _add_step(message, img_id)
 
 
-def click(obj):
+def click(element):
     _run_wait_hook()    
     driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(obj, driver)
-    _wait_for_visible(test_object)
+    test_object = get_selenium_object(element, driver)
+    #_wait_for_visible(test_object)
     test_object.click()
-    _add_step('Click {0}'.format(obj[2]))
+    _add_step('Click {0}'.format(element[2]))
+
+
+def close():
+    driver = core.getOrCreateWebdriver()
+    driver.quit()
+    core.reset_driver_object()
 
 
 def go_to(url):
@@ -62,62 +79,73 @@ def go_to(url):
     _add_step('Go to url:\'{0}\''.format(url))
 
 
-def send_keys(obj, text):
+def select_by_index(element, index):
     _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(obj, driver)
-    test_object.send_keys(text)
-    _add_step('Write \'{0}\' in element {1}'.format(text, obj[2]))
-
-
-def select_by_text(obj, text):
-    _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(obj, driver)
-    select = selenium.webdriver.support.select.Select(test_object)
-    select.select_by_visible_text(text)
-    _add_step('Select \'{0}\' from element {1}'.format(text, obj[2]))
-
-
-def select_by_index(obj, index):
-    _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(obj, driver)
-    select = selenium.webdriver.support.select.Select(test_object)
-    select.select_by_index(index)
-    _add_step('Select index \'{0}\' in element {1}'.format(index, obj[2]))
-
-
-def select_by_value(obj, value):
-    _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(obj, driver)
-    select = selenium.webdriver.support.select.Select(test_object)
-    select.select_by_value(value)
-    _add_step('Select \'{0}\' value in element {1}'.format(value, obj[2]))
-
-
-def verify_text(text):
-    _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
-    _add_step('Verify \'{0}\' is present in page'.format(text))
-    if text not in driver.page_source:
-        raise TextNotPresent(
-                    "Text '{}' was not found in the page".format(text))
-
-
-def verify_text_in_element(text, element):
-    _run_wait_hook()
-    print 'CORRI WAIT HOOK'
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
-    print 'Encontre el OBJETO'
-    _add_step('Verify element \'{0}\' contains text \'{1}\''
-                        .format(element[2], text))
-    print 'TEXT', test_object.text
-    if text not in test_object.text:
-        raise TextNotPresent("Text \'{0}\' was not found in element {1}"
-                             .format(text, element[2]))
+    select = selenium.webdriver.support.select.Select(test_object)
+    select.select_by_index(index)
+    _add_step('Select index \'{0}\' in element {1}'.format(index, element[2]))
+
+
+def select_by_text(element, text):
+    _run_wait_hook()
+    driver = core.getOrCreateWebdriver()
+    test_object = get_selenium_object(element, driver)
+    select = selenium.webdriver.support.select.Select(test_object)
+    select.select_by_visible_text(text)
+    _add_step('Select \'{0}\' from element {1}'.format(text, element[2]))
+
+
+def select_by_value(element, value):
+    _run_wait_hook()
+    driver = core.getOrCreateWebdriver()
+    test_object = get_selenium_object(element, driver)
+    select = selenium.webdriver.support.select.Select(test_object)
+    select.select_by_value(value)
+    _add_step('Select \'{0}\' value in element {1}'.format(value, element[2]))
+
+
+def send_keys(element, text):
+    _run_wait_hook()
+    driver = core.getOrCreateWebdriver()
+    test_object = get_selenium_object(element, driver)
+    test_object.send_keys(text)
+    _add_step('Write \'{0}\' in element {1}'.format(text, element[2]))
+
+
+def store(data, key, value):
+    data[key] = value
+
+
+def verify_exists(element):
+    _add_step('Not implemented')
+
+
+def verify_is_enabled(element):
+    _run_wait_hook()
+    driver = core.getOrCreateWebdriver()
+    test_object = get_selenium_object(element, driver)
+    _add_step('Verify the element \'{0}\' '
+              'is not enabled'
+              .format(element[2]))
+    if not test_object.is_enabled():
+        raise Exception('Element is enabled')
+
+
+def verify_is_not_enabled(element):
+    _run_wait_hook()
+    driver = core.getOrCreateWebdriver()
+    test_object = get_selenium_object(element, driver)
+    _add_step('Verify the element \'{0}\' '
+              'is not enabled'
+              .format(element[2]))
+    if test_object.is_enabled():
+        raise Exception('Element is enabled')
+
+
+def verify_not_exists(element):
+    _add_step('Not implemented')
 
 
 def verify_selected_option(element, text):
@@ -134,33 +162,26 @@ def verify_selected_option(element, text):
                              .format(element[2], text))
 
 
-def verify_is_not_enabled(element):
-    #TODO
+def verify_text(text):
+    _run_wait_hook()
+    driver = core.getOrCreateWebdriver()
+    _add_step('Verify \'{0}\' is present in page'.format(text))
+    if text not in driver.page_source:
+        raise TextNotPresent(
+                    "Text '{}' was not found in the page".format(text))
+
+
+def verify_text_in_element(element, text):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
-    _add_step('Verify the element \'{0}\' '
-              'is not enabled'
-              .format(element[2]))
-    if test_object.is_enabled():
-        raise Exception('Element is enabled')
-
-
-def capture(msg=''):
-    driver = core.getOrCreateWebdriver()
-    #screenshot_name = 'test' + msg.replace(' ', '_')
-    #screenshot_filename = .format(len(logger.screenshots))
-    #driver.save_screenshot(screenshot_name + '.jpg')
-    img = Image.open(StringIO.StringIO(driver.get_screenshot_as_png()))
-    img_id = str(uuid.uuid4())[:8]
-    logger.screenshots[img_id] = img
-    _add_step(msg, img_id)
-
-
-def close():
-    driver = core.getOrCreateWebdriver()
-    driver.quit()
-    core.reset_driver_object()
+    print 'Encontre el OBJETO'
+    _add_step('Verify element \'{0}\' contains text \'{1}\''
+                        .format(element[2], text))
+    print 'TEXT', test_object.text
+    if text not in test_object.text:
+        raise TextNotPresent("Text \'{0}\' was not found in element {1}"
+                             .format(text, element[2]))
 
 
 def wait(seconds):

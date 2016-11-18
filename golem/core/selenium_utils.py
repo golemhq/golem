@@ -32,10 +32,10 @@ def _find_selenium_object(obj, driver, remaining_time):
             raise IncorrectSelectorType('Selector {0} is not a valid option'
                                 .format(obj[0]))
     except:
+        time.sleep(0.5)
         end_time = time.time()
         new_remaining_time = remaining_time - (end_time - start_time)
         if new_remaining_time > 0:
-            time.sleep(0.5)
             test_object = _find_selenium_object(obj, driver, new_remaining_time)
         else:
             raise ElementNotFound(

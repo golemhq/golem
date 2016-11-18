@@ -123,8 +123,8 @@ def get_test_data(workspace, project, full_test_case_name):
                                 workspace,
                                 'projects',
                                 project,
-                                os.sep.join(parents),
                                 'data',
+                                os.sep.join(parents),
                                 '{}.csv'.format(test))
     if not os.path.exists(data_file_path):
         print 'Warning: No data file found for {}'.format(full_test_case_name)
@@ -166,7 +166,6 @@ def get_test_case_class(project_name, test_case_name):
     separeted by dots'''
 
     # TODO verify the file exists before trying to import
-    print 'FILE', test_case_name
     modulex = importlib.import_module('projects.{0}.test_cases.{1}'
                                       .format(project_name, test_case_name))
     test_case_only = test_case_name.split('.')[-1]
