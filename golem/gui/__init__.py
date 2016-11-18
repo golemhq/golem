@@ -143,9 +143,8 @@ def get_page_objects():
     if request.method == 'POST':
         projectname = request.form['project']
 
-        page_objects = utils.get_page_objects_as_list(
-                            root_path,
-                            projectname)
+        path = os.path.join(root_path, 'projects', projectname, 'pages')
+        page_objects = utils.get_files_in_directory_dotted_path(path)
 
         return json.dumps(page_objects)
 

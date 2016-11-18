@@ -90,21 +90,25 @@ def get_projects(workspace):
     projects = os.walk(path).next()[1]
     return projects
 
-
-def get_page_objects_as_list(workspace, project):
-    pages_path = os.path.join(workspace, 'projects', project, 'pages')
-    page_object_path_list = []
-    page_object_list = []
-    for path, subdirs, files in os.walk(pages_path):
+def get_files_in_directory_dotted_path(path):
+    '''generate a list of all the files inside a directory with 
+    the relative path as a dotted string.
+    example:
+    given C:/base_dir/dir/sub_dir/file.py
+    get_files_in_directory_dotted_path('C:/base_dir/'):
+    >['dir.sub_dir.file']'''
+    all_files = []
+    files_with_dotted_path = []
+    for path, subdirs, files in os.walk(path):
         for name in files:
             if name != '__init__.py':
                 filepath = os.path.join(path, os.path.splitext(name)[0])
-                page_object_path_list.append(filepath)
-    for file in page_object_path_list:
-        rel_path_as_list = file.replace(pages_path, '').split(os.sep)
+                all_files.append(filepath)
+    for file in all_files:
+        rel_path_as_list = file.replace(path, '').split(os.sep)
         rel_path_as_list = [x for x in rel_path_as_list if x != '']
-        page_object_list.append('.'.join(rel_path_as_list))
-    return page_object_list
+        files_with_dotted_path.append('.'.join(rel_path_as_list))
+    return files_with_dotted_path
 
 
 def get_test_data(workspace, project, full_test_case_name):
@@ -143,6 +147,18 @@ def get_suite_test_cases(project, suite):
 
     return tests
 
+    
+def get_directory_suite_test_cases(workspace, project, suite):
+    '''Return a list with all the test cases of a given directory suite
+    a directory suite is a directory inside "/test_cases" folder'''
+    tests = list()
+
+    path = os.path.join(workspace, 'projects', project, 'test_cases', suite)
+    tests = get_files_in_directory_dotted_path(path)
+    tests = ['.'.join((suite, x)) for x in tests]
+
+    return tests
+
 
 def get_test_case_class(project_name, test_case_name):
     '''Returns the class present in a module of the same name.
@@ -150,6 +166,7 @@ def get_test_case_class(project_name, test_case_name):
     separeted by dots'''
 
     # TODO verify the file exists before trying to import
+    print 'FILE', test_case_name
     modulex = importlib.import_module('projects.{0}.test_cases.{1}'
                                       .format(project_name, test_case_name))
     test_case_only = test_case_name.split('.')[-1]
@@ -245,3 +262,12 @@ def separate_file_from_parents(full_filename):
     file = splitted.pop()
     parents = splitted
     return (file, parents)
+
+
+def is_first_level_directory(workspace, project, directory):
+    path = os.path.join(workspace,
+                        'projects',
+                        project,
+                        'test_cases',
+                        directory)
+    return os.path.isdir(path)

@@ -86,7 +86,8 @@ def save_page_object(root_path, project, page_name, elements, functions):
 
 def is_page_object(parameter, root_path, project):
     # identify if a parameter is a page object
-    page_objects = utils.get_page_objects_as_list(root_path, project)
+    path = os.path.join(root_path, 'projects', projectname, 'pages')
+    page_objects = utils.get_page_objects_as_list(path)
     page_object_chain = '.'.join(parameter.split('.')[:-1])
     if page_object_chain in page_objects:
         return True

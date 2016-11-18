@@ -151,37 +151,39 @@ def run_single_test_case(workspace, project, full_test_case_name):
         multiprocess_executor(execution_list, thread_amount)
 
 
-def run_suite(workspace, project, full_suite_name):
-    ''' a suite '''
+def run_suite(workspace, project, suite, is_directory=False):
+    '''run a suite
+    a suite can be a python module in "test_suites" directory or
+    a first level directory in "test_cases" directory, the latter
+    allows the user to run all the test cases inside that directory without
+    the need to create a new suite and add the tests to it'''
 
-    # TO DO implement directory suites
-
-    if not utils.test_suite_exists(workspace, project, full_suite_name):
-        sys.exit(
-            "ERROR: no test suite named {} exists".format(full_suite_name))
+    # get test case list
+    if is_directory:
+        test_case_list = utils.get_directory_suite_test_cases(workspace,
+                                                              project,
+                                                              suite)
     else:
-        # get test case list
-        test_case_list = utils.get_suite_test_cases(project,
-                                                    full_suite_name)
+        test_case_list = utils.get_suite_test_cases(project, suite)
 
-        thread_amount = test_execution.thread_amount
+    thread_amount = test_execution.thread_amount
 
-        # get test data for each test case present in the suite 
-        # and append tc/data pairs for each test case and for each data
-        # set to execution list.
-        # if there is no data for a test case, it is appended with an
-        # empty dict
-        execution_list = []
-        for test_case in test_case_list:
-            data_sets = utils.get_test_data(workspace,
-                                            project,
-                                            test_case)
-            if data_sets:
-                for data_set in data_sets:
-                    execution_list.append((test_case, data_set))
-            else:
-                execution_list.append((test_case, {}))
+    # get test data for each test case present in the suite 
+    # and append tc/data pairs for each test case and for each data
+    # set to execution list.
+    # if there is no data for a test case, it is appended with an
+    # empty dict
+    execution_list = []
+    for test_case in test_case_list:
+        data_sets = utils.get_test_data(workspace,
+                                        project,
+                                        test_case)
+        if data_sets:
+            for data_set in data_sets:
+                execution_list.append((test_case, data_set))
+        else:
+            execution_list.append((test_case, {}))
 
     multiprocess_executor(execution_list,
                           thread_amount,
-                          suite_name=full_suite_name)
+                          suite_name=suite)
