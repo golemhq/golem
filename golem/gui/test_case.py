@@ -60,12 +60,12 @@ def get_datos(content):
     return datos
 
 
-def get_page_objects(content):
+def get_page_objectsdeprecado(content):
 
     page_objects = []
     index = -1
     for i, line in enumerate(content):
-        if 'page objects' in line:
+        if 'pages' in line:
             index = i + 1
             break
     while not 'class' in content[index]:
@@ -81,6 +81,26 @@ def get_page_objects(content):
             po_with_rel_path = rel_path + page_object
             page_objects.append(po_with_rel_path)
         index += 1
+    return page_objects
+
+
+def get_page_objects(content):
+    page_objects = []
+    index = -1
+    for i, line in enumerate(content):
+        if 'pages' in line:
+            index = i
+            break
+    pages_string = ''
+    while True:
+        pages_string += content[index]
+        index += 1
+        if ']' in pages_string:
+            break
+    pages_string = pages_string.replace('\n', '').strip().replace(' ', '')
+    pages_string = pages_string.split('[')[1].split(']')[0]
+    for page in pages_string.split(','):
+        page_objects.append(page.replace("'", '').replace('"', ''))
     return page_objects
 
 
@@ -131,25 +151,16 @@ def parse_test_case(workspace, project, parents, test_case_name):
 
     with open(path) as f:
         content = f.readlines()
-    
-    #execute_script_content = get_execute_script_content(content)
 
     description = get_description(content)
-
     page_objects = get_page_objects(content)
-    print 'PAGE OBJECTS PARSED', page_objects
-
-    #datos = get_datos(content)
-
     steps = _get_steps(content)
 
     test_case = {
         'description': description,
         'page_objects': page_objects,
-        #'datos': datos,
         'steps': steps,
     }
-
     return test_case
 
 
@@ -181,13 +192,13 @@ def new_test_case(root_path, project, parents, tc_name):
 test_case_content = """from golem.core.actions import *
 from golem.core import execution_logger as logger
 
-# page objects
-
 
 class {0}:    
 
     description = ''''''
     
+    pages = []
+
     def setup(self):
         logger.description = self.description
 
@@ -228,15 +239,21 @@ def format_parameters(step, root_path, project, parents, test_case_name):
     return all_parameters_string
 
 
-def format_page_object_import_string(project, page_object):
-    po, parents = utils.separate_file_from_parents(page_object)
-    if parents:
-        parents = '.' + '.'.join(parents)
-    else:
-        parents = ''
-    po_import_string = 'from projects.{0}.pages{1} ' \
-                       'import {2}\n'.format(project, parents, po)
-    return po_import_string
+def format_page_object_string(page_objects):
+    # po, parents = utils.separate_file_from_parents(page_object)
+    # if parents:
+    #     parents = '.' + '.'.join(parents)
+    # else:
+    #     parents = ''
+    # po_import_string = 'from projects.{0}.pages{1} ' \
+    #                    'import {2}\n'.format(project, parents, po)
+    # return po_import_string
+    po_string = ''
+    for po in page_objects:
+        po_string = po_string + " '" + po + "',\n" + " " * 12
+    po_string = "[{}]".format(po_string.strip()[:-1])
+    return po_string
+
 
 
 def save_test_case(root_path, project, full_test_case_name, description, 
@@ -249,23 +266,17 @@ def save_test_case(root_path, project, full_test_case_name, description,
                                   os.sep.join(parents),
                                   '{}.py'.format(tc_name))
 
-    print 'description', description
-    print 'page_objects', page_objects
-    print 'test_steps', test_steps
-
     with open(test_case_path, 'w') as f:
 
         f.write('from golem.core.actions import *\n')
         f.write('from golem.core import execution_logger as logger\n')
         f.write('\n')
-        f.write('# page objects\n')
-        for po in page_objects:
-            f.write(format_page_object_import_string(project, po))
-        f.write('\n')
         f.write('\n')
         f.write('class {}:\n'.format(tc_name))
         f.write('\n')
         f.write('    description = \'\'\'{}\'\'\'\n'.format(description))
+        f.write('\n')
+        f.write('    pages = {}\n'.format(format_page_object_string(page_objects)))
         f.write('\n')
         f.write('    def setup(self):\n')
         f.write('        logger.description = self.description\n')

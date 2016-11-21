@@ -274,42 +274,20 @@ def is_first_level_directory(workspace, project, directory):
     return os.path.isdir(path)
 
 
-def generate_sub_module(page_dot_path, imported_module):
-
-    if len(page_dot_path) > 1:
-        new_module = imp.new_module(page_dot_path[0])
-        page_dot_path.pop(0)
-        setattr(new_module,
-                page_dot_path[0],
-                generate_sub_module(page_dot_path, imported_module))
-        return new_module
+def generate_page_object_module(project, parent_module, full_path, page_path_list):
+    if len(page_path_list) > 1:
+        if not hasattr(parent_module, page_path_list[0]):
+            new_module = imp.new_module(page_path_list[0])
+            setattr(parent_module, 
+                    page_path_list[0],
+                    new_module)
+        else:
+            new_module = getattr(parent_module, page_path_list[0])
+        page_path_list.pop(0)
+        new_module = generate_page_object_module(project, new_module, full_path, page_path_list)
+        setattr(parent_module, page_path_list[0], new_module)
     else:
-        return imported_module
-
-
-def generate_page_object_module(project, page):
-    imported_module = importlib.import_module('projects.{}.pages.{}'
-                                              .format(project, page))
-    page_dot_path = page.split('.')
-    if len(page_dot_path) > 1:
-        new_module = imp.new_module(page_dot_path[0])
-        page_dot_path.pop(0)
-        setattr(new_module, 
-                new_module.__name__,
-                generate_sub_module(page_dot_path, imported_module))
-        imported_module = new_module
-    else:
-        return imported_module
-
-
-    # first_module = page.pop(0)
-    # #new_module = imp.new_module(first_module)
-    # new_module = importlib.import_module(first_module)
-    # #exec('test_class.{} = new_module'.format(first_module))
-    # setattr(parent_module, first_module, new_module)
-    # if page_dot_path:
-    #     import_page_objects()
-
-
-
-
+        imported_module = importlib.import_module('projects.{}.pages.{}'
+                                              .format(project, full_path))
+        setattr(parent_module, page_path_list[0], imported_module)
+    return parent_module

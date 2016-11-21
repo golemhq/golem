@@ -52,14 +52,18 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
 
         test_class = utils.get_test_case_class(project,
                                                test_case_name)
-
+        # import the page objects into the test module
         for page in test_class.pages:
-            generated_module = utils.generate_page_object_module(project, page)
-            setattr(modulex, page.split('.')[0], generated_module)
+            modulex = utils.generate_page_object_module(project, modulex,
+                                                        page, page.split('.'))
+        # import logger into the test module
+        setattr(modulex, 'logger', golem.core.execution_logger)
+        # import actions into the test module
+        for action in dir(golem.core.actions):
+            setattr(modulex, action, getattr(golem.core.actions, action))
 
-        print dir(modulex.aa)
         instance = test_class()
-        #print 'INSTANCE', modulex.page.page1_elem
+
         if hasattr(instance, 'setup'):
             instance.setup()
         else:
