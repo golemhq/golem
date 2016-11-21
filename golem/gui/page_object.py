@@ -66,12 +66,15 @@ def get_page_object_elements_and_functions(root_path, project, full_po_name):
     return page_object_data
 
 
-def save_page_object(root_path, project, page_name, elements, functions):
-    page_object_path = os.path.join(
-        root_path, 'projects', project, 'pages', page_name + '.py')
+def save_page_object(root_path, project, full_page_name, elements, functions):
+    page_name, parents = utils.separate_file_from_parents(full_page_name)
+    page_object_path = os.path.join(root_path,
+                                    'projects',
+                                    project,
+                                    'pages',
+                                    os.sep.join(parents),
+                                    '{}.py'.format(page_name))
 
-    print 'ELEMENTS', elements
-    print 'FUNCTIONS', functions
 
     with open(page_object_path, 'w') as f:
         for element in elements:
@@ -86,8 +89,8 @@ def save_page_object(root_path, project, page_name, elements, functions):
 
 def is_page_object(parameter, root_path, project):
     # identify if a parameter is a page object
-    path = os.path.join(root_path, 'projects', projectname, 'pages')
-    page_objects = utils.get_page_objects_as_list(path)
+    path = os.path.join(root_path, 'projects', project, 'pages')
+    page_objects = utils.get_files_in_directory_dotted_path(path)
     page_object_chain = '.'.join(parameter.split('.')[:-1])
     if page_object_chain in page_objects:
         return True

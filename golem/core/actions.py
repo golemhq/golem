@@ -9,7 +9,7 @@ from PIL import Image
 
 from golem import core
 from golem.core import execution_logger as logger
-from golem.core.exceptions import TextNotPresent
+from golem.core.exceptions import TextNotPresent, ElementNotFound
 from golem.core.selenium_utils import get_selenium_object
 
 
@@ -85,7 +85,8 @@ def select_by_index(element, index):
     test_object = get_selenium_object(element, driver)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_index(index)
-    _add_step('Select index \'{0}\' in element {1}'.format(index, element[2]))
+    _add_step('Select option of index {0} from element {1}'
+              .format(index, element[2]))
 
 
 def select_by_text(element, text):
@@ -103,7 +104,7 @@ def select_by_value(element, value):
     test_object = get_selenium_object(element, driver)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_value(value)
-    _add_step('Select \'{0}\' value in element {1}'.format(value, element[2]))
+    _add_step('Select \'{0}\' value from element {1}'.format(value, element[2]))
 
 
 def send_keys(element, text):
@@ -119,16 +120,17 @@ def store(data, key, value):
 
 
 def verify_exists(element):
-    _add_step('Not implemented')
+    _run_wait_hook()
+    driver = core.getOrCreateWebdriver()
+    _add_step('Verify that the element {} exists'.format(element[2]))
+    test_object = get_selenium_object(element, driver)
 
 
 def verify_is_enabled(element):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
-    _add_step('Verify the element \'{0}\' '
-              'is not enabled'
-              .format(element[2]))
+    _add_step('Verify the element \'{0}\' is enabled'.format(element[2]))
     if not test_object.is_enabled():
         raise Exception('Element is enabled')
 
@@ -145,7 +147,16 @@ def verify_is_not_enabled(element):
 
 
 def verify_not_exists(element):
-    _add_step('Not implemented')
+    _run_wait_hook()
+    driver = core.getOrCreateWebdriver()
+    _add_step('Verify that the element {} does not exists'.format(element[2]))
+    try:
+        test_object = get_selenium_object(element, driver)
+        if test_object:
+            raise Exception('Element {} exists and should not'
+                            .format(element[2]))
+    except ElementNotFound:
+        pass
 
 
 def verify_selected_option(element, text):

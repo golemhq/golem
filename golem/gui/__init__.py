@@ -144,7 +144,9 @@ def get_page_objects():
         projectname = request.form['project']
 
         path = os.path.join(root_path, 'projects', projectname, 'pages')
+        print 'PATH', path
         page_objects = utils.get_files_in_directory_dotted_path(path)
+        print 'PAGE BEJCTS', page_objects
 
         return json.dumps(page_objects)
 

@@ -9,6 +9,7 @@ import os
 import sys
 import time
 import traceback
+import importlib
 from multiprocessing import Pool
 from multiprocessing.pool import ApplyResult
 
@@ -46,11 +47,19 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
                                                       suite_name,
                                                       suite_timestamp)
     try:
-        test_class = utils.get_test_case_class(
-                        project,
-                        test_case_name)
-        instance = test_class()
+        modulex = importlib.import_module('projects.{0}.test_cases.{1}'
+                                      .format(project, test_case_name))
 
+        test_class = utils.get_test_case_class(project,
+                                               test_case_name)
+
+        for page in test_class.pages:
+            generated_module = utils.generate_page_object_module(project, page)
+            setattr(modulex, page.split('.')[0], generated_module)
+
+        print dir(modulex.aa)
+        instance = test_class()
+        #print 'INSTANCE', modulex.page.page1_elem
         if hasattr(instance, 'setup'):
             instance.setup()
         else:

@@ -149,8 +149,8 @@ def get_global_actions():
         },
         {
             'name': 'verify text in element',
-            'parameters': [{'name': 'text', 'type': 'value'},
-                           {'name': 'element', 'type': 'element'}]
+            'parameters': [{'name': 'element', 'type': 'element'},
+                           {'name': 'text', 'type': 'value'}]
         },
         {
             'name': 'wait',

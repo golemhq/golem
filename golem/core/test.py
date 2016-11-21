@@ -3,27 +3,19 @@ from golem.core import utils, actions, execution_logger
 
 # DEPRECATED
 class Test:    
-    ''' baste test class '''
+    ''' base test class '''
 
     def __init__(self):     #, data, context):
 
+        #for page in self.pages:
+        # exec 'from projects.test.pages import mercadolibre' #{}'.format(page)
+        # exec 'from projects.test.pages.mercadolibre import header'
+
+        # print 'at base class', mercadolibre.header.registrate
+        # setattr(Test, 'lala', 'lolo')
         #execution_logger.description = self.description
 
-        ###if context.engine == 'selenium':
-        #start a selenium driver and 
-        #store it in context.driver
-        #self.driver = utils.get_driver(context.selenium_driver)
-        #core.getOrCreateWebdriver(context.selenium_driver)
-
-        #set implicit wait
-        ###if 'implicit_wait' in context.settings: self.driver.implicitly_wait(context.settings['implicit_wait'])
-        
         #self.data = data
-        
-        #self.context = context
-        
-        
-        #self.run(driver_instance, data)
 
         print "initializing"
     

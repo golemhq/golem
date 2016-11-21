@@ -4,6 +4,7 @@ import importlib
 import logging
 import os
 import sys
+import imp
 
 from golem.core import test_execution
 
@@ -90,22 +91,23 @@ def get_projects(workspace):
     projects = os.walk(path).next()[1]
     return projects
 
-def get_files_in_directory_dotted_path(path):
-    '''generate a list of all the files inside a directory with 
-    the relative path as a dotted string.
+
+def get_files_in_directory_dotted_path(base_path):
+    '''generate a list of all the files inside a directory and
+    subdirectories with the relative path as a dotted string.
     example:
     given C:/base_dir/dir/sub_dir/file.py
     get_files_in_directory_dotted_path('C:/base_dir/'):
     >['dir.sub_dir.file']'''
     all_files = []
     files_with_dotted_path = []
-    for path, subdirs, files in os.walk(path):
+    for path, subdirs, files in os.walk(base_path):
         for name in files:
             if name != '__init__.py':
                 filepath = os.path.join(path, os.path.splitext(name)[0])
                 all_files.append(filepath)
     for file in all_files:
-        rel_path_as_list = file.replace(path, '').split(os.sep)
+        rel_path_as_list = file.replace(base_path, '').split(os.sep)
         rel_path_as_list = [x for x in rel_path_as_list if x != '']
         files_with_dotted_path.append('.'.join(rel_path_as_list))
     return files_with_dotted_path
@@ -270,3 +272,44 @@ def is_first_level_directory(workspace, project, directory):
                         'test_cases',
                         directory)
     return os.path.isdir(path)
+
+
+def generate_sub_module(page_dot_path, imported_module):
+
+    if len(page_dot_path) > 1:
+        new_module = imp.new_module(page_dot_path[0])
+        page_dot_path.pop(0)
+        setattr(new_module,
+                page_dot_path[0],
+                generate_sub_module(page_dot_path, imported_module))
+        return new_module
+    else:
+        return imported_module
+
+
+def generate_page_object_module(project, page):
+    imported_module = importlib.import_module('projects.{}.pages.{}'
+                                              .format(project, page))
+    page_dot_path = page.split('.')
+    if len(page_dot_path) > 1:
+        new_module = imp.new_module(page_dot_path[0])
+        page_dot_path.pop(0)
+        setattr(new_module, 
+                new_module.__name__,
+                generate_sub_module(page_dot_path, imported_module))
+        imported_module = new_module
+    else:
+        return imported_module
+
+
+    # first_module = page.pop(0)
+    # #new_module = imp.new_module(first_module)
+    # new_module = importlib.import_module(first_module)
+    # #exec('test_class.{} = new_module'.format(first_module))
+    # setattr(parent_module, first_module, new_module)
+    # if page_dot_path:
+    #     import_page_objects()
+
+
+
+

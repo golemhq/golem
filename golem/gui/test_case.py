@@ -71,8 +71,15 @@ def get_page_objects(content):
     while not 'class' in content[index]:
         page_object_line = content[index]
         if 'import' in page_object_line:
-            page_object = page_object_line.split('import')[1]
-            page_objects.append(page_object.strip())
+            page_object = page_object_line.split('import')[1].strip()
+            before_import = page_object_line.split('import')[0]
+            rel_path = before_import.split('pages')[1].strip()
+            if rel_path:
+                if rel_path[0] == '.':
+                    rel_path = rel_path[1:]
+                rel_path += '.'
+            po_with_rel_path = rel_path + page_object
+            page_objects.append(po_with_rel_path)
         index += 1
     return page_objects
 
@@ -115,8 +122,7 @@ def parse_test_case(workspace, project, parents, test_case_name):
 
     parents_joined = os.sep.join(parents)
 
-    path = os.path.join(
-                        workspace,
+    path = os.path.join(workspace,
                         'projects',
                         project,
                         'test_cases',
@@ -131,6 +137,7 @@ def parse_test_case(workspace, project, parents, test_case_name):
     description = get_description(content)
 
     page_objects = get_page_objects(content)
+    print 'PAGE OBJECTS PARSED', page_objects
 
     #datos = get_datos(content)
 
@@ -241,6 +248,10 @@ def save_test_case(root_path, project, full_test_case_name, description,
                                   'test_cases', 
                                   os.sep.join(parents),
                                   '{}.py'.format(tc_name))
+
+    print 'description', description
+    print 'page_objects', page_objects
+    print 'test_steps', test_steps
 
     with open(test_case_path, 'w') as f:
 
