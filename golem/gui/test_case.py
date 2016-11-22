@@ -189,10 +189,7 @@ def new_test_case(root_path, project, parents, tc_name):
         f.write('')
 
 
-test_case_content = """from golem.core.actions import *
-from golem.core import execution_logger as logger
-
-
+test_case_content = """
 class {0}:    
 
     description = ''''''
@@ -221,15 +218,15 @@ def format_parameters(step, root_path, project, parents, test_case_name):
         else:
             # is not a page object,
             # identify if its a value or element parameter
-            if data.is_data_variable(root_path,
-                                     project,
-                                     parents,
-                                     test_case_name,
-                                     parameter):
+            is_data_var = data.is_data_variable(root_path,
+                                                project,
+                                                parents,
+                                                test_case_name,
+                                                parameter)
+            if is_data_var:
                 this_parameter_string = 'data[\'{}\']'.format(parameter)
             else:
-                print 'ACTION', action
-                if action == 'wait':
+                if action in ['wait', 'select_by_index']:
                     this_parameter_string = parameter
                 else:
                     this_parameter_string = '\'' + parameter + '\''
@@ -240,14 +237,6 @@ def format_parameters(step, root_path, project, parents, test_case_name):
 
 
 def format_page_object_string(page_objects):
-    # po, parents = utils.separate_file_from_parents(page_object)
-    # if parents:
-    #     parents = '.' + '.'.join(parents)
-    # else:
-    #     parents = ''
-    # po_import_string = 'from projects.{0}.pages{1} ' \
-    #                    'import {2}\n'.format(project, parents, po)
-    # return po_import_string
     po_string = ''
     for po in page_objects:
         po_string = po_string + " '" + po + "',\n" + " " * 12
@@ -267,10 +256,6 @@ def save_test_case(root_path, project, full_test_case_name, description,
                                   '{}.py'.format(tc_name))
 
     with open(test_case_path, 'w') as f:
-
-        f.write('from golem.core.actions import *\n')
-        f.write('from golem.core import execution_logger as logger\n')
-        f.write('\n')
         f.write('\n')
         f.write('class {}:\n'.format(tc_name))
         f.write('\n')

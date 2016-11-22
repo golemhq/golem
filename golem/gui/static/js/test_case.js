@@ -822,6 +822,6 @@ function addRowToDataTable(){
 
 function openPageObjectInNewWindow(elem){
     var inputVal = $(elem).parent().parent().find('input').val();
-    var url = "/p/wiki/page/"+inputVal+"/";
+    var url = "/p/"+project+"/page/"+inputVal+"/";
     window.open(url, '_blank');
 }
