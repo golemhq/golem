@@ -1,4 +1,7 @@
 
+html {
+    overflow-y: scroll;
+}
 
 
 .input-group {

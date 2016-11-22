@@ -6,7 +6,7 @@ var globalActions = [];
 var selectedPageObjectsElements = [];
 var selectedPageObjectsFunctions = [];
 
-
+var unsavedChanges = false;
 
 $(document).ready(function() {      
 
@@ -45,6 +45,8 @@ $(document).ready(function() {
         getSelectedPageObjectElements();
     });
 
+    // set unsaved changes watcher
+    watchForUnsavedChanges();
 });
 
 
@@ -122,6 +124,7 @@ function addFirstStepInput(){
 
 function deleteInput(elem){
     $(elem).parent().parent().remove();
+    unsavedChanges = true;
 }
 
 
@@ -135,20 +138,15 @@ function getPageObjects(){
         type: 'POST',
         success: function(data) {
             for(po in data){
-                console.log(data)
                 var po = data[po];
                 pageObjects.push({
-                    // 'value': po.name.split('.')[0],
-                    // 'data': po,
                     'value': po,
                     'data': po,
                 });
             }
-
             startPageObjectsAutocomplete();
         },
         error: function() {
-            
         }
     });
 }
@@ -161,6 +159,7 @@ function startPageObjectsAutocomplete(){
         minChars: 0,
         onSelect: function (suggestion) {
             getSelectedPageObjectElements();
+            unsavedChanges = true;
         },
         onSearchStart: function () {
         },
@@ -189,8 +188,6 @@ function startStepFirstInputAutocomplete(){
         })        
     }
 
-    console.log("get page object actions");
-
     autocomplete = $(".step-first-input").autocomplete({
         lookup: lookup,
         minChars: 0,
@@ -199,6 +196,7 @@ function startStepFirstInputAutocomplete(){
             // not this is not always called, 
             // sometimes the onchange is called before
             stepFirstInputChange($(this));
+            unsavedChanges = true;
         },
         onSearchStart: function () {
         },
@@ -249,16 +247,20 @@ function stepFirstInputChange(elem){
                             </div> \
                         </div>");
 
-        step.append(newInput);
+        newInput.on('change', function(){
+            unsavedChanges = true;
+        });
 
-        // start all elements input through getselectedpageobjectelements function()
+        step.append(newInput);
 
         // five focus to the first parameter input
         step.find(".parameter-input").first().focus();
 
         getSelectedPageObjectElements()
 
-        startAllValueInputAutocomplete();        
+        startAllValueInputAutocomplete();
+
+        unsavedChanges = true;      
     }
 }
 
@@ -284,6 +286,7 @@ function startAllValueInputAutocomplete(){
             minChars: 0,
             onSelect: function (suggestion) {
                 //stepFirstInputChange($(this));
+                unsavedChanges = true;
             },
             onSearchStart: function () {},
             beforeRender: function (container) {},
@@ -314,6 +317,7 @@ function startAllElementInputAutocomplete(){
             minChars: 0,
             onSelect: function (suggestion) {
                 //stepFirstInputChange($(this));
+                unsavedChanges = true;
             },
             onSearchStart: function () {},
             beforeRender: function (container) {},
@@ -323,95 +327,6 @@ function startAllElementInputAutocomplete(){
     })
 
 }
-
-
-// function getPageObjectElements(pageObjectName, input){
-//     var pageObjectData = getPageObjectDataFromPageObjects(pageObjectName);
-
-//     $.ajax({
-//         url: "/get_page_object_elements/",
-//         data: {
-//             "project": project,
-//             "canal": canal,
-//             "pageObjectPath": pageObjectData.data['path'],
-//             "pageObjectName": pageObjectData.data['name'],
-//         },
-//         dataType: 'json',
-//         type: 'POST',
-//         success: function(data) {
-//             startWebElementAutocomplete(data, input);
-//         },
-//         error: function() {
-            
-//         }
-//     });
-// }
-
-
-// function startWebElementAutocomplete(data, input){
-//     var lookup = []
-//     for(we in data.web_elements){
-//         lookup.push({
-//             'value': data.web_elements[we],
-//             'data': data.web_elements[we]
-//         })
-//     }
-
-//     autocomplete = input.autocomplete({
-//         lookup: lookup,
-//         minChars: 0,
-//         onSelect: function (suggestion) {
-//             addThirdStepTextBox($(this));
-//         },
-//         onSearchStart: function () {
-//         },
-//         beforeRender: function (container) {},
-//         onSearchComplete: function (query, suggestions) {
-//         }
-//     });
-// }
-
-
-// function addThirdStepTextBox(elem){
-//     var step = $(elem).parent().parent().parent();
-//     var alreadyHasSecondStep = step.find(".third-second-input").length > 0;
-
-//     if(!alreadyHasSecondStep){
-
-//         var placeholder = 'acción';
-
-//         step.append(
-//             "<div class='col-sm-3'> \
-//                 <div class='input-group'> \
-//                     <input type='text' class='form-control third-second-input' \
-//                         placeholder='"+placeholder+"' onchange='stepThirdInputChange(this);'> \
-//                 </div> \
-//             </div>");
-
-//         startActionAutocomplete(step.find(".third-second-input"));
-//     }
-// }
-
-
-// function addFourthStepTextBox(elem){
-//     var step = $(elem).parent().parent().parent();
-//     var alreadyHasFourthStep = step.find(".fourth-second-input").length > 0;
-
-//     if(!alreadyHasFourthStep){
-
-//         var placeholder = 'valor a utilizar';
-
-//         step.append(
-//             "<div class='col-sm-3'> \
-//                 <div class='input-group'> \
-//                     <input type='text' class='form-control fourth-second-input' \
-//                         placeholder='"+placeholder+"' onchange='stepFourthInputChange(this);'> \
-//                 </div> \
-//             </div>");
-
-//         startFourthStepAutocomplete(step.find(".fourth-second-input"));
-//     }
-// }
 
 
 function getDatosValues(){
@@ -439,52 +354,6 @@ function getDatosValues(){
         }
     });
 }
-
-
-// function startFourthStepAutocomplete(elem){
-//     var datos = getLoadedDatos();
-//     var lookup = [];
-//     for(d in datos){
-//         lookup.push({
-//             'value': datos[d],
-//             'data': datos[d],
-//         })
-//     }
-//     autocomplete = elem.autocomplete({
-//         lookup: lookup,
-//         minChars: 0,
-//         onSelect: function (suggestion) {
-//         },
-//         onSearchStart: function () {
-//         },
-//         beforeRender: function (container) {},
-//         onSearchComplete: function (query, suggestions) {
-//         }
-//     });
-// }
-
-
-
-
-
-
-
-
-// function saveTestCase(){
-//     var testCaseName = $("#testCaseName").html();
-//     var pageObjects = getSelectedPageObjects();
-//     var datos = getLoadedDatosWihValues();
-//     var steps;
-// }
-
-
-
-
-
-
-
-
-
 
 
 function isInPageObjectArray(value){
@@ -541,8 +410,6 @@ function getLoadedDatosWithValues(){
     });
     return datos;
 }
-
-
 
 
 function getGlobalActions(){
@@ -709,6 +576,12 @@ function saveTestCase(){
         contentType: 'application/json; charset=utf-8',
         type: 'POST',
         success: function(data) {
+            unsavedChanges = false;
+            toastr.options = {
+                "positionClass": "toast-top-center",
+                "timeOut": "3000",
+                "hideDuration": "100"}
+            toastr.success("Test case "+testCaseName+" saved")
         },
         error: function() {
         }
@@ -719,6 +592,11 @@ function saveTestCase(){
 
 
 function runTestCase(){
+    toastr.options = {
+        "positionClass": "toast-top-center",
+        "timeOut": "3000",
+        "hideDuration": "100"}
+    toastr.success('Running test case ' + testCaseName);
     $.ajax({
         url: "/run_test_case/",
         data: {
@@ -728,7 +606,6 @@ function runTestCase(){
          dataType: 'json',
          type: 'POST',
          success: function(data) {
-            
          },
          error: function() {}
      });
@@ -824,4 +701,27 @@ function openPageObjectInNewWindow(elem){
     var inputVal = $(elem).parent().parent().find('input').val();
     var url = "/p/wiki/page/"+inputVal+"/";
     window.open(url, '_blank');
+}
+
+
+function watchForUnsavedChanges(){
+    $("input").on("change keyup paste", function(){
+        unsavedChanges = true;
+    });
+
+    $("#description").on("change keyup paste", function(){
+        unsavedChanges = true;
+    });
+    
+    $("#dataTable").on("change keyup paste", function(){
+        unsavedChanges = true;
+    });
+
+    window.addEventListener("beforeunload", function (e) {
+        if(unsavedChanges){
+            var confirmationMessage = 'There are unsaved changes';
+            (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+            return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+        }
+    });
 }

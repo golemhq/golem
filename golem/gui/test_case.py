@@ -189,10 +189,7 @@ def new_test_case(root_path, project, parents, tc_name):
         f.write('')
 
 
-test_case_content = """from golem.core.actions import *
-from golem.core import execution_logger as logger
-
-
+test_case_content = """
 class {0}:    
 
     description = ''''''

@@ -40,8 +40,8 @@ function addNewTestCase(input){
         return
     }
     // validate length
-    if(testCaseName.length > 40){
-        displayErrorModal(['Maximum length is 40 characters']);
+    if(testCaseName.length > 60){
+        displayErrorModal(['Maximum length is 60 characters']);
         return
     }
     // validate there is no more than 1 slash
@@ -159,8 +159,8 @@ function addNewPageObject(input){
         return
     }
     // validate length
-    if(pageObjectName.length > 40){
-        displayErrorModal(['Maximum length is 40 characters']);
+    if(pageObjectName.length > 60){
+        displayErrorModal(['Maximum length is 60 characters']);
         return
     }
     // validate there is no more than 1 slash

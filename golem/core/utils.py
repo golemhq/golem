@@ -52,8 +52,8 @@ def _generate_dict_from_file_structure(full_path):
         # remove __init__.py from list of files
         if '__init__.py' in files:
             files.remove('__init__.py')
-        # remove file extentions
-        filenames = [x[:-3] for x in files]
+        # remove files that are not .py extension and remove extensions
+        filenames = [x[:-3] for x in files if x.split('.')[1] == 'py']
         filename_filepath_duple_list = []
         # remove root_dir form folders
         folders_without_root_dir = [x for x in folders if x != root_dir]

@@ -2,12 +2,11 @@ import json
 import os
 
 from flask import Flask, render_template, request, redirect, jsonify, g
-from flask.ext.login import (
-                        LoginManager,
-                        login_user,
-                        logout_user,
-                        current_user,
-                        login_required)
+from flask.ext.login import (LoginManager,
+                             login_user,
+                             logout_user,
+                             current_user,
+                             login_required)
 
 from golem.core import utils
 from . import gui_utils, test_case, page_object, data, user

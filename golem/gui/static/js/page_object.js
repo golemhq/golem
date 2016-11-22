@@ -1,4 +1,4 @@
-
+var unsavedChanges = false;
 
 var selectors = [
     'id',
@@ -18,6 +18,8 @@ $(document).ready(function() {
         $(this).parent().parent().parent().find('.element-display-name').val($(this).val());
     });
 
+    // set unsaved changes watcher
+    watchForUnsavedChanges();
 });
 
 
@@ -78,10 +80,17 @@ function addPageObjectInput(){
             </div> \
         </div>");
 
+    // give focus to the last input
+    $("#elements>div").last().find("input").first().focus();
+
     startAllSelectorInputAutocomplete();
 
     $(".element-name").keyup(function(){
         $(this).parent().parent().parent().find('.element-display-name').val($(this).val());
+    });
+
+    $("#elements input").on("change", function(){
+        unsavedChanges = true;
     });
 }
 
@@ -118,8 +127,30 @@ function savePageObject(){
         contentType: 'application/json; charset=utf-8',
         type: 'POST',
         success: function(data) {
+            toastr.options = {
+                "positionClass": "toast-top-center",
+                "timeOut": "3000",
+                "hideDuration": "100"}
+            toastr.success("Page "+pageObjectName+" saved");
+
+            unsavedChanges = false;
         },
         error: function() {
+        }
+    });
+}
+
+
+function watchForUnsavedChanges(){
+    $("input").on("change keyup paste", function(){
+        unsavedChanges = true;
+    });
+
+    window.addEventListener("beforeunload", function (e) {
+        if(unsavedChanges){
+            var confirmationMessage = 'There are unsaved changes';
+            (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+            return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
         }
     });
 }
