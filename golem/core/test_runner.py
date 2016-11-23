@@ -5,21 +5,20 @@ parallel using multiprocessing.
 The test_runner method is in charge of executing a single test case.
 """
 
-import os
+import importlib
 import sys
 import time
 import traceback
-import importlib
 from multiprocessing import Pool
 from multiprocessing.pool import ApplyResult
 
 import golem.core
-from golem.core import (utils,
-                        test_execution,
+from golem.core import (actions,
                         logger,
-                        selenium_utils,
                         report,
-                        actions)
+                        test_execution,
+                        utils)
+
 
 def test_runner(workspace, project, test_case_name, test_data, suite_name,
                 suite_data, suite_timestamp, settings):
@@ -47,8 +46,8 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
                                                       suite_name,
                                                       suite_timestamp)
     try:
-        modulex = importlib.import_module('projects.{0}.test_cases.{1}'
-                                      .format(project, test_case_name))
+        modulex = importlib.import_module(
+            'projects.{0}.test_cases.{1}'.format(project, test_case_name))
 
         test_class = utils.get_test_case_class(project,
                                                test_case_name)
@@ -135,7 +134,7 @@ def multiprocess_executor(execution_list, processes=1,
 
     lst_results = [r.get() for r in results]
 
-    #for res in lst_results:
+    # for res in lst_results:
     #    print '\none result\n',res
 
     pool.close()
@@ -181,7 +180,7 @@ def run_suite(workspace, project, suite, is_directory=False):
 
     thread_amount = test_execution.thread_amount
 
-    # get test data for each test case present in the suite 
+    # get test data for each test case present in the suite
     # and append tc/data pairs for each test case and for each data
     # set to execution list.
     # if there is no data for a test case, it is appended with an

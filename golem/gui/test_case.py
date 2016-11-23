@@ -2,25 +2,23 @@ import os
 import re
 
 from golem.core import utils
-from golem.gui import data, page_object, gui_utils
+from golem.gui import data, page_object
 
 
 def _get_steps(content):
 
     index = -1
     steps = []
-    for i, line in enumerate(content): 
+    for i, line in enumerate(content):
         if 'def test(self, data):' in line:
             index = i + 1
             break
     if index >= 0:
-        while True:
+        end_of_steps = False
+        while not end_of_steps:
             current_line = content[index]
-            if 'def teardown' in current_line:
-                end_of_steps = True
-                break
-            if len(current_line.strip()) > 0 and current_line.strip() != 'pass':
-                #this is a step
+            if len(current_line.strip()) and current_line.strip() != 'pass':
+                # this is a step
                 method_name = current_line.split('(')[0].strip()
                 parameters = current_line.split('(')[1].split(')')[0]
                 parameter_list = [x for x in parameters.split(',')]
@@ -31,33 +29,14 @@ def _get_steps(content):
                     else:
                         formatted_parameters.append(parameter)
                 step = {
-                    'method_name' : method_name.replace('_', ' '),
-                    'parameters' : formatted_parameters
+                    'method_name': method_name.replace('_', ' '),
+                    'parameters': formatted_parameters
                 }
                 steps.append(step)
-            if 'def teardown' in current_line:
+            if 'def teardown' in content[index + 1]:
                 end_of_steps = True
             index += 1
     return steps
-
-
-def get_datos(content):
-    save_content = False
-    datos_lines = []
-    for line in content:   
-        if save_content and 'pasos' not in line:
-            datos_lines.append(line)
-        if 'datos' in line:
-            save_content = True
-        if 'pasos' in line:
-            save_content = False
-    datos = []
-    for line in datos_lines:
-        line = line.replace('\t', '')
-        if len(line.strip()) > 0:
-            variable = line.split(' ')[1]
-            datos.append(variable);
-    return datos
 
 
 def get_page_objectsdeprecado(content):
@@ -68,7 +47,7 @@ def get_page_objectsdeprecado(content):
         if 'pages' in line:
             index = i + 1
             break
-    while not 'class' in content[index]:
+    while 'class' not in content[index]:
         page_object_line = content[index]
         if 'import' in page_object_line:
             page_object = page_object_line.split('import')[1].strip()
@@ -106,13 +85,10 @@ def get_page_objects(content):
 
 def get_description(content):
 
-    contentString = ''.join(content)
+    content_string = ''.join(content)
     description = ''
-    index = 0
-    description = re.search(
-                            ".*description = \'\'\'(.*\n*.*)\'\'\'",
-                            contentString
-                            ).group(1)
+    description = re.search(".*description = \'\'\'(.*\n*.*)\'\'\'",
+                            content_string).group(1)
     description = re.sub("\s\s+", " ", description)
     return description
 
@@ -190,10 +166,10 @@ def new_test_case(root_path, project, parents, tc_name):
 
 
 test_case_content = """
-class {0}:    
+class {0}:
 
     description = ''''''
-    
+
     pages = []
 
     def setup(self):
@@ -244,14 +220,13 @@ def format_page_object_string(page_objects):
     return po_string
 
 
-
-def save_test_case(root_path, project, full_test_case_name, description, 
+def save_test_case(root_path, project, full_test_case_name, description,
                    page_objects, test_steps):
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
     test_case_path = os.path.join(root_path,
                                   'projects',
                                   project,
-                                  'test_cases', 
+                                  'test_cases',
                                   os.sep.join(parents),
                                   '{}.py'.format(tc_name))
 
@@ -261,7 +236,8 @@ def save_test_case(root_path, project, full_test_case_name, description,
         f.write('\n')
         f.write('    description = \'\'\'{}\'\'\'\n'.format(description))
         f.write('\n')
-        f.write('    pages = {}\n'.format(format_page_object_string(page_objects)))
+        f.write('    pages = {}\n'
+                .format(format_page_object_string(page_objects)))
         f.write('\n')
         f.write('    def setup(self):\n')
         f.write('        logger.description = self.description\n')
@@ -269,16 +245,15 @@ def save_test_case(root_path, project, full_test_case_name, description,
         f.write('    def test(self, data):\n')
         if test_steps:
             for step in test_steps:
-                f.write('        {0}({1})\n'.format(
-                                                step['action'].replace(' ', '_'),
-                                                format_parameters(
-                                                    step,
-                                                    root_path,
-                                                    project,
-                                                    parents,
-                                                    tc_name
-                                                    )
-                                                ))
+                parameters_formatted = format_parameters(step,
+                                                         root_path,
+                                                         project,
+                                                         parents,
+                                                         tc_name)
+                f.write('        {0}({1})\n'
+                        .format(step['action'].replace(' ', '_'),
+                                parameters_formatted)
+                        )
         else:
             f.write('        pass\n')
         f.write('\n')

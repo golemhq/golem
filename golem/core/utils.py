@@ -1,12 +1,8 @@
 import csv
 import datetime
-import importlib
-import logging
-import os
-import sys
 import imp
-
-from golem.core import test_execution
+import importlib
+import os
 
 
 def _generate_dict_from_file_structure(full_path):
@@ -121,13 +117,9 @@ def get_test_data(workspace, project, full_test_case_name):
 
     # check if CSV file == test case name exists
     test, parents = separate_file_from_parents(full_test_case_name)
-    data_file_path = os.path.join(
-                                workspace,
-                                'projects',
-                                project,
-                                'data',
-                                os.sep.join(parents),
-                                '{}.csv'.format(test))
+    data_file_path = os.path.join(workspace, 'projects', project,
+                                  'data', os.sep.join(parents),
+                                  '{}.csv'.format(test))
     if not os.path.exists(data_file_path):
         print 'Warning: No data file found for {}'.format(full_test_case_name)
     else:
@@ -142,14 +134,14 @@ def get_suite_test_cases(project, suite):
     '''Return a list with all the test cases of a given suite'''
     tests = list()
 
-    suite_module = importlib.import_module(
-                                'projects.{0}.test_suites.{1}'
-                                .format(project, suite), package=None)
+    suite_module = importlib.import_module('projects.{0}.test_suites.{1}'
+                                           .format(project, suite),
+                                           package=None)
     tests = suite_module.test_case_list
 
     return tests
 
-    
+
 def get_directory_suite_test_cases(workspace, project, suite):
     '''Return a list with all the test cases of a given directory suite
     a directory suite is a directory inside "/test_cases" folder'''
@@ -249,10 +241,10 @@ def display_tree_structure_command_line(structure, lvl=0):
     """Displays a directory tree structure to the command line"""
     for key, value in structure.iteritems():
         if type(key) is tuple:
-            print '{}> {}'.format(' '*lvl*4, key[0])
+            print '{}> {}'.format(' ' * lvl * 4, key[0])
         else:
-            print '{}{}/'.format(' '*lvl*4, key)
-            display_tree_structure_command_line(value, lvl+1)
+            print '{}{}/'.format(' ' * lvl * 4, key)
+            display_tree_structure_command_line(value, lvl + 1)
 
 
 def separate_file_from_parents(full_filename):
@@ -274,20 +266,22 @@ def is_first_level_directory(workspace, project, directory):
     return os.path.isdir(path)
 
 
-def generate_page_object_module(project, parent_module, full_path, page_path_list):
+def generate_page_object_module(project, parent_module,
+                                full_path, page_path_list):
     if len(page_path_list) > 1:
         if not hasattr(parent_module, page_path_list[0]):
             new_module = imp.new_module(page_path_list[0])
-            setattr(parent_module, 
+            setattr(parent_module,
                     page_path_list[0],
                     new_module)
         else:
             new_module = getattr(parent_module, page_path_list[0])
         page_path_list.pop(0)
-        new_module = generate_page_object_module(project, new_module, full_path, page_path_list)
+        new_module = generate_page_object_module(project, new_module,
+                                                 full_path, page_path_list)
         setattr(parent_module, page_path_list[0], new_module)
     else:
         imported_module = importlib.import_module('projects.{}.pages.{}'
-                                              .format(project, full_path))
+                                                  .format(project, full_path))
         setattr(parent_module, page_path_list[0], imported_module)
     return parent_module
