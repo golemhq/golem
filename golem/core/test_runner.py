@@ -31,7 +31,7 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
         'test_elapsed_time': None,
         'test_timestamp': None}
 
-    import execution_logger
+    from golem.core import execution_logger
     instance = None
     test_timestamp = utils.get_timestamp()
     test_start_time = time.time()
@@ -48,7 +48,6 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
     try:
         modulex = importlib.import_module(
             'projects.{0}.test_cases.{1}'.format(project, test_case_name))
-
         test_class = utils.get_test_case_class(project,
                                                test_case_name)
         # import the page objects into the test module
@@ -62,12 +61,10 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
             setattr(modulex, action, getattr(golem.core.actions, action))
 
         instance = test_class()
-
         if hasattr(instance, 'setup'):
             instance.setup()
         else:
             raise Exception
-
         if hasattr(instance, 'test'):
             instance.test(test_data)
         else:
@@ -78,9 +75,8 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
         result['error'] = traceback.format_exc()
         if settings['screenshot_on_error']:
             actions.capture('error')
-        print dir(traceback)
-        print traceback.print_exc()
-
+        print(dir(traceback))
+        print(traceback.print_exc())
     try:
         if hasattr(instance, 'teardown'):
             instance.teardown()
@@ -108,7 +104,7 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
 
 def multiprocess_executor(execution_list, processes=1,
                           suite_name=None, suite_data=None):
-    print 'execution list', execution_list
+    print('execution list', execution_list)
     timestamp = utils.get_timestamp()
 
     if not suite_name:

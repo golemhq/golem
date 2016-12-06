@@ -31,7 +31,7 @@ def getOrCreateWebdriver(*args):
                 driver = webdriver.PhantomJS(
                                     executable_path=executable_path)
             else:
-                print 'not implemented yet'
+                print('not implemented yet')
                 sys.exit()
         # maximize driver window by default (fix)
         driver.maximize_window()

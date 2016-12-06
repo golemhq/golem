@@ -5,6 +5,6 @@ def log_result(result):
 
     logs.append(result)
 
-    print logs
+    print(logs)
 
     return

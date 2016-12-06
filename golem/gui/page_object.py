@@ -4,7 +4,6 @@ import types
 import inspect
 
 from golem.core import utils
-from golem.gui import gui_utils
 
 
 def get_web_elements(content, po_name):
@@ -27,7 +26,7 @@ def get_web_elements(content, po_name):
     return elements
 
 
-def get_page_object_elements_and_functions(root_path, project, full_po_name):
+def get_page_object_content(root_path, project, full_po_name):
     po, parents = utils.separate_file_from_parents(full_po_name)
 
     modulex = importlib.import_module('projects.{0}.pages.{1}'
@@ -35,6 +34,11 @@ def get_page_object_elements_and_functions(root_path, project, full_po_name):
     variable_list = [item for item in dir(modulex) if not item.startswith("__")]
     element_list = []
     function_list = []
+    import_lines = []
+    # get all the import lines in a list
+    for line in inspect.getsource(modulex).split('\n'):
+        if 'import' in line:
+            import_lines.append(line)
     for var_name in variable_list:
         variable = getattr(modulex, var_name)
         if isinstance(variable, types.FunctionType):
@@ -47,7 +51,7 @@ def get_page_object_elements_and_functions(root_path, project, full_po_name):
                 'code': inspect.getsource(variable)
             }
             function_list.append(new_function)
-        elif isinstance(variable, types.TupleType):
+        elif isinstance(variable, tuple):
             # this is a web element tuple
             new_element = {
                 'element_name': var_name,
@@ -58,15 +62,17 @@ def get_page_object_elements_and_functions(root_path, project, full_po_name):
             }
             element_list.append(new_element)
         else:
-            print 'ERROR'
+            print('ERROR')
     page_object_data = {
         'function_list': function_list,
-        'element_list': element_list
+        'element_list': element_list,
+        'import_lines': import_lines
     }
     return page_object_data
 
 
-def save_page_object(root_path, project, full_page_name, elements, functions):
+def save_page_object(root_path, project, full_page_name,
+                     elements, functions, import_lines):
     page_name, parents = utils.separate_file_from_parents(full_page_name)
     page_object_path = os.path.join(root_path,
                                     'projects',
@@ -74,17 +80,17 @@ def save_page_object(root_path, project, full_page_name, elements, functions):
                                     'pages',
                                     os.sep.join(parents),
                                     '{}.py'.format(page_name))
-
-
     with open(page_object_path, 'w') as f:
+        for line in import_lines:
+            f.write("{}\n".format(line))
         for element in elements:
-            f.write("{0} = ('{1}', '{2}', '{3}')\n\n".format(
+            f.write("\n\n{0} = ('{1}', \"{2}\", '{3}')".format(
                     element['name'],
                     element['selector'],
                     element['value'],
                     element['display_name']))
         for func in functions:
-            f.write(func + '\n\n')
+            f.write('\n\n' + func)
 
 
 def is_page_object(parameter, root_path, project):
@@ -106,6 +112,6 @@ def new_page_object(root_path, project, parents, page_object_name):
     if not os.path.exists(page_object_path):
         os.makedirs(page_object_path)
     page_object_full_path = os.path.join(page_object_path, page_object_name + '.py')
-    
+
     with open(page_object_full_path, 'w') as f:
         f.write('')

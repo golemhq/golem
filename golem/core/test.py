@@ -17,6 +17,6 @@ class Test:
 
         #self.data = data
 
-        print "initializing"
+        print("initializing")
     
 

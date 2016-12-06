@@ -14,8 +14,6 @@ $(document).ready(function() {
 
     getPageObjects();
 
-    //getDatosValues();
-
     getSelectedPageObjectElements();
 
     startAllElementInputAutocomplete();
@@ -326,33 +324,6 @@ function startAllElementInputAutocomplete(){
         });
     })
 
-}
-
-
-function getDatosValues(){
-    $.ajax({
-        url: "/get_datos_values/",
-        data: {
-            "project": project,
-            "canal": canal,
-            "testCaseName": testCaseName,
-        },
-        dataType: 'json',
-        type: 'POST',
-        success: function(data) {
-            console.log(data);
-            for(dt in data){
-                $(".dato").each(function(){
-                    if($(this).find(".dato-variable").val() == data[dt].name){
-                        $(this).find(".dato-value").val(data[dt].value);
-                    }
-                })
-            }
-        },
-        error: function() {
-            
-        }
-    });
 }
 
 

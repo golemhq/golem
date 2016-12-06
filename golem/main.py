@@ -27,9 +27,9 @@ def execute_from_command_line(root_path):
     if args.main_action == 'run':
         test_execution.thread_amount = args.threads
         if not args.project:
-            print 'Usage:', parser.usage, '\n\n', 'Project List:'
+            print('Usage:', parser.usage, '\n\n', 'Project List:')
             for proj in utils.get_projects(root_path):
-                print '> {}'.format(proj)
+                print('> {}'.format(proj))
             sys.exit()
         # check if selected project does not exist
         elif not args.project in utils.get_projects(root_path):
@@ -43,12 +43,12 @@ def execute_from_command_line(root_path):
 
             # check if test_or_suite value is present
             if not args.test_or_suite:
-                print 'Usage:', parser.usage
-                print '\nTest Cases:'
+                print('Usage:', parser.usage)
+                print('\nTest Cases:')
                 test_cases = utils.get_test_cases(root_path,
                                                   test_execution.project)
                 utils.display_tree_structure_command_line(test_cases)
-                print '\nTest Suites:'
+                print('\nTest Suites:')
                 test_suites = utils.get_suites(root_path,
                                                test_execution.project)
                 utils.display_tree_structure_command_line(test_suites)

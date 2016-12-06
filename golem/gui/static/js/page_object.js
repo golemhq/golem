@@ -96,8 +96,9 @@ function addPageObjectInput(){
 
 
 function savePageObject(){
-
     var elements = [];
+    var functions = [];
+    var importLines = [];
 
     $(".element").each(function(){
         elements.push({
@@ -107,13 +108,12 @@ function savePageObject(){
             'display_name': $(this).find('.element-display-name').val()
         });
     });
-
-    var functions = []
-
     $(".function").each(function(){
         functions.push($(this).find('.func-code').val());
     });
-
+    $(".import-line").each(function(){
+        importLines.push($(this).val());
+    });
 
     $.ajax({
         url: "/save_page_object/",
@@ -121,7 +121,8 @@ function savePageObject(){
                 "project": project,
                 "pageObjectName": pageObjectName,
                 "elements": elements,
-                "functions": functions
+                "functions": functions,
+                "importLines": importLines
             }),
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',

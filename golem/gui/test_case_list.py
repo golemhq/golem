@@ -24,7 +24,7 @@ class TestCaseList:
                 if not row[0]:
                     row[0] = str(uuid.uuid4());
         else:
-            print "first column is not inner_id"   
+            print("first column is not inner_id")
             
         with open(self.path, 'w') as test_case_file:    
 

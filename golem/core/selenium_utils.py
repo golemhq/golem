@@ -79,7 +79,7 @@ def get_driver(driver_selected):
             driver = webdriver.PhantomJS(
                                 executable_path=executable_path)
         else:
-            print 'not implemented yet'
+            print('not implemented yet')
             sys.exit()
 
     return driver

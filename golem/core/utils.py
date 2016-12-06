@@ -4,6 +4,8 @@ import imp
 import importlib
 import os
 
+from functools import reduce
+
 
 def _generate_dict_from_file_structure(full_path):
     """Generates a dictionary with the preserved structure of a given
@@ -84,7 +86,7 @@ def get_suites(workspace, project):
 def get_projects(workspace):
     projects = []
     path = os.path.join(workspace, 'projects')
-    projects = os.walk(path).next()[1]
+    projects = os.walk(path).__next__()[1]
     return projects
 
 
@@ -121,9 +123,9 @@ def get_test_data(workspace, project, full_test_case_name):
                                   'data', os.sep.join(parents),
                                   '{}.csv'.format(test))
     if not os.path.exists(data_file_path):
-        print 'Warning: No data file found for {}'.format(full_test_case_name)
+        print('Warning: No data file found for {}'.format(full_test_case_name))
     else:
-        with open(data_file_path, 'rb') as csv_file:
+        with open(data_file_path, 'r') as csv_file:
             dict_reader = csv.DictReader(csv_file)
             for data_set in dict_reader:
                 data_dict_list.append(data_set)
@@ -172,11 +174,15 @@ def get_global_settings():
 
     settings = {}
     if os.path.exists('settings.conf'):
-        execfile("settings.conf", settings)
-        # remove __builtins__ key, not used
-        settings.pop("__builtins__", None)
+        ## execfile("settings.conf", settings)
+
+        # the following code parses a conf file in python 3.x
+        with open("settings.conf") as f:
+            code = compile(f.read(), "settings.conf", 'exec')
+            exec(code, settings)
+            settings.pop("__builtins__", None)
     else:
-        print 'Warning: global Settings file is not present'
+        print('Warning: global Settings file is not present')
 
     return settings
 
@@ -190,11 +196,15 @@ def get_project_settings(project, global_settings):
                                          project,
                                          'settings.conf')
     if os.path.exists(project_settings_path):
-        execfile(project_settings_path, project_settings)
-        # remove __builtins__ key, not used
-        project_settings.pop("__builtins__", None)
+        ## execfile(project_settings_path, project_settings)
+
+        # the following code parses a conf file in python 3.x
+        with open(project_settings_path) as f:
+            code = compile(f.read(), project_settings_path, 'exec')
+            exec(code, project_settings)
+            project_settings.pop("__builtins__", None)
     else:
-        print 'Warning: project Settings file is not present'
+        print('Warning: project Settings file is not present')
     # merge global and project settings
     for setting in project_settings:
         if setting in global_settings:
@@ -239,11 +249,11 @@ def test_suite_exists(workspace, project, full_test_suite_name):
 
 def display_tree_structure_command_line(structure, lvl=0):
     """Displays a directory tree structure to the command line"""
-    for key, value in structure.iteritems():
+    for key, value in structure.items():
         if type(key) is tuple:
-            print '{}> {}'.format(' ' * lvl * 4, key[0])
+            print('{}> {}'.format(' ' * lvl * 4, key[0]))
         else:
-            print '{}{}/'.format(' ' * lvl * 4, key)
+            print('{}{}/'.format(' ' * lvl * 4, key))
             display_tree_structure_command_line(value, lvl + 1)
 
 

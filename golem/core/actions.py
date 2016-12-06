@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 import uuid
-import StringIO
+import io
 import importlib
 
 import selenium
@@ -27,15 +27,15 @@ def _run_wait_hook():
                                                 .format(core.project))
         wait_hook_function = getattr(extend_module, wait_hook)
         wait_hook_function()
-        print 'Wait hook waited for {} seconds'.format(time.time() - start_time)
+        print('Wait hook waited for {} seconds'.format(time.time() - start_time))
 
 
 def _wait_for_visible(element):
     not_visible = True
     start_time = time.time()
-    visible = element.is_displayed()        
+    visible = element.is_displayed()
     while not visible:
-        print 'Element is not visible, waiting..'
+        print('Element is not visible, waiting..')
         time.sleep(0.5)
         visible = element.is_displayed()
 
@@ -52,7 +52,7 @@ def capture(message=''):
     #screenshot_name = 'test' + msg.replace(' ', '_')
     #screenshot_filename = .format(len(logger.screenshots))
     #driver.save_screenshot(screenshot_name + '.jpg')
-    img = Image.open(StringIO.StringIO(driver.get_screenshot_as_png()))
+    img = Image.open(io.BytesIO(driver.get_screenshot_as_png()))
     img_id = str(uuid.uuid4())[:8]
     logger.screenshots[img_id] = img
     _add_step(message, img_id)

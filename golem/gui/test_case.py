@@ -230,7 +230,7 @@ def save_test_case(root_path, project, full_test_case_name, description,
                                   os.sep.join(parents),
                                   '{}.py'.format(tc_name))
 
-    with open(test_case_path, 'w') as f:
+    with open(test_case_path, 'w', encoding='utf-8') as f:
         f.write('\n')
         f.write('class {}:\n'.format(tc_name))
         f.write('\n')

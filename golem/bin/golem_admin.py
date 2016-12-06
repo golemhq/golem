@@ -20,7 +20,7 @@ def main():
         # Generate a new 'golem' directory
         dir_name = args.name
         if os.path.exists(dir_name):
-            print 'Error: the directory {} already exists'.format(dir_name)
+            print('Error: the directory {} already exists'.format(dir_name))
         else:
             # copy golem/template/ content to new directory
             source = os.path.join(golem.__path__[0], 'template')

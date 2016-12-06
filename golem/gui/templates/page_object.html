@@ -120,7 +120,7 @@
 
         <h4 style="margin-top: 20px">Functions</h4>
 
-        <div id="datosContainer">
+        <div id="functionContainer">
 
             <div id="functions">
                 {% for function in page_object_data.function_list %}
@@ -141,6 +141,9 @@
                 {% endfor %}
             </div>
 
+           {% for line in page_object_data.import_lines %}
+                <input type="hidden" class="import-line" value="{{line}}">
+           {% endfor %}
 
         </div>
 
