@@ -596,7 +596,7 @@ function runTestCase(){
         "positionClass": "toast-top-center",
         "timeOut": "3000",
         "hideDuration": "100"}
-    toastr.success('Running test case ' + testCaseName);
+    toastr.info('Running test case ' + testCaseName);
     $.ajax({
         url: "/run_test_case/",
         data: {

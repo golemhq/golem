@@ -93,25 +93,25 @@ def get_description(content):
     return description
 
 
-def get_execute_script_content(content):
+# def get_execute_script_content(content):
 
-    execute_script_content = []
+#     execute_script_content = []
 
-    save_content = False
-    level = 0
-    for line in content:
-        if save_content and '{' in line:
-            level += 1
-        if save_content and '}' in line:
-            if level > 0:
-                level -= 1
-            else:
-                save_content = False
-        if save_content:
-            execute_script_content.append(line)
-        if 'executeScript' in line:
-            save_content = True
-    return execute_script_content
+#     save_content = False
+#     level = 0
+#     for line in content:
+#         if save_content and '{' in line:
+#             level += 1
+#         if save_content and '}' in line:
+#             if level > 0:
+#                 level -= 1
+#             else:
+#                 save_content = False
+#         if save_content:
+#             execute_script_content.append(line)
+#         if 'executeScript' in line:
+#             save_content = True
+#     return execute_script_content
 
 
 def parse_test_case(workspace, project, parents, test_case_name):
