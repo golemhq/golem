@@ -125,7 +125,7 @@ def get_test_data(workspace, project, full_test_case_name):
     if not os.path.exists(data_file_path):
         print('Warning: No data file found for {}'.format(full_test_case_name))
     else:
-        with open(data_file_path, 'r') as csv_file:
+        with open(data_file_path, 'r', encoding='utf8') as csv_file:
             dict_reader = csv.DictReader(csv_file)
             for data_set in dict_reader:
                 data_dict_list.append(data_set)

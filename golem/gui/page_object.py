@@ -80,7 +80,7 @@ def save_page_object(root_path, project, full_page_name,
                                     'pages',
                                     os.sep.join(parents),
                                     '{}.py'.format(page_name))
-    with open(page_object_path, 'w') as f:
+    with open(page_object_path, 'w', encoding='utf-8') as f:
         for line in import_lines:
             f.write("{}\n".format(line))
         for element in elements:
