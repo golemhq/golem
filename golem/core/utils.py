@@ -295,3 +295,30 @@ def generate_page_object_module(project, parent_module,
                                                   .format(project, full_path))
         setattr(parent_module, page_path_list[0], imported_module)
     return parent_module
+
+
+def create_new_directory(path_list, add_init=False):
+    path = os.sep.join(path_list)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    if add_init:
+        # add __init__.py file to make the new directory a python package
+        init_path = os.path.join(path, '__init__.py')
+        open(init_path, 'a').close()
+
+
+def create_new_project(workspace, project):
+    create_new_directory([workspace, 'projects', project],
+                               add_init=True)
+    create_new_directory([workspace, 'projects', project, 'data'],
+                               add_init=False)
+    create_new_directory([workspace, 'projects', project, 'pages'],
+                               add_init=True)
+    create_new_directory([workspace, 'projects', project, 'reports'],
+                               add_init=False)
+    create_new_directory([workspace, 'projects', project, 'test_cases'],
+                               add_init=True)
+    create_new_directory([workspace, 'projects', project, 'test_suites'],
+                               add_init=True)
+    extend_path = os.path.join(workspace, 'projects', project, 'extend.py')
+    open(extend_path, 'a').close()

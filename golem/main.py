@@ -96,7 +96,11 @@ def execute_from_command_line(root_path):
 
     # main action == startproject
     if args.main_action == 'startproject':
-        sys.exit('To be defined')
+        if args.project in utils.get_projects(root_path):
+            sys.exit('Error: a project with that name already exists'
+                     .format(args.project))
+        else:
+            utils.create_new_project(root_path, args.project)
 
     # main action == createuser
     if args.main_action == 'createuser':

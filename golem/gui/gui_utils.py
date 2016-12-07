@@ -2,28 +2,23 @@ import csv
 import datetime
 import os
 
+from golem.core import utils
+
 
 def new_directory(root_path, project, parents, directory_name):
     parents_joined = os.sep.join(parents)
 
-    directory_path = os.path.join(
-        root_path, 'projects', project, 'test_cases', parents_joined, directory_name)
-
-    if not os.path.exists(directory_path):
-        os.makedirs(directory_path)
+    utils.create_new_directory([root_path, 'projects', project, 'test_cases',
+                               parents_joined, directory_name], 
+                               add_init=True)
 
 
 def new_directory_page_object(root_path, project, parents, directory_name):
     parents_joined = os.sep.join(parents)
 
-    directory_path = os.path.join(
-        root_path, 'projects', project, 'pages', parents_joined, directory_name)
-
-    if not os.path.exists(directory_path):
-        os.makedirs(directory_path)
-    # add __init__.py file to make the new directory a python package
-    init_path = os.path.join(directory_path, '__init__.py')
-    open(init_path, 'a').close()
+    utils.create_new_directory([root_path, 'projects', project, 'pages',
+                               parents_joined, directory_name], 
+                               add_init=True)
 
 
 def run_test_case(project, test_case_name):

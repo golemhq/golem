@@ -33,6 +33,8 @@ def get_golem_parser():
     gui_parser = sub_parsers.add_parser('gui')
 
     start_project_parser = sub_parsers.add_parser('startproject')
+    start_project_parser.add_argument('project',
+                                      help="project name")
 
     createuser_parser = sub_parsers.add_parser('createuser')
 
@@ -44,16 +46,23 @@ def get_golem_admin_parser():
 
     parser = argparse.ArgumentParser(add_help=False)
 
-    parser.add_argument(
-        'action',
-        metavar='action',
-        choices=['startdirectory'],
-        help="action"
-    )
-    parser.add_argument(
-        'name',
-        metavar='name',
-        help="directory name"
-    )
+    # parser.add_argument(
+    #     'action',
+    #     metavar='action',
+    #     choices=['startdirectory'],
+    #     help="action"
+    # )
+    # parser.add_argument(
+    #     'name',
+    #     metavar='name',
+    #     help="directory name"
+    # )
+
+    sub_parsers = parser.add_subparsers(dest="main_action")
+
+    new_directory_parser = sub_parsers.add_parser('startdirectory')
+    new_directory_parser.add_argument('name',
+                                      metavar='name',
+                                      help="directory name")
 
     return parser
