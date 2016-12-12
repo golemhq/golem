@@ -37,6 +37,7 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
     test_start_time = time.time()
 
     golem.core.project = project
+    golem.core.workspace = workspace
     golem.core.set_settings(settings)
 
     # create a directory to store report.json and screenshots
@@ -77,6 +78,7 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
             actions.capture('error')
         print(dir(traceback))
         print(traceback.print_exc())
+
     try:
         if hasattr(instance, 'teardown'):
             instance.teardown()

@@ -504,7 +504,7 @@ function saveTestCase(){
         'testData': testData,
         'testSteps': testSteps,
         'project': project,
-        'testCaseName': testCaseName
+        'testCaseName': fullTestCaseName
     }
 
     $.ajax({
@@ -537,7 +537,7 @@ function runTestCase(){
         url: "/run_test_case/",
         data: {
              "project": project,
-             "testCaseName": testCaseName,
+             "testCaseName": fullTestCaseName,
          },
          dataType: 'json',
          type: 'POST',

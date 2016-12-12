@@ -79,3 +79,27 @@ Verify that an element contains the given text.
 - **wait(seconds)**
 
 Pause execution for the given amount of seconds
+
+
+Configuration Options
+--------------------------------------
+
+- **implicit_wait**
+
+Default time to wait looking for an element until it is found.
+
+- **screenshot_on_error**
+
+Take a screenshot on error by default
+
+- **default_driver**
+
+Define the driver to use unless overriden by the -d/--driver flag
+
+- **chrome_driver_path**
+
+Full path to the chrome driver executable
+
+- **wait_hook**
+
+Custom wait method to use, specific to each application, must be defined inside extend.py

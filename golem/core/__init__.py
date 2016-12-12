@@ -7,32 +7,41 @@ settings = None
 
 project = None
 
+workspace = None
+
 
 # will fail if driver name is not passed and driver not instantiated
 def getOrCreateWebdriver(*args):
+    global settings
     global driver
-    # driver = driver or utils.get_driver(args[0])
-    driver_selected = 'firefox'
+
     if not driver:
-        # driver = selenium_utils.get_driver('firefox')
+
+        if settings['driver']:
+            driver_selected = settings['driver']
+        elif 'default_driver' in settings:
+            driver_selected = settings['default_driver']
+        else:
+            driver_selected = 'firefox'
+
         if driver_selected == 'firefox':
             driver = webdriver.Firefox()
         if driver_selected == 'chrome':
-            driver = webdriver.Chrome()
-        if driver_selected == 'ie':
-            driver = webdriver.Ie()
-        if driver_selected == 'phantomjs':
-            if os.name == 'nt':
-                executable_path = os.path.join(
-                                            golem.__path__[0],
-                                            'lib',
-                                            'phantom',
-                                            'phantomjs.exe')
-                driver = webdriver.PhantomJS(
-                                    executable_path=executable_path)
-            else:
-                print('not implemented yet')
-                sys.exit()
+            driver = webdriver.Chrome(executable_path=settings['chrome_driver_path'])
+        # if driver_selected == 'ie':
+        #     driver = webdriver.Ie()
+        # if driver_selected == 'phantomjs':
+        #     if os.name == 'nt':
+        #         executable_path = os.path.join(
+        #                                     golem.__path__[0],
+        #                                     'lib',
+        #                                     'phantom',
+        #                                     'phantomjs.exe')
+        #         driver = webdriver.PhantomJS(
+        #                             executable_path=executable_path)
+            # else:
+            #     print('not implemented yet')
+            #     sys.exit()
         # maximize driver window by default (fix)
         driver.maximize_window()
 

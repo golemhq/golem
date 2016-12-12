@@ -36,7 +36,12 @@ def get_page_object_content(root_path, project, full_po_name):
     function_list = []
     import_lines = []
     # get all the import lines in a list
-    for line in inspect.getsource(modulex).split('\n'):
+    source_code_list = []
+    try:
+        source_code_list = inspect.getsource(modulex).split('\n')
+    except:
+        pass
+    for line in source_code_list:
         if 'import' in line:
             import_lines.append(line)
     for var_name in variable_list:

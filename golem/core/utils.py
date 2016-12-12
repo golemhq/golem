@@ -39,7 +39,6 @@ def _generate_dict_from_file_structure(full_path):
         ('file2', 'file2'): None,
     }
     """
-
     root_dir = os.path.basename(os.path.normpath(full_path))
 
     dir_tree = {}

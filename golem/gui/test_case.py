@@ -125,7 +125,7 @@ def parse_test_case(workspace, project, parents, test_case_name):
                         parents_joined,
                         test_case_name + '.py')
 
-    with open(path) as f:
+    with open(path, encoding='utf-8') as f:
         content = f.readlines()
 
     description = get_description(content)

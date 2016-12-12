@@ -26,6 +26,7 @@ def execute_from_command_line(root_path):
     # main action == run
     if args.main_action == 'run':
         test_execution.thread_amount = args.threads
+        test_execution.settings['driver'] = args.driver
         if not args.project:
             print('Usage:', parser.usage, '\n\n', 'Project List:')
             for proj in utils.get_projects(root_path):

@@ -29,6 +29,14 @@ def get_golem_parser():
                             type=int,
                             metavar='amount of threads for parallel execution',
                             help="amount of threads for parallel execution")
+    run_parser.add_argument('-d',
+                            '--driver',
+                            action='store',
+                            nargs='?',
+                            choices=['firefox', 'chrome'],
+                            type=str,
+                            metavar='Web Driver',
+                            help="Web Driver")
 
     gui_parser = sub_parsers.add_parser('gui')
 
