@@ -129,6 +129,9 @@ def get_test_data(workspace, project, full_test_case_name):
             dict_reader = csv.DictReader(csv_file)
             for data_set in dict_reader:
                 data_dict_list.append(data_set)
+
+    if not data_dict_list:
+        data_dict_list = [{}]
     return data_dict_list
 
 

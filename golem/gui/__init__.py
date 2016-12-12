@@ -50,7 +50,7 @@ def login():
                     if not user.password_is_correct(username, password,
                                                     root_path):
                         result['errors'].append('Username and password'
-                                                'do not match')
+                                                ' do not match')
         if not next_url:
             next_url = '/'
 

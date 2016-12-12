@@ -64,11 +64,11 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
         if hasattr(instance, 'setup'):
             instance.setup()
         else:
-            raise Exception
+            raise Exception('Test class does not have setup method')
         if hasattr(instance, 'test'):
             instance.test(test_data)
         else:
-            raise Exception
+            raise Exception('Test class does not have test method')
 
     except:
         result['result'] = 'fail'
@@ -95,6 +95,10 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
     result['test_timestamp'] = test_timestamp
     result['screenshots'] = execution_logger.screenshots
 
+    execution_logger.description = None
+    execution_logger.steps = []
+    execution_logger.screenshots = {}
+
     report.generate_report(report_directory,
                            test_case_name,
                            test_data,
@@ -107,8 +111,8 @@ def multiprocess_executor(execution_list, processes=1,
     print('execution list', execution_list)
     timestamp = utils.get_timestamp()
 
-    if not suite_name:
-        suite_name = '__single__'
+    # if not suite_name:
+    #     suite_name = '__single__'
 
     pool = Pool(processes=processes)
 
@@ -117,8 +121,8 @@ def multiprocess_executor(execution_list, processes=1,
         apply_async = pool.apply_async(test_runner,
                                        args=(test_execution.root_path,
                                              test_execution.project,
-                                             test[0],
-                                             test[1],
+                                             test['test_case_name'],
+                                             test['data_set'],
                                              suite_name,
                                              suite_data,
                                              timestamp,
@@ -152,9 +156,10 @@ def run_single_test_case(workspace, project, full_test_case_name):
         execution_list = []
         if data_sets:
             for data_set in data_sets:
-                execution_list.append((full_test_case_name, data_set))
-        else:
-            execution_list.append((full_test_case_name, {}))
+                execution_list.append({
+                    'test_case_name': full_test_case_name,
+                    'data_set': data_set
+                    })
         # run the single test, once for each data set
         multiprocess_executor(execution_list, thread_amount)
 
@@ -188,9 +193,10 @@ def run_suite(workspace, project, suite, is_directory=False):
                                         test_case)
         if data_sets:
             for data_set in data_sets:
-                execution_list.append((test_case, data_set))
-        else:
-            execution_list.append((test_case, {}))
+                execution_list.append({
+                    'test_case_name': test_case,
+                    'data_set': data_set
+                    })
 
     multiprocess_executor(execution_list,
                           thread_amount,

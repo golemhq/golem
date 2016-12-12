@@ -1,8 +1,6 @@
 
 var pageObjects = [];
-
 var globalActions = [];
-
 var selectedPageObjectsElements = [];
 var selectedPageObjectsFunctions = [];
 
@@ -11,18 +9,12 @@ var unsavedChanges = false;
 $(document).ready(function() {      
 
     getGlobalActions();
-
     getPageObjects();
-
     getSelectedPageObjectElements();
-
     startAllElementInputAutocomplete();
-            
     startAllValueInputAutocomplete();  
 
-
     $(".dato-variable").blur(function() {
-        //alert('blur')
         startAllValueInputAutocomplete();
     });
 
@@ -61,7 +53,7 @@ function addPOInput(){
                 </button> \
             </span> \
             <span class='input-group-btn'> \
-                <button class='btn btn-default' type='button' onclick='deleteInput(this)'> \
+                <button class='btn btn-default' type='button' onclick='deletePageObject(this)'> \
                     <span class='glyphicon glyphicon-remove' aria-hidden='true'></span> \
                 </button> \
             </span> \
@@ -73,29 +65,6 @@ function addPOInput(){
     startPageObjectsAutocomplete();
 }
 
-
-function addDatoInput(){
-    $("#datos").append(
-        "<div class='dato'> \
-            <div class='col-sm-5'> \
-                <div class='input-group'> \
-                    <input type='text' class='form-control dato-variable' \
-                        onchange='startAllValueInputAutocomplete();' value='' placeholder='nombre'> \
-                </div> \
-            </div> \
-            <div class='col-sm-1'> \
-                <label>=</label> \
-            </div> \
-            <div class='col-sm-6'> \
-                <div class='input-group'> \
-                    <input type='text' class='form-control dato-value' value='' placeholder='valor'> \
-                    <span class='input-group-btn'> \
-                        <button class='btn btn-default' type='button' onclick='deleteInputDato(this)'><span class='glyphicon glyphicon-remove' aria-hidden='true'></span></button> \
-                    </span> \
-                </div> \
-            </div> \
-        </div>");
-}
 
 function addFirstStepInput(){
     
@@ -120,7 +89,7 @@ function addFirstStepInput(){
 }
 
 
-function deleteInput(elem){
+function deletePageObject(elem){
     $(elem).parent().parent().remove();
     unsavedChanges = true;
 }
@@ -467,8 +436,6 @@ function getSelectedPageObjectElements(){
 }
 
 
-
-
 function saveTestCase(){
 
     var description = $("#description").val();
@@ -560,8 +527,6 @@ function saveTestCase(){
 }
 
 
-
-
 function runTestCase(){
     toastr.options = {
         "positionClass": "toast-top-center",
@@ -586,14 +551,6 @@ function runTestCase(){
 function dataTableHeaderInputChange(){
     startAllValueInputAutocomplete();
 }
-
-
-
-
-
-
-
-
 
 
 // U T I L S

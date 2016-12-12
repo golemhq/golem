@@ -59,12 +59,12 @@ def capture(message=''):
 
 
 def click(element):
+    _add_step('Click {0}'.format(element[2]))
     _run_wait_hook()    
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     #_wait_for_visible(test_object)
     test_object.click()
-    _add_step('Click {0}'.format(element[2]))
 
 
 def close():
@@ -74,45 +74,45 @@ def close():
 
 
 def go_to(url):
+    _add_step('Go to url:\'{0}\''.format(url))
     driver = core.getOrCreateWebdriver()
     driver.get(url)
-    _add_step('Go to url:\'{0}\''.format(url))
 
 
 def select_by_index(element, index):
+    _add_step('Select option of index {0} from element {1}'
+              .format(index, element[2]))
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_index(index)
-    _add_step('Select option of index {0} from element {1}'
-              .format(index, element[2]))
 
 
 def select_by_text(element, text):
+    _add_step('Select \'{0}\' from element {1}'.format(text, element[2]))
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_visible_text(text)
-    _add_step('Select \'{0}\' from element {1}'.format(text, element[2]))
 
 
 def select_by_value(element, value):
+    _add_step('Select \'{0}\' value from element {1}'.format(value, element[2]))
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_value(value)
-    _add_step('Select \'{0}\' value from element {1}'.format(value, element[2]))
 
 
 def send_keys(element, text):
+    _add_step('Write \'{0}\' in element {1}'.format(text, element[2]))
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     test_object.send_keys(text)
-    _add_step('Write \'{0}\' in element {1}'.format(text, element[2]))
 
 
 def store(data, key, value):
