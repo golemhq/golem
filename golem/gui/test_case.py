@@ -15,52 +15,56 @@ def _get_steps(content):
             break
     if index >= 0:
         end_of_steps = False
-        while not end_of_steps:
+        while 'def teardown' not in content[index] and index <= len(content):
             current_line = content[index]
             if len(current_line.strip()) and current_line.strip() != 'pass':
                 # this is a step
-                method_name = current_line.split('(')[0].strip()
-                parameters = current_line.split('(')[1].split(')')[0]
-                parameter_list = [x for x in parameters.split(',')]
-                formatted_parameters = []
-                for parameter in parameter_list:
-                    if '\'' in parameter:
-                        formatted_parameters.append(parameter.split('\'')[1])
+                method_name = current_line.split('(', 1)[0].strip()
+                parameters = current_line.split('(', 1)[1].strip() 
+
+                processed_parameters = []
+                current_parameter  = ''
+                processing_nested_function = False
+                for i in range(len(parameters)):
+                    this_char = parameters[i]
+                    if this_char is ',' and not processing_nested_function:
+                        processed_parameters.append(current_parameter)
+                        current_parameter = ''
                     else:
-                        formatted_parameters.append(parameter)
+                        if this_char is ')':
+                            processing_nested_function = False
+                        if this_char == '(':
+                            processing_nested_function = True
+                        current_parameter += this_char
+                processed_parameters.append(current_parameter)
+                formatted_parameters = []
+                for pp in processed_parameters:
+                    pp = pp.strip()
+                    if pp[-1] is ')':
+                        pp = pp[:-1]
+                    if pp[0] in ['\'', '\"']:
+                        pp = pp[1:]
+                    if pp[-1] in ['\'', '\"']:
+                        pp = pp[:-1]
+                    if 'data' in pp:
+                        pp = pp.split('\'')[1]            
+
+                    formatted_parameters.append(pp)
+                # parameter_list = [x for x in parameters.split(',')]
+                # formatted_parameters = []
+                # for parameter in parameter_list:
+                #     if '\'' in parameter:
+                #         formatted_parameters.append(parameter.split('\'')[1])
+                #     else:
+                #         formatted_parameters.append(parameter)
+
                 step = {
                     'method_name': method_name.replace('_', ' '),
                     'parameters': formatted_parameters
                 }
                 steps.append(step)
-            if 'def teardown' in content[index + 1]:
-                end_of_steps = True
             index += 1
     return steps
-
-
-def get_page_objectsdeprecado(content):
-
-    page_objects = []
-    index = -1
-    for i, line in enumerate(content):
-        if 'pages' in line:
-            index = i + 1
-            break
-    while 'class' not in content[index]:
-        page_object_line = content[index]
-        if 'import' in page_object_line:
-            page_object = page_object_line.split('import')[1].strip()
-            before_import = page_object_line.split('import')[0]
-            rel_path = before_import.split('pages')[1].strip()
-            if rel_path:
-                if rel_path[0] == '.':
-                    rel_path = rel_path[1:]
-                rel_path += '.'
-            po_with_rel_path = rel_path + page_object
-            page_objects.append(po_with_rel_path)
-        index += 1
-    return page_objects
 
 
 def get_page_objects(content):
@@ -183,7 +187,8 @@ class {0}:
 """
 
 
-def format_parameters(step, root_path, project, parents, test_case_name):
+def format_parameters(step, root_path, project, parents, test_case_name, 
+                      stored_keys):
     parameters = step['parameters']
     action = step['action'].replace(' ', '_')
     formatted_parameters = []
@@ -191,15 +196,16 @@ def format_parameters(step, root_path, project, parents, test_case_name):
         if page_object.is_page_object(parameter, root_path, project):
             # it is a page object, leave as is
             this_parameter_string = parameter
+        elif 'random(' in parameter:
+            this_parameter_string = parameter
         else:
             # is not a page object,
             # identify if its a value or element parameter
-            is_data_var = data.is_data_variable(root_path,
-                                                project,
-                                                parents,
-                                                test_case_name,
-                                                parameter)
-            if is_data_var:
+            is_data_var = data.is_data_variable(root_path, project, parents,
+                                                test_case_name, parameter)
+            is_in_stored_keys = parameter in stored_keys
+            action_is_store = action == 'store'
+            if (is_data_var or is_in_stored_keys) and not action_is_store:
                 this_parameter_string = 'data[\'{}\']'.format(parameter)
             else:
                 if action in ['wait', 'select_by_index']:
@@ -220,15 +226,24 @@ def format_page_object_string(page_objects):
     return po_string
 
 
+def get_stored_keys(steps):
+    stored_keys = []
+    for step in steps:
+        parameters = step['parameters']
+        action = step['action'].replace(' ', '_')
+        if action == 'store':
+            stored_keys.append(parameters[0])
+    return stored_keys
+
+
 def save_test_case(root_path, project, full_test_case_name, description,
                    page_objects, test_steps):
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    test_case_path = os.path.join(root_path,
-                                  'projects',
-                                  project,
-                                  'test_cases',
-                                  os.sep.join(parents),
+    test_case_path = os.path.join(root_path, 'projects', project,
+                                  'test_cases', os.sep.join(parents),
                                   '{}.py'.format(tc_name))
+
+    stored_keys = get_stored_keys(test_steps)
 
     with open(test_case_path, 'w', encoding='utf-8') as f:
         f.write('\n')
@@ -245,15 +260,12 @@ def save_test_case(root_path, project, full_test_case_name, description,
         f.write('    def test(self, data):\n')
         if test_steps:
             for step in test_steps:
-                parameters_formatted = format_parameters(step,
-                                                         root_path,
-                                                         project,
-                                                         parents,
-                                                         tc_name)
+                parameters_formatted = format_parameters(step, root_path,
+                                                         project, parents,
+                                                         tc_name, stored_keys)
                 f.write('        {0}({1})\n'
                         .format(step['action'].replace(' ', '_'),
-                                parameters_formatted)
-                        )
+                                parameters_formatted))
         else:
             f.write('        pass\n')
         f.write('\n')

@@ -3,6 +3,8 @@ import time
 import uuid
 import io
 import importlib
+import string
+import random as rand
 
 import selenium
 from PIL import Image
@@ -77,6 +79,24 @@ def go_to(url):
     _add_step('Go to url:\'{0}\''.format(url))
     driver = core.getOrCreateWebdriver()
     driver.get(url)
+
+
+def random(*args):
+    random_string = ''
+    for arg in args:
+        if arg[0] == 'c':
+            string_length = int(arg[1:])
+            new_str = ''.join(rand.sample(string.ascii_lowercase,
+                                            string_length))
+            random_string += new_str
+        elif arg[0] == 'd':
+            string_length = int(arg[1:])
+            new_str = rand.randint(pow(10, string_length - 1),
+                                   pow(10, string_length) - 1)
+            random_string += str(new_str)
+        else:
+            random_string += arg
+    return random_string
 
 
 def select_by_index(element, index):
