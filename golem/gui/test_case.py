@@ -46,7 +46,7 @@ def _get_steps(content):
                         pp = pp[1:]
                     if pp[-1] in ['\'', '\"']:
                         pp = pp[:-1]
-                    if 'data' in pp:
+                    if 'data[' in pp:
                         pp = pp.split('\'')[1]            
 
                     formatted_parameters.append(pp)

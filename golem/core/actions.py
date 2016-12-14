@@ -50,6 +50,7 @@ def _wait_for_visible(element):
 
 
 def capture(message=''):
+    _run_wait_hook() 
     driver = core.getOrCreateWebdriver()
     #screenshot_name = 'test' + msg.replace(' ', '_')
     #screenshot_filename = .format(len(logger.screenshots))
@@ -135,8 +136,8 @@ def send_keys(element, text):
     test_object.send_keys(text)
 
 
-def store(data, key, value):
-    data[key] = value
+def store(key, value):
+    core.test_data[key] = value
 
 
 def verify_exists(element):

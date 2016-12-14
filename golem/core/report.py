@@ -13,23 +13,13 @@ def create_report_directory(workspace, project, test_case_name,
 
     # create suite execution folder in reports directory
     if suite_name:
-        report_directory = os.path.join(workspace,
-                                   'projects',
-                                   project,
-                                   'reports',
-                                   suite_name,
-                                   timestamp,
-                                   test_case_name,
-                                   set_name)
+        report_directory = os.path.join(workspace, 'projects', project,
+                                   'reports', suite_name, timestamp,
+                                   test_case_name, set_name)
     else:
-        report_directory = os.path.join(workspace,
-                                   'projects',
-                                   project,
-                                   'reports',
-                                   '__single__',
-                                   test_case_name,
-                                   timestamp,
-                                   set_name)
+        report_directory = os.path.join(workspace, 'projects', project,
+                                   'reports', '__single__', test_case_name,
+                                   timestamp, set_name)
 
     if not os.path.isdir(report_directory):
         try:
@@ -51,7 +41,8 @@ def generate_report(report_directory, test_case_name, test_data, result):
         'description': result['description'],
         'error': result['error'],
         'test_elapsed_time': result['test_elapsed_time'],
-        'test_timestamp': result['test_timestamp']
+        'test_timestamp': result['test_timestamp'],
+        'browser': result['browser']
     }
     
     with open(json_report_path, 'w', encoding='utf-8') as json_file:

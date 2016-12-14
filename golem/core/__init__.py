@@ -9,6 +9,8 @@ project = None
 
 workspace = None
 
+test_data = None
+
 
 # will fail if driver name is not passed and driver not instantiated
 def getOrCreateWebdriver(*args):
@@ -17,12 +19,7 @@ def getOrCreateWebdriver(*args):
 
     if not driver:
 
-        if settings['driver']:
-            driver_selected = settings['driver']
-        elif 'default_driver' in settings:
-            driver_selected = settings['default_driver']
-        else:
-            driver_selected = 'firefox'
+        driver_selected = get_selected_driver()
 
         if driver_selected == 'firefox':
             driver = webdriver.Firefox()
@@ -63,3 +60,14 @@ def get_setting(setting):
         return settings[setting]
     else:
         return False
+
+
+def get_selected_driver():
+    global settings
+    if settings['driver']:
+        driver_selected = settings['driver']
+    elif 'default_driver' in settings:
+        driver_selected = settings['default_driver']
+    else:
+        driver_selected = 'firefox'
+    return driver_selected

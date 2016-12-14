@@ -29,7 +29,8 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
         'description': None,
         'steps': None,
         'test_elapsed_time': None,
-        'test_timestamp': None}
+        'test_timestamp': None,
+        'browser': None}
 
     from golem.core import execution_logger
     instance = None
@@ -38,6 +39,7 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
 
     golem.core.project = project
     golem.core.workspace = workspace
+    golem.core.test_data = test_data
     golem.core.set_settings(settings)
 
     # create a directory to store report.json and screenshots
@@ -67,15 +69,21 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
         else:
             raise Exception('Test class does not have setup method')
         if hasattr(instance, 'test'):
-            instance.test(test_data)
+            # instance.test(test_data)
+            instance.test(golem.core.test_data)
         else:
             raise Exception('Test class does not have test method')
 
     except:
         result['result'] = 'fail'
         result['error'] = traceback.format_exc()
-        if settings['screenshot_on_error']:
-            actions.capture('error')
+        try:
+            if settings['screenshot_on_error']:
+                actions.capture('error')
+        except:
+            # if the test failed and chrome is not available
+            # capture screenshot is not possible, continue
+            pass
         print(dir(traceback))
         print(traceback.print_exc())
 
@@ -96,6 +104,7 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
     result['test_elapsed_time'] = test_elapsed_time
     result['test_timestamp'] = test_timestamp
     result['screenshots'] = execution_logger.screenshots
+    result['browser'] = golem.core.get_selected_driver()
 
     execution_logger.description = None
     execution_logger.steps = []
