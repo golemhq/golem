@@ -77,6 +77,10 @@ def string_to_time(time_string):
 def get_global_actions():
     global_actions = [
         {
+            'name': 'add_step',
+            'parameters': [{'name': 'message', 'type': 'value'}]
+        },
+        {
             'name': 'capture',
             'parameters': [{'name': 'message (optional)', 'type': 'value'}]
         },

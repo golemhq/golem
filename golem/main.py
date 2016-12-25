@@ -20,7 +20,8 @@ def execute_from_command_line(root_path):
     golem.core.temp = test_execution.settings
     # main action == gui
     if args.main_action == 'gui':
-        gui_start.run_gui()
+        port_number = args.port
+        gui_start.run_gui(port_number)
         sys.exit()
 
     # main action == run

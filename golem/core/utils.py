@@ -324,3 +324,5 @@ def create_new_project(workspace, project):
                                add_init=True)
     extend_path = os.path.join(workspace, 'projects', project, 'extend.py')
     open(extend_path, 'a').close()
+    settings_path = os.path.join(workspace, 'projects', project, 'settings.conf')
+    open(settings_path, 'a').close()

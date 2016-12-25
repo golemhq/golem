@@ -6,6 +6,10 @@ Actions
 --------------------------------------
 
 
+- **add_step(message='')**
+
+Log a new step to be displayed in the report later
+
 - **capture(message='')**
 
 Take a screenshot of the browser, the message is optional
@@ -103,3 +107,19 @@ Full path to the chrome driver executable
 - **wait_hook**
 
 Custom wait method to use, specific to each application, must be defined inside extend.py
+
+
+Command Line
+--------------------------------------
+
+- **run project test_case|test_suite [-t|--threads -d|--driver]**
+
+Run a test case or test suite from a project. Threads indicates the amount of test cases to execute in parallel, default is 1. Driver indicates wich driver to use to run the tests, options are: firefox, chrome, default is firefox. Chrome driver requires chrome_driver_path setting to be defined in settings file.
+
+- **gui [-p|--port]**
+
+Start Golem GUI. Port indicates which port number to use, default is 5000.
+
+- **startproject project**
+
+Starts a new project with the given name. Creates the base files and folders.

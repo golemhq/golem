@@ -15,12 +15,6 @@ from golem.core.exceptions import TextNotPresent, ElementNotFound
 from golem.core.selenium_utils import get_selenium_object
 
 
-def _add_step(msg, screenshot=None):
-    if screenshot:
-        msg += '__{}'.format(screenshot)
-    logger.steps.append(msg)
-
-
 def _run_wait_hook():
     wait_hook = core.get_setting('wait_hook')
     if wait_hook:
@@ -49,6 +43,10 @@ def _wait_for_visible(element):
 #     driver.execute_script(click_script)
 
 
+def add_step(msg):
+    logger.steps.append(msg)
+
+
 def capture(message=''):
     _run_wait_hook() 
     driver = core.getOrCreateWebdriver()
@@ -58,11 +56,12 @@ def capture(message=''):
     img = Image.open(io.BytesIO(driver.get_screenshot_as_png()))
     img_id = str(uuid.uuid4())[:8]
     logger.screenshots[img_id] = img
-    _add_step(message, img_id)
+    message += '__{}'.format(img_id)
+    add_step(message)
 
 
 def click(element):
-    _add_step('Click {0}'.format(element[2]))
+    add_step('Click {0}'.format(element[2]))
     _run_wait_hook()    
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
@@ -77,7 +76,7 @@ def close():
 
 
 def go_to(url):
-    _add_step('Go to url:\'{0}\''.format(url))
+    add_step('Go to url:\'{0}\''.format(url))
     driver = core.getOrCreateWebdriver()
     driver.get(url)
 
@@ -101,7 +100,7 @@ def random(*args):
 
 
 def select_by_index(element, index):
-    _add_step('Select option of index {0} from element {1}'
+    add_step('Select option of index {0} from element {1}'
               .format(index, element[2]))
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
@@ -111,7 +110,7 @@ def select_by_index(element, index):
 
 
 def select_by_text(element, text):
-    _add_step('Select \'{0}\' from element {1}'.format(text, element[2]))
+    add_step('Select \'{0}\' from element {1}'.format(text, element[2]))
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
@@ -120,7 +119,7 @@ def select_by_text(element, text):
 
 
 def select_by_value(element, value):
-    _add_step('Select \'{0}\' value from element {1}'.format(value, element[2]))
+    add_step('Select \'{0}\' value from element {1}'.format(value, element[2]))
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
@@ -129,7 +128,7 @@ def select_by_value(element, value):
 
 
 def send_keys(element, text):
-    _add_step('Write \'{0}\' in element {1}'.format(text, element[2]))
+    add_step('Write \'{0}\' in element {1}'.format(text, element[2]))
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
@@ -143,7 +142,7 @@ def store(key, value):
 def verify_exists(element):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
-    _add_step('Verify that the element {} exists'.format(element[2]))
+    add_step('Verify that the element {} exists'.format(element[2]))
     test_object = get_selenium_object(element, driver)
 
 
@@ -151,7 +150,7 @@ def verify_is_enabled(element):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
-    _add_step('Verify the element \'{0}\' is enabled'.format(element[2]))
+    add_step('Verify the element \'{0}\' is enabled'.format(element[2]))
     if not test_object.is_enabled():
         raise Exception('Element is enabled')
 
@@ -160,7 +159,7 @@ def verify_is_not_enabled(element):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
-    _add_step('Verify the element \'{0}\' '
+    add_step('Verify the element \'{0}\' '
               'is not enabled'
               .format(element[2]))
     if test_object.is_enabled():
@@ -170,7 +169,7 @@ def verify_is_not_enabled(element):
 def verify_not_exists(element):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
-    _add_step('Verify that the element {} does not exists'.format(element[2]))
+    add_step('Verify that the element {} does not exists'.format(element[2]))
     try:
         test_object = get_selenium_object(element, driver)
         if test_object:
@@ -185,7 +184,7 @@ def verify_selected_option(element, text):
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     select = selenium.webdriver.support.select.Select(test_object)
-    _add_step('Verify selected option of element \'{0}\' '
+    add_step('Verify selected option of element \'{0}\' '
                         'is \'{1}\''
                         .format(element[2], text))
     if not select.first_selected_option.text == text:
@@ -197,7 +196,7 @@ def verify_selected_option(element, text):
 def verify_text(text):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
-    _add_step('Verify \'{0}\' is present in page'.format(text))
+    add_step('Verify \'{0}\' is present in page'.format(text))
     if text not in driver.page_source:
         raise TextNotPresent(
                     "Text '{}' was not found in the page".format(text))
@@ -207,7 +206,7 @@ def verify_text_in_element(element, text):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
-    _add_step('Verify element \'{0}\' contains text \'{1}\''
+    add_step('Verify element \'{0}\' contains text \'{1}\''
                         .format(element[2], text))
     if text not in test_object.text:
         raise TextNotPresent("Text \'{0}\' was not found in element {1}"

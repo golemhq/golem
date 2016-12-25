@@ -39,6 +39,14 @@ def get_golem_parser():
                             help="Web Driver")
 
     gui_parser = sub_parsers.add_parser('gui')
+    gui_parser.add_argument('-p',
+                            '--port',
+                            action='store',
+                            nargs='?',
+                            default=5000,
+                            type=int,
+                            metavar='port number',
+                            help="port number to use for Golem GUI")
 
     start_project_parser = sub_parsers.add_parser('startproject')
     start_project_parser.add_argument('project',
