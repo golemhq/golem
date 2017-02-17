@@ -101,6 +101,8 @@ def execute_from_command_line(root_path):
         if args.project in utils.get_projects(root_path):
             sys.exit('Error: a project with that name already exists'
                      .format(args.project))
+        elif args.project == 'demo':
+            utils.create_demo_project(root_path)
         else:
             utils.create_new_project(root_path, args.project)
 

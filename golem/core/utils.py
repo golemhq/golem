@@ -2,9 +2,12 @@ import csv
 import datetime
 import imp
 import importlib
+import shutil
 import os
 
 from functools import reduce
+
+import golem
 
 
 def _generate_dict_from_file_structure(full_path):
@@ -310,8 +313,7 @@ def create_new_directory(path_list, add_init=False):
 
 
 def create_new_project(workspace, project):
-    create_new_directory([workspace, 'projects', project],
-                               add_init=True)
+    create_new_directory([workspace, 'projects', project], add_init=True)
     create_new_directory([workspace, 'projects', project, 'data'],
                                add_init=False)
     create_new_directory([workspace, 'projects', project, 'pages'],
@@ -326,3 +328,10 @@ def create_new_project(workspace, project):
     open(extend_path, 'a').close()
     settings_path = os.path.join(workspace, 'projects', project, 'settings.conf')
     open(settings_path, 'a').close()
+
+
+def create_demo_project(workspace):
+    create_new_directory([workspace, 'projects', 'demo'])
+    source = os.path.join(golem.__path__[0], 'templates/demo_project')
+    destination = os.path.join(workspace, 'projects', 'demo')
+    shutil.copytree(source, destination)
