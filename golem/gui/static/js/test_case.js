@@ -76,10 +76,13 @@ function addFirstStepInput(){
             <div class='col-sm-3 step-input-container'> \
                 <div class='input-group'> \
                     <input type='text' class='form-control step-first-input' \
-                        placeholder='action' onchange='stepFirstInputChange(this);'> \
+                        placeholder='action' onchange=''> \
                 </div> \
             </div> \
         </div>");
+
+    // was failing with onchange, calling the function twice
+    // stepFirstInputChange(this); return false
 
     // give focus to the last step action input
     $(".step-first-input").last().focus();
@@ -165,6 +168,12 @@ function startStepFirstInputAutocomplete(){
             stepFirstInputChange($(this));
             unsavedChanges = true;
         },
+        onSelect: function (suggestion) {
+            // not this is not always called, 
+            // sometimes the onchange is called before
+            stepFirstInputChange($(this));
+            unsavedChanges = true;
+        },
         onSearchStart: function () {
         },
         beforeRender: function (container) {},
@@ -175,6 +184,7 @@ function startStepFirstInputAutocomplete(){
 
 
 function stepFirstInputChange(elem){
+    console.log('called');
     var step = $(elem).parent().parent().parent();
     var hasParameter = step.find('.parameter-input').length > 0
     var placeholder = ''
@@ -229,6 +239,8 @@ function stepFirstInputChange(elem){
 
         unsavedChanges = true;      
     }
+
+    return false
 }
 
 
