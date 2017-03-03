@@ -4,29 +4,28 @@ Golem - Test Automation Framework
 Intro
 --------------------------------------
 
-Golem is a test automation framework for functional tests, with keyworddriven, datadriven and Page Objects pattern built in, written in python and Selenium-Webdriver as the automation engine.
-
+Golem is a test automation framework for functional tests that uses keyworddriven, datadriven and Page Objects patterns. I'ts written in python and uses Selenium-Webdriver as the automation engine.
 
 Installation
 --------------------------------------
 
-Currently Golem is only guaranteed to work with Python 2.7, you may download and install it from here [python.org/downloads/](http://www.python.org/downloads/) 
+Golem works with Python 3.5+, you may download and install it from here [python.org/downloads/](http://www.python.org/downloads/) 
 
 
- - **Clone the Golem repo and install**
+##### **1. Clone the Golem repo and install**
 
-Create a directory anywhere in your system:
-
-```
-mkdir golemroot && cd golemroot
-```
+First, Create a directory anywhere in your system:
 
 ```
-git clone https://github.com/lucianopuccio/Golem.git
+mkdir golem && cd golem
+```
+
+```
+git clone https://github.com/lucianopuccio/Golem.git .
 ```
 
 
- - **Using virtualenv**
+##### **2. Using virtualenv**
 
 It is optional but recommended to install Golem and it's dependencies in a [virtual environment](http://www.virtualenv.org/en/latest/) instead of globally.
 
@@ -34,19 +33,19 @@ It is optional but recommended to install Golem and it's dependencies in a [virt
 virtualenv env
 ```
 
-**Windows**:
+- **Windows**:
 
 ```
 env\scripts\activate
 ```
 
-**Linux**:
+- **Mac/Linux**:
 
 ```
 source env/bin/activate
 ```
 
- - **Install Golem from source**
+##### **3. Install Golem from source**
 
 ```
 cd golem
@@ -58,24 +57,31 @@ python setup.py install
 
 QuickStart
 --------------------------------------
- - **Create the test projects root directory**
+##### **1. Create the test projects root directory**
 
-You need to create a new projects directory to hold the test cases and required files. Open a console wherever you want the new directory
+A directory must be created to contain the project, tests and required files. Open a console wherever you want the new directory to be.
 
-Create a **new** test project inside the test projects root
+
+Create the test directory:
 
 ```
-golem-admin startdirectory <directory name>
+golem-admin startdirectory <directory_name>
 ```
 
 This will create a folder for all subsequent projects.
 
- - **Create a new project**
- ```
-golem-admin createdirectory <directory name>
+
+##### **2. Create a new project**
+
+Next, create a **new** test project inside the test directory
+```
+cd <directory_name>
+```
+```
+python golem.py startproject <project_name>
 ```
 
-==============
+##### **3. Start the GUI**
 
 To start the Golem GUI run the following command:
 
@@ -83,3 +89,12 @@ To start the Golem GUI run the following command:
 python golem.py gui
 ```
 
+The GUI can be accessed at http://localhost:5000/
+
+By default, this is the first user available: user: **admin** / password: **admin**
+
+To add or edit users, the following file must be editted: _<test_directory>/users.json_
+
+<br>
+
+See the full documentation: [https://github.com/lucianopuccio/golem/wiki/Golem---Documentation](https://github.com/lucianopuccio/golem/wiki/Golem---Documentation)

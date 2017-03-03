@@ -4,5 +4,5 @@ flask==0.10.1
 itsdangerous==0.24
 jinja2==2.7.2
 markupsafe==0.23
-selenium==2.48.0
+selenium==3.0.2
 werkzeug==0.9.4
