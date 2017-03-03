@@ -1,0 +1,175 @@
+{% extends "report/base.html" %}
+
+{% block header_declarations %}
+<link href="{{ url_for('static', filename='report/css/report.css') }}" rel="stylesheet" type="text/css" media="screen">
+{% endblock %}
+
+{% block content %}
+
+<!-- BOTTOM: LEFT NAV AND RIGHT MAIN CONTENT -->
+<div class="bottom">
+	<div class="container">
+		<div class="row">
+			<!-- content-wrapper -->
+			<div id="columna-principal" class="col-md-10 col-md-offset-1 content-wrapper">
+				<div class="row">
+					<h1 class="titulo-pagina">{{project}} - {{suite}} <small>({{formatted_date}})</small></h1>
+					<div class="col-md-12  proyect-container">
+						<!-- SECCION POR MODULO -->
+						<h3>General</h3>
+						<!-- RESPONSIVE TABLE -->
+						<div class="widget widget-table">
+							<div class="widget-content">
+								<div class="table-responsive">
+									<table class="table por-modulo">
+										<thead>
+											<tr>
+												<th>#</th>
+												<th class="module-col-header">Module</th>
+												<th>Total Tests</th>
+												<th>Tests Ok</th>
+												<th>Tests Failed</th>
+												<th>Percentage</th>
+												<th>Total Time</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr class="primera-fila">
+												<td class="module-number"></td>
+												<td class="module"></td>
+												<td class="total-tests"></td>
+												<td class="tests-ok"></td>
+												<td class="tests-failed"></td>
+												<td class="percentage">
+													<div class="progress demo-only">
+														<div aria-valuenow="10" style="width: 100%;" class="progress-bar progress-bar-danger" data-transitiongoal="10"></div>	
+														<div aria-valuenow="20" style="width: 50%;" class="progress-bar barra-azul" data-transitiongoal="20"></div>
+													</div>
+												</td>
+												<td class="total-time"></td>
+											</tr>
+											<tr class="total-row" id="totalRow">
+												<td class="module-number"></td>
+												<td class="module">Total</td>
+												<td class="total-tests"></td>
+												<td class="tests-ok"></td>
+												<td class="tests-failed"></td>
+												<td class="percentage">
+													<div class="progress demo-only">
+														<div aria-valuenow="10" style="width: 100%;" class="progress-bar progress-bar-danger" data-transitiongoal="10"></div>	
+														<div aria-valuenow="20" style="width: 50%;" class="progress-bar barra-azul" data-transitiongoal="20"></div>
+													</div>
+												</td>
+												<td class="total-time"></td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+						<!-- END RESPONSIVE TABLE -->
+						<!-- FIN SECCION POR MODULO -->
+						<!-- SECCION POR CU/DTF -->
+
+						<!-- <h3>Module</h3> -->
+						<!-- RESPONSIVE TABLE -->
+							<!-- <div class="widget widget-table">
+								<div class="widget-content">
+									<div class="table-responsive">
+										<table class="table por-CU">
+											<thead>
+												<tr>
+													<th>#</th>
+													<th>Canal/Módulo</th>
+													<th>Identificador</th>
+													<th>Resultado</th>
+													<th>Casos de Prueba</th>
+													<th>Total CPR ok</th>
+													<th>Total CPR fallados</th>
+													<th>Gráfica</th>
+													<th>Tiempo Insumido</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr class="primera-fila">
+													<td></td>
+													<td></td>
+													<td></td>
+													<td></td>
+													<td></td>
+													<td></td>
+													<td></td>
+													<td>
+														<div class="progress demo-only">
+															<div aria-valuenow="10" style="width: 100%;" class="progress-bar progress-bar-danger" data-transitiongoal="10"></div>	
+															<div aria-valuenow="20" style="width: 50%;" class="progress-bar" data-transitiongoal="20"></div>
+														</div>
+													</td>
+													<td></td>
+												</tr>
+
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div> -->
+							<!-- END RESPONSIVE TABLE -->
+							<!-- FIN SECCION POR CU/DTF -->
+							<!-- SECCION DETALLE POR CU/DTF -->
+							<h3>Detail</h3>
+							<!-- RESPONSIVE TABLE -->
+							<div class="widget widget-table">
+								<div class="widget-content">
+									<div class="table-responsive">
+										<table class="table por-CP">
+											<thead>
+												<tr>
+													<th>#</th>
+													<th class="module-col-header">Module</th>
+													<th>Test Case Name</th>
+													<th>Result</th>
+													<th>Time</th>
+													<th>Detail</th>
+													<!-- <th>Log</th> -->
+												</tr>
+											</thead>
+											<tbody>
+												<tr class="primera-fila">
+													<td class="tc-number"></td>
+													<td class="tc-module"></td>
+													<td class="tc-name"></td>
+													<td class="tc-result"></td>
+													<td class="tc-time"></td>
+													<td class="tc-reporte"></td>
+													<!-- <td class="tcp-log"></td> -->
+												</tr>
+
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+							<!-- END RESPONSIVE TABLE -->
+						</div>
+						<!-- FIN SECCION DETALLE POR CU/DTF -->
+					</div>
+				</div>
+			</div>									
+			<!-- BOTTOM: LEFT NAV AND RIGHT MAIN CONTENT -->
+		</div>
+		<!-- content-wrapper -->
+	</div>
+
+	{% endblock %}
+
+	{% block page_footer_declarations %}
+
+	<script type="text/javascript">
+		var project = '{{project}}';
+		var suite = '{{suite}}';
+		var execution = '{{execution}}';
+	</script>
+
+	<script src="{{ url_for('static', filename='report/js/reporte.js') }}"></script>
+
+	{% endblock %}

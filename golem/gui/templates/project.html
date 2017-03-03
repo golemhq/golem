@@ -27,7 +27,7 @@
 			        	</ul>
 			        </li>
 			    {%- else %}
-			    	<li><a href="/p/{{project}}/tc/{{key.1}}/">{{ key.0 }}</a></li>
+			    	<li><a href="/p/{{project}}/tc/{{key.1}}/">{{ key.0 }}</a> <!-- <span class="icon-arrow-right pull-right"><i class="glyphicon glyphicon-remove"></i></span><span class="icon-arrow-right pull-right"><i class="glyphicon glyphicon-share"></i></span> --></li>
 			    {%- endif %}
 			{%- endfor %}
 			<li><i class="glyphicon glyphicon-plus-sign"></i><a href="#" onclick="startAddNewTestCase(this)"> Add New</a></li>

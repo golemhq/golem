@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!--[if IE 9 ]><html class="ie ie9" lang="en" class="no-js"> <![endif]-->
+<!--[if !(IE)]><!-->
+<html lang="en" class="no-js">
+<!--<![endif]-->
+
+<head>
+	<title>Pruebas Automáticas</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta name="description" content="Bootstrap Admin Dashboard Theme">
+	<meta name="author" content="">
+
+	<!-- CSS -->
+	<link href="{{ url_for('static', filename='report/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" media="screen">
+	<link href="{{ url_for('static', filename='report/css/font-awesome.min.css') }}" rel="stylesheet" type="text/css" media="screen">
+	<link href="{{ url_for('static', filename='report/css/main.min.css') }}" rel="stylesheet" type="text/css" media="screen">
+	<link href="{{ url_for('static', filename='report/css/custom.css') }}" rel="stylesheet" type="text/css" media="screen">
+
+	{% block header_declarations %} {% endblock %}
+
+	<!--[if lte IE 9]>
+	<link href="assets/css/main-ie.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/css/main-ie-part2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<![endif]-->
+
+</head>
+
+<body class="dashboard">
+
+	<!-- WRAPPER -->
+	<div class="wrapper">
+
+		{% block content %} {% endblock %}
+
+	</div>
+	<!-- /wrapper -->
+
+	<!-- FOOTER -->
+	<footer class="footer">
+		&copy; 2017
+	</footer>
+	<!-- END FOOTER -->
+
+	<!-- Javascript -->
+	<script src="{{ url_for('static', filename='report/js/jquery/jquery-2.1.0.min.js') }}" ></script>
+	<script src="{{ url_for('static', filename='report/js/bootstrap/bootstrap.js') }}" ></script>
+	<script src="{{ url_for('static', filename='report/js/plugins/modernizr/modernizr.js') }}" ></script>
+	<script src="{{ url_for('static', filename='report/js/plugins/stat/jquery.easypiechart.min.js') }}" ></script>
+	<script src="{{ url_for('static', filename='report/js/plugins/datatable/jquery.dataTables.min.js') }}" ></script>
+	<script src="{{ url_for('static', filename='report/js/plugins/datatable/dataTables.bootstrap.js') }}" ></script>	
+
+	{% block page_footer_declarations %} {% endblock %}
+
+	<div class="modal fade" id="screenshotModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<img id="expandedScreenshot">
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+
+</body>
+</html>

@@ -1,7 +1,14 @@
 import json
 import os
 
-from flask import Flask, render_template, request, redirect, g
+from flask import (Flask,
+                   jsonify,
+                   render_template,
+                   request,
+                   redirect,
+                   g,
+                   send_from_directory)
+
 from flask.ext.login import (LoginManager,
                              login_user,
                              logout_user,
@@ -9,7 +16,7 @@ from flask.ext.login import (LoginManager,
                              login_required)
 
 from golem.core import utils
-from . import gui_utils, test_case, page_object, data, user
+from . import gui_utils, test_case, page_object, data, user, parser
 
 
 app = Flask(__name__)
@@ -324,6 +331,97 @@ def run_test_case():
 def logout():
     logout_user()
     return redirect('/')
+
+
+########
+# REPORT
+########
+
+# REPORT INDEX
+@app.route("/report/")
+def report_index():
+
+    return render_template('report/index.html', project='')
+
+
+
+
+@app.route("/report/project/<project>/")
+def project_view(project):
+    return render_template('report/index.html', project=project)
+
+
+@app.route("/report/project/<project>/suite/<suite>/")
+def suite_view(project, suite):
+    return render_template('report/suite.html',
+                           project=project,
+                           suite=suite)
+
+
+@app.route("/report/project/<project>/<suite>/<execution>/")
+def execution_report(project, suite, execution):
+    formatted_date = parser.get_start_date_time_from_timestamp(execution)
+    return render_template('report/reporte.html',
+                           project=project,
+                           suite=suite,
+                           execution=execution,
+                           formatted_date=formatted_date)
+
+
+@app.route("/report/project/<project>/<suite>/<execution>/<test_case>/<test_set>/")
+def sing_test_case(project, suite, execution, test_case, test_set):
+    test_case_data = parser.get_test_case_data(root_path, project, suite,
+                                               execution, test_case, test_set)
+    return render_template('report/test_case.html',
+                           project=project,
+                           suite=suite,
+                           execution=execution,
+                           test_case=test_case,
+                           test_set=test_set,
+                           test_case_data=test_case_data)
+
+
+@app.route("/report/get_ultimos_proyectos/", methods=['POST'])
+def get_ultimos_proyectos():
+    if request.method == 'POST':
+        project = request.form['project']
+        suite = request.form['suite']
+        limit = request.form['limit']
+        project_data = parser.get_last_executions(root_path,
+                                                  project,
+                                                  suite,
+                                                  limit)
+
+        return jsonify(projects=project_data)
+
+
+@app.route("/report/get_execution_data/", methods=['POST'])
+def get_execution_data():
+    if request.method == 'POST':
+
+        project = request.form['project']
+        suite = request.form['suite']
+        execution = request.form['execution']
+
+        execution_data = parser.get_ejecucion_data(root_path,
+                                                   project,
+                                                   suite,
+                                                   execution)
+
+        return jsonify(execution_data=execution_data)
+
+
+@app.route('/report/screenshot/<project>/<suite>/<execution>/<test_case>/<test_set>/<scr>/')
+def screenshot_file(project, suite, execution, test_case, test_set, scr):
+    screenshot_path = os.path.join(root_path, 'projects', project, 'reports',
+                                   suite, execution, test_case, test_set)
+    return send_from_directory(screenshot_path,
+                               '{}.png'.format(scr))  # as_attachment=True)
+
+
+
+
+
 
 
 @login_manager.user_loader
