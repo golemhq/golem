@@ -57,14 +57,18 @@ def get_user(user_id, root_path):
                 return new_user
 
 
-def has_permissions_to_project(user_id, project, root_path):
+def has_permissions_to_project(user_id, project, root_path, module='gui'):
     with open(os.path.join(root_path, 'users.json')) as users_file:    
         user_data = json.load(users_file)
         has_permission = False
         for user in user_data:
             if user['id'] == user_id:
-                project_in_projects = project in user['projects']
-                asterisc_in_projects = '*' in user['projects']
+                if module == 'gui':
+                    project_in_projects = project in user['gui_projects']
+                    asterisc_in_projects = '*' in user['gui_projects']
+                elif module == 'report':
+                    project_in_projects = project in user['report_projects']
+                    asterisc_in_projects = '*' in user['report_projects']
                 is_admin = user['is_admin']
                 if project_in_projects or asterisc_in_projects or is_admin:
                     has_permission = True

@@ -35,11 +35,9 @@ root_path = None
 def login():
 
     if request.method == 'POST':
-
         result = {
             'errors': []
         }
-
         username = request.form['username']
         password = request.form['password']
         next_url = request.form['next']
@@ -93,13 +91,10 @@ def index():
 @app.route("/p/<project>/")
 @login_required
 def project(project):
-    if not user.has_permissions_to_project(g.user.id, project, root_path):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
-
     test_cases = utils.get_test_cases(root_path, project)
-
     page_objects = utils.get_page_objects(root_path, project)
-
     return render_template('project.html',
                            test_cases=test_cases,
                            project=project,
@@ -111,7 +106,7 @@ def project(project):
 @login_required
 def test_case_view(project, test_case_name):
     # check if user has permissions for this project
-    if not user.has_permissions_to_project(g.user.id, project, root_path):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
 
     tc_name, parents = utils.separate_file_from_parents(test_case_name)
@@ -265,7 +260,7 @@ def get_global_actions():
 @app.route("/p/<project>/page/<full_page_name>/")
 @login_required
 def page_view(project, full_page_name):
-    if not user.has_permissions_to_project(g.user.id, project, root_path):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
 
     page_object_data = page_object.get_page_object_content(root_path,
@@ -339,37 +334,53 @@ def logout():
 
 # REPORT INDEX
 @app.route("/report/")
+@login_required
 def report_index():
-
-    return render_template('report/index.html', project='')
-
-
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
+        return render_template('not_permission.html')
+    else:
+        return render_template('report/index.html', project='')
 
 
 @app.route("/report/project/<project>/")
+@login_required
 def project_view(project):
-    return render_template('report/index.html', project=project)
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
+        return render_template('not_permission.html')
+    else:
+        return render_template('report/index.html', project=project)
 
 
 @app.route("/report/project/<project>/suite/<suite>/")
+@login_required
 def suite_view(project, suite):
-    return render_template('report/suite.html',
-                           project=project,
-                           suite=suite)
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
+        return render_template('not_permission.html')
+    else:
+        return render_template('report/suite.html',
+                               project=project,
+                               suite=suite)
 
 
 @app.route("/report/project/<project>/<suite>/<execution>/")
+@login_required
 def execution_report(project, suite, execution):
-    formatted_date = parser.get_start_date_time_from_timestamp(execution)
-    return render_template('report/reporte.html',
-                           project=project,
-                           suite=suite,
-                           execution=execution,
-                           formatted_date=formatted_date)
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
+        return render_template('not_permission.html')
+    else:
+        formatted_date = parser.get_start_date_time_from_timestamp(execution)
+        return render_template('report/reporte.html',
+                               project=project,
+                               suite=suite,
+                               execution=execution,
+                               formatted_date=formatted_date)
 
 
 @app.route("/report/project/<project>/<suite>/<execution>/<test_case>/<test_set>/")
+@login_required
 def sing_test_case(project, suite, execution, test_case, test_set):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
+        return render_template('not_permission.html')
     test_case_data = parser.get_test_case_data(root_path, project, suite,
                                                execution, test_case, test_set)
     return render_template('report/test_case.html',
