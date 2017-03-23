@@ -36,6 +36,20 @@ html {
 	font-weight: bold;
 	margin-right: 5px;
 	width: 16px;
+	cursor: move;
+	cursor: -webkit-grabbing;
+}
+
+.step-remove-icon {
+	float: right;
+	height: 34px;
+	line-height: 34px;
+	font-weight: bold;
+	width: 16px;
+}
+
+.step-remove-icon a {
+	color: black;
 }
 
 #steps {

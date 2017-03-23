@@ -95,6 +95,7 @@ def project(project):
         return render_template('not_permission.html')
     test_cases = utils.get_test_cases(root_path, project)
     page_objects = utils.get_page_objects(root_path, project)
+    # suites = 
     return render_template('project.html',
                            test_cases=test_cases,
                            project=project,
@@ -150,103 +151,115 @@ def get_selected_page_object_elements():
         return json.dumps(po_elements)
 
 
-@app.route("/nuevo_test_case/", methods=['POST'])
-def nuevo_test_case():
+@app.route("/new_tree_element/", methods=['POST'])
+def new_tree_element():
 
     if request.method == 'POST':
-        projectname = request.form['project']
+        project = request.form['project']
+        element_type = request.form['elementType']
+        is_dir = request.form['isDir']
         parents = request.form['parents'].split('.')
-        tc_name = request.form['testCaseName']
+        element_name = request.form['elementName']
 
         errors = []
 
-        # check if a file already exists
-        if gui_utils.file_already_exists(root_path, projectname, 'test_cases',
-                                         parents, tc_name):
-            errors.append('A file with that name already exists')
+        if is_dir == 'true':
+            is_dir = True
+        else:
+            is_dir = False
 
-        if not errors:
-            test_case.new_test_case(root_path, projectname, parents, tc_name)
+        if is_dir:
+            element_name = element_name.replace('/', '')
+            if element_type == 'test_case':
+                gui_utils.new_directory_test_case(root_path, project, parents, element_name)
+            elif element_type == 'page_object':
+                gui_utils.new_directory_page_object(root_path, project, parents, element_name)
+        else:
+            if element_type == 'test_case':
+                errors = test_case.new_test_case(root_path, project, parents, element_name)
+            elif element_type == 'page_object':
+                errors = page_object.new_page_object(root_path, project, parents, element_name)
 
         return json.dumps({
             'errors': errors,
-            'project_name': projectname,
-            'tc_name': tc_name})
+            'project_name': project,
+            'element_name': element_name,
+            'is_dir': is_dir})
 
 
-@app.route("/new_directory_test_case/", methods=['POST'])
-def new_directory_test_case():
+# @app.route("/new_directory_test_case/", methods=['POST'])
+# def new_directory_test_case():
 
-    if request.method == 'POST':
-        projectname = request.form['project']
-        parents = request.form['parents'].split('.')
-        directory_name = request.form['directoryName'].replace('/', '')
+#     if request.method == 'POST':
+#         projectname = request.form['project']
+#         parents = request.form['parents'].split('.')
+#         directory_name = request.form['directoryName'].replace('/', '')
 
-        errors = []
+#         errors = []
 
-        # check if a directory already exists
-        if gui_utils.directory_already_exists(root_path, projectname,
-                                              'test_cases', parents,
-                                              directory_name):
-            errors.append('A directory with that name already exists')
+#         # check if a directory already exists
+#         if gui_utils.directory_already_exists(root_path, projectname,
+#                                               'test_cases', parents,
+#                                               directory_name):
+#             errors.append('A directory with that name already exists')
 
-        if not errors:
-            gui_utils.new_directory(root_path, projectname,
-                                    parents, directory_name)
+#         if not errors:
+#             gui_utils.new_directory(root_path, projectname,
+#                                     parents, directory_name)
 
-        return json.dumps({
-            'errors': errors,
-            'project_name': projectname,
-            'directory_name': directory_name})
-
-
-@app.route("/new_page_object/", methods=['POST'])
-def new_page_object():
-
-    if request.method == 'POST':
-        projectname = request.form['project']
-        parents = request.form['parents'].split('.')
-        page_object_name = request.form['pageObjectName']
-
-        errors = []
-
-        # check if a file already exists
-        if gui_utils.file_already_exists(root_path, projectname, 'pages',
-                                         parents, page_object_name):
-            errors.append('A file with that name already exists')
-
-        if not errors:
-            page_object.new_page_object(root_path, projectname, parents,
-                                        page_object_name)
-
-        return json.dumps({
-            'errors': errors,
-            'project_name': projectname,
-            'page_object_name': page_object_name})
+#         return json.dumps({
+#             'errors': errors,
+#             'project_name': projectname,
+#             'directory_name': directory_name})
 
 
-@app.route("/new_directory_page_object/", methods=['POST'])
-def new_directory_page_object():
+# @app.route("/new_page_object/", methods=['POST'])
+# def new_page_object():
 
-    if request.method == 'POST':
-        projectname = request.form['project']
-        parents = request.form['parents'].split('.')
-        directory_name = request.form['directoryName'].replace('/', '')
+#     if request.method == 'POST':
+#         projectname = request.form['project']
+#         parents = request.form['parents'].split('.')
+#         page_object_name = request.form['pageObjectName']
 
-        errors = []
+#         errors = []
 
-        # check if a directory already exists
-        if gui_utils.directory_already_exists(root_path, projectname, 'pages',
-                                              parents, directory_name):
-            errors.append('A directory with that name already exists')
+#         # check if a file already exists
+#         if gui_utils.file_already_exists(root_path, projectname, 'pages',
+#                                          parents, page_object_name):
+#             errors.append('A file with that name already exists')
 
-        if not errors:
-            gui_utils.new_directory_page_object(root_path, projectname,
-                                                parents, directory_name)
+#         if not errors:
+#             page_object.new_page_object(root_path, projectname, parents,
+#                                         page_object_name)
 
-        return json.dumps({'errors': errors,
-                           'project_name': projectname,
-                           'directory_name': directory_name})
+#         return json.dumps({
+#             'errors': errors,
+#             'project_name': projectname,
+#             'page_object_name': page_object_name})
+
+
+# @app.route("/new_directory_page_object/", methods=['POST'])
+# def new_directory_page_object():
+
+#     if request.method == 'POST':
+#         projectname = request.form['project']
+#         parents = request.form['parents'].split('.')
+#         directory_name = request.form['directoryName'].replace('/', '')
+
+#         errors = []
+
+#         # check if a directory already exists
+#         if gui_utils.directory_already_exists(root_path, projectname, 'pages',
+#                                               parents, directory_name):
+#             errors.append('A directory with that name already exists')
+
+#         if not errors:
+#             gui_utils.new_directory_page_object(root_path, projectname,
+#                                                 parents, directory_name)
+
+#         return json.dumps({'errors': errors,
+#                            'project_name': projectname,
+#                            'directory_name': directory_name})
 
 
 @app.route("/get_global_actions/", methods=['POST'])

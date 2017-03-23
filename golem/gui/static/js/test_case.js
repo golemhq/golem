@@ -37,6 +37,16 @@ $(document).ready(function() {
 
     // set unsaved changes watcher
     watchForUnsavedChanges();
+
+    // start sortable steps
+    var el = document.getElementById('steps');
+    var sortable = Sortable.create(el, {
+        handle: '.step-numbering',        
+        // Element dragging ended
+        onEnd: function (/**Event*/evt) {
+            fillStepNumbering();
+        },
+    });
 });
 
 
@@ -68,16 +78,21 @@ function addPOInput(){
 
 function addFirstStepInput(){
     
-    var nextStepNumber = $(".step-first-input").length + 1;
+    // var nextStepNumber = $(".step-first-input").length + 1;
 
     $("#steps").append(
         "<div class='step'> \
-            <div class='step-numbering'>"+nextStepNumber+"</div> \
+            <div class='step-numbering'></div> \
             <div class='col-sm-3 step-input-container'> \
                 <div class='input-group'> \
                     <input type='text' class='form-control step-first-input' \
                         placeholder='action' onchange=''> \
                 </div> \
+            </div> \
+            <div class='step-remove-icon'> \
+                <a href='javascript:void(0)' onclick='deleteStep(this);'> \
+                    <span class='glyphicon glyphicon-remove' aria-hidden='true'></span> \
+                </a> \
             </div> \
         </div>");
 
@@ -86,6 +101,8 @@ function addFirstStepInput(){
 
     // give focus to the last step action input
     $(".step-first-input").last().focus();
+
+    fillStepNumbering();
 
     //onchange='stepFirstInputChange(this);'> \
     startStepFirstInputAutocomplete();
@@ -426,11 +443,13 @@ function getSelectedPageObjectElements(){
                 // TODO, add elements and functions one by one
 
                 // check if element does no already exist in selected ...
-                if(! checkIfElementIsInSelectedPageObjectElements(
-                            selectedPageObjectsElements,
-                            data.element_list[0].element_full_name)){
-                    selectedPageObjectsElements = selectedPageObjectsElements.concat(data.element_list);
-                    startAllElementInputAutocomplete(); 
+                if(data.element_list.length > 0){
+                    if(! checkIfElementIsInSelectedPageObjectElements(
+                                selectedPageObjectsElements,
+                                data.element_list[0].element_full_name)){
+                        selectedPageObjectsElements = selectedPageObjectsElements.concat(data.element_list);
+                        startAllElementInputAutocomplete(); 
+                    }
                 }
                 if(data.function_list.length > 0){
                     if(! checkIfFunctionIsInSelectedPageObjectFunctions(
@@ -664,4 +683,19 @@ function watchForUnsavedChanges(){
             return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
         }
     });
+}
+
+
+function fillStepNumbering(){
+    var count = 1;
+    $(".step").each(function(){
+        $(this).find('.step-numbering').html(count);
+        count++;
+    });
+}
+
+
+function deleteStep(elem){
+    $(elem).parent().parent().remove();
+    unsavedChanges = true;
 }

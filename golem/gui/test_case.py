@@ -2,7 +2,7 @@ import os
 import re
 
 from golem.core import utils
-from golem.gui import data, page_object
+from golem.gui import data, page_object, gui_utils
 
 
 def _get_steps(content):
@@ -10,7 +10,7 @@ def _get_steps(content):
     index = -1
     steps = []
     for i, line in enumerate(content):
-        if 'def test(self, data):' in line:
+        if 'def test(data):' in line:
             index = i + 1
             break
     if index >= 0:
@@ -145,45 +145,47 @@ def parse_test_case(workspace, project, parents, test_case_name):
 
 
 def new_test_case(root_path, project, parents, tc_name):
-    parents_joined = os.sep.join(parents)
+    errors = []
+    # check if a file already exists
+    if gui_utils.file_already_exists(root_path, project, 'test_cases', parents, tc_name):
+        errors.append('A file with that name already exists')
 
-    test_case_path = os.path.join(
-        root_path, 'projects', project, 'test_cases', parents_joined)
-    if not os.path.exists(test_case_path):
-        os.makedirs(test_case_path)
-    test_case_full_path = os.path.join(test_case_path, tc_name + '.py')
+    if not errors:
+        parents_joined = os.sep.join(parents)
 
-    data_path = os.path.join(root_path,
-                             'projects',
-                             project,
-                             'data',
-                             parents_joined)
-    if not os.path.exists(data_path):
-        os.makedirs(data_path)
-    data_full_path = os.path.join(data_path, tc_name + '.csv')
+        test_case_path = os.path.join(
+            root_path, 'projects', project, 'test_cases', parents_joined)
+        if not os.path.exists(test_case_path):
+            os.makedirs(test_case_path)
+        test_case_full_path = os.path.join(test_case_path, tc_name + '.py')
 
-    with open(test_case_full_path, 'w') as f:
-        f.write(test_case_content.format(tc_name))
+        data_path = os.path.join(root_path, 'projects', project, 'data', parents_joined)
+        if not os.path.exists(data_path):
+            os.makedirs(data_path)
+        data_full_path = os.path.join(data_path, tc_name + '.csv')
 
-    with open(data_full_path, 'w') as f:
-        f.write('')
+        with open(test_case_full_path, 'w') as f:
+            f.write(test_case_content)
+
+        with open(data_full_path, 'w') as f:
+            f.write('')
+    return errors
 
 
 test_case_content = """
-class {0}:
 
-    description = ''''''
+description = ''''''
 
-    pages = []
+pages = []
 
-    def setup(self):
-        logger.description = self.description
+def setup():
+    logger.description = description
 
-    def test(self, data):
-        pass
+def test(data):
+    pass
 
-    def teardown(self):
-        close()
+def teardown():
+    close()
 """
 
 
@@ -221,7 +223,7 @@ def format_parameters(step, root_path, project, parents, test_case_name,
 def format_page_object_string(page_objects):
     po_string = ''
     for po in page_objects:
-        po_string = po_string + " '" + po + "',\n" + " " * 12
+        po_string = po_string + " '" + po + "',\n" + " " * 8
     po_string = "[{}]".format(po_string.strip()[:-1])
     return po_string
 
@@ -246,28 +248,31 @@ def save_test_case(root_path, project, full_test_case_name, description,
     stored_keys = get_stored_keys(test_steps)
 
     with open(test_case_path, 'w', encoding='utf-8') as f:
+        # f.write('\n')
+        # f.write('class {}:\n'.format(tc_name))
         f.write('\n')
-        f.write('class {}:\n'.format(tc_name))
         f.write('\n')
-        f.write('    description = \'\'\'{}\'\'\'\n'.format(description))
+        f.write('description = \'\'\'{}\'\'\'\n'.format(description))
         f.write('\n')
-        f.write('    pages = {}\n'
-                .format(format_page_object_string(page_objects)))
         f.write('\n')
-        f.write('    def setup(self):\n')
-        f.write('        logger.description = self.description\n')
+        f.write('pages = {}\n'.format(format_page_object_string(page_objects)))
         f.write('\n')
-        f.write('    def test(self, data):\n')
+        f.write('\n')
+        f.write('def setup():\n')
+        f.write('    logger.description = description\n')
+        f.write('\n')
+        f.write('\n')
+        f.write('def test(data):\n')
         if test_steps:
             for step in test_steps:
                 parameters_formatted = format_parameters(step, root_path,
                                                          project, parents,
                                                          tc_name, stored_keys)
-                f.write('        {0}({1})\n'
+                f.write('    {0}({1})\n'
                         .format(step['action'].replace(' ', '_'),
                                 parameters_formatted))
         else:
-            f.write('        pass\n')
+            f.write('    pass\n')
         f.write('\n')
-        f.write('    def teardown(self):\n')
-        f.write('        close()\n')
+        f.write('def teardown():\n')
+        f.write('    close()\n')

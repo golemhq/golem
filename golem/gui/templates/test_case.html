@@ -106,6 +106,12 @@
                 </div>
                 {% endfor %}
 
+                <div class="step-remove-icon">
+                    <a href="javascript:void(0)" class=" onclick="deleteStep(this);">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    </a>
+                </div>
+
             </div>
 
             {% endfor %}
@@ -125,7 +131,7 @@
 
         <div class="clearfix"></div>
 
-        <button class="btn btn-default btn-sm" onclick="addFirstStepInput();"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
+        <button class="btn btn-default btn-sm" style="margin-left: 21px;" onclick="addFirstStepInput();"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
 
     </div>
 
@@ -138,6 +144,7 @@
 
             <div id="datos">
                 <table class="table table-bordered table-condensed" id="dataTable"> 
+                    
                     {% if test_data %}
                     <thead> 
                         <tr> 
@@ -230,15 +237,11 @@
 
     </div>
 
-
 </div>
 
-
-
-<script src="{{ url_for('static', filename='js/test_case.js') }}"></script>
-
+<script src="{{ url_for('static', filename='js/sortable/sortable.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/jquery-autocomplete/jquery.autocomplete.min.js') }}"></script>
-
+<script src="{{ url_for('static', filename='js/test_case.js') }}"></script>
 <script>
     var project = "{{project}}";
     var testCaseName = "{{test_case_name}}";

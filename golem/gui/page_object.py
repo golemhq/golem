@@ -5,6 +5,8 @@ import inspect
 
 from golem.core import utils
 
+from golem.gui import gui_utils
+
 
 def get_web_elements(content, po_name):
     elements = []
@@ -109,14 +111,20 @@ def is_page_object(parameter, root_path, project):
         return False
 
 
-def new_page_object(root_path, project, parents, page_object_name):
-    parents_joined = os.sep.join(parents)
+def new_page_object(root_path, project, parents, po_name):
+    errors = []
+    if gui_utils.file_already_exists(root_path, project, 'page_objects', parents, po_name):
+        errors.append('A file with that name already exists')
 
-    page_object_path = os.path.join(
-        root_path, 'projects', project, 'pages', parents_joined)
-    if not os.path.exists(page_object_path):
-        os.makedirs(page_object_path)
-    page_object_full_path = os.path.join(page_object_path, page_object_name + '.py')
+    if not errors:
+        parents_joined = os.sep.join(parents)
 
-    with open(page_object_full_path, 'w') as f:
-        f.write('')
+        page_object_path = os.path.join(
+            root_path, 'projects', project, 'pages', parents_joined)
+        if not os.path.exists(page_object_path):
+            os.makedirs(page_object_path)
+        page_object_full_path = os.path.join(page_object_path, po_name + '.py')
+
+        with open(page_object_full_path, 'w') as f:
+            f.write('')
+    return errors

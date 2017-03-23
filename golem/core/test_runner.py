@@ -33,7 +33,7 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
         'browser': None}
 
     from golem.core import execution_logger
-    instance = None
+    ## instance = None
     test_timestamp = utils.get_timestamp()
     test_start_time = time.time()
 
@@ -49,30 +49,36 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
                                                       suite_name,
                                                       suite_timestamp)
     try:
-        modulex = importlib.import_module(
+        test_module = importlib.import_module(
             'projects.{0}.test_cases.{1}'.format(project, test_case_name))
-        test_class = utils.get_test_case_class(project,
-                                               test_case_name)
+
+        # print('Module')
+        # print(modulex)
+        # print(modulex.pages)
+        # print(modulex.setup)
+        # print()
+        # test_class = utils.get_test_case_class(project,
+        #                                        test_case_name)
         # import the page objects into the test module
-        for page in test_class.pages:
-            modulex = utils.generate_page_object_module(project, modulex,
-                                                        page, page.split('.'))
+        for page in test_module.pages:
+            test_module = utils.generate_page_object_module(project, test_module, page, page.split('.'))
         # import logger into the test module
-        setattr(modulex, 'logger', golem.core.execution_logger)
+        setattr(test_module, 'logger', golem.core.execution_logger)
         # import actions into the test module
         for action in dir(golem.core.actions):
-            setattr(modulex, action, getattr(golem.core.actions, action))
+            setattr(test_module, action, getattr(golem.core.actions, action))
 
-        instance = test_class()
-        if hasattr(instance, 'setup'):
-            instance.setup()
+        # instance = test_class()
+
+        if hasattr(test_module, 'setup'):
+            test_module.setup()
         else:
-            raise Exception('Test class does not have setup method')
-        if hasattr(instance, 'test'):
+            raise Exception('Test does not have setup method')
+        if hasattr(test_module, 'test'):
             # instance.test(test_data)
-            instance.test(golem.core.test_data)
+            test_module.test(golem.core.test_data)
         else:
-            raise Exception('Test class does not have test method')
+            raise Exception('Test does not have test method')
 
     except:
         result['result'] = 'fail'
@@ -88,8 +94,8 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
         print(traceback.print_exc())
 
     try:
-        if hasattr(instance, 'teardown'):
-            instance.teardown()
+        if hasattr(test_module, 'teardown'):
+            test_module.teardown()
         else:
             actions.close()
     except:
@@ -159,18 +165,21 @@ def run_single_test_case(workspace, project, full_test_case_name):
         sys.exit(
             "ERROR: no test case named {} exists".format(full_test_case_name))
     else:
+        thread_amount = test_execution.thread_amount
+        execution_list = []
+        
         # get test data
         data_sets = utils.get_test_data(workspace,
                                         project,
                                         full_test_case_name)
-        thread_amount = test_execution.thread_amount
-        execution_list = []
-        if data_sets:
-            for data_set in data_sets:
-                execution_list.append({
-                    'test_case_name': full_test_case_name,
-                    'data_set': data_set
-                    })
+        if not data_sets:
+            data_sets = [{}]
+        
+        for data_set in data_sets:
+            execution_list.append({
+                'test_case_name': full_test_case_name,
+                'data_set': data_set
+                })
         # run the single test, once for each data set
         multiprocess_executor(execution_list, thread_amount)
 
@@ -202,12 +211,13 @@ def run_suite(workspace, project, suite, is_directory=False):
         data_sets = utils.get_test_data(workspace,
                                         project,
                                         test_case)
-        if data_sets:
-            for data_set in data_sets:
-                execution_list.append({
-                    'test_case_name': test_case,
-                    'data_set': data_set
-                    })
+        if not data_sets:
+            data_sets = [{}]
+        for data_set in data_sets:
+            execution_list.append({
+                'test_case_name': test_case,
+                'data_set': data_set
+                })
 
     multiprocess_executor(execution_list,
                           thread_amount,
