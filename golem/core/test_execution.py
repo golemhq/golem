@@ -10,3 +10,7 @@ test = None
 suite = None
 
 settings = None
+
+thread_amount = None
+
+timestamp = None

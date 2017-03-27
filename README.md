@@ -65,7 +65,7 @@ A directory must be created to contain the project, tests and required files. Op
 Create the test directory:
 
 ```
-golem-admin startdirectory <directory_name>
+golem-admin createdirectory <directory_name>
 ```
 
 This will create a folder for all subsequent projects.
@@ -78,7 +78,7 @@ Next, create a **new** test project inside the test directory
 cd <directory_name>
 ```
 ```
-python golem.py startproject <project_name>
+python golem.py createproject <project_name>
 ```
 
 ##### **3. Start the GUI**

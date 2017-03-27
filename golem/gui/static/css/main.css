@@ -66,8 +66,9 @@ body {
 }
 
 @media (min-width: 768px) {
-.container {
-    max-width: 730px;
+    .container {
+        max-width: 730px;
+    }
 }
 
 @media (min-width: 1170px) {
@@ -133,5 +134,30 @@ body {
 }
 
 .autocomplete-suggestion {
+    padding: 2px 5px 2px 5px;
+}
+
+.autocomplete-suggestion:hover {
     cursor: pointer;
+    background: lightgrey;
+}
+
+.header-col{
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+
+.loader {
+    border: 5px solid #f3f3f3; /* Light grey */
+    border-top: 5px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

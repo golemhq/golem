@@ -52,6 +52,9 @@ def _generate_dict_from_file_structure(full_path):
         # remove __init__.py from list of files
         if '__init__.py' in files:
             files.remove('__init__.py')
+        # mac OS creates '.DS_store' files
+        if '.DS_Store' in files:
+            files.remove('.DS_Store')
         # remove files that are not .py extension and remove extensions
         filenames = [x[:-3] for x in files if x.split('.')[1] == 'py']
         filename_filepath_duple_list = []
@@ -81,7 +84,15 @@ def get_page_objects(workspace, project):
 
 def get_suites(workspace, project):
     path = os.path.join(workspace, 'projects', project, 'test_suites')
-    suites = _generate_dict_from_file_structure(path)
+    
+    ## suites = _generate_dict_from_file_structure(path)
+
+    suites = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+
+    if '__init__.py' in suites:
+        suites.remove('__init__.py')
+    # remove files that are not .py extension and remove extensions
+    suites = [x[:-3] for x in suites if x.split('.')[1] == 'py']
     return suites
 
 
@@ -103,7 +114,7 @@ def get_files_in_directory_dotted_path(base_path):
     files_with_dotted_path = []
     for path, subdirs, files in os.walk(base_path):
         for name in files:
-            if name != '__init__.py':
+            if name not in ['__init__.py', '.DS_Store']:
                 filepath = os.path.join(path, os.path.splitext(name)[0])
                 all_files.append(filepath)
     for file in all_files:
@@ -161,17 +172,38 @@ def get_directory_suite_test_cases(workspace, project, suite):
     return tests
 
 
-def get_test_case_class(project_name, test_case_name):
-    '''Returns the class present in a module of the same name.
-    'test_case_name' might be the full path to the module,
-    separeted by dots'''
+def get_suite_amount_of_workers(workspace, project, suite):
+    amount = 1
 
-    # TODO verify the file exists before trying to import
-    modulex = importlib.import_module('projects.{0}.test_cases.{1}'
-                                      .format(project_name, test_case_name))
-    test_case_only = test_case_name.split('.')[-1]
-    test_case_class = getattr(modulex, test_case_only)
-    return test_case_class
+    suite_module = importlib.import_module('projects.{0}.test_suites.{1}'.format(project, suite),
+                                           package=None)
+    if hasattr(suite_module, 'workers'):
+        amount = suite_module.workers
+
+    return amount
+
+
+def get_suite_browsers(workspace, project, suite):
+    browsers = []
+    suite_module = importlib.import_module('projects.{0}.test_suites.{1}'.format(project, suite),
+                                           package=None)
+    if hasattr(suite_module, 'browsers'):
+        browsers = suite_module.browsers
+
+    return browsers
+
+
+# def get_test_case_class(project_name, test_case_name):
+#     '''Returns the class present in a module of the same name.
+#     'test_case_name' might be the full path to the module,
+#     separeted by dots'''
+
+#     # TODO verify the file exists before trying to import
+#     modulex = importlib.import_module('projects.{0}.test_cases.{1}'
+#                                       .format(project_name, test_case_name))
+#     test_case_only = test_case_name.split('.')[-1]
+#     test_case_class = getattr(modulex, test_case_only)
+#     return test_case_class
 
 
 def get_global_settings():
@@ -302,8 +334,9 @@ def generate_page_object_module(project, parent_module,
     return parent_module
 
 
-def create_new_directory(path_list, add_init=False):
-    path = os.sep.join(path_list)
+def create_new_directory(path_list=None, path=None, add_init=False):
+    if path_list:
+        path = os.sep.join(path_list)
     if not os.path.exists(path):
         os.makedirs(path)
     if add_init:
@@ -313,17 +346,12 @@ def create_new_directory(path_list, add_init=False):
 
 
 def create_new_project(workspace, project):
-    create_new_directory([workspace, 'projects', project], add_init=True)
-    create_new_directory([workspace, 'projects', project, 'data'],
-                               add_init=False)
-    create_new_directory([workspace, 'projects', project, 'pages'],
-                               add_init=True)
-    create_new_directory([workspace, 'projects', project, 'reports'],
-                               add_init=False)
-    create_new_directory([workspace, 'projects', project, 'test_cases'],
-                               add_init=True)
-    create_new_directory([workspace, 'projects', project, 'test_suites'],
-                               add_init=True)
+    create_new_directory(path_list=[workspace, 'projects', project], add_init=True)
+    create_new_directory(path_list=[workspace, 'projects', project, 'data'], add_init=False)
+    create_new_directory(path_list=[workspace, 'projects', project, 'pages'], add_init=True)
+    create_new_directory(path_list=[workspace, 'projects', project, 'reports'], add_init=False)
+    create_new_directory(path_list=[workspace, 'projects', project, 'test_cases'], add_init=True)
+    create_new_directory(path_list=[workspace, 'projects', project, 'test_suites'], add_init=True)
     extend_path = os.path.join(workspace, 'projects', project, 'extend.py')
     open(extend_path, 'a').close()
     settings_path = os.path.join(workspace, 'projects', project, 'settings.conf')
@@ -331,7 +359,7 @@ def create_new_project(workspace, project):
 
 
 def create_demo_project(workspace):
-    create_new_directory([workspace, 'projects', 'demo'])
+    create_new_directory(path_list=[workspace, 'projects', 'demo'])
     source = os.path.join(golem.__path__[0], 'templates/demo_project')
     destination = os.path.join(workspace, 'projects', 'demo')
     shutil.copytree(source, destination)

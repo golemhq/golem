@@ -16,7 +16,7 @@ from flask.ext.login import (LoginManager,
                              login_required)
 
 from golem.core import utils
-from . import gui_utils, test_case, page_object, data, user, parser
+from . import gui_utils, test_case, page_object, suite, data, user, parser
 
 
 app = Flask(__name__)
@@ -95,11 +95,13 @@ def project(project):
         return render_template('not_permission.html')
     test_cases = utils.get_test_cases(root_path, project)
     page_objects = utils.get_page_objects(root_path, project)
+    suites = utils.get_suites(root_path, project)
     # suites = 
     return render_template('project.html',
                            test_cases=test_cases,
                            project=project,
-                           page_objects=page_objects)
+                           page_objects=page_objects,
+                           suites=suites)
 
 
 # TEST CASE VIEW
@@ -145,9 +147,7 @@ def get_selected_page_object_elements():
         projectname = request.form['project']
         page_object_name = request.form['pageObject']
 
-        po_elements = page_object.get_page_object_content(root_path,
-                                                          projectname,
-                                                          page_object_name)
+        po_elements = page_object.get_page_object_content(root_path, projectname, page_object_name)
         return json.dumps(po_elements)
 
 
@@ -179,87 +179,14 @@ def new_tree_element():
                 errors = test_case.new_test_case(root_path, project, parents, element_name)
             elif element_type == 'page_object':
                 errors = page_object.new_page_object(root_path, project, parents, element_name)
+            elif element_type == 'suite':
+                errors = suite.new_suite(root_path, project, element_name)
 
         return json.dumps({
             'errors': errors,
             'project_name': project,
             'element_name': element_name,
             'is_dir': is_dir})
-
-
-# @app.route("/new_directory_test_case/", methods=['POST'])
-# def new_directory_test_case():
-
-#     if request.method == 'POST':
-#         projectname = request.form['project']
-#         parents = request.form['parents'].split('.')
-#         directory_name = request.form['directoryName'].replace('/', '')
-
-#         errors = []
-
-#         # check if a directory already exists
-#         if gui_utils.directory_already_exists(root_path, projectname,
-#                                               'test_cases', parents,
-#                                               directory_name):
-#             errors.append('A directory with that name already exists')
-
-#         if not errors:
-#             gui_utils.new_directory(root_path, projectname,
-#                                     parents, directory_name)
-
-#         return json.dumps({
-#             'errors': errors,
-#             'project_name': projectname,
-#             'directory_name': directory_name})
-
-
-# @app.route("/new_page_object/", methods=['POST'])
-# def new_page_object():
-
-#     if request.method == 'POST':
-#         projectname = request.form['project']
-#         parents = request.form['parents'].split('.')
-#         page_object_name = request.form['pageObjectName']
-
-#         errors = []
-
-#         # check if a file already exists
-#         if gui_utils.file_already_exists(root_path, projectname, 'pages',
-#                                          parents, page_object_name):
-#             errors.append('A file with that name already exists')
-
-#         if not errors:
-#             page_object.new_page_object(root_path, projectname, parents,
-#                                         page_object_name)
-
-#         return json.dumps({
-#             'errors': errors,
-#             'project_name': projectname,
-#             'page_object_name': page_object_name})
-
-
-# @app.route("/new_directory_page_object/", methods=['POST'])
-# def new_directory_page_object():
-
-#     if request.method == 'POST':
-#         projectname = request.form['project']
-#         parents = request.form['parents'].split('.')
-#         directory_name = request.form['directoryName'].replace('/', '')
-
-#         errors = []
-
-#         # check if a directory already exists
-#         if gui_utils.directory_already_exists(root_path, projectname, 'pages',
-#                                               parents, directory_name):
-#             errors.append('A directory with that name already exists')
-
-#         if not errors:
-#             gui_utils.new_directory_page_object(root_path, projectname,
-#                                                 parents, directory_name)
-
-#         return json.dumps({'errors': errors,
-#                            'project_name': projectname,
-#                            'directory_name': directory_name})
 
 
 @app.route("/get_global_actions/", methods=['POST'])
@@ -324,12 +251,80 @@ def save_test_case():
 
 @app.route("/run_test_case/", methods=['POST'])
 def run_test_case():
-
     if request.method == 'POST':
         projectname = request.form['project']
         test_case_name = request.form['testCaseName']
 
-        gui_utils.run_test_case(projectname, test_case_name)
+        timestamp = gui_utils.run_test_case(projectname, test_case_name)
+
+        return json.dumps(timestamp)
+
+@app.route("/check_test_case_run_result/", methods=['POST'])
+def check_test_case_run_result():
+    if request.method == 'POST':
+        projectname = request.form['project']
+        test_case_name = request.form['testCaseName']
+        timestamp = request.form['timestamp']
+
+        path = os.path.join(root_path, 'projects', projectname, 'reports', '__single__', test_case_name, timestamp)
+
+        sets = []
+        complete = False
+
+        if os.path.isdir(path):
+            for elem in os.listdir(path):
+                sets.append(elem)
+
+        if sets:
+          new_path = os.path.join(path, sets[0])
+          set_content = os.listdir(new_path)
+          if set_content:
+            report_path = os.path.join(new_path, 'report.json')
+            print('REPORT PATH', report_path)
+            with open(report_path) as data_file:    
+                json_data = json.load(data_file)
+            complete = True
+
+        if complete:
+          result = {'status': 'complete', 'report_data': json_data}
+        else:
+          result = {'status': 'not_complete'}
+
+        return json.dumps(result)
+
+@app.route("/p/<project>/suite/<suite>/")
+def suite_view(project, suite):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+
+    all_test_cases = utils.get_test_cases(root_path, project)
+
+    selected_tests = utils.get_suite_test_cases(project, suite)
+
+    worker_amount = utils.get_suite_amount_of_workers(root_path, project, suite)
+
+    browsers = utils.get_suite_browsers(root_path, project, suite)
+    browsers = ', '.join(browsers)
+    # page_object_data = page_object.get_page_object_content(root_path,
+    #                                                        project,
+    #                                                        full_page_name)
+
+    return render_template('suite.html', project=project, all_test_cases=all_test_cases,
+                           selected_tests=selected_tests, suite=suite, worker_amount=worker_amount,
+                           browsers=browsers)
+
+
+@app.route("/save_suite/", methods=['POST'])
+def save_suite():
+
+    if request.method == 'POST':
+        project = request.json['project']
+        suite_name = request.json['suite']
+        test_cases = request.json['testCases']
+        workers = request.json['workers']
+        browsers = request.json['browsers']
+
+        suite.save_suite(root_path, project, suite_name, test_cases, workers, browsers)
 
         return json.dumps('ok')
 
@@ -366,7 +361,7 @@ def project_view(project):
 
 @app.route("/report/project/<project>/suite/<suite>/")
 @login_required
-def suite_view(project, suite):
+def suite_report_view(project, suite):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:

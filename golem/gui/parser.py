@@ -53,12 +53,8 @@ def get_ejecucion_data(root_path, project, suite, execution):
     total_cases_ok = 0
     total_cases = 0
 
-    execution_dir = os.path.join(root_path,
-                                 'projects',
-                                 project,
-                                 'reports',
-                                 suite,
-                                 execution)
+    execution_dir = os.path.join(root_path, 'projects', project, 'reports',
+                                 suite, execution)
 
     # ejecucion_data['modulo'] = modulo
     execution_data['test_cases'] = []
@@ -75,6 +71,14 @@ def get_ejecucion_data(root_path, project, suite, execution):
             new_test_case = {}
 
             test_set_path = os.path.join(test_case_path, test_set)
+
+            # if the suite is being executed, the report dir might exist,
+            # but the report.json may still not be generated
+            report_json_path = os.path.join(test_set_path, 'report.json')
+            
+            if not os.path.exists(report_json_path):
+                continue
+
             with open(os.path.join(test_set_path, 'report.json'), 'r') as json_file:
                 report_data = json.load(json_file)
                 

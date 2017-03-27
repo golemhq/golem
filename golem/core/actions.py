@@ -206,8 +206,7 @@ def verify_text_in_element(element, text):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
-    add_step('Verify element \'{0}\' contains text \'{1}\''
-                        .format(element[2], text))
+    add_step('Verify element \'{0}\' contains text \'{1}\''.format(element[2], text))
     if text not in test_object.text:
         raise TextNotPresent("Text \'{0}\' was not found in element {1}"
                              .format(text, element[2]))

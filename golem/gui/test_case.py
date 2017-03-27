@@ -38,16 +38,21 @@ def _get_steps(content):
                         current_parameter += this_char
                 processed_parameters.append(current_parameter)
                 formatted_parameters = []
+                print(processed_parameters)
                 for pp in processed_parameters:
                     pp = pp.strip()
-                    if pp[-1] is ')':
-                        pp = pp[:-1]
-                    if pp[0] in ['\'', '\"']:
-                        pp = pp[1:]
-                    if pp[-1] in ['\'', '\"']:
-                        pp = pp[:-1]
-                    if 'data[' in pp:
-                        pp = pp.split('\'')[1]            
+                    if pp[0] == '(':
+                        # this is a tuple, leave as is
+                        pass
+                    else:
+                        if pp[-1] is ')':
+                            pp = pp[:-1]
+                        if pp[0] in ['\'', '\"']:
+                            pp = pp[1:]
+                        if pp[-1] in ['\'', '\"']:
+                            pp = pp[:-1]
+                        if 'data[' in pp:
+                            pp = pp.split('\'')[1]            
 
                     formatted_parameters.append(pp)
                 # parameter_list = [x for x in parameters.split(',')]
@@ -91,8 +96,8 @@ def get_description(content):
 
     content_string = ''.join(content)
     description = ''
-    description = re.search(".*description = \'\'\'(.*\n*.*)\'\'\'",
-                            content_string).group(1)
+    ## description = re.search(".*description = \'(.*\n*.*)\'", content_string).group(1)
+    description = re.search(".*description = \'(.*?)\'", content_string).group(1)
     description = re.sub("\s\s+", " ", description)
     return description
 
@@ -152,11 +157,15 @@ def new_test_case(root_path, project, parents, tc_name):
 
     if not errors:
         parents_joined = os.sep.join(parents)
+        base_path = os.path.join(root_path, 'projects', project, 'test_cases')
+        test_case_path = os.path.join(base_path, parents_joined)
 
-        test_case_path = os.path.join(
-            root_path, 'projects', project, 'test_cases', parents_joined)
+        # create the directory structure (with __init__.py files) if it does not exist
         if not os.path.exists(test_case_path):
-            os.makedirs(test_case_path)
+            for parent in parents:
+                base_path = os.path.join(base_path, parent)
+                utils.create_new_directory(path=base_path, add_init=True)
+
         test_case_full_path = os.path.join(test_case_path, tc_name + '.py')
 
         data_path = os.path.join(root_path, 'projects', project, 'data', parents_joined)
@@ -174,7 +183,7 @@ def new_test_case(root_path, project, parents, tc_name):
 
 test_case_content = """
 
-description = ''''''
+description = ''
 
 pages = []
 
@@ -211,6 +220,8 @@ def format_parameters(step, root_path, project, parents, test_case_name,
                 this_parameter_string = 'data[\'{}\']'.format(parameter)
             else:
                 if action in ['wait', 'select_by_index']:
+                    this_parameter_string = parameter
+                elif parameter[0] == '(' and parameter[-1] == ')':
                     this_parameter_string = parameter
                 else:
                     this_parameter_string = '\'' + parameter + '\''
@@ -252,7 +263,7 @@ def save_test_case(root_path, project, full_test_case_name, description,
         # f.write('class {}:\n'.format(tc_name))
         f.write('\n')
         f.write('\n')
-        f.write('description = \'\'\'{}\'\'\'\n'.format(description))
+        f.write('description = \'{}\'\n'.format(description))
         f.write('\n')
         f.write('\n')
         f.write('pages = {}\n'.format(format_page_object_string(page_objects)))

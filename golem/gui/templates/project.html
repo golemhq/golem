@@ -85,15 +85,33 @@
 					<i class="glyphicon glyphicon-plus-sign"></i>
 					<a href="#" onclick="displayNewElementForm(this)"> Add New</a>
 				</span>
+			</li>
 				<!-- <i class="glyphicon glyphicon-plus-sign"></i><a href="#" onclick="startAddNewPageObject(this)"> Add New</a></li> -->
 		</ul>
 
 	</div>
 
+	<div class="clearfix"></div>
+	<br>
 
 	<div class="col-sm-6">
 		<span><strong>Test Suites</strong></span>
-
+		<ul id="suites" class="tree">
+			{% for suite in suites %}
+				<li>
+					<a href="/p/{{project}}/suite/{{suite}}/">{{suite}}</a>
+				</li>
+			{% endfor%}
+			<li>
+				<span class="new-element-form" style="display: none;">
+					<input class='new-element-input new-suite' type='text' onblur="addElement(event);" onkeyup="if(event.keyCode==13){addElement(event)}">
+				</span>
+				<span class="display-new-element-link">
+					<i class="glyphicon glyphicon-plus-sign"></i>
+					<a href="#" onclick="displayNewElementForm(this)"> Add New</a>
+				</span>
+			</li>
+		</ul>
 
 	</div>
 

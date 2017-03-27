@@ -25,18 +25,24 @@ def get_golem_parser():
                             '--threads',
                             action='store',
                             nargs='?',
-                            default=1,
+                            # default=1,
                             type=int,
                             metavar='amount of threads for parallel execution',
                             help="amount of threads for parallel execution")
     run_parser.add_argument('-d',
-                            '--driver',
+                            '--drivers',
                             action='store',
-                            nargs='?',
+                            nargs='*',
                             choices=['firefox', 'chrome'],
                             type=str,
-                            metavar='Web Driver',
-                            help="Web Driver")
+                            metavar='Web Drivers',
+                            help="Web Drivers")
+    run_parser.add_argument('--timestamp',
+                            action='store',
+                            nargs='?',
+                            type=str,
+                            metavar='Timestamp',
+                            help="Timestamp")
 
     gui_parser = sub_parsers.add_parser('gui')
     gui_parser.add_argument('-p',
@@ -48,9 +54,23 @@ def get_golem_parser():
                             metavar='port number',
                             help="port number to use for Golem GUI")
 
-    start_project_parser = sub_parsers.add_parser('startproject')
-    start_project_parser.add_argument('project',
+    create_project_parser = sub_parsers.add_parser('createproject')
+    create_project_parser.add_argument('project',
                                       help="project name")
+
+    create_test_parser = sub_parsers.add_parser('createtest')
+    create_test_parser.add_argument('project',
+                                    help="project name")
+    create_test_parser.add_argument('test',
+                                    metavar='test case name',
+                                    help="test case name")
+
+    create_suite_parser = sub_parsers.add_parser('createsuite')
+    create_suite_parser.add_argument('project',
+                                    help="project name")
+    create_suite_parser.add_argument('suite',
+                                    metavar='suite name',
+                                    help="suite name")
 
     createuser_parser = sub_parsers.add_parser('createuser')
 
@@ -76,7 +96,7 @@ def get_golem_admin_parser():
 
     sub_parsers = parser.add_subparsers(dest="main_action")
 
-    new_directory_parser = sub_parsers.add_parser('startdirectory')
+    new_directory_parser = sub_parsers.add_parser('createdirectory')
     new_directory_parser.add_argument('name',
                                       metavar='name',
                                       help="directory name")

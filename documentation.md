@@ -85,6 +85,16 @@ Verify that an element contains the given text.
 Pause execution for the given amount of seconds
 
 
+Test Suite
+--------------------------------------
+
+The test is comprised of the following: list of test cases, browsers to execute and amount of workers.
+
+When selecting all the test cases inside a folder, it can be abbreviated with the name of the folder followed by a forward dash like so: "folder_name/". An asterisc marks every test case to be executed inside the suite
+
+
+
+
 Configuration Options
 --------------------------------------
 
@@ -102,7 +112,7 @@ Define the driver to use unless overriden by the -d/--driver flag
 
 - **chrome_driver_path**
 
-Full path to the chrome driver executable
+Path to the chrome driver executable. If the chromedriver is inside the test dir, it can be referenced as './chromedriver'
 
 - **wait_hook**
 
@@ -120,6 +130,6 @@ Run a test case or test suite from a project. Threads indicates the amount of te
 
 Start Golem GUI. Port indicates which port number to use, default is 5000.
 
-- **startproject project**
+- **createproject project**
 
-Starts a new project with the given name. Creates the base files and folders.
+Creates a new project with the given name. Creates the base files and folders.

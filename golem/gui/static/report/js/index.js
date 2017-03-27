@@ -130,7 +130,17 @@ function cargarGraficoHistorial(project, suite){
 	      title: '',
 	      hAxis: {title: '',  titleTextStyle: {color: '#333'}},
 	      vAxis: {minValue: 0},
-	      backgroundColor: '#f9f9f9'
+	      height: 273,
+	      backgroundColor: '#f9f9f9',
+	      animation: {
+	      	startup: true, 
+	      	duration: 700,
+	      	easing: 'in'},
+	      backgroundColor: {
+	      		fill: '#f9f9f9',
+	        	stroke: '#d3d3d3',
+	        	strokeWidth: 2,
+    	  	}
 	    };
 
 	    var chart = new google.visualization.AreaChart(container);

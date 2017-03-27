@@ -27,7 +27,7 @@
 
     <div class="col-sm-10 col-sm-offset-1" id="datosContainerContainer">
 
-        <div class="col-sm-6">
+        <div class="col-sm-6 header-col">
             <h3 id="pageObjectName">
                 <small>
                     <a href="/p/{{project}}/" class="link-without-underline">
@@ -36,7 +36,7 @@
                 </small>
             {{page_name}}</h3>
         </div>
-        <div class="col-sm-6 text-right" style="padding-top: 20px">
+        <div class="col-sm-6 text-right header-col" style="padding-top: 20px">
             <button id="save" class="btn btn-default btn-sm" onclick="savePageObject();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
         </div>
 
@@ -66,46 +66,46 @@
                 {% for element in page_object_data.element_list %}
                     <div class="element col-md-12">
                         <div class="col-sm-3">
-                            <div class="input-group">
+                            <div class="input-group po-input-group">
                                 <input type="text" class="form-control element-name" value="{{element.element_name}}" placeholder="name">
                             </div> 
                         </div>
                         <div class="col-sm-3">
-                            <div class="input-group">
+                            <div class="input-group po-input-group">
                                 <input type="text" class="form-control element-selector" value="{{element.element_selector}}" placeholder="selector">
                             </div> 
                         </div>
                         <div class="col-sm-3">
-                            <div class="input-group">
+                            <div class="input-group po-input-group">
                                 <input type="text" class="form-control element-value" value="{{element.element_value}}" placeholder="value">
                             </div> 
                         </div>
                         <div class="col-sm-3">
-                            <div class="input-group">
+                            <div class="input-group po-input-group">
                                 <input type="text" class="form-control element-display-name" value="{{element.element_display_name}}" placeholder="display name">
                             </div> 
                         </div>
                     </div>
                 {% endfor %}
-                {% if not page_object_data %}
+                {% if not page_object_data.element_list %}
                     <div class="element col-md-12">
                         <div class="col-sm-3">
-                            <div class="input-group">
+                            <div class="input-group po-input-group">
                                 <input type="text" class="form-control element-name" value="" placeholder="name">
                             </div> 
                         </div>
                         <div class="col-sm-3">
-                            <div class="input-group">
+                            <div class="input-group po-input-group">
                                 <input type="text" class="form-control element-selector" value="" placeholder="selector">
                             </div> 
                         </div>
                         <div class="col-sm-3">
-                            <div class="input-group">
+                            <div class="input-group po-input-group">
                                 <input type="text" class="form-control element-value" value="" placeholder="value">
                             </div> 
                         </div>
                         <div class="col-sm-3">
-                            <div class="input-group">
+                            <div class="input-group po-input-group  ">
                                 <input type="text" class="form-control element-display-name" value="" placeholder="display name">
                             </div> 
                         </div>

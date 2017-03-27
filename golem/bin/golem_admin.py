@@ -16,7 +16,7 @@ def main():
     parser = cli.get_golem_admin_parser()
     args = parser.parse_args()
 
-    if args.main_action == 'startdirectory':
+    if args.main_action == 'createdirectory':
         # Generate a new 'golem' directory
         dir_name = args.name
         if os.path.exists(dir_name):

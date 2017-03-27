@@ -55,25 +55,25 @@ function addPageObjectInput(){
     $("#elements").append(
         "<div class='element col-md-12'> \
             <div class='col-sm-3'> \
-                <div class='input-group'> \
+                <div class='input-group po-input-group'> \
                     <input type='text' class='form-control element-name' value='' \
                         placeholder='name'> \
                 </div> \
             </div> \
             <div class='col-sm-3'> \
-                <div class='input-group'> \
+                <div class='input-group po-input-group'> \
                     <input type='text' class='form-control element-selector' \
                         value='' placeholder='selector'> \
                 </div> \
             </div> \
             <div class='col-sm-3'> \
-                <div class='input-group'> \
+                <div class='input-group po-input-group'> \
                     <input type='text' class='form-control element-value' \
                         value='' placeholder='value'> \
                 </div> \
             </div> \
             <div class='col-sm-3'> \
-                <div class='input-group'> \
+                <div class='input-group po-input-group'> \
                     <input type='text' class='form-control element-display-name' \
                         value='' placeholder='display name'> \
                 </div> \

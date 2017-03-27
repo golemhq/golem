@@ -573,6 +573,8 @@ function runTestCase(){
          dataType: 'json',
          type: 'POST',
          success: function(data) {
+            var timestamp = data;
+            checkTestCaseResult(project, fullTestCaseName, timestamp);
          },
          error: function() {}
      });
@@ -698,4 +700,58 @@ function fillStepNumbering(){
 function deleteStep(elem){
     $(elem).parent().parent().remove();
     unsavedChanges = true;
+}
+
+
+function checkTestCaseResult(project, fullTestCaseName, timestamp){
+
+    $("#testRunModal").modal("show");
+
+    $("#testRunModal .modal-title").html('Running Test Case');
+
+    $("#loaderContainer").show();
+
+    $("#testResultContainer").html('');
+
+    checkAndRecheckStatus(project, fullTestCaseName, timestamp);
+}
+
+function checkAndRecheckStatus(project, fullTestCaseName, timestamp){
+
+    $.ajax({
+        url: "/check_test_case_run_result/",
+        data: {
+             "project": project,
+             "testCaseName": fullTestCaseName,
+             "timestamp": timestamp
+         },
+         dataType: 'json',
+         type: 'POST',
+         success: function(data) {
+            if(data.status == 'not_complete'){
+                setTimeout(function(){
+                    checkAndRecheckStatus(project, fullTestCaseName, timestamp);
+                }, 500, project, fullTestCaseName, timestamp);
+            }
+            else{
+                $("#loaderContainer").hide();
+
+                $("#testRunModal .modal-title").html('Result');
+
+                $("#testResultContainer").html('');
+
+                $("#testResultContainer").append('<span><strong>Result:</strong> ' + data.report_data.result + '</span><br>');
+                $("#testResultContainer").append('<span><strong>Error:</strong> ' + data.report_data.short_error + '</span><br>');
+                $("#testResultContainer").append('<span><strong>Elapsed Time:</strong> ' + data.report_data.test_elapsed_time + '</span><br>');
+                $("#testResultContainer").append('<span><strong>Browser:<strong> ' + data.report_data.browser + '</span><br>');
+                $("#testResultContainer").append('<span><strong>Steps:</strong></span>');
+                $("#testResultContainer").append("<ol style='margin-left: 20px'></ol>");
+                for(s in data.report_data.steps){
+                    $("#testResultContainer ol").append('<li>' + data.report_data.steps[s] + '</li>')
+                }
+                $("#testResultContainer").append('</ol>')
+            }
+         },
+         error: function() {}
+     });
 }

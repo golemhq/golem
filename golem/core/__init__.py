@@ -3,6 +3,8 @@ from selenium import webdriver
 
 driver = None
 
+driver_name = None
+
 settings = None
 
 project = None
@@ -63,11 +65,9 @@ def get_setting(setting):
 
 
 def get_selected_driver():
-    global settings
-    if settings['driver']:
-        driver_selected = settings['driver']
-    elif 'default_driver' in settings:
-        driver_selected = settings['default_driver']
+    global driver_name
+    if driver_name:
+        driver_selected = driver_name
     else:
         driver_selected = 'firefox'
     return driver_selected

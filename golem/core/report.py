@@ -34,12 +34,18 @@ def generate_report(report_directory, test_case_name, test_data, result):
     
     json_report_path = os.path.join(report_directory, 'report.json')
 
+    if result['error']:
+        short_error = result['error'].split('\n')[-2]
+    else:
+        short_error = ''
+
     report = {
         'test_case': test_case_name,
         'result': result['result'],
         'steps': result['steps'],
         'description': result['description'],
         'error': result['error'],
+        'short_error': short_error,
         'test_elapsed_time': result['test_elapsed_time'],
         'test_timestamp': result['test_timestamp'],
         'browser': result['browser']

@@ -118,11 +118,15 @@ def new_page_object(root_path, project, parents, po_name):
 
     if not errors:
         parents_joined = os.sep.join(parents)
-
-        page_object_path = os.path.join(
-            root_path, 'projects', project, 'pages', parents_joined)
+        base_path = os.path.join(root_path, 'projects', project, 'pages')
+        page_object_path = os.path.join(base_path, parents_joined)
+        
+        # create the directory structure (with __init__.py files) if it does not exist
         if not os.path.exists(page_object_path):
-            os.makedirs(page_object_path)
+            for parent in parents:
+                base_path = os.path.join(base_path, parent)
+                utils.create_new_directory(path=base_path, add_init=True)
+
         page_object_full_path = os.path.join(page_object_path, po_name + '.py')
 
         with open(page_object_full_path, 'w') as f:

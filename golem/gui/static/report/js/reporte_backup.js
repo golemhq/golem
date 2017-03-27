@@ -1,18 +1,6 @@
-
-var allTestCases = {};
-var maxNumberOfSubModules = 0;
-var baseDelay = 1000;
-
+var allTestCases = [];
 
 $(document).ready(function() {            
-	
-
-
-	getReportData();
-});
-
-
-function getReportData(){
 	$.post(
 		"/report/get_execution_data/",
 		{ 
@@ -24,23 +12,12 @@ function getReportData(){
   			loadReport(data.execution_data);
   		}
 	);
-
-	baseDelay += 10;
-
-	setTimeout(function(){
-		getReportData()
-	}, baseDelay);
-}
+});
 
 
 function loadReport(execution_data){
-	//loadDetailTable(execution_data.test_cases);
-	//loadGeneralTable(execution_data.test_cases);
-
-
-	for(tc in execution_data.test_cases){
-		addTestCaseToDetailTable(execution_data.test_cases[tc]);
-	}
+	loadDetailTable(execution_data.test_cases);
+	loadGeneralTable(execution_data.test_cases);
 }
 
 
@@ -54,9 +31,11 @@ function loadDetailTable(test_cases){
 		}
 		$(newColsString).insertAfter("table.por-CP thead .module-col-header");
 	}
-
+	
 	for(idx in test_cases){
 		var testCase = test_cases[idx];
+
+		console.log(testCase);
 
 		var testCaseRow = $("table.por-CP .primera-fila").clone().removeClass('primera-fila');
 
@@ -153,64 +132,6 @@ function loadGeneralTable(testCases){
 	barra_azul.attr('data-transitiongoal', okPercentage);
 	setTimeout(animateProgressBar, 10, id);
 }
-
-
-
-
-
-// ===================
-
-
-
-
-
-function addTestCaseToDetailTable(testCase){
-	// is this test case already added to the table?
-	console.log(testCase);
-	if(allTestCases[testCase.test_set] == undefined ){
-		// this test case is not added yet
-
-		var testCaseRow = $("table.por-CP .primera-fila").clone().removeClass('primera-fila');
-
-		var numbering = $(".table.por-CP tbody tr").length;
-		testCaseRow.find("td.tc-number").html(numbering);
-
-		if(testCase.module.length > 0){
-			testCaseRow.find("td.tc-module").html(testCase.module);	
-		}
-		else{
-			testCaseRow.find("td.tc-module").html('-');	
-		}
-
-		testCaseRow.find("td.tc-name").html(testCase.name);
-		testCaseRow.find("td.tc-result").html(testCase.result);
-		testCaseRow.find("td.tc-time").html(testCase.test_elapsed_time);
-		testCaseRow.find("td.tc-reporte").html(
-			"<a target='_blank' href='/report/project/"+project+"/"+suite+"/"+execution+"/"+testCase.full_name+"/"+testCase.test_set+"'>See Report</a>");
-
-
-		$("table.por-CP tbody").append(testCaseRow);
-
-		// add this test case to allTestCases
-		allTestCases[testCase.test_set] = testCase;
-	}
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// =================
 
 function animateProgressBar(id){
 	var goal = $("#"+id).attr('data-transitiongoal');

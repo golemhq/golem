@@ -4,7 +4,8 @@ import os
 import sys
 
 from golem.core import utils, cli, test_runner, test_execution
-from golem.gui import gui_start
+from golem.gui import gui_start, test_case
+from golem.gui import suite as suite_module
 
 
 def execute_from_command_line(root_path):
@@ -18,6 +19,7 @@ def execute_from_command_line(root_path):
 
     import golem.core
     golem.core.temp = test_execution.settings
+
     # main action == gui
     if args.main_action == 'gui':
         port_number = args.port
@@ -27,7 +29,8 @@ def execute_from_command_line(root_path):
     # main action == run
     if args.main_action == 'run':
         test_execution.thread_amount = args.threads
-        test_execution.settings['driver'] = args.driver
+        test_execution.drivers = args.drivers
+        test_execution.timestamp = args.timestamp
         if not args.project:
             print('Usage:', parser.usage, '\n\n', 'Project List:')
             for proj in utils.get_projects(root_path):
@@ -53,7 +56,9 @@ def execute_from_command_line(root_path):
                 print('\nTest Suites:')
                 test_suites = utils.get_suites(root_path,
                                                test_execution.project)
-                utils.display_tree_structure_command_line(test_suites)
+                for suite in test_suites:
+                    print('> ' + suite)
+                # utils.display_tree_structure_command_line(test_suites)
                 sys.exit()
 
             # check if test_or_suite value matches an existing test suite
@@ -96,8 +101,8 @@ def execute_from_command_line(root_path):
                          'suite or test'
                          .format(args.test_or_suite))
 
-    # main action == startproject
-    if args.main_action == 'startproject':
+    # main action == createproject
+    if args.main_action == 'createproject':
         if args.project in utils.get_projects(root_path):
             sys.exit('Error: a project with that name already exists'
                      .format(args.project))
@@ -105,6 +110,30 @@ def execute_from_command_line(root_path):
             utils.create_demo_project(root_path)
         else:
             utils.create_new_project(root_path, args.project)
+
+    # main action == createtest
+    if args.main_action == 'createtest':
+        if args.project not in utils.get_projects(root_path):
+            sys.exit('Error: a project with that name does not exist')
+        
+        split_path = args.test.split('.')
+        test_name = split_path.pop()
+        errors = test_case.new_test_case(root_path, args.project, split_path, test_name)
+        if errors:
+            for error in errors:
+                print(error)
+
+    # main action == createsuite
+    if args.main_action == 'createsuite':
+        if args.project not in utils.get_projects(root_path):
+            sys.exit('Error: a project with that name does not exist')
+        
+        # split_path = args.suite.split('.')
+        # suite_name = split_path.pop()
+        errors = suite_module.new_suite(root_path, args.project, args.suite)
+        if errors:
+            for error in errors:
+                print(error)
 
     # main action == createuser
     if args.main_action == 'createuser':

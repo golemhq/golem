@@ -20,7 +20,7 @@ from golem.core import (actions,
                         utils)
 
 
-def test_runner(workspace, project, test_case_name, test_data, suite_name,
+def test_runner(workspace, project, test_case_name, test_data, driver, suite_name,
                 suite_data, suite_timestamp, settings):
     ''' runs a single test case by name'''
     result = {
@@ -30,7 +30,7 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
         'steps': None,
         'test_elapsed_time': None,
         'test_timestamp': None,
-        'browser': None}
+        'browser': driver}
 
     from golem.core import execution_logger
     ## instance = None
@@ -40,23 +40,16 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
     golem.core.project = project
     golem.core.workspace = workspace
     golem.core.test_data = test_data
+    golem.core.driver_name = driver
     golem.core.set_settings(settings)
 
     # create a directory to store report.json and screenshots
-    report_directory = report.create_report_directory(workspace,
-                                                      project,
-                                                      test_case_name,
-                                                      suite_name,
-                                                      suite_timestamp)
+    report_directory = report.create_report_directory(workspace, project, test_case_name,
+                                                      suite_name, suite_timestamp)
     try:
         test_module = importlib.import_module(
             'projects.{0}.test_cases.{1}'.format(project, test_case_name))
 
-        # print('Module')
-        # print(modulex)
-        # print(modulex.pages)
-        # print(modulex.setup)
-        # print()
         # test_class = utils.get_test_case_class(project,
         #                                        test_case_name)
         # import the page objects into the test module
@@ -123,13 +116,13 @@ def test_runner(workspace, project, test_case_name, test_data, suite_name,
     return result
 
 
-def multiprocess_executor(execution_list, processes=1,
-                          suite_name=None, suite_data=None):
+def multiprocess_executor(execution_list, processes=1, suite_name=None, suite_data=None):
     print('execution list', execution_list)
-    timestamp = utils.get_timestamp()
 
-    # if not suite_name:
-    #     suite_name = '__single__'
+    if test_execution.timestamp:
+        timestamp = test_execution.timestamp
+    else:
+        timestamp = utils.get_timestamp()
 
     pool = Pool(processes=processes)
 
@@ -140,6 +133,7 @@ def multiprocess_executor(execution_list, processes=1,
                                              test_execution.project,
                                              test['test_case_name'],
                                              test['data_set'],
+                                             test['driver'],
                                              suite_name,
                                              suite_data,
                                              timestamp,
@@ -165,9 +159,23 @@ def run_single_test_case(workspace, project, full_test_case_name):
         sys.exit(
             "ERROR: no test case named {} exists".format(full_test_case_name))
     else:
-        thread_amount = test_execution.thread_amount
-        execution_list = []
+        threads = 1
+        if test_execution.thread_amount:
+            threads = test_execution.thread_amount
         
+        execution_list = []
+
+        drivers = []
+        
+        if test_execution.drivers:
+            drivers = test_execution.drivers
+
+        if not drivers and 'default_driver' in test_execution.settings:
+            drivers = [test_execution.settings['default_driver']]
+
+        if not drivers:
+            drivers = ['firefox']
+
         # get test data
         data_sets = utils.get_test_data(workspace,
                                         project,
@@ -176,12 +184,15 @@ def run_single_test_case(workspace, project, full_test_case_name):
             data_sets = [{}]
         
         for data_set in data_sets:
-            execution_list.append({
-                'test_case_name': full_test_case_name,
-                'data_set': data_set
-                })
+            for driver in drivers:
+                execution_list.append({
+                    'test_case_name': full_test_case_name,
+                    'data_set': data_set,
+                    'driver': driver,
+                    })
+
         # run the single test, once for each data set
-        multiprocess_executor(execution_list, thread_amount)
+        multiprocess_executor(execution_list, threads)
 
 
 def run_suite(workspace, project, suite, is_directory=False):
@@ -193,13 +204,34 @@ def run_suite(workspace, project, suite, is_directory=False):
 
     # get test case list
     if is_directory:
-        test_case_list = utils.get_directory_suite_test_cases(workspace,
-                                                              project,
-                                                              suite)
+        test_case_list = utils.get_directory_suite_test_cases(workspace, project, suite)
     else:
         test_case_list = utils.get_suite_test_cases(project, suite)
 
-    thread_amount = test_execution.thread_amount
+    threads = 1
+    
+    suite_file_amount_workers = utils.get_suite_amount_of_workers(workspace, project, suite)
+    if suite_file_amount_workers > 1:
+        threads = suite_file_amount_workers
+
+    # the thread count pass through cli has higher priority
+    if test_execution.thread_amount:
+        threads = test_execution.thread_amount
+
+    drivers = []
+
+    suite_file_drivers = utils.get_suite_browsers(workspace, project, suite)
+    if suite_file_drivers:
+        drivers = suite_file_drivers
+
+    if test_execution.drivers:
+        drivers = test_execution.drivers
+
+    if not drivers and 'default_driver' in test_execution.settings:
+        drivers = [test_execution.settings['default_driver']]
+
+    if not drivers:
+        drivers = ['firefox']
 
     # get test data for each test case present in the suite
     # and append tc/data pairs for each test case and for each data
@@ -208,17 +240,17 @@ def run_suite(workspace, project, suite, is_directory=False):
     # empty dict
     execution_list = []
     for test_case in test_case_list:
-        data_sets = utils.get_test_data(workspace,
-                                        project,
-                                        test_case)
+        data_sets = utils.get_test_data(workspace, project, test_case)
         if not data_sets:
             data_sets = [{}]
         for data_set in data_sets:
-            execution_list.append({
-                'test_case_name': test_case,
-                'data_set': data_set
-                })
+            for driver in drivers:
+                execution_list.append({
+                    'test_case_name': test_case,
+                    'data_set': data_set,
+                    'driver': driver
+                    })
 
     multiprocess_executor(execution_list,
-                          thread_amount,
+                          threads,
                           suite_name=suite)

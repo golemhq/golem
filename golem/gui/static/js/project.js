@@ -23,11 +23,17 @@ function addElement(event){
         urlPrefixForElementType = 'tc';
         inputClass = 'new-test-case';
     }
-    else{
+    else if(input.hasClass('new-page-object')){
         elementType = 'page_object';
         urlPrefixForElementType = 'page';
         inputClass = 'new-page-object';
     }
+    else if(input.hasClass('new-suite')){
+        elementType = 'suite';
+        urlPrefixForElementType = 'suite';
+        inputClass = 'new-suite';
+    }
+
     var parentsSeparetedByDots = getParentsSeparatedByDots(input);
     var elementName = input.val();
     var isDir = false;
@@ -53,6 +59,11 @@ function addElement(event){
     // validate there is no more than 1 slash
     if(elementName.split('/').length -1 > 1){
         displayErrorModal(['Only one slash character is allowed']);
+        return   
+    }
+    // validate there is no more than 1 slash
+    if(elementType == 'suite' &&  elementName.split('/').length -1 == 1){
+        displayErrorModal(['Suite names cannot contain slashes']);
         return   
     }
     // validate if there is a slash it is trailing
