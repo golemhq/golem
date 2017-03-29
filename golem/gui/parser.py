@@ -59,6 +59,8 @@ def get_ejecucion_data(root_path, project, suite, execution):
     # ejecucion_data['modulo'] = modulo
     execution_data['test_cases'] = []
 
+    print(execution_dir)
+    
     test_cases = os.walk(execution_dir).__next__()[1]
 
     for test_case in test_cases:

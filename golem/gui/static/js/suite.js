@@ -179,3 +179,27 @@ function getNodeFullPath(thisLi, nodeName){
     }
 }
 
+
+function runSuite(){
+
+    toastr.options = {
+        "positionClass": "toast-top-center",
+        "timeOut": "4000",
+        "hideDuration": "100"}    
+    $.ajax({
+        url: "/run_suite/",
+        data: {
+             "project": project,
+             "suite": suite,
+         },
+         dataType: 'json',
+         type: 'POST',
+         success: function(data) {
+            http://localhost:5000/report/project/demo/simplesuite/2017.03.27.15.03.36.194/
+            var url = '/report/project/' + project + '/' + suite + '/' + data + '/';
+            toastr.info('Running suite ' + suite + " - <a target='_blank' href='" + url + "'>open</a>");
+         },
+         error: function() {}
+     });
+
+}

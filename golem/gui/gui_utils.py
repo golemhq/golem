@@ -41,6 +41,15 @@ def run_test_case(project, test_case_name):
     ## subprocess.check_output(['python', 'golem.py', 'run', project, test_case_name])
 
 
+def run_suite(project, suite_name):
+    timestamp = utils.get_timestamp()
+    ## os.system('python golem.py run {0} {1} --timestamp {2}'.format(project, test_case_name, timestamp))
+    subprocess.Popen(['python', 'golem.py', 'run', project, suite_name, '--timestamp', timestamp])
+    return timestamp
+    ## subprocess.check_output(['python', 'golem.py', 'run', project, test_case_name])
+
+
+
 def get_time_span(task_id):
 
     path = os.path.join('results', '{0}.csv'.format(task_id))

@@ -292,6 +292,17 @@ def check_test_case_run_result():
 
         return json.dumps(result)
 
+@app.route("/run_suite/", methods=['POST'])
+def run_suite():
+    if request.method == 'POST':
+        projectname = request.form['project']
+        suite_name = request.form['suite']
+
+        timestamp = gui_utils.run_suite(projectname, suite_name)
+
+        return json.dumps(timestamp)
+
+
 @app.route("/p/<project>/suite/<suite>/")
 def suite_view(project, suite):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):

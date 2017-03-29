@@ -197,6 +197,7 @@ def verify_text(text):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     add_step('Verify \'{0}\' is present in page'.format(text))
+    time.sleep(3)
     if text not in driver.page_source:
         raise TextNotPresent(
                     "Text '{}' was not found in the page".format(text))
