@@ -5,10 +5,15 @@ import os
 class User: 
     id = None
     username = None
+    is_admin = False
 
     @property
     def is_authenticated(self):
         return True
+
+    # @property
+    # def is_admin(self):
+    #     return self.is_admin
 
     @property
     def is_active(self):
@@ -54,6 +59,7 @@ def get_user(user_id, root_path):
                 new_user = User
                 new_user.username = user['username']
                 new_user.id = user['id']
+                new_user.is_admin = user['is_admin']
                 return new_user
 
 
@@ -74,3 +80,10 @@ def has_permissions_to_project(user_id, project, root_path, module='gui'):
                     has_permission = True
         return has_permission
 
+
+def is_admin(user_id, root_path):
+    with open(os.path.join(root_path, 'users.json')) as users_file:    
+        user_data = json.load(users_file)
+        for user in user_data:
+            if user['id'] == user_id:
+                return user['is_admin']

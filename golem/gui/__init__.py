@@ -52,8 +52,7 @@ def login():
                 if not password:
                     result['errors'].append('Password is required')
                 else:
-                    if not user.password_is_correct(username, password,
-                                                    root_path):
+                    if not user.password_is_correct(username, password, root_path):
                         result['errors'].append('Username and password'
                                                 ' do not match')
         if not next_url:
@@ -68,6 +67,7 @@ def login():
             new_user = user.User()
             new_user.username = username
             new_user.id = user_id
+            new_user.is_admin = user.is_admin(user_id, root_path)
             # check if user is already logged in
             if g.user is not None and g.user.is_authenticated:
                 return redirect(next_url)
@@ -182,11 +182,26 @@ def new_tree_element():
             elif element_type == 'suite':
                 errors = suite.new_suite(root_path, project, element_name)
 
-        return json.dumps({
-            'errors': errors,
-            'project_name': project,
-            'element_name': element_name,
-            'is_dir': is_dir})
+        return json.dumps({'errors': errors, 'project_name': project,
+                           'element_name': element_name, 'is_dir': is_dir})
+
+
+@app.route("/new_project/", methods=['POST'])
+def new_project():
+
+    if request.method == 'POST':
+        project_name = request.form['projectName']
+        
+        errors = []
+        if len(project_name) < 3:
+          errors.append('Project name is too short')
+        elif len(project_name) > 50:
+          errors.append('Project name is too long')
+        elif project_name in utils.get_projects(root_path):
+          errors.append('A project with that name already exists')
+        else:
+          utils.create_new_project(root_path, project_name)
+        return json.dumps({'errors': errors, 'project_name': project_name})
 
 
 @app.route("/get_global_actions/", methods=['POST'])
