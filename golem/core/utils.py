@@ -6,6 +6,7 @@ import shutil
 import os
 
 from functools import reduce
+from collections import OrderedDict
 
 import golem
 
@@ -44,7 +45,7 @@ def _generate_dict_from_file_structure(full_path):
     """
     root_dir = os.path.basename(os.path.normpath(full_path))
 
-    dir_tree = {}
+    dir_tree = OrderedDict()
     start = full_path.rfind(os.sep) + 1
 
     for path, dirs, files in os.walk(full_path):
@@ -63,9 +64,10 @@ def _generate_dict_from_file_structure(full_path):
         for f in filenames:
             file_with_dotted_path = '.'.join(folders_without_root_dir + [f])
             filename_filepath_duple_list.append((f, file_with_dotted_path))
-        subdir_dict = dict.fromkeys(filename_filepath_duple_list)
-        parent = reduce(dict.get, folders[:-1], dir_tree)
-        parent[folders[-1]] = subdir_dict
+        subdir_dict = OrderedDict.fromkeys(filename_filepath_duple_list)
+        parent = reduce(OrderedDict.get, folders[:-1], dir_tree)
+        parent.update({folders[-1]: subdir_dict})
+        parent.move_to_end(folders[-1], last=False)
     dir_tree = dir_tree[root_dir]
     return dir_tree
 
