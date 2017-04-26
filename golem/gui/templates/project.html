@@ -20,10 +20,14 @@
 			{%- for key, value in test_cases.items() recursive %}
 				
 				{%- if value is mapping -%}
-					<li>
+					<li class="tree-element branch">
 						<a href="#">{{key}}</a>
+						<span class="pull-right tree-element-buttons">
+							<button><i class="glyphicon glyphicon-edit"></i></button>
+			    			<button><i class="glyphicon glyphicon-copy"></i></button>
+			    			<button><i class="glyphicon glyphicon-remove"></i></button>
+			    		</span>
 			        	<ul>{{ loop(value.items()) }}
-			        		<!-- <li><i class="glyphicon glyphicon-plus-sign"></i><a href="#" onclick="startAddNewTestCase(this)"> Add New</a></li> -->
 			        		<li>
 				        		<span class="new-element-form" style="display: none;">
 									<input class='new-element-input new-test-case' type='text' onblur="addElement(event);" onkeyup="if(event.keyCode==13){addElement(event)}">
@@ -36,7 +40,15 @@
 			        	</ul>
 			        </li>
 			    {%- else %}
-			    	<li><a href="/p/{{project}}/tc/{{key.1}}/">{{ key.0 }}</a> <!-- <span class="icon-arrow-right pull-right"><i class="glyphicon glyphicon-remove"></i></span><span class="icon-arrow-right pull-right"><i class="glyphicon glyphicon-share"></i></span> --></li>
+			    	<li class="tree-element">
+			    		<a href="/p/{{project}}/tc/{{key.1}}/">{{ key.0 }}</a> 
+			    		<span class="pull-right tree-element-buttons">
+			    			<!-- <button><i class="glyphicon glyphicon-play"></i></button>-->
+			    			<button><i class="glyphicon glyphicon-edit"></i></button>
+			    			<button><i class="glyphicon glyphicon-copy"></i></button>
+			    			<button><i class="glyphicon glyphicon-remove"></i></button>
+			    		</span>
+			    	</li>
 			    {%- endif %}
 			{%- endfor %}
 			<li>
@@ -57,8 +69,13 @@
 		<span><strong>Test Suites</strong></span>
 		<ul id="suites" class="tree">
 			{% for suite in suites %}
-				<li>
+				<li class="tree-element">
 					<a href="/p/{{project}}/suite/{{suite}}/">{{suite}}</a>
+					<span class="pull-right tree-element-buttons">
+						<button><i class="glyphicon glyphicon-edit"></i></button>
+		    			<button><i class="glyphicon glyphicon-copy"></i></button>
+		    			<button><i class="glyphicon glyphicon-remove"></i></button>
+		    		</span>
 				</li>
 			{% endfor%}
 			<li>
@@ -85,10 +102,14 @@
 		<ul id="pagesTree">
 			{%- for key, value in page_objects.items() recursive %}
 				{%- if value is mapping -%}
-					<li>
+					<li class="tree-element branch">
 						<a href="#">{{key}}</a>
+						<span class="pull-right tree-element-buttons">
+							<button><i class="glyphicon glyphicon-edit"></i></button>
+			    			<button><i class="glyphicon glyphicon-copy"></i></button>
+			    			<button><i class="glyphicon glyphicon-remove"></i></button>
+			    		</span>
 			        	<ul>{{ loop(value.items()) }}
-			        		<!-- <li><i class="glyphicon glyphicon-plus-sign"></i><a href="#" onclick="startAddNewPageObject(this)"> Add New</a></li> -->
 							<li>
 				        		<span class="new-element-form" style="display: none;">
 									<input class='new-element-input new-page-object' type='text' onblur="addElement(event);" onkeyup="if(event.keyCode==13){addElement(event)}">
@@ -101,7 +122,14 @@
 			        	</ul>
 			        </li>
 			    {%- else %}
-			    	<li><a href="/p/{{project}}/page/{{key.1}}/">{{ key.0 }}</a></li>
+			    	<li class="tree-element">
+			    		<a href="/p/{{project}}/page/{{key.1}}/">{{ key.0 }}</a>
+			    		<span class="pull-right tree-element-buttons">
+			    			<button><i class="glyphicon glyphicon-edit"></i></button>
+			    			<button><i class="glyphicon glyphicon-copy"></i></button>
+			    			<button onclick="removeTreeElement(this)"><i class="glyphicon glyphicon-remove"></i></button>
+			    		</span>
+			    	</li>
 			    {%- endif %}
 			{%- endfor %}
 			<li>
@@ -113,7 +141,6 @@
 					<a href="#" onclick="displayNewElementForm(this)"> Add New</a>
 				</span>
 			</li>
-				<!-- <i class="glyphicon glyphicon-plus-sign"></i><a href="#" onclick="startAddNewPageObject(this)"> Add New</a></li> -->
 		</ul>
 
 	</div>

@@ -61,3 +61,17 @@
     padding:0px 0px 0px 0px;
     outline: 0;
 }
+
+
+
+.tree-element-buttons {
+    display: none;
+}
+
+li.tree-element:hover > .tree-element-buttons {
+    display: block;
+}
+
+li.tree-element:hover > .tree-element-buttons button {
+    display: inline-block !important;
+}

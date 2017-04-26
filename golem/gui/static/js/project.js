@@ -90,7 +90,7 @@ function addElement(event){
 
                 // add new li for the element
                 var lastLi = input.parent().parent().parent().find("li").last();
-                lastLi.before("<li></li>");
+                lastLi.before("<li class='tree-element'></li>");
                 var newLi = lastLi.prev();
 
                 if(data.is_dir){
@@ -108,7 +108,12 @@ function addElement(event){
                         var urlForTeseCase = data.element_name;
                     }
                     // input.parent().parent().parent().find("li").last().before("<li><a href='/p/"+data.project_name+"/tc/"+urlForTeseCase+"/'>"+data.element_name+"</a></li>");
-                    newLi.html("<a href='/p/"+data.project_name+"/"+urlPrefixForElementType+"/"+urlForTeseCase+"/'>"+data.element_name+"</a>");
+                    newLi.html("<a href='/p/"+data.project_name+"/"+urlPrefixForElementType+"/"+urlForTeseCase+"/'>"+data.element_name+"</a> \
+                                <span class='pull-right tree-element-buttons'> \
+                                    <button><i class='glyphicon glyphicon-edit'></i></button> \
+                                    <button><i class='glyphicon glyphicon-copy'></i></button> \
+                                    <button><i class='glyphicon glyphicon-remove'></i></button> \
+                                </span>");
                 }
 
                 // reset the form, hide the form and display the add new link
@@ -260,3 +265,11 @@ function getParentsSeparatedByDots(elem){
     });
     return dotted_branches
 }
+
+
+function removeTreeElement(elem){
+    console.log(elem);
+    var parent = $(elem).parent().parent();
+    console.log(parent)
+}
+

@@ -64,6 +64,11 @@ $.fn.extend({
 function addBranchToTree(branch, branchName, inputClass){
 
     branch.html("<a href='#'>"+branchName+"</a> \
+                    <span class='pull-right tree-element-buttons'> \
+                        <button><i class='glyphicon glyphicon-edit'></i></button> \
+                        <button><i class='glyphicon glyphicon-copy'></i></button> \
+                        <button><i class='glyphicon glyphicon-remove'></i></button> \
+                    </span> \
                     <ul> \
                         <li> \
                             <span class='new-element-form' style='display: none;'> \
