@@ -1,8 +1,93 @@
-Golem - Test Automation Framework
+Golem - Documentation
 ==================================================
 
 
-Actions
+# Installation
+--------------------------------------
+
+Currently Golem is only guaranteed to work with Python 3.5+, you may download and install it from here [python.org/downloads/](http://www.python.org/downloads/) 
+
+
+#### 1. Clone the Golem repo and install
+
+Create a directory anywhere in your system:
+
+```
+git clone https://github.com/lucianopuccio/Golem.git golem
+```
+
+
+#### 2. Using virtualenv
+
+It is optional but recommended to install Golem and it's dependencies in a [virtual environment](http://www.virtualenv.org/en/latest/) instead of globally.
+
+```
+virtualenv env
+```
+
+- **Windows**:
+
+```
+env\scripts\activate
+```
+
+- **Mac/Linux**:
+
+```
+source env/bin/activate
+```
+
+#### 3. Install Golem from source
+
+```
+cd golem
+python setup.py install
+```
+
+
+# QuickStart
+--------------------------------------
+#### **1. Create the test projects root directory**
+
+A directory must be created to contain the projects, tests and required files. Open a console wherever you want the new directory to be.
+
+
+**Create the test directory:**
+
+```
+golem-admin createdirectory <directory_name>
+```
+
+This will create a folder that will contain all subsequent projects.
+
+
+##### **2. Create a new project**
+
+Next, create a **new** project inside the test directory
+```
+cd <directory_name>
+python golem.py createproject <project_name>
+```
+
+##### **3. Start the GUI**
+
+To start the Golem GUI run the following command:
+
+```
+python golem.py gui
+```
+
+The GUI can be accessed at http://localhost:5000/
+
+By default, this is the first user available: user: **admin** / password: **admin**
+
+# Automate a Test Case
+--------------------------------------
+To automate a test case first you must define the pages with which you are going to interact.
+
+#### ****
+
+# Actions
 --------------------------------------
 
 
@@ -85,7 +170,7 @@ Verify that an element contains the given text.
 Pause execution for the given amount of seconds
 
 
-Test Suite
+# Test Suite
 --------------------------------------
 
 The test is comprised of the following: list of test cases, browsers to execute and amount of workers.
@@ -93,9 +178,7 @@ The test is comprised of the following: list of test cases, browsers to execute 
 When selecting all the test cases inside a folder, it can be abbreviated with the name of the folder followed by a forward dash like so: "folder_name/". An asterisc marks every test case to be executed inside the suite
 
 
-
-
-Configuration Options
+# Configuration Options
 --------------------------------------
 
 - **implicit_wait**
@@ -119,7 +202,7 @@ Path to the chrome driver executable. If the chromedriver is inside the test dir
 Custom wait method to use, specific to each application, must be defined inside extend.py
 
 
-Command Line
+# Command Line
 --------------------------------------
 
 - **run project test_case|test_suite [-t|--threads -d|--driver]**
