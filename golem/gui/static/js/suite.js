@@ -3,47 +3,65 @@ $(document).ready(function() {
     $('#testCasesTree').treed();
 
     $("#allTestCasesCheckbox").change(function(){
-        checkAllTestCases($("#suiteTests ul"), this.checked);
+        checkUncheckAllTestCases(this.checked);
     });
-
-    $(".select-testcase-checkbox").change(function(){
-        // is this a branch?
-        var li = $(this).parent();
-        if( li.hasClass('branch') ){
-            checkAllTestCases(li.find('ul').first(), this.checked)
-        }
-    });
-
 
     // check the selected tests cases
     checkSelectedTests(selectedTests);
 
-
     // if a test is unchecked, all parent and grandparent branches must be unchecked too
+    // if a test is checked, and all it's siblings are checked, the parent must be checked
     $(".select-testcase-checkbox").change(function(){
-        if( !this.checked ){
+        if( this.checked ){
+            // a checkbox was checked, check if this level and n parent
+            // levels must be checked as well
+            verifyIfAllCheckboxesAreCheckedInLevelAndCheckParent(
+                $(this).closest('ul').parent());
+        }
+        else{
+            // a checkbox was unhecked
             uncheckParentAndGrandParents($(this));
             // uncheck the root checkbox 
             $("#allTestCasesCheckbox").prop('checked', false);
+        }
+
+        // is this a branch?
+        var li = $(this).parent();
+        if( li.hasClass('branch') ){
+            checkBranchTestCases(li, this.checked)
         }
     });
 });
 
 
+function checkSelectedTests(selectedTests){
+    // if '*' is in selectedTests, check all test cases regardless
+    if(selectedTests.indexOf('*') > -1){
+        checkUncheckAllTestCases(true);
+    }
+    else{
+        for(t in selectedTests){
+            var splitTest = selectedTests[t].split('.');
+            var isDir = false;
+            var lastChar = splitTest[splitTest.length-1].substr(-1);
+            if (lastChar == '/') {
+                branchLi = findBranchAndCheckDescendents(splitTest, $("#testCasesTree"));
 
-function checkAllTestCases(elem, isChecked){
-    elem.find("input").each(function(){
-        $(this).prop('checked', isChecked);
-    });
+            }
+            else{
+                var rootUl = $("#testCasesTree");
+                checkTest(rootUl, splitTest);
+            }
+        }
+    }
 }
 
 
-function checkSelectedTests(selectedTests){
-    for(t in selectedTests){
-        var splitTest = selectedTests[t].split('.');
-        var rootUl = $("#testCasesTree");
-        checkTest(rootUl, splitTest);
-    }
+function checkUncheckAllTestCases(isChecked){
+    $("#allTestCasesCheckbox").prop('checked', isChecked);
+    $(".select-testcase-checkbox").each(function(){
+        $(this).prop('checked', isChecked);
+    });
 }
 
 
@@ -53,10 +71,11 @@ function checkTest(rootUl, testPath){
         rootUl.children('li').find('label>.node-name').each(function(){
             if($(this).html() == testPath[0]){
                 $(this).siblings('input').prop('checked', true);
+                verifyIfAllCheckboxesAreCheckedInLevelAndCheckParent(
+                    $(this).closest('ul').parent());
                 return
             }
         });
-        //alert('There was an error loading test case list');
     }
     else if(testPath.length > 1){
         var branchName = testPath.shift();
@@ -68,7 +87,80 @@ function checkTest(rootUl, testPath){
                 return
             }
         });
-        //alert('There was an error loading test case list');
+    }
+}
+
+
+function checkBranchTestCases(branch, isChecked){
+    branch.find($(".select-testcase-checkbox")).each(function(){
+        $(this).prop('checked', isChecked);
+    });
+
+}
+
+
+var findBranchAndCheckDescendents = function(testPath, rootUl){
+    if(testPath.length == 1){
+        // the branch is in this level
+        rootUl.find('>li.branch').each(function(){
+            if($(this).find('>a').html()+'/' == testPath[0]){
+                console.log('returning this', $(this).find('>ul'));
+                var branchUl = $(this).find('>ul');
+                $(this).find('>input').prop('checked', true);
+                checkBranchTestCases(branchUl, true);
+            }
+        });
+    }
+    else if(testPath.length > 1){
+        var branchName = testPath.shift();
+        // find branch
+        var newUl;
+        rootUl.children('li.branch').find('a.branch-name').each(function(){
+            if($(this).html() == branchName){
+                newUl = $(this).parent().children('ul');
+            }
+        });
+        findBranchAndCheckDescendents(testPath, newUl);
+    }
+}
+
+
+
+function verifyIfAllCheckboxesAreCheckedInLevelAndCheckParent(branch){
+    var testCaseList = [];
+    var branches = branch.find('>ul>li>input');
+    var nodes = branch.find('>ul>li>label>input');
+    var allChecked = true;
+    branches.each(function(){
+        if(!$(this).prop('checked')){
+            allChecked = false;
+        }
+    });
+    nodes.each(function(){
+        if(!$(this).prop('checked')){
+            allChecked = false;
+        }
+    });
+    if(allChecked){
+        if(branch[0].id == 'suiteTests'){
+            $("#allTestCasesCheckbox").prop('checked', true);
+            return
+        }
+        else{
+            branch.find('>input').prop('checked', true);
+        }
+        
+        var parentBranch;
+        if(branch.parent().closest('.branch').length == 1){
+            parentBranch = branch.parent().closest('.branch');
+        }
+        else{
+            parentBranch = $("#suiteTests");
+        }
+
+        if(parentBranch.length == 1){
+            verifyIfAllCheckboxesAreCheckedInLevelAndCheckParent(parentBranch);
+        }
     }
 }
 
@@ -80,7 +172,7 @@ function uncheckParentAndGrandParents(elem){
         if($(this).hasClass('branch')){
             // this is a branch, uncheck it
             $(this).children('input').prop('checked', false);
-    }
+        }
     });
 }
 
@@ -132,6 +224,7 @@ function getAllCheckedTests(){
     return testCaseList
 }
 
+
 function getAllCheckedTestsInALevel(rootUl, testCaseList){
     var lis = rootUl.children('li');
     lis.each(function(){
@@ -167,7 +260,6 @@ function getNodeFullPath(thisLi, nodeName){
     parents.each(function(){
         // check if parent is li.branch
         if($(this).hasClass('branch')){
-            console.log($(this));
             fullPath.splice(0, 0, $(this).children('a.branch-name').html());
         }
     });
@@ -195,7 +287,6 @@ function runSuite(){
          dataType: 'json',
          type: 'POST',
          success: function(data) {
-            http://localhost:5000/report/project/demo/simplesuite/2017.03.27.15.03.36.194/
             var url = '/report/project/' + project + '/' + suite + '/' + data + '/';
             toastr.info('Running suite ' + suite + " - <a target='_blank' href='" + url + "'>open</a>");
          },

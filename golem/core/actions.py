@@ -26,14 +26,14 @@ def _run_wait_hook():
         print('Wait hook waited for {} seconds'.format(time.time() - start_time))
 
 
-def _wait_for_visible(element):
-    not_visible = True
-    start_time = time.time()
-    visible = element.is_displayed()
-    while not visible:
-        print('Element is not visible, waiting..')
-        time.sleep(0.5)
-        visible = element.is_displayed()
+# def _wait_for_visible(element):
+#     not_visible = True
+#     start_time = time.time()
+#     visible = element.is_displayed()
+#     while not visible:
+#         print('Element is not visible, waiting..')
+#         time.sleep(0.5)
+#         visible = element.is_displayed()
 
 
 # def force_click(css_selector):
@@ -219,3 +219,26 @@ def wait(seconds):
     except:
         raise Exception
     time.sleep(to_int)
+
+
+def wait_for_element_visible(element, timeout=20):
+    start_time = time.time()
+    driver = core.getOrCreateWebdriver()
+    test_object = get_selenium_object(element, driver)
+    visible = test_object.is_displayed()
+    while not visible:
+        print('Element is not visible, waiting..')
+        time.sleep(0.5)
+        visible = test_object.is_displayed()
+
+
+def wait_for_element_enabled(element, timeout=20):
+    start_time = time.time()
+    driver = core.getOrCreateWebdriver()
+    test_object = get_selenium_object(element, driver)
+    enabled = element.is_enabled()
+    while not enabled:
+        print('Element is not visible, waiting..')
+        time.sleep(0.5)
+        enabled = element.is_displayed()
+

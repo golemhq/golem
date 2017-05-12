@@ -161,3 +161,19 @@ body {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.no-pad-left {
+    padding-left: 0px;
+}
+
+.no-pad-right {
+    padding-right: 0px;
+}
+
+.padding-left-5 {
+    padding-left: 5px;
+}
+
+.padding-right-5 {
+    padding-right: 5px;
+}

@@ -326,14 +326,12 @@ def suite_view(project, suite):
     all_test_cases = utils.get_test_cases(root_path, project)
 
     selected_tests = utils.get_suite_test_cases(project, suite)
+    print('SELENCTED TESTS', selected_tests)
 
     worker_amount = utils.get_suite_amount_of_workers(root_path, project, suite)
 
     browsers = utils.get_suite_browsers(root_path, project, suite)
     browsers = ', '.join(browsers)
-    # page_object_data = page_object.get_page_object_content(root_path,
-    #                                                        project,
-    #                                                        full_page_name)
 
     return render_template('suite.html', project=project, all_test_cases=all_test_cases,
                            selected_tests=selected_tests, suite=suite, worker_amount=worker_amount,

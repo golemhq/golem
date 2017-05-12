@@ -141,6 +141,7 @@ def get_test_case_data(root_path, project, suite, execution, test_case, test_set
         )
         test_case_data['start_date_time'] = start_date_time
         test_case_data['error'] = report_data['error']
+        test_case_data['short_error'] = report_data['short_error']
         test_case_data['browser'] = report_data['browser']
         steps = []
         for step in report_data['steps']:

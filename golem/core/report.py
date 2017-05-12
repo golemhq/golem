@@ -35,7 +35,7 @@ def generate_report(report_directory, test_case_name, test_data, result):
     json_report_path = os.path.join(report_directory, 'report.json')
 
     if result['error']:
-        short_error = result['error'].split('\n')[-2]
+        short_error = '\n'.join(result['error'].split('\n')[-2:])
     else:
         short_error = ''
 

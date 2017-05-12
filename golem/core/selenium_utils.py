@@ -28,8 +28,7 @@ def _find_selenium_object(selector_type, selector_value, element_name, driver, r
         elif selector_type == 'tag_name':
             test_object = driver.find_element_by_tag_name(selector_value)
         else:
-            raise IncorrectSelectorType('Selector {0} is not a valid option'
-                                .format(selector_type))
+            raise IncorrectSelectorType('Selector {0} is not a valid option'.format(selector_type))
     except:
         time.sleep(0.5)
         end_time = time.time()
@@ -38,9 +37,8 @@ def _find_selenium_object(selector_type, selector_value, element_name, driver, r
             test_object = _find_selenium_object(selector_type, selector_value, element_name, 
                                                 driver, new_remaining_time)
         else:
-            raise ElementNotFound(
-                    'Element {0} not found using selector {1}:\'{2}\''
-                    .format(element_name, selector_type, selector_value))
+            raise ElementNotFound('Element {0} not found using selector {1}:\'{2}\''
+                                  .format(element_name, selector_type, selector_value))
     return test_object
 
 
@@ -52,17 +50,13 @@ def get_selenium_object(elem, driver):
     element_name = ''
     if len(elem) == 3:
         element_name = elem[2]
-    test_object = _find_selenium_object(selector_type, selector_value, element_name, 
+    test_object = _find_selenium_object(selector_type, selector_value, element_name,
                                         driver, implicit_wait)
     return test_object
 
 
 def get_test_or_suite_data(root_path, project, parents, test_case_name):
-    test_data = data.parse_test_data(
-                        root_path,
-                        project,
-                        parents,
-                        test_case_name)
+    test_data = data.parse_test_data(root_path, project, parents, test_case_name)
     return test_data
 
 

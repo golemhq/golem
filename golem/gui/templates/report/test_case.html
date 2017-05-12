@@ -42,9 +42,9 @@
 						<div class="col-sm-10">{{test_case_data.start_date_time}}</div>
 						<div class="col-sm-2">Elapsed Time</div>
 						<div class="col-sm-10">{{test_case_data.test_elapsed_time}} seconds</div>
-						{% if test_case_data.error %}
+						{% if test_case_data.short_error %}
 							<div class="col-sm-2">Error</div>
-							<div class="col-sm-10" style="word-wrap: break-word;">{{test_case_data.error}}</div>
+							<div class="col-sm-10" style="word-wrap: break-word;">{{test_case_data.short_error}}</div>
 						{% endif %}
 					</div>
 				</div>

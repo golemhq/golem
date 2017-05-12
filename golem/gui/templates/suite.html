@@ -70,9 +70,9 @@
         <div class="clearfix"></div> 
         <br>       
 
-        <div id="suiteTests">
-                
-            <h4><input type="checkbox" id="allTestCasesCheckbox" class="select-testcase-checkbox" style="margin-top: 0px !important;"> Test Cases</h4>
+        <ul id="suiteTests" class="tree" style="padding-left: 15px">
+            <input type="checkbox" id="allTestCasesCheckbox" class="select-testcase-checkbox" style="margin-top: 0px !important;">
+            <h4> Test Cases</h4>
             <ul id="testCasesTree">
                 {%- for key, value in all_test_cases.items() recursive %}
                     <li>
@@ -86,7 +86,7 @@
                     </li>
                 {%- endfor %}
 
-        </div>
+        </ul>
 
         <div class="clearfix"></div>
 

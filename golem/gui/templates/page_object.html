@@ -45,16 +45,16 @@
         <h4>Elements</h4>
 
         <div class="col-md-12" style="margin-bottom: 10px">
-            <div class="col-sm-3">
+            <div class="col-sm-3 no-pad-left padding-right-5">
                 <strong>Name</strong>
             </div>
-            <div class="col-sm-3">
+            <div class="col-sm-3 padding-left-5 padding-right-5">
                 <strong>Selector</strong>
             </div>
-            <div class="col-sm-3">
+            <div class="col-sm-3 padding-left-5 padding-right-5">
                 <strong>Value</strong>
             </div>
-            <div class="col-sm-3">
+            <div class="col-sm-3 padding-left-5 no-pad-right">
                 <strong>Display Name</strong>
             </div>
         </div>
@@ -64,23 +64,23 @@
         <div id="datosContainer">
             <div id="elements">
                 {% for element in page_object_data.element_list %}
-                    <div class="element col-md-12">
-                        <div class="col-sm-3">
+                    <div class="element col-md-12 clearfix">
+                        <div class="col-sm-3 no-pad-left padding-right-5">
                             <div class="input-group po-input-group">
                                 <input type="text" class="form-control element-name" value="{{element.element_name}}" placeholder="name">
                             </div> 
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-3 padding-left-5 padding-right-5">
                             <div class="input-group po-input-group">
                                 <input type="text" class="form-control element-selector" value="{{element.element_selector}}" placeholder="selector">
                             </div> 
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-3 padding-left-5 padding-right-5">
                             <div class="input-group po-input-group">
                                 <input type="text" class="form-control element-value" value="{{element.element_value}}" placeholder="value">
                             </div> 
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-3 padding-left-5 no-pad-right">
                             <div class="input-group po-input-group">
                                 <input type="text" class="form-control element-display-name" value="{{element.element_display_name}}" placeholder="display name">
                             </div> 
@@ -88,23 +88,23 @@
                     </div>
                 {% endfor %}
                 {% if not page_object_data.element_list %}
-                    <div class="element col-md-12">
-                        <div class="col-sm-3">
+                    <div class="element col-md-12 clearfix">
+                        <div class="col-sm-3 no-pad-left padding-right-5">
                             <div class="input-group po-input-group">
                                 <input type="text" class="form-control element-name" value="" placeholder="name">
                             </div> 
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-3 padding-left-5 padding-right-5">
                             <div class="input-group po-input-group">
                                 <input type="text" class="form-control element-selector" value="" placeholder="selector">
                             </div> 
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-3 padding-left-5 padding-right-5">
                             <div class="input-group po-input-group">
                                 <input type="text" class="form-control element-value" value="" placeholder="value">
                             </div> 
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-3 padding-left-5 no-pad-right">
                             <div class="input-group po-input-group  ">
                                 <input type="text" class="form-control element-display-name" value="" placeholder="display name">
                             </div> 
@@ -113,7 +113,9 @@
                 {% endif %}
             </div>
 
-            <button class="btn btn-default btn-sm" style="margin-left: 30px" onclick="addPageObjectInput();"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Element</button>
+            <div class="clearfix"></div>
+
+            <button class="btn btn-default btn-sm" style="margin-left: 15px;" onclick="addPageObjectInput();"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Element</button>
         </div>
 
         <div class="clearfix"></div>
