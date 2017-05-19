@@ -3,7 +3,9 @@ import datetime
 import imp
 import importlib
 import shutil
+import json
 import os
+import uuid
 
 from functools import reduce
 from collections import OrderedDict
@@ -365,3 +367,37 @@ def create_demo_project(workspace):
     source = os.path.join(golem.__path__[0], 'templates/demo_project')
     destination = os.path.join(workspace, 'projects', 'demo')
     shutil.copytree(source, destination)
+
+
+def create_user(workspace, username, password, is_admin, projects, reports):
+    errors = []
+    new_user = {
+
+    }
+
+    with open(os.path.join(workspace, 'users.json')) as users_file:    
+        user_data = json.load(users_file)
+    
+    for user in user_data:
+        if user['username'] == username:
+            errors.append('username {} already exists'.format(username))
+            break
+
+    if not errors:
+        new_user = {
+            'id': str(uuid.uuid4())[:8],
+            'username': username,
+            'password': password,
+            'is_admin': is_admin,
+            'gui_projects': projects,
+            'report_projects': reports
+        }
+    
+        user_data.append(new_user)
+
+        with open(os.path.join(workspace, 'users.json'), 'w') as users_file:
+            json.dump(user_data, users_file, indent=4)
+
+    return errors
+
+

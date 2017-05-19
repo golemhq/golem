@@ -136,5 +136,13 @@ def execute_from_command_line(root_path):
 
     # main action == createuser
     if args.main_action == 'createuser':
-        sys.exit('To be defined')
+        print(args)
+        errors = utils.create_user(root_path, args.username, args.password, args.admin,
+                                   args.projects, args.reports)
+        if errors:
+            for error in errors:
+                print(error)
+        else:
+            print('User {} was created successfully'.format(args.username))
+
         
