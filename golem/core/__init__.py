@@ -1,3 +1,5 @@
+import sys
+
 from selenium import webdriver
 
 
@@ -26,7 +28,10 @@ def getOrCreateWebdriver(*args):
         if driver_selected == 'firefox':
             driver = webdriver.Firefox()
         if driver_selected == 'chrome':
-            driver = webdriver.Chrome(executable_path=settings['chrome_driver_path'])
+            if 'chrome_driver_path' in settings:
+                driver = webdriver.Chrome(executable_path=settings['chrome_driver_path'])
+            else:
+                sys.exit('Error: chrome_driver_path setting is not defined')
         # if driver_selected == 'ie':
         #     driver = webdriver.Ie()
         # if driver_selected == 'phantomjs':
