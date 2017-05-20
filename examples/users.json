@@ -4,6 +4,7 @@
 		"username": "admin",
 		"password": "admin",
 		"is_admin": true,
-		"projects": ["*"]
+		"gui_projects": ["*"],
+		"report_projects": ["*"]
 	}
 ]

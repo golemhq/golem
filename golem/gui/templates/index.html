@@ -21,7 +21,7 @@
             </div>
             <div id="projectCreationForm" style="display: none;">
                 <div class="form-group" style="margin-bottom: 5px">
-                    <input type="text" class="form-control" id="newProjectName" placeholder="Project Name" maxlength="50">
+                    <input type="text" class="form-control" id="newProjectName" placeholder="Project Name" maxlength="50" onkeyup="if(event.keyCode==13){createProject()}">
                 </div>
                 <div class="text-right">
                     <button id="createProjectCancel" class="btn btn-default">Cancel</button>
