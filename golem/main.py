@@ -42,41 +42,35 @@ def execute_from_command_line(root_path):
                      .format(test_execution.project))
         else:
             test_execution.project = args.project
-            test_execution.settings = utils.get_project_settings(
-                                                    args.project,
-                                                    test_execution.settings)
+            test_execution.settings = utils.get_project_settings(args.project,
+                                                                 test_execution.settings)
 
             # check if test_or_suite value is present
             if not args.test_or_suite:
                 print('Usage:', parser.usage)
                 print('\nTest Cases:')
-                test_cases = utils.get_test_cases(root_path,
-                                                  test_execution.project)
+                test_cases = utils.get_test_cases(root_path, test_execution.project)
                 utils.display_tree_structure_command_line(test_cases)
                 print('\nTest Suites:')
-                test_suites = utils.get_suites(root_path,
-                                               test_execution.project)
+                test_suites = utils.get_suites(root_path, test_execution.project)
                 for suite in test_suites:
                     print('> ' + suite)
                 # utils.display_tree_structure_command_line(test_suites)
                 sys.exit()
 
             # check if test_or_suite value matches an existing test suite
-            elif utils.test_suite_exists(root_path,
-                                       test_execution.project,
-                                       args.test_or_suite):
+            elif utils.test_suite_exists(root_path, test_execution.project,
+                                         args.test_or_suite):
                 test_execution.suite = args.test_or_suite
                 # execute test suite
-                test_runner.run_suite(root_path,
-                                      test_execution.project,
+                test_runner.run_suite(root_path, test_execution.project,
                                       test_execution.suite)
 
             # check if test_or_suite value matches a first level directory
             # in the test cases directory. this allows to execute all the 
             # test cases in a directory as a test suite
 
-            elif utils.is_first_level_directory(root_path,
-                                                test_execution.project,
+            elif utils.is_first_level_directory(root_path, test_execution.project,
                                                 args.test_or_suite):
                 test_execution.suite = args.test_or_suite
                 # execute test suite
@@ -86,13 +80,11 @@ def execute_from_command_line(root_path):
                                       is_directory=True)
 
             # check if test_or_suite value matches an existing test case
-            elif utils.test_case_exists(root_path,
-                                        test_execution.project,
+            elif utils.test_case_exists(root_path, test_execution.project,
                                         args.test_or_suite):
                 test_execution.test = args.test_or_suite
                 # execute test case
-                test_runner.run_single_test_case(root_path,
-                                                 test_execution.project,
+                test_runner.run_single_test_case(root_path, test_execution.project,
                                                  test_execution.test)
             
             else:

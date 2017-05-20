@@ -209,6 +209,10 @@ def get_suite_browsers(workspace, project, suite):
 #     test_case_class = getattr(modulex, test_case_only)
 #     return test_case_class
 
+def assign_settings_default_values(settings):
+    if not 'screenshot_on_step' in settings:
+        settings['screenshot_on_step'] = False
+
 
 def get_global_settings():
     '''get global settings from root folder'''
@@ -224,6 +228,8 @@ def get_global_settings():
             settings.pop("__builtins__", None)
     else:
         print('Warning: global Settings file is not present')
+
+    settings = assign_settings_default_values(settings)
 
     return settings
 

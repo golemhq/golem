@@ -56,17 +56,19 @@ def capture(message=''):
     img = Image.open(io.BytesIO(driver.get_screenshot_as_png()))
     img_id = str(uuid.uuid4())[:8]
     logger.screenshots[img_id] = img
-    message += '__{}'.format(img_id)
-    add_step(message)
+    full_message = '{0}__{1}'.format(message, img_id)
+    add_step(full_message)
 
 
 def click(element):
-    add_step('Click {0}'.format(element[2]))
+    step_msg = 'Click {0}'.format(element[2])
     _run_wait_hook()    
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     #_wait_for_visible(test_object)
     test_object.click()
+    if core.settings['screenshot_on_error']: capture(step_msg)
+    else: add_step(step_msg)
 
 
 def close():
