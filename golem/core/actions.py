@@ -256,7 +256,7 @@ def wait_for_element_enabled(element, timeout=20):
     test_object = get_selenium_object(element, driver)
     enabled = element.is_enabled()
     while not enabled:
-        print('Element is not visible, waiting..')
+        print('Element is not enabled, waiting..')
         time.sleep(0.5)
         enabled = element.is_displayed()
         current_time = time.time()

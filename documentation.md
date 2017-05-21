@@ -111,6 +111,10 @@ Closes the webdriver browser
 
 Navigate to a URL
 
+ - **random(args)**
+
+Generate a random string
+
 - **select_by_index(element, text)**
 
 Select an option from a <select> by the index of the option
@@ -169,6 +173,14 @@ Verify that an element contains the given text.
 
 Pause execution for the given amount of seconds
 
+- **wait_for_element_visible(element, timeout)**
+
+Pause execution for the given amount of seconds until the element is visible (default is 20 seconds)
+
+- **wait_for_element_enabled(element, timeout)**
+
+Pause execution for the given amount of seconds until the element is enabled (default is 20 seconds)
+
 
 # Test Suite
 --------------------------------------
@@ -188,6 +200,10 @@ Default time to wait looking for an element until it is found.
 - **screenshot_on_error**
 
 Take a screenshot on error by default
+
+- **screenshot_on_step**
+
+Take a screenshot on every step
 
 - **default_driver**
 
