@@ -42,9 +42,15 @@ def _run_wait_hook():
 #     print click_script
 #     driver.execute_script(click_script)
 
+def _capture_or_add_step(message, screenshot_on_step):
+    if screenshot_on_step:
+        capture(step_message)
+    else:
+        add_step(step_message)
 
-def add_step(msg):
-    logger.steps.append(msg)
+
+def add_step(message):
+    logger.steps.append(message)
 
 
 def capture(message=''):
@@ -61,14 +67,13 @@ def capture(message=''):
 
 
 def click(element):
-    step_msg = 'Click {0}'.format(element[2])
+    step_message = 'Click {0}'.format(element[2])
     _run_wait_hook()    
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     #_wait_for_visible(test_object)
     test_object.click()
-    if core.settings['screenshot_on_error']: capture(step_msg)
-    else: add_step(step_msg)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
 def close():
@@ -78,9 +83,10 @@ def close():
 
 
 def go_to(url):
-    add_step('Go to url:\'{0}\''.format(url))
+    step_message = 'Go to url:\'{0}\''.format(url)
     driver = core.getOrCreateWebdriver()
     driver.get(url)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
 def random(*args):
@@ -102,39 +108,42 @@ def random(*args):
 
 
 def select_by_index(element, index):
-    add_step('Select option of index {0} from element {1}'
-              .format(index, element[2]))
+    step_message = 'Select option of index {0} from element {1}'.format(index, element[2])
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_index(index)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
 def select_by_text(element, text):
-    add_step('Select \'{0}\' from element {1}'.format(text, element[2]))
+    step_message = 'Select \'{0}\' from element {1}'.format(text, element[2])
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_visible_text(text)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
 def select_by_value(element, value):
-    add_step('Select \'{0}\' value from element {1}'.format(value, element[2]))
+    step_message = 'Select \'{0}\' value from element {1}'.format(value, element[2])
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_value(value)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
 def send_keys(element, text):
-    add_step('Write \'{0}\' in element {1}'.format(text, element[2]))
+    step_message = 'Write \'{0}\' in element {1}'.format(text, element[2])
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     test_object.send_keys(text)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
 def store(key, value):
@@ -144,7 +153,8 @@ def store(key, value):
 def verify_exists(element):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
-    add_step('Verify that the element {} exists'.format(element[2]))
+    step_message = 'Verify that the element {} exists'.format(element[2])
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     test_object = get_selenium_object(element, driver)
 
 
@@ -152,7 +162,8 @@ def verify_is_enabled(element):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
-    add_step('Verify the element \'{0}\' is enabled'.format(element[2]))
+    step_message = 'Verify the element \'{0}\' is enabled'.format(element[2])
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if not test_object.is_enabled():
         raise Exception('Element is enabled')
 
@@ -161,9 +172,8 @@ def verify_is_not_enabled(element):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
-    add_step('Verify the element \'{0}\' '
-              'is not enabled'
-              .format(element[2]))
+    step_message = 'Verify the element \'{0}\' is not enabled'.format(element[2])
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if test_object.is_enabled():
         raise Exception('Element is enabled')
 
@@ -171,7 +181,8 @@ def verify_is_not_enabled(element):
 def verify_not_exists(element):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
-    add_step('Verify that the element {} does not exists'.format(element[2]))
+    step_message = 'Verify that the element {} does not exists'.format(element[2])
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     try:
         test_object = get_selenium_object(element, driver)
         if test_object:
@@ -186,9 +197,8 @@ def verify_selected_option(element, text):
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     select = selenium.webdriver.support.select.Select(test_object)
-    add_step('Verify selected option of element \'{0}\' '
-                        'is \'{1}\''
-                        .format(element[2], text))
+    step_message = 'Verify selected option of element \'{0}\' is \'{1}\''.format(element[2], text)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if not select.first_selected_option.text == text:
         raise TextNotPresent('Option selected in element \'{0}\' '
                              'is not {1}'
@@ -198,8 +208,8 @@ def verify_selected_option(element, text):
 def verify_text(text):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
-    add_step('Verify \'{0}\' is present in page'.format(text))
-    time.sleep(3)
+    step_message = 'Verify \'{0}\' is present in page'.format(text)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if text not in driver.page_source:
         raise TextNotPresent(
                     "Text '{}' was not found in the page".format(text))
@@ -209,7 +219,8 @@ def verify_text_in_element(element, text):
     _run_wait_hook()
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
-    add_step('Verify element \'{0}\' contains text \'{1}\''.format(element[2], text))
+    step_message = 'Verify element \'{0}\' contains text \'{1}\''.format(element[2], text)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if text not in test_object.text:
         raise TextNotPresent("Text \'{0}\' was not found in element {1}"
                              .format(text, element[2]))
@@ -219,23 +230,28 @@ def wait(seconds):
     try:
         to_int = int(seconds)
     except:
-        raise Exception
+        raise Exception('seconds value should be an integer')
     time.sleep(to_int)
 
 
 def wait_for_element_visible(element, timeout=20):
     start_time = time.time()
+    timed_out = False
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     visible = test_object.is_displayed()
-    while not visible:
+    while not visible and not timed_out:
         print('Element is not visible, waiting..')
         time.sleep(0.5)
         visible = test_object.is_displayed()
+        current_time = time.time()
+        if current_time - start_time > timeout:
+            timed_out = True
 
 
 def wait_for_element_enabled(element, timeout=20):
     start_time = time.time()
+    timed_out = False
     driver = core.getOrCreateWebdriver()
     test_object = get_selenium_object(element, driver)
     enabled = element.is_enabled()
@@ -243,4 +259,6 @@ def wait_for_element_enabled(element, timeout=20):
         print('Element is not visible, waiting..')
         time.sleep(0.5)
         enabled = element.is_displayed()
-
+        current_time = time.time()
+        if current_time - start_time > timeout:
+            timed_out = True
