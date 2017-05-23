@@ -12,3 +12,4 @@ script: pytest tests
 branches:
   only:
     - master
+    - develop
