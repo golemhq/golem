@@ -22,8 +22,6 @@ def main():
         if os.path.exists(dir_name):
             print('Error: the directory {} already exists'.format(dir_name))
         else:
-            # copy golem/template/ content to new directory
-            source = os.path.join(golem.__path__[0], 'templates/test_dir')
             destination = os.path.join(os.getcwd(), dir_name)
-            shutil.copytree(source, destination)
+            utils.create_test_dir(destination)
     return
