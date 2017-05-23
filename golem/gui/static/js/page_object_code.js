@@ -1,27 +1,37 @@
 var unsavedChanges = false;
 
-var selectors = [
-    'id',
-    'name',
-    'text',
-    'link_text',
-    'partial_link_text',
-    'css',
-    'xpath',
-    'tag_name',];
-
 
 $(document).ready(function() {      
 
-    startAllSelectorInputAutocomplete();
-
-    $(".element-name").keyup(function(){
-        $(this).parent().parent().parent().find('.element-display-name').val($(this).val());
+   var myCodeMirror = CodeMirror($("#codeEditorContainer")[0], {
+      value: pageObjectCode,
+      mode:  "python",
+      //theme: "default",
+      lineNumbers: true,
+      styleActiveLine: true,
+      matchBrackets: true
     });
 
     // set unsaved changes watcher
     watchForUnsavedChanges();
 });
+
+
+function loadGuiView(){
+    //savePageObject();
+
+    // redirect to gui view
+    window.location.replace("/p/"+project+"/page/"+pageObjectName+"/");
+}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -155,12 +165,4 @@ function watchForUnsavedChanges(){
             return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
         }
     });
-}
-
-
-function loadCodeView(){
-    savePageObject();
-
-    // redirect to gui view
-    window.location.replace("/p/"+project+"/page/"+pageObjectName+"/code/");
 }

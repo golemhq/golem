@@ -122,6 +122,10 @@ def get_global_actions():
             'parameters': [{'name': 'url', 'type': 'value'}]
         },
         {
+            'name': 'random',
+            'parameters': [{'name': 'args', 'type': 'value'}]
+        },
+        {
             'name': 'select by index',
             'parameters': [{'name': 'from element', 'type': 'element'},
                            {'name': 'index', 'type': 'value'}]
@@ -179,6 +183,16 @@ def get_global_actions():
         {
             'name': 'wait',
             'parameters': [{'name': 'seconds', 'type': 'value'}]
+        },
+        {
+            'name': 'wait for element visible',
+            'parameters': [{'name': 'element', 'type': 'element'},
+                           {'name': 'timeout', 'type': 'value'}]
+        },
+        {
+            'name': 'wait for element enabled',
+            'parameters': [{'name': 'element', 'type': 'element'},
+                           {'name': 'timeout', 'type': 'value'}]
         }
     ]
     return global_actions
