@@ -23,7 +23,8 @@ def execute_from_command_line(root_path):
     # main action == gui
     if args.main_action == 'gui':
         port_number = args.port
-        gui_start.run_gui(port_number)
+        debug = args.debug
+        gui_start.run_gui(port_number, debug)
         sys.exit()
 
     # main action == run

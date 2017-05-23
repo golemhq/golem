@@ -166,7 +166,7 @@ def run_single_test_case(workspace, project, full_test_case_name):
         execution_list = []
 
         drivers = []
-        
+
         if test_execution.drivers:
             drivers = test_execution.drivers
 

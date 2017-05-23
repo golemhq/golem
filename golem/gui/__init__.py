@@ -218,14 +218,20 @@ def page_view(project, full_page_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
 
-    page_object_data = page_object.get_page_object_content(root_path,
-                                                           project,
-                                                           full_page_name)
+    page_object_data = page_object.get_page_object_content(root_path, project, full_page_name)
 
-    return render_template('page_object.html',
-                           project=project,
-                           page_object_data=page_object_data,
+    return render_template('page_object.html', project=project, page_object_data=page_object_data,
                            page_name=full_page_name)
+
+
+@app.route("/p/<project>/page/<full_page_name>/code/")
+@login_required
+def page_code_view(project, full_page_name):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+    page_object_data = page_object.get_page_object_content(root_path, project, full_page_name)
+    return render_template('page_object_code.html', project=project,
+                           page_object_data=page_object_data, page_name=full_page_name)
 
 
 @app.route("/save_page_object/", methods=['POST'])

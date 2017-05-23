@@ -29,6 +29,8 @@ def get_golem_parser():
     gui_parser = sub_parsers.add_parser('gui')
     gui_parser.add_argument('-p', '--port', action='store', nargs='?', default=5000, type=int,
                             metavar='port number', help="port number to use for Golem GUI")
+    gui_parser.add_argument('-d', '--debug', action='store_true', default=False,
+                            help="Start the gui application in debug mode")
 
     # createproject
     create_project_parser = sub_parsers.add_parser('createproject')

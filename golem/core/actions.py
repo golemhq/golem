@@ -44,9 +44,9 @@ def _run_wait_hook():
 
 def _capture_or_add_step(message, screenshot_on_step):
     if screenshot_on_step:
-        capture(step_message)
+        capture(message)
     else:
-        add_step(step_message)
+        add_step(message)
 
 
 def add_step(message):

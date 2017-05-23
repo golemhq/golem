@@ -1,0 +1,58 @@
+{% extends "layout.html" %} 
+
+{% block head %} 
+
+<link rel="stylesheet" href="{{ url_for('static', filename='js/code_mirror/codemirror.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/page_object_code.css') }}">
+
+{% endblock %} 
+
+{% block content %}
+
+
+
+<div class="col-sm-10 col-sm-offset-1">
+
+    <div class="col-sm-6 header-col">
+        <h3 id="pageObjectName">
+            <small>
+                <a href="/p/{{project}}/" class="link-without-underline">
+                    <span class="glyphicon glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+                </a>
+            </small>
+            {{page_name}}</h3>
+        </div>
+        
+        <div class="col-sm-6 text-right header-col" style="padding-top: 20px">
+            <button id="loadGuiButton" class="btn btn-default btn-sm" onclick="loadGuiView()"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> GUI</button>
+            <button id="save" class="btn btn-default btn-sm" onclick="savePageObject();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+        </div>
+
+        <div class="clearfix"></div>
+
+        <div id="codeEditorContainer">
+            <!-- <textarea id="codeEditor">
+                {% for line in page_object_data.entire_code %}
+                {{line}}
+                {% endfor %}
+            </textarea> -->
+        </div>
+
+
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/code_mirror/codemirror.js') }}"></script>
+<script src="{{ url_for('static', filename='js/code_mirror/python.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/page_object_code.js') }}"></script>
+
+<script>
+    var project = "{{project}}";
+    var pageObjectName = "{{page_name}}";
+    var pageObjectCode = {{page_object_data.source_code|tojson}};
+</script>
+
+{% endblock %}

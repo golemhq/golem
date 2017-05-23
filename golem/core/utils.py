@@ -212,6 +212,7 @@ def get_suite_browsers(workspace, project, suite):
 def assign_settings_default_values(settings):
     if not 'screenshot_on_step' in settings:
         settings['screenshot_on_step'] = False
+    return settings
 
 
 def get_global_settings():
