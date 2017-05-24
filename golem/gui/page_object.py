@@ -31,8 +31,7 @@ def get_web_elements(content, po_name):
 def get_page_object_content(root_path, project, full_po_name):
     po, parents = utils.separate_file_from_parents(full_po_name)
 
-    modulex = importlib.import_module('projects.{0}.pages.{1}'
-                                      .format(project, full_po_name))
+    modulex = importlib.import_module('projects.{0}.pages.{1}'.format(project, full_po_name))
     variable_list = [item for item in dir(modulex) if not item.startswith("__")]
     element_list = []
     function_list = []
@@ -95,13 +94,23 @@ def save_page_object(root_path, project, full_page_name,
         for line in import_lines:
             f.write("{}\n".format(line))
         for element in elements:
-            f.write("\n\n{0} = ('{1}', \"{2}\", '{3}')".format(
-                    element['name'],
-                    element['selector'],
-                    element['value'],
-                    element['display_name']))
+            # replace the spaces with underlines of the element name
+            if ' ' in element['name']:
+                element['name'] = element['name'].replace(' ', '_')
+            f.write("\n\n{0} = ('{1}', \"{2}\", '{3}')".format(element['name'],
+                                                               element['selector'],
+                                                               element['value'],
+                                                               element['display_name']))
         for func in functions:
             f.write('\n\n' + func)
+
+
+def save_page_object_code(root_path, project, full_page_name, content):
+    page_name, parents = utils.separate_file_from_parents(full_page_name)
+    page_object_path = os.path.join(root_path, 'projects', project, 'pages',
+                                    os.sep.join(parents), '{}.py'.format(page_name))
+    with open(page_object_path, 'w', encoding='utf-8') as f:
+        f.write(content)
 
 
 def is_page_object(parameter, root_path, project):

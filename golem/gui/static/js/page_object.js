@@ -102,12 +102,14 @@ function savePageObject(){
     var importLines = [];
 
     $(".element").each(function(){
-        elements.push({
-            'name': $(this).find('.element-name').val(),
-            'selector': $(this).find('.element-selector').val(),
-            'value': $(this).find('.element-value').val(),
-            'display_name': $(this).find('.element-display-name').val()
-        });
+        if($(this).find('.element-name').val().length > 0){
+            elements.push({
+                'name': $(this).find('.element-name').val(),
+                'selector': $(this).find('.element-selector').val(),
+                'value': $(this).find('.element-value').val(),
+                'display_name': $(this).find('.element-display-name').val()
+            });
+        }
     });
     $(".function").each(function(){
         functions.push($(this).find('.func-code').val());
@@ -159,7 +161,11 @@ function watchForUnsavedChanges(){
 
 
 function loadCodeView(){
-    savePageObject();
+    if(unsavedChanges){
+        savePageObject();
+    }
+
+    unsavedChanges = false;
 
     // redirect to gui view
     window.location.replace("/p/"+project+"/page/"+pageObjectName+"/code/");
