@@ -102,27 +102,6 @@ def get_description(content):
     return description
 
 
-# def get_execute_script_content(content):
-
-#     execute_script_content = []
-
-#     save_content = False
-#     level = 0
-#     for line in content:
-#         if save_content and '{' in line:
-#             level += 1
-#         if save_content and '}' in line:
-#             if level > 0:
-#                 level -= 1
-#             else:
-#                 save_content = False
-#         if save_content:
-#             execute_script_content.append(line)
-#         if 'executeScript' in line:
-#             save_content = True
-#     return execute_script_content
-
-
 def parse_test_case(workspace, project, parents, test_case_name):
 
     parents_joined = os.sep.join(parents)
@@ -179,13 +158,12 @@ def new_test_case(root_path, project, parents, tc_name):
 
 
 test_case_content = """
-
 description = ''
 
 pages = []
 
 def setup():
-    logger.description = description
+    pass
 
 def test(data):
     pass
@@ -256,19 +234,13 @@ def save_test_case(root_path, project, full_test_case_name, description,
     stored_keys = get_stored_keys(test_steps)
 
     with open(test_case_path, 'w', encoding='utf-8') as f:
-        # f.write('\n')
-        # f.write('class {}:\n'.format(tc_name))
-        f.write('\n')
         f.write('\n')
         f.write('description = \'{}\'\n'.format(description))
         f.write('\n')
-        f.write('\n')
         f.write('pages = {}\n'.format(format_page_object_string(page_objects)))
         f.write('\n')
-        f.write('\n')
         f.write('def setup():\n')
-        f.write('    logger.description = description\n')
-        f.write('\n')
+        f.write('    pass\n')
         f.write('\n')
         f.write('def test(data):\n')
         if test_steps:
