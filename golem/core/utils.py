@@ -376,6 +376,47 @@ def create_demo_project(workspace):
     shutil.copytree(source, destination)
 
 
+def create_test_dir(workspace):
+    create_new_directory(path_list=[workspace], add_init=True)
+    create_new_directory(path_list=[workspace, 'projects'], add_init=True)
+    create_new_directory(path_list=[workspace, 'drivers'], add_init=False)
+    
+    golem_py_content = ("import os\n"
+                        "import sys\n"
+                        "\n\n"
+                        "# deactivate .pyc extention file generation\n"
+                        "sys.dont_write_bytecode = True\n"
+                        "\n\n"
+                        "if __name__ == '__main__':\n"
+                        "    del sys.path[0]\n"
+                        "    sys.path.append('')\n\n"
+                        "    from golem.main import execute_from_command_line\n\n"
+                        "    execute_from_command_line(os.getcwd())\n")
+    golem_py_path = os.path.join(workspace, 'golem.py')
+    with open(golem_py_path, 'a') as golem_py_file:
+        golem_py_file.write(golem_py_content)
+
+    settings_content = ("\nimplicit_wait = 10\n"
+                        "screenshot_on_error = True\n"
+                        "wait_hook = None\n")
+    settings_path = os.path.join(workspace, 'settings.conf')
+    with open(settings_path, 'a') as settings_file:
+        settings_file.write(settings_content)
+
+    users_content = [
+        {
+            "id": "000000001",
+            "username": "admin",
+            "password": "admin",
+            "is_admin": True,
+            "projects": ["*"]
+        }
+    ]
+    users_path = os.path.join(workspace, 'users.json')
+    open(users_path, 'a').close()
+    create_user(workspace, 'admin', 'admin', True, ["*"], ["*"])
+
+
 def create_user(workspace, username, password, is_admin, projects, reports):
     errors = []
     new_user = {
@@ -383,7 +424,10 @@ def create_user(workspace, username, password, is_admin, projects, reports):
     }
 
     with open(os.path.join(workspace, 'users.json')) as users_file:    
-        user_data = json.load(users_file)
+        try:
+            user_data = json.load(users_file)
+        except:
+            user_data = []
     
     for user in user_data:
         if user['username'] == username:

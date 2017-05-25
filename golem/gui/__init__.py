@@ -250,6 +250,19 @@ def save_page_object():
         return json.dumps('ok')
 
 
+@app.route("/save_page_object_code/", methods=['POST'])
+def save_page_object_code():
+
+    if request.method == 'POST':
+        projectname = request.json['project']
+        page_object_name = request.json['pageObjectName']
+        content = request.json['content']
+
+        page_object.save_page_object_code(root_path, projectname, page_object_name, content)
+
+        return json.dumps('ok')
+
+
 @app.route("/save_test_case/", methods=['POST'])
 def save_test_case():
 
