@@ -468,7 +468,9 @@ function getSelectedPageObjectElements(){
 
 
 function saveTestCase(){
-
+    if(!unsavedChanges){
+        return
+    }
     var description = $("#description").val();
 
     var pageObjects = [];
@@ -731,7 +733,7 @@ function checkAndRecheckStatus(project, fullTestCaseName, timestamp){
             if(data.status == 'not_complete'){
                 setTimeout(function(){
                     checkAndRecheckStatus(project, fullTestCaseName, timestamp);
-                }, 500, project, fullTestCaseName, timestamp);
+                }, 2000, project, fullTestCaseName, timestamp);
             }
             else{
                 $("#loaderContainer").hide();
@@ -754,4 +756,16 @@ function checkAndRecheckStatus(project, fullTestCaseName, timestamp){
          },
          error: function() {}
      });
+}
+
+
+function loadCodeView(){
+    if(unsavedChanges){
+        saveTestCase();
+    }
+
+    unsavedChanges = false;
+
+    // redirect to gui view
+    window.location.replace("/p/"+project+"/tc/"+testCaseName+"/code/");
 }

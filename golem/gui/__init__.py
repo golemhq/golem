@@ -113,19 +113,28 @@ def test_case_view(project, test_case_name):
         return render_template('not_permission.html')
 
     tc_name, parents = utils.separate_file_from_parents(test_case_name)
-
-    test_case_data = test_case.parse_test_case(root_path, project,
-                                               parents, tc_name)
-
-    test_data = utils.get_test_data(root_path,
-                                    project,
-                                    test_case_name)
+    test_case_contents = test_case.parse_test_case(root_path, project, parents, tc_name)
+    test_data = utils.get_test_data(root_path, project, test_case_name)
 
     return render_template('test_case.html', project=project,
-                           test_case_data=test_case_data,
-                           test_case_name=tc_name,
-                           full_test_case_name=test_case_name,
-                           test_data=test_data)
+                           test_case_contents=test_case_contents, test_case_name=tc_name,
+                           full_test_case_name=test_case_name, test_data=test_data)
+
+
+@app.route("/p/<project>/tc/<test_case_name>/code/")
+@login_required
+def test_case_code_view(project, test_case_name):
+    # check if user has permissions for this project
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+
+    tc_name, parents = utils.separate_file_from_parents(test_case_name)
+    test_case_contents = test_case.parse_test_case(root_path, project, parents, tc_name)
+    test_data = utils.get_test_data(root_path, project, test_case_name)
+
+    return render_template('test_case_code.html', project=project, 
+                           test_case_contents=test_case_contents, test_case_name=tc_name,
+                           full_test_case_name=test_case_name, test_data=test_data)
 
 
 @app.route("/get_page_objects/", methods=['POST'])
@@ -279,6 +288,21 @@ def save_test_case():
 
         test_case.save_test_case(root_path, projectname, test_case_name,
                                  description, page_objects, test_steps)
+
+        return json.dumps('ok')
+
+
+@app.route("/save_test_case_code/", methods=['POST'])
+def save_test_case_code():
+
+    if request.method == 'POST':
+        projectname = request.json['project']
+        test_case_name = request.json['testCaseName']
+        test_data = request.json['testData']
+        content = request.json['content']
+
+        data.save_test_data(root_path, projectname, test_case_name, test_data)
+        test_case.save_test_case_code(root_path, projectname, test_case_name, content)
 
         return json.dumps('ok')
 

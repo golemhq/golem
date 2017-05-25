@@ -1,0 +1,70 @@
+
+html {
+    overflow-y: scroll;
+}
+
+
+.CodeMirror {
+	font-size:13px;
+	height: 350px;
+}
+
+
+.light-gray-block {
+	background-color: #F8F8F8; 
+}
+
+.light-gray-block:hover {
+	background-color: white; 
+}
+
+
+#datosContainerContainer {
+	/*background-color: #fdfdf1;*/
+	padding-bottom: 10px;
+}
+
+#datosContainer {
+
+}
+
+#datos {
+	display: table-cell;
+	width: 100%;
+	position: relative;
+}
+
+#dataTable {
+	background-color: white;
+	margin-bottom: 5px;
+}
+
+#dataTable td, #dataTable th {
+	padding: 0px;
+}
+
+#dataTable th.index {
+	width: 30px;
+	text-align: center;
+}
+
+#dataTable .input-group {
+	margin-bottom: 0px;
+}
+
+#dataTable input {
+	border: 0px;
+	padding: 4px 4px;
+	height: 25px;
+}
+
+.add-new-icon {
+	width: 25px;
+	vertical-align: inherit;
+}
+
+.input-middle-btn button{
+	border-radius: 0px;
+	border-left: 0px;
+	border-right: 0px;
+}

@@ -127,24 +127,21 @@ def parse_test_case(workspace, project, parents, test_case_name):
 
     parents_joined = os.sep.join(parents)
 
-    path = os.path.join(workspace,
-                        'projects',
-                        project,
-                        'test_cases',
-                        parents_joined,
-                        test_case_name + '.py')
+    path = os.path.join(workspace, 'projects', project, 'test_cases',
+                        parents_joined, test_case_name + '.py')
 
     with open(path, encoding='utf-8') as f:
-        content = f.readlines()
+        file_lines = f.readlines()
 
-    description = get_description(content)
-    page_objects = get_page_objects(content)
-    steps = _get_steps(content)
+    description = get_description(file_lines)
+    page_objects = get_page_objects(file_lines)
+    steps = _get_steps(file_lines)
 
     test_case = {
         'description': description,
         'page_objects': page_objects,
         'steps': steps,
+        'content': ''.join(file_lines)
     }
     return test_case
 
@@ -287,3 +284,11 @@ def save_test_case(root_path, project, full_test_case_name, description,
         f.write('\n')
         f.write('def teardown():\n')
         f.write('    close()\n')
+
+
+def save_test_case_code(root_path, project, full_test_case_name, content):
+    tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
+    test_case_path = os.path.join(root_path, 'projects', project, 'test_cases',
+                                  os.sep.join(parents), '{}.py'.format(tc_name))
+    with open(test_case_path, 'w', encoding='utf-8') as f:
+        f.write(content)

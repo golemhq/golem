@@ -55,25 +55,25 @@ function startAllSelectorInputAutocomplete(){
 function addPageObjectInput(){
     $("#elements").append(
         "<div class='element col-md-12 clearfix'> \
-            <div class='col-sm-3 no-pad-left padding-right-5'> \
+            <div class='col-xs-3 no-pad-left padding-right-5'> \
                 <div class='input-group po-input-group'> \
                     <input type='text' class='form-control element-name' value='' \
                         placeholder='name'> \
                 </div> \
             </div> \
-            <div class='col-sm-3 padding-left-5 padding-right-5'> \
+            <div class='col-xs-3 padding-left-5 padding-right-5'> \
                 <div class='input-group po-input-group'> \
                     <input type='text' class='form-control element-selector' \
                         value='' placeholder='selector'> \
                 </div> \
             </div> \
-            <div class='col-sm-3 padding-left-5 padding-right-5'> \
+            <div class='col-xs-3 padding-left-5 padding-right-5'> \
                 <div class='input-group po-input-group'> \
                     <input type='text' class='form-control element-value' \
                         value='' placeholder='value'> \
                 </div> \
             </div> \
-            <div class='col-sm-3 padding-left-5 no-pad-right'> \
+            <div class='col-xs-3 padding-left-5 no-pad-right'> \
                 <div class='input-group po-input-group'> \
                     <input type='text' class='form-control element-display-name' \
                         value='' placeholder='display name'> \
