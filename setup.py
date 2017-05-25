@@ -8,6 +8,7 @@ import sys
 
 import golem
 
+
 here = os.path.abspath(os.path.dirname(__file__))
 
 def read(*filenames, **kwargs):
@@ -57,7 +58,9 @@ setup(
     platforms='any',
     test_suite='',
     classifiers=[
-        'Programming Language :: Python',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Development Status :: 4 - Beta',
         'Natural Language :: English',
         'Environment :: Web Environment',

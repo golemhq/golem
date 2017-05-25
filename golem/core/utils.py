@@ -69,6 +69,23 @@ def _generate_dict_from_file_structure(full_path):
         subdir_dict = OrderedDict.fromkeys(filename_filepath_duple_list)
         parent = reduce(OrderedDict.get, folders[:-1], dir_tree)
         parent.update({folders[-1]: subdir_dict})
+
+        # this code is added to give support to python 2.7
+        # which does not have move_to_end method
+        # if not hasattr(OrderedDict, 'move_to_end'):
+        #     def move_to_end(self, key, last=True):
+        #         link_prev, link_next, key = link = self._OrderedDict__map[key]
+        #         link_prev[1] = link_next
+        #         link_next[0] = link_prev
+        #         root = self._OrderedDict__root
+        #         if last:
+        #             last = root[0]
+        #             link[0] = last
+        #             link[1] = root
+        #             last[1] = root[0] = link
+        #     OrderedDict.move_to_end = move_to_end
+        # end of python 2.7 support code
+
         parent.move_to_end(folders[-1], last=False)
     dir_tree = dir_tree[root_dir]
     return dir_tree
@@ -103,7 +120,7 @@ def get_suites(workspace, project):
 def get_projects(workspace):
     projects = []
     path = os.path.join(workspace, 'projects')
-    projects = os.walk(path).__next__()[1]
+    projects = next(os.walk(path))[1]
     return projects
 
 
