@@ -226,27 +226,57 @@ def get_suite_browsers(workspace, project, suite):
 #     test_case_class = getattr(modulex, test_case_only)
 #     return test_case_class
 
+
+def read_json_remove_comments(json_path):
+
+    with open(json_path, 'r') as settings_file:
+        file_lines = settings_file.readlines()
+        lines_without_comments = []
+        for line in file_lines:
+            if line.strip()[0:2] != '//' and len(line.strip()) > 0:
+                lines_without_comments.append(line)
+        file_content_without_comments = ''.join(lines_without_comments)
+        
+        return json.loads(file_content_without_comments)
+
+
 def assign_settings_default_values(settings):
+    if not 'implicit_wait' in settings:
+        settings['implicit_wait'] = None
+    elif settings['implicit_wait'] == '':
+        settings['implicit_wait'] = None
+
+    if not 'screenshot_on_error' in settings:
+        settings['screenshot_on_error'] = False
+    elif settings['screenshot_on_error'] == '':
+        settings['screenshot_on_error'] = False
+
     if not 'screenshot_on_step' in settings:
         settings['screenshot_on_step'] = False
+    elif settings['screenshot_on_step'] == '':
+        settings['screenshot_on_step'] == False
+
+    if not 'wait_hook' in settings:
+        settings['wait_hook'] = None
+    elif settings['wait_hook'] == '':
+        settings['wait_hook'] == None
+
+    if not 'default_driver' in settings:
+        settings['default_driver'] = 'firefox'
+    elif settings['default_driver'] == '':
+        settings['default_driver'] == 'firefox'
+
+    if not 'chrome_driver_path' in settings:
+        settings['chrome_driver_path'] = None
+    elif settings['chrome_driver_path'] == '':
+        settings['chrome_driver_path'] == None
+
     return settings
 
 
 def get_global_settings():
     '''get global settings from root folder'''
-
-    settings = {}
-    if os.path.exists('settings.conf'):
-        ## execfile("settings.conf", settings)
-
-        # the following code parses a conf file in python 3.x
-        with open("settings.conf") as f:
-            code = compile(f.read(), "settings.conf", 'exec')
-            exec(code, settings)
-            settings.pop("__builtins__", None)
-    else:
-        print('Warning: global Settings file is not present')
-
+    settings = read_json_remove_comments('settings.json')
     settings = assign_settings_default_values(settings)
 
     return settings
@@ -256,25 +286,11 @@ def get_project_settings(project, global_settings):
     '''get project level settings from selected project folder,
     this overrides any global settings'''
 
-    project_settings = {}
-    project_settings_path = os.path.join('projects',
-                                         project,
-                                         'settings.conf')
-    if os.path.exists(project_settings_path):
-        ## execfile(project_settings_path, project_settings)
-
-        # the following code parses a conf file in python 3.x
-        with open(project_settings_path) as f:
-            code = compile(f.read(), project_settings_path, 'exec')
-            exec(code, project_settings)
-            project_settings.pop("__builtins__", None)
-    else:
-        print('Warning: project Settings file is not present')
-    # merge global and project settings
+    project_settings_path = os.path.join('projects', project, 'settings.json')
+    project_settings = read_json_remove_comments(project_settings_path)
+    # merge and override global settings with project settings
     for setting in project_settings:
-        if setting in global_settings:
-            global_settings[setting] = project_settings[setting]
-        else:
+        if project_settings[setting]:
             global_settings[setting] = project_settings[setting]
 
     return global_settings
@@ -290,24 +306,16 @@ def get_timestamp():
 
 def test_case_exists(workspace, project, full_test_case_name):
     test, parents = separate_file_from_parents(full_test_case_name)
-    path = os.path.join(workspace,
-                        'projects',
-                        project,
-                        'test_cases',
-                        os.sep.join(parents),
-                        '{}.py'.format(test))
+    path = os.path.join(workspace, 'projects', project, 'test_cases',
+                        os.sep.join(parents), '{}.py'.format(test))
     test_exists = os.path.isfile(path)
     return test_exists
 
 
 def test_suite_exists(workspace, project, full_test_suite_name):
     suite, parents = separate_file_from_parents(full_test_suite_name)
-    path = os.path.join(workspace,
-                        'projects',
-                        project,
-                        'test_suites',
-                        os.sep.join(parents),
-                        '{}.py'.format(suite))
+    path = os.path.join(workspace, 'projects', project, 'test_suites',
+                        os.sep.join(parents), '{}.py'.format(suite))
     suite_exists = os.path.isfile(path)
     return suite_exists
 
@@ -333,11 +341,7 @@ def separate_file_from_parents(full_filename):
 
 
 def is_first_level_directory(workspace, project, directory):
-    path = os.path.join(workspace,
-                        'projects',
-                        project,
-                        'test_cases',
-                        directory)
+    path = os.path.join(workspace, 'projects', project, 'test_cases', directory)
     return os.path.isdir(path)
 
 
@@ -413,22 +417,35 @@ def create_test_dir(workspace):
     with open(golem_py_path, 'a') as golem_py_file:
         golem_py_file.write(golem_py_content)
 
-    settings_content = ("\nimplicit_wait = 10\n"
-                        "screenshot_on_error = True\n"
-                        "wait_hook = None\n")
+    settings_content = (
+        "// Place this settings file at the root of the test directory to impact all\n",
+        "// the projects or inside a project folder to impact a single project.\n",
+        "// Be aware that project settings override global settings.\n",
+        "{\n",
+        "// Default time to wait looking for an element until it is found\n",
+        "\"implicit_wait\": 20,\n",
+        "\n",
+        "// Take a screenshot on error by default\n",
+        "\"screenshot_on_error\": true,\n",
+        "\n",
+        "// Take a screenshot on every step\n",
+        "\"screenshot_on_step\": false,\n",
+        "\n",
+        "// Custom wait method to use before each step, must be defined inside extend.py\n",
+        "\"wait_hook\": null,\n",
+        "\n",
+        "// Define the driver to use, unless overriden by the -d/--driver flag\n",
+        "\"default_driver\": \"firefox\"\n,",
+        "\n",
+        "// Path to the chrome driver executable. If the chromedriver is inside the test dir.\n",
+        "// It can be referenced as './chromedriver'\n",
+        "\"chrome_driver_path\": \"./drivers/chromedriver\"\n",
+        "}\n"
+    )
     settings_path = os.path.join(workspace, 'settings.conf')
     with open(settings_path, 'a') as settings_file:
         settings_file.write(settings_content)
 
-    users_content = [
-        {
-            "id": "000000001",
-            "username": "admin",
-            "password": "admin",
-            "is_admin": True,
-            "projects": ["*"]
-        }
-    ]
     users_path = os.path.join(workspace, 'users.json')
     open(users_path, 'a').close()
     create_user(workspace, 'admin', 'admin', True, ["*"], ["*"])
@@ -436,21 +453,15 @@ def create_test_dir(workspace):
 
 def create_user(workspace, username, password, is_admin, projects, reports):
     errors = []
-    new_user = {
-
-    }
-
     with open(os.path.join(workspace, 'users.json')) as users_file:    
         try:
             user_data = json.load(users_file)
         except:
             user_data = []
-    
     for user in user_data:
         if user['username'] == username:
             errors.append('username {} already exists'.format(username))
             break
-
     if not errors:
         new_user = {
             'id': str(uuid.uuid4())[:8],
@@ -460,9 +471,7 @@ def create_user(workspace, username, password, is_admin, projects, reports):
             'gui_projects': projects,
             'report_projects': reports
         }
-    
         user_data.append(new_user)
-
         with open(os.path.join(workspace, 'users.json'), 'w') as users_file:
             json.dump(user_data, users_file, indent=4)
 

@@ -60,12 +60,10 @@ def execute_from_command_line(root_path):
                 sys.exit()
 
             # check if test_or_suite value matches an existing test suite
-            elif utils.test_suite_exists(root_path, test_execution.project,
-                                         args.test_or_suite):
+            elif utils.test_suite_exists(root_path, test_execution.project, args.test_or_suite):
                 test_execution.suite = args.test_or_suite
                 # execute test suite
-                test_runner.run_suite(root_path, test_execution.project,
-                                      test_execution.suite)
+                test_runner.run_suite(root_path, test_execution.project, test_execution.suite)
 
             # check if test_or_suite value matches a first level directory
             # in the test cases directory. this allows to execute all the 
@@ -75,14 +73,11 @@ def execute_from_command_line(root_path):
                                                 args.test_or_suite):
                 test_execution.suite = args.test_or_suite
                 # execute test suite
-                test_runner.run_suite(root_path,
-                                      test_execution.project,
-                                      test_execution.suite,
-                                      is_directory=True)
+                test_runner.run_suite(root_path, test_execution.project,
+                                      test_execution.suite, is_directory=True)
 
             # check if test_or_suite value matches an existing test case
-            elif utils.test_case_exists(root_path, test_execution.project,
-                                        args.test_or_suite):
+            elif utils.test_case_exists(root_path, test_execution.project, args.test_or_suite):
                 test_execution.test = args.test_or_suite
                 # execute test case
                 test_runner.run_single_test_case(root_path, test_execution.project,
@@ -91,8 +86,7 @@ def execute_from_command_line(root_path):
             else:
                 # test_or_suite does not match any existing suite or test
                 sys.exit('Error: the value {0} does not match an existing '
-                         'suite or test'
-                         .format(args.test_or_suite))
+                         'suite or test'.format(args.test_or_suite))
 
     # main action == createproject
     if args.main_action == 'createproject':
