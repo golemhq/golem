@@ -8,6 +8,7 @@ import sys
 
 import golem
 
+
 here = os.path.abspath(os.path.dirname(__file__))
 
 def read(*filenames, **kwargs):
@@ -24,7 +25,7 @@ long_description = read('README.md')
 class PyTest(TestCommand):
     def finalize_options(self):
         TestCommand.finalize_options(self)
-        self.test_args = ['test']
+        self.test_args = ['tests']
         self.test_suite = True
 
     def run_tests(self):
@@ -43,7 +44,7 @@ setup(
                       'Flask-login==0.3.2',
                       'selenium==2.52.0',
                       'Pillow>3.3.1',
-                      'pytest'],
+                      'pytest>=3.0.0'],
     #scripts=['golem/bin/golem-admin.py'],
     entry_points={
         'console_scripts': ['golem-admin = golem.bin.golem_admin:main']
@@ -57,7 +58,9 @@ setup(
     platforms='any',
     test_suite='',
     classifiers=[
-        'Programming Language :: Python',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Development Status :: 4 - Beta',
         'Natural Language :: English',
         'Environment :: Web Environment',

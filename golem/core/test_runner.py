@@ -62,7 +62,9 @@ def test_runner(workspace, project, test_case_name, test_data, driver, suite_nam
             setattr(test_module, action, getattr(golem.core.actions, action))
 
         # instance = test_class()
-
+        if hasattr(test_module, 'description'):
+            golem.core.execution_logger.description = test_module.description
+    
         if hasattr(test_module, 'setup'):
             test_module.setup()
         else:

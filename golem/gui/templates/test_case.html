@@ -20,7 +20,7 @@
         <span id="changesSavedNotification">All changes saved</span>
     </div>-->
     <div>
-        <div class="col-sm-9 header-col">
+        <div class="col-sm-8 header-col">
             <h3 id="testCaseName">
                 <small>
                     <a href="/p/{{project}}/" class="link-without-underline">
@@ -30,8 +30,11 @@
                 {{test_case_name}}
             </h3>
         </div>
-        <div class="col-sm-3 text-right header-col" style="padding-top: 20px">
-            <button id="runTest" class="btn btn-default btn-sm" onclick="runTestCase()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Test Case</button>
+        <div class="col-sm-4 text-right header-col" style="padding-top: 20px">
+            <button id="runTest" class="btn btn-default btn-sm" onclick="runTestCase()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Test</button>
+
+            <button id="loadCodeButton" class="btn btn-default btn-sm" onclick="loadCodeView();"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Code<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a>
+            
             <button id="save" class="btn btn-default btn-sm" onclick="saveTestCase();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
         </div>
     </div>
@@ -41,7 +44,7 @@
     <div id="descriptionPageObjectsContainer" style="display: table; width: 100%">
         <div class="col-sm-6 same-heigth-col light-gray-block" id="descriptionContainer" style="border: 1px solid #e0e0e0;">
             <h4>Description</h4>
-            <textarea id="description" class="form-control" rows="3">{{test_case_data.description }}</textarea>
+            <textarea id="description" class="form-control" rows="3">{{test_case_contents.description }}</textarea>
         </div>
 
         <div class="col-sm-6 same-heigth-col light-gray-block" id="pageObjectsContainerContainer" style="border-top: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
@@ -49,7 +52,7 @@
             <h4>Pages</h4>
             <div id="pageObjectsContainer">
                 <div id="pageObjects">
-                    {% for po in test_case_data.page_objects %}  
+                    {% for po in test_case_contents.page_objects %}  
                     <div class="input-group">
                         <input type="text" class="form-control custom-input page-objects-input page-objects-autocomplete" value="{{ po }}">
                         <span class="input-group-btn input-middle-btn">
@@ -60,7 +63,7 @@
                         </span>
                     </div>
                     {% endfor %}
-                    {% if not test_case_data.page_objects %}
+                    {% if not test_case_contents.page_objects %}
                     <div class="input-group">
                         <input type="text" class="form-control custom-input page-objects-input page-objects-autocomplete" value="{{ po }}">
                         <span class="input-group-btn input-middle-btn">
@@ -86,7 +89,7 @@
         <h4>Steps</h4>
         <div id="steps">
 
-            {% for step in test_case_data.steps %}
+            {% for step in test_case_contents.steps %}
 
             <div class='step'>
                 <div class="step-numbering">{{loop.index}}</div>
@@ -116,7 +119,7 @@
 
             {% endfor %}
 
-            {% if not test_case_data.steps %}
+            {% if not test_case_contents.steps %}
             <div class='step'>
                 <div class="step-numbering">1</div>
                 <div class='col-sm-3 step-input-container'>

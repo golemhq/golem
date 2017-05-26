@@ -1,0 +1,173 @@
+{% extends "layout.html" %} 
+
+{% block head %} 
+
+<link rel="stylesheet" href="{{ url_for('static', filename='js/code_mirror/codemirror.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_code.css') }}">
+
+{% endblock %} 
+
+{% block content %}
+
+<div>
+
+    <div>
+        <div class="col-sm-8 header-col">
+            <h3 id="testCaseName">
+                <small>
+                    <a href="/p/{{project}}/" class="link-without-underline">
+                        <span class="glyphicon glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+                    </a>
+                </small>
+                {{test_case_name}}
+            </h3>
+        </div>
+        <div class="col-sm-4 text-right header-col" style="padding-top: 20px">
+            <button id="runTest" class="btn btn-default btn-sm" onclick="runTestCase()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Test</button>
+            <button id="loadGuiButton" class="btn btn-default btn-sm" onclick="loadGuiView()"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Preview</button>
+            <button id="save" class="btn btn-default btn-sm" onclick="saveTestCase();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div id="codeEditorContainer" class="col-sm-12" style="border: 1px solid #e0e0e0; padding-left:0px; padding-right: 0px">
+    </div>
+
+    <div id="datosContainerContainer" class="col-sm-12 light-gray-block" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
+
+        <h4>Data</h4>
+        <div id="datosContainer">
+
+            <div id="datos">
+                <table class="table table-bordered table-condensed" id="dataTable"> 
+                    
+                    {% if test_data %}
+                    <thead> 
+                        <tr> 
+                            <th class="index">#</th> 
+                            {% for key, val in test_data[0].items() %}
+                            <th>
+                                <div class="input-group">
+                                    <input class="form-control" type="text" value="{{key}}">
+                                </div>
+                            </th>
+                            {% endfor %}
+                            <th>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in test_data %}
+                        <tr>
+                            <th scope="row" class="index">{{loop.index}}</th> 
+                            {% for key, value in row.items() %}
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text" value="{{value}}">
+                                </div>
+                            </td>
+                            {% endfor %}
+                            <td><div class="input-group"><input class="form-control" type="text"></div>
+                            </td> 
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <th scope="row" class="index">{{test_data|length + 1}}</th> 
+                            {% for item in test_data[0].items() %}
+                            <td><div class="input-group"><input class="form-control" type="text"></div>
+                            </td> 
+                            {% endfor %}
+                            <td><div class="input-group"><input class="form-control" type="text"></div>
+                            </td> 
+                        </tr>
+                    </tbody>
+
+                    {% else %}
+                    <thead> 
+                        <tr> 
+                            <th class="index">#</th> 
+                            {% for i in range(4) %}
+                            <th>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </th>
+                            {% endfor %}
+                        </tr> 
+                    </thead> 
+                    <tbody>
+                        {% for i in range(3) %}
+                        <tr> 
+                            <th scope="row" class="index">{{i+1}}</th>
+                            {% for j in range(4) %}
+                            <td>
+                                <div class="input-group">
+                                    <input class="form-control" type="text">
+                                </div>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>     
+                    {% endif %}
+
+                </table>
+
+            </div>
+
+            <div style="display: table-cell; position: relative;">
+                <a href="javascript:void(0)" onclick="addColumnToDataTable();">
+                    <img src="{{ url_for('static', filename='img/plus_sign.png') }}" class="add-new-icon" style="margin-left: 5px;">
+                </a>
+            </div>
+
+            <div class="text-right" style="width: 100%">
+                <a href="javascript:void(0)" onclick="addRowToDataTable();">
+                    <img src="{{ url_for('static', filename='img/plus_sign.png') }}" class="add-new-icon" style="margin-right: 30px;">
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+    <div class="modal fade" id="testRunModal" tabindex="-1" role="dialog" style="top: 15%">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Running Test Case</h4>
+      </div>
+      <div class="modal-body">
+
+        <div id="loaderContainer" class="text-center">
+            <label class="loader"></label>
+        </div>
+        <div id="testResultContainer">
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Dismiss</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script src="{{ url_for('static', filename='js/code_mirror/codemirror.js') }}"></script>
+<script src="{{ url_for('static', filename='js/code_mirror/python.js') }}"></script>
+<script src="{{ url_for('static', filename='js/test_case_code.js') }}"></script>
+<script>
+    var project = "{{project}}";
+    var testCaseName = "{{test_case_name}}";
+    var fullTestCaseName = "{{full_test_case_name}}";
+    var testCaseCode = {{test_case_contents.content|tojson}};
+</script>
+
+{% endblock %}

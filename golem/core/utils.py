@@ -69,6 +69,23 @@ def _generate_dict_from_file_structure(full_path):
         subdir_dict = OrderedDict.fromkeys(filename_filepath_duple_list)
         parent = reduce(OrderedDict.get, folders[:-1], dir_tree)
         parent.update({folders[-1]: subdir_dict})
+
+        # this code is added to give support to python 2.7
+        # which does not have move_to_end method
+        # if not hasattr(OrderedDict, 'move_to_end'):
+        #     def move_to_end(self, key, last=True):
+        #         link_prev, link_next, key = link = self._OrderedDict__map[key]
+        #         link_prev[1] = link_next
+        #         link_next[0] = link_prev
+        #         root = self._OrderedDict__root
+        #         if last:
+        #             last = root[0]
+        #             link[0] = last
+        #             link[1] = root
+        #             last[1] = root[0] = link
+        #     OrderedDict.move_to_end = move_to_end
+        # end of python 2.7 support code
+
         parent.move_to_end(folders[-1], last=False)
     dir_tree = dir_tree[root_dir]
     return dir_tree
@@ -103,7 +120,7 @@ def get_suites(workspace, project):
 def get_projects(workspace):
     projects = []
     path = os.path.join(workspace, 'projects')
-    projects = os.walk(path).__next__()[1]
+    projects = next(os.walk(path))[1]
     return projects
 
 
@@ -376,6 +393,47 @@ def create_demo_project(workspace):
     shutil.copytree(source, destination)
 
 
+def create_test_dir(workspace):
+    create_new_directory(path_list=[workspace], add_init=True)
+    create_new_directory(path_list=[workspace, 'projects'], add_init=True)
+    create_new_directory(path_list=[workspace, 'drivers'], add_init=False)
+    
+    golem_py_content = ("import os\n"
+                        "import sys\n"
+                        "\n\n"
+                        "# deactivate .pyc extention file generation\n"
+                        "sys.dont_write_bytecode = True\n"
+                        "\n\n"
+                        "if __name__ == '__main__':\n"
+                        "    del sys.path[0]\n"
+                        "    sys.path.append('')\n\n"
+                        "    from golem.main import execute_from_command_line\n\n"
+                        "    execute_from_command_line(os.getcwd())\n")
+    golem_py_path = os.path.join(workspace, 'golem.py')
+    with open(golem_py_path, 'a') as golem_py_file:
+        golem_py_file.write(golem_py_content)
+
+    settings_content = ("\nimplicit_wait = 10\n"
+                        "screenshot_on_error = True\n"
+                        "wait_hook = None\n")
+    settings_path = os.path.join(workspace, 'settings.conf')
+    with open(settings_path, 'a') as settings_file:
+        settings_file.write(settings_content)
+
+    users_content = [
+        {
+            "id": "000000001",
+            "username": "admin",
+            "password": "admin",
+            "is_admin": True,
+            "projects": ["*"]
+        }
+    ]
+    users_path = os.path.join(workspace, 'users.json')
+    open(users_path, 'a').close()
+    create_user(workspace, 'admin', 'admin', True, ["*"], ["*"])
+
+
 def create_user(workspace, username, password, is_admin, projects, reports):
     errors = []
     new_user = {
@@ -383,7 +441,10 @@ def create_user(workspace, username, password, is_admin, projects, reports):
     }
 
     with open(os.path.join(workspace, 'users.json')) as users_file:    
-        user_data = json.load(users_file)
+        try:
+            user_data = json.load(users_file)
+        except:
+            user_data = []
     
     for user in user_data:
         if user['username'] == username:

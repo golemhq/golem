@@ -55,25 +55,25 @@ function startAllSelectorInputAutocomplete(){
 function addPageObjectInput(){
     $("#elements").append(
         "<div class='element col-md-12 clearfix'> \
-            <div class='col-sm-3 no-pad-left padding-right-5'> \
+            <div class='col-xs-3 no-pad-left padding-right-5'> \
                 <div class='input-group po-input-group'> \
                     <input type='text' class='form-control element-name' value='' \
                         placeholder='name'> \
                 </div> \
             </div> \
-            <div class='col-sm-3 padding-left-5 padding-right-5'> \
+            <div class='col-xs-3 padding-left-5 padding-right-5'> \
                 <div class='input-group po-input-group'> \
                     <input type='text' class='form-control element-selector' \
                         value='' placeholder='selector'> \
                 </div> \
             </div> \
-            <div class='col-sm-3 padding-left-5 padding-right-5'> \
+            <div class='col-xs-3 padding-left-5 padding-right-5'> \
                 <div class='input-group po-input-group'> \
                     <input type='text' class='form-control element-value' \
                         value='' placeholder='value'> \
                 </div> \
             </div> \
-            <div class='col-sm-3 padding-left-5 no-pad-right'> \
+            <div class='col-xs-3 padding-left-5 no-pad-right'> \
                 <div class='input-group po-input-group'> \
                     <input type='text' class='form-control element-display-name' \
                         value='' placeholder='display name'> \
@@ -102,12 +102,14 @@ function savePageObject(){
     var importLines = [];
 
     $(".element").each(function(){
-        elements.push({
-            'name': $(this).find('.element-name').val(),
-            'selector': $(this).find('.element-selector').val(),
-            'value': $(this).find('.element-value').val(),
-            'display_name': $(this).find('.element-display-name').val()
-        });
+        if($(this).find('.element-name').val().length > 0){
+            elements.push({
+                'name': $(this).find('.element-name').val(),
+                'selector': $(this).find('.element-selector').val(),
+                'value': $(this).find('.element-value').val(),
+                'display_name': $(this).find('.element-display-name').val()
+            });
+        }
     });
     $(".function").each(function(){
         functions.push($(this).find('.func-code').val());
@@ -159,7 +161,11 @@ function watchForUnsavedChanges(){
 
 
 function loadCodeView(){
-    savePageObject();
+    if(unsavedChanges){
+        savePageObject();
+    }
+
+    unsavedChanges = false;
 
     // redirect to gui view
     window.location.replace("/p/"+project+"/page/"+pageObjectName+"/code/");
