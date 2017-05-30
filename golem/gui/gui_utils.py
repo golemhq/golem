@@ -9,21 +9,18 @@ from golem.core import utils
 def new_directory_test_case(root_path, project, parents, directory_name):
     parents_joined = os.sep.join(parents)
     errors = []
-
     if directory_already_exists(root_path, project, 'test_cases', parents, directory_name):
         errors.append('A directory with that name already exists')
 
     if not errors:
         utils.create_new_directory(path_list=[root_path, 'projects', project, 'test_cases',
                                    parents_joined, directory_name], add_init=True)
-
     return errors
 
 
 def new_directory_page_object(root_path, project, parents, directory_name):
     parents_joined = os.sep.join(parents)
     errors = []
-
     if directory_already_exists(root_path, project, 'pages', parents, directory_name):
         errors.append('A directory with that name already exists')
     

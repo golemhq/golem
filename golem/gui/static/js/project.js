@@ -35,7 +35,7 @@ function addElement(event){
     }
 
     var parentsSeparetedByDots = getParentsSeparatedByDots(input);
-    var elementName = input.val();
+    var elementName = input.val().trim();
     var isDir = false;
     if(elementName.indexOf('/') > -1){
         isDir = true;

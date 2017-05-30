@@ -166,30 +166,33 @@ def new_tree_element():
     if request.method == 'POST':
         project = request.form['project']
         element_type = request.form['elementType']
-        is_dir = request.form['isDir']
+        is_dir = json.loads(request.form['isDir'])
         parents = request.form['parents'].split('.')
         element_name = request.form['elementName']
 
         errors = []
 
-        if is_dir == 'true':
-            is_dir = True
-        else:
-            is_dir = False
-
         if is_dir:
-            element_name = element_name.replace('/', '')
-            if element_type == 'test_case':
-                gui_utils.new_directory_test_case(root_path, project, parents, element_name)
-            elif element_type == 'page_object':
-                gui_utils.new_directory_page_object(root_path, project, parents, element_name)
-        else:
-            if element_type == 'test_case':
-                errors = test_case.new_test_case(root_path, project, parents, element_name)
-            elif element_type == 'page_object':
-                errors = page_object.new_page_object(root_path, project, parents, element_name)
-            elif element_type == 'suite':
-                errors = suite.new_suite(root_path, project, element_name)
+                element_name = element_name.replace('/', '')
+
+        for c in element_name:
+            if not c.isalnum() and not c in ['-', '_']:
+                errors.append('Only letters, numbers, \'-\' and \'_\' are allowed')
+                break
+
+        if not errors:
+            if is_dir:
+                if element_type == 'test_case':
+                    gui_utils.new_directory_test_case(root_path, project, parents, element_name)
+                elif element_type == 'page_object':
+                    gui_utils.new_directory_page_object(root_path, project, parents, element_name)
+            else:
+                if element_type == 'test_case':
+                    errors = test_case.new_test_case(root_path, project, parents, element_name)
+                elif element_type == 'page_object':
+                    errors = page_object.new_page_object(root_path, project, parents, element_name)
+                elif element_type == 'suite':
+                    errors = suite.new_suite(root_path, project, element_name)
 
         return json.dumps({'errors': errors, 'project_name': project,
                            'element_name': element_name, 'is_dir': is_dir})

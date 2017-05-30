@@ -126,7 +126,7 @@ def is_page_object(parameter, root_path, project):
 
 def new_page_object(root_path, project, parents, po_name):
     errors = []
-    if gui_utils.file_already_exists(root_path, project, 'page_objects', parents, po_name):
+    if gui_utils.file_already_exists(root_path, project, 'pages', parents, po_name):
         errors.append('A file with that name already exists')
 
     if not errors:
