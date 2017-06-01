@@ -48,6 +48,8 @@ function savePageObject(){
                 "timeOut": "3000",
                 "hideDuration": "100"}
             toastr.success("Page "+pageObjectName+" saved");
+
+            codeEditor.markClean();
         },
         error: function() {
         }
