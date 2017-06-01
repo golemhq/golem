@@ -71,6 +71,7 @@ def _generate_dict_from_file_structure(full_path):
         parent.update({folders[-1]: subdir_dict})
 
         # this code is added to give support to python 2.7
+        # support for python 2.7 has been dropped
         # which does not have move_to_end method
         # if not hasattr(OrderedDict, 'move_to_end'):
         #     def move_to_end(self, key, last=True):
@@ -105,8 +106,6 @@ def get_page_objects(workspace, project):
 
 def get_suites(workspace, project):
     path = os.path.join(workspace, 'projects', project, 'test_suites')
-    
-    ## suites = _generate_dict_from_file_structure(path)
 
     suites = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
 
@@ -173,8 +172,7 @@ def get_suite_test_cases(project, suite):
     '''Return a list with all the test cases of a given suite'''
     tests = list()
 
-    suite_module = importlib.import_module('projects.{0}.test_suites.{1}'
-                                           .format(project, suite),
+    suite_module = importlib.import_module('projects.{0}.test_suites.{1}'.format(project, suite),
                                            package=None)
     tests = suite_module.test_case_list
 
@@ -195,7 +193,6 @@ def get_directory_suite_test_cases(workspace, project, suite):
 
 def get_suite_amount_of_workers(workspace, project, suite):
     amount = 1
-
     suite_module = importlib.import_module('projects.{0}.test_suites.{1}'.format(project, suite),
                                            package=None)
     if hasattr(suite_module, 'workers'):
@@ -214,21 +211,12 @@ def get_suite_browsers(workspace, project, suite):
     return browsers
 
 
-# def get_test_case_class(project_name, test_case_name):
-#     '''Returns the class present in a module of the same name.
-#     'test_case_name' might be the full path to the module,
-#     separeted by dots'''
-
-#     # TODO verify the file exists before trying to import
-#     modulex = importlib.import_module('projects.{0}.test_cases.{1}'
-#                                       .format(project_name, test_case_name))
-#     test_case_only = test_case_name.split('.')[-1]
-#     test_case_class = getattr(modulex, test_case_only)
-#     return test_case_class
-
-
-def read_json_remove_comments(json_path):
-
+def read_json_and_remove_comments(json_path):
+    """What if I want to store comments in a JSON file?
+    The parser is going to throw errors.
+    So pass a JSON file path to tthis function and it will read it, remove the comments
+    and then parse it.
+    Comment lines starting with '//' are ignored"""
     with open(json_path, 'r') as settings_file:
         file_lines = settings_file.readlines()
         lines_without_comments = []
@@ -276,7 +264,7 @@ def assign_settings_default_values(settings):
 
 def get_global_settings():
     '''get global settings from root folder'''
-    settings = read_json_remove_comments('settings.json')
+    settings = read_json_and_remove_comments('settings.json')
     settings = assign_settings_default_values(settings)
 
     return settings
@@ -287,7 +275,7 @@ def get_project_settings(project, global_settings):
     this overrides any global settings'''
 
     project_settings_path = os.path.join('projects', project, 'settings.json')
-    project_settings = read_json_remove_comments(project_settings_path)
+    project_settings = read_json_and_remove_comments(project_settings_path)
     # merge and override global settings with project settings
     for setting in project_settings:
         if project_settings[setting]:
@@ -345,19 +333,15 @@ def is_first_level_directory(workspace, project, directory):
     return os.path.isdir(path)
 
 
-def generate_page_object_module(project, parent_module,
-                                full_path, page_path_list):
+def generate_page_object_module(project, parent_module, full_path, page_path_list):
     if len(page_path_list) > 1:
         if not hasattr(parent_module, page_path_list[0]):
             new_module = imp.new_module(page_path_list[0])
-            setattr(parent_module,
-                    page_path_list[0],
-                    new_module)
+            setattr(parent_module, page_path_list[0], new_module)
         else:
             new_module = getattr(parent_module, page_path_list[0])
         page_path_list.pop(0)
-        new_module = generate_page_object_module(project, new_module,
-                                                 full_path, page_path_list)
+        new_module = generate_page_object_module(project, new_module, full_path, page_path_list)
         setattr(parent_module, page_path_list[0], new_module)
     else:
         imported_module = importlib.import_module('projects.{}.pages.{}'

@@ -4,28 +4,7 @@ import types
 import inspect
 
 from golem.core import utils
-
 from golem.gui import gui_utils
-
-
-def get_web_elements(content, po_name):
-    elements = []
-
-    # for line in content:
-    #     if '=' in line:
-    #         element_name = line.split('=')[0].strip()
-    #         element_description = line.split('=')[1].strip()
-    #         element_selector = element_description.split(',')[0].strip().replace('\'','').replace('(','')
-    #         element_value = element_description.split(',')[1].strip().replace('\'','')
-    #         element_display_name = element_description.split(',')[2].strip().replace('\'','').replace(')', '')
-    #         elements.append({
-    #             'element_name': element_name,
-    #             'element_selector': element_selector,
-    #             'element_value': element_value,
-    #             'element_display_name': element_display_name,
-    #             'element_full_name': ''.join([po_name, '.', element_name])
-    #             })
-    return elements
 
 
 def get_page_object_content(root_path, project, full_po_name):
@@ -38,7 +17,7 @@ def get_page_object_content(root_path, project, full_po_name):
     import_lines = []
     code_line_list = []
     source_code = ''
-     # get all the import lines in a list
+    # get all the import lines in a list
     try:
         source_code = inspect.getsource(modulex)
     except:
@@ -84,12 +63,8 @@ def get_page_object_content(root_path, project, full_po_name):
 def save_page_object(root_path, project, full_page_name,
                      elements, functions, import_lines):
     page_name, parents = utils.separate_file_from_parents(full_page_name)
-    page_object_path = os.path.join(root_path,
-                                    'projects',
-                                    project,
-                                    'pages',
-                                    os.sep.join(parents),
-                                    '{}.py'.format(page_name))
+    page_object_path = os.path.join(root_path, 'projects', project, 'pages',
+                                    os.sep.join(parents), '{}.py'.format(page_name))
     with open(page_object_path, 'w', encoding='utf-8') as f:
         for line in import_lines:
             f.write("{}\n".format(line))

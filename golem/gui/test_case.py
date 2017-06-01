@@ -93,29 +93,22 @@ def get_page_objects(content):
 
 
 def get_description(content):
-
     content_string = ''.join(content)
     description = ''
-    ## description = re.search(".*description = \'(.*\n*.*)\'", content_string).group(1)
     description = re.search(".*description = \'(.*?)\'", content_string).group(1)
     description = re.sub("\s\s+", " ", description)
     return description
 
 
 def parse_test_case(workspace, project, parents, test_case_name):
-
     parents_joined = os.sep.join(parents)
-
     path = os.path.join(workspace, 'projects', project, 'test_cases',
                         parents_joined, test_case_name + '.py')
-
     with open(path, encoding='utf-8') as f:
         file_lines = f.readlines()
-
     description = get_description(file_lines)
     page_objects = get_page_objects(file_lines)
     steps = _get_steps(file_lines)
-
     test_case = {
         'description': description,
         'page_objects': page_objects,
@@ -130,28 +123,22 @@ def new_test_case(root_path, project, parents, tc_name):
     # check if a file already exists
     if gui_utils.file_already_exists(root_path, project, 'test_cases', parents, tc_name):
         errors.append('A file with that name already exists')
-
     if not errors:
         parents_joined = os.sep.join(parents)
         base_path = os.path.join(root_path, 'projects', project, 'test_cases')
         test_case_path = os.path.join(base_path, parents_joined)
-
-        # create the directory structure (with __init__.py files) if it does not exist
+        # create the directory structure if it does not exist
         if not os.path.exists(test_case_path):
             for parent in parents:
                 base_path = os.path.join(base_path, parent)
                 utils.create_new_directory(path=base_path, add_init=True)
-
         test_case_full_path = os.path.join(test_case_path, tc_name + '.py')
-
         data_path = os.path.join(root_path, 'projects', project, 'data', parents_joined)
         if not os.path.exists(data_path):
             os.makedirs(data_path)
         data_full_path = os.path.join(data_path, tc_name + '.csv')
-
         with open(test_case_full_path, 'w') as f:
             f.write(test_case_content)
-
         with open(data_full_path, 'w') as f:
             f.write('')
     return errors
@@ -173,8 +160,7 @@ def teardown():
 """
 
 
-def format_parameters(step, root_path, project, parents, test_case_name, 
-                      stored_keys):
+def format_parameters(step, root_path, project, parents, test_case_name, stored_keys):
     parameters = step['parameters']
     action = step['action'].replace(' ', '_')
     formatted_parameters = []
@@ -227,9 +213,8 @@ def get_stored_keys(steps):
 def save_test_case(root_path, project, full_test_case_name, description,
                    page_objects, test_steps):
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    test_case_path = os.path.join(root_path, 'projects', project,
-                                  'test_cases', os.sep.join(parents),
-                                  '{}.py'.format(tc_name))
+    test_case_path = os.path.join(root_path, 'projects', project, 'test_cases',
+                                  os.sep.join(parents), '{}.py'.format(tc_name))
 
     stored_keys = get_stored_keys(test_steps)
 

@@ -4,8 +4,7 @@ import os
 
 def get_start_date_time_from_timestamp(timestamp):
     sp = timestamp.split('.')
-    date_time_string = '{0}/{1}/{2} {3}:{4}'.format(sp[0], sp[1], sp[2],
-                                                    sp[3], sp[4])
+    date_time_string = '{0}/{1}/{2} {3}:{4}'.format(sp[0], sp[1], sp[2], sp[3], sp[4])
     return date_time_string
 
 
@@ -35,9 +34,6 @@ def get_last_executions(root_path, project, suite, limit):
             suite_executions = []
             suite_path = os.path.join(report_path, su)
             suite_executions = os.walk(suite_path).__next__()[1]
-            #last_executions = sorted(suite_executions, reverse=True)
-            for exe in suite_executions:
-                print(exe)
             last_executions = sorted(suite_executions)
             limit = int(limit)
             if limit is not 0:
@@ -58,8 +54,6 @@ def get_ejecucion_data(root_path, project, suite, execution):
 
     # ejecucion_data['modulo'] = modulo
     execution_data['test_cases'] = []
-
-    print(execution_dir)
     
     test_cases = os.walk(execution_dir).__next__()[1]
 
