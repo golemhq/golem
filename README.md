@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/lucianopuccio/golem.svg?branch=master)](https://travis-ci.org/lucianopuccio/golem)
+
 Golem - Test Automation Framework
 ==================================================
 
@@ -10,7 +12,7 @@ Golem is a test automation framework for functional tests. It has a GUI (a web a
 Installation
 --------------------------------------
 
-Currently Golem is only guaranteed to work with Python 3.5+, you may download and install it from here [python.org/downloads/](http://www.python.org/downloads/) 
+Currently Golem is only guaranteed to work with Python 3.4+, you may download and install it from here [python.org/downloads/](http://www.python.org/downloads/) 
 
 
 ##### **1. Clone the Golem repo and install**

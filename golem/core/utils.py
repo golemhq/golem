@@ -402,31 +402,30 @@ def create_test_dir(workspace):
         golem_py_file.write(golem_py_content)
 
     settings_content = (
-        "// Place this settings file at the root of the test directory to impact all\n",
-        "// the projects or inside a project folder to impact a single project.\n",
-        "// Be aware that project settings override global settings.\n",
-        "{\n",
-        "// Default time to wait looking for an element until it is found\n",
-        "\"implicit_wait\": 20,\n",
-        "\n",
-        "// Take a screenshot on error by default\n",
-        "\"screenshot_on_error\": true,\n",
-        "\n",
-        "// Take a screenshot on every step\n",
-        "\"screenshot_on_step\": false,\n",
-        "\n",
-        "// Custom wait method to use before each step, must be defined inside extend.py\n",
-        "\"wait_hook\": null,\n",
-        "\n",
-        "// Define the driver to use, unless overriden by the -d/--driver flag\n",
-        "\"default_driver\": \"firefox\"\n,",
-        "\n",
-        "// Path to the chrome driver executable. If the chromedriver is inside the test dir.\n",
-        "// It can be referenced as './chromedriver'\n",
-        "\"chrome_driver_path\": \"./drivers/chromedriver\"\n",
-        "}\n"
-    )
-    settings_path = os.path.join(workspace, 'settings.conf')
+        "// Place this settings file at the root of the test directory to impact all\n"
+        "// the projects or inside a project folder to impact a single project.\n"
+        "// Be aware that project settings override global settings.\n"
+        "{\n"
+        "// Default time to wait looking for an element until it is found\n"
+        "\"implicit_wait\": 20,\n"
+        "\n"
+        "// Take a screenshot on error by default\n"
+        "\"screenshot_on_error\": true,\n"
+        "\n"
+        "// Take a screenshot on every step\n"
+        "\"screenshot_on_step\": false,\n"
+        "\n"
+        "// Custom wait method to use before each step, must be defined inside extend.py\n"
+        "\"wait_hook\": null,\n"
+        "\n"
+        "// Define the driver to use, unless overriden by the -d/--driver flag\n"
+        "\"default_driver\": \"firefox\"\n,"
+        "\n"
+        "// Path to the chrome driver executable. If the chromedriver is inside the test dir.\n"
+        "// It can be referenced as './chromedriver'\n"
+        "\"chrome_driver_path\": \"./drivers/chromedriver\"\n"
+        "}\n")
+    settings_path = os.path.join(workspace, 'settings.json')
     with open(settings_path, 'a') as settings_file:
         settings_file.write(settings_content)
 
