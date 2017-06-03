@@ -1,4 +1,4 @@
-"""A CLI admin script used to generate the initial directory that
+"""A CLI admin script used to generate the initial 'test directory that
 contains the projects and all the required fields for Golem to
 work. This is a is directory independent script.
 """

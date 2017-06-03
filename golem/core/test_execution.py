@@ -1,5 +1,4 @@
-
-# A list of variables used for the current execution
+"""A list of variables used for the current execution"""
 
 root_path = None
 

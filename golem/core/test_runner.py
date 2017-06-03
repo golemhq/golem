@@ -1,7 +1,10 @@
-"""This module contains the methods for running a suite of tests and
+"""
+This module contains the methods for running a suite of tests and
 a single test case.
+
 The multiprocess_executor method runs all the test cases provided in
 parallel using multiprocessing.
+
 The test_runner method is in charge of executing a single test case.
 """
 
@@ -14,7 +17,6 @@ from multiprocessing.pool import ApplyResult
 
 import golem.core
 from golem.core import (actions,
-                        logger,
                         report,
                         test_execution,
                         utils)
@@ -130,17 +132,16 @@ def multiprocess_executor(execution_list, processes=1, suite_name=None, suite_da
 
     results = []
     for test in execution_list:
-        apply_async = pool.apply_async(test_runner,
-                                       args=(test_execution.root_path,
-                                             test_execution.project,
-                                             test['test_case_name'],
-                                             test['data_set'],
-                                             test['driver'],
-                                             suite_name,
-                                             suite_data,
-                                             timestamp,
-                                             test_execution.settings),
-                                       callback=logger.log_result)
+        args = (test_execution.root_path,
+                test_execution.project,
+                test['test_case_name'],
+                test['data_set'],
+                test['driver'],
+                suite_name,
+                suite_data,
+                timestamp,
+                test_execution.settings)
+        apply_async = pool.apply_async(test_runner, args=args)
         results.append(apply_async)
 
     map(ApplyResult.wait, results)

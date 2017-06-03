@@ -22,7 +22,7 @@ class Test_startdirectory:
         # verify the correct files exist
         assert '__init__.py' in files
         assert 'golem.py' in files
-        assert 'settings.conf' in files
+        assert 'settings.json' in files
         assert 'users.json' in files
         # verify there are 2 directories
         assert len(dirs) == 2

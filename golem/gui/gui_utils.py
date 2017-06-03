@@ -9,45 +9,38 @@ from golem.core import utils
 def new_directory_test_case(root_path, project, parents, directory_name):
     parents_joined = os.sep.join(parents)
     errors = []
-
     if directory_already_exists(root_path, project, 'test_cases', parents, directory_name):
         errors.append('A directory with that name already exists')
 
     if not errors:
         utils.create_new_directory(path_list=[root_path, 'projects', project, 'test_cases',
                                    parents_joined, directory_name], add_init=True)
-
     return errors
 
 
 def new_directory_page_object(root_path, project, parents, directory_name):
     parents_joined = os.sep.join(parents)
     errors = []
-
     if directory_already_exists(root_path, project, 'pages', parents, directory_name):
         errors.append('A directory with that name already exists')
     
     if not errors:
         utils.create_new_directory(path_list=[root_path, 'projects', project, 'pages',
-                               parents_joined, directory_name], add_init=True)
+                                   parents_joined, directory_name], add_init=True)
     return errors
 
 
 def run_test_case(project, test_case_name):
     timestamp = utils.get_timestamp()
-    ## os.system('python golem.py run {0} {1} --timestamp {2}'.format(project, test_case_name, timestamp))
-    subprocess.Popen(['python', 'golem.py', 'run', project, test_case_name, '--timestamp', timestamp])
+    subprocess.Popen(['python', 'golem.py', 'run', project, test_case_name,
+                     '--timestamp', timestamp])
     return timestamp
-    ## subprocess.check_output(['python', 'golem.py', 'run', project, test_case_name])
 
 
 def run_suite(project, suite_name):
     timestamp = utils.get_timestamp()
-    ## os.system('python golem.py run {0} {1} --timestamp {2}'.format(project, test_case_name, timestamp))
     subprocess.Popen(['python', 'golem.py', 'run', project, suite_name, '--timestamp', timestamp])
     return timestamp
-    ## subprocess.check_output(['python', 'golem.py', 'run', project, test_case_name])
-
 
 
 def get_time_span(task_id):
@@ -68,10 +61,8 @@ def get_time_span(task_id):
 
 def directory_already_exists(root_path, project, root_dir, parents, dir_name):
     parents_joined = os.sep.join(parents)
-
-    directory_path = os.path.join(
-        root_path, 'projects', project, root_dir, parents_joined, dir_name)    
-
+    directory_path = os.path.join(root_path, 'projects', project, root_dir,
+                                  parents_joined, dir_name)
     if os.path.exists(directory_path):
         return True
     else:

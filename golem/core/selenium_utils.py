@@ -69,17 +69,12 @@ def get_driver(driver_selected):
         driver = webdriver.Chrome()
     if driver_selected == 'ie':
         driver = webdriver.Ie()
-    if driver_selected == 'phantomjs':
-        if os.name == 'nt':
-            executable_path = os.path.join(
-                                        golem.__path__[0],
-                                        'lib',
-                                        'phantom',
-                                        'phantomjs.exe')
-            driver = webdriver.PhantomJS(
-                                executable_path=executable_path)
-        else:
-            print('not implemented yet')
-            sys.exit()
-
+    # if driver_selected == 'phantomjs':
+    #     if os.name == 'nt':
+    #         executable_path = os.path.join(golem.__path__[0], 'lib', 'phantom', 'phantomjs.exe')
+    #         driver = webdriver.PhantomJS(
+    #                             executable_path=executable_path)
+    #     else:
+    #         print('not implemented yet')
+    #         sys.exit()
     return driver

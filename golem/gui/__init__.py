@@ -16,7 +16,7 @@ from flask.ext.login import (LoginManager,
                              login_required)
 
 from golem.core import utils
-from . import gui_utils, test_case, page_object, suite, data, user, parser
+from . import gui_utils, test_case, page_object, suite, data, user, report_parser
 
 
 app = Flask(__name__)
@@ -53,16 +53,12 @@ def login():
                     result['errors'].append('Password is required')
                 else:
                     if not user.password_is_correct(username, password, root_path):
-                        result['errors'].append('Username and password'
-                                                ' do not match')
+                        result['errors'].append('Username and password do not match')
         if not next_url:
             next_url = '/'
 
         if len(result['errors']) > 0:
-            return render_template(
-                'login.html',
-                next_url=next_url,
-                errors=result['errors'])
+            return render_template('login.html', next_url=next_url, errors=result['errors'])
         else:
             new_user = user.User()
             new_user.username = username
@@ -97,11 +93,8 @@ def project(project):
     page_objects = utils.get_page_objects(root_path, project)
     suites = utils.get_suites(root_path, project)
     # suites = 
-    return render_template('project.html',
-                           test_cases=test_cases,
-                           project=project,
-                           page_objects=page_objects,
-                           suites=suites)
+    return render_template('project.html', test_cases=test_cases, project=project,
+                           page_objects=page_objects, suites=suites)
 
 
 # TEST CASE VIEW
@@ -166,30 +159,33 @@ def new_tree_element():
     if request.method == 'POST':
         project = request.form['project']
         element_type = request.form['elementType']
-        is_dir = request.form['isDir']
+        is_dir = json.loads(request.form['isDir'])
         parents = request.form['parents'].split('.')
         element_name = request.form['elementName']
 
         errors = []
 
-        if is_dir == 'true':
-            is_dir = True
-        else:
-            is_dir = False
-
         if is_dir:
-            element_name = element_name.replace('/', '')
-            if element_type == 'test_case':
-                gui_utils.new_directory_test_case(root_path, project, parents, element_name)
-            elif element_type == 'page_object':
-                gui_utils.new_directory_page_object(root_path, project, parents, element_name)
-        else:
-            if element_type == 'test_case':
-                errors = test_case.new_test_case(root_path, project, parents, element_name)
-            elif element_type == 'page_object':
-                errors = page_object.new_page_object(root_path, project, parents, element_name)
-            elif element_type == 'suite':
-                errors = suite.new_suite(root_path, project, element_name)
+                element_name = element_name.replace('/', '')
+
+        for c in element_name:
+            if not c.isalnum() and not c in ['-', '_']:
+                errors.append('Only letters, numbers, \'-\' and \'_\' are allowed')
+                break
+
+        if not errors:
+            if is_dir:
+                if element_type == 'test_case':
+                    gui_utils.new_directory_test_case(root_path, project, parents, element_name)
+                elif element_type == 'page_object':
+                    gui_utils.new_directory_page_object(root_path, project, parents, element_name)
+            else:
+                if element_type == 'test_case':
+                    errors = test_case.new_test_case(root_path, project, parents, element_name)
+                elif element_type == 'page_object':
+                    errors = page_object.new_page_object(root_path, project, parents, element_name)
+                elif element_type == 'suite':
+                    errors = suite.new_suite(root_path, project, element_name)
 
         return json.dumps({'errors': errors, 'project_name': project,
                            'element_name': element_name, 'is_dir': is_dir})
@@ -255,7 +251,6 @@ def save_page_object():
 
         page_object.save_page_object(root_path, projectname, page_object_name,
                                      elements, functions, import_lines)
-
         return json.dumps('ok')
 
 
@@ -288,7 +283,6 @@ def save_test_case():
 
         test_case.save_test_case(root_path, projectname, test_case_name,
                                  description, page_objects, test_steps)
-
         return json.dumps('ok')
 
 
@@ -317,6 +311,7 @@ def run_test_case():
 
         return json.dumps(timestamp)
 
+
 @app.route("/check_test_case_run_result/", methods=['POST'])
 def check_test_case_run_result():
     if request.method == 'POST':
@@ -324,8 +319,8 @@ def check_test_case_run_result():
         test_case_name = request.form['testCaseName']
         timestamp = request.form['timestamp']
 
-        path = os.path.join(root_path, 'projects', projectname, 'reports', '__single__', test_case_name, timestamp)
-
+        path = os.path.join(root_path, 'projects', projectname, 'reports',
+                            '__single__', test_case_name, timestamp)
         sets = []
         complete = False
 
@@ -349,6 +344,7 @@ def check_test_case_run_result():
           result = {'status': 'not_complete'}
 
         return json.dumps(result)
+
 
 @app.route("/run_suite/", methods=['POST'])
 def run_suite():
@@ -432,9 +428,7 @@ def suite_report_view(project, suite):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:
-        return render_template('report/suite.html',
-                               project=project,
-                               suite=suite)
+        return render_template('report/suite.html', project=project, suite=suite)
 
 
 @app.route("/report/project/<project>/<suite>/<execution>/")
@@ -443,12 +437,9 @@ def execution_report(project, suite, execution):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:
-        formatted_date = parser.get_start_date_time_from_timestamp(execution)
-        return render_template('report/reporte.html',
-                               project=project,
-                               suite=suite,
-                               execution=execution,
-                               formatted_date=formatted_date)
+        formatted_date = report_parser.get_start_date_time_from_timestamp(execution)
+        return render_template('report/reporte.html', project=project, suite=suite,
+                               execution=execution, formatted_date=formatted_date)
 
 
 @app.route("/report/project/<project>/<suite>/<execution>/<test_case>/<test_set>/")
@@ -456,14 +447,10 @@ def execution_report(project, suite, execution):
 def sing_test_case(project, suite, execution, test_case, test_set):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
-    test_case_data = parser.get_test_case_data(root_path, project, suite,
+    test_case_data = report_parser.get_test_case_data(root_path, project, suite,
                                                execution, test_case, test_set)
-    return render_template('report/test_case.html',
-                           project=project,
-                           suite=suite,
-                           execution=execution,
-                           test_case=test_case,
-                           test_set=test_set,
+    return render_template('report/test_case.html', project=project, suite=suite,
+                           execution=execution, test_case=test_case, test_set=test_set,
                            test_case_data=test_case_data)
 
 
@@ -473,11 +460,7 @@ def get_ultimos_proyectos():
         project = request.form['project']
         suite = request.form['suite']
         limit = request.form['limit']
-        project_data = parser.get_last_executions(root_path,
-                                                  project,
-                                                  suite,
-                                                  limit)
-
+        project_data = report_parser.get_last_executions(root_path, project, suite, limit)
         return jsonify(projects=project_data)
 
 
@@ -488,12 +471,7 @@ def get_execution_data():
         project = request.form['project']
         suite = request.form['suite']
         execution = request.form['execution']
-
-        execution_data = parser.get_ejecucion_data(root_path,
-                                                   project,
-                                                   suite,
-                                                   execution)
-
+        execution_data = report_parser.get_ejecucion_data(root_path, project, suite, execution)
         return jsonify(execution_data=execution_data)
 
 
@@ -501,13 +479,11 @@ def get_execution_data():
 def screenshot_file(project, suite, execution, test_case, test_set, scr):
     screenshot_path = os.path.join(root_path, 'projects', project, 'reports',
                                    suite, execution, test_case, test_set)
-    return send_from_directory(screenshot_path,
-                               '{}.png'.format(scr))  # as_attachment=True)
+    return send_from_directory(screenshot_path, '{}.png'.format(scr))
 
-
-
-
-
+###############
+# END OF REPORT
+###############
 
 
 @login_manager.user_loader

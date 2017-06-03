@@ -195,19 +195,19 @@ When selecting all the test cases inside a folder, it can be abbreviated with th
 
 - **implicit_wait**
 
-Default time to wait looking for an element until it is found.
+Default time to wait looking for an element until it is found
 
 - **screenshot_on_error**
 
-Take a screenshot on error by default
+Take a screenshot on error by default, default: false
 
 - **screenshot_on_step**
 
-Take a screenshot on every step
+Take a screenshot on every step, default: false
 
 - **default_driver**
 
-Define the driver to use unless overriden by the -d/--driver flag
+Define the driver to use, unless overriden by the -d/--driver flag
 
 - **chrome_driver_path**
 
@@ -215,7 +215,8 @@ Path to the chrome driver executable. If the chromedriver is inside the test dir
 
 - **wait_hook**
 
-Custom wait method to use, specific to each application, must be defined inside extend.py
+Custom wait method to use before each step, must be defined inside extend.py
+
 
 
 # Command Line

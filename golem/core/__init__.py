@@ -2,29 +2,21 @@ import sys
 
 from selenium import webdriver
 
-
+# vaplues used during the execution of a test case
 driver = None
-
 driver_name = None
-
 settings = None
-
 project = None
-
 workspace = None
-
 test_data = None
 
 
-# will fail if driver name is not passed and driver not instantiated
 def getOrCreateWebdriver(*args):
     global settings
     global driver
 
     if not driver:
-
         driver_selected = get_selected_driver()
-
         if driver_selected == 'firefox':
             driver = webdriver.Firefox()
         if driver_selected == 'chrome':

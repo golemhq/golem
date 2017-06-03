@@ -1,3 +1,4 @@
+"""Define the parsers for the golem_admin and main modules"""
 import argparse
 
 
