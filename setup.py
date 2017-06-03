@@ -44,8 +44,9 @@ setup(
                 'using Selenium as automation engine tool',
     long_description=long_description,
     url='https://github.com/lucianopuccio/golem',
-    # author='Luciano Puccio',
-    author_email='',
+    download_url = 'https://github.com/lucianopuccio/golem/archive/0.1.0a1.tar.gz',
+    author='Luciano Puccio',
+    author_email='me@mail.com',
     license='MIT',
     classifiers=[
         'Development Status :: 4 - Beta',
