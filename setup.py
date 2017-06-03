@@ -43,7 +43,7 @@ setup(
     description='Test automation framework for functional tests using Selenium',
     # long_description=long_description,
     url='https://github.com/lucianopuccio/golem',
-    download_url = 'https://github.com/lucianopuccio/golem/archive/0.1.0a2.tar.gz',
+    download_url = 'https://github.com/lucianopuccio/golem/archive/0.1.0a3.tar.gz',
     author='Luciano Puccio',
     author_email='me@mail.com',
     license='MIT',
