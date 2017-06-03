@@ -45,7 +45,6 @@ def execute_from_command_line(root_path):
             test_execution.project = args.project
             test_execution.settings = utils.get_project_settings(args.project,
                                                                  test_execution.settings)
-
             # check if test_or_suite value is present
             if not args.test_or_suite:
                 print('Usage:', parser.usage)
@@ -68,7 +67,6 @@ def execute_from_command_line(root_path):
             # check if test_or_suite value matches a first level directory
             # in the test cases directory. this allows to execute all the 
             # test cases in a directory as a test suite
-
             elif utils.is_first_level_directory(root_path, test_execution.project,
                                                 args.test_or_suite):
                 test_execution.suite = args.test_or_suite
@@ -82,7 +80,6 @@ def execute_from_command_line(root_path):
                 # execute test case
                 test_runner.run_single_test_case(root_path, test_execution.project,
                                                  test_execution.test)
-            
             else:
                 # test_or_suite does not match any existing suite or test
                 sys.exit('Error: the value {0} does not match an existing '
@@ -101,7 +98,6 @@ def execute_from_command_line(root_path):
     if args.main_action == 'createtest':
         if args.project not in utils.get_projects(root_path):
             sys.exit('Error: a project with that name does not exist')
-        
         split_path = args.test.split('.')
         test_name = split_path.pop()
         errors = test_case.new_test_case(root_path, args.project, split_path, test_name)
@@ -113,9 +109,6 @@ def execute_from_command_line(root_path):
     if args.main_action == 'createsuite':
         if args.project not in utils.get_projects(root_path):
             sys.exit('Error: a project with that name does not exist')
-        
-        # split_path = args.suite.split('.')
-        # suite_name = split_path.pop()
         errors = suite_module.new_suite(root_path, args.project, args.suite)
         if errors:
             for error in errors:
@@ -131,5 +124,3 @@ def execute_from_command_line(root_path):
                 print(error)
         else:
             print('User {} was created successfully'.format(args.username))
-
-        

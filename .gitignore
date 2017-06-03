@@ -1,5 +1,6 @@
 *.pyc
 golem.egg-info/
 __pycache__/
+dist/
 .cache/
 .tox

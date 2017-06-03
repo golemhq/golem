@@ -1,8 +1,8 @@
 from __future__ import print_function
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
+from codecs import open
 import io
-import codecs
 import os
 import sys
 
@@ -10,6 +10,7 @@ import golem
 
 
 here = os.path.abspath(os.path.dirname(__file__))
+
 
 def read(*filenames, **kwargs):
     encoding = kwargs.get('encoding', 'utf-8')
@@ -20,7 +21,10 @@ def read(*filenames, **kwargs):
             buf.append(f.read())
     return sep.join(buf)
 
+
+# Get the long description from the README file
 long_description = read('README.md')
+
 
 class PyTest(TestCommand):
     def finalize_options(self):
@@ -36,41 +40,41 @@ class PyTest(TestCommand):
 setup(
     name='golem',
     version=golem.__version__,
-    url='http://github.com//',
-    license='TBD',
-    author='Luciano Puccio',
-    tests_require=['pytest'],
+    description='Test automation framework for functional tests'
+                'using Selenium as automation engine tool',
+    long_description=long_description,
+    url='https://github.com/lucianopuccio/golem',
+    # author='Luciano Puccio',
+    author_email='',
+    license='MIT',
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Natural Language :: English',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Topic :: Software Development :: Quality Assurance',
+        'Topic :: Software Development :: Testing',
+        ],
+    keywords='test automation framework selenium webdriver',
+    packages=['golem'],
     install_requires=['Flask==0.10.1',
                       'Flask-login==0.3.2',
                       'selenium==2.52.0',
-                      'Pillow>3.3.1',
-                      'pytest>=3.0.0'],
-    #scripts=['golem/bin/golem-admin.py'],
+                      'Pillow>3.3.1'
+                      ],
+    tests_require=['pytest'],
     entry_points={
         'console_scripts': ['golem-admin = golem.bin.golem_admin:main']
     },
     cmdclass={'test': PyTest},
-    author_email='mail@lucianopuccio.com',
-    description='Test automation framework for functional test automation written in python and using Selenium as automation engine tool',
-    long_description=long_description,
-    packages=['golem'],
+    
     include_package_data=True,
     platforms='any',
     test_suite='',
-    classifiers=[
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Development Status :: 4 - Beta',
-        'Natural Language :: English',
-        'Environment :: Web Environment',
-        'Intended Audience :: QA Engineers',
-        'License :: OSI Approved :: Apache Software License',
-        'Operating System :: OS Independent',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-        'Topic :: Software Development :: Libraries :: Application Frameworks',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-        ],
     extras_require={
         'testing': ['pytest'],
     }

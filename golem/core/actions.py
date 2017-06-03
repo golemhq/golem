@@ -1,3 +1,4 @@
+"""Function wrappers for the actions"""
 import time
 import uuid
 import io
@@ -40,6 +41,7 @@ def _run_wait_hook():
 #     click_script = """$("{0}").click();""".format(css_selector)
 #     print click_script
 #     driver.execute_script(click_script)
+
 
 def _capture_or_add_step(message, screenshot_on_step):
     if screenshot_on_step:

@@ -1,3 +1,4 @@
+"""Generate the report structure, json and screenshots"""
 import json
 import os
 import uuid
@@ -47,5 +48,4 @@ def generate_report(report_directory, test_case_name, test_data, result):
     # save screenshots
     for scr in result['screenshots']:
         img_filename = '{}.png'.format(scr)
-        result['screenshots'][scr].save(os.path.join(report_directory,
-                                                     img_filename))
+        result['screenshots'][scr].save(os.path.join(report_directory, img_filename))

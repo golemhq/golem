@@ -60,8 +60,7 @@ def get_page_object_content(root_path, project, full_po_name):
     return page_object_data
 
 
-def save_page_object(root_path, project, full_page_name,
-                     elements, functions, import_lines):
+def save_page_object(root_path, project, full_page_name, elements, functions, import_lines):
     page_name, parents = utils.separate_file_from_parents(full_page_name)
     page_object_path = os.path.join(root_path, 'projects', project, 'pages',
                                     os.sep.join(parents), '{}.py'.format(page_name))

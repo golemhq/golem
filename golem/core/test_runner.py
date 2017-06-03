@@ -1,7 +1,10 @@
-"""This module contains the methods for running a suite of tests and
+"""
+This module contains the methods for running a suite of tests and
 a single test case.
+
 The multiprocess_executor method runs all the test cases provided in
 parallel using multiprocessing.
+
 The test_runner method is in charge of executing a single test case.
 """
 
