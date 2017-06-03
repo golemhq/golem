@@ -22,8 +22,7 @@ def read(*filenames, **kwargs):
     return sep.join(buf)
 
 
-# Get the long description from the README file
-long_description = read('README.md')
+# long_description = read('README.md')
 
 
 class PyTest(TestCommand):
@@ -37,14 +36,14 @@ class PyTest(TestCommand):
         errcode = pytest.main(self.test_args)
         sys.exit(errcode)
 
+
 setup(
     name='golem',
     version=golem.__version__,
-    description='Test automation framework for functional tests'
-                'using Selenium as automation engine tool',
-    long_description=long_description,
+    description='Test automation framework for functional tests using Selenium',
+    # long_description=long_description,
     url='https://github.com/lucianopuccio/golem',
-    download_url = 'https://github.com/lucianopuccio/golem/archive/0.1.0a1.tar.gz',
+    download_url = 'https://github.com/lucianopuccio/golem/archive/0.1.0a2.tar.gz',
     author='Luciano Puccio',
     author_email='me@mail.com',
     license='MIT',
