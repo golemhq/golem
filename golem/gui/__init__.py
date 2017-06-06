@@ -315,14 +315,15 @@ def run_test_case():
 @app.route("/check_test_case_run_result/", methods=['POST'])
 def check_test_case_run_result():
     if request.method == 'POST':
-        projectname = request.form['project']
+        project = request.form['project']
         test_case_name = request.form['testCaseName']
         timestamp = request.form['timestamp']
 
-        path = os.path.join(root_path, 'projects', projectname, 'reports',
+        path = os.path.join(root_path, 'projects', project, 'reports',
                             '__single__', test_case_name, timestamp)
         sets = []
         complete = False
+        test_case_data = {}
 
         if os.path.isdir(path):
             for elem in os.listdir(path):
@@ -333,9 +334,15 @@ def check_test_case_run_result():
           set_content = os.listdir(new_path)
           if set_content:
             report_path = os.path.join(new_path, 'report.json')
-            print('REPORT PATH', report_path)
             with open(report_path) as data_file:    
                 json_data = json.load(data_file)
+
+                json_data['steps'] = [x.split('__')[0] for x in json_data['steps']]
+
+
+            # this does not work for single test cases, only suites
+            # test_case_data = report_parser.get_test_case_data(root_path, project, '__single__',
+            #                                    execution, test_case, test_set)
             complete = True
 
         if complete:

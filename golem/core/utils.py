@@ -273,9 +273,10 @@ def get_global_settings():
 def get_project_settings(project, global_settings):
     '''get project level settings from selected project folder,
     this overrides any global settings'''
-
     project_settings_path = os.path.join('projects', project, 'settings.json')
-    project_settings = read_json_and_remove_comments(project_settings_path)
+    project_settings = {}
+    if os.path.isfile(project_settings_path):
+        project_settings = read_json_and_remove_comments(project_settings_path)
     # merge and override global settings with project settings
     for setting in project_settings:
         if project_settings[setting]:

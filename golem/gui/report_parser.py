@@ -140,10 +140,11 @@ def get_test_case_data(root_path, project, suite, execution, test_case, test_set
         steps = []
         for step in report_data['steps']:
             if '__' in step:
-                this_step = (step.split('__')[0],
-                             step.split('__')[1])
+                this_step = {'message': step.split('__')[0],
+                             'screenshot': step.split('__')[1]}
             else:
-                this_step = (step.split('__')[0],)
+                this_step = {'message': step,
+                             'screenshot': None}
             steps.append(this_step)
         test_case_data['steps'] = steps
 
