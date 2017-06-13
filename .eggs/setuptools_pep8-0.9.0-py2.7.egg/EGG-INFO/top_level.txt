@@ -1,0 +1,2 @@
+setuptools_pep8
+tests

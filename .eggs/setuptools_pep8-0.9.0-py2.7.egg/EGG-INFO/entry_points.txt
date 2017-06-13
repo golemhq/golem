@@ -1,0 +1,3 @@
+[distutils.commands]
+pep8 = setuptools_pep8.setuptools_command:Pep8Command
+

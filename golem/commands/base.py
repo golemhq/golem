@@ -7,29 +7,22 @@ from golem.gui import (gui_start, test_case,
 class BaseCommand:
     cmd = None
 
-    def __init__(self, test_ex, parser):
+    def __init__(self, parser):
         sub_parser = parser.add_parser(self.cmd)
         self.add_arguments(sub_parser)
 
     def add_arguments(self, parser):
         pass
 
-    def run(self, args):
+    def run(self, *args):
         raise NotImplementedError('Command not implemented')
-
-
-class TestCommand:
-
-    def __init__(self, test_ex, parser):
-        self.test_execution = test_ex
-        super().__init__(parser)
 
 
 class CommandException(Exception):
     pass
 
 
-class RunCommand(TestCommand):
+class RunCommand(BaseCommand):
     cmd = 'run'
 
     def add_arguments(self, parser):
@@ -49,12 +42,12 @@ class RunCommand(TestCommand):
         parser.add_argument('--timestamp', action='store', nargs='?', type=str,
                                 metavar='Timestamp', help="Timestamp")
 
-    def run(self, args):
-        self.test_execution.thread_amount = args.threads
-        self.test_execution.drivers = args.drivers
-        self.test_execution.timestamp = args.timestamp
+    def run(self, test_execution, args):
+        test_execution.thread_amount = args.threads
+        test_execution.drivers = args.drivers
+        test_execution.timestamp = args.timestamp
 
-        root_path = self.test_execution.root_path
+        root_path = test_execution.root_path
 
         if not args.project:
             msg = ['Usage:', parser.usage, '\n\n', 'Project List:']
@@ -64,13 +57,13 @@ class RunCommand(TestCommand):
         elif not args.project in utils.get_projects(root_path):
             raise CommandException(
                 'Error: the project {0} does not exist'.format(
-                    self.test_execution.project)
+                    test_execution.project)
             )
         else:
-            self.test_execution.project = args.project
-            self.test_execution.settings = utils.get_project_settings(
+            test_execution.project = args.project
+            test_execution.settings = utils.get_project_settings(
                 args.project,
-                self.test_execution.settings)
+                test_execution.settings)
             # check if test_or_suite value is present
             if not args.test_or_suite:
                 msg = ['Usage: {}'.format(parser.usage),
@@ -90,29 +83,29 @@ class RunCommand(TestCommand):
                 test_execution.suite = args.test_or_suite
                 # execute test suite
                 test_runner.run_suite(root_path,
-                                      self.test_execution.project,
-                                      self.test_execution.suite)
+                                      test_execution.project,
+                                      test_execution.suite)
 
             # check if test_or_suite value matches a first level directory
             # in the test cases directory. this allows to execute all the
             # test cases in a directory as a test suite
             elif utils.is_first_level_directory(root_path,
-                                                self.test_execution.project,
-                                                args.test_or_suite):
+                                                test_execution.project,
+                                                test_or_suite):
                 test_execution.suite = args.test_or_suite
                 # execute test suite
                 test_runner.run_suite(root_path,
-                                      self.test_execution.project,
-                                      self.test_execution.suite,
+                                      test_execution.project,
+                                      test_execution.suite,
                                       is_directory=True)
             # check if test_or_suite value matches an existing test case
-            elif utils.test_case_exists(root_path, self.test_execution.project,
+            elif utils.test_case_exists(root_path, test_execution.project,
                                         args.test_or_suite):
-                self.test_execution.test = args.test_or_suite
+                test_execution.test = args.test_or_suite
                 # execute test case
                 test_runner.run_single_test_case(root_path,
-                                                 self.test_execution.project,
-                                                 self.test_execution.test)
+                                                 test_execution.project,
+                                                 test_execution.test)
             else:
                 # test_or_suite does not match any existing suite or test
                 raise CommandException(
@@ -120,7 +113,7 @@ class RunCommand(TestCommand):
                     'suite or test'.format(args.test_or_suite))
 
 
-class GuiCommand(TestCommand):
+class GuiCommand(BaseCommand):
     cmd = 'gui'
 
     def add_arguments(self, parser):
@@ -132,20 +125,20 @@ class GuiCommand(TestCommand):
                             default=False,
                             help="Start the gui application in debug mode")
 
-    def run(self, args):
+    def run(self, test_execution, args):
         port_number = args.port
         debug = args.debug
         gui_start.run_gui(port_number, debug)
 
 
-class CreateProjectCommand(TestCommand):
+class CreateProjectCommand(BaseCommand):
     cmd = 'createproject'
 
     def add_arguments(self, parser):
         parser.add_argument('project', help="project name")
 
-    def run(self, args):
-        root_path = self.test_execution.root_path
+    def run(self, test_execution, args):
+        root_path = test_execution.root_path
 
         if args.project in utils.get_projects(root_path):
             msg = 'Error: a project with the name \'{}\' already exists'.format(
@@ -158,7 +151,7 @@ class CreateProjectCommand(TestCommand):
             utils.create_new_project(root_path, args.project)
 
 
-class CreateTestCommand(TestCommand):
+class CreateTestCommand(BaseCommand):
     cmd = 'createtest'
 
     def add_arguments(self, parser):
@@ -166,8 +159,8 @@ class CreateTestCommand(TestCommand):
         parser.add_argument('test', metavar='test case name',
                             help="test case name")
 
-    def run(self, args):
-        root_path = self.test_execution.root_path
+    def run(self, test_execution, args):
+        root_path = test_execution.root_path
 
         if args.project not in utils.get_projects(root_path):
             raise CommandException(
@@ -181,16 +174,16 @@ class CreateTestCommand(TestCommand):
             raise CommandException('\n'.join(errors))
 
 
-class CreateSuiteCommand(TestCommand):
+class CreateSuiteCommand(BaseCommand):
     cmd = 'createsuite'
 
     def add_arguments(self, parser):
         parser.add_argument('project', help="project name")
         parser.add_argument('suite', metavar='suite name', help="suite name")
 
-    def run(self, args):
+    def run(self, test_execution, args):
         if args.project not in utils.get_projects(
-                self.test_execution.root_path):
+                test_execution.root_path):
             raise CommandException(
                 'Error: a project with that name does not exist')
         errors = suite_module.new_suite(root_path, args.project, args.suite)
@@ -198,7 +191,7 @@ class CreateSuiteCommand(TestCommand):
             raise CommandException('\n'.join(errors))
 
 
-class CreateUserCommand(TestCommand):
+class CreateUserCommand(BaseCommand):
     cmd = 'createuser'
 
     def add_arguments(self, parser):
@@ -211,7 +204,7 @@ class CreateUserCommand(TestCommand):
         parser.add_argument('-r', '--reports', nargs='+', default=[],
                             help="reports the user has access")
 
-    def run(self, args):
+    def run(self, test_execution, args):
         errors = utils.create_user(root_path, args.username,
                                    args.password, args.admin,
                                    args.projects, args.reports)

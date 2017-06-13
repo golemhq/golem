@@ -1,38 +1,54 @@
 from .base import (CommandException, RunCommand,
                    GuiCommand, CreateProjectCommand,
                    CreateSuiteCommand, CreateTestCommand,
-                   CreateUserCommand)
+                   CreateUserCommand, CreateDirAdminCommand)
+
+
+INIT_CMDS = [
+    GuiCommand,
+    CreateProjectCommand,
+    CreateSuiteCommand,
+    CreateTestCommand,
+    CreateUserCommand
+]
+
+
+INIT_ADMIN_CMDS = [
+    CreateDirAdminCommand
+]
 
 
 COMMANDS = {
-    GuiCommand.cmd: GuiCommand,
-    CreateProjectCommand.cmd: CreateProjectCommand,
-    CreateSuiteCommand.cmd: CreateSuiteCommand,
-    CreateTestCommand.cmd: CreateTestCommand,
-    CreateUserCommand.cmd: CreateUserCommand
 }
 
 
 COMMANDS_ADMIN = {
-    CreateDirAdminCommand.cmd: CreateDirAdminCommand
 }
 
 
-def register_command(klass):
-    COMMANDS[klass.cmd] = klass()
+def register_command(klass, parser):
+    COMMANDS[klass.cmd] = klass(parser)
 
 
-def register_admin_command(klass):
-    COMMANDS_ADMIN[klass.cmd] = klass()
+def register_admin_command(klass, parser):
+    COMMANDS_ADMIN[klass.cmd] = klass(parser)
+
+
+def init_cli(parser):
+    for cmd in INIT_CMDS:
+        register_command(cmd, parser)
+
+
+def init_admin_cli(parser):
+    for cmd in INIT_ADMIN_CMDS:
+        register_admin_command(cmd, parser)
 
 
 def run(cmd_name, tex, args):
-    cmd = COMMANDS[cmd]
-    cmd_obj = cmd(tex, args)
-    cmd_obj.run()
+    cmd = COMMANDS[cmd_name]
+    cmd.run(tex, args)
 
 
 def run_admin(cmd_name, args):
-    cmd = COMMANDS_ADMIN[cmd]
-    cmd_obj = cmd(args)
-    cmd_obj.run()
+    cmd = COMMANDS_ADMIN[cmd_name]
+    cmd.run(args)
