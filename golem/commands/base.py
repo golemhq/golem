@@ -1,3 +1,4 @@
+import os
 from golem.core import test_runner, utils
 from golem.gui import (gui_start, test_case,
                        suite as suite_module)
@@ -9,7 +10,6 @@ class BaseCommand:
     def __init__(self, test_ex, parser):
         sub_parser = parser.add_parser(self.cmd)
         self.add_arguments(sub_parser)
-        self.test_execution = test_ex
 
     def add_arguments(self, parser):
         pass
@@ -18,11 +18,18 @@ class BaseCommand:
         raise NotImplementedError('Command not implemented')
 
 
+class TestCommand:
+
+    def __init__(self, test_ex, parser):
+        self.test_execution = test_ex
+        super().__init__(parser)
+
+
 class CommandException(Exception):
     pass
 
 
-class RunCommand(BaseCommand):
+class RunCommand(TestCommand):
     cmd = 'run'
 
     def add_arguments(self, parser):
@@ -113,7 +120,7 @@ class RunCommand(BaseCommand):
                     'suite or test'.format(args.test_or_suite))
 
 
-class GuiCommand(BaseCommand):
+class GuiCommand(TestCommand):
     cmd = 'gui'
 
     def add_arguments(self, parser):
@@ -131,7 +138,7 @@ class GuiCommand(BaseCommand):
         gui_start.run_gui(port_number, debug)
 
 
-class CreateProjectCommand(BaseCommand):
+class CreateProjectCommand(TestCommand):
     cmd = 'createproject'
 
     def add_arguments(self, parser):
@@ -151,7 +158,7 @@ class CreateProjectCommand(BaseCommand):
             utils.create_new_project(root_path, args.project)
 
 
-class CreateTestCommand(BaseCommand):
+class CreateTestCommand(TestCommand):
     cmd = 'createtest'
 
     def add_arguments(self, parser):
@@ -174,7 +181,7 @@ class CreateTestCommand(BaseCommand):
             raise CommandException('\n'.join(errors))
 
 
-class CreateSuiteCommand(BaseCommand):
+class CreateSuiteCommand(TestCommand):
     cmd = 'createsuite'
 
     def add_arguments(self, parser):
@@ -191,7 +198,7 @@ class CreateSuiteCommand(BaseCommand):
             raise CommandException('\n'.join(errors))
 
 
-class CreateUserCommand(BaseCommand):
+class CreateUserCommand(TestCommand):
     cmd = 'createuser'
 
     def add_arguments(self, parser):
@@ -212,3 +219,23 @@ class CreateUserCommand(BaseCommand):
             raise CommandException('\n'.join(errors))
         else:
             print('User {} was created successfully'.format(args.username))
+
+
+class CreateDirAdminCommand(BaseCommand):
+    cmd = 'createdirectory'
+
+    def add_arguments(self, parser):
+        parser.add_argument('name', metavar='name',
+                            help='directory name')
+
+    def run(self, args):
+        # Generate a new 'golem' directory
+        dir_name = args.name
+
+        if os.path.exists(dir_name):
+            raise CommandException(
+                'Error: the directory {} already exists'.format(dir_name)
+            )
+
+        destination = os.path.join(os.getcwd(), dir_name)
+        utils.create_test_dir(destination)

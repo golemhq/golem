@@ -1,11 +1,6 @@
 """Main point of entrance to the application"""
 
-import os
-import sys
-
-from .core import utils, cli, test_runner, test_execution
-from .gui import gui_start, test_case
-from .gui import suite as suite_module
+from .core import utils, cli, test_execution
 from . import commands
 
 
@@ -21,4 +16,4 @@ def execute_from_command_line(root_path):
     import golem.core
     golem.core.temp = test_execution.settings
 
-    commands.run(test_execution, args.main_action)
+    commands.run(test_execution, args.main_action, args)
