@@ -1,6 +1,7 @@
 """Main point of entrance to the application"""
 
-from .core import utils, cli, test_execution
+import argparse
+from .core import utils, test_execution
 from . import commands
 
 
@@ -12,7 +13,7 @@ def execute_from_command_line(root_path):
     )
 
     sub_parsers = parser.add_subparsers(dest="main_action")
-    commands.init_cli(parser)
+    commands.init_cli(sub_parsers)
     args = parser.parse_args()
 
     # set test_execution values
@@ -23,4 +24,4 @@ def execute_from_command_line(root_path):
     golem.core.temp = test_execution.settings
 
     if args.main_action:
-        commands.run(test_execution, args.main_action, args)
+        commands.run(args.main_action, test_execution, args)
