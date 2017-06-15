@@ -12,7 +12,7 @@ Golem is a test automation framework for functional tests. It has a GUI (a web a
 Installation
 --------------------------------------
 
-Currently Golem is only guaranteed to work with Python 3.4+, you may download and install it from here [python.org/downloads/](http://www.python.org/downloads/) 
+Currently Golem is only guaranteed to work with Python 3.4+, you may download and install it from here [python.org/downloads/](http://www.python.org/downloads/)
 
 
 ##### **1. Clone the Golem repo and install**
@@ -48,14 +48,10 @@ env\scripts\activate
 source env/bin/activate
 ```
 
-##### **3. Install Golem from source**
+##### **3. Install Golem using pip **
 
 ```
-cd golem
-```
-
-```
-python setup.py install
+pip install https://github.com/lucianopuccio/golem/archive/0.1.0a3.tar.gz
 ```
 
 # QuickStart
