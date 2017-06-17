@@ -7,18 +7,7 @@
 {% endblock %} 
 
 {% block content %}
-
 <div>
-    <!--
-    <div id="tc_toolbar">
-
-        <button name="save" id="save" onclick="saveTestCase();">Save</button>
-        <label>
-            <input type="checkbox" name="autosave" id="autosave" checked="checked" autocomplete="off">Autosave
-        </label>
-        <span>|</span>
-        <span id="changesSavedNotification">All changes saved</span>
-    </div>-->
     <div>
         <div class="col-sm-8 header-col">
             <h3 id="testCaseName">
@@ -52,9 +41,9 @@
             <h4>Pages</h4>
             <div id="pageObjectsContainer">
                 <div id="pageObjects">
-                    {% for po in test_case_contents.page_objects %}  
+                    {% for page in test_case_contents.pages %}  
                     <div class="input-group">
-                        <input type="text" class="form-control custom-input page-objects-input page-objects-autocomplete" value="{{ po }}">
+                        <input type="text" class="form-control custom-input page-objects-input page-objects-autocomplete" value="{{ page }}">
                         <span class="input-group-btn input-middle-btn">
                             <button class="btn btn-default" type="button" onclick="openPageObjectInNewWindow(this)"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></button>
                         </span>
@@ -63,7 +52,7 @@
                         </span>
                     </div>
                     {% endfor %}
-                    {% if not test_case_contents.page_objects %}
+                    {% if not test_case_contents.pages %}
                     <div class="input-group">
                         <input type="text" class="form-control custom-input page-objects-input page-objects-autocomplete" value="{{ po }}">
                         <span class="input-group-btn input-middle-btn">
@@ -89,7 +78,7 @@
         <h4>Steps</h4>
         <div id="steps">
 
-            {% for step in test_case_contents.steps %}
+            {% for step in test_case_contents.steps.test %}
 
             <div class='step'>
                 <div class="step-numbering">{{loop.index}}</div>
@@ -119,7 +108,7 @@
 
             {% endfor %}
 
-            {% if not test_case_contents.steps %}
+            {% if not test_case_contents.steps.test %}
             <div class='step'>
                 <div class="step-numbering">1</div>
                 <div class='col-sm-3 step-input-container'>

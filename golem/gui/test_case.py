@@ -1,124 +1,75 @@
 import os
 import re
+import importlib
+import inspect
 
 from golem.core import utils
 from golem.gui import data, page_object, gui_utils
 
 
-def _get_steps(content):
+def _parse_step(step):
+    method_name = step.split('(', 1)[0].strip()
+    clean_argument_list = []
 
-    index = -1
-    steps = []
-    for i, line in enumerate(content):
-        if 'def test(data):' in line:
-            index = i + 1
-            break
-    if index >= 0:
-        end_of_steps = False
-        while 'def teardown' not in content[index] and index <= len(content):
-            current_line = content[index]
-            if len(current_line.strip()) and current_line.strip() != 'pass':
-                # this is a step
-                method_name = current_line.split('(', 1)[0].strip()
-                parameters = current_line.split('(', 1)[1].strip() 
+    args_re = re.compile('\((?P<args>.*)\)')
+    args_search = args_re.search(step)
+    if args_search:
+        arguments = args_search.group('args')
+        argument_list = [x.strip() for x in arguments.split(',')]
+        for arg in argument_list:
+            if 'data[' in arg:
+                data_re = re.compile("[\'|\"](?P<data>.*)[\'|\"]")
+                g = data_re.search(arg)
+                clean_argument_list.append(g.group('data'))
+            else:
+                clean_argument_list.append(arg.replace('\'', '').replace('"', ''))
 
-                processed_parameters = []
-                current_parameter  = ''
-                processing_nested_function = False
-                for i in range(len(parameters)):
-                    this_char = parameters[i]
-                    if this_char is ',' and not processing_nested_function:
-                        processed_parameters.append(current_parameter)
-                        current_parameter = ''
-                    else:
-                        if this_char is ')':
-                            processing_nested_function = False
-                        if this_char == '(':
-                            processing_nested_function = True
-                        current_parameter += this_char
-                processed_parameters.append(current_parameter)
-                formatted_parameters = []
-                print(processed_parameters)
-                for pp in processed_parameters:
-                    pp = pp.strip()
-                    if pp[0] == '(':
-                        # this is a tuple, leave as is
-                        pass
-                    else:
-                        if pp[-1] is ')':
-                            pp = pp[:-1]
-                        if pp[0] in ['\'', '\"']:
-                            pp = pp[1:]
-                        if pp[-1] in ['\'', '\"']:
-                            pp = pp[:-1]
-                        if 'data[' in pp:
-                            pp = pp.split('\'')[1]            
-
-                    formatted_parameters.append(pp)
-                # parameter_list = [x for x in parameters.split(',')]
-                # formatted_parameters = []
-                # for parameter in parameter_list:
-                #     if '\'' in parameter:
-                #         formatted_parameters.append(parameter.split('\'')[1])
-                #     else:
-                #         formatted_parameters.append(parameter)
-
-                step = {
-                    'method_name': method_name.replace('_', ' '),
-                    'parameters': formatted_parameters
-                }
-                steps.append(step)
-            index += 1
-    return steps
-
-
-def get_page_objects(content):
-    page_objects = []
-    index = -1
-    for i, line in enumerate(content):
-        if 'pages' in line:
-            index = i
-            break
-    pages_string = ''
-    while True:
-        pages_string += content[index]
-        index += 1
-        if ']' in pages_string:
-            break
-    pages_string = pages_string.replace('\n', '').strip().replace(' ', '')
-    pages_string = pages_string.split('[')[1].split(']')[0]
-    for page in pages_string.split(','):
-        page_objects.append(page.replace("'", '').replace('"', ''))
-    return page_objects
-
-
-def get_description(content):
-    content_string = ''.join(content)
-    description = ''
-    description = re.search(".*description = \'(.*?)\'", content_string).group(1)
-    description = re.sub("\s\s+", " ", description)
-    return description
-
-
-def parse_test_case(workspace, project, parents, test_case_name):
-    parents_joined = os.sep.join(parents)
-    path = os.path.join(workspace, 'projects', project, 'test_cases',
-                        parents_joined, test_case_name + '.py')
-    with open(path, encoding='utf-8') as f:
-        file_lines = f.readlines()
-    description = get_description(file_lines)
-    page_objects = get_page_objects(file_lines)
-    steps = _get_steps(file_lines)
-    test_case = {
-        'description': description,
-        'page_objects': page_objects,
-        'steps': steps,
-        'content': ''.join(file_lines)
+    step = {
+        'method_name': method_name.replace('_', ' '),
+        'parameters': clean_argument_list
     }
-    return test_case
+    return step
+
+
+def get_test_case_parts(project, test_case_name):
+    test_contents = {}
+    test_module = importlib.import_module('projects.{0}.test_cases.{1}'.format(project, test_case_name))
+    # get description
+    description = getattr(test_module, 'description', '')
+    # get list of pages
+    pages = getattr(test_module, 'pages', [])
+    # get setup steps
+    setup = getattr(test_module, 'setup', None)
+    # get test steps
+    test_method_steps = []
+    test_method = getattr(test_module, 'test', None)
+    test_method_lines_raw = inspect.getsourcelines(test_method)[0]
+    test_method_lines = [x.strip().replace('\n', '') for x in test_method_lines_raw]
+    test_method_lines.pop(0)
+    for line in test_method_lines:
+        if line != 'pass':
+            test_method_steps.append(_parse_step(line))
+
+    test_contents['description'] = description
+    test_contents['pages'] = pages
+    test_contents['steps'] = {
+        'test' : test_method_steps
+    }
+    test_contents['content'] = inspect.getsource(test_module)
+    return test_contents
 
 
 def new_test_case(root_path, project, parents, tc_name):
+    test_case_content = (
+        "\n"
+        "description = ''\n\n"
+        "pages = []\n\n"
+        "def setup():\n"
+        "    pass\n\n"
+        "def test(data):\n"
+        "    pass\n\n"
+        "def teardown():\n"
+        "    close()\n\n")
     errors = []
     # check if a file already exists
     if gui_utils.file_already_exists(root_path, project, 'test_cases', parents, tc_name):
@@ -142,22 +93,6 @@ def new_test_case(root_path, project, parents, tc_name):
         with open(data_full_path, 'w') as f:
             f.write('')
     return errors
-
-
-test_case_content = """
-description = ''
-
-pages = []
-
-def setup():
-    pass
-
-def test(data):
-    pass
-
-def teardown():
-    close()
-"""
 
 
 def format_parameters(step, root_path, project, parents, test_case_name, stored_keys):
@@ -238,7 +173,7 @@ def save_test_case(root_path, project, full_test_case_name, description,
                                 parameters_formatted))
         else:
             f.write('    pass\n')
-        f.write('\n')
+        f.write('\n\n')
         f.write('def teardown():\n')
         f.write('    close()\n')
 
