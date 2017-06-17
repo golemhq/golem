@@ -61,6 +61,7 @@ setup(
         ],
     keywords='test automation framework selenium webdriver',
     packages=['golem'],
+    setup_requires=['setuptools-pep8'],
     install_requires=['Flask==0.10.1',
                       'Flask-login==0.3.2',
                       'selenium==2.52.0',
@@ -71,7 +72,7 @@ setup(
         'console_scripts': ['golem-admin = golem.bin.golem_admin:main']
     },
     cmdclass={'test': PyTest},
-    
+
     include_package_data=True,
     platforms='any',
     test_suite='',
