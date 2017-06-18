@@ -32,6 +32,10 @@ html {
 	padding-bottom: 10px;
 }
 
+#setupSteps {
+	margin-bottom: 20px;	
+}
+
 .step-input-container {
 	padding-left: 0px;
 	padding-right: 10px;

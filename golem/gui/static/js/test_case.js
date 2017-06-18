@@ -39,7 +39,24 @@ $(document).ready(function() {
     watchForUnsavedChanges();
 
     // start sortable steps
-    var el = document.getElementById('steps');
+    startSortableSteps();
+    var el = $("#testSteps .steps").get(0);
+    var sortable = Sortable.create(el, {
+        handle: '.step-numbering',        
+        // Element dragging ended
+        onEnd: function (/**Event*/evt) {
+            fillStepNumbering();
+        },
+    });
+    var el = $("#testSteps .steps").get(0);
+    var sortable = Sortable.create(el, {
+        handle: '.step-numbering',        
+        // Element dragging ended
+        onEnd: function (/**Event*/evt) {
+            fillStepNumbering();
+        },
+    });
+    var el = $("#testSteps .steps").get(0);
     var sortable = Sortable.create(el, {
         handle: '.step-numbering',        
         // Element dragging ended
@@ -76,17 +93,24 @@ function addPOInput(){
 }
 
 
-function addFirstStepInput(){
-    
-    // var nextStepNumber = $(".step-first-input").length + 1;
+function addFirstStepInput(targetSection){
 
-    $("#steps").append(
+    if(targetSection == 'setup'){
+        var section = $("#setupSteps .steps");
+    }
+    else if(targetSection == 'test'){
+        var section = $("#testSteps .steps");
+    }
+    else if(targetSection == 'teardown'){
+        var section = $("#teardownSteps .steps");
+    }
+    section.append(
         "<div class='step'> \
             <div class='step-numbering'></div> \
             <div class='col-sm-3 step-input-container'> \
                 <div class='input-group'> \
                     <input type='text' class='form-control step-first-input' \
-                        placeholder='action' onchange=''> \
+                        placeholder='action'> \
                 </div> \
             </div> \
             <div class='step-remove-icon'> \
@@ -96,15 +120,10 @@ function addFirstStepInput(){
             </div> \
         </div>");
 
-    // was failing with onchange, calling the function twice
-    // stepFirstInputChange(this); return false
-
     // give focus to the last step action input
     $(".step-first-input").last().focus();
 
     fillStepNumbering();
-
-    //onchange='stepFirstInputChange(this);'> \
     startStepFirstInputAutocomplete();
 }
 
@@ -515,7 +534,7 @@ function saveTestCase(){
     testData = tempTestData;
 
     var testSteps = [];
-    $(".step").each(function(){
+    $("#testSteps .step").each(function(){
         var thisStep = {
             'action': '',
             'parameters': []
@@ -694,7 +713,17 @@ function watchForUnsavedChanges(){
 
 function fillStepNumbering(){
     var count = 1;
-    $(".step").each(function(){
+    $("#setupSteps .step").each(function(){
+        $(this).find('.step-numbering').html(count);
+        count++;
+    });
+    var count = 1;
+    $("#testSteps .step").each(function(){
+        $(this).find('.step-numbering').html(count);
+        count++;
+    });
+    var count = 1;
+    $("#teardownSteps .step").each(function(){
         $(this).find('.step-numbering').html(count);
         count++;
     });
@@ -770,4 +799,33 @@ function loadCodeView(){
 
     // redirect to gui view
     window.location.replace("/p/"+project+"/tc/"+testCaseName+"/code/");
+}
+
+
+function showSetupSteps(){
+    $("#showSetupLink").hide();
+    $("#setupSteps").slideDown();
+}
+
+
+function showTeardownSteps(){
+    $("#showTeardownLink").hide();
+    $("#teardownSteps").slideDown();
+}
+
+
+function startSortableSteps(){
+    var setupSteps = $("#setupSteps .steps").get(0);
+    var testSteps = $("#testSteps .steps").get(0);
+    var teardownSteps = $("#teardownSteps .steps").get(0);
+    var settings = {
+        handle: '.step-numbering',        
+        // Element dragging ended
+        onEnd: function (/**Event*/evt) {
+            fillStepNumbering();
+        }
+    };
+    var sortable = Sortable.create(setupSteps, settings);
+    var sortable = Sortable.create(testSteps, settings);
+    var sortable = Sortable.create(teardownSteps, settings);
 }

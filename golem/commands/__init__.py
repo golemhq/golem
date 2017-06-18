@@ -5,6 +5,7 @@ from .base import (CommandException, RunCommand,
 
 
 INIT_CMDS = [
+    RunCommand,
     GuiCommand,
     CreateProjectCommand,
     CreateSuiteCommand,

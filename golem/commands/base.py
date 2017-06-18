@@ -91,7 +91,7 @@ class RunCommand(BaseCommand):
             # test cases in a directory as a test suite
             elif utils.is_first_level_directory(root_path,
                                                 test_execution.project,
-                                                test_or_suite):
+                                                args.test_or_suite):
                 test_execution.suite = args.test_or_suite
                 # execute test suite
                 test_runner.run_suite(root_path,

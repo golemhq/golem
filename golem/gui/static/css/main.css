@@ -2,46 +2,6 @@
 
 
 
-.onoffswitch {
-    display: inline-block;
-}
-
-#tc_toolbar {
-    height: 40px;
-}
-
-
-.htCore tbody tr:first-child{
-	padding: 10px;
-	text-align: center;
-	line-height: 21px;
-	height: 25px;
-	font-size: 14px;
-	vertical-align: top;
-
-}
-
-.htCore tbody tr:first-child td{
-	padding-top: 2px;
-	background-color: #EEE;
-
-}
-
-
-.htCore tbody tr td{
-	/*this is to hide fist column*/
-	/*border-left: 1px solid #ccc;
-	border-right: 0px;*/
-}
-
-tbody tr td:last-child{
-	/*border-right: 1px solid #ccc;*/
-}
-
-
-body {
-}
-
 .header, .marketing, .footer {
     padding-left: 15px;
     padding-right: 15px;
@@ -67,36 +27,18 @@ body {
 
 @media (min-width: 768px) {
     .container {
-        max-width: 730px;
+        min-width: 100%;
     }
 }
 
 @media (min-width: 1170px) {
     .container {
-        max-width: 1170px;
+        min-width: 1100px;
     }
 }
 
 .container-narrow > hr {
     margin: 30px 0;
-}
-
-.jumbotron {
-    border-bottom: 1px solid #e5e5e5;
-    text-align: center;
-}
-
-.jumbotron .btn {
-    font-size: 21px;
-    padding: 14px 24px;
-}
-
-.marketing {
-    margin: 40px 0;
-}
-
-.marketing p + h4 {
-    margin-top: 28px;
 }
 
 @media screen and (min-width: 768px) {
@@ -115,8 +57,9 @@ body {
 }
 
 
-.link-without-underline:hover, .link-without-underline:visited {
+.link-without-underline:hover, .link-without-underline:visited, .link-without-underline:focus {
     text-decoration: none;
+    outline: none;
 }
 
 .autocomplete-suggestions {

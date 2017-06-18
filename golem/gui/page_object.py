@@ -48,8 +48,10 @@ def get_page_object_content(root_path, project, full_po_name):
                 'element_full_name': ''.join([full_po_name, '.', var_name])
             }
             element_list.append(new_element)
+        elif isinstance(variable, types.ModuleType):
+            pass
         else:
-            print('ERROR')
+            print('ERROR', variable)
     page_object_data = {
         'function_list': function_list,
         'element_list': element_list,

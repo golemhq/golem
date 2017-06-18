@@ -11,7 +11,7 @@ def _parse_step(step):
     method_name = step.split('(', 1)[0].strip()
     clean_argument_list = []
 
-    args_re = re.compile('\((?P<args>.*)\)')
+    args_re = re.compile('\((?P<args>.+)\)')
     args_search = args_re.search(step)
     if args_search:
         arguments = args_search.group('args')
@@ -23,7 +23,6 @@ def _parse_step(step):
                 clean_argument_list.append(g.group('data'))
             else:
                 clean_argument_list.append(arg.replace('\'', '').replace('"', ''))
-
     step = {
         'method_name': method_name.replace('_', ' '),
         'parameters': clean_argument_list
@@ -31,29 +30,41 @@ def _parse_step(step):
     return step
 
 
-def get_test_case_parts(project, test_case_name):
+def _get_parsed_steps(function_code):
+    steps = []
+    code_lines = inspect.getsourcelines(function_code)[0]
+    code_lines = [x.strip().replace('\n', '') for x in code_lines]
+    code_lines.pop(0)
+    for line in code_lines:
+        if line != 'pass':
+            steps.append(_parse_step(line))
+    return steps
+
+
+def get_test_case_content(project, test_case_name):
     test_contents = {}
-    test_module = importlib.import_module('projects.{0}.test_cases.{1}'.format(project, test_case_name))
+    test_module = importlib.import_module('projects.{0}.test_cases.{1}'
+                                          .format(project, test_case_name))
     # get description
     description = getattr(test_module, 'description', '')
     # get list of pages
     pages = getattr(test_module, 'pages', [])
     # get setup steps
-    setup = getattr(test_module, 'setup', None)
+    setup_function_code = getattr(test_module, 'setup', None)
+    setup_steps = _get_parsed_steps(setup_function_code)
     # get test steps
-    test_method_steps = []
-    test_method = getattr(test_module, 'test', None)
-    test_method_lines_raw = inspect.getsourcelines(test_method)[0]
-    test_method_lines = [x.strip().replace('\n', '') for x in test_method_lines_raw]
-    test_method_lines.pop(0)
-    for line in test_method_lines:
-        if line != 'pass':
-            test_method_steps.append(_parse_step(line))
-
+    test_function_code = getattr(test_module, 'test', None)
+    test_steps = _get_parsed_steps(test_function_code)
+    # get teardown steps
+    teardown_function_code = getattr(test_module, 'teardown', None)
+    teardown_steps = _get_parsed_steps(teardown_function_code)
+    
     test_contents['description'] = description
     test_contents['pages'] = pages
     test_contents['steps'] = {
-        'test' : test_method_steps
+        'setup': setup_steps,
+        'test' : test_steps,
+        'teardown': teardown_steps
     }
     test_contents['content'] = inspect.getsource(test_module)
     return test_contents
