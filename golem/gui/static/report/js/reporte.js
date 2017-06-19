@@ -1,7 +1,7 @@
 
 var allTestCases = {};
 var maxNumberOfSubModules = 0;
-var baseDelay = 500;
+var baseDelay = 2000;
 
 
 $(document).ready(function() {            

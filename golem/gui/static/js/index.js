@@ -18,7 +18,6 @@ $(document).ready(function() {
 
 
 function createProject(){
-    event.preventDefault();
     var input = $("#newProjectName");
     var projectName = input.val();
 
@@ -51,7 +50,6 @@ function createProject(){
         type: 'POST',
         success: function(data) {
             if(data.errors.length == 0){
-
                 // add new li for the element
                 $("#projectList").append("<a href='/p/"+data.project_name+"/' class='list-group-item'>"+data.project_name+"</a>");
                 

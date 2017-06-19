@@ -98,7 +98,7 @@ def project(project):
 
 
 # TEST CASE VIEW
-@app.route("/p/<project>/tc/<test_case_name>/")
+@app.route("/p/<project>/test/<test_case_name>/")
 @login_required
 def test_case_view(project, test_case_name):
     # check if user has permissions for this project
@@ -114,7 +114,7 @@ def test_case_view(project, test_case_name):
                            full_test_case_name=test_case_name, test_data=test_data)
 
 
-@app.route("/p/<project>/tc/<test_case_name>/code/")
+@app.route("/p/<project>/test/<test_case_name>/code/")
 @login_required
 def test_case_code_view(project, test_case_name):
     # check if user has permissions for this project
@@ -278,8 +278,7 @@ def save_test_case():
         test_data = request.json['testData']
         test_steps = request.json['testSteps']
 
-        data.save_test_data(root_path, projectname, test_case_name,
-                            test_data)
+        data.save_test_data(root_path, projectname, test_case_name, test_data)
 
         test_case.save_test_case(root_path, projectname, test_case_name,
                                  description, page_objects, test_steps)
@@ -370,12 +369,8 @@ def suite_view(project, suite):
         return render_template('not_permission.html')
 
     all_test_cases = utils.get_test_cases(root_path, project)
-
-    selected_tests = utils.get_suite_test_cases(project, suite)
-    print('SELENCTED TESTS', selected_tests)
-
+    selected_tests = utils.get_suite_test_cases(root_path, project, suite)
     worker_amount = utils.get_suite_amount_of_workers(root_path, project, suite)
-
     browsers = utils.get_suite_browsers(root_path, project, suite)
     browsers = ', '.join(browsers)
 

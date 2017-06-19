@@ -19,7 +19,7 @@ def format_list_items(list_items):
 
 
 def save_suite(root_path, project, suite, test_cases, workers, browsers):
-    suite_path = os.path.join(root_path, 'projects', project, 'test_suites',
+    suite_path = os.path.join(root_path, 'projects', project, 'suites',
                                     '{}.py'.format(suite))
     with open(suite_path, 'w', encoding='utf-8') as f:
         f.write('\n\n')
@@ -32,18 +32,17 @@ def save_suite(root_path, project, suite, test_cases, workers, browsers):
 
 def new_suite(root_path, project, suite_name):
     errors = []
-    if gui_utils.file_already_exists(root_path, project, 'test_suites', [], suite_name):
+    if gui_utils.file_already_exists(root_path, project, 'suites', [], suite_name):
         errors.append('A file with that name already exists')
 
     if not errors:
         suite_path = os.path.join(root_path, 'projects', project, 'test_suites')
         suite_full_path = os.path.join(suite_path, suite_name + '.py')
+        test_case_content = ('\n'
+                             'browsers = []\n\n'
+                             'workers = 1\n\n'
+                             'test_case_list = []\n')
         with open(suite_full_path, 'w') as f:
             f.write(test_case_content)
     return errors
 
-
-test_case_content = ('\n',
-                     'browsers = []\n\n'
-                     'workers = 1\n\n'
-                     'test_case_list = []\n')

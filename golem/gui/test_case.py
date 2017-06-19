@@ -43,7 +43,7 @@ def _get_parsed_steps(function_code):
 
 def get_test_case_content(project, test_case_name):
     test_contents = {}
-    test_module = importlib.import_module('projects.{0}.test_cases.{1}'
+    test_module = importlib.import_module('projects.{0}.tests.{1}'
                                           .format(project, test_case_name))
     # get description
     description = getattr(test_module, 'description', '')
@@ -83,11 +83,11 @@ def new_test_case(root_path, project, parents, tc_name):
         "    close()\n\n")
     errors = []
     # check if a file already exists
-    if gui_utils.file_already_exists(root_path, project, 'test_cases', parents, tc_name):
+    if gui_utils.file_already_exists(root_path, project, 'tests', parents, tc_name):
         errors.append('A file with that name already exists')
     if not errors:
         parents_joined = os.sep.join(parents)
-        base_path = os.path.join(root_path, 'projects', project, 'test_cases')
+        base_path = os.path.join(root_path, 'projects', project, 'tests')
         test_case_path = os.path.join(base_path, parents_joined)
         # create the directory structure if it does not exist
         if not os.path.exists(test_case_path):
@@ -126,8 +126,10 @@ def format_parameters(step, root_path, project, parents, test_case_name, stored_
             if (is_data_var or is_in_stored_keys) and not action_is_store:
                 this_parameter_string = 'data[\'{}\']'.format(parameter)
             else:
+                print(parameter)
                 if action in ['wait', 'select_by_index']:
                     this_parameter_string = parameter
+
                 elif parameter[0] == '(' and parameter[-1] == ')':
                     this_parameter_string = parameter
                 else:
@@ -159,39 +161,63 @@ def get_stored_keys(steps):
 def save_test_case(root_path, project, full_test_case_name, description,
                    page_objects, test_steps):
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    test_case_path = os.path.join(root_path, 'projects', project, 'test_cases',
+    test_case_path = os.path.join(root_path, 'projects', project, 'tests',
                                   os.sep.join(parents), '{}.py'.format(tc_name))
-
-    stored_keys = get_stored_keys(test_steps)
+    setup_stored_keys = get_stored_keys(test_steps['setup']) 
+    test_stored_keys = get_stored_keys(test_steps['test'])
+    teardown_stored_keys = get_stored_keys(test_steps['teardown'])
 
     with open(test_case_path, 'w', encoding='utf-8') as f:
+        # write description
         f.write('\n')
         f.write('description = \'{}\'\n'.format(description))
         f.write('\n')
+        # write the list of pages
         f.write('pages = {}\n'.format(format_page_object_string(page_objects)))
         f.write('\n')
+        # write the setup function
         f.write('def setup():\n')
-        f.write('    pass\n')
+        if test_steps['setup']:
+            for step in test_steps['setup']:
+                parameters_formatted = format_parameters(step, root_path, project,
+                                                         parents, tc_name,
+                                                         setup_stored_keys)
+                f.write('    {0}({1})\n'
+                        .format(step['action'].replace(' ', '_'),
+                                parameters_formatted))
+        else:
+            f.write('    pass\n')
         f.write('\n')
+        # write the test function
         f.write('def test(data):\n')
-        if test_steps:
-            for step in test_steps:
-                parameters_formatted = format_parameters(step, root_path,
-                                                         project, parents,
-                                                         tc_name, stored_keys)
+        if test_steps['test']:
+            for step in test_steps['test']:
+                parameters_formatted = format_parameters(step, root_path, project,
+                                                         parents, tc_name,
+                                                         test_stored_keys)
                 f.write('    {0}({1})\n'
                         .format(step['action'].replace(' ', '_'),
                                 parameters_formatted))
         else:
             f.write('    pass\n')
         f.write('\n\n')
+        # write the teardown function
         f.write('def teardown():\n')
-        f.write('    close()\n')
+        if test_steps['teardown']:
+            for step in test_steps['teardown']:
+                parameters_formatted = format_parameters(step, root_path, project,
+                                                         parents, tc_name,
+                                                         teardown_stored_keys)
+                f.write('    {0}({1})\n'
+                        .format(step['action'].replace(' ', '_'),
+                                parameters_formatted))
+        else:
+            f.write('    pass\n')
 
 
 def save_test_case_code(root_path, project, full_test_case_name, content):
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    test_case_path = os.path.join(root_path, 'projects', project, 'test_cases',
+    test_case_path = os.path.join(root_path, 'projects', project, 'tests',
                                   os.sep.join(parents), '{}.py'.format(tc_name))
     with open(test_case_path, 'w', encoding='utf-8') as f:
         f.write(content)

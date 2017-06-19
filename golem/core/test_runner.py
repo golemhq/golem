@@ -50,7 +50,7 @@ def test_runner(workspace, project, test_case_name, test_data, driver, suite_nam
                                                       suite_name, suite_timestamp)
     try:
         test_module = importlib.import_module(
-            'projects.{0}.test_cases.{1}'.format(project, test_case_name))
+            'projects.{0}.tests.{1}'.format(project, test_case_name))
 
         # test_class = utils.get_test_case_class(project,
         #                                        test_case_name)
@@ -209,14 +209,14 @@ def run_suite(workspace, project, suite, is_directory=False):
     if is_directory:
         test_case_list = utils.get_directory_suite_test_cases(workspace, project, suite)
     else:
-        test_case_list = utils.get_suite_test_cases(project, suite)
+        test_case_list = utils.get_suite_test_cases(workspace, project, suite)
 
     threads = 1
     
     suite_file_amount_workers = utils.get_suite_amount_of_workers(workspace, project, suite)
     if suite_file_amount_workers > 1:
         threads = suite_file_amount_workers
-
+    print('treads', threads)
     # the thread count pass through cli has higher priority
     if test_execution.thread_amount:
         threads = test_execution.thread_amount

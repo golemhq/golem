@@ -55,6 +55,31 @@ def get_selenium_object(elem, driver):
     return test_object
 
 
+def get_selenium_objects(elem, driver):
+    selector_type = elem[0]
+    selector_value = elem[1]
+    test_objects = []
+    if selector_type == 'id':
+        test_objects = driver.find_elements_by_id(selector_value)
+    elif selector_type == 'css':
+        test_objects = driver.find_elements_by_css_selector(selector_value)
+    elif selector_type == 'text':
+        test_objects = driver.find_elements_by_css_selector("text[{}]".format(selector_value))
+    elif selector_type == 'link_text':
+        test_objects = driver.find_elements_by_link_text(selector_value)
+    elif selector_type == 'partial_link_text':
+        test_objects = driver.find_elements_by_partial_link_text(selector_value)
+    elif selector_type == 'name':
+        test_objects = driver.find_elements_by_name(selector_value)
+    elif selector_type == 'xpath':
+        test_objects = driver.find_elements_by_xpath(selector_value)
+    elif selector_type == 'tag_name':
+        test_objects = driver.find_elements_by_tag_name(selector_value)
+    else:
+        raise IncorrectSelectorType('Selector {0} is not a valid option'.format(selector_type))
+    return test_objects
+
+
 def get_test_or_suite_data(root_path, project, parents, test_case_name):
     test_data = data.parse_test_data(root_path, project, parents, test_case_name)
     return test_data

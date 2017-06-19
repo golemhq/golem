@@ -533,20 +533,27 @@ function saveTestCase(){
     }
     testData = tempTestData;
 
-    var testSteps = [];
-    $("#testSteps .step").each(function(){
-        var thisStep = {
-            'action': '',
-            'parameters': []
+    var testSteps = {
+        'setup': [],
+        'test': [],
+        'teardown': []
+    };
+    $("#setupSteps .step").each(function(){
+        var thisStep = getThisStep(this);
+        if(thisStep.action.length > 0){
+            testSteps.setup.push(thisStep);    
         }
-        if($(this).find('.step-first-input').val().length > 0){
-            thisStep.action = $(this).find('.step-first-input').val();
-
-            $(this).find('.parameter-input').each(function(){
-                thisStep.parameters.push($(this).val());
-            });
-
-            testSteps.push(thisStep);
+    });
+    $("#testSteps .step").each(function(){
+        var thisStep = getThisStep(this);
+        if(thisStep.action.length > 0){
+            testSteps.test.push(thisStep);    
+        }
+    });
+    $("#teardownSteps .step").each(function(){
+        var thisStep = getThisStep(this);
+        if(thisStep.action.length > 0){
+            testSteps.teardown.push(thisStep);    
         }
     });
 
@@ -798,7 +805,7 @@ function loadCodeView(){
     unsavedChanges = false;
 
     // redirect to gui view
-    window.location.replace("/p/"+project+"/tc/"+testCaseName+"/code/");
+    window.location.replace("/p/"+project+"/test/"+testCaseName+"/code/");
 }
 
 
@@ -828,4 +835,19 @@ function startSortableSteps(){
     var sortable = Sortable.create(setupSteps, settings);
     var sortable = Sortable.create(testSteps, settings);
     var sortable = Sortable.create(teardownSteps, settings);
+}
+
+
+function getThisStep(elem){
+    var thisStep = {
+        'action': '',
+        'parameters': []
+    }
+    if($(elem).find('.step-first-input').val().length > 0){
+        thisStep.action = $(elem).find('.step-first-input').val();
+        $(elem).find('.parameter-input').each(function(){
+            thisStep.parameters.push($(this).val());
+        });
+    }
+    return thisStep
 }

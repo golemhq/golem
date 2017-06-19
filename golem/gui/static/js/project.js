@@ -20,7 +20,7 @@ function addElement(event){
     var inputClass = '';
     if(input.hasClass('new-test-case')){
         elementType = 'test_case';
-        urlPrefixForElementType = 'tc';
+        urlPrefixForElementType = 'test';
         inputClass = 'new-test-case';
     }
     else if(input.hasClass('new-page-object')){
@@ -107,7 +107,6 @@ function addElement(event){
                     else{
                         var urlForTeseCase = data.element_name;
                     }
-                    // input.parent().parent().parent().find("li").last().before("<li><a href='/p/"+data.project_name+"/tc/"+urlForTeseCase+"/'>"+data.element_name+"</a></li>");
                     newLi.html("<a href='/p/"+data.project_name+"/"+urlPrefixForElementType+"/"+urlForTeseCase+"/'>"+data.element_name+"</a> \
                                 <span class='pull-right tree-element-buttons'> \
                                     <button><i class='glyphicon glyphicon-edit'></i></button> \

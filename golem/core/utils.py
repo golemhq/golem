@@ -93,7 +93,7 @@ def _generate_dict_from_file_structure(full_path):
 
 
 def get_test_cases(workspace, project):
-    path = os.path.join(workspace, 'projects', project, 'test_cases')
+    path = os.path.join(workspace, 'projects', project, 'tests')
     test_cases = _generate_dict_from_file_structure(path)
     return test_cases
 
@@ -105,7 +105,7 @@ def get_page_objects(workspace, project):
 
 
 def get_suites(workspace, project):
-    path = os.path.join(workspace, 'projects', project, 'test_suites')
+    path = os.path.join(workspace, 'projects', project, 'suites')
 
     suites = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
 
@@ -168,14 +168,16 @@ def get_test_data(workspace, project, full_test_case_name):
     return data_dict_list
 
 
-def get_suite_test_cases(project, suite):
+def get_suite_test_cases(workspace, project, suite):
     '''Return a list with all the test cases of a given suite'''
-    tests = list()
-
-    suite_module = importlib.import_module('projects.{0}.test_suites.{1}'.format(project, suite),
+    tests = []
+    suite_module = importlib.import_module('projects.{0}.suites.{1}'.format(project, suite),
                                            package=None)
-    tests = suite_module.test_case_list
-
+    if '*' in suite_module.test_case_list:
+        path = os.path.join(workspace, 'projects', project, 'tests')
+        tests = get_files_in_directory_dotted_path(path)
+    else:
+        tests = suite_module.test_case_list
     return tests
 
 
@@ -184,7 +186,7 @@ def get_directory_suite_test_cases(workspace, project, suite):
     a directory suite is a directory inside "/test_cases" folder'''
     tests = list()
 
-    path = os.path.join(workspace, 'projects', project, 'test_cases', suite)
+    path = os.path.join(workspace, 'projects', project, 'tests', suite)
     tests = get_files_in_directory_dotted_path(path)
     tests = ['.'.join((suite, x)) for x in tests]
 
@@ -193,7 +195,7 @@ def get_directory_suite_test_cases(workspace, project, suite):
 
 def get_suite_amount_of_workers(workspace, project, suite):
     amount = 1
-    suite_module = importlib.import_module('projects.{0}.test_suites.{1}'.format(project, suite),
+    suite_module = importlib.import_module('projects.{0}.suites.{1}'.format(project, suite),
                                            package=None)
     if hasattr(suite_module, 'workers'):
         amount = suite_module.workers
@@ -203,7 +205,7 @@ def get_suite_amount_of_workers(workspace, project, suite):
 
 def get_suite_browsers(workspace, project, suite):
     browsers = []
-    suite_module = importlib.import_module('projects.{0}.test_suites.{1}'.format(project, suite),
+    suite_module = importlib.import_module('projects.{0}.suites.{1}'.format(project, suite),
                                            package=None)
     if hasattr(suite_module, 'browsers'):
         browsers = suite_module.browsers
@@ -295,7 +297,7 @@ def get_timestamp():
 
 def test_case_exists(workspace, project, full_test_case_name):
     test, parents = separate_file_from_parents(full_test_case_name)
-    path = os.path.join(workspace, 'projects', project, 'test_cases',
+    path = os.path.join(workspace, 'projects', project, 'tests',
                         os.sep.join(parents), '{}.py'.format(test))
     test_exists = os.path.isfile(path)
     return test_exists
@@ -303,7 +305,7 @@ def test_case_exists(workspace, project, full_test_case_name):
 
 def test_suite_exists(workspace, project, full_test_suite_name):
     suite, parents = separate_file_from_parents(full_test_suite_name)
-    path = os.path.join(workspace, 'projects', project, 'test_suites',
+    path = os.path.join(workspace, 'projects', project, 'suites',
                         os.sep.join(parents), '{}.py'.format(suite))
     suite_exists = os.path.isfile(path)
     return suite_exists
@@ -330,7 +332,7 @@ def separate_file_from_parents(full_filename):
 
 
 def is_first_level_directory(workspace, project, directory):
-    path = os.path.join(workspace, 'projects', project, 'test_cases', directory)
+    path = os.path.join(workspace, 'projects', project, 'tests', directory)
     return os.path.isdir(path)
 
 
@@ -367,12 +369,14 @@ def create_new_project(workspace, project):
     create_new_directory(path_list=[workspace, 'projects', project, 'data'], add_init=False)
     create_new_directory(path_list=[workspace, 'projects', project, 'pages'], add_init=True)
     create_new_directory(path_list=[workspace, 'projects', project, 'reports'], add_init=False)
-    create_new_directory(path_list=[workspace, 'projects', project, 'test_cases'], add_init=True)
-    create_new_directory(path_list=[workspace, 'projects', project, 'test_suites'], add_init=True)
+    create_new_directory(path_list=[workspace, 'projects', project, 'tests'], add_init=True)
+    create_new_directory(path_list=[workspace, 'projects', project, 'suites'], add_init=True)
     extend_path = os.path.join(workspace, 'projects', project, 'extend.py')
     open(extend_path, 'a').close()
-    settings_path = os.path.join(workspace, 'projects', project, 'settings.conf')
-    open(settings_path, 'a').close()
+
+    settings_path = os.path.join(workspace, 'projects', project, 'settings.json')
+    with open(settings_path, 'a') as settings_file:
+        settings_file.write(settings_file_content())
 
 
 def create_demo_project(workspace):
@@ -382,26 +386,7 @@ def create_demo_project(workspace):
     shutil.copytree(source, destination)
 
 
-def create_test_dir(workspace):
-    create_new_directory(path_list=[workspace], add_init=True)
-    create_new_directory(path_list=[workspace, 'projects'], add_init=True)
-    create_new_directory(path_list=[workspace, 'drivers'], add_init=False)
-    
-    golem_py_content = ("import os\n"
-                        "import sys\n"
-                        "\n\n"
-                        "# deactivate .pyc extention file generation\n"
-                        "sys.dont_write_bytecode = True\n"
-                        "\n\n"
-                        "if __name__ == '__main__':\n"
-                        "    del sys.path[0]\n"
-                        "    sys.path.append('')\n\n"
-                        "    from golem.main import execute_from_command_line\n\n"
-                        "    execute_from_command_line(os.getcwd())\n")
-    golem_py_path = os.path.join(workspace, 'golem.py')
-    with open(golem_py_path, 'a') as golem_py_file:
-        golem_py_file.write(golem_py_content)
-
+def settings_file_content():
     settings_content = (
         "// Place this settings file at the root of the test directory to impact all\n"
         "// the projects or inside a project folder to impact a single project.\n"
@@ -426,9 +411,33 @@ def create_test_dir(workspace):
         "// It can be referenced as './chromedriver'\n"
         "\"chrome_driver_path\": \"./drivers/chromedriver\"\n"
         "}\n")
+    return settings_content
+
+
+def create_test_dir(workspace):
+    create_new_directory(path_list=[workspace], add_init=True)
+    create_new_directory(path_list=[workspace, 'projects'], add_init=True)
+    create_new_directory(path_list=[workspace, 'drivers'], add_init=False)
+    
+    golem_py_content = ("import os\n"
+                        "import sys\n"
+                        "\n\n"
+                        "# deactivate .pyc extention file generation\n"
+                        "sys.dont_write_bytecode = True\n"
+                        "\n\n"
+                        "if __name__ == '__main__':\n"
+                        "    del sys.path[0]\n"
+                        "    sys.path.append('')\n\n"
+                        "    from golem.main import execute_from_command_line\n\n"
+                        "    execute_from_command_line(os.getcwd())\n")
+    golem_py_path = os.path.join(workspace, 'golem.py')
+    with open(golem_py_path, 'a') as golem_py_file:
+        golem_py_file.write(golem_py_content)
+
+    
     settings_path = os.path.join(workspace, 'settings.json')
     with open(settings_path, 'a') as settings_file:
-        settings_file.write(settings_content)
+        settings_file.write(settings_file_content())
 
     users_path = os.path.join(workspace, 'users.json')
     open(users_path, 'a').close()

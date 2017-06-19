@@ -1,10 +1,14 @@
 [
-	{
-		"id": "000000001",
-		"username": "admin",
-		"password": "admin",
-		"is_admin": true,
-		"gui_projects": ["*"],
-		"report_projects": ["*"]
-	}
+    {
+        "id": "4c487cc8",
+        "username": "admin",
+        "password": "admin",
+        "is_admin": true,
+        "gui_projects": [
+            "*"
+        ],
+        "report_projects": [
+            "*"
+        ]
+    }
 ]

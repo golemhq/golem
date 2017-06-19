@@ -6,7 +6,7 @@ import sys
 sys.dont_write_bytecode = True
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     del sys.path[0]
     sys.path.append('')
 

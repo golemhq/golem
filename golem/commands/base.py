@@ -32,7 +32,7 @@ class RunCommand(BaseCommand):
                             default='', metavar='test case or suite',
                             help="test case or test suite to run")
         parser.add_argument('-t', '--threads', action='store',
-                            nargs='?', default=1, type=int,
+                            nargs='?', default=0, type=int,
                             metavar='amount of threads for parallel execution',
                             help="amount of threads for parallel execution")
         parser.add_argument('-d', '--drivers', action='store',
@@ -44,6 +44,7 @@ class RunCommand(BaseCommand):
 
     def run(self, test_execution, args):
         test_execution.thread_amount = args.threads
+        print('args.threads', args.threads)
         test_execution.drivers = args.drivers
         test_execution.timestamp = args.timestamp
 

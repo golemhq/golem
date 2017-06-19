@@ -14,7 +14,7 @@ Login
 	<div class="col-md-4 col-md-offset-4">
 		<h4>Login</h4>
 		{% if errors %}
-			<ul>
+			<ul id="errorList">
 				{% for error in errors %}
 					<li>{{error}}</li>
 				{% endfor %}
