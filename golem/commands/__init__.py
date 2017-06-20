@@ -27,17 +27,17 @@ COMMANDS_ADMIN = {
 }
 
 
-def register_command(klass, parser):
-    COMMANDS[klass.cmd] = klass(parser)
+def register_command(klass, parser, subparser):
+    COMMANDS[klass.cmd] = klass(parser, subparser)
 
 
 def register_admin_command(klass, parser):
     COMMANDS_ADMIN[klass.cmd] = klass(parser)
 
 
-def init_cli(parser):
+def init_cli(parser, subparser):
     for cmd in INIT_CMDS:
-        register_command(cmd, parser)
+        register_command(cmd, parser, subparser)
 
 
 def init_admin_cli(parser):
@@ -46,10 +46,16 @@ def init_admin_cli(parser):
 
 
 def run(cmd_name, tex, args):
-    cmd = COMMANDS[cmd_name]
-    cmd.run(tex, args)
+    try:
+        cmd = COMMANDS[cmd_name]
+        cmd.run(tex, args)
+    except CommandException as ex:
+        print(str(ex))
 
 
 def run_admin(cmd_name, args):
-    cmd = COMMANDS_ADMIN[cmd_name]
-    cmd.run(args)
+    try:
+        cmd = COMMANDS_ADMIN[cmd_name]
+        cmd.run(args)
+    except CommandException as ex:
+        print(str(ex))

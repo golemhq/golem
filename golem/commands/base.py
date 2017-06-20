@@ -7,9 +7,10 @@ from golem.gui import (gui_start, test_case,
 class BaseCommand:
     cmd = None
 
-    def __init__(self, parser):
-        sub_parser = parser.add_parser(self.cmd)
-        self.add_arguments(sub_parser)
+    def __init__(self, parser, subparser):
+        cmd_parser = subparser.add_parser(self.cmd)
+        self.add_arguments(cmd_parser)
+        self._parser = parser
 
     def add_arguments(self, parser):
         pass
@@ -51,7 +52,7 @@ class RunCommand(BaseCommand):
         root_path = test_execution.root_path
 
         if not args.project:
-            msg = ['Usage:', parser.usage, '\n\n', 'Project List:']
+            msg = ['Usage:', self._parser.usage, '\n\nProject List:']
             for proj in utils.get_projects(root_path):
                 msg.append('> {}'.format(proj))
             raise CommandException('\n'.join(msg))
@@ -67,7 +68,7 @@ class RunCommand(BaseCommand):
                 test_execution.settings)
             # check if test_or_suite value is present
             if not args.test_or_suite:
-                msg = ['Usage: {}'.format(parser.usage),
+                msg = ['Usage: {}'.format(self._parser.usage),
                        'Test Cases:']
                 test_cases = utils.get_test_cases(root_path,
                                                   test_execution.project)
