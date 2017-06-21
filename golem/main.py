@@ -13,7 +13,7 @@ def execute_from_command_line(root_path):
     )
 
     sub_parsers = parser.add_subparsers(dest="main_action")
-    commands.init_cli(sub_parsers)
+    commands.init_cli(parser, sub_parsers)
     args = parser.parse_args()
 
     # set test_execution values
