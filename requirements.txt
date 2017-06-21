@@ -1,5 +1,7 @@
 Flask-Login==0.3.2
 flask==0.10.1
-selenium==3.0.2
+selenium==2.52.0
 Pillow>3.3.1
 pytest
+sphinx
+recommonmark

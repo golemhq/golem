@@ -1,0 +1,224 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Golem Actions &#8212; Golem 0.1.0a3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.0a3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="The Web Module" href="the-web-module.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="golem-actions">
+<span id="golem-actions"></span><h1>Golem Actions<a class="headerlink" href="#golem-actions" title="Permalink to this headline">¶</a></h1>
+<p>The entire list of available actions is the following:</p>
+<ul class="simple">
+<li><strong>add_step(message)</strong></li>
+</ul>
+<p>Logs a new step to be displayed in the report later</p>
+<ul class="simple">
+<li><strong>capture(message='')</strong></li>
+</ul>
+<p>Take a screenshot of the browser, the message is optional</p>
+<ul class="simple">
+<li><strong>click(element)</strong></li>
+</ul>
+<p>Perform a mouse click</p>
+<ul class="simple">
+<li><strong>close()</strong></li>
+</ul>
+<p>Closes the webdriver browser</p>
+<ul class="simple">
+<li><strong>go_to(url)</strong></li>
+</ul>
+<p>Navigate to a URL</p>
+<ul class="simple">
+<li><strong>random(args)</strong></li>
+</ul>
+<p>Generate a random string</p>
+<ul class="simple">
+<li><strong>select_by_index(element, text)</strong></li>
+</ul>
+<p>Select an option from a &lt;select&gt; element by the index of the option</p>
+<ul class="simple">
+<li><strong>select_by_text(element, text)</strong></li>
+</ul>
+<p>Select an option from a &lt;select&gt; element by the option text</p>
+<ul class="simple">
+<li><strong>select_by_value(element, value)</strong></li>
+</ul>
+<p>Select an option from a &lt;select&gt; element by the option value.</p>
+<p>For example, given:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">select</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">option</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;AR&quot;</span><span class="o">&gt;</span><span class="n">Argentina</span><span class="o">&lt;/</span><span class="n">option</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">option</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;BR&quot;</span><span class="o">&gt;</span><span class="n">Brazil</span><span class="o">&lt;/</span><span class="n">option</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">select</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>You could use:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">select_by_index</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">select_by_text</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s1">&#39;Argentina&#39;</span><span class="p">)</span>
+<span class="n">select_by_value</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s1">&#39;AR&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In all those examples, the first option is going to be selected.</p>
+<ul class="simple">
+<li><strong>send_keys(element, text)</strong></li>
+</ul>
+<p>Send key strokes to the element</p>
+<ul class="simple">
+<li><strong>store(key, value)</strong></li>
+</ul>
+<p>Store a value in the given key for later use. The value is going to be available through the data dictionary.</p>
+<ul class="simple">
+<li><strong>verify_exists(element)</strong></li>
+</ul>
+<p>Verify an element exists in the page</p>
+<ul class="simple">
+<li><strong>verify_is_enabled(element)</strong></li>
+</ul>
+<p>Verify an element is enabled</p>
+<ul class="simple">
+<li><strong>verify_is_not_enabled(element)</strong></li>
+</ul>
+<p>Verify an element is not enabled</p>
+<ul class="simple">
+<li><strong>verify_not_exists(element)</strong></li>
+</ul>
+<p>Verify an element does not exist in the page</p>
+<ul class="simple">
+<li><strong>verify_selected_option(element, text)</strong></li>
+</ul>
+<p>Verify that the option selected in a &lt;select&gt; is the one given (by the option text)</p>
+<ul class="simple">
+<li><strong>verify_text(text)</strong></li>
+</ul>
+<p>Verify the given text is present anywhere on the page (in the entire DOM)</p>
+<ul class="simple">
+<li><strong>verify_text_in_element(element, text)</strong></li>
+</ul>
+<p>Verify that an element contains the given text.</p>
+<ul class="simple">
+<li><strong>wait(seconds)</strong></li>
+</ul>
+<p>Pause execution for the given amount of seconds</p>
+<ul class="simple">
+<li><strong>wait_for_element_visible(element, timeout)</strong></li>
+</ul>
+<p>Pause execution for the given amount of seconds until the element is visible (default is 20 seconds)</p>
+<ul class="simple">
+<li><strong>wait_for_element_enabled(element, timeout)</strong></li>
+</ul>
+<p>Pause execution for the given amount of seconds until the element is enabled (default is 20 seconds)</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Golem</a></h1>
+
+
+
+<p class="blurb">test automation framework</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=lucianopuccio&repo=golem&type=star&count=False&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quick-start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adding-tests.html">Adding Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="managing-test-data.html">Managing Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using-pages.html">Using Pages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="suites.html">Suites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the-cli.html">The CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Golem Actions</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="the-web-module.html" title="previous chapter">The Web Module</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Luciano Puccio.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/actions.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

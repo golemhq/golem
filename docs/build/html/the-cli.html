@@ -1,0 +1,148 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The CLI &#8212; Golem 0.1.0a3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.0a3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The Web Module" href="the-web-module.html" />
+    <link rel="prev" title="Suites" href="suites.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-cli">
+<span id="the-cli"></span><h1>The CLI<a class="headerlink" href="#the-cli" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="commands-for-golem-admin">
+<span id="commands-for-golem-admin"></span><h2>Commands for golem-admin:<a class="headerlink" href="#commands-for-golem-admin" title="Permalink to this headline">¶</a></h2>
+<p><strong>golem-admin createdirectory name</strong></p>
+<p>Used to generate a new test directory.</p>
+</div>
+<div class="section" id="commands-for-golem-py">
+<span id="commands-for-golem-py"></span><h2>Commands for golem.py:<a class="headerlink" href="#commands-for-golem-py" title="Permalink to this headline">¶</a></h2>
+<p><strong>python golem.py run project &lt;test&gt;|&lt;suite&gt; [-t|--threads -d|--driver]</strong></p>
+<p>Run a test case or test suite from a project. Threads indicates the amount of test cases to execute in parallel, default is 1. Driver indicates wich driver to use to run the tests, options are: firefox, chrome, default is firefox. Chrome requires chrome_driver_path setting to be defined in the settings file.</p>
+<p><strong>python golem.py gui [-p|--port]</strong></p>
+<p>Start Golem Web Module (GUI). Port indicates which port number to use, default is 5000.</p>
+<p><strong>python golem.py createproject &lt;project name&gt;</strong></p>
+<p>Creates a new project with the given name. Creates the base files and folders.</p>
+<p><strong>python golem.py createtest &lt;project name&gt; &lt;test name&gt;</strong></p>
+<p>Creates a new test inside the given project.</p>
+<p><strong>python golem.py createsuite &lt;project name&gt; &lt;suite name&gt;</strong></p>
+<p>Creates a new suite inside the given project.</p>
+<p><strong>python golem.py createuser &lt;username&gt; &lt;password&gt; [-a|--admin -p|--projects -r|--reports]</strong></p>
+<p>Add a new user, projects is a list of projects that the user can access and reports determines which project reports the user can see. In both cases use '*' to give the user access to all projects</p>
+<p>Next, go to <a class="reference external" href="the-web-module.html">The Web Module</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Golem</a></h1>
+
+
+
+<p class="blurb">test automation framework</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=lucianopuccio&repo=golem&type=star&count=False&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quick-start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adding-tests.html">Adding Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="managing-test-data.html">Managing Test Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using-pages.html">Using Pages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="suites.html">Suites</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="suites.html" title="previous chapter">Suites</a></li>
+      <li>Next: <a href="the-web-module.html" title="next chapter">The Web Module</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Luciano Puccio.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/the-cli.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
