@@ -3,12 +3,12 @@ Installation
 
 ##### Requirements
 
-Golem requires Python 3.4 or newer. You may download and install it from here [python.org/downloads/](http://www.python.org/downloads/)
+Golem requires Python 3.4 or higher. You may download and install it from here [python.org/downloads/](http://www.python.org/downloads/)
 
 
 ##### Using virtualenv (optional)
 
-It is recommended (but not required) to install Golem and it's dependencies in a [virtual environment](http://www.virtualenv.org/en/latest/) instead of globally. To do that, follow this steps:
+It is recommended to install Golem and it's dependencies in a [virtual environment](http://www.virtualenv.org/en/latest/) instead of globally. To do that, follow this steps:
 
 ```
 pip install virtualenv
