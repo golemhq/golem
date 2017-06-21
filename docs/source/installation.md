@@ -30,7 +30,7 @@ source env/bin/activate
 ##### Install Using PIP
 
 ```
-pip install https://github.com/lucianopuccio/golem/archive/0.1.0a3.tar.gz
+pip install https://github.com/lucianopuccio/golem/archive/0.1.1.tar.gz
 ```
 
 

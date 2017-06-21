@@ -15,7 +15,7 @@ Installation
 Golem works with Python 3.4+
 
 ```
-pip install https://github.com/lucianopuccio/golem/archive/0.1.0a3.tar.gz
+pip install https://github.com/lucianopuccio/golem/archive/0.1.1.tar.gz
 ```
 
 Documentation
