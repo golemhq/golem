@@ -67,13 +67,7 @@
     border-left: 1px solid #CCCCCC;
     border-bottom: 1px solid #CCCCCC;
     border-right: 1px solid #CCCCCC;
-}
-
-.autocomplete-suggestions {
-    background-color: white;
-    border-left: 1px solid #CCCCCC;
-    border-bottom: 1px solid #CCCCCC;
-    border-right: 1px solid #CCCCCC;
+    max-height: inherit !important;
 }
 
 .autocomplete-suggestion {

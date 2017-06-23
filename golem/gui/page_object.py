@@ -40,11 +40,14 @@ def get_page_object_content(root_path, project, full_po_name):
             function_list.append(new_function)
         elif isinstance(variable, tuple):
             # this is a web element tuple
+            element_display_name = ''
+            if len(variable) >= 3:
+                element_display_name = variable[2]
             new_element = {
                 'element_name': var_name,
                 'element_selector': variable[0],
                 'element_value': variable[1],
-                'element_display_name': variable[2],
+                'element_display_name': element_display_name,
                 'element_full_name': ''.join([full_po_name, '.', var_name])
             }
             element_list.append(new_element)
