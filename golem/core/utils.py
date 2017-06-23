@@ -123,6 +123,10 @@ def get_projects(workspace):
     return projects
 
 
+def project_exists(workspace, project):
+    return project in get_projects(workspace)
+
+
 def get_files_in_directory_dotted_path(base_path):
     '''generate a list of all the files inside a directory and
     subdirectories with the relative path as a dotted string.

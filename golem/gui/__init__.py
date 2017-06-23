@@ -89,12 +89,16 @@ def index():
 def project(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
-    test_cases = utils.get_test_cases(root_path, project)
-    page_objects = utils.get_page_objects(root_path, project)
-    suites = utils.get_suites(root_path, project)
-    # suites = 
-    return render_template('project.html', test_cases=test_cases, project=project,
-                           page_objects=page_objects, suites=suites)
+    elif not utils.project_exists(root_path, project):
+        from flask import abort
+
+        abort(404)
+    else:
+        test_cases = utils.get_test_cases(root_path, project)
+        page_objects = utils.get_page_objects(root_path, project)
+        suites = utils.get_suites(root_path, project)
+        return render_template('project.html', test_cases=test_cases, project=project,
+                               page_objects=page_objects, suites=suites)
 
 
 # TEST CASE VIEW
@@ -501,6 +505,11 @@ def unauthorized_callback():
 @app.before_request
 def before_request():
     g.user = current_user
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
 if __name__ == "__main__":
