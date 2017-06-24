@@ -235,7 +235,7 @@ function getAllCheckedTestsInALevel(rootUl, testCaseList){
             // is this branch checked?
             if(thisBranchInput.prop('checked')){
                 var nodeWithFullPath = getNodeFullPath(thisLi, thisBranchName);
-                testCaseList.push(nodeWithFullPath + '/');
+                testCaseList.push(nodeWithFullPath + '.*');
             }
             else{
                 var newRootUl = thisLi.children('ul');

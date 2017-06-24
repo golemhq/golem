@@ -16,8 +16,8 @@ from flask.ext.login import (LoginManager,
                              current_user,
                              login_required)
 
-from golem.core import utils
-from . import gui_utils, test_case, page_object, suite, data, user, report_parser
+from golem.core import utils, test_case, page_object, suite, data
+from . import gui_utils, user, report_parser
 
 
 app = Flask(__name__)
@@ -174,9 +174,11 @@ def new_tree_element():
         if not errors:
             if is_dir:
                 if element_type == 'test_case':
-                    gui_utils.new_directory_test_case(root_path, project, parents, element_name)
+                    errors = gui_utils .new_directory_test_case(root_path, project, parents,
+                                                               element_name)
                 elif element_type == 'page_object':
-                    gui_utils.new_directory_page_object(root_path, project, parents, element_name)
+                    errors = gui_utils.new_directory_page_object(root_path, project, parents,
+                                                                 element_name)
             else:
                 if element_type == 'test_case':
                     errors = test_case.new_test_case(root_path, project, parents, element_name)

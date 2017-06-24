@@ -535,14 +535,12 @@ function saveTestCase(runAfter){
         type: 'POST',
         success: function(data) {
             unsavedChanges = false;
-            if(!runAfter){
-                toastr.options = {
-                    "positionClass": "toast-top-center",
-                    "timeOut": "3000",
-                    "hideDuration": "100"}
-                toastr.success("Test case "+testCaseName+" saved")
-            }
-            else{
+            toastr.options = {
+                "positionClass": "toast-top-center",
+                "timeOut": "3000",
+                "hideDuration": "100"}
+            toastr.success("Test case "+testCaseName+" saved")
+            if(runAfter){
                 runTestCase();
             }
         },
@@ -553,6 +551,16 @@ function saveTestCase(runAfter){
 
 
 function runTestCase(){
+    if(unsavedChanges){
+        saveTestCase(true);
+    }
+    else{
+        doRunTestCase();
+    }
+}
+
+
+function doRunTestCase(){
     toastr.options = {
         "positionClass": "toast-top-center",
         "timeOut": "3000",

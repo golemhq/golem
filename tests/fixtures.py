@@ -5,7 +5,7 @@ from subprocess import call
 import pytest
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="class")
 def test_directory_fixture():    
     base_dir = os.getcwd()
     test_dir_name = 'temp_directory1'
@@ -21,7 +21,7 @@ def test_directory_fixture():
 
 
 @pytest.mark.usefixtures("test_directory")
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="class")
 def project_fixture(test_directory_fixture):
 	project_name = 'temp_project1'
 	os.chdir(test_directory_fixture['test_directory_name'])

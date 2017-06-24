@@ -216,7 +216,7 @@ def run_suite(workspace, project, suite, is_directory=False):
     suite_file_amount_workers = utils.get_suite_amount_of_workers(workspace, project, suite)
     if suite_file_amount_workers > 1:
         threads = suite_file_amount_workers
-    print('treads', threads)
+
     # the thread count pass through cli has higher priority
     if test_execution.thread_amount:
         threads = test_execution.thread_amount

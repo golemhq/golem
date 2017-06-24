@@ -222,6 +222,7 @@ def verify_text_in_element(element, text):
     test_object = get_selenium_object(element, driver)
     step_message = 'Verify element \'{0}\' contains text \'{1}\''.format(element[2], text)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
+    print(test_object.text)
     if text not in test_object.text:
         raise TextNotPresent("Text \'{0}\' was not found in element {1}"
                              .format(text, element[2]))

@@ -3,8 +3,8 @@ import re
 import importlib
 import inspect
 
-from golem.core import utils
-from golem.gui import data, page_object, gui_utils
+from golem.core import utils, data, page_object
+from golem.gui import gui_utils
 
 
 def _parse_step(step):
@@ -141,7 +141,6 @@ def format_parameters(step, root_path, project, parents, test_case_name, stored_
                 if (is_data_var or is_in_stored_keys) and not action_is_store:
                     this_parameter_string = 'data[\'{}\']'.format(parameter)
                 else:
-                    print(parameter)
                     if action in ['wait', 'select_by_index']:
                         this_parameter_string = parameter
                     elif parameter[0] == '(' and parameter[-1] == ')':
@@ -151,7 +150,6 @@ def format_parameters(step, root_path, project, parents, test_case_name, stored_
             formatted_parameters.append(this_parameter_string)
 
     all_parameters_string = ', '.join(formatted_parameters)
-    print('ALL PARAMETERS STRING', all_parameters_string)
     return all_parameters_string
 
 

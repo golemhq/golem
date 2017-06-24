@@ -106,9 +106,7 @@ def get_page_objects(workspace, project):
 
 def get_suites(workspace, project):
     path = os.path.join(workspace, 'projects', project, 'suites')
-
     suites = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
-
     if '__init__.py' in suites:
         suites.remove('__init__.py')
     # remove files that are not .py extension and remove extensions
@@ -128,12 +126,14 @@ def project_exists(workspace, project):
 
 
 def get_files_in_directory_dotted_path(base_path):
-    '''generate a list of all the files inside a directory and
+    '''
+    generate a list of all the files inside a directory and
     subdirectories with the relative path as a dotted string.
-    example:
-    given C:/base_dir/dir/sub_dir/file.py
+    for example, given:
+    C:/base_dir/dir/sub_dir/file.py
     get_files_in_directory_dotted_path('C:/base_dir/'):
-    >['dir.sub_dir.file']'''
+    >['dir.sub_dir.file']
+    '''
     all_files = []
     files_with_dotted_path = []
     for path, subdirs, files in os.walk(base_path):
@@ -181,7 +181,16 @@ def get_suite_test_cases(workspace, project, suite):
         path = os.path.join(workspace, 'projects', project, 'tests')
         tests = get_files_in_directory_dotted_path(path)
     else:
-        tests = suite_module.test_case_list
+        for test in suite_module.test_case_list:
+            if test[-1] == '*':
+                this_dir = os.path.join(test[:-2])
+                path = os.path.join(workspace, 'projects', project,
+                                    'tests', this_dir)
+                this_dir_tests = get_files_in_directory_dotted_path(path)
+                this_dir_tests = ['{}.{}'.format(this_dir, x) for x in this_dir_tests]
+                tests = tests + this_dir_tests
+            else:
+                tests.append(test)
     return tests
 
 

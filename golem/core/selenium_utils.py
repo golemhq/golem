@@ -3,7 +3,7 @@ import time
 from selenium import webdriver
 
 from golem import core
-from golem.gui import data
+from golem.core import data
 from golem.core.exceptions import IncorrectSelectorType, ElementNotFound
 
 

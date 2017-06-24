@@ -67,9 +67,9 @@ function addElement(event){
         return   
     }
     // validate if there is a slash it is trailing
-    if(elementName.split('/').length -1 == 1){
-        if(elementName.indexOf('/') != 0){
-            displayErrorModal(['Directories should have a trailing slash character']);
+    if(isDir){
+        if(elementName.indexOf('/') != elementName.length-1){
+            displayErrorModal(['Directories should end with a trailing slash character']);
             return
         }
     }

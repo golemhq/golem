@@ -1,7 +1,6 @@
 import os
-from golem.core import test_runner, utils
-from golem.gui import (gui_start, test_case,
-                       suite as suite_module)
+from golem.core import test_runner, utils, test_case, suite as suite_module
+from golem.gui import gui_start
 
 
 class BaseCommand:
@@ -171,10 +170,10 @@ class CreateTestCommand(BaseCommand):
             raise CommandException(
                 'Error: a project with that name does not exist'
             )
-        split_path = args.test.split('.')
-        test_name = split_path.pop()
+        dot_path = args.test.split('.')
+        test_name = dot_path.pop()
         errors = test_case.new_test_case(root_path, args.project,
-                                         split_path, test_name)
+                                         dot_path, test_name)
         if errors:
             raise CommandException('\n'.join(errors))
 
