@@ -4,8 +4,9 @@ from subprocess import call
 
 import pytest
 
-
-@pytest.fixture(scope="class")
+# this is deprecated, sould be @pytest.fixture
+# but travis uses an old version of pytest for python 3.4
+@pytest.yield_fixture(scope="class")
 def test_directory_fixture():    
     base_dir = os.getcwd()
     test_dir_name = 'temp_directory1'
@@ -21,7 +22,7 @@ def test_directory_fixture():
 
 
 @pytest.mark.usefixtures("test_directory")
-@pytest.fixture(scope="class")
+@pytest.yield_fixture(scope="class")
 def project_fixture(test_directory_fixture):
 	project_name = 'temp_project1'
 	os.chdir(test_directory_fixture['test_directory_name'])
