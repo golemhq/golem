@@ -10,7 +10,7 @@ def main():
     parser = argparse.ArgumentParser(add_help=False)
     sub_parsers = parser.add_subparsers(dest="main_action")
 
-    commands.init_admin_cli(sub_parsers)
+    commands.init_admin_cli(sub_parsers, sub_parsers)
     args = parser.parse_args()
 
     if args.main_action:

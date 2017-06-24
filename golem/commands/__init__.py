@@ -31,8 +31,8 @@ def register_command(klass, parser, subparser):
     COMMANDS[klass.cmd] = klass(parser, subparser)
 
 
-def register_admin_command(klass, parser):
-    COMMANDS_ADMIN[klass.cmd] = klass(parser)
+def register_admin_command(klass, parser, subparser):
+    COMMANDS_ADMIN[klass.cmd] = klass(parser, subparser)
 
 
 def init_cli(parser, subparser):
@@ -40,9 +40,9 @@ def init_cli(parser, subparser):
         register_command(cmd, parser, subparser)
 
 
-def init_admin_cli(parser):
+def init_admin_cli(parser, subparser):
     for cmd in INIT_ADMIN_CMDS:
-        register_admin_command(cmd, parser)
+        register_admin_command(cmd, parser, subparser)
 
 
 def run(cmd_name, tex, args):
