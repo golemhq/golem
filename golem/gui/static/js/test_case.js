@@ -3,7 +3,6 @@ var pageObjects = [];
 var globalActions = [];
 var selectedPageObjectsElements = [];
 var selectedPageObjectsFunctions = [];
-
 var unsavedChanges = false;
 
 $(document).ready(function() {      
@@ -20,18 +19,15 @@ $(document).ready(function() {
 
     $(".dato-variable").keyup(function(e) {
         if (e.which == 13) // Enter key
-            //alert('keyup')
         startAllValueInputAutocomplete();
     });
 
     $(".page-objects-input").blur(function() {
-        //alert('blur')
         getSelectedPageObjectElements();
     });
 
     $(".page-objects-input").keyup(function(e) {
         if (e.which == 13) // Enter key
-            //alert('keyup')
         getSelectedPageObjectElements();
     });
 
@@ -40,30 +36,6 @@ $(document).ready(function() {
 
     // start sortable steps
     startSortableSteps();
-    var el = $("#testSteps .steps").get(0);
-    var sortable = Sortable.create(el, {
-        handle: '.step-numbering',        
-        // Element dragging ended
-        onEnd: function (/**Event*/evt) {
-            fillStepNumbering();
-        },
-    });
-    var el = $("#testSteps .steps").get(0);
-    var sortable = Sortable.create(el, {
-        handle: '.step-numbering',        
-        // Element dragging ended
-        onEnd: function (/**Event*/evt) {
-            fillStepNumbering();
-        },
-    });
-    var el = $("#testSteps .steps").get(0);
-    var sortable = Sortable.create(el, {
-        handle: '.step-numbering',        
-        // Element dragging ended
-        onEnd: function (/**Event*/evt) {
-            fillStepNumbering();
-        },
-    });
 });
 
 
@@ -121,7 +93,7 @@ function addFirstStepInput(targetSection){
         </div>");
 
     // give focus to the last step action input
-    $(".step-first-input").last().focus();
+    section.find(".step-first-input").last().focus();
 
     fillStepNumbering();
     startStepFirstInputAutocomplete();
@@ -159,9 +131,8 @@ function getPageObjects(){
 
 
 function startPageObjectsAutocomplete(){
-
     autocomplete = $(".page-objects-autocomplete").autocomplete({
-        lookup: pageObjects,
+        lookup: getPageObjectsNotYetSelected(),
         minChars: 0,
         onSelect: function (suggestion) {
             getSelectedPageObjectElements();
@@ -220,7 +191,6 @@ function startStepFirstInputAutocomplete(){
 
 
 function stepFirstInputChange(elem){
-    console.log('called');
     var step = $(elem).parent().parent().parent();
     var hasParameter = step.find('.parameter-input').length > 0
     var placeholder = ''
@@ -449,7 +419,6 @@ function getSelectedPageObjectElements(){
     selectedPageObjectsElements = [];
 
     for(po in selectedPageObjects){
-        console.log(selectedPageObjects[po]);
         $.ajax({
             url: "/get_selected_page_object_elements/",
             data: {
@@ -486,30 +455,22 @@ function getSelectedPageObjectElements(){
 }
 
 
-function saveTestCase(){
+function saveTestCase(runAfter){
+    runAfter = runAfter || false;
     if(!unsavedChanges){
         return
     }
     var description = $("#description").val();
-
-    var pageObjects = [];
-    $(".page-objects-input").each(function(){
-        if($(this).val().length > 0){
-            pageObjects.push($(this).val());
-        }
-    });
-
+    var pageObjects = getSelectedPageObjects();
+    // get data from table
     var testData = [];
-    
     var headerInputs = $("#dataTable thead input")    
     var tableRows = $("#dataTable tbody tr");
-    
     tableRows.each(function(){
         var currentRow = $(this);
         var rowCells = currentRow.find("td input");
         var rowDict = {}
         rowCells.each(function(i){
-            //console.log($(headerInputs[i]).val());
             if($(headerInputs[i]).val().length > 0){
                 rowDict[$(headerInputs[i]).val()] = $(this).val();
             }
@@ -574,11 +535,16 @@ function saveTestCase(){
         type: 'POST',
         success: function(data) {
             unsavedChanges = false;
-            toastr.options = {
-                "positionClass": "toast-top-center",
-                "timeOut": "3000",
-                "hideDuration": "100"}
-            toastr.success("Test case "+testCaseName+" saved")
+            if(!runAfter){
+                toastr.options = {
+                    "positionClass": "toast-top-center",
+                    "timeOut": "3000",
+                    "hideDuration": "100"}
+                toastr.success("Test case "+testCaseName+" saved")
+            }
+            else{
+                runTestCase();
+            }
         },
         error: function() {
         }
@@ -618,13 +584,11 @@ function dataTableHeaderInputChange(){
 
 function getSelectedPageObjects(){
     var selectedPageObjects = [];
-
     $(".page-objects-input").each(function(){
         if($(this).val().length > 0){
             selectedPageObjects.push($(this).val());
         }
     })
-
     return selectedPageObjects
 }
 
@@ -744,15 +708,10 @@ function deleteStep(elem){
 
 
 function checkTestCaseResult(project, fullTestCaseName, timestamp){
-
     $("#testRunModal").modal("show");
-
     $("#testRunModal .modal-title").html('Running Test Case');
-
     $("#loaderContainer").show();
-
     $("#testResultContainer").html('');
-
     checkAndRecheckStatus(project, fullTestCaseName, timestamp);
 }
 
@@ -850,4 +809,16 @@ function getThisStep(elem){
         });
     }
     return thisStep
+}
+
+
+function getPageObjectsNotYetSelected(){
+    var selectedPageObjects = getSelectedPageObjects();
+    var pageObjectsNotYetSelected = [];
+    for(p in pageObjects){
+        if($.inArray(pageObjects[p].data, selectedPageObjects) == -1){
+            pageObjectsNotYetSelected.push(pageObjects[p]);
+        }
+    }
+    return pageObjectsNotYetSelected
 }

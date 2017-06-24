@@ -7,7 +7,8 @@ from flask import (Flask,
                    request,
                    redirect,
                    g,
-                   send_from_directory)
+                   send_from_directory,
+                   abort)
 
 from flask.ext.login import (LoginManager,
                              login_user,
@@ -90,8 +91,6 @@ def project(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
     elif not utils.project_exists(root_path, project):
-        from flask import abort
-
         abort(404)
     else:
         test_cases = utils.get_test_cases(root_path, project)
@@ -136,24 +135,19 @@ def test_case_code_view(project, test_case_name):
 
 @app.route("/get_page_objects/", methods=['POST'])
 def get_page_objects():
-
     if request.method == 'POST':
-        projectname = request.form['project']
-
-        path = os.path.join(root_path, 'projects', projectname, 'pages')
+        project = request.form['project']
+        path = os.path.join(root_path, 'projects', project, 'pages')
         page_objects = utils.get_files_in_directory_dotted_path(path)
-
         return json.dumps(page_objects)
 
 
 @app.route("/get_selected_page_object_elements/", methods=['POST'])
 def get_selected_page_object_elements():
-
     if request.method == 'POST':
-        projectname = request.form['project']
-        page_object_name = request.form['pageObject']
-
-        po_elements = page_object.get_page_object_content(root_path, projectname, page_object_name)
+        project = request.form['project']
+        page_name = request.form['pageObject']
+        po_elements = page_object.get_page_object_content(root_path, project, page_name)
         return json.dumps(po_elements)
 
 

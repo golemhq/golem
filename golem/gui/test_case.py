@@ -9,6 +9,8 @@ from golem.gui import data, page_object, gui_utils
 
 def _parse_step(step):
     method_name = step.split('(', 1)[0].strip()
+    if not '.' in method_name:
+        method_name = method_name.replace('_', ' ')
     clean_argument_list = []
 
     args_re = re.compile('\((?P<args>.+)\)')
@@ -24,7 +26,7 @@ def _parse_step(step):
             else:
                 clean_argument_list.append(arg.replace('\'', '').replace('"', ''))
     step = {
-        'method_name': method_name.replace('_', ' '),
+        'method_name': method_name,
         'parameters': clean_argument_list
     }
     return step
@@ -50,14 +52,20 @@ def get_test_case_content(project, test_case_name):
     # get list of pages
     pages = getattr(test_module, 'pages', [])
     # get setup steps
+    setup_steps = []
     setup_function_code = getattr(test_module, 'setup', None)
-    setup_steps = _get_parsed_steps(setup_function_code)
+    if setup_function_code:
+        setup_steps = _get_parsed_steps(setup_function_code)
     # get test steps
+    test_steps = []
     test_function_code = getattr(test_module, 'test', None)
-    test_steps = _get_parsed_steps(test_function_code)
+    if test_function_code:
+        test_steps = _get_parsed_steps(test_function_code)
     # get teardown steps
+    teardown_steps = []
     teardown_function_code = getattr(test_module, 'teardown', None)
-    teardown_steps = _get_parsed_steps(teardown_function_code)
+    if teardown_function_code:
+        teardown_steps = _get_parsed_steps(teardown_function_code)
     
     test_contents['description'] = description
     test_contents['pages'] = pages
@@ -66,7 +74,12 @@ def get_test_case_content(project, test_case_name):
         'test' : test_steps,
         'teardown': teardown_steps
     }
-    test_contents['content'] = inspect.getsource(test_module)
+    content = ''
+    try:
+        content = inspect.getsource(test_module)
+    except:
+        pass
+    test_contents['content'] = content
     return test_contents
 
 
@@ -111,32 +124,34 @@ def format_parameters(step, root_path, project, parents, test_case_name, stored_
     action = step['action'].replace(' ', '_')
     formatted_parameters = []
     for parameter in parameters:
-        if page_object.is_page_object(parameter, root_path, project):
-            # it is a page object, leave as is
-            this_parameter_string = parameter
-        elif 'random(' in parameter:
-            this_parameter_string = parameter
-        else:
-            # is not a page object,
-            # identify if its a value or element parameter
-            is_data_var = data.is_data_variable(root_path, project, parents,
-                                                test_case_name, parameter)
-            is_in_stored_keys = parameter in stored_keys
-            action_is_store = action == 'store'
-            if (is_data_var or is_in_stored_keys) and not action_is_store:
-                this_parameter_string = 'data[\'{}\']'.format(parameter)
+        if parameter:
+            this_parameter_string = ''
+            if page_object.is_page_object(parameter, root_path, project):
+                # it is a page object, leave as is
+                this_parameter_string = parameter
+            elif 'random(' in parameter:
+                this_parameter_string = parameter
             else:
-                print(parameter)
-                if action in ['wait', 'select_by_index']:
-                    this_parameter_string = parameter
-
-                elif parameter[0] == '(' and parameter[-1] == ')':
-                    this_parameter_string = parameter
+                # is not a page object,
+                # identify if its a value or element parameter
+                is_data_var = data.is_data_variable(root_path, project, parents,
+                                                    test_case_name, parameter)
+                is_in_stored_keys = parameter in stored_keys
+                action_is_store = action == 'store'
+                if (is_data_var or is_in_stored_keys) and not action_is_store:
+                    this_parameter_string = 'data[\'{}\']'.format(parameter)
                 else:
-                    this_parameter_string = '\'' + parameter + '\''
-        formatted_parameters.append(this_parameter_string)
+                    print(parameter)
+                    if action in ['wait', 'select_by_index']:
+                        this_parameter_string = parameter
+                    elif parameter[0] == '(' and parameter[-1] == ')':
+                        this_parameter_string = parameter
+                    else:
+                        this_parameter_string = '\'' + parameter + '\''
+            formatted_parameters.append(this_parameter_string)
 
     all_parameters_string = ', '.join(formatted_parameters)
+    print('ALL PARAMETERS STRING', all_parameters_string)
     return all_parameters_string
 
 
@@ -146,6 +161,20 @@ def format_page_object_string(page_objects):
         po_string = po_string + " '" + po + "',\n" + " " * 8
     po_string = "[{}]".format(po_string.strip()[:-1])
     return po_string
+
+
+def format_description(description):
+    formatted_description = ''
+    description = description.replace('"', '\\"').replace("'", "\\'")
+    if '\n' in description:
+        desc_lines = description.split('\n')
+        formatted_description = 'description = \'\'\''
+        for line in desc_lines:
+            formatted_description = formatted_description + '\n' + line
+        formatted_description = formatted_description + '\'\'\'\n'
+    else:
+        formatted_description = 'description = \'{}\'\n'.format(description)
+    return formatted_description
 
 
 def get_stored_keys(steps):
@@ -167,10 +196,13 @@ def save_test_case(root_path, project, full_test_case_name, description,
     test_stored_keys = get_stored_keys(test_steps['test'])
     teardown_stored_keys = get_stored_keys(test_steps['teardown'])
 
+    
+    formatted_description = format_description(description)
+
     with open(test_case_path, 'w', encoding='utf-8') as f:
         # write description
         f.write('\n')
-        f.write('description = \'{}\'\n'.format(description))
+        f.write(formatted_description)
         f.write('\n')
         # write the list of pages
         f.write('pages = {}\n'.format(format_page_object_string(page_objects)))
