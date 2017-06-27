@@ -3,6 +3,9 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+# travis uses an older version of pytest for python 3.4
+before_install:
+  - pip install --upgrade pytest
 # command to install dependencies
 install:
   # - pip install -r requirements.txt
