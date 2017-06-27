@@ -5,6 +5,13 @@ Installation
 
 Golem requires Python 3.4 or higher. You may download and install it from here [python.org/downloads/](http://www.python.org/downloads/)
 
+PIP is required to install it, check if you already have it, it should come bundled with Python
+
+```
+pip --version
+```
+
+If you don't have PIP installed, follow [these instructions](https://pip.pypa.io/en/stable/installing/).
 
 ##### Using virtualenv (optional)
 

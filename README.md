@@ -21,4 +21,4 @@ pip install https://github.com/lucianopuccio/golem/archive/0.1.1.tar.gz
 Documentation
 --------------------------------------
 
-[http://golem-framework.readthedocs.io/][http://golem-framework.readthedocs.io/]
+[http://golem-framework.readthedocs.io/](http://golem-framework.readthedocs.io/)

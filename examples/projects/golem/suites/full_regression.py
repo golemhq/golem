@@ -4,8 +4,9 @@ browsers = [
     'firefox'
 ]
 
-workers = 3
+workers = 5
 
 test_case_list = [
-    '*'
+    'login.*',
+    'index.*'
 ]

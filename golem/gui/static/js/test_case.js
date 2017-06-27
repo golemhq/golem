@@ -772,7 +772,7 @@ function loadCodeView(){
     unsavedChanges = false;
 
     // redirect to gui view
-    window.location.replace("/p/"+project+"/test/"+testCaseName+"/code/");
+    window.location.replace("/p/"+project+"/test/"+fullTestCaseName+"/code/");
 }
 
 

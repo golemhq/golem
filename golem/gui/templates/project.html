@@ -103,7 +103,7 @@
 		<ul id="pagesTree">
 			{%- for key, value in page_objects.items() recursive %}
 				{%- if value is mapping -%}
-					<li class="tree-element branch">
+					<li class="tree-element branch" data-branch-name="{{key}}">
 						<a href="#">{{key}}</a>
 						<span class="pull-right tree-element-buttons">
 							<button><i class="glyphicon glyphicon-edit"></i></button>
@@ -123,7 +123,7 @@
 			        	</ul>
 			        </li>
 			    {%- else %}
-			    	<li class="tree-element">
+			    	<li class="tree-element" data-leaf-name="{{key.0}}">
 			    		<a href="/p/{{project}}/page/{{key.1}}/">{{ key.0 }}</a>
 			    		<span class="pull-right tree-element-buttons">
 			    			<button><i class="glyphicon glyphicon-edit"></i></button>
