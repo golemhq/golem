@@ -12,9 +12,10 @@ install:
   - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then pip install --upgrade pytest; fi 
 # command to run tests
 script: 
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then py.test tests; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.5 ]]; then py.test tests; fi 
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then pytest tests; fi 
+  - python setup.py test
+  # - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then python setup.py test tests; fi
+  # - if [[ $TRAVIS_PYTHON_VERSION == 3.5 ]]; then py.test tests; fi 
+  # - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then pytest tests; fi 
 # which branch to test
 branches:
   only:
