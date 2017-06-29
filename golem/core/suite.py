@@ -4,7 +4,6 @@ import types
 import inspect
 
 from golem.core import utils
-from golem.gui import gui_utils
 
 
 def _format_list_items(list_items):
@@ -32,7 +31,7 @@ def save_suite(root_path, project, suite, test_cases, workers, browsers):
 
 def new_suite(root_path, project, suite_name):
     errors = []
-    if gui_utils.file_already_exists(root_path, project, 'suites', [], suite_name):
+    if utils.file_exists(root_path, project, 'suites', suite_name):
         errors.append('A file with that name already exists')
 
     if not errors:

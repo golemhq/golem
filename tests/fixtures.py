@@ -4,6 +4,7 @@ from subprocess import call
 
 import pytest
 
+
 # this is deprecated, sould be @pytest.fixture
 # but travis uses an old version of pytest for python 3.4
 @pytest.yield_fixture(scope="class")

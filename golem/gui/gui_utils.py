@@ -69,18 +69,6 @@ def directory_already_exists(root_path, project, root_dir, parents, dir_name):
         return False
 
 
-def file_already_exists(root_path, project, root_dir, parents, filename):
-    parents_joined = os.sep.join(parents)
-
-    directory_path = os.path.join(
-        root_path, 'projects', project, root_dir, parents_joined, filename + '.py')    
-
-    if os.path.isfile(directory_path):
-        return True
-    else:
-        return False
-
-
 def time_to_string():
     time_format = '%Y-%m-%d-%H-%M-%S-%f'
     return datetime.datetime.now().strftime(time_format)

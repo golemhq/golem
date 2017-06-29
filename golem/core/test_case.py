@@ -4,7 +4,6 @@ import importlib
 import inspect
 
 from golem.core import utils, data, page_object
-from golem.gui import gui_utils
 
 
 def _parse_step(step):
@@ -96,7 +95,7 @@ def new_test_case(root_path, project, parents, tc_name):
         "    close()\n\n")
     errors = []
     # check if a file already exists
-    if gui_utils.file_already_exists(root_path, project, 'tests', parents, tc_name):
+    if utils.file_exists(root_path, project, 'tests', os.sep.join(parents), tc_name):
         errors.append('A file with that name already exists')
     if not errors:
         parents_joined = os.sep.join(parents)

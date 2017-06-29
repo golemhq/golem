@@ -72,7 +72,6 @@ setup(
         'console_scripts': ['golem-admin = golem.bin.golem_admin:main']
     },
     cmdclass={'test': PyTest},
-
     include_package_data=True,
     platforms='any',
     test_suite='',

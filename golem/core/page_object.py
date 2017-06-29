@@ -4,7 +4,6 @@ import types
 import inspect
 
 from golem.core import utils
-from golem.gui import gui_utils
 
 
 def get_page_object_content(root_path, project, full_po_name):
@@ -105,7 +104,7 @@ def is_page_object(parameter, root_path, project):
 
 def new_page_object(root_path, project, parents, po_name):
     errors = []
-    if gui_utils.file_already_exists(root_path, project, 'pages', parents, po_name):
+    if utils.file_exists(root_path, project, 'pages', os.sep.join(parents), po_name):
         errors.append('A file with that name already exists')
 
     if not errors:
