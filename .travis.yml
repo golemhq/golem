@@ -8,12 +8,13 @@ before_install:
 install:
   # - pip install -r requirements.txt
   - python setup.py install
-# travis uses an older version of pytest for python 3.4
-#  - pip install --upgrade pytest
+  # travis uses an older version of pytest for python 3.4
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then pip install --upgrade pytest; fi 
 # command to run tests
 script: 
-# - python setup.py test
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.4 || $TRAVIS_PYTHON_VERSION == 3.5 ]]; then py.test tests; else pytest tests; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then py.test tests; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then py.test tests; fi 
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then pytest tests; fi 
 # which branch to test
 branches:
   only:

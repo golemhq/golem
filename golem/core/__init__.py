@@ -11,7 +11,7 @@ workspace = None
 test_data = None
 
 
-def getOrCreateWebdriver(*args):
+def get_or_create_webdriver(*args):
     global settings
     global driver
 

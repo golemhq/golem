@@ -42,7 +42,9 @@ def _find_selenium_object(selector_type, selector_value, element_name, driver, r
     return test_object
 
 
-def get_selenium_object(elem, driver):
+def get_selenium_object(elem, driver=None):
+    if not driver:
+        driver = core.get_or_create_webdriver()
     test_object = None
     implicit_wait = core.get_setting('implicit_wait')
     selector_type = elem[0]
@@ -55,7 +57,9 @@ def get_selenium_object(elem, driver):
     return test_object
 
 
-def get_selenium_objects(elem, driver):
+def get_selenium_objects(elem, driver=None):
+    if not driver:
+        driver = core.get_or_create_webdriver()
     selector_type = elem[0]
     selector_value = elem[1]
     test_objects = []
@@ -103,3 +107,58 @@ def get_driver(driver_selected):
     #         print('not implemented yet')
     #         sys.exit()
     return driver
+
+
+class By():
+
+    def id(selector, element_name=''):
+        return get_selenium_object(('id', selector, element_name))
+
+    def name(selector, element_name=''):
+        return get_selenium_object(('name', selector, element_name))
+
+    def text(selector, element_name=''):
+        return get_selenium_object(('text', selector, element_name))
+
+    def link_text(selector, element_name=''):
+        return get_selenium_object(('link_text', selector, element_name))
+
+    def partial_link_text(selector, element_name=''):
+        return get_selenium_object(('partial_link_text', selector, element_name))
+
+    def css(selector, element_name=''):
+        return get_selenium_object(('css', selector, element_name))
+
+    def xpath(selector, element_name=''):
+        return get_selenium_object(('xpath', selector, element_name))
+
+    def tag_name(selector, element_name=''):
+        return get_selenium_object(('tag_name', selector, element_name))
+
+
+class Bys():
+
+    def id(selector, element_name=''):
+        return get_selenium_objects(('id', selector, element_name))
+
+    def name(selector, element_name=''):
+        return get_selenium_objects(('name', selector, element_name))
+
+    def text(selector, element_name=''):
+        return get_selenium_objects(('text', selector, element_name))
+
+    def link_text(selector, element_name=''):
+        return get_selenium_objects(('link_text', selector, element_name))
+
+    def partial_link_text(selector, element_name=''):
+        return get_selenium_objects(('partial_link_text', selector, element_name))
+
+    def css(selector, element_name=''):
+        return get_selenium_objects(('css', selector, element_name))
+
+    def xpath(selector, element_name=''):
+        return get_selenium_objects(('xpath', selector, element_name))
+
+    def tag_name(selector, element_name=''):
+        return get_selenium_objects(('tag_name', selector, element_name))
+

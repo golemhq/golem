@@ -7,12 +7,13 @@ import string
 import random as rand
 
 import selenium
+from selenium.webdriver.common.keys import Keys
 from PIL import Image
 
 from golem import core
 from golem.core import execution_logger as logger
 from golem.core.exceptions import TextNotPresent, ElementNotFound
-from golem.core.selenium_utils import get_selenium_object
+from golem.selenium.utils import get_selenium_object
 
 
 def _run_wait_hook():
@@ -68,51 +69,50 @@ def capture(message=''):
 
 
 def click(element):
+    _run_wait_hook()
     step_message = 'Click {0}'.format(element[2])
-    _run_wait_hook()    
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(element, driver)
-    #_wait_for_visible(test_object)
-    test_object.click()
+    element = get_selenium_object(element)
+    element.click()
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
 def close():
-    driver = core.getOrCreateWebdriver()
+    driver = core.get_or_create_webdriver()
     driver.quit()
     core.reset_driver_object()
 
 
 def go_to(url):
     step_message = 'Go to url:\'{0}\''.format(url)
-    driver = core.getOrCreateWebdriver()
+    driver = core.get_or_create_webdriver()
     driver.get(url)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
-def random(*args):
+def press_key(element, key):
+    element = get_selenium_object(element)
+    if key == 'RETURN' or key == 'ENTER':
+        element.send_keys(Keys.RETURN);
+    else:
+        raise Exception('Key value is invalid')
+
+
+def random(value):
     random_string = ''
-    for arg in args:
-        if arg[0] == 'c':
-            string_length = int(arg[1:])
-            new_str = ''.join(rand.sample(string.ascii_lowercase,
-                                            string_length))
-            random_string += new_str
-        elif arg[0] == 'd':
-            string_length = int(arg[1:])
-            new_str = rand.randint(pow(10, string_length - 1),
-                                   pow(10, string_length) - 1)
-            random_string += str(new_str)
+    for char in value:
+        if char == 'c':
+            random_string += rand.choice(string.ascii_lowercase)
+        elif char == 'd':
+            random_string += str(rand.randint(0, 9))
         else:
-            random_string += arg
+            random_string += char
     return random_string
 
 
 def select_by_index(element, index):
     step_message = 'Select option of index {0} from element {1}'.format(index, element[2])
     _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(element, driver)
+    test_object = get_selenium_object(element)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_index(index)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
@@ -121,8 +121,7 @@ def select_by_index(element, index):
 def select_by_text(element, text):
     step_message = 'Select \'{0}\' from element {1}'.format(text, element[2])
     _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(element, driver)
+    test_object = get_selenium_object(element)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_visible_text(text)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
@@ -131,19 +130,17 @@ def select_by_text(element, text):
 def select_by_value(element, value):
     step_message = 'Select \'{0}\' value from element {1}'.format(value, element[2])
     _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(element, driver)
+    test_object = get_selenium_object(element)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_value(value)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
 def send_keys(element, text):
-    step_message = 'Write \'{0}\' in element {1}'.format(text, element[2])
     _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(element, driver)
-    test_object.send_keys(text)
+    step_message = 'Write \'{0}\' in element {1}'.format(text, element[2])
+    element = get_selenium_object(element)
+    element.send_keys(text)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
@@ -153,16 +150,14 @@ def store(key, value):
 
 def verify_exists(element):
     _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
     step_message = 'Verify that the element {} exists'.format(element[2])
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
-    test_object = get_selenium_object(element, driver)
+    test_object = get_selenium_object(element)
 
 
 def verify_is_enabled(element):
     _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(element, driver)
+    test_object = get_selenium_object(element)
     step_message = 'Verify the element \'{0}\' is enabled'.format(element[2])
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if not test_object.is_enabled():
@@ -171,8 +166,7 @@ def verify_is_enabled(element):
 
 def verify_is_not_enabled(element):
     _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(element, driver)
+    test_object = get_selenium_object(element)
     step_message = 'Verify the element \'{0}\' is not enabled'.format(element[2])
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if test_object.is_enabled():
@@ -181,11 +175,10 @@ def verify_is_not_enabled(element):
 
 def verify_not_exists(element):
     _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
     step_message = 'Verify that the element {} does not exists'.format(element[2])
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     try:
-        test_object = get_selenium_object(element, driver)
+        test_object = get_selenium_object(element)
         if test_object:
             raise Exception('Element {} exists and should not'
                             .format(element[2]))
@@ -195,8 +188,7 @@ def verify_not_exists(element):
 
 def verify_selected_option(element, text):
     _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(element, driver)
+    test_object = get_selenium_object(element)
     select = selenium.webdriver.support.select.Select(test_object)
     step_message = 'Verify selected option of element \'{0}\' is \'{1}\''.format(element[2], text)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
@@ -208,7 +200,7 @@ def verify_selected_option(element, text):
 
 def verify_text(text):
     _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
+    driver = core.get_or_create_webdriver()
     step_message = 'Verify \'{0}\' is present in page'.format(text)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if text not in driver.page_source:
@@ -218,11 +210,9 @@ def verify_text(text):
 
 def verify_text_in_element(element, text):
     _run_wait_hook()
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(element, driver)
+    test_object = get_selenium_object(element)
     step_message = 'Verify element \'{0}\' contains text \'{1}\''.format(element[2], text)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
-    print(test_object.text)
     if text not in test_object.text:
         raise TextNotPresent("Text \'{0}\' was not found in element {1}"
                              .format(text, element[2]))
@@ -239,8 +229,7 @@ def wait(seconds):
 def wait_for_element_visible(element, timeout=20):
     start_time = time.time()
     timed_out = False
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(element, driver)
+    test_object = get_selenium_object(element)
     visible = test_object.is_displayed()
     while not visible and not timed_out:
         print('Element is not visible, waiting..')
@@ -254,8 +243,7 @@ def wait_for_element_visible(element, timeout=20):
 def wait_for_element_enabled(element, timeout=20):
     start_time = time.time()
     timed_out = False
-    driver = core.getOrCreateWebdriver()
-    test_object = get_selenium_object(element, driver)
+    test_object = get_selenium_object(element)
     enabled = element.is_enabled()
     while not enabled:
         print('Element is not enabled, waiting..')
