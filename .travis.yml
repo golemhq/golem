@@ -13,8 +13,8 @@ install:
 # command to run tests
 script: 
   - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then py.test tests; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then py.test tests; fi 
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then pytest tests; fi 
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.5 ]]; then py.test tests; fi 
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then pytest tests; fi 
 # which branch to test
 branches:
   only:
