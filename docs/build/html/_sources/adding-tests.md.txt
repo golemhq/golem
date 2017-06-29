@@ -5,7 +5,7 @@ Tests should be placed in the 'tests' folder inside a project. You can use more 
 
 **Add a new test using the console:**
 ```
-python golem.py createtest <project_name> <test_name>
+python golem.py createtest <project name> <test name>
 ```
 
 You can also create new tests using the **web module**.

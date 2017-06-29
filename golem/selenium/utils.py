@@ -1,6 +1,7 @@
 import time
 
 from selenium import webdriver
+from selenium.webdriver.remote.webelement import WebElement
 
 from golem import core
 from golem.core import data
@@ -107,6 +108,21 @@ def get_driver(driver_selected):
     #         print('not implemented yet')
     #         sys.exit()
     return driver
+
+
+class Element(WebElement):
+
+    def __init__(self):
+        super().__init__()
+
+    # def find_by_id(id):
+    #     return super().find_element_by_id(id)
+
+    def find_by_id(self, id):
+        return super(Element, self).find_element_by_id(id)
+
+    def find_by_css(css):
+        return super().find_element_by_css_selector(css)
 
 
 class By():

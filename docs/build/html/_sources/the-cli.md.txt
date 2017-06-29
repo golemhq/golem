@@ -4,7 +4,7 @@ The CLI
 
 ##### Commands for golem-admin:
 
-**golem-admin createdirectory name**
+**golem-admin createdirectory \<name\>**
 
 Used to generate a new test directory.
 

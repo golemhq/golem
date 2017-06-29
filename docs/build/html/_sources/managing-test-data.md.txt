@@ -3,7 +3,7 @@ Managing Test Data
 
 Keeping the test data (input and output values) properly managed is vital for the success of the automated tests.
 
-To do that, Golem tests can store the data in a separate file. This increments
+To do that, Golem tests can store the data in a separate file.
 
 Let's rewrite the previous example but extracting all the data values outside of the code:
 
@@ -49,7 +49,7 @@ With this improvement, we don't have to modify the code each time the test value
 
 **Multiple data sets**
 
-What if we needed to execute the same test, but with different values each time. That is, the steps of the test are the same, what changes is the data. In that case, with Golem you can add data sets (more rows to the data file) and Golem will automatically execute the same test using all the data sets provided
+What if we need to execute the same test, but with different values each time. That is, the steps of the test are the same, what changes is the data. In that case, with Golem you can add data sets (more rows to the data file) and Golem will automatically execute the same test using all the data sets provided
 
 
 For example, consider the previous data file, but with added rows:
