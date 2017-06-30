@@ -1,4 +1,5 @@
 import time
+import types
 
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
@@ -110,71 +111,68 @@ def get_driver(driver_selected):
     return driver
 
 
-class Element(WebElement):
-
-    def __init__(self):
-        super().__init__()
-
-    # def find_by_id(id):
-    #     return super().find_element_by_id(id)
-
-    def find_by_id(self, id):
-        return super(Element, self).find_element_by_id(id)
-
-    def find_by_css(css):
-        return super().find_element_by_css_selector(css)
+def _find(self, id=None, name=None, text=None, link_text=None, partial_link_text=None,
+         css=None, xpath=None, tag_name=None):
+    return element(id, name, text, link_text, partial_link_text, css,
+                   xpath, tag_name)
 
 
-class By():
-
-    def id(selector, element_name=''):
-        return get_selenium_object(('id', selector, element_name))
-
-    def name(selector, element_name=''):
-        return get_selenium_object(('name', selector, element_name))
-
-    def text(selector, element_name=''):
-        return get_selenium_object(('text', selector, element_name))
-
-    def link_text(selector, element_name=''):
-        return get_selenium_object(('link_text', selector, element_name))
-
-    def partial_link_text(selector, element_name=''):
-        return get_selenium_object(('partial_link_text', selector, element_name))
-
-    def css(selector, element_name=''):
-        return get_selenium_object(('css', selector, element_name))
-
-    def xpath(selector, element_name=''):
-        return get_selenium_object(('xpath', selector, element_name))
-
-    def tag_name(selector, element_name=''):
-        return get_selenium_object(('tag_name', selector, element_name))
+def _find_all(self, id=None, name=None, text=None, link_text=None, partial_link_text=None,
+             css=None, xpath=None, tag_name=None):
+    return elements(id, name, text, link_text, partial_link_text, css,
+                    xpath, tag_name)
 
 
-class Bys():
+def element(id=None, name=None, text=None, link_text=None, partial_link_text=None,
+            css=None, xpath=None, tag_name=None):
+    webelement = None
+    if id:
+        webelement = get_selenium_object(('id', id, 'element_name'))
+    elif name:
+        webelement = get_selenium_object(('name', name, 'element_name'))
+    elif text:
+        webelement = get_selenium_object(('text', text, 'element_name'))
+    elif link_text:
+        webelement = get_selenium_object(('link_text', link_text, 'element_name'))
+    elif partial_link_text:
+        webelement = get_selenium_object(('partial_link_text', partial_link_text, 'element_name'))
+    elif css:
+        webelement = get_selenium_object(('css', css, 'element_name'))
+    elif xpath:
+        webelement = get_selenium_object(('xpath', xpath, 'element_name'))
+    elif tag_name:
+        webelement = get_selenium_object(('tag_name', tag_name, 'element_name'))
+    else:
+         raise IncorrectSelectorType('Selector is not a valid option')
+    # bound find and find_all functions to the WebElement instance
+    webelement.find = types.MethodType(_find, webelement)
+    webelement.find_all = types.MethodType(_find_all, webelement)
+    return webelement
 
-    def id(selector, element_name=''):
-        return get_selenium_objects(('id', selector, element_name))
 
-    def name(selector, element_name=''):
-        return get_selenium_objects(('name', selector, element_name))
-
-    def text(selector, element_name=''):
-        return get_selenium_objects(('text', selector, element_name))
-
-    def link_text(selector, element_name=''):
-        return get_selenium_objects(('link_text', selector, element_name))
-
-    def partial_link_text(selector, element_name=''):
-        return get_selenium_objects(('partial_link_text', selector, element_name))
-
-    def css(selector, element_name=''):
-        return get_selenium_objects(('css', selector, element_name))
-
-    def xpath(selector, element_name=''):
-        return get_selenium_objects(('xpath', selector, element_name))
-
-    def tag_name(selector, element_name=''):
-        return get_selenium_objects(('tag_name', selector, element_name))
-
+def elements(id=None, name=None, text=None, link_text=None, partial_link_text=None,
+            css=None, xpath=None, tag_name=None):
+    webelements = None
+    if id:
+        webelements = get_selenium_objects(('id', id, 'element_name'))
+    elif name:
+        webelements = get_selenium_objects(('name', name, 'element_name'))
+    elif text:
+        webelements = get_selenium_objects(('text', text, 'element_name'))
+    elif link_text:
+        webelements = get_selenium_objects(('link_text', link_text, 'element_name'))
+    elif partial_link_text:
+        webelements = get_selenium_objects(('partial_link_text', partial_link_text, 'element_name'))
+    elif css:
+        webelements = get_selenium_objects(('css', css, 'element_name'))
+    elif xpath:
+        webelements = get_selenium_objects(('xpath', xpath, 'element_name'))
+    elif tag_name:
+        webelements = get_selenium_objects(('tag_name', tag_name, 'element_name'))
+    else:
+         raise IncorrectSelectorType('Selector is not a valid option')
+    # bound find and find_all functions to each WebElement instance
+    for webelement in webelements:
+        webelement.find = types.MethodType(_find, webelement)
+        webelement.find_all = types.MethodType(_find_all, webelement)
+    return webelements

@@ -52,5 +52,12 @@ And this is how it looks when using the Web Module:
 ![using-a-custom-function](_static/img/using-a-custom-function.png "Using A Custom Function")
 
 
+**Using default actions inside functions**
 
-Next, go to [Suites](suites.html)
+TBD
+
+**Finding elements dynamically inside functions**
+
+TBD
+
+<!-- Next, go to [Suites](suites.html) -->
