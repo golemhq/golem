@@ -178,6 +178,7 @@ function addTestCaseToDetailTable(testCase){
 		}
 
 		testCaseRow.find("td.tc-name").html(testCase.name);
+		testCaseRow.find("td.tc-browser").html(testCase.browser);
 		testCaseRow.find("td.tc-result").html(testCase.result);
 		testCaseRow.find("td.tc-time").html(testCase.test_elapsed_time);
 		testCaseRow.find("td.tc-reporte").html(
@@ -224,7 +225,7 @@ function updateModuleRowInGeneralTable(testCase){
 		barra_azul.attr('id', id);
   		barra_azul.attr('data-transitiongoal', okPercentage);
 
-		moduleRow.insertBefore("#totalRow");
+		//moduleRow.insertBefore("#totalRow");
 
 		//refreshNumbering();
 		
