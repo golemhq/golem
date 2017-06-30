@@ -1,22 +1,18 @@
 language: python
+
 python:
-  - "3.4"
+  # - "3.4"
   - "3.5"
   - "3.6"
-before_install:
-# command to install dependencies
+
 install:
-  # - pip install -r requirements.txt
   - python setup.py install
   # travis uses an older version of pytest for python 3.4
   - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then pip install --upgrade pytest; fi 
-# command to run tests
+
 script: 
   - python setup.py test
-  # - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then python setup.py test tests; fi
-  # - if [[ $TRAVIS_PYTHON_VERSION == 3.5 ]]; then py.test tests; fi 
-  # - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then pytest tests; fi 
-# which branch to test
+
 branches:
   only:
     - master
