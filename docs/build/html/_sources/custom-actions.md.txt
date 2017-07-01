@@ -1,7 +1,7 @@
 Custom Actions
 ==================================================
 
-There are times when simple actions like click or send keys are not enough and more complex actions are required. Also, when a group of actions are repeated over many tests, they should be grouped into a single function and written once. This greately improves the maintenance of the tests.
+There are times when simple actions like *click* or *send keys* are not enough and more complex actions are required. Also, when a group of actions are repeated over many tests, they should be grouped into a single function and written once. This greatly improves the maintenance of the tests.
 
 This custom functions/actions should be defined inside the pages.
 
@@ -28,22 +28,17 @@ def do_login(username, password):
 
 ```
 
-Now, this new action 'do_login' that we wrote is available as a normal action whenever we import the login page to any test, like so:
+Now, this new action 'do_login' that we wrote is available as a normal action whenever we import the login page to a test, like so:
 
 
-**some_test.py**
+**successful_login.py**
 ```python
-description = 'Verify that ...'
+description = 'Verify that the user can log in to the application'
 
 pages = ['login']
 
-
-def setup(data):
-    login.do_login('johndoe', 'password123456')
-
-
 def test(data):
-    ...
+    login.do_login('arya', 'winterfell123')
 
 ```
 
@@ -79,7 +74,7 @@ Sometimes you have to define selectors dynamically. For that Golem provides two 
 
 The first, *element()*, returns a pure selenium [WebElement](https://seleniumhq.github.io/selenium/docs/api/py/webdriver_remote/selenium.webdriver.remote.webelement.html#module-selenium.webdriver.remote.webelement) (equivalent to find_element_by_*). The WebElement returned has two added functions: *find()* and *find_all()* that let's you chain find funcions to search for elements and sub-elements.
 
-The second, *elements()*, returns a list of selenium WebElements (equivalent to find_elements_by_*)
+The second function, *elements()*, returns a list of selenium WebElements (equivalent to find_elements_by_*)
 
 Let's see an example using *element()*, *elements()*, *find()* and *find_all()*:
 
@@ -95,8 +90,8 @@ def verify_page_title(title_text):
 
 
 def verify_amount_of_items(amount):
-    list_elem = element(id='listId')
-    list_items = list_elem.find_all(css='li>span')
+    list_element = element(id='listId')
+    list_items = list_element.find_all(css='li>span')
     if not len(list_items) == amount:
         raise Exception('List has incorrect amount of items')
 
@@ -108,7 +103,7 @@ def click_submit_button():
 
 ##### A more complex function
 
-Let's imagine our application has a table that displayes the results of a search, and the table looks as follows:
+Let's imagine our application has a table that displays the results of a search, and the table looks like this:
 
 
 <table id="resultsTable"> 

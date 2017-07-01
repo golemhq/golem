@@ -3,7 +3,7 @@
 // Be aware that project settings override global settings.
 {
 // Default time to wait looking for an element until it is found
-"implicit_wait": 20,
+"implicit_wait": 10,
 
 // Take a screenshot on error by default
 "screenshot_on_error": true,

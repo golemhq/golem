@@ -5,7 +5,7 @@ error message when creating a project with the name too short (less than 3 chars
 pages = ['login',
          'index']
 
-def setup():
+def setup(data):
     go_to('http://localhost:8000/')
     login.do_login('admin', 'admin')
 
@@ -17,5 +17,5 @@ def test(data):
     index.verify_error_message('Project name is too short')
 
 
-def teardown():
+def teardown(data):
     close()

@@ -153,7 +153,7 @@ function savePageObject(){
         success: function(data) {
             toastr.options = {
                 "positionClass": "toast-top-center",
-                "timeOut": "3000",
+                "timeOut": "15000",
                 "hideDuration": "100"}
             toastr.success("Page "+pageObjectName+" saved");
 

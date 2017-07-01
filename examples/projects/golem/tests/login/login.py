@@ -3,7 +3,7 @@ description = 'Verify that the user can log in to Golem'
 
 pages = ['login', 'index']
 
-def setup():
+def setup(data):
     pass
 
 def test(data):
@@ -15,5 +15,5 @@ def test(data):
     verify_text_in_element(index.title, 'Select a Project')
 
 
-def teardown():
+def teardown(data):
     close()

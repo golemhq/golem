@@ -3,7 +3,7 @@ description = 'Verify that the user cannot log in if password value is missing'
 
 pages = ['login']
 
-def setup():
+def setup(data):
     pass
 
 def test(data):
@@ -14,5 +14,5 @@ def test(data):
     verify_text_in_element(login.error_list, 'Password is required')
 
 
-def teardown():
+def teardown(data):
     close()

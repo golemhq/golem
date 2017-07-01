@@ -20,6 +20,7 @@ from golem.selenium.utils import get_selenium_object
 def _run_wait_hook():
     wait_hook = core.get_setting('wait_hook')
     if wait_hook:
+        wait('0.3')
         start_time = time.time()
         extend_module = importlib.import_module('projects.{0}.extend'
                                                 .format(core.project))
@@ -236,7 +237,29 @@ def wait(seconds):
     time.sleep(to_int)
 
 
+def wait_for_element_not_visible(element, timeout=20):
+    try:
+        timeout = int(timeout)
+    except:
+        raise Exception('Timeout should be an only digits')
+    start_time = time.time()
+    timed_out = False
+    test_object = get_selenium_object(element)
+    visible = test_object.is_displayed()
+    while visible and not timed_out:
+        print('Element is still visible, waiting..')
+        time.sleep(0.5)
+        visible = test_object.is_displayed()
+        current_time = time.time()
+        if current_time - start_time > timeout:
+            timed_out = True
+
+
 def wait_for_element_visible(element, timeout=20):
+    try:
+        timeout = int(timeout)
+    except:
+        raise Exception('Timeout should be an only digits')
     start_time = time.time()
     timed_out = False
     test_object = get_selenium_object(element)
@@ -262,3 +285,5 @@ def wait_for_element_enabled(element, timeout=20):
         current_time = time.time()
         if current_time - start_time > timeout:
             timed_out = True
+
+
