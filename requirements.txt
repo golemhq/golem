@@ -1,6 +1,6 @@
 Flask-Login==0.4.0
 flask==0.12.2
-selenium==2.52.0
+selenium==3.4.3
 pytest
 sphinx
 recommonmark

@@ -16,6 +16,7 @@ Golem
    the-web-module
    actions
    custom-actions
+   settings
 
 
 

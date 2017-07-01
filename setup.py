@@ -64,7 +64,7 @@ setup(
     setup_requires=['setuptools-pep8'],
     install_requires=['Flask==0.10.1',
                       'Flask-login==0.3.2',
-                      'selenium==2.52.0'
+                      'selenium==3.4.3'
                       ],
     tests_require=['pytest'],
     entry_points={
