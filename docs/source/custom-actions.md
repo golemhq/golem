@@ -60,4 +60,4 @@ TBD
 
 TBD
 
-<!-- Next, go to [Suites](suites.html) -->
+Next, go to [Settings](settings.html)

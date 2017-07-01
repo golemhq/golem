@@ -250,9 +250,9 @@ def assign_settings_default_values(settings):
         settings['implicit_wait'] = None
 
     if not 'screenshot_on_error' in settings:
-        settings['screenshot_on_error'] = False
+        settings['screenshot_on_error'] = True
     elif settings['screenshot_on_error'] == '':
-        settings['screenshot_on_error'] = False
+        settings['screenshot_on_error'] = True
 
     if not 'screenshot_on_step' in settings:
         settings['screenshot_on_step'] = False
@@ -389,7 +389,7 @@ def create_new_project(workspace, project):
 
     settings_path = os.path.join(workspace, 'projects', project, 'settings.json')
     with open(settings_path, 'a') as settings_file:
-        settings_file.write(settings_file_content())
+        settings_file.write(reduced_settings_file_content())
 
 
 def create_demo_project(workspace):
@@ -401,9 +401,8 @@ def create_demo_project(workspace):
 
 def settings_file_content():
     settings_content = (
-        "// Place this settings file at the root of the test directory to impact all\n"
-        "// the projects or inside a project folder to impact a single project.\n"
-        "// Be aware that project settings override global settings.\n"
+        "// Place this settings file at the root of the test directory to\n"
+        "// impact all the projects\n"
         "{\n"
         "// Default time to wait looking for an element until it is found\n"
         "\"implicit_wait\": 20,\n"
@@ -418,11 +417,23 @@ def settings_file_content():
         "\"wait_hook\": null,\n"
         "\n"
         "// Define the driver to use, unless overriden by the -d/--driver flag\n"
-        "\"default_driver\": \"firefox\"\n,"
+        "\"default_driver\": \"firefox\",\n"
         "\n"
-        "// Path to the chrome driver executable. If the chromedriver is inside the test dir.\n"
-        "// It can be referenced as './chromedriver'\n"
-        "\"chrome_driver_path\": \"./drivers/chromedriver\"\n"
+        "// Path to the chrome driver executable. By default it points to the "
+        "// \'drivers\' folder inside the test directory.\n"
+        "\"chrome_driver_path\": \"./drivers/chromedriver\",\n"
+        "\n"
+        "// Path to the gecko driver executable. This is used by Firefox.\n"
+        "// By default it points to the 'drivers' folder inside the test directory.\n"
+        "\"gecko_driver_path\": \"./drivers/geckodriver\"\n"
+        "}\n")
+    return settings_content
+
+
+def reduced_settings_file_content():
+    settings_content = (
+        "// Settings defined here will override global settings\n"
+        "{\n"
         "}\n")
     return settings_content
 
