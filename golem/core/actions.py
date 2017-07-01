@@ -1,14 +1,15 @@
 """Function wrappers for the actions"""
 import time
 import uuid
-import io
+# import io
+import os
 import importlib
 import string
 import random as rand
 
 import selenium
 from selenium.webdriver.common.keys import Keys
-from PIL import Image
+#from PIL import Image
 
 from golem import core
 from golem.core import execution_logger as logger
@@ -38,7 +39,7 @@ def _run_wait_hook():
 
 
 # def force_click(css_selector):
-#     driver = core.getOrCreateWebdriver()
+#     driver = core.get_or_create_web_driver()
 #     click_script = """$("{0}").click();""".format(css_selector)
 #     print click_script
 #     driver.execute_script(click_script)
@@ -57,13 +58,22 @@ def add_step(message):
 
 def capture(message=''):
     _run_wait_hook() 
-    driver = core.getOrCreateWebdriver()
-    #screenshot_name = 'test' + msg.replace(' ', '_')
-    #screenshot_filename = .format(len(logger.screenshots))
-    #driver.save_screenshot(screenshot_name + '.jpg')
-    img = Image.open(io.BytesIO(driver.get_screenshot_as_png()))
+    driver = core.get_or_create_webdriver()
+    # print('SHOULD SAVE SCREENSHOT IN', core.report_directory)
+    
+    # store img in memory and save to disk when at the end
+    # when the report is generated
+    # Note: this solution uses pillow
+    # img = Image.open(io.BytesIO(driver.get_screenshot_as_png()))
+    # img_id = str(uuid.uuid4())[:8]
+    # logger.screenshots[img_id] = img
+    
+    # store image at this point, the target directory is already
+    # created since the beginning of the test, stored in golem.gore.report_directory
     img_id = str(uuid.uuid4())[:8]
-    logger.screenshots[img_id] = img
+    img_path = os.path.join(core.report_directory, '{}.png'.format(img_id))
+    driver.get_screenshot_as_file(img_path)
+
     full_message = '{0}__{1}'.format(message, img_id)
     add_step(full_message)
 

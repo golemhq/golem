@@ -10,7 +10,7 @@ from flask import (Flask,
                    send_from_directory,
                    abort)
 
-from flask.ext.login import (LoginManager,
+from flask_login import (LoginManager,
                              login_user,
                              logout_user,
                              current_user,
