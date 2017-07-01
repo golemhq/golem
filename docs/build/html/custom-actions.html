@@ -27,6 +27,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The CLI" href="the-cli.html" />
     <link rel="prev" title="Golem Actions" href="actions.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -45,7 +46,7 @@
             
   <div class="section" id="custom-actions">
 <span id="custom-actions"></span><h1>Custom Actions<a class="headerlink" href="#custom-actions" title="Permalink to this headline">¶</a></h1>
-<p>There are times when simple actions like click or send keys are not enough and more complex actions are required. Also, when a group of actions are repeated over many tests, they should be grouped into a single function and written once. This improves greately the maintenance of the tests.</p>
+<p>There are times when simple actions like click or send keys are not enough and more complex actions are required. Also, when a group of actions are repeated over many tests, they should be grouped into a single function and written once. This greately improves the maintenance of the tests.</p>
 <p>This custom functions/actions should be defined inside the pages.</p>
 <p><strong>Let's see a simple example</strong></p>
 <p>Consider the case of making a login. It usually takes 3 or more steps and is used in almost all the tests. So instead of repeating the same steps, test after test, we can define a 'login' function inside the login page, like so:</p>
@@ -85,7 +86,116 @@
 </div>
 <p>And this is how it looks when using the Web Module:</p>
 <p><img alt="using-a-custom-function" src="_images/using-a-custom-function.png" /></p>
-<p>Next, go to <a class="reference external" href="suites.html">Suites</a></p>
+<div class="section" id="using-golem-actions-inside-functions">
+<span id="using-golem-actions-inside-functions"></span><h2>Using Golem actions inside functions<a class="headerlink" href="#using-golem-actions-inside-functions" title="Permalink to this headline">¶</a></h2>
+<p>To use the default golem actions inside a function, you can do the following:</p>
+<p><strong>some_page.py</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">golem.core</span> <span class="kn">import</span> <span class="n">actions</span>
+
+
+<span class="n">my_input</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;myInput&#39;</span><span class="p">)</span>
+
+<span class="n">my_button</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;myButton&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">some_function</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="n">actions</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="n">my_input</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="n">actions</span><span class="o">.</span><span class="n">click</span><span class="p">(</span><span class="n">my_button</span><span class="p">)</span>
+
+</pre></div>
+</div>
+</div>
+<div class="section" id="finding-elements-dynamically">
+<span id="finding-elements-dynamically"></span><h2>Finding elements dynamically<a class="headerlink" href="#finding-elements-dynamically" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes you have to define selectors dynamically. For that Golem provides two functions: <em>element()</em> and <em>elements()</em>.</p>
+<p>The first, <em>element()</em>, returns a pure selenium <a class="reference external" href="https://seleniumhq.github.io/selenium/docs/api/py/webdriver_remote/selenium.webdriver.remote.webelement.html#module-selenium.webdriver.remote.webelement">WebElement</a> (equivalent to find_element_by_*). The WebElement returned has two added functions: <em>find()</em> and <em>find_all()</em> that let's you chain find funcions to search for elements and sub-elements.</p>
+<p>The second, <em>elements()</em>, returns a list of selenium WebElements (equivalent to find_elements_by_*)</p>
+<p>Let's see an example using <em>element()</em>, <em>elements()</em>, <em>find()</em> and <em>find_all()</em>:</p>
+<p><strong>some_page.py</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">golem.selenium.utils</span> <span class="kn">import</span> <span class="n">element</span><span class="p">,</span> <span class="n">elements</span>
+
+
+<span class="k">def</span> <span class="nf">verify_page_title</span><span class="p">(</span><span class="n">title_text</span><span class="p">):</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">element</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;titleId&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">title</span><span class="o">.</span><span class="n">text</span> <span class="o">==</span> <span class="n">title_text</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Title value is incorrect&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">verify_amount_of_items</span><span class="p">(</span><span class="n">amount</span><span class="p">):</span>
+    <span class="n">list_elem</span> <span class="o">=</span> <span class="n">element</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;listId&#39;</span><span class="p">)</span>
+    <span class="n">list_items</span> <span class="o">=</span> <span class="n">list_elem</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">css</span><span class="o">=</span><span class="s1">&#39;li&gt;span&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_items</span><span class="p">)</span> <span class="o">==</span> <span class="n">amount</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;List has incorrect amount of items&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">click_submit_button</span><span class="p">():</span>
+    <span class="n">element</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;formId&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">css</span><span class="o">=</span><span class="s1">&#39;button.submit&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+
+</pre></div>
+</div>
+</div>
+<div class="section" id="a-more-complex-function">
+<span id="a-more-complex-function"></span><h2>A more complex function<a class="headerlink" href="#a-more-complex-function" title="Permalink to this headline">¶</a></h2>
+<p>Let's imagine our application has a table that displayes the results of a search, and the table looks as follows:</p>
+<table id="resultsTable"> 
+    <thead> 
+        <tr> 
+            <th>Name</th>
+            <th>Age</th>
+            <th>Wolf Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Jon</td>
+            <td>14</td>
+            <td>Ghost</td> 
+        </tr>
+        <tr>
+            <td>Brandon</td>
+            <td>7</td>
+            <td>Summer</td> 
+        </tr>
+        <tr>
+            <td>Arya</td>
+            <td>9</td>
+            <td>Nymeria</td> 
+        </tr>
+        <tr>
+            <td>Rickon</td>
+            <td>2</td>
+            <td>Shaggydog</td> 
+        </tr>
+        <tr>
+            <td>Robb</td>
+            <td>14</td>
+            <td>Grey Wind</td> 
+        </tr>
+    </tbody>
+</table><p>The test needs to verify that a certain owner has the correct wolf. The catch here is that the table is dynamic, that is, the order of the rows and the value of the cells might change from time to time. This makes it difficult to write a selector that points to the cell we need to find because as soon as a row is added or removed, the selector will stop working.</p>
+<p>To sort this obstacle, the solution is to go through the table row by row and cell by cell looking for the exact row and cell that we need, no matter the actual location.</p>
+<p>With Golem this is quite easy to do, check the following example:</p>
+<p><strong>results_page.py</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">golem.selenium.utils</span> <span class="kn">import</span> <span class="n">element</span>
+
+
+<span class="k">def</span> <span class="nf">verify_wolf_name</span><span class="p">(</span><span class="n">owner</span><span class="p">,</span> <span class="n">wolf_name</span><span class="p">):</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">element</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;resultsTable&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;tbody&gt;tr&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="n">cells</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">==</span> <span class="n">owner</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">==</span> <span class="n">wolf_name</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Wolf name for {} is invalid&#39;</span>
+                                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">owner</span><span class="p">))</span>
+
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Owner {} was not found in the table&#39;</span>
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">owner</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Next, go to <a class="reference external" href="the-cli.html">The CLI</a></p>
+</div>
 </div>
 
 
@@ -120,10 +230,12 @@
 <li class="toctree-l1"><a class="reference internal" href="managing-test-data.html">Managing Test Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-pages.html">Using Pages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="suites.html">Suites</a></li>
-<li class="toctree-l1"><a class="reference internal" href="the-cli.html">The CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Custom Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the-cli.html">The CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
 </ul>
 
 <div class="relations">
@@ -131,6 +243,7 @@
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="actions.html" title="previous chapter">Golem Actions</a></li>
+      <li>Next: <a href="the-cli.html" title="next chapter">The CLI</a></li>
   </ul></li>
 </ul>
 </div>

@@ -5,4 +5,4 @@ The web module enables the user to generate, edit and execute tests and suites w
 
 WIP
 
-Next, go to [actions](actions.html)
+Next, go to [Settings](settings.html)

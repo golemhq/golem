@@ -13,7 +13,7 @@ Let's rewrite the previous example but extracting all the data values outside of
 description = 'Search an article in Wikipedia'
 
 def test(data):
-    go_to(data['URL']')
+    go_to(data['URL'])
     send_keys(('id', 'searchInput'), data['search_value'])
     click(('id', 'searchButton'))
     verify_text_in_element(('id', 'firstHeading'), data['article_title'])
@@ -86,7 +86,11 @@ For example, consider the previous data file, but with added rows:
     </tbody>
 </table>
 
-Using that data file, Golem will run the same test 3 times, using each time a different data set. Check the third and fourth row out, we can even point the same test to different URLs.
+Using that data file, Golem will run the same test 4 times, using each time a different data set.
 
+<div class="admonition note">
+    <p class="first admonition-title">Check this out</p>
+    <p>In the third and fourth rows we used a different URL, so we can even point the same test to different environments by just changing the data sets.</p>
+</div>
 
 Next, go to [Using Pages](using-pages.html)

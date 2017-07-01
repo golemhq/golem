@@ -75,7 +75,8 @@
 <p>Use the <strong>setup</strong> function to separate the preconditions from the main test steps.</p>
 <p>The <strong>test</strong> method should contain the steps of the test and should have at least one validation at the end.</p>
 <p>The <strong>teardown</strong> function is always executed, even if the other functions fail. So use the Teardown function to run final commands needed to set everything back to the original position. It is used most commonly to close the browser.</p>
-<p>Next is a bare minimum test that navigates to 'wikipedia.org', searches an article and validates that the Title of the article is correct.</p>
+<p><strong>An Example</strong></p>
+<p>Next is a bare minimum test that navigates to 'en.wikipedia.org', searches an article and validates that the Title of the article is correct.</p>
 <p><strong>validate_article_title.py</strong></p>
 <div class="highlight-python"><div class="highlight"><pre><span></span>
 <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Search an article in Wikipedia&#39;</span>
@@ -97,6 +98,7 @@
 </div>
 <p><strong>Golem actions:</strong></p>
 <p>In the previous example, <em>go_to</em>, <em>send_keys</em>, <em>click</em>, and <em>verify_text...</em> are Golem actions. Check out <a class="reference external" href="actions.html">the entire list of actions</a>.</p>
+<p><br></p>
 <p>Next, go to <a class="reference external" href="managing-test-data.html">Managing Test Data</a></p>
 </div>
 
@@ -132,9 +134,12 @@
 <li class="toctree-l1"><a class="reference internal" href="managing-test-data.html">Managing Test Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-pages.html">Using Pages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="suites.html">Suites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom-actions.html">Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="the-cli.html">The CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
 </ul>
 
 <div class="relations">

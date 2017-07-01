@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Suites &#8212; Golem 0.1.0a3 documentation</title>
+    <title>Web Drivers &#8212; Golem 0.1.0a3 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -27,8 +27,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Golem Actions" href="actions.html" />
-    <link rel="prev" title="Using Pages" href="using-pages.html" />
+    <link rel="prev" title="Settings" href="settings.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -44,29 +43,9 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="suites">
-<span id="suites"></span><h1>Suites<a class="headerlink" href="#suites" title="Permalink to this headline">¶</a></h1>
-<p>A suite lets you arbitrarily select a sub-set of tests to execute as a group. Let's say, you want to test only the most important tests, or the tests for a specific module. In that ocasion, you use a suite.</p>
-<p>A suite contains a list of <em>tests</em>, a list of <em>browsers</em> and the amount of <em>workers</em>. Consider the following example:</p>
-<p><strong>full_regression.py</strong></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>
-<span class="n">browsers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;firefox&#39;</span><span class="p">,</span> <span class="s1">&#39;chrome&#39;</span><span class="p">]</span>
-
-<span class="n">workers</span> <span class="o">=</span> <span class="mi">2</span>
-
-<span class="n">tests</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;test1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;test2&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;some_folder.test3&#39;</span><span class="p">,</span>
-<span class="p">]</span>
-
-</pre></div>
-</div>
-<p>This suite will execute the 3 tests, once per each browser defined. So it will execute a total of 6 tests.</p>
-<p><strong>Parallelisation</strong></p>
-<p>The 'workers = 2' tells Golem how many tests should be executed at the same time. If instead we write 'workers = 6', then all the tests would be executed at the same time.</p>
-<p>Next, go to <a class="reference external" href="actions.html">Actions</a></p>
-</div>
+  <div class="section" id="web-drivers">
+<span id="web-drivers"></span><h1>Web Drivers<a class="headerlink" href="#web-drivers" title="Permalink to this headline">¶</a></h1>
+<!-- Next, go to [Using Pages](using-pages.html) --></div>
 
 
           </div>
@@ -99,21 +78,20 @@
 <li class="toctree-l1"><a class="reference internal" href="adding-tests.html">Adding Tests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="managing-test-data.html">Managing Test Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-pages.html">Using Pages</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Suites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="suites.html">Suites</a></li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="custom-actions.html">Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="the-cli.html">The CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
-<li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Web Drivers</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="using-pages.html" title="previous chapter">Using Pages</a></li>
-      <li>Next: <a href="actions.html" title="next chapter">Golem Actions</a></li>
+      <li>Previous: <a href="settings.html" title="previous chapter">Settings</a></li>
   </ul></li>
 </ul>
 </div>
@@ -139,7 +117,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
-      <a href="_sources/suites.md.txt"
+      <a href="_sources/web-drivers.md.txt"
           rel="nofollow">Page source</a>
     </div>
 

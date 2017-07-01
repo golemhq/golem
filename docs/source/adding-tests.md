@@ -41,8 +41,9 @@ The **test** method should contain the steps of the test and should have at leas
 
 The **teardown** function is always executed, even if the other functions fail. So use the Teardown function to run final commands needed to set everything back to the original position. It is used most commonly to close the browser.
 
+**An Example**
 
-Next is a bare minimum test that navigates to 'wikipedia.org', searches an article and validates that the Title of the article is correct.
+Next is a bare minimum test that navigates to 'en.wikipedia.org', searches an article and validates that the Title of the article is correct.
 
 
 **validate_article_title.py**
@@ -71,5 +72,6 @@ python golem.py run <project_name> validate_article_title
 
 In the previous example, *go_to*, *send_keys*, *click*, and *verify_text...* are Golem actions. Check out [the entire list of actions](actions.html).
 
+<br>
 
 Next, go to [Managing Test Data](managing-test-data.html)

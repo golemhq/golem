@@ -111,22 +111,24 @@ def get_driver(driver_selected):
     return driver
 
 
-def _find(self, id=None, name=None, text=None, link_text=None, partial_link_text=None,
+def _find(self, element_tuple=None, id=None, name=None, text=None, link_text=None, partial_link_text=None,
          css=None, xpath=None, tag_name=None):
-    return element(id, name, text, link_text, partial_link_text, css,
+    return element(element_tuple, id, name, text, link_text, partial_link_text, css,
                    xpath, tag_name)
 
 
-def _find_all(self, id=None, name=None, text=None, link_text=None, partial_link_text=None,
+def _find_all(self, element_tuple=None, id=None, name=None, text=None, link_text=None, partial_link_text=None,
              css=None, xpath=None, tag_name=None):
-    return elements(id, name, text, link_text, partial_link_text, css,
+    return elements(element_tuple, id, name, text, link_text, partial_link_text, css,
                     xpath, tag_name)
 
 
-def element(id=None, name=None, text=None, link_text=None, partial_link_text=None,
-            css=None, xpath=None, tag_name=None):
+def element(element_tuple=None,id=None, name=None, text=None, link_text=None,
+            partial_link_text=None, css=None, xpath=None, tag_name=None):
     webelement = None
-    if id:
+    if element_tuple:
+        webelements = get_selenium_objects(element_tuple)
+    elif id:
         webelement = get_selenium_object(('id', id, 'element_name'))
     elif name:
         webelement = get_selenium_object(('name', name, 'element_name'))
@@ -150,10 +152,12 @@ def element(id=None, name=None, text=None, link_text=None, partial_link_text=Non
     return webelement
 
 
-def elements(id=None, name=None, text=None, link_text=None, partial_link_text=None,
-            css=None, xpath=None, tag_name=None):
+def elements(element_tuple=None, id=None, name=None, text=None, link_text=None,
+             partial_link_text=None, css=None, xpath=None, tag_name=None):
     webelements = None
-    if id:
+    if element_tuple:
+        webelements = get_selenium_objects(element_tuple)
+    elif id:
         webelements = get_selenium_objects(('id', id, 'element_name'))
     elif name:
         webelements = get_selenium_objects(('name', name, 'element_name'))
