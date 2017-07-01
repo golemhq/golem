@@ -21,7 +21,7 @@ def new_directory_test_case(root_path, project, parents, directory_name):
 def new_directory_page_object(root_path, project, parents, directory_name):
     parents_joined = os.sep.join(parents)
     errors = []
-    if directory_already_exists(root_path, project, 'pages', parents, directory_name):
+    if directory_already_exists(root_path, project, 'pages', parents_joined, directory_name):
         errors.append('A directory with that name already exists')
     
     if not errors:

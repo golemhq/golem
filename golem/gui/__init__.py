@@ -174,7 +174,7 @@ def new_tree_element():
         if not errors:
             if is_dir:
                 if element_type == 'test_case':
-                    errors = gui_utils .new_directory_test_case(root_path, project, parents,
+                    errors = gui_utils.new_directory_test_case(root_path, project, parents,
                                                                element_name)
                 elif element_type == 'page_object':
                     errors = gui_utils.new_directory_page_object(root_path, project, parents,

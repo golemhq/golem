@@ -42,6 +42,7 @@ function addElement(event){
     }
 
     if(elementName.length == 0){
+        input.val('');
         input.parent().hide();
         input.parent().parent().find(".display-new-element-link").show();
         return

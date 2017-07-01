@@ -75,7 +75,9 @@ def save_page_object(root_path, project, full_page_name, elements, functions, im
             # replace the spaces with underlines of the element name
             if ' ' in element['name']:
                 element['name'] = element['name'].replace(' ', '_')
-            f.write("\n\n{0} = ('{1}', \"{2}\", '{3}')".format(element['name'],
+            element['value'] = element['value'].replace('"', '\\"').replace("'", "\\'")
+            print(element['value'])
+            f.write("\n\n{0} = ('{1}', \'{2}\', '{3}')".format(element['name'],
                                                                element['selector'],
                                                                element['value'],
                                                                element['display_name']))
@@ -104,7 +106,9 @@ def is_page_object(parameter, root_path, project):
 
 def new_page_object(root_path, project, parents, po_name):
     errors = []
-    if utils.file_exists(root_path, project, 'pages', os.sep.join(parents), po_name):
+    path = os.path.join(root_path, 'projects', project, 'pages', os.sep.join(parents),
+                        '{}.py'.format(po_name))
+    if os.path.isfile(path):
         errors.append('A file with that name already exists')
 
     if not errors:

@@ -100,15 +100,32 @@ function savePageObject(){
     var elements = [];
     var functions = [];
     var importLines = [];
+    var errors = false;
 
     $(".element").each(function(){
         if($(this).find('.element-name').val().length > 0){
-            elements.push({
-                'name': $(this).find('.element-name').val(),
-                'selector': $(this).find('.element-selector').val(),
-                'value': $(this).find('.element-value').val(),
-                'display_name': $(this).find('.element-display-name').val()
-            });
+            var name = $(this).find('.element-name').val().trim();
+            var selector = $(this).find('.element-selector').val();
+            var value = $(this).find('.element-value').val();
+            var display_name = $(this).find('.element-display-name').val();
+            // validate the name is a valid python variable name
+            var validChars = /^[0-9a-zA-Z\_]+$/;
+            if(!name.match(validChars)){
+                displayErrorModal(['Element names should contain only letters, numbers and underscores']);
+                errors = true;
+            }
+            else if(!isNaN(name.charAt(0))){
+                displayErrorModal(['Element names should not begin with a digit']);
+                errors = true
+            }
+            else{
+                elements.push({
+                    'name': name,
+                    'selector': selector,
+                    'value': value,
+                    'display_name': display_name 
+                });
+            }
         }
     });
     $(".function").each(function(){
@@ -118,6 +135,9 @@ function savePageObject(){
         importLines.push($(this).val());
     });
 
+    if(errors){
+        return
+    }
     $.ajax({
         url: "/save_page_object/",
         data: JSON.stringify({

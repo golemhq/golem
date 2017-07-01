@@ -482,9 +482,3 @@ def create_user(workspace, username, password, is_admin, projects, reports):
             json.dump(user_data, users_file, indent=4)
 
     return errors
-
-
-def file_exists(*args):
-    directory_path = os.sep.join(args)
-    return os.path.isfile(directory_path)
-

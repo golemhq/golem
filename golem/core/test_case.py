@@ -87,15 +87,17 @@ def new_test_case(root_path, project, parents, tc_name):
         "\n"
         "description = ''\n\n"
         "pages = []\n\n"
-        "def setup():\n"
+        "def setup(data):\n"
         "    pass\n\n"
         "def test(data):\n"
         "    pass\n\n"
-        "def teardown():\n"
+        "def teardown(data):\n"
         "    close()\n\n")
     errors = []
     # check if a file already exists
-    if utils.file_exists(root_path, project, 'tests', os.sep.join(parents), tc_name):
+    path = os.path.join(root_path, 'projects', project, 'tests',
+                        os.sep.join(parents), '{}.py'.format(tc_name))
+    if os.path.isfile(path):
         errors.append('A file with that name already exists')
     if not errors:
         parents_joined = os.sep.join(parents)
@@ -205,7 +207,7 @@ def save_test_case(root_path, project, full_test_case_name, description,
         f.write('pages = {}\n'.format(format_page_object_string(page_objects)))
         f.write('\n')
         # write the setup function
-        f.write('def setup():\n')
+        f.write('def setup(data):\n')
         if test_steps['setup']:
             for step in test_steps['setup']:
                 parameters_formatted = format_parameters(step, root_path, project,
@@ -231,7 +233,7 @@ def save_test_case(root_path, project, full_test_case_name, description,
             f.write('    pass\n')
         f.write('\n\n')
         # write the teardown function
-        f.write('def teardown():\n')
+        f.write('def teardown(data):\n')
         if test_steps['teardown']:
             for step in test_steps['teardown']:
                 parameters_formatted = format_parameters(step, root_path, project,

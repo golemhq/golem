@@ -31,8 +31,9 @@ def save_suite(root_path, project, suite, test_cases, workers, browsers):
 
 def new_suite(root_path, project, suite_name):
     errors = []
-    if utils.file_exists(root_path, project, 'suites', suite_name):
-        errors.append('A file with that name already exists')
+    path = os.path.join(root_path, 'projects', project, 'suites', '{}.py'.format(suite_name))
+    if os.path.isfile(path):
+        errors.append('A suite with that name already exists')
 
     if not errors:
         suite_path = os.path.join(root_path, 'projects', project, 'suites')

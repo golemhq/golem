@@ -35,7 +35,6 @@ def test_runner(workspace, project, test_case_name, test_data, driver, suite_nam
         'browser': driver}
 
     from golem.core import execution_logger
-    ## instance = None
     test_timestamp = utils.get_timestamp()
     test_start_time = time.time()
 
@@ -52,23 +51,23 @@ def test_runner(workspace, project, test_case_name, test_data, driver, suite_nam
         test_module = importlib.import_module(
             'projects.{0}.tests.{1}'.format(project, test_case_name))
 
-        # test_class = utils.get_test_case_class(project,
-        #                                        test_case_name)
         # import the page objects into the test module
         for page in test_module.pages:
-            test_module = utils.generate_page_object_module(project, test_module, page, page.split('.'))
+            test_module = utils.generate_page_object_module(project, test_module,
+                                                            page, page.split('.'))
         # import logger into the test module
         setattr(test_module, 'logger', golem.core.execution_logger)
+        
         # import actions into the test module
         for action in dir(golem.core.actions):
             setattr(test_module, action, getattr(golem.core.actions, action))
 
-        # instance = test_class()
+        # log description
         if hasattr(test_module, 'description'):
             golem.core.execution_logger.description = test_module.description
     
         if hasattr(test_module, 'setup'):
-            test_module.setup()
+            test_module.setup(golem.core.test_data)
         else:
             raise Exception('Test does not have setup method')
         if hasattr(test_module, 'test'):
@@ -84,7 +83,7 @@ def test_runner(workspace, project, test_case_name, test_data, driver, suite_nam
             if settings['screenshot_on_error']:
                 actions.capture('error')
         except:
-            # if the test failed and chrome is not available
+            # if the test failed and driver is not available
             # capture screenshot is not possible, continue
             pass
         print(dir(traceback))
@@ -92,7 +91,7 @@ def test_runner(workspace, project, test_case_name, test_data, driver, suite_nam
 
     try:
         if hasattr(test_module, 'teardown'):
-            test_module.teardown()
+            test_module.teardown(golem.core.test_data)
         else:
             actions.close()
     except:
