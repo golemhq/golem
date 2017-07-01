@@ -47,6 +47,8 @@ def test_runner(workspace, project, test_case_name, test_data, driver, suite_nam
     # create a directory to store report.json and screenshots
     report_directory = report.create_report_directory(workspace, project, test_case_name,
                                                       suite_name, suite_timestamp)
+    golem.core.report_directory = report_directory
+
     try:
         test_module = importlib.import_module(
             'projects.{0}.tests.{1}'.format(project, test_case_name))

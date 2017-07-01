@@ -9,6 +9,7 @@ settings = None
 project = None
 workspace = None
 test_data = None
+report_directory = None
 
 
 def get_or_create_webdriver(*args):

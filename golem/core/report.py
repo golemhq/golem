@@ -46,6 +46,7 @@ def generate_report(report_directory, test_case_name, test_data, result):
         json.dump(report, json_file, indent=4)
 
     # save screenshots
-    for scr in result['screenshots']:
-        img_filename = '{}.png'.format(scr)
-        result['screenshots'][scr].save(os.path.join(report_directory, img_filename))
+    # no longer needed, screenshots are saved to disk when they are captured
+    # for scr in result['screenshots']:
+    #     img_filename = '{}.png'.format(scr)
+    #     result['screenshots'][scr].save(os.path.join(report_directory, img_filename))

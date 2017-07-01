@@ -1,7 +1,6 @@
-Flask-Login==0.3.2
-flask==0.10.1
+Flask-Login==0.4.0
+flask==0.12.2
 selenium==2.52.0
-Pillow>3.3.1
 pytest
 sphinx
 recommonmark
