@@ -3,7 +3,7 @@
 // Be aware that project settings override global settings.
 {
 // Default time to wait looking for an element until it is found
-"implicit_wait": 20,
+"implicit_wait": 10,
 
 // Take a screenshot on error by default
 "screenshot_on_error": true,
@@ -19,9 +19,9 @@
 
 // Path to the chrome driver executable. By default it points to the
 // 'drivers folder inside the test directory
-"chrome_driver_path": "./drivers/chromedriver",
+"chrome_driver_path": "./drivers/chromedriver.exe",
 
 // Path to the gecko driver executable. This is used by Firefox.
 // By default it points to the 'drivers folder inside the test directory.
-"gecko_driver_path": "./drivers/geckodriver"
+"gecko_driver_path": "./drivers/geckodriver.exe"
 }

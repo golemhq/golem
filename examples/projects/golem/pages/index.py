@@ -12,8 +12,6 @@ create_button = ('id', "createProjectCreate", 'Create button')
 
 project_list_item = ('css', '#projectList>a')
 
-error_list_items = ('css', '#errorList li', 'error_list_item')
-
 error_modal = ('id', 'errorModal', 'error_modal')
 
 
@@ -27,7 +25,7 @@ def verify_project_exists(project_name):
 
 def verify_error_message(error_message):
     actions.wait_for_element_visible(error_modal)
-    items = elements(error_list_items)
+    items = elements(css='#errorList li')
     error_messages = [x.text for x in items]
     actions.capture('verify the application shows the error message: {}'.format(error_message))
     if not error_message in error_messages:

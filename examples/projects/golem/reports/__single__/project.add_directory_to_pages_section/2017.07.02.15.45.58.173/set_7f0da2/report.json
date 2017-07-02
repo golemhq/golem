@@ -1,0 +1,19 @@
+{
+    "test_case": "project.add_directory_to_pages_section",
+    "result": "fail",
+    "steps": [
+        "Go to url:'http://localhost:8000/'",
+        "Write 'admin' in element username",
+        "Write 'admin' in element password",
+        "Click login_button",
+        "Access project test",
+        "Write 'rcyfe/' in element add input",
+        "error__33edeb5d"
+    ],
+    "description": "Verify that the user can add a directory in the pages section by appending '\\' at the end",
+    "error": "Traceback (most recent call last):\n  File \"c:\\users\\luciano\\desktop\\golem\\src\\golem\\core\\test_runner.py\", line 77, in test_runner\n    test_module.test(golem.core.test_data)\n  File \"C:\\Users\\Luciano\\Desktop\\GOLEM\\example\\projects\\golem\\tests\\project\\add_directory_to_pages_section.py\", line 19, in test\n    project.verify_page_exists(data['directory_name'])\n  File \"C:\\Users\\Luciano\\Desktop\\GOLEM\\example\\projects\\golem\\pages\\project.py\", line 46, in verify_page_exists\n    page_name[-1] = ''\nTypeError: 'str' object does not support item assignment\n",
+    "short_error": "TypeError: 'str' object does not support item assignment\n",
+    "test_elapsed_time": 17.43,
+    "test_timestamp": "2017.07.02.15.45.58.729",
+    "browser": "chrome"
+}

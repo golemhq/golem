@@ -126,7 +126,7 @@ def _find_all(self, element_tuple=None, id=None, name=None, text=None, link_text
 def element(element_tuple=None,id=None, name=None, text=None, link_text=None,
             partial_link_text=None, css=None, xpath=None, tag_name=None):
     webelement = None
-    if element_tuple:
+    if type(element_tuple) == tuple:
         webelements = get_selenium_objects(element_tuple)
     elif id:
         webelement = get_selenium_object(('id', id, 'element_name'))
@@ -155,7 +155,7 @@ def element(element_tuple=None,id=None, name=None, text=None, link_text=None,
 def elements(element_tuple=None, id=None, name=None, text=None, link_text=None,
              partial_link_text=None, css=None, xpath=None, tag_name=None):
     webelements = None
-    if element_tuple:
+    if type(element_tuple) == tuple:
         webelements = get_selenium_objects(element_tuple)
     elif id:
         webelements = get_selenium_objects(('id', id, 'element_name'))
