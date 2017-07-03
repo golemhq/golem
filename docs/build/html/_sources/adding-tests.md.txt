@@ -38,7 +38,7 @@ def teardown(data):
 
 ```
 
-And from the Web Module it has the following structure:
+And a test as seen with the Web Module has the following structure:
 
 ![empty test](_static/img/empty-test.png "Empty Test")
 
@@ -54,7 +54,7 @@ The **test** method should contain the steps of the test and should have at leas
 
 The **teardown** function is always executed, even if the other functions fail. So use the Teardown function to run final commands needed to set everything back to the original position. It is used most commonly to close the browser.
 
-**A test example**
+##### A test example
 
 Next is a bare minimum test that navigates to 'en.wikipedia.org', searches an article and validates that the Title of the article is correct.
 
@@ -75,7 +75,20 @@ def teardown():
 
 ```
 
-Run this test with the following command:
+And seeing it with the Web Module:
+
+![example test](_static/img/example-test.png "Example Test")
+
+##### Run the test
+
+<div class="admonition note">
+    <p class="first admonition-title">Note</p>
+    <p>Selenium 3 needs to have the browsers web drivers configured (previously Firefox used to work out of the box but not anymore).
+    <p>To learn how to configure the drivers check the <a href="web-drivers.html">Web Elements page</a>.</p>
+</div>
+
+To run the test just press the 'Run Test' button in the Web Module. The test can also be run using the command line with the following command:
+
 ```
 python golem.py run <project_name> validate_article_title
 ```

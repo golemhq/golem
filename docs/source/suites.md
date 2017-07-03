@@ -22,11 +22,17 @@ tests = [
 
 ```
 
-This suite will execute the 3 tests, once per each browser defined. So it will execute a total of 6 tests. 
+![suite example](_static/img/suite-example.png "Suite Example")
 
-**Parallelisation**
+<div class="admonition note">
+    <p class="first admonition-title">Note</p>
+    <p>This suite will execute all maked tests, once per each browser defined and test set</p>
+</div>
 
-The 'workers = 2' tells Golem how many tests should be executed at the same time. If instead we write 'workers = 6', then all the tests would be executed at the same time.
+
+##### Test Parallelization
+
+The 'workers = 2' tells Golem how many tests should be executed at the same time. How many tests can be parallelized depends on your test infrastructure
 
 
 

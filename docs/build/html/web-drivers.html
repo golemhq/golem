@@ -45,7 +45,28 @@
             
   <div class="section" id="web-drivers">
 <span id="web-drivers"></span><h1>Web Drivers<a class="headerlink" href="#web-drivers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="chrome">
+<span id="chrome"></span><h2>Chrome<a class="headerlink" href="#chrome" title="Permalink to this headline">¶</a></h2>
+<p>To automate Chrome, Chromedriver is needed.</p>
+<p>ChromeDriver is a standalone server which implements WebDriver's wire protocol for Chromium. ChromeDriver is available for Chrome on Android and Chrome on Desktop (Mac, Linux, Windows and ChromeOS).</p>
+<p>Download Chromedriver from <a class="reference external" href="https://sites.google.com/a/chromium.org/chromedriver/">here</a></p>
+<p>To set it up for Golem to use, place it anywhere in your machine (you can use the 'drivers' folder that is generated automatically inside the test directory) and point to it with the 'chrome_driver_path' settings variable:</p>
+<p><strong>settings.json</strong></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s2">&quot;chrome_driver_path&quot;</span><span class="p">:</span> <span class="s2">&quot;./drivers/chromedriver&quot;</span><span class="p">,</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="firefox">
+<span id="firefox"></span><h2>Firefox<a class="headerlink" href="#firefox" title="Permalink to this headline">¶</a></h2>
+<p>Firefox used to work out of the box without the need of any extra driver server. Starting from Selenium 3.4, the Geckodriver server is required.</p>
+<p>Download the Geckodriver from <a class="reference external" href="https://github.com/mozilla/geckodriver/releases">here</a></p>
+<p>The Geckodriver should be in the system path. Golem can manually replace this with the following setting variable.</p>
+<p><strong>settings.json</strong></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gecko_driver_path</span><span class="s2">&quot;: &quot;</span><span class="o">./</span><span class="n">drivers</span><span class="o">/</span><span class="n">geckodriver</span><span class="s2">&quot;,</span>
+</pre></div>
+</div>
 <!-- Next, go to [Using Pages](using-pages.html) --></div>
+</div>
 
 
           </div>

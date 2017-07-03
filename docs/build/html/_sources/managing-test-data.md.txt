@@ -5,6 +5,8 @@ Keeping the test data (input and output values) properly managed is vital for th
 
 To do that, Golem tests can store the data in a separate file.
 
+##### Using the Data Table
+
 Let's rewrite the previous example but extracting all the data values outside of the code:
 
 **validate_article_title.py**
@@ -45,6 +47,11 @@ def teardown():
 
 
 With this improvement, we don't have to modify the code each time the test values change. In the case of testing in different environments, we can quickly swap data files without modifying the tests themselves.
+
+With the Web Module, the result is the following:
+
+
+![test with data table](_static/img/test-with-data-table.png "Test With Data Table")
 
 
 **Multiple data sets**

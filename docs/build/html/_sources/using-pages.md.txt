@@ -5,7 +5,7 @@ If you remember from the previous example, each time the test interacts with a w
 
 Imagine what would happen after the application under tests changes. If a selector for a web element changes and that web element is used in hundreds of tests, it will take an insane amount of time to fix.
 
-**Defining pages**
+##### Defining pages
 
 It is a good practice to keep the web element selectors outside of the test, and declared once in a single place. That place should be a **Page Object**.
 
@@ -49,6 +49,14 @@ title = ('id', 'firstHeading', 'Title')
 
 ```
 
+These pages, as seen with the Web Module, look like this:
+
+![header page](_static/img/header-page.png "Header Page")
+
+![article page](_static/img/article-page.png "Article Page")
+
+##### Using pages inside tests
+
 Having these 2 pages defined, we can use them in our test, and refactor it as follows:
 
 **validate_article_title.py**
@@ -69,5 +77,8 @@ def teardown():
 
 ```
 
+And from the Web Module:
+
+![test with pages](_static/img/test-with-pages.png "Test With Pages")
 
 Next, go to [Suites](suites.html)

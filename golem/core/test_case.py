@@ -10,23 +10,42 @@ def _parse_step(step):
     method_name = step.split('(', 1)[0].strip()
     if not '.' in method_name:
         method_name = method_name.replace('_', ' ')
-    clean_argument_list = []
+    clean_param_list = []
 
-    args_re = re.compile('\((?P<args>.+)\)')
-    args_search = args_re.search(step)
-    if args_search:
-        arguments = args_search.group('args')
-        argument_list = [x.strip() for x in arguments.split(',')]
-        for arg in argument_list:
-            if 'data[' in arg:
+    params_re = re.compile('\((?P<args>.+)\)')
+    params_search = params_re.search(step)
+    if params_search:
+        params_string = params_search.group('args')
+
+        param_list = []
+        param_pairs = []
+        inside_param = False
+        current_start = 0
+        for i in range(len(params_string)):
+            is_last_char = i == len(params_string) -1
+            is_higher_level_comma = params_string[i] == ',' and not inside_param
+            if params_string[i] == '(':
+                inside_param = True
+            elif params_string[i] == ')':
+                inside_param = False
+            elif is_higher_level_comma or is_last_char:
+                param_pairs.append((current_start, i))
+                current_start = i + 1
+        for pair in param_pairs:
+            param_list.append(params_string[pair[0]:pair[1]])
+
+        for param in param_list:
+            if 'data[' in param:
                 data_re = re.compile("[\'|\"](?P<data>.*)[\'|\"]")
-                g = data_re.search(arg)
-                clean_argument_list.append(g.group('data'))
+                g = data_re.search(param)
+                clean_param_list.append(g.group('data'))
+            elif '(' in param and ')' in param:
+                clean_param_list.append(param)
             else:
-                clean_argument_list.append(arg.replace('\'', '').replace('"', ''))
+                clean_param_list.append(param.replace('\'', '').replace('"', ''))
     step = {
         'method_name': method_name,
-        'parameters': clean_argument_list
+        'parameters': clean_param_list
     }
     return step
 

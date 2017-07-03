@@ -276,7 +276,7 @@ function runSuite(){
 
     toastr.options = {
         "positionClass": "toast-top-center",
-        "timeOut": "4000",
+        "timeOut": "15000",
         "hideDuration": "100"}    
     $.ajax({
         url: "/run_suite/",
