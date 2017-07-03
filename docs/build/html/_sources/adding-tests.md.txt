@@ -1,14 +1,23 @@
 Adding Tests
 ==================================================
 
-Tests should be placed in the 'tests' folder inside a project. You can use more folders to further group and arrange the tests.
+Tests should be placed in the 'tests' folder of a project. You can use more folders to further group and arrange the tests.
+
+##### Add a new test
 
 **Add a new test using the console:**
 ```
 python golem.py createtest <project name> <test name>
 ```
 
-You can also create new tests using the **web module**.
+**Add a test from the Web Module**:
+
+![add-test](_static/img/add-test.png "Add Test")
+
+<div class="admonition note">
+    <p class="first admonition-title">Note</p>
+    <p>It is possible to add folders to the list by appending '/' at the end</p>
+</div>
 
 A new test created with either of these options will have the following structure:
 
@@ -29,7 +38,11 @@ def teardown(data):
 
 ```
 
-The **description** is used to describe the test and it's value is displayed in the generated reports, afterwards.
+And from the Web Module it has the following structure:
+
+![empty test](_static/img/empty-test.png "Empty Test")
+
+The **description** is used to define the goal of the test and its value is displayed in the generated report, afterwards.
 
 **Pages** is a list of the pages of the application under test that this test will interact with. More about pages later.
 
@@ -41,7 +54,7 @@ The **test** method should contain the steps of the test and should have at leas
 
 The **teardown** function is always executed, even if the other functions fail. So use the Teardown function to run final commands needed to set everything back to the original position. It is used most commonly to close the browser.
 
-**An Example**
+**A test example**
 
 Next is a bare minimum test that navigates to 'en.wikipedia.org', searches an article and validates that the Title of the article is correct.
 
