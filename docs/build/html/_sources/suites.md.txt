@@ -30,4 +30,4 @@ The 'workers = 2' tells Golem how many tests should be executed at the same time
 
 
 
-Next, go to [the cli](the-cli.html)
+Next, go to [Actions](actions.html)

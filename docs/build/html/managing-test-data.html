@@ -54,7 +54,7 @@
 <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Search an article in Wikipedia&#39;</span>
 
 <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-    <span class="n">go_to</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;URL&#39;</span><span class="p">]</span><span class="s1">&#39;)</span>
+    <span class="n">go_to</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;URL&#39;</span><span class="p">])</span>
     <span class="n">send_keys</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;searchInput&#39;</span><span class="p">),</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;search_value&#39;</span><span class="p">])</span>
     <span class="n">click</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;searchButton&#39;</span><span class="p">))</span>
     <span class="n">verify_text_in_element</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;firstHeading&#39;</span><span class="p">),</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;article_title&#39;</span><span class="p">])</span>
@@ -114,8 +114,11 @@
             <td>Soupe à l'oignon</td>
         </tr>
     </tbody>
-</table><p>Using that data file, Golem will run the same test 3 times, using each time a different data set. Check the third and fourth row out, we can even point the same test to different URLs.</p>
-<p>Next, go to <a class="reference external" href="using-pages.html">Using Pages</a></p>
+</table><p>Using that data file, Golem will run the same test 4 times, using each time a different data set.</p>
+<div class="admonition note">
+    <p class="first admonition-title">Check this out</p>
+    <p>In the third and fourth rows we used a different URL, so we can even point the same test to different environments by just changing the data sets.</p>
+</div><p>Next, go to <a class="reference external" href="using-pages.html">Using Pages</a></p>
 </div>
 
 
@@ -150,9 +153,12 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Managing Test Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-pages.html">Using Pages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="suites.html">Suites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom-actions.html">Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="the-cli.html">The CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
 </ul>
 
 <div class="relations">

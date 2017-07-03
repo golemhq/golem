@@ -23,7 +23,9 @@ function getReportData(){
   		}
 	);
 
-	baseDelay += 10;
+	if(baseDelay <= 10000){
+		baseDelay += 100;
+	}
 
 	setTimeout(function(){
 		getReportData()
@@ -225,7 +227,7 @@ function updateModuleRowInGeneralTable(testCase){
 		barra_azul.attr('id', id);
   		barra_azul.attr('data-transitiongoal', okPercentage);
 
-		//moduleRow.insertBefore("#totalRow");
+		moduleRow.insertBefore("#totalRow");
 
 		//refreshNumbering();
 		

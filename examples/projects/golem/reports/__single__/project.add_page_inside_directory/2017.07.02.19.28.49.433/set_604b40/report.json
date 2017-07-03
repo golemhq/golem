@@ -1,0 +1,19 @@
+{
+    "test_case": "project.add_page_inside_directory",
+    "result": "fail",
+    "steps": [
+        "Go to url:'http://localhost:8000/'",
+        "Write 'admin' in element username",
+        "Write 'admin' in element password",
+        "Click login_button",
+        "Access project test",
+        "Write 'kkihr/' in element add input",
+        "error__c3b6c5b6"
+    ],
+    "description": "Verify that the user can create a new page inside a directory",
+    "error": "Traceback (most recent call last):\n  File \"c:\\users\\luciano\\desktop\\golem\\src\\golem\\core\\test_runner.py\", line 77, in test_runner\n    test_module.test(golem.core.test_data)\n  File \"C:\\Users\\Luciano\\Desktop\\GOLEM\\example\\projects\\golem\\tests\\project\\add_page_inside_directory.py\", line 20, in test\n    project.add_new_page(data['page_name'], data['dir_name'])\n  File \"C:\\Users\\Luciano\\Desktop\\GOLEM\\example\\projects\\golem\\pages\\project.py\", line 33, in add_new_page\n    this_branch_selector += 'li[data-branch-name=\\'{}\\'] > a'.format(branch)\nUnboundLocalError: local variable 'this_branch_selector' referenced before assignment\n",
+    "short_error": "UnboundLocalError: local variable 'this_branch_selector' referenced before assignment\n",
+    "test_elapsed_time": 13.83,
+    "test_timestamp": "2017.07.02.19.28.49.961",
+    "browser": "chrome"
+}

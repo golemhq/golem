@@ -46,13 +46,19 @@
             
   <div class="section" id="adding-tests">
 <span id="adding-tests"></span><h1>Adding Tests<a class="headerlink" href="#adding-tests" title="Permalink to this headline">¶</a></h1>
-<p>Tests should be placed in the 'tests' folder inside a project. You can use more folders to further group and arrange the tests.</p>
+<p>Tests should be placed in the 'tests' folder of a project. You can use more folders to further group and arrange the tests.</p>
+<div class="section" id="add-a-new-test">
+<span id="add-a-new-test"></span><h2>Add a new test<a class="headerlink" href="#add-a-new-test" title="Permalink to this headline">¶</a></h2>
 <p><strong>Add a new test using the console:</strong></p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">golem</span><span class="o">.</span><span class="n">py</span> <span class="n">createtest</span> <span class="o">&lt;</span><span class="n">project</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">test</span> <span class="n">name</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-<p>You can also create new tests using the <strong>web module</strong>.</p>
-<p>A new test created with either of these options will have the following structure:</p>
+<p><strong>Add a test from the Web Module</strong>:</p>
+<p><img alt="add-test" src="_images/add-test.png" /></p>
+<div class="admonition note">
+    <p class="first admonition-title">Note</p>
+    <p>It is possible to add folders to the list by appending '/' at the end</p>
+</div><p>A new test created with either of these options will have the following structure:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span>
 <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
@@ -69,13 +75,16 @@
 
 </pre></div>
 </div>
-<p>The <strong>description</strong> is used to describe the test and it's value is displayed in the generated reports, afterwards.</p>
+<p>And from the Web Module it has the following structure:</p>
+<p><img alt="empty test" src="_images/empty-test.png" /></p>
+<p>The <strong>description</strong> is used to define the goal of the test and its value is displayed in the generated report, afterwards.</p>
 <p><strong>Pages</strong> is a list of the pages of the application under test that this test will interact with. More about pages later.</p>
 <p>After that, a test implements three functions, <strong>setup</strong>, <strong>test</strong> and <strong>teardown</strong>. These functions are always executed in that order.</p>
 <p>Use the <strong>setup</strong> function to separate the preconditions from the main test steps.</p>
 <p>The <strong>test</strong> method should contain the steps of the test and should have at least one validation at the end.</p>
 <p>The <strong>teardown</strong> function is always executed, even if the other functions fail. So use the Teardown function to run final commands needed to set everything back to the original position. It is used most commonly to close the browser.</p>
-<p>Next is a bare minimum test that navigates to 'wikipedia.org', searches an article and validates that the Title of the article is correct.</p>
+<p><strong>A test example</strong></p>
+<p>Next is a bare minimum test that navigates to 'en.wikipedia.org', searches an article and validates that the Title of the article is correct.</p>
 <p><strong>validate_article_title.py</strong></p>
 <div class="highlight-python"><div class="highlight"><pre><span></span>
 <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Search an article in Wikipedia&#39;</span>
@@ -97,7 +106,9 @@
 </div>
 <p><strong>Golem actions:</strong></p>
 <p>In the previous example, <em>go_to</em>, <em>send_keys</em>, <em>click</em>, and <em>verify_text...</em> are Golem actions. Check out <a class="reference external" href="actions.html">the entire list of actions</a>.</p>
+<p><br></p>
 <p>Next, go to <a class="reference external" href="managing-test-data.html">Managing Test Data</a></p>
+</div>
 </div>
 
 
@@ -132,9 +143,12 @@
 <li class="toctree-l1"><a class="reference internal" href="managing-test-data.html">Managing Test Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-pages.html">Using Pages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="suites.html">Suites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom-actions.html">Custom Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="the-cli.html">The CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
 </ul>
 
 <div class="relations">

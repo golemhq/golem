@@ -107,3 +107,4 @@ Pause execution for the given amount of seconds until the element is visible (de
 
 Pause execution for the given amount of seconds until the element is enabled (default is 20 seconds)
 
+Next, go to [Custom Actions](custom-actions.html)

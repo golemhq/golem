@@ -1,0 +1,13 @@
+{
+    "test_case": "project.add_directory_to_pages_section",
+    "result": "fail",
+    "steps": [
+        "Go to url:'http://localhost:8000/'"
+    ],
+    "description": "Verify that the user can add a directory in the pages section by appending '\\' at the end",
+    "error": "Traceback (most recent call last):\n  File \"c:\\users\\luciano\\desktop\\golem\\src\\golem\\core\\test_runner.py\", line 72, in test_runner\n    test_module.setup(golem.core.test_data)\n  File \"C:\\Users\\Luciano\\Desktop\\GOLEM\\example\\projects\\golem\\tests\\project\\add_directory_to_pages_section.py\", line 11, in setup\n    login.do_login('admin', 'admin')\n  File \"C:\\Users\\Luciano\\Desktop\\GOLEM\\example\\projects\\golem\\pages\\login.py\", line 14, in do_login\n    actions.send_keys(username_input, username)\n  File \"c:\\users\\luciano\\desktop\\golem\\src\\golem\\core\\actions.py\", line 154, in send_keys\n    element.send_keys(text)\nAttributeError: 'NoneType' object has no attribute 'send_keys'\n",
+    "short_error": "AttributeError: 'NoneType' object has no attribute 'send_keys'\n",
+    "test_elapsed_time": 28.42,
+    "test_timestamp": "2017.07.02.15.41.44.375",
+    "browser": "chrome"
+}

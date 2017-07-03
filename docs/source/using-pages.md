@@ -1,7 +1,7 @@
 Using Pages
 ==================================================
 
-If you remember from the previous example, each time the test interacts with a web element, the selector for that element is declared. That is going to lead only to trouble down the road. 
+If you remember from the previous example, each time the test interacts with a web element (an HTML tag), the selector for that element needs to be declared. That is going to lead only to trouble down the road. 
 
 Imagine what would happen after the application under tests changes. If a selector for a web element changes and that web element is used in hundreds of tests, it will take an insane amount of time to fix.
 

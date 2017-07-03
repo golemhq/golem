@@ -2,7 +2,7 @@ import sys
 
 from selenium import webdriver
 
-# vaplues used during the execution of a test case
+# values used during the execution of a test case
 driver = None
 driver_name = None
 settings = None
@@ -19,7 +19,11 @@ def get_or_create_webdriver(*args):
     if not driver:
         driver_selected = get_selected_driver()
         if driver_selected == 'firefox':
-            driver = webdriver.Firefox()
+            if 'gecko_driver_path' in settings:
+                print('PATH', settings['gecko_driver_path'])
+                driver = webdriver.Firefox(executable_path=settings['gecko_driver_path'])
+            else:
+                sys.exit('Error: gecko_driver_path setting is not defined')
         if driver_selected == 'chrome':
             if 'chrome_driver_path' in settings:
                 driver = webdriver.Chrome(executable_path=settings['chrome_driver_path'])

@@ -12,10 +12,12 @@ Golem
    managing-test-data
    using-pages
    suites
-   the-cli
-   the-web-module
    actions
    custom-actions
+   the-cli
+   the-web-module
+   settings
+   web-drivers
 
 
 

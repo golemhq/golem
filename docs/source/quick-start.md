@@ -14,15 +14,6 @@ golem-admin createdirectory <directory_name>
 This will create a folder that will contain all subsequent projects.
 
 
-##### Create a new project
-
-Next, create a new **project** inside the test directory
-
-```
-cd <directory_name>
-python golem.py createproject <project_name>
-```
-
 ##### Start the Web Module
 
 To start the Golem Web Module, run the following command:
@@ -34,5 +25,20 @@ python golem.py gui
 The Web Module can be accessed at [http://localhost:5000/](http://localhost:5000/)
 
 By default, the following user is available: username: **admin** / password: **admin**
+
+
+##### Create a new project
+
+Next, create a new **project** inside the test directory
+
+```
+cd <directory_name>
+python golem.py createproject <project_name>
+```
+
+Or, create a new project using the Web Module:
+
+![add-project](_static/img/add-project.png "Add Project")
+
 
 Next, go to [Adding Tests](adding-tests.html)

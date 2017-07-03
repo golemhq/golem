@@ -3,7 +3,7 @@ description = 'Verify that the user cannot log in with in correct password'
 
 pages = ['login']
 
-def setup():
+def setup(data):
     pass
 
 def test(data):
@@ -15,5 +15,5 @@ def test(data):
     verify_text_in_element(login.error_list, 'Username and password do not match')
 
 
-def teardown():
+def teardown(data):
     close()
