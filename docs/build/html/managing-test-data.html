@@ -48,6 +48,8 @@
 <span id="managing-test-data"></span><h1>Managing Test Data<a class="headerlink" href="#managing-test-data" title="Permalink to this headline">¶</a></h1>
 <p>Keeping the test data (input and output values) properly managed is vital for the success of the automated tests.</p>
 <p>To do that, Golem tests can store the data in a separate file.</p>
+<div class="section" id="using-the-data-table">
+<span id="using-the-data-table"></span><h2>Using the Data Table<a class="headerlink" href="#using-the-data-table" title="Permalink to this headline">¶</a></h2>
 <p>Let's rewrite the previous example but extracting all the data values outside of the code:</p>
 <p><strong>validate_article_title.py</strong></p>
 <div class="highlight-python"><div class="highlight"><pre><span></span>
@@ -81,6 +83,8 @@
         </tr>
     </tbody>
 </table><p>With this improvement, we don't have to modify the code each time the test values change. In the case of testing in different environments, we can quickly swap data files without modifying the tests themselves.</p>
+<p>With the Web Module, the result is the following:</p>
+<p><img alt="test with data table" src="_images/test-with-data-table.png" /></p>
 <p><strong>Multiple data sets</strong></p>
 <p>What if we need to execute the same test, but with different values each time. That is, the steps of the test are the same, what changes is the data. In that case, with Golem you can add data sets (more rows to the data file) and Golem will automatically execute the same test using all the data sets provided</p>
 <p>For example, consider the previous data file, but with added rows:</p>
@@ -119,6 +123,7 @@
     <p class="first admonition-title">Check this out</p>
     <p>In the third and fourth rows we used a different URL, so we can even point the same test to different environments by just changing the data sets.</p>
 </div><p>Next, go to <a class="reference external" href="using-pages.html">Using Pages</a></p>
+</div>
 </div>
 
 

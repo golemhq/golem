@@ -75,7 +75,7 @@
 
 </pre></div>
 </div>
-<p>And from the Web Module it has the following structure:</p>
+<p>And a test as seen with the Web Module has the following structure:</p>
 <p><img alt="empty test" src="_images/empty-test.png" /></p>
 <p>The <strong>description</strong> is used to define the goal of the test and its value is displayed in the generated report, afterwards.</p>
 <p><strong>Pages</strong> is a list of the pages of the application under test that this test will interact with. More about pages later.</p>
@@ -83,7 +83,9 @@
 <p>Use the <strong>setup</strong> function to separate the preconditions from the main test steps.</p>
 <p>The <strong>test</strong> method should contain the steps of the test and should have at least one validation at the end.</p>
 <p>The <strong>teardown</strong> function is always executed, even if the other functions fail. So use the Teardown function to run final commands needed to set everything back to the original position. It is used most commonly to close the browser.</p>
-<p><strong>A test example</strong></p>
+</div>
+<div class="section" id="a-test-example">
+<span id="a-test-example"></span><h2>A test example<a class="headerlink" href="#a-test-example" title="Permalink to this headline">¶</a></h2>
 <p>Next is a bare minimum test that navigates to 'en.wikipedia.org', searches an article and validates that the Title of the article is correct.</p>
 <p><strong>validate_article_title.py</strong></p>
 <div class="highlight-python"><div class="highlight"><pre><span></span>
@@ -100,7 +102,16 @@
 
 </pre></div>
 </div>
-<p>Run this test with the following command:</p>
+<p>And seeing it with the Web Module:</p>
+<p><img alt="example test" src="_images/example-test.png" /></p>
+</div>
+<div class="section" id="run-the-test">
+<span id="run-the-test"></span><h2>Run the test<a class="headerlink" href="#run-the-test" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+    <p class="first admonition-title">Note</p>
+    <p>Selenium 3 needs to have the browsers web drivers configured (previously Firefox used to work out of the box but not anymore).
+    <p>To learn how to configure the drivers check the <a href="web-drivers.html">Web Elements page</a>.</p>
+</div><p>To run the test just press the 'Run Test' button in the Web Module. The test can also be run using the command line with the following command:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">golem</span><span class="o">.</span><span class="n">py</span> <span class="n">run</span> <span class="o">&lt;</span><span class="n">project_name</span><span class="o">&gt;</span> <span class="n">validate_article_title</span>
 </pre></div>
 </div>

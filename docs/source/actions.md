@@ -99,11 +99,15 @@ Verify that an element contains the given text.
 
 Pause execution for the given amount of seconds
 
-- **wait_for_element_visible(element, timeout)**
+- **wait_for_element_not_visible(element, timeout=20)**
+
+Pause execution for the given amount of seconds until the element is no longer visible (default is 20 seconds)
+
+- **wait_for_element_visible(element, timeout=20)**
 
 Pause execution for the given amount of seconds until the element is visible (default is 20 seconds)
 
-- **wait_for_element_enabled(element, timeout)**
+- **wait_for_element_enabled(element, timeout=20)**
 
 Pause execution for the given amount of seconds until the element is enabled (default is 20 seconds)
 

@@ -39,6 +39,6 @@ Path to the gecko driver executable. By default it points to the *drivers* folde
 
 Custom wait method to use for every action, that can be specific to each application. It must be defined inside extend.py
 
-
+<br>
 
 Next, go to [Web Drivers](web-drivers.html)

@@ -1,4 +1,5 @@
 import sys
+import os
 
 from selenium import webdriver
 
@@ -20,8 +21,9 @@ def get_or_create_webdriver(*args):
         driver_selected = get_selected_driver()
         if driver_selected == 'firefox':
             if 'gecko_driver_path' in settings:
-                print('PATH', settings['gecko_driver_path'])
-                driver = webdriver.Firefox(executable_path=settings['gecko_driver_path'])
+                #os.environ["webdriver.firefox.driver"] = settings['gecko_driver_path']
+                os.environ["webdriver.gecko.driver"] = settings['gecko_driver_path']
+                driver = webdriver.Firefox()
             else:
                 sys.exit('Error: gecko_driver_path setting is not defined')
         if driver_selected == 'chrome':

@@ -48,7 +48,8 @@
 <span id="using-pages"></span><h1>Using Pages<a class="headerlink" href="#using-pages" title="Permalink to this headline">¶</a></h1>
 <p>If you remember from the previous example, each time the test interacts with a web element (an HTML tag), the selector for that element needs to be declared. That is going to lead only to trouble down the road.</p>
 <p>Imagine what would happen after the application under tests changes. If a selector for a web element changes and that web element is used in hundreds of tests, it will take an insane amount of time to fix.</p>
-<p><strong>Defining pages</strong></p>
+<div class="section" id="defining-pages">
+<span id="defining-pages"></span><h2>Defining pages<a class="headerlink" href="#defining-pages" title="Permalink to this headline">¶</a></h2>
 <p>It is a good practice to keep the web element selectors outside of the test, and declared once in a single place. That place should be a <strong>Page Object</strong>.</p>
 <p>A Page Object represents an entire page of the application (or a part of a page, like the header or the menu). Inside that Page, you can declare the selectors for all the web elements that your tests are going to interact with.</p>
 <p>You can also define complex actions that the tests can perform inside that page, this take the form of fuctions. More on this later.</p>
@@ -83,6 +84,12 @@
 
 </pre></div>
 </div>
+<p>These pages, as seen with the Web Module, look like this:</p>
+<p><img alt="header page" src="_images/header-page.png" /></p>
+<p><img alt="article page" src="_images/article-page.png" /></p>
+</div>
+<div class="section" id="using-pages-inside-tests">
+<span id="using-pages-inside-tests"></span><h2>Using pages inside tests<a class="headerlink" href="#using-pages-inside-tests" title="Permalink to this headline">¶</a></h2>
 <p>Having these 2 pages defined, we can use them in our test, and refactor it as follows:</p>
 <p><strong>validate_article_title.py</strong></p>
 <div class="highlight-python"><div class="highlight"><pre><span></span>
@@ -101,7 +108,10 @@
 
 </pre></div>
 </div>
+<p>And from the Web Module:</p>
+<p><img alt="test with pages" src="_images/test-with-pages.png" /></p>
 <p>Next, go to <a class="reference external" href="suites.html">Suites</a></p>
+</div>
 </div>
 
 

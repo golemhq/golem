@@ -44,7 +44,6 @@ class RunCommand(BaseCommand):
 
     def run(self, test_execution, args):
         test_execution.thread_amount = args.threads
-        print('args.threads', args.threads)
         test_execution.drivers = args.drivers
         test_execution.timestamp = args.timestamp
 
@@ -58,7 +57,7 @@ class RunCommand(BaseCommand):
         elif not args.project in utils.get_projects(root_path):
             raise CommandException(
                 'Error: the project {0} does not exist'.format(
-                    test_execution.project)
+                    args.project)
             )
         else:
             test_execution.project = args.project

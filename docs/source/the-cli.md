@@ -35,5 +35,6 @@ Creates a new suite inside the given project.
 
 Add a new user, projects is a list of projects that the user can access and reports determines which project reports the user can see. In both cases use '*' to give the user access to all projects
 
+<br>
 
 Next, go to [The Web Module](the-web-module.html)
