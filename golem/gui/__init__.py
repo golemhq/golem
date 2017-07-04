@@ -319,7 +319,7 @@ def check_test_case_run_result():
         timestamp = request.form['timestamp']
 
         path = os.path.join(root_path, 'projects', project, 'reports',
-                            '__single__', test_case_name, timestamp)
+                            'single_tests', test_case_name, timestamp)
         sets = []
         complete = False
         test_case_data = {}

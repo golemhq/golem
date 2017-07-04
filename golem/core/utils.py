@@ -251,12 +251,12 @@ def assign_settings_default_values(settings):
 
     if not 'screenshot_on_error' in settings:
         settings['screenshot_on_error'] = True
-    elif settings['screenshot_on_error'] == '':
+    elif settings['screenshot_on_error'] == '' or settings['screenshot_on_error'] == None:
         settings['screenshot_on_error'] = True
 
     if not 'screenshot_on_step' in settings:
         settings['screenshot_on_step'] = False
-    elif settings['screenshot_on_step'] == '':
+    elif settings['screenshot_on_step'] == '' or settings['screenshot_on_step'] == None:
         settings['screenshot_on_step'] == False
 
     if not 'wait_hook' in settings:
@@ -273,6 +273,26 @@ def assign_settings_default_values(settings):
         settings['chrome_driver_path'] = None
     elif settings['chrome_driver_path'] == '':
         settings['chrome_driver_path'] == None
+
+    if not 'gecko_driver_path' in settings:
+        settings['gecko_driver_path'] = None
+    elif not settings['gecko_driver_path']:
+        settings['gecko_driver_path'] == None
+
+    if not 'console_log_level' in settings:
+        settings['console_log_level'] = 'INFO'
+    elif not settings['console_log_level']:
+        settings['console_log_level'] = 'INFO'
+
+    if not 'file_log_level' in settings:
+        settings['file_log_level'] = 'DEBUG'
+    elif not settings['file_log_level']:
+        settings['file_log_level'] = 'DEBUG'
+
+    if not 'log_all_events' in settings:
+        settings['log_all_events'] = True
+    elif settings['log_all_events'] == '' or settings['log_all_events'] == None:
+        settings['log_all_events'] = True
 
     return settings
 
@@ -426,6 +446,17 @@ def settings_file_content():
         "// Path to the gecko driver executable. This is used by Firefox.\n"
         "// By default it points to the 'drivers' folder inside the test directory.\n"
         "\"gecko_driver_path\": \"./drivers/geckodriver\"\n"
+        
+        "// Log level to console. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.\n"
+        "// Default option is INFO\n"
+        "\"console_log_level\": \"INFO\",\n"
+        "\n"
+        "// Log level to file. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.\n"
+        "// Default option is DEBUG\n"
+        "\"console_log_level\": \"DEBUG\",\n"
+        "\n"
+        "// Log all events, instead of just Golem events. Default is false\n"
+        "\"log_all_events\": false\n"
         "}\n")
     return settings_content
 

@@ -22,8 +22,8 @@ from golem.core import (actions,
                         utils)
 
 
-def test_runner(workspace, project, test_case_name, test_data, driver, suite_name,
-                suite_data, suite_timestamp, settings):
+def test_runner(workspace, project, test_name, test_data, driver,
+                settings, report_directory):
     ''' runs a single test case by name'''
     result = {
         'result': 'pass',
@@ -32,9 +32,19 @@ def test_runner(workspace, project, test_case_name, test_data, driver, suite_nam
         'steps': None,
         'test_elapsed_time': None,
         'test_timestamp': None,
-        'browser': driver}
+        'browser': driver
+    }
 
     from golem.core import execution_logger
+
+    execution_logger.get_logger(report_directory,
+                                settings['console_log_level'],
+                                settings['file_log_level'],
+                                settings['log_all_events'])
+
+    execution_logger.logger.info('Test execution started: {}'.format(test_name))
+    execution_logger.logger.info('Driver: {}'.format(driver))
+
     test_timestamp = utils.get_timestamp()
     test_start_time = time.time()
 
@@ -43,15 +53,11 @@ def test_runner(workspace, project, test_case_name, test_data, driver, suite_nam
     golem.core.test_data = test_data
     golem.core.driver_name = driver
     golem.core.set_settings(settings)
-
-    # create a directory to store report.json and screenshots
-    report_directory = report.create_report_directory(workspace, project, test_case_name,
-                                                      suite_name, suite_timestamp)
     golem.core.report_directory = report_directory
 
     try:
         test_module = importlib.import_module(
-            'projects.{0}.tests.{1}'.format(project, test_case_name))
+            'projects.{0}.tests.{1}'.format(project, test_name))
 
         # import the page objects into the test module
         for page in test_module.pages:
@@ -107,41 +113,45 @@ def test_runner(workspace, project, test_case_name, test_data, driver, suite_nam
     result['steps'] = execution_logger.steps
     result['test_elapsed_time'] = test_elapsed_time
     result['test_timestamp'] = test_timestamp
-    result['screenshots'] = execution_logger.screenshots
+    # result['screenshots'] = execution_logger.screenshots
     result['browser'] = golem.core.get_selected_driver()
 
     execution_logger.description = None
     execution_logger.steps = []
     execution_logger.screenshots = {}
 
-    report.generate_report(report_directory,
-                           test_case_name,
-                           test_data,
-                           result)
+    report.generate_report(report_directory, test_name,
+                           test_data, result)
     return result
 
 
-def multiprocess_executor(execution_list, processes=1, suite_name=None, suite_data=None):
-    print('execution list', execution_list)
+def multiprocess_executor(execution_list, processes=1, suite_name=None):
+    print('Executing:')
+    for test in execution_list:
+        print('{} in {} with {}'.format(test['test_name'],
+                                        test['driver'],
+                                        test['data_set']))
 
-    if test_execution.timestamp:
-        timestamp = test_execution.timestamp
-    else:
-        timestamp = utils.get_timestamp()
+    if not test_execution.timestamp:
+        test_execution.timestamp = utils.get_timestamp()
 
     pool = Pool(processes=processes)
 
     results = []
+
     for test in execution_list:
+        # generate a report directory for this test
+        report_directory = report.create_report_directory(test_execution.root_path,
+                                                          test_execution.project,
+                                                          test['test_name'], suite_name, 
+                                                          test_execution.timestamp)
         args = (test_execution.root_path,
                 test_execution.project,
-                test['test_case_name'],
+                test['test_name'],
                 test['data_set'],
                 test['driver'],
-                suite_name,
-                suite_data,
-                timestamp,
-                test_execution.settings)
+                test_execution.settings,
+                report_directory)
         apply_async = pool.apply_async(test_runner, args=args)
         results.append(apply_async)
 
@@ -190,7 +200,7 @@ def run_single_test_case(workspace, project, full_test_case_name):
         for data_set in data_sets:
             for driver in drivers:
                 execution_list.append({
-                    'test_case_name': full_test_case_name,
+                    'test_name': full_test_case_name,
                     'data_set': data_set,
                     'driver': driver,
                     })
@@ -250,7 +260,7 @@ def run_suite(workspace, project, suite, is_directory=False):
         for data_set in data_sets:
             for driver in drivers:
                 execution_list.append({
-                    'test_case_name': test_case,
+                    'test_name': test_case,
                     'data_set': data_set,
                     'driver': driver
                     })
