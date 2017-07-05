@@ -84,6 +84,7 @@ def click(element):
     step_message = 'Click {0}'.format(element[2])
     element = get_selenium_object(element)
     element.click()
+    logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
@@ -94,9 +95,10 @@ def close():
 
 
 def go_to(url):
-    step_message = 'Go to url:\'{0}\''.format(url)
+    step_message = 'Go to url: \'{0}\''.format(url)
     driver = core.get_or_create_webdriver()
     driver.get(url)
+    logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
@@ -152,6 +154,7 @@ def send_keys(element, text):
     step_message = 'Write \'{0}\' in element {1}'.format(text, element[2])
     element = get_selenium_object(element)
     element.send_keys(text)
+    logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 

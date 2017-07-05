@@ -66,6 +66,18 @@
 						</div>
 					{% endfor %}
 				</div>
+
+				<div class="col-md-12 proyect-container main-container test_case_container" id="log">
+					<h3>Log</h3>
+					<div id="logLines" style="font-family: monospace; font-size: 14px;">
+						{% for line in test_case_data.log %}
+							<div class="step">
+								<span>{{line}}</span>
+							</div>
+						{% endfor %}
+					</div>
+				</div>
+
 			</div>
 		</div>									
 		<!-- BOTTOM: LEFT NAV AND RIGHT MAIN CONTENT -->

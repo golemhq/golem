@@ -132,3 +132,24 @@ html {
 	border-left: 0px;
 	border-right: 0px;
 }
+
+@media (min-width: 768px){
+	.modal-dialog {
+    	width: 760px;
+    	margin: 30px auto;
+}
+
+.modal {
+	top: 10%!important;
+}
+
+.modal-body {
+	max-height: calc(90vh - 200px);
+	overflow-y: auto;
+}
+
+#testResultLogs {
+	font-family: monospace;
+	margin-bottom: 20px;
+}
+

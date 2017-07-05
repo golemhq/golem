@@ -4,6 +4,7 @@ var globalActions = [];
 var selectedPageObjectsElements = [];
 var selectedPageObjectsFunctions = [];
 var unsavedChanges = false;
+var checkDelay = 2000;
 
 $(document).ready(function() {      
 
@@ -719,7 +720,9 @@ function checkTestCaseResult(project, fullTestCaseName, timestamp){
     $("#testRunModal").modal("show");
     $("#testRunModal .modal-title").html('Running Test Case');
     $("#loaderContainer").show();
-    $("#testResultContainer").html('');
+    $("#testResults").html('');
+    $("#testResultLogs").html('');
+    checkDelay = 2000;
     checkAndRecheckStatus(project, fullTestCaseName, timestamp);
 }
 
@@ -734,29 +737,30 @@ function checkAndRecheckStatus(project, fullTestCaseName, timestamp){
          },
          dataType: 'json',
          type: 'POST',
-         success: function(data) {
-            if(data.status == 'not_complete'){
+         success: function(result) {
+            checkDelay += 100;
+            if(!result.complete){
                 setTimeout(function(){
                     checkAndRecheckStatus(project, fullTestCaseName, timestamp);
-                }, 2000, project, fullTestCaseName, timestamp);
+                }, checkDelay, project, fullTestCaseName, timestamp);
+                
+                if(result.logs.length){
+                    $("#loaderContainer").hide();
+                    mergeAndDisplayLogs(result.logs);
+                }
             }
             else{
-                $("#loaderContainer").hide();
 
                 $("#testRunModal .modal-title").html('Result');
 
-                $("#testResultContainer").html('');
-
-                $("#testResultContainer").append('<span><strong>Result:</strong> ' + data.report_data.result + '</span><br>');
-                $("#testResultContainer").append('<span><strong>Error:</strong> ' + data.report_data.short_error + '</span><br>');
-                $("#testResultContainer").append('<span><strong>Elapsed Time:</strong> ' + data.report_data.test_elapsed_time + '</span><br>');
-                $("#testResultContainer").append('<span><strong>Browser:<strong> ' + data.report_data.browser + '</span><br>');
-                $("#testResultContainer").append('<span><strong>Steps:</strong></span>');
-                $("#testResultContainer").append("<ol style='margin-left: 20px'></ol>");
-                for(s in data.report_data.steps){
-                    $("#testResultContainer ol").append('<li>' + data.report_data.steps[s] + '</li>')
+                if(result.logs.length){
+                    $("#loaderContainer").hide();
+                    mergeAndDisplayLogs(result.logs);
                 }
-                $("#testResultContainer").append('</ol>')
+
+                if(result.reports.length){
+                    displayTestResults(result.reports);
+                }
             }
          },
          error: function() {}
@@ -830,3 +834,44 @@ function getPageObjectsNotYetSelected(){
     }
     return pageObjectsNotYetSelected
 }
+
+
+function mergeAndDisplayLogs(logs){
+    for(l in logs){
+        var thisLog = logs[l];
+        for(line in thisLog){
+            var thisLine = thisLog[line];
+            // is this line already in the log area?
+            var lineIsDisplayed = false;
+            $("#testResultLogs div.log-line").each(function(){
+                if($(this).html() === thisLine){
+                    lineIsDisplayed = true;
+                }
+            });
+
+            if(!lineIsDisplayed){
+                $("#testResultLogs").append("<div class='log-line'>"+thisLine+"</div>");
+            }
+        }
+    }
+}
+
+
+function displayTestResults(reports){
+    for(r in reports){
+        var thisReport = reports[r];
+        var report = $("<div class='report-result'></div>");
+        report.append('<span><strong>Result:</strong> ' + thisReport.result + '</span><br>');
+        report.append('<span><strong>Error:</strong> ' + thisReport.short_error + '</span><br>');
+        report.append('<span><strong>Elapsed Time:</strong> ' + thisReport.test_elapsed_time + '</span><br>');
+        report.append('<span><strong>Browser:<strong> ' + thisReport.browser + '</span><br>');
+        report.append('<span><strong>Steps:</strong></span>');
+        report.append("<ol style='margin-left: 20px'></ol>");
+        for(s in thisReport.steps){
+            report.find("ol").append('<li>' + thisReport.steps[s] + '</li>')
+        }
+        report.append('</ol>');
+        $("#testResults").append(report);
+    }
+}
+

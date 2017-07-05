@@ -16,8 +16,7 @@ from multiprocessing import Pool
 from multiprocessing.pool import ApplyResult
 
 import golem.core
-from golem.core import (actions,
-                        report,
+from golem.core import (report,
                         test_execution,
                         utils)
 
@@ -36,6 +35,7 @@ def test_runner(workspace, project, test_name, test_data, driver,
     }
 
     from golem.core import execution_logger
+    from golem.core import actions
 
     execution_logger.get_logger(report_directory,
                                 settings['console_log_level'],
@@ -224,9 +224,9 @@ def run_suite(workspace, project, suite, is_directory=False):
 
     threads = 1
     
-    suite_file_amount_workers = utils.get_suite_amount_of_workers(workspace, project, suite)
-    if suite_file_amount_workers > 1:
-        threads = suite_file_amount_workers
+    suite_amount_workers = utils.get_suite_amount_of_workers(workspace, project, suite)
+    if suite_amount_workers >= 1:
+        threads = suite_amount_workers
 
     # the thread count pass through cli has higher priority
     if test_execution.thread_amount:
