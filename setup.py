@@ -38,7 +38,7 @@ class PyTest(TestCommand):
 
 
 setup(
-    name='golem',
+    name='golem-framework',
     version=golem.__version__,
     description='Test automation framework for functional tests using Selenium',
     # long_description=long_description,
