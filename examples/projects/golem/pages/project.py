@@ -6,8 +6,6 @@ new_page_button = ('css', "#pagesTree .display-new-element-link a", 'new_page_bu
 
 new_page_input = ('css', '#pagesTree .new-element-form', 'new_pages_input')
 
-error_modal = ('id', 'errorModal', 'error_modal')
-
 
 def click_pages_add_new(path=''):
     split_path = []
@@ -29,8 +27,8 @@ def add_new_page(name, path=''):
         split_path = path.split('.')
     selector = '#pagesTree >'
     for i in range(len(split_path)):
-        branch = split_path[i].replace('/', '')
-        this_branch_selector = selector + 'li[data-branch-name=\'{}\'] > a'.format(branch)
+        branch = split_path[i]
+        this_branch_selector += 'li[data-branch-name=\'{}\'] > a'.format(branch)
         element(css=this_branch_selector).click()
         selector = selector +'li[data-branch-name=\'{}\'] ul '.format(branch)
     add_link_selector = selector + ' li > span > a'
@@ -41,25 +39,19 @@ def add_new_page(name, path=''):
     actions.press_key(add_page_input, 'ENTER')
 
 
-def verify_page_exists(page_name, path):
-    if page_name[-1] == '/':
-        page_name = page_name[:-1]
+def verify_page_exists(full_path):
+    split_path = []
+    if len(full_path):
+        split_path = full_path.split('.')
+    dir_name = split_path.pop()
     selector = 'ul#pagesTree >'
-    for i in range(len(path)):
-        branch = path[i]
+    for i in range(len(split_path)):
+        branch = split_path[i]
         this_branch_selector += 'li[data-branch-name=\'{}\'] > a'.format(branch)
         element(css=this_branch_selector).click()
         selector = selector +'li[data-branch-name=\'{}\'] ul '.format(branch)
+
     list_of_lis_selector = selector + ' li.tree-element'
     list_of_lis = elements(css=list_of_lis_selector)
-    if not page_name in [x.text for x in list_of_lis]:
-        raise Exception('Page {} was not found'.format(page_name))
-
-
-def verify_error_message(error_message):
-    actions.wait_for_element_visible(error_modal)
-    items = elements(css='#errorList li')
-    error_messages = [x.text for x in items]
-    actions.capture('verify the application shows the error message: {}'.format(error_message))
-    if not error_message in error_messages:
-        raise Exception('Error message {} is not present'.format(error_message))
+    if not dir_name in [x.text for x in list_of_lis]:
+        raise Exception('Page {} was not found'.format(dir_name))

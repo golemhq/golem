@@ -25,7 +25,7 @@ Take a screenshot on every step. Default is False.
 
 - *default_driver*
 
-Define the driver to use unless overriden by the -d/--driver flag. Default is 'firefox'. Valid options are: firefox, chrome, TBD
+Define the driver to use unless overriden by the -d/--driver flag. Default is 'chrome'. Valid options are: firefox, chrome, TBD
 
 - *chrome_driver_path*
 

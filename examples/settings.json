@@ -15,13 +15,15 @@
 "wait_hook": null,
 
 // Define the driver to use, unless overriden by the -d/--driver flag
-"default_driver": "firefox",
+"default_driver": "chrome",
 
 // Path to the chrome driver executable. By default it points to the
 // 'drivers folder inside the test directory
-"chrome_driver_path": "./drivers/chromedriver.exe",
+"chrome_driver_path": "./drivers/chromedriver",
 
 // Path to the gecko driver executable. This is used by Firefox.
 // By default it points to the 'drivers folder inside the test directory.
-"gecko_driver_path": "./drivers/geckodriver.exe"
+"gecko_driver_path": "./drivers/geckodriver",
+
+"log_all_events": false
 }

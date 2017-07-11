@@ -1,8 +1,7 @@
 
 
 browsers = [
-    'firefox',
-    'chrome'
+    'firefox'
 ]
 
 workers = 5
