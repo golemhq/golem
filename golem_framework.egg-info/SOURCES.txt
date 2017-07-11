@@ -1,0 +1,10 @@
+setup.cfg
+setup.py
+golem/__init__.py
+golem/main.py
+golem_framework.egg-info/PKG-INFO
+golem_framework.egg-info/SOURCES.txt
+golem_framework.egg-info/dependency_links.txt
+golem_framework.egg-info/entry_points.txt
+golem_framework.egg-info/requires.txt
+golem_framework.egg-info/top_level.txt
