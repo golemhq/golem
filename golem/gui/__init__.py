@@ -11,12 +11,12 @@ from flask import (Flask,
                    abort)
 
 from flask_login import (LoginManager,
-                             login_user,
-                             logout_user,
-                             current_user,
-                             login_required)
+                         login_user,
+                         logout_user,
+                         current_user,
+                         login_required)
 
-from golem.core import utils, test_case, page_object, suite, data
+from golem.core import utils, test_case, page_object, suite, data, test_execution
 from . import gui_utils, user, report_parser
 
 
@@ -321,33 +321,41 @@ def check_test_case_run_result():
         path = os.path.join(root_path, 'projects', project, 'reports',
                             'single_tests', test_case_name, timestamp)
         sets = []
-        complete = False
-        test_case_data = {}
+        result = {
+            'reports': [],
+            'logs': [],
+            'complete': False
+        }
 
         if os.path.isdir(path):
             for elem in os.listdir(path):
-                sets.append(elem)
+                sets.append(elem)  
 
-        if sets:
-          new_path = os.path.join(path, sets[0])
-          set_content = os.listdir(new_path)
-          if set_content:
-            report_path = os.path.join(new_path, 'report.json')
-            with open(report_path) as data_file:    
-                json_data = json.load(data_file)
+        # is execution finished?
+        result['complete'] = report_parser.is_execution_finished(path, sets)
 
-                json_data['steps'] = [x.split('__')[0] for x in json_data['steps']]
+        for data_set in sets:
 
+            report_path = os.path.join(path, data_set, 'report.json')
+            if os.path.exists(report_path):
+                with open(report_path) as report_file:    
+                    report_data = json.load(report_file)
+                    report_data['steps'] = [x.split('__')[0] for x in report_data['steps']]
+                    result['reports'].append(report_data)
 
-            # this does not work for single test cases, only suites
-            # test_case_data = report_parser.get_test_case_data(root_path, project, '__single__',
-            #                                    execution, test_case, test_set)
-            complete = True
+            log_path = os.path.join(path, data_set, 'execution_console.log')
+            if os.path.exists(log_path):
+                with open(log_path) as log_file:
+                    log = log_file.readlines()
+                    result['logs'].append(log)
 
-        if complete:
-          result = {'status': 'complete', 'report_data': json_data}
-        else:
-          result = {'status': 'not_complete'}
+        # for data_set in sets:
+        #     new_path = os.path.join(path, sets[0])
+        #     report_path = os.path.join(new_path, 'report.json')
+        #     if os.path.exists(report_path):
+        #         with open(report_path) as report_file:    
+        #             report_data = json.load(report_file)
+        #             report_data['steps'] = [x.split('__')[0] for x in report_data['steps']]
 
         return json.dumps(result)
 
@@ -373,10 +381,11 @@ def suite_view(project, suite):
     worker_amount = utils.get_suite_amount_of_workers(root_path, project, suite)
     browsers = utils.get_suite_browsers(root_path, project, suite)
     browsers = ', '.join(browsers)
+    default_browser = test_execution.settings['default_driver']
 
     return render_template('suite.html', project=project, all_test_cases=all_test_cases,
                            selected_tests=selected_tests, suite=suite, worker_amount=worker_amount,
-                           browsers=browsers)
+                           browsers=browsers, default_browser=default_browser)
 
 
 @app.route("/save_suite/", methods=['POST'])

@@ -16,8 +16,7 @@ from multiprocessing import Pool
 from multiprocessing.pool import ApplyResult
 
 import golem.core
-from golem.core import (actions,
-                        report,
+from golem.core import (report,
                         test_execution,
                         utils)
 
@@ -27,15 +26,16 @@ def test_runner(workspace, project, test_name, test_data, driver,
     ''' runs a single test case by name'''
     result = {
         'result': 'pass',
-        'error': None,
-        'description': None,
-        'steps': None,
+        'error': '',
+        'description': '',
+        'steps': [],
         'test_elapsed_time': None,
         'test_timestamp': None,
         'browser': driver
     }
 
     from golem.core import execution_logger
+    from golem.core import actions
 
     execution_logger.get_logger(report_directory,
                                 settings['console_log_level'],
@@ -44,6 +44,11 @@ def test_runner(workspace, project, test_name, test_data, driver,
 
     execution_logger.logger.info('Test execution started: {}'.format(test_name))
     execution_logger.logger.info('Driver: {}'.format(driver))
+    if test_data:
+        data_string = '\n'
+        for key in test_data.keys():
+            data_string += '    {}: {}\n'.format(key, test_data[key])
+        execution_logger.logger.info('Using data: {}'.format(data_string))
 
     test_timestamp = utils.get_timestamp()
     test_start_time = time.time()
@@ -55,6 +60,8 @@ def test_runner(workspace, project, test_name, test_data, driver,
     golem.core.set_settings(settings)
     golem.core.report_directory = report_directory
 
+    test_module = None
+    
     try:
         test_module = importlib.import_module(
             'projects.{0}.tests.{1}'.format(project, test_name))
@@ -73,17 +80,19 @@ def test_runner(workspace, project, test_name, test_data, driver,
         # log description
         if hasattr(test_module, 'description'):
             golem.core.execution_logger.description = test_module.description
-    
+        else:
+            execution_logger.logger.info('Test does not have description')
+        
+        # run setup method
         if hasattr(test_module, 'setup'):
             test_module.setup(golem.core.test_data)
         else:
-            raise Exception('Test does not have setup method')
+            execution_logger.logger.info('Test does not have setup function')
+
         if hasattr(test_module, 'test'):
-            # instance.test(test_data)
             test_module.test(golem.core.test_data)
         else:
-            raise Exception('Test does not have test method')
-
+            raise Exception('Test does not have test function')
     except:
         result['result'] = 'fail'
         result['error'] = traceback.format_exc()
@@ -94,20 +103,26 @@ def test_runner(workspace, project, test_name, test_data, driver,
             # if the test failed and driver is not available
             # capture screenshot is not possible, continue
             pass
-        print(dir(traceback))
-        print(traceback.print_exc())
+
+        execution_logger.logger.error('An error ocurred:', exc_info=True)
 
     try:
         if hasattr(test_module, 'teardown'):
             test_module.teardown(golem.core.test_data)
         else:
+            execution_logger.logger.info('Test does not have a teardown function')
             actions.close()
     except:
         result['result'] = 'fail'
-        result['error'] = 'teardown failed'
+        result['error'] += '\n\nteardown failed'
+        result['error'] += '\n' + traceback.format_exc()
+        execution_logger.logger.error('An error ocurred in the teardown:', exc_info=True)
 
     test_end_time = time.time()
     test_elapsed_time = round(test_end_time - test_start_time, 2)
+
+    if not result['error']:
+        execution_logger.logger.info('Test passed')
 
     result['description'] = execution_logger.description
     result['steps'] = execution_logger.steps
@@ -120,8 +135,7 @@ def test_runner(workspace, project, test_name, test_data, driver,
     execution_logger.steps = []
     execution_logger.screenshots = {}
 
-    report.generate_report(report_directory, test_name,
-                           test_data, result)
+    report.generate_report(report_directory, test_name, test_data, result)
     return result
 
 
@@ -224,9 +238,9 @@ def run_suite(workspace, project, suite, is_directory=False):
 
     threads = 1
     
-    suite_file_amount_workers = utils.get_suite_amount_of_workers(workspace, project, suite)
-    if suite_file_amount_workers > 1:
-        threads = suite_file_amount_workers
+    suite_amount_workers = utils.get_suite_amount_of_workers(workspace, project, suite)
+    if suite_amount_workers >= 1:
+        threads = suite_amount_workers
 
     # the thread count pass through cli has higher priority
     if test_execution.thread_amount:

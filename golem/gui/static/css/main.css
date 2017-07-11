@@ -114,3 +114,14 @@
 .padding-right-5 {
     padding-right: 5px;
 }
+
+
+
+.fail-icon {
+  color: red;
+}
+
+
+.pass-icon {
+  color: green;
+}

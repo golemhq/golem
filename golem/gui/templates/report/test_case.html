@@ -31,7 +31,13 @@
 							{% endfor %}
 						{% endif %}
 						<div class="col-xs-2">Result</div>
-						<div class="col-xs-10">{{test_case_data.result}}</div>
+						<div class="col-xs-10">{{test_case_data.result}} 
+						{%if test_case_data.result == 'pass' %}
+							<span class="pass-icon"><span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span></span>
+						{%else%}
+							<span class="fail-icon"><span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></span>
+						{% endif %}
+						</div>
 						{% if test_case_data.url %}
 						<div class="col-xs-2">URL</div>
 						<div class="col-xs-10">{{test_case_data.url}}</div>
@@ -66,6 +72,18 @@
 						</div>
 					{% endfor %}
 				</div>
+
+				<div class="col-md-12 proyect-container main-container test_case_container" id="log">
+					<h3>Log</h3>
+					<div id="logLines" style="font-family: monospace; font-size: 14px;">
+						{% for line in test_case_data.log %}
+							<div class="step">
+								<span>{{line}}</span>
+							</div>
+						{% endfor %}
+					</div>
+				</div>
+
 			</div>
 		</div>									
 		<!-- BOTTOM: LEFT NAV AND RIGHT MAIN CONTENT -->

@@ -51,7 +51,7 @@
             <div class="input-group form-group">
                 <label for="browsers" class="col-sm-3 control-label">Browsers</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control" id="browsers" value="{{browsers}}" placeholder="list of browsers">
+                    <input type="text" class="form-control" id="browsers" value="{{ browsers if browsers else default_browser}}" placeholder="list of browsers">
                 </div>
             </div> 
         </div>

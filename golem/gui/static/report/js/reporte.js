@@ -24,7 +24,7 @@ function getReportData(){
 	);
 
 	if(baseDelay <= 10000){
-		baseDelay += 100;
+		baseDelay += 50;
 	}
 
 	setTimeout(function(){
@@ -179,12 +179,19 @@ function addTestCaseToDetailTable(testCase){
 			testCaseRow.find("td.tc-module").html('-');	
 		}
 
+		if(testCase.result === 'pass'){
+			var resultString = passIcon() + ' ' +testCase.result;
+		}
+		else if(testCase.result == 'fail'){
+			var resultString = failIcon() + ' ' + testCase.result;	
+		}
+
 		testCaseRow.find("td.tc-name").html(testCase.name);
 		testCaseRow.find("td.tc-browser").html(testCase.browser);
-		testCaseRow.find("td.tc-result").html(testCase.result);
-		testCaseRow.find("td.tc-time").html(testCase.test_elapsed_time);
+		testCaseRow.find("td.tc-result").html(resultString);
+		testCaseRow.find("td.tc-time").html(testCase.test_elapsed_time + ' s');
 		testCaseRow.find("td.tc-reporte").html(
-			"<a target='_blank' href='/report/project/"+project+"/"+suite+"/"+execution+"/"+testCase.full_name+"/"+testCase.test_set+"'>See Report</a>");
+			"<a href='/report/project/"+project+"/"+suite+"/"+execution+"/"+testCase.full_name+"/"+testCase.test_set+"'>See Report</a>");
 
 
 		$("table.por-CP tbody").append(testCaseRow);
@@ -219,7 +226,7 @@ function updateModuleRowInGeneralTable(testCase){
 		moduleRow.find(".total-tests").html(testsInModule);
 		moduleRow.find(".tests-ok").html(testsOkInModule);
 		moduleRow.find(".tests-failed").html(testsFailedInModule);
-		moduleRow.find(".total-time").html(timeInModule);
+		moduleRow.find(".total-time").html(timeInModule + 's');
 
 		var okPercentage = testsOkInModule * 100 / testsInModule;
 		var barra_azul = moduleRow.find('.barra-azul');
@@ -246,7 +253,7 @@ function updateModuleRowInGeneralTable(testCase){
 		row.find(".total-tests").html(testsInModule);
 		row.find(".tests-ok").html(testsOkInModule);
 		row.find(".tests-failed").html(testsFailedInModule);
-		row.find(".total-time").html(timeInModule);
+		row.find(".total-time").html(timeInModule + ' s');
 
 		var okPercentage = testsOkInModule * 100 / testsInModule;
 		var barra_azul = row.find('.barra-azul');
@@ -311,7 +318,7 @@ function refreshGeneralTable(){
 	totalRow.find(".total-tests").html(totalTestCases);
 	totalRow.find(".tests-ok").html(totalTestsOk);
 	totalRow.find(".tests-failed").html(totalTestsFailed);
-	totalRow.find(".total-time").html(totalTime);
+	totalRow.find(".total-time").html(totalTime + ' s');
 	
 	var okPercentage = totalTestsOk * 100 / totalTestCases;
 	var barra_azul = totalRow.find('.barra-azul');

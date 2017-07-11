@@ -16,25 +16,36 @@ def _parse_step(step):
     params_search = params_re.search(step)
     if params_search:
         params_string = params_search.group('args')
-
         param_list = []
         param_pairs = []
         inside_param = False
         current_start = 0
+
         for i in range(len(params_string)):
             is_last_char = i == len(params_string) -1
-            is_higher_level_comma = params_string[i] == ',' and not inside_param
+            is_higher_level_comma = False
+            if params_string[i] == ',' and not inside_param:
+                is_higher_level_comma = True
+
             if params_string[i] == '(':
                 inside_param = True
-            elif params_string[i] == ')':
+            elif inside_param and params_string[i] == ')':
                 inside_param = False
-            elif is_higher_level_comma or is_last_char:
+            
+            if is_higher_level_comma:
                 param_pairs.append((current_start, i))
                 current_start = i + 1
+            elif is_last_char:
+                param_pairs.append((current_start, i+1))
+                current_start = i + 2            
+
         for pair in param_pairs:
             param_list.append(params_string[pair[0]:pair[1]])
 
+        param_list = [x.strip() for x in param_list]
+        print(param_list)
         for param in param_list:
+
             if 'data[' in param:
                 data_re = re.compile("[\'|\"](?P<data>.*)[\'|\"]")
                 g = data_re.search(param)
