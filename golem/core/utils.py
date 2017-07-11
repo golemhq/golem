@@ -239,8 +239,13 @@ def read_json_and_remove_comments(json_path):
             if line.strip()[0:2] != '//' and len(line.strip()) > 0:
                 lines_without_comments.append(line)
         file_content_without_comments = ''.join(lines_without_comments)
-        
-        return json.loads(file_content_without_comments)
+        json_data = {}
+        try:
+            json_data = json.loads(file_content_without_comments)
+        except Exception as e:
+            print('There was an error reading settings file {}'.format(json_path))
+
+        return json_data
 
 
 def assign_settings_default_values(settings):

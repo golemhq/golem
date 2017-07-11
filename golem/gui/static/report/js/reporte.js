@@ -24,7 +24,7 @@ function getReportData(){
 	);
 
 	if(baseDelay <= 10000){
-		baseDelay += 100;
+		baseDelay += 50;
 	}
 
 	setTimeout(function(){
@@ -184,7 +184,7 @@ function addTestCaseToDetailTable(testCase){
 		testCaseRow.find("td.tc-result").html(testCase.result);
 		testCaseRow.find("td.tc-time").html(testCase.test_elapsed_time);
 		testCaseRow.find("td.tc-reporte").html(
-			"<a target='_blank' href='/report/project/"+project+"/"+suite+"/"+execution+"/"+testCase.full_name+"/"+testCase.test_set+"'>See Report</a>");
+			"<a href='/report/project/"+project+"/"+suite+"/"+execution+"/"+testCase.full_name+"/"+testCase.test_set+"'>See Report</a>");
 
 
 		$("table.por-CP tbody").append(testCaseRow);

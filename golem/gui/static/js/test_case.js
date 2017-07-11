@@ -861,7 +861,13 @@ function displayTestResults(reports){
     for(r in reports){
         var thisReport = reports[r];
         var report = $("<div class='report-result'></div>");
-        report.append('<span><strong>Result:</strong> ' + thisReport.result + '</span><br>');
+        if(thisReport.result === 'pass'){
+            var resultIcon = '<span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>';
+        }
+        else{
+            var resultIcon = '<span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>';   
+        }
+        report.append('<span><strong>Result:</strong> ' + thisReport.result + resultIcon + '</span><br>');
         report.append('<span><strong>Error:</strong> ' + thisReport.short_error + '</span><br>');
         report.append('<span><strong>Elapsed Time:</strong> ' + thisReport.test_elapsed_time + '</span><br>');
         report.append('<span><strong>Browser:<strong> ' + thisReport.browser + '</span><br>');
