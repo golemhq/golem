@@ -851,6 +851,8 @@ function mergeAndDisplayLogs(logs){
 
             if(!lineIsDisplayed){
                 $("#testResultLogs").append("<div class='log-line'>"+thisLine+"</div>");
+
+                $('.modal-body').scrollTop($('.modal-body')[0].scrollHeight);
             }
         }
     }
@@ -862,12 +864,12 @@ function displayTestResults(reports){
         var thisReport = reports[r];
         var report = $("<div class='report-result'></div>");
         if(thisReport.result === 'pass'){
-            var resultIcon = '<span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span>';
+            var resultIcon = '<span class="pass-icon"><span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span></span>';
         }
         else{
-            var resultIcon = '<span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>';   
+            var resultIcon = '<span class="fail-icon"><span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></span>';
         }
-        report.append('<span><strong>Result:</strong> ' + thisReport.result + resultIcon + '</span><br>');
+        report.append('<span><strong>Result:</strong> ' + thisReport.result + ' ' + resultIcon + '</span><br>');
         report.append('<span><strong>Error:</strong> ' + thisReport.short_error + '</span><br>');
         report.append('<span><strong>Elapsed Time:</strong> ' + thisReport.test_elapsed_time + '</span><br>');
         report.append('<span><strong>Browser:<strong> ' + thisReport.browser + '</span><br>');
@@ -879,5 +881,6 @@ function displayTestResults(reports){
         report.append('</ol>');
         $("#testResults").append(report);
     }
+    $('.modal-body').scrollTop($('.modal-body')[0].scrollHeight);
 }
 

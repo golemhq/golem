@@ -270,9 +270,9 @@ def assign_settings_default_values(settings):
         settings['wait_hook'] == None
 
     if not 'default_driver' in settings:
-        settings['default_driver'] = 'firefox'
+        settings['default_driver'] = 'chrome'
     elif settings['default_driver'] == '':
-        settings['default_driver'] == 'firefox'
+        settings['default_driver'] == 'chrome'
 
     if not 'chrome_driver_path' in settings:
         settings['chrome_driver_path'] = None
@@ -442,7 +442,7 @@ def settings_file_content():
         "\"wait_hook\": null,\n"
         "\n"
         "// Define the driver to use, unless overriden by the -d/--driver flag\n"
-        "\"default_driver\": \"firefox\",\n"
+        "\"default_driver\": \"chrome\",\n"
         "\n"
         "// Path to the chrome driver executable. By default it points to the "
         "// \'drivers\' folder inside the test directory.\n"

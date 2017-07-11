@@ -60,6 +60,8 @@ def test_runner(workspace, project, test_name, test_data, driver,
     golem.core.set_settings(settings)
     golem.core.report_directory = report_directory
 
+    test_module = None
+    
     try:
         test_module = importlib.import_module(
             'projects.{0}.tests.{1}'.format(project, test_name))
@@ -102,8 +104,6 @@ def test_runner(workspace, project, test_name, test_data, driver,
             # capture screenshot is not possible, continue
             pass
 
-        #print('THIS IS DIR TRACEBAC', dir(traceback))
-        #print(traceback.print_exc())
         execution_logger.logger.error('An error ocurred:', exc_info=True)
 
     try:

@@ -117,90 +117,11 @@
 
 
 
-
-
-
-
-
-
-
-
-
-.success {
-  display: inline-block;
-  position: relative;
-  border: $line-width solid currentColor;
-  border-radius: 50%;
-  font-size: 0.4px;
-  width: 50em;
-  height: 50em;
-  color: #8fcf8f;
-  transform: rotate(40deg);
-  
-  &::before,
-  &::after {
-    content: '';
-    background-color: currentColor;
-    position: absolute;
-    width: $line-width;
-    border-radius: 3px;
-  }
-  
-  &::before {
-    height: 33em;
-    left: 50%;
-    top: 50%;
-    margin-left: 2em;
-    margin-top: -18em;
-  }
-  
-  &::after {
-    height: 15em;
-    transform: rotate(90deg);
-    top: 50%;
-    left: 50%;
-    margin-top: 5em;
-    margin-left: -6em;
-  }
-  
-  &--big {
-    font-size: 1.5px;
-  }
+.fail-icon {
+  color: red;
 }
 
-.fail {
-  display: inline-block;
-  position: relative;
-  border: $line-width solid currentColor;
-  border-radius: 50%;
-  font-size: 0.4px;
-  width: 50em;
-  height: 50em;
-  color: #e27d7a;
-  
-  &::before,
-  &::after{
-    content: '';
-    width: $line-width;
-    height: 34em;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    margin-top: -17em;
-    margin-left: -2em;
-    background-color: currentColor;
-    border-radius: 3px;
-  }
-  
-  &::before {
-    transform: rotate(45deg);
-  }
-  
-  &::after {
-    transform: rotate(-45deg);
-  }
-  
-  &--big {
-    font-size: 1.5px;
-  }
+
+.pass-icon {
+  color: green;
 }

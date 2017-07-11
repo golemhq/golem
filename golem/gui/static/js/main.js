@@ -9,3 +9,13 @@ function displayErrorModal(errors){
     $("#errorModal").modal("show");
     $("#errorModal .dismiss-modal").focus();
 }
+
+
+function passIcon(){
+    return '<span class="pass-icon"><span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span></span>'
+}
+
+
+function failIcon(){
+    return '<span class="fail-icon"><span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></span>';
+}

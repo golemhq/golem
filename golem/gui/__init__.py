@@ -11,12 +11,12 @@ from flask import (Flask,
                    abort)
 
 from flask_login import (LoginManager,
-                             login_user,
-                             logout_user,
-                             current_user,
-                             login_required)
+                         login_user,
+                         logout_user,
+                         current_user,
+                         login_required)
 
-from golem.core import utils, test_case, page_object, suite, data
+from golem.core import utils, test_case, page_object, suite, data, test_execution
 from . import gui_utils, user, report_parser
 
 
@@ -381,10 +381,11 @@ def suite_view(project, suite):
     worker_amount = utils.get_suite_amount_of_workers(root_path, project, suite)
     browsers = utils.get_suite_browsers(root_path, project, suite)
     browsers = ', '.join(browsers)
+    default_browser = test_execution.settings['default_driver']
 
     return render_template('suite.html', project=project, all_test_cases=all_test_cases,
                            selected_tests=selected_tests, suite=suite, worker_amount=worker_amount,
-                           browsers=browsers)
+                           browsers=browsers, default_browser=default_browser)
 
 
 @app.route("/save_suite/", methods=['POST'])
