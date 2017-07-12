@@ -52,6 +52,13 @@ Create a new virtualenv in the 'env/' folder
 virtualenv env
 ```
 
+If the virtual environment is not created with Python 3 you should instead use the following command:
+
+```
+virtualenv env -p python3
+```
+
+
 - **Windows**:
 
 ```

@@ -1,12 +1,11 @@
 Metadata-Version: 1.1
 Name: golem-framework
-Version: 0.1.8
+Version: 0.1.9
 Summary: Test automation framework for functional tests using Selenium
 Home-page: https://github.com/lucianopuccio/golem
 Author: Luciano Puccio
 Author-email: me@mail.com
 License: MIT
-Download-URL: https://github.com/lucianopuccio/golem/archive/0.1.0a3.tar.gz
 Description: UNKNOWN
 Keywords: test automation framework selenium webdriver
 Platform: any
