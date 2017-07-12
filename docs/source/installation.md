@@ -69,7 +69,7 @@ source env/bin/activate
 The quickest and the prefered way to install Golem.
 
 ```
-pip install https://github.com/lucianopuccio/golem/archive/0.1.1.tar.gz
+pip install golem-framework
 ```
 
 

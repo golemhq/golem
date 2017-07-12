@@ -1,8 +1,5 @@
-from __future__ import print_function
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
-from codecs import open
-import io
 import os
 import sys
 
@@ -10,19 +7,6 @@ import golem
 
 
 here = os.path.abspath(os.path.dirname(__file__))
-
-
-def read(*filenames, **kwargs):
-    encoding = kwargs.get('encoding', 'utf-8')
-    sep = kwargs.get('sep', '\n')
-    buf = []
-    for filename in filenames:
-        with io.open(filename, encoding=encoding) as f:
-            buf.append(f.read())
-    return sep.join(buf)
-
-
-# long_description = read('README.md')
 
 
 class PyTest(TestCommand):
@@ -43,7 +27,6 @@ setup(
     description='Test automation framework for functional tests using Selenium',
     # long_description=long_description,
     url='https://github.com/lucianopuccio/golem',
-    download_url = 'https://github.com/lucianopuccio/golem/archive/0.1.0a3.tar.gz',
     author='Luciano Puccio',
     author_email='me@mail.com',
     license='MIT',
@@ -60,7 +43,7 @@ setup(
         'Topic :: Software Development :: Testing',
         ],
     keywords='test automation framework selenium webdriver',
-    packages=['golem'],
+    packages=find_packages(),
     setup_requires=['setuptools-pep8'],
     install_requires=['Flask==0.10.1',
                       'Flask-login==0.3.2',

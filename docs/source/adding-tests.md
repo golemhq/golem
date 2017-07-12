@@ -84,7 +84,7 @@ And seeing it with the Web Module:
 <div class="admonition note">
     <p class="first admonition-title">Note</p>
     <p>Selenium 3 needs to have the browsers web drivers configured (previously Firefox used to work out of the box but not anymore).
-    <p>To learn how to configure the drivers check the <a href="web-drivers.html">Web Elements page</a>.</p>
+    <p>To learn how to configure the drivers check the <a href="web-drivers.html">Web Drivers page</a>.</p>
 </div>
 
 To run the test just press the 'Run Test' button in the Web Module. The test can also be run using the command line with the following command:

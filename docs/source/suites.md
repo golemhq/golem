@@ -1,4 +1,4 @@
-Suites
+--no-cache-dirSuites
 ==================================================
 
 
@@ -26,7 +26,7 @@ tests = [
 
 <div class="admonition note">
     <p class="first admonition-title">Note</p>
-    <p>This suite will execute all maked tests, once per each browser defined and test set</p>
+    <p>This suite will execute all marked tests, once per each browser defined and test set</p>
 </div>
 
 
