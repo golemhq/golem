@@ -1,6 +1,6 @@
 *.pyc
 .eggs/
-golem.egg-info/
+*.egg-info/
 __pycache__/
 dist/
 .cache/

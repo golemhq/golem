@@ -2,6 +2,10 @@ import sys
 import os
 
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
+
+from golem.core import execution_logger as logger
+
 
 # values used during the execution of a test case
 driver = None
@@ -20,17 +24,26 @@ def get_or_create_webdriver(*args):
     if not driver:
         driver_selected = get_selected_driver()
         if driver_selected == 'firefox':
-            if 'gecko_driver_path' in settings:
-                #os.environ["webdriver.firefox.driver"] = settings['gecko_driver_path']
-                os.environ["webdriver.gecko.driver"] = settings['gecko_driver_path']
-                driver = webdriver.Firefox()
+            if settings['gecko_driver_path']:
+                try:
+                    os.environ["webdriver.gecko.driver"] = settings['gecko_driver_path']
+                    driver = webdriver.Firefox()
+                except:
+                    msg = 'Could not start firefox driver using the path \'{}\''.format(settings['gecko_driver_path'])
+                    logger.logger.error(msg)
+                    raise Exception(msg) from None
             else:
-                sys.exit('Error: gecko_driver_path setting is not defined')
+                raise Exception('gecko_driver_path setting is not defined')
         if driver_selected == 'chrome':
-            if 'chrome_driver_path' in settings:
-                driver = webdriver.Chrome(executable_path=settings['chrome_driver_path'])
+            if settings['chrome_driver_path']:
+                try:
+                    driver = webdriver.Chrome(executable_path=settings['chrome_driver_path'])
+                except:
+                    msg = 'Could not start chrome driver using the path \'{}\''.format(settings['chrome_driver_path'])
+                    logger.logger.error(msg)
+                    raise Exception(msg) from None
             else:
-                sys.exit('Error: chrome_driver_path setting is not defined')
+                raise Exception('chrome_driver_path setting is not defined')
         # if driver_selected == 'ie':
         #     driver = webdriver.Ie()
         # if driver_selected == 'phantomjs':
@@ -73,5 +86,5 @@ def get_selected_driver():
     if driver_name:
         driver_selected = driver_name
     else:
-        driver_selected = 'firefox'
+        driver_selected = 'chrome'
     return driver_selected

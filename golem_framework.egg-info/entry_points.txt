@@ -1,3 +1,0 @@
-[console_scripts]
-golem-admin = golem.bin.golem_admin:main
-

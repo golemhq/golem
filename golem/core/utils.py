@@ -450,8 +450,8 @@ def settings_file_content():
         "\n"
         "// Path to the gecko driver executable. This is used by Firefox.\n"
         "// By default it points to the 'drivers' folder inside the test directory.\n"
-        "\"gecko_driver_path\": \"./drivers/geckodriver\"\n"
-        
+        "\"gecko_driver_path\": \"./drivers/geckodriver\",\n"
+        "\n"
         "// Log level to console. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.\n"
         "// Default option is INFO\n"
         "\"console_log_level\": \"INFO\",\n"
