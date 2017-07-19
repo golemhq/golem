@@ -1,0 +1,60 @@
+
+/* data table */
+
+#datosContainerContainer {
+	padding-bottom: 10px;
+}
+
+#datos {
+	display: table-cell;
+	width: 100%;
+	position: relative;
+}
+
+#dataTable {
+	background-color: white;
+	margin-bottom: 5px;
+}
+
+#dataTable td, #dataTable th {
+	padding: 0px;
+}
+
+#dataTable th.index {
+	width: 30px;
+	text-align: center;
+}
+
+#dataTable .input-group {
+	margin-bottom: 0px;
+}
+
+#dataTable input {
+	border: 0px;
+	padding: 4px 4px;
+	height: 25px;
+}
+
+
+/* execution modal */
+
+@media (min-width: 768px){
+	.modal-dialog {
+    	width: 760px;
+    	margin: 30px auto;
+    }
+}
+
+.modal {
+	top: 10%!important;
+}
+
+.modal-body {
+	max-height: calc(90vh - 200px);
+	overflow-y: auto;
+}
+
+#testResultLogs {
+	font-family: monospace;
+	margin-bottom: 20px;
+}

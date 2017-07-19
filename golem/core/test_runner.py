@@ -142,10 +142,9 @@ def test_runner(workspace, project, test_name, test_data, driver,
 def multiprocess_executor(execution_list, processes=1, suite_name=None):
     print('Executing:')
     for test in execution_list:
-        print('{} in {} with {}'.format(test['test_name'],
-                                        test['driver'],
-                                        test['data_set']))
-
+        print('{} in {} with the following data: {}'.format(test['test_name'],
+                                                            test['driver'],
+                                                            dict(test['data_set'])))
     if not test_execution.timestamp:
         test_execution.timestamp = utils.get_timestamp()
 

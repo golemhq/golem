@@ -43,13 +43,23 @@ function savePageObject(){
         contentType: 'application/json; charset=utf-8',
         type: 'POST',
         success: function(data) {
-            toastr.options = {
-                "positionClass": "toast-top-center",
-                "timeOut": "3000",
-                "hideDuration": "100"}
-            toastr.success("Page "+pageObjectName+" saved");
+            console.log(data);
+            if(data === 'ok'){
+                toastr.options = {
+                    "positionClass": "toast-top-center",
+                    "timeOut": "3000",
+                    "hideDuration": "100"}
+                toastr.success("Page "+pageObjectName+" saved");
 
-            codeEditor.markClean();
+                codeEditor.markClean();
+            }
+            else{
+                toastr.options = {
+                    "positionClass": "toast-top-center",
+                    "timeOut": "3000",
+                    "hideDuration": "100"}
+                toastr.error(data);
+            }
         },
         error: function() {
         }

@@ -8,7 +8,7 @@ from . import commands
 def execute_from_command_line(root_path):
     parser = argparse.ArgumentParser(
         description='run test case, test suite or start the Golem GUI tool',
-        usage='golem run project_name test_case|test_suite',
+        usage='golem.py run project test_case|test_suite|directory',
         add_help=False
     )
 

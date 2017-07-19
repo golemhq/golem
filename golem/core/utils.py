@@ -529,3 +529,12 @@ def create_user(workspace, username, password, is_admin, projects, reports):
             json.dump(user_data, users_file, indent=4)
 
     return errors
+
+
+def code_syntax_is_valid(code):
+    error = ''
+    try:
+        compile(code, '<string>', 'exec')
+    except Exception as e:
+        error = e
+    return error
