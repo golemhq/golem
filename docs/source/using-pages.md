@@ -3,7 +3,7 @@ Using Pages
 
 If you remember from the previous example, each time the test interacts with a web element (an HTML tag), the selector for that element needs to be declared. That is going to lead only to trouble down the road. 
 
-Imagine what would happen after the application under tests changes. If a selector for a web element changes and that web element is used in hundreds of tests, it will take an insane amount of time to fix.
+Imagine what would happen after the application under tests changes. If a selector for a web element changes and that web element is used in hundreds of tests, it will take an huge amount of time to fix.
 
 ##### Defining pages
 
@@ -31,7 +31,7 @@ def teardown():
 
 ```
 
-Let's extract all the selectors and put them inside Pages. For this we create 2 pages, the first will be the 'header' page, as it's the same header for every page of the application. The second page will be the 'article' page.
+Let's extract all the selectors and put them inside Pages. For this we create two pages, the first will be the 'header' page, as it's the same header for every page of the application. The second page will be the 'article' page.
 
 **header.py**
 ```python
@@ -57,7 +57,7 @@ These pages, as seen with the Web Module, look like this:
 
 ##### Using pages inside tests
 
-Having these 2 pages defined, we can use them in our test, and refactor it as follows:
+Having these two pages defined, we can use them in our test, and refactor it as follows:
 
 **validate_article_title.py**
 ```python

@@ -56,7 +56,7 @@ The **teardown** function is always executed, even if the other functions fail. 
 
 ##### A test example
 
-Next is a bare minimum test that navigates to 'en.wikipedia.org', searches an article and validates that the Title of the article is correct.
+Next is a bare minimum test that navigates to 'en.wikipedia.org', searches an article and validates that the title of the article is correct.
 
 
 **validate_article_title.py**
@@ -83,7 +83,7 @@ And seeing it with the Web Module:
 
 <div class="admonition note">
     <p class="first admonition-title">Note</p>
-    <p>Selenium 3 needs to have the browsers web drivers configured (previously Firefox used to work out of the box but not anymore).
+    <p>Selenium 3 needs to have the browser's web drivers configured (Firefox used to work out of the box but not anymore).
     <p>To learn how to configure the drivers check the <a href="web-drivers.html">Web Drivers page</a>.</p>
 </div>
 

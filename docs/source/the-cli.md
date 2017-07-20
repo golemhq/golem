@@ -1,6 +1,8 @@
 The CLI
 ==================================================
 
+All the tasks in Golem can be done using the command line. This are the available commands:
+
 
 ##### Commands for golem-admin:
 

@@ -1,13 +1,13 @@
 Custom Actions
 ==================================================
 
-There are times when simple actions like *click* or *send keys* are not enough and more complex actions are required. Also, when a group of actions are repeated over many tests, they should be grouped into a single function and written once. This greatly improves the maintenance of the tests.
+There are times when simple actions like *click* or *send keys* are not enough and more complex actions are required. Also, when a group of actions are repeated over many tests, they should be grouped into a single function and written once in a single place. This greatly improves the maintenance of the tests.
 
 This custom functions/actions should be defined inside the pages.
 
 **Let's see a simple example**
 
-Consider the case of making a login. It usually takes 3 or more steps and is used in almost all the tests. So instead of repeating the same steps, test after test, we can define a 'login' function inside the login page, like so:
+Consider the case of making a login to a web application. It usually takes 3 or more steps and is used in almost all the tests. So instead of repeating the same steps, test after test, we can define a 'login' function inside the login page, like so:
 
 **login.py**
 ```python
@@ -70,7 +70,7 @@ def some_function(text):
 
 ##### Finding elements dynamically
 
-Sometimes you have to define selectors dynamically. For that Golem provides two functions: *element()* and *elements()*. 
+Sometimes you have to define selectors dynamically. For that, Golem provides two functions: *element()* and *elements()*. 
 
 The first, *element()*, returns a pure selenium [WebElement](https://seleniumhq.github.io/selenium/docs/api/py/webdriver_remote/selenium.webdriver.remote.webelement.html#module-selenium.webdriver.remote.webelement) (equivalent to find_element_by_*). The WebElement returned has two added functions: *find()* and *find_all()* that let's you chain find funcions to search for elements and sub-elements.
 
@@ -169,6 +169,13 @@ def verify_wolf_name(owner, wolf_name):
     raise Exception('Owner {} was not found in the table'
                     .format(owner))
 ```
+
+*Explanation*:
+
+We define a function that receives two parameters: the name of the owner and the name of the wolf.
+In first place, we find all the rows of the table, and store them in a *rows* list.
+For each row in the *rows* list we search for all the cells of that row (*row.find_all('td')*) and store them in the *cells* list.
+Then we ask if the first cell value is equal to the name of the owner, if this is the case, this is the row we are looking for. We then ask if the third cell value is equal to the wolf name. This is the actual validation.
 
 
 Next, go to [The CLI](the-cli.html)
