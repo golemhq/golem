@@ -1,7 +1,7 @@
 Golem Actions
 ==================================================
 
-The entire list of available actions is the following:
+Golem comes with predefined actions that cover almost all the needs to write tests. They are self-documenting. The entire list of available actions is the following:
 
 
 - **add_step(message)**
@@ -44,20 +44,20 @@ For example, given:
 
 ```
 <select>
-    <option value="AR">Argentina</option>
-    <option value="BR">Brazil</option>
+    <option value="CA">Canada</option>
+    <option value="US">United States</option>
+    <option value="MX">Mexico</option>
 </select>
 ```
 
-You could use:
+To select the first option You could use:
 
 ```
 select_by_index(elem, 0)
-select_by_text(elem, 'Argentina')
-select_by_value(elem, 'AR')
+select_by_text(elem, 'Canada')
+select_by_value(elem, 'CA')
 ```
 
-In all those examples, the first option is going to be selected.
 
 - **send_keys(element, text)**
 

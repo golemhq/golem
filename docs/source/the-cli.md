@@ -1,6 +1,8 @@
 The CLI
 ==================================================
 
+All the tasks in Golem can be done using the command line. This are the available commands:
+
 
 ##### Commands for golem-admin:
 
@@ -15,9 +17,9 @@ Used to generate a new test directory.
 
 Run a test case or test suite from a project. Threads indicates the amount of test cases to execute in parallel, default is 1. Driver indicates wich driver to use to run the tests, options are: firefox, chrome, default is firefox. Chrome requires chrome_driver_path setting to be defined in the settings file.
 
-**python golem.py gui [-p|--port]**
+**python golem.py gui [-p|--port -o|--open]**
 
-Start Golem Web Module (GUI). Port indicates which port number to use, default is 5000.
+Start Golem Web Module (GUI). Port indicates which port number to use, default is 5000. Open param navigates to the GUI module using the machine default browser.
 
 **python golem.py createproject \<project name\>**
 

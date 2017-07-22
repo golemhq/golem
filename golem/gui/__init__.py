@@ -248,7 +248,6 @@ def save_page_object():
         elements = request.json['elements']
         functions = request.json['functions']
         import_lines = request.json['importLines']
-
         page_object.save_page_object(root_path, projectname, page_object_name,
                                      elements, functions, import_lines)
         return json.dumps('ok')
@@ -256,15 +255,21 @@ def save_page_object():
 
 @app.route("/save_page_object_code/", methods=['POST'])
 def save_page_object_code():
-
     if request.method == 'POST':
         projectname = request.json['project']
         page_object_name = request.json['pageObjectName']
         content = request.json['content']
-
-        page_object.save_page_object_code(root_path, projectname, page_object_name, content)
-
-        return json.dumps('ok')
+        result = {
+            'result': 'ok',
+            'errors': []
+        }
+        error = utils.code_syntax_is_valid(content)
+        if error:
+            result['result'] = 'error'
+        else:
+            page_object.save_page_object_code(root_path, projectname,
+                                              page_object_name, content)
+        return json.dumps(result)
 
 
 @app.route("/save_test_case/", methods=['POST'])
@@ -293,6 +298,8 @@ def save_test_case_code():
         test_case_name = request.json['testCaseName']
         test_data = request.json['testData']
         content = request.json['content']
+
+        print(test_data)
 
         data.save_test_data(root_path, projectname, test_case_name, test_data)
         test_case.save_test_case_code(root_path, projectname, test_case_name, content)

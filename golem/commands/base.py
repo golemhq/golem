@@ -40,7 +40,7 @@ class RunCommand(BaseCommand):
                             type=str, metavar='Web Drivers',
                             help="Web Drivers")
         parser.add_argument('--timestamp', action='store', nargs='?', type=str,
-                                metavar='Timestamp', help="Timestamp")
+                            metavar='Timestamp', help="Timestamp")
 
     def run(self, test_execution, args):
         test_execution.thread_amount = args.threads
@@ -50,7 +50,7 @@ class RunCommand(BaseCommand):
         root_path = test_execution.root_path
 
         if not args.project:
-            msg = ['Usage:', self._parser.usage, '\n\nProject List:']
+            msg = ['Usage:', self._parser.usage, '\nProjects:']
             for proj in utils.get_projects(root_path):
                 msg.append('> {}'.format(proj))
             raise CommandException('\n'.join(msg))
@@ -121,6 +121,9 @@ class GuiCommand(BaseCommand):
                             nargs='?', default=5000, type=int,
                             metavar='port number',
                             help="port number to use for Golem GUI")
+        parser.add_argument('-o', '--open', action='store_true',
+                            default=False,
+                            help="Open the GUI module in the browser")
         # parser.add_argument('-d', '--debug', action='store_true',
         #                     default=False,
         #                     help="Start the gui application in debug mode")
@@ -131,7 +134,7 @@ class GuiCommand(BaseCommand):
         # Note, some features won't work if the golem gui is not 
         # started with debug = True
         debug = True
-        gui_start.run_gui(port_number, debug)
+        gui_start.run_gui(port_number, debug, args.open)
 
 
 class CreateProjectCommand(BaseCommand):
@@ -148,8 +151,8 @@ class CreateProjectCommand(BaseCommand):
                 args.project
             )
             raise CommandException(msg)
-        elif args.project == 'demo':
-            utils.create_demo_project(root_path)
+        # elif args.project == 'demo':
+        #     utils.create_demo_project(root_path)
         else:
             utils.create_new_project(root_path, args.project)
 
@@ -182,14 +185,16 @@ class CreateSuiteCommand(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('project', help="project name")
-        parser.add_argument('suite', metavar='suite name', help="suite name")
+        parser.add_argument('suite', metavar='suite name',
+                            help="suite name")
 
     def run(self, test_execution, args):
         if args.project not in utils.get_projects(
                 test_execution.root_path):
             raise CommandException(
                 'Error: a project with that name does not exist')
-        errors = suite_module.new_suite(root_path, args.project, args.suite)
+        errors = suite_module.new_suite(test_execution.root_path,
+                                        args.project, args.suite)
         if errors:
             raise CommandException('\n'.join(errors))
 
@@ -200,15 +205,15 @@ class CreateUserCommand(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('username', help="username")
         parser.add_argument('password', help="suite name")
-        parser.add_argument('-a', '--admin', action='store_true', default=False,
-                            help="is admin")
+        parser.add_argument('-a', '--admin', action='store_true',
+                            default=False, help="is admin")
         parser.add_argument('-p', '--projects', nargs='+', default=[],
                             help="projects the user has access")
         parser.add_argument('-r', '--reports', nargs='+', default=[],
                             help="reports the user has access")
 
     def run(self, test_execution, args):
-        errors = utils.create_user(root_path, args.username,
+        errors = utils.create_user(test_execution.root_path, args.username,
                                    args.password, args.admin,
                                    args.projects, args.reports)
         if errors:

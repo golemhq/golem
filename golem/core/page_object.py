@@ -87,9 +87,9 @@ def save_page_object(root_path, project, full_page_name, elements, functions, im
 
 def save_page_object_code(root_path, project, full_page_name, content):
     page_name, parents = utils.separate_file_from_parents(full_page_name)
-    page_object_path = os.path.join(root_path, 'projects', project, 'pages',
+    page_path = os.path.join(root_path, 'projects', project, 'pages',
                                     os.sep.join(parents), '{}.py'.format(page_name))
-    with open(page_object_path, 'w', encoding='utf-8') as f:
+    with open(page_path, 'w', encoding='utf-8') as f:
         f.write(content)
 
 

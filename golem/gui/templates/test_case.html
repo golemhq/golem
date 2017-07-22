@@ -3,6 +3,7 @@
 {% block head %} 
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/test_case.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_common.css') }}">
 
 {% endblock %} 
 
@@ -20,7 +21,7 @@
             </h3>
         </div>
         <div class="col-sm-4 text-right header-col" style="padding-top: 20px">
-            <button id="runTest" class="btn btn-default btn-sm" onclick="runTestCase()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Test</button>
+            <button id="runTest" class="btn btn-default btn-sm" onclick="testRunner.runTestCase()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Test</button>
 
             <button id="loadCodeButton" class="btn btn-default btn-sm" onclick="loadCodeView()"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Code<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></button>
             
@@ -334,13 +335,13 @@
             </div>
 
             <div style="display: table-cell; position: relative;">
-                <a href="javascript:void(0)" onclick="addColumnToDataTable();">
+                <a href="javascript:void(0)" onclick="dataTable.addColumnToDataTable();">
                     <img src="{{ url_for('static', filename='img/plus_sign.png') }}" class="add-new-icon" style="margin-left: 5px;">
                 </a>
             </div>
 
             <div class="text-right" style="width: 100%">
-                <a href="javascript:void(0)" onclick="addRowToDataTable();">
+                <a href="javascript:void(0)" onclick="dataTable.addRowToDataTable();">
                     <img src="{{ url_for('static', filename='img/plus_sign.png') }}" class="add-new-icon" style="margin-right: 30px;">
                 </a>
             </div>
@@ -351,10 +352,8 @@
 </div>
 
 
-
-
-
-    <div class="modal fade" id="testRunModal" tabindex="-1" role="dialog" style="top: 15%">
+<!-- execution modal -->
+<div class="modal fade" id="testRunModal" tabindex="-1" role="dialog" style="top: 15%">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -363,14 +362,14 @@
       </div>
       <div class="modal-body">
 
-        <div id="loaderContainer" class="text-center">
-            <label class="loader"></label>
-        </div>
-
         <div id="testResultContainer">
             <div id="testResultLogs">
             </div>
             <div id="testResults"></div>
+        </div>
+
+        <div id="loaderContainer" class="text-center">
+            <label class="loader"></label>
         </div>
 
       </div>
@@ -386,6 +385,7 @@
 <script src="{{ url_for('static', filename='js/sortable/sortable.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/jquery-autocomplete/jquery.autocomplete.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/test_case.js') }}"></script>
+<script src="{{ url_for('static', filename='js/test_case_common.js') }}"></script>
 <script>
     var project = "{{project}}";
     var testCaseName = "{{test_case_name}}";

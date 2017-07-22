@@ -463,37 +463,9 @@ function saveTestCase(runAfter){
     }
     var description = $("#description").val();
     var pageObjects = getSelectedPageObjects();
+    
     // get data from table
-    var testData = [];
-    var headerInputs = $("#dataTable thead input")    
-    var tableRows = $("#dataTable tbody tr");
-    tableRows.each(function(){
-        var currentRow = $(this);
-        var rowCells = currentRow.find("td input");
-        var rowDict = {}
-        rowCells.each(function(i){
-            if($(headerInputs[i]).val().length > 0){
-                rowDict[$(headerInputs[i]).val()] = $(this).val();
-            }
-        });
-        if(!jQuery.isEmptyObject(rowDict)){
-            testData.push(rowDict)
-        }
-    });
-    // empty values are allowed but only for one row of data
-    var tempTestData = [testData[0]];
-    for(var i = 1; i <= testData.length - 1; i++){
-        var allEmpty = true;
-        for(key in testData[i]){
-            if(testData[i][key].length > 0){
-                allEmpty = false
-            }
-        }
-        if(!allEmpty){
-            tempTestData.push(testData[i])
-        }
-    }
-    testData = tempTestData;
+    var testData = dataTable.getData();
 
     var testSteps = {
         'setup': [],
@@ -540,47 +512,14 @@ function saveTestCase(runAfter){
                 "positionClass": "toast-top-center",
                 "timeOut": "3000",
                 "hideDuration": "100"}
-            toastr.success("Test case "+testCaseName+" saved")
+            toastr.success("Test "+testCaseName+" saved")
             if(runAfter){
-                runTestCase();
+                testRunner.runTestCase();
             }
         },
         error: function() {
         }
     });
-}
-
-
-function runTestCase(){
-    if(unsavedChanges){
-        saveTestCase(true);
-    }
-    else{
-        doRunTestCase();
-    }
-}
-
-
-function doRunTestCase(){
-    toastr.options = {
-        "positionClass": "toast-top-center",
-        "timeOut": "3000",
-        "hideDuration": "100"}
-    toastr.info('Running test case ' + testCaseName);
-    $.ajax({
-        url: "/run_test_case/",
-        data: {
-             "project": project,
-             "testCaseName": fullTestCaseName,
-         },
-         dataType: 'json',
-         type: 'POST',
-         success: function(data) {
-            var timestamp = data;
-            checkTestCaseResult(project, fullTestCaseName, timestamp);
-         },
-         error: function() {}
-     });
 }
 
 
@@ -617,45 +556,6 @@ function checkIfFunctionIsInSelectedPageObjectFunctions(selectedFunctions, funct
         }
     }
     return false
-}
-
-function addColumnToDataTable(){
-    $("#dataTable thead tr").append(
-        "<th> \
-            <div class='input-group'> \
-                <input class='form-control' type='text'> \
-            </div> \
-        </th>"
-    );
-
-    $("#dataTable tbody tr").each(function(){
-        $(this).append(
-            "<td> \
-                <div class='input-group'> \
-                    <input class='form-control' type='text'> \
-                </div> \
-            </td>"
-        );
-    });
-}
-
-function addRowToDataTable(){
-    var amountOfColumns = $("#dataTable thead tr th").length -1;
-    var amountOfRows = $("#dataTable tbody tr").length;
-    var newCells = "";
-    for(var i = 0; i < amountOfColumns; i++){
-        newCells += "<td> \
-                        <div class='input-group'> \
-                            <input class='form-control' type='text'> \
-                        </div> \
-                    </td>";
-    }
-    
-    $("#dataTable tbody").append(
-        "<tr> \
-            <th scope='row' class='index'>"+(amountOfRows+1)+"</th> \
-            " + newCells + " \
-        </tr>");
 }
 
 
@@ -716,65 +616,11 @@ function deleteStep(elem){
 }
 
 
-function checkTestCaseResult(project, fullTestCaseName, timestamp){
-    $("#testRunModal").modal("show");
-    $("#testRunModal .modal-title").html('Running Test Case');
-    $("#loaderContainer").show();
-    $("#testResults").html('');
-    $("#testResultLogs").html('');
-    checkDelay = 2000;
-    checkAndRecheckStatus(project, fullTestCaseName, timestamp);
-}
-
-function checkAndRecheckStatus(project, fullTestCaseName, timestamp){
-
-    $.ajax({
-        url: "/check_test_case_run_result/",
-        data: {
-             "project": project,
-             "testCaseName": fullTestCaseName,
-             "timestamp": timestamp
-         },
-         dataType: 'json',
-         type: 'POST',
-         success: function(result) {
-            checkDelay += 100;
-            if(!result.complete){
-                setTimeout(function(){
-                    checkAndRecheckStatus(project, fullTestCaseName, timestamp);
-                }, checkDelay, project, fullTestCaseName, timestamp);
-                
-                if(result.logs.length){
-                    $("#loaderContainer").hide();
-                    mergeAndDisplayLogs(result.logs);
-                }
-            }
-            else{
-
-                $("#testRunModal .modal-title").html('Result');
-
-                if(result.logs.length){
-                    $("#loaderContainer").hide();
-                    mergeAndDisplayLogs(result.logs);
-                }
-
-                if(result.reports.length){
-                    displayTestResults(result.reports);
-                }
-            }
-         },
-         error: function() {}
-     });
-}
-
-
 function loadCodeView(){
     if(unsavedChanges){
         saveTestCase();
     }
-
     unsavedChanges = false;
-
     // redirect to gui view
     window.location.replace("/p/"+project+"/test/"+fullTestCaseName+"/code/");
 }
@@ -833,54 +679,5 @@ function getPageObjectsNotYetSelected(){
         }
     }
     return pageObjectsNotYetSelected
-}
-
-
-function mergeAndDisplayLogs(logs){
-    for(l in logs){
-        var thisLog = logs[l];
-        for(line in thisLog){
-            var thisLine = thisLog[line];
-            // is this line already in the log area?
-            var lineIsDisplayed = false;
-            $("#testResultLogs div.log-line").each(function(){
-                if($(this).html() === thisLine){
-                    lineIsDisplayed = true;
-                }
-            });
-
-            if(!lineIsDisplayed){
-                $("#testResultLogs").append("<div class='log-line'>"+thisLine+"</div>");
-
-                $('.modal-body').scrollTop($('.modal-body')[0].scrollHeight);
-            }
-        }
-    }
-}
-
-
-function displayTestResults(reports){
-    for(r in reports){
-        var thisReport = reports[r];
-        var report = $("<div class='report-result'></div>");
-        if(thisReport.result === 'pass'){
-            var resultIcon = '<span class="pass-icon"><span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span></span>';
-        }
-        else{
-            var resultIcon = '<span class="fail-icon"><span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></span>';
-        }
-        report.append('<span><strong>Result:</strong> ' + thisReport.result + ' ' + resultIcon + '</span><br>');
-        report.append('<span><strong>Error:</strong> ' + thisReport.short_error + '</span><br>');
-        report.append('<span><strong>Elapsed Time:</strong> ' + thisReport.test_elapsed_time + '</span><br>');
-        report.append('<span><strong>Browser:<strong> ' + thisReport.browser + '</span><br>');
-        report.append('<span><strong>Steps:</strong></span>');
-        report.append("<ol style='margin-left: 20px'></ol>");
-        for(s in thisReport.steps){
-            report.find("ol").append('<li>' + thisReport.steps[s] + '</li>')
-        }
-        report.append('</ol>');
-        $("#testResults").append(report);
-    }
-    $('.modal-body').scrollTop($('.modal-body')[0].scrollHeight);
 }
 

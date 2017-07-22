@@ -128,7 +128,7 @@ def new_test_case(root_path, project, parents, tc_name):
     path = os.path.join(root_path, 'projects', project, 'tests',
                         os.sep.join(parents), '{}.py'.format(tc_name))
     if os.path.isfile(path):
-        errors.append('A file with that name already exists')
+        errors.append('A test with that name already exists')
     if not errors:
         parents_joined = os.sep.join(parents)
         base_path = os.path.join(root_path, 'projects', project, 'tests')

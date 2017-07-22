@@ -26,14 +26,13 @@ tests = [
 
 <div class="admonition note">
     <p class="first admonition-title">Note</p>
-    <p>This suite will execute all marked tests, once per each browser defined and test set</p>
+    <p>This suite will execute all marked tests, once per each browser and test set</p>
 </div>
 
 
 ##### Test Parallelization
 
-The 'workers = 2' tells Golem how many tests should be executed at the same time. How many tests can be parallelized depends on your test infrastructure
-
+The 'workers = 2' tells Golem how many tests should be executed at the same time. Default is one (one at a time). How many tests can be parallelized depends on your test infrastructure
 
 
 Next, go to [Actions](actions.html)

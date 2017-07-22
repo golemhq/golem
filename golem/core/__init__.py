@@ -29,7 +29,8 @@ def get_or_create_webdriver(*args):
                     os.environ["webdriver.gecko.driver"] = settings['gecko_driver_path']
                     driver = webdriver.Firefox()
                 except:
-                    msg = 'Could not start firefox driver using the path \'{}\''.format(settings['gecko_driver_path'])
+                    msg = ('Could not start firefox driver using the path \'{}\', '
+                           'check the settings file.'.format(settings['gecko_driver_path']))
                     logger.logger.error(msg)
                     raise Exception(msg) from None
             else:
@@ -39,7 +40,8 @@ def get_or_create_webdriver(*args):
                 try:
                     driver = webdriver.Chrome(executable_path=settings['chrome_driver_path'])
                 except:
-                    msg = 'Could not start chrome driver using the path \'{}\''.format(settings['chrome_driver_path'])
+                    msg = ('Could not start chrome driver using the path \'{}\', '
+                           'check the settings file.'.format(settings['chrome_driver_path']))
                     logger.logger.error(msg)
                     raise Exception(msg) from None
             else:
