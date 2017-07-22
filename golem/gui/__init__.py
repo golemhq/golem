@@ -260,8 +260,8 @@ def save_page_object_code():
         page_object_name = request.json['pageObjectName']
         content = request.json['content']
         result = {
-            result = 'ok'
-            errors = []
+            'result': 'ok',
+            'errors': []
         }
         error = utils.code_syntax_is_valid(content)
         if error:

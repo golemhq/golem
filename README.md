@@ -25,6 +25,8 @@ Golem works with Python 3.4+
 pip install golem-framework
 ```
 
+Read the full installation guide here: [http://golem-framework.readthedocs.io/en/latest/installation.html](golem-framework.readthedocs.io/en/latest/installation.html)
+
 Quick Start
 --------------------------------------
 
@@ -50,3 +52,9 @@ Documentation
 --------------------------------------
 
 Read the full documentation here: [http://golem-framework.readthedocs.io/](http://golem-framework.readthedocs.io/)
+
+
+Roadmap
+--------------------------------------
+Integrate with Appium for mobile testing
+Add API test capability
