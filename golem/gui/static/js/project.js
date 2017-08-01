@@ -19,12 +19,12 @@ function addElement(event){
     var urlPrefixForElementType = '';
     var inputClass = '';
     if(input.hasClass('new-test-case')){
-        elementType = 'test_case';
+        elementType = 'test';
         urlPrefixForElementType = 'test';
         inputClass = 'new-test-case';
     }
     else if(input.hasClass('new-page-object')){
-        elementType = 'page_object';
+        elementType = 'page';
         urlPrefixForElementType = 'page';
         inputClass = 'new-page-object';
     }
@@ -39,6 +39,8 @@ function addElement(event){
     var isDir = false;
     if(elementName.indexOf('/') > -1){
         isDir = true;
+        if(elementType == 'test') elementType = 'test_dir';
+        else if(elementType == 'page') elementType = 'page_dir';
     }
 
     if(elementName.length == 0){
@@ -268,8 +270,6 @@ function getParentsSeparatedByDots(elem){
 
 
 function removeTreeElement(elem){
-    console.log(elem);
     var parent = $(elem).parent().parent();
-    console.log(parent)
 }
 

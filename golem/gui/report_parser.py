@@ -108,19 +108,24 @@ def get_ejecucion_data(root_path, project, suite, execution):
     return execution_data
 
 
-def get_test_case_data(root_path, project, suite, execution, test_case, test_set):
+def get_test_case_data(root_path, project, test, suite=None, execution=None,
+                       test_set=None, is_single=False):
     test_case_data = {
         'log': [],
     }
-
-    test_case_dir = os.path.join(root_path, 'projects', project, 'reports', 
-                                 suite, execution, test_case, test_set)
+    print(root_path, project, test, execution, test_set)
+    if is_single:
+        test_case_dir = os.path.join(root_path, 'projects', project, 'reports', 
+                                     'single_tests', test, execution, test_set)
+    else:
+        test_case_dir = os.path.join(root_path, 'projects', project, 'reports', 
+                                     suite, execution, test, test_set)
     with open(os.path.join(test_case_dir, 'report.json'), 'r') as json_file:
         report_data = json.load(json_file)
 
         module = ''
         sub_modules = []
-        test_case_splitted = test_case.split('.')
+        test_case_splitted = test.split('.')
         if len(test_case_splitted) > 1:
             module = test_case_splitted[0]
             if len(test_case_splitted) > 2:
@@ -129,7 +134,7 @@ def get_test_case_data(root_path, project, suite, execution, test_case, test_set
         test_case_name = test_case_splitted[-1]
         test_case_data['sub_modules'] = sub_modules
         test_case_data['name'] = test_case_name
-        test_case_data['full_name'] = test_case
+        test_case_data['full_name'] = test
         test_case_data['description'] = report_data['description']
         test_case_data['result'] = report_data['result']
         test_case_data['test_elapsed_time'] = report_data['test_elapsed_time']
@@ -150,6 +155,10 @@ def get_test_case_data(root_path, project, suite, execution, test_case, test_set
                              'screenshot': None}
             steps.append(this_step)
         test_case_data['steps'] = steps
+
+        test_case_data['test_set'] = test_set
+        test_case_data['execution'] = execution
+
 
     log_path = os.path.join(test_case_dir, 'execution.log')
     if os.path.exists(log_path):

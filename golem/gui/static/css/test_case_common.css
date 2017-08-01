@@ -1,4 +1,20 @@
 
+#backButton, #testName {
+	display: inline;
+} 
+
+#testName {
+	word-break: break-all;
+}
+
+#testNameInput {
+	display: inline;
+}
+
+#testNameInput input {
+	width: calc(100% - 20px);
+}
+
 /* data table */
 
 #datosContainerContainer {

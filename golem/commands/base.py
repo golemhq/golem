@@ -1,5 +1,6 @@
 import os
-from golem.core import test_runner, utils, test_case, suite as suite_module
+from golem.core import utils, test_case, suite as suite_module
+from golem.test_runner import start_execution
 from golem.gui import gui_start
 
 
@@ -36,7 +37,7 @@ class RunCommand(BaseCommand):
                             metavar='amount of threads for parallel execution',
                             help="amount of threads for parallel execution")
         parser.add_argument('-d', '--drivers', action='store',
-                            nargs='*', choices=['firefox', 'chrome'],
+                            nargs='*', choices=['firefox', 'chrome', 'remote-chrome', 'remote-firefox'],
                             type=str, metavar='Web Drivers',
                             help="Web Drivers")
         parser.add_argument('--timestamp', action='store', nargs='?', type=str,
@@ -82,9 +83,9 @@ class RunCommand(BaseCommand):
                                          args.test_or_suite):
                 test_execution.suite = args.test_or_suite
                 # execute test suite
-                test_runner.run_suite(root_path,
-                                      test_execution.project,
-                                      test_execution.suite)
+                start_execution.run_test_or_suite(root_path,
+                                                  test_execution.project,
+                                                  suite=test_execution.suite)
 
             # check if test_or_suite value matches a first level directory
             # in the test cases directory. this allows to execute all the
@@ -94,18 +95,17 @@ class RunCommand(BaseCommand):
                                                 args.test_or_suite):
                 test_execution.suite = args.test_or_suite
                 # execute test suite
-                test_runner.run_suite(root_path,
-                                      test_execution.project,
-                                      test_execution.suite,
-                                      is_directory=True)
+                start_execution.run_test_or_suite(root_path,
+                                                  test_execution.project,
+                                                  suite_directory=test_execution.suite)
             # check if test_or_suite value matches an existing test case
             elif utils.test_case_exists(root_path, test_execution.project,
                                         args.test_or_suite):
                 test_execution.test = args.test_or_suite
                 # execute test case
-                test_runner.run_single_test_case(root_path,
-                                                 test_execution.project,
-                                                 test_execution.test)
+                start_execution.run_test_or_suite(root_path,
+                                                  test_execution.project,
+                                                  test=test_execution.test)
             else:
                 # test_or_suite does not match any existing suite or test
                 raise CommandException(

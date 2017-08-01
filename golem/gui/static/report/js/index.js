@@ -29,20 +29,24 @@ function loadProject(project, projectData){
 	var projectContainer = $(".proyect-container.primer-proyecto").clone().removeClass('primer-proyecto');
 
 	// fill in project name
-	projectContainer.find(".project-name").html( project );
+	var projectLink = projectContainer.find(".project-name a")
+	projectLink.html(project);
+	projectLink.attr('href', '/report/project/' + project + '/')
 	projectContainer.attr('id', project);
 	allProjectsData[project] = {};
 
 	for(suite in projectData){
 		var suiteContainer = projectContainer.find(".suite-container.primer-suite-container").clone().removeClass('primer-suite-container');
+		var loadSuiteUrl = "/report/project/"+project+"/suite/"+suite+"/";
 		suiteContainer.attr('id', suite);
-		suiteContainer.find(".suite-name").html(suite);
+		suiteContainer.find(".suite-name a").html(suite);
 
 		allProjectsData[project][suite] = [ ['date', 'total', 'error']];
 
 		var tablaUltimasEjec = suiteContainer.find(".table.ultimas-ejecuciones");
 
-		suiteContainer.find(".seeAllLink").attr("href", "/report/project/"+project+"/suite/"+suite+"/");
+		suiteContainer.find(".suite-name a").attr('href', loadSuiteUrl);
+		suiteContainer.find(".seeAllLink").attr("href", loadSuiteUrl);
 
 		// fill in last executions table
 		var index = 1;

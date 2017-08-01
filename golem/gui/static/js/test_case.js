@@ -138,6 +138,17 @@ function startPageObjectsAutocomplete(){
         onSelect: function (suggestion) {
             getSelectedPageObjectElements();
             unsavedChanges = true;
+
+            // shoud I add a new page input?
+            var theresEmptyInput = false;
+            $(".page-objects-input").each(function(){
+                if($(this).val() == ''){
+                    theresEmptyInput = true;
+                }
+            })
+            if(!theresEmptyInput){
+                addPOInput();
+            }
         },
         onSearchStart: function () {
         },
@@ -569,7 +580,15 @@ function openPageObjectInNewWindow(elem){
 
 
 function watchForUnsavedChanges(){
-    $("input").on("change keyup paste", function(){
+    $(".page-objects-input").on("change keyup paste", function(){
+        unsavedChanges = true;
+    });
+
+    $(".step-first-input").on("change keyup paste", function(){
+        unsavedChanges = true;
+    });
+
+    $(".parameter-input").on("change keyup paste", function(){
         unsavedChanges = true;
     });
 
@@ -628,13 +647,13 @@ function loadCodeView(){
 
 function showSetupSteps(){
     $("#showSetupLink").hide();
-    $("#setupSteps").slideDown();
+    $("#setupSteps").slideDown('fast');
 }
 
 
 function showTeardownSteps(){
     $("#showTeardownLink").hide();
-    $("#teardownSteps").slideDown();
+    $("#teardownSteps").slideDown('fast');
 }
 
 

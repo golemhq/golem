@@ -22,18 +22,22 @@ google.charts.load('current', {'packages':['corechart']});
 			<div id="columna-principal" class="col-md-10 col-md-offset-1 content-wrapper">
 
 				<div class="row all-projects-container">
-					<h1 class="titulo-pagina">Golem Report Dashboard{% if project %} - {{project}}{% endif %}</h1>
+					<h1 class="titulo-pagina">Report Dashboard{% if project %} - {{project}}{% endif %}</h1>
 					<!-- Project Container -->
 					<div class="col-md-12  proyect-container primer-proyecto">
 						<div class="col-md-12">
-							<h3 class="project-name"></h3>
+							<h3 class="project-name">
+								<a href="#" class="link-without-underline"></a>
+							</h3>
 						</div>
 						<!-- Suite Container -->
 						<div class="suite-container primer-suite-container">
 							<div class="col-md-7 ultimas-ejecuciones-container">
 								<div class="widget widget-table">
 									<div class="widget-header">
-										<h3><i class="fa fa-table"></i><span class="suite-name"></span> - latest executions</h3>
+										<h3><i class="fa fa-table"></i><span class="suite-name">
+											<a class="link-without-underline"></a>
+										</span> - latest executions</h3>
 									</div>
 									<div class="widget-content table-content">
 										<div class="table-responsive">
