@@ -2,6 +2,7 @@ import sys
 import os
 
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import WebDriverException
 
 from golem.core import execution_logger as logger
@@ -20,7 +21,6 @@ report_directory = None
 def get_or_create_webdriver(*args):
     global settings
     global driver
-
     if not driver:
         driver_selected = get_selected_driver()
         if driver_selected == 'firefox':
@@ -35,7 +35,7 @@ def get_or_create_webdriver(*args):
                     raise Exception(msg) from None
             else:
                 raise Exception('gecko_driver_path setting is not defined')
-        if driver_selected == 'chrome':
+        elif driver_selected == 'chrome':
             if settings['chrome_driver_path']:
                 try:
                     driver = webdriver.Chrome(executable_path=settings['chrome_driver_path'])
@@ -61,7 +61,15 @@ def get_or_create_webdriver(*args):
             #     print('not implemented yet')
             #     sys.exit()
         # maximize driver window by default (fix)
-        driver.maximize_window()
+        elif driver_selected == 'remote-chrome':
+            os.environ["webdriver.chrome.driver"] = settings['chrome_driver_path']
+            driver = webdriver.Remote(command_executor='http://localhost:4444/wd/hub',
+                                      desired_capabilities=DesiredCapabilities.CHROME)
+        elif driver_selected == 'remote-firefox':
+            driver = webdriver.Remote(command_executor='http://localhost:4444/wd/hub',
+                                      desired_capabilities=DesiredCapabilities.FIREFOX)
+    
+    driver.maximize_window()
 
     return driver
 

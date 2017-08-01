@@ -16,7 +16,14 @@ from flask_login import (LoginManager,
                          current_user,
                          login_required)
 
-from golem.core import utils, test_case, page_object, suite, data, test_execution
+from golem.core import (utils,
+                        test_case,
+                        page_object,
+                        suite,
+                        data,
+                        test_execution,
+                        changelog)
+
 from . import gui_utils, user, report_parser
 
 
@@ -156,39 +163,43 @@ def new_tree_element():
 
     if request.method == 'POST':
         project = request.form['project']
-        element_type = request.form['elementType']
+        elem_type = request.form['elementType']
         is_dir = json.loads(request.form['isDir'])
-        parents = request.form['parents'].split('.')
-        element_name = request.form['elementName']
+        parents = request.form['parents']
+        parent_list = parents.split('.')
+        elem_name = request.form['elementName']
+        full_elem_name = elem_name
+        if parents:
+            full_elem_name = '{}.{}'.format(parents, elem_name)
 
         errors = []
 
         if is_dir:
-                element_name = element_name.replace('/', '')
+            elem_name = elem_name.replace('/', '')
 
-        for c in element_name:
+        for c in elem_name:
             if not c.isalnum() and not c in ['-', '_']:
                 errors.append('Only letters, numbers, \'-\' and \'_\' are allowed')
                 break
 
         if not errors:
-            if is_dir:
-                if element_type == 'test_case':
-                    errors = gui_utils.new_directory_test_case(root_path, project, parents,
-                                                               element_name)
-                elif element_type == 'page_object':
-                    errors = gui_utils.new_directory_page_object(root_path, project, parents,
-                                                                 element_name)
-            else:
-                if element_type == 'test_case':
-                    errors = test_case.new_test_case(root_path, project, parents, element_name)
-                elif element_type == 'page_object':
-                    errors = page_object.new_page_object(root_path, project, parents, element_name)
-                elif element_type == 'suite':
-                    errors = suite.new_suite(root_path, project, element_name)
+            if elem_type == 'test_dir':
+                errors = gui_utils.new_directory_test_case(root_path, project, parent_list,
+                                                           elem_name)
+            elif elem_type == 'page_dir':
+                errors = gui_utils.new_directory_page_object(root_path, project, parent_list,
+                                                             elem_name)
+            elif elem_type == 'test':
+                errors = test_case.new_test_case(root_path, project, parent_list, elem_name)
+                changelog.log_change(root_path, project, 'CREATE', 'test',
+                                     full_elem_name, g.user.username)
+            elif elem_type == 'page':
+                errors = page_object.new_page_object(root_path, project, parent_list, elem_name)
+            elif elem_type == 'suite':
+                errors = suite.new_suite(root_path, project, elem_name)
 
         return json.dumps({'errors': errors, 'project_name': project,
-                           'element_name': element_name, 'is_dir': is_dir})
+                           'element_name': elem_name, 'is_dir': is_dir})
 
 
 @app.route("/new_project/", methods=['POST'])
@@ -276,17 +287,20 @@ def save_page_object_code():
 def save_test_case():
 
     if request.method == 'POST':
-        projectname = request.json['project']
-        test_case_name = request.json['testCaseName']
+        project = request.json['project']
+        test_name = request.json['testCaseName']
         description = request.json['description']
         page_objects = request.json['pageObjects']
         test_data = request.json['testData']
         test_steps = request.json['testSteps']
 
-        data.save_test_data(root_path, projectname, test_case_name, test_data)
+        data.save_test_data(root_path, project, test_name, test_data)
 
-        test_case.save_test_case(root_path, projectname, test_case_name,
-                                 description, page_objects, test_steps)
+        test_case.save_test_case(root_path, project, test_name, description,
+                                 page_objects, test_steps)
+
+        changelog.log_change(root_path, project, 'MODIFY', 'test', test_name,
+                              g.user.username)
         return json.dumps('ok')
 
 
@@ -310,11 +324,12 @@ def save_test_case_code():
 @app.route("/run_test_case/", methods=['POST'])
 def run_test_case():
     if request.method == 'POST':
-        projectname = request.form['project']
-        test_case_name = request.form['testCaseName']
+        project = request.form['project']
+        test_name = request.form['testCaseName']
 
-        timestamp = gui_utils.run_test_case(projectname, test_case_name)
+        timestamp = gui_utils.run_test_case(project, test_name)
 
+        changelog.log_change(root_path, project, 'RUN', 'test', test_name, g.user.username)
         return json.dumps(timestamp)
 
 
@@ -343,12 +358,37 @@ def check_test_case_run_result():
 
         for data_set in sets:
 
+           
+
             report_path = os.path.join(path, data_set, 'report.json')
             if os.path.exists(report_path):
-                with open(report_path) as report_file:    
-                    report_data = json.load(report_file)
-                    report_data['steps'] = [x.split('__')[0] for x in report_data['steps']]
-                    result['reports'].append(report_data)
+
+
+
+                test_case_data = report_parser.get_test_case_data(root_path, project,
+                                                              test_case_name, execution=timestamp,
+                                                              test_set=data_set, is_single=True)
+
+                print(test_case_data)
+
+
+                result['reports'].append(test_case_data)
+
+
+
+                # with open(report_path) as report_file:    
+                #     report_data = json.load(report_file)
+                #     temp_steps = []
+                #     for step in report_data['steps']:
+                #         if len(step.split('__')) == 2:
+                #             this_step = {'message': step.split('__')[0],
+                #                          'screenshot': step.split('__')[1]}
+                #         else:
+                #             this_step = {'message': step,
+                #                          'screenshot': ''}
+                #         temp_steps.append(this_step)
+                #     report_data['steps'] = temp_steps
+                #     result['reports'].append(report_data)
 
             log_path = os.path.join(path, data_set, 'execution_console.log')
             if os.path.exists(log_path):
@@ -365,6 +405,30 @@ def check_test_case_run_result():
         #             report_data['steps'] = [x.split('__')[0] for x in report_data['steps']]
 
         return json.dumps(result)
+
+
+@app.route("/change_test_name/", methods=['POST'])
+def change_test_name():
+    if request.method == 'POST':
+        project = request.form['project']
+        test_name = request.form['testName']
+        new_test_name = request.form['newTestName']
+
+        test, parents = utils.separate_file_from_parents(test_name)
+        current_path = os.path.join(root_path, 'projects', project, 'tests',
+                                    os.sep.join(parents), '{}.py'.format(test))
+
+        test, parents = utils.separate_file_from_parents(new_test_name)
+        new_path = os.path.join(root_path, 'projects', project, 'tests',
+                                os.sep.join(parents), '{}.py'.format(test))
+
+        try:
+            os.rename(current_path, new_path)
+            return json.dumps('ok')
+        except:
+            return json.dumps('error')
+
+        
 
 
 @app.route("/run_suite/", methods=['POST'])
@@ -465,8 +529,9 @@ def execution_report(project, suite, execution):
 def sing_test_case(project, suite, execution, test_case, test_set):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
-    test_case_data = report_parser.get_test_case_data(root_path, project, suite,
-                                               execution, test_case, test_set)
+    test_case_data = report_parser.get_test_case_data(root_path, project, test_case,
+                                                      suite=suite, execution=execution,
+                                                      test_set=test_set)
     return render_template('report/test_case.html', project=project, suite=suite,
                            execution=execution, test_case=test_case, test_set=test_set,
                            test_case_data=test_case_data)
@@ -498,6 +563,14 @@ def screenshot_file(project, suite, execution, test_case, test_set, scr):
     screenshot_path = os.path.join(root_path, 'projects', project, 'reports',
                                    suite, execution, test_case, test_set)
     return send_from_directory(screenshot_path, '{}.png'.format(scr))
+
+
+@app.route('/test/screenshot/<project>/<test>/<execution>/<test_set>/<scr>/')
+def screenshot_file2(project, test, execution, test_set, scr):
+    screenshot_path = os.path.join(root_path, 'projects', project, 'reports',
+                                   'single_tests', test, execution, test_set)
+    return send_from_directory(screenshot_path, '{}.png'.format(scr))
+
 
 ###############
 # END OF REPORT

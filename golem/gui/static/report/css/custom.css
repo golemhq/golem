@@ -96,3 +96,9 @@
 	margin-right: 5px;
 }
 
+.link-without-underline, .link-without-underline:hover, .link-without-underline:visited, .link-without-underline:focus {
+    text-decoration: none;
+    outline: none;
+    color: inherit;
+}
+

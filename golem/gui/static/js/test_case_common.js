@@ -1,4 +1,5 @@
 
+
 var testRunner = new function(){
     
     this.runTestCase = function(){
@@ -69,7 +70,7 @@ var testRunner = new function(){
                         $("#loaderContainer").hide();
                         testRunner.mergeAndDisplayLogs(result.logs);
                     }
-                    if(result.reports.length){
+                    if(result.reports.length >= 1){
                         testRunner.displayTestResults(result.reports);
                     }
                 }
@@ -116,7 +117,22 @@ var testRunner = new function(){
             report.append('<span><strong>Steps:</strong></span>');
             report.append("<ol style='margin-left: 20px'></ol>");
             for(s in thisReport.steps){
-                report.find("ol").append('<li>' + thisReport.steps[s] + '</li>')
+                var thisStep = thisReport.steps[s];
+                
+
+                if(thisStep.screenshot){
+                    var msg = "<span class='hand-icon' data-toggle='collapse' data-target='#"+thisStep.screenshot+"' \
+                        aria-expanded='false' aria-controls='"+thisStep.screenshot+"'>'"+thisStep.message+"' \
+                        <span class='glyphicon glyphicon-picture' aria-hidden='true'></span></span> \
+                    <div class='collapse text-center' id='"+ thisStep.screenshot + "'> \
+                        <img class='step-screenshot hand-icon' style='width: 100%;' src='/test/screenshot/"+ project +"/"+ thisReport.name +"/"+thisReport.execution+ "/"+thisReport.test_set+ "/"+ thisStep.screenshot +"/' onclick='expandImg(event);'> \
+                    </div>";
+                }
+                else{
+                    var msg = thisStep.message;
+                }
+
+                report.find("ol").append('<li>' + msg + '</li>');
             }
             report.append('</ol>');
             $("#testResults").append(report);
@@ -205,4 +221,62 @@ var dataTable = new function(){
 
 }
 
+
+var header = new function(){
+
+    this.startEditTestName = function(){
+        $("#testNameInput input").val(fullTestCaseName);
+        $("#testNameInput").show();
+        $("#testName").hide();
+        $("#testNameInput input").focus();
+
+        $("#testNameInput input").on('blur', function(e){
+            header.saveEdition();
+        });
+
+        $("#testNameInput input").on('keyup', function(e){
+            if(e.keyCode == '13') $(this).blur();
+        });
+    }
+
+    this.saveEdition = function(){
+        var newTestNameValue = $("#testNameInput input").val();
+        console.log(newTestNameValue, fullTestCaseName);
+        if(newTestNameValue == fullTestCaseName){
+            $("#testNameInput").hide();
+            $("#testName").show();
+            return
+        }
+        // TO DO: validate
+
+        $.ajax({
+            url: "/change_test_name/",
+            data: {
+                 "project": project,
+                 "testName": fullTestCaseName,
+                 "newTestName": newTestNameValue
+             },
+             dataType: 'json',
+             type: 'POST',
+             success: function(result) {
+                if(result == 'ok'){
+                    fullTestCaseName = newTestNameValue;
+                    $("#testNameInput input").val('');
+                    $("#testNameInput").hide();
+                    $("#testName").html(newTestNameValue).show();
+
+                    var new_url = "/p/" + project + "/test/" + newTestNameValue + "/";
+                    window.history.pushState("object or string", "", new_url);
+                }
+                else{
+                    $("#testNameInput").hide();
+                    $("#testName").show();
+                }
+             },
+             error: function() {}
+         });
+
+    }
+
+}
 

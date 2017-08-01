@@ -96,6 +96,16 @@ def close():
     core.reset_driver_object()
 
 
+def debug():
+    print('Entering interactive debug mode')
+    print('Type exit to stop')
+    command = input()
+    while command != 'exit':
+        print('running {}'.format(command))
+        eval(command)
+        command = input()
+
+
 def go_to(url):
     step_message = 'Go to url: \'{0}\''.format(url)
     driver = core.get_or_create_webdriver()
