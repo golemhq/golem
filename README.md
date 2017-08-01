@@ -59,4 +59,6 @@ Roadmap
 
 Integrate with Appium for mobile testing
 
-Add API test capability
+Allow Golem to create and run API tests
+
+Golem should work with Javascript and Java as well

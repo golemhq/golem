@@ -96,15 +96,14 @@ def close():
     core.reset_driver_object()
 
 
-# def debug():
-#     print('Entering interactive debug mode')
-#     print('Type exit to stop')
-#     import sys
-#     command = sys.stdin.readline()
-#     while command != 'exit':
-#         print('running {}'.format(command))
-#         command = sys.stdin.readline()
-#     stdin.close()
+def debug():
+    print('Entering interactive debug mode')
+    print('Type exit to stop')
+    command = input()
+    while command != 'exit':
+        print('running {}'.format(command))
+        eval(command)
+        command = input()
 
 
 def go_to(url):

@@ -125,7 +125,7 @@ var testRunner = new function(){
                         aria-expanded='false' aria-controls='"+thisStep.screenshot+"'>'"+thisStep.message+"' \
                         <span class='glyphicon glyphicon-picture' aria-hidden='true'></span></span> \
                     <div class='collapse text-center' id='"+ thisStep.screenshot + "'> \
-                        <img class='step-screenshot hand-icon' src='/test/screenshot/"+ project +"/"+ thisReport.name +"/"+thisReport.execution+ "/"+thisReport.test_set+ "/"+ thisStep.screenshot +"/' onclick='expandImg(event);'> \
+                        <img class='step-screenshot hand-icon' style='width: 100%;' src='/test/screenshot/"+ project +"/"+ thisReport.name +"/"+thisReport.execution+ "/"+thisReport.test_set+ "/"+ thisStep.screenshot +"/' onclick='expandImg(event);'> \
                     </div>";
                 }
                 else{

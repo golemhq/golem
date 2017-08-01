@@ -97,7 +97,7 @@ class RunCommand(BaseCommand):
                 # execute test suite
                 start_execution.run_test_or_suite(root_path,
                                                   test_execution.project,
-                                                  suite_directory=test_execution.suite)
+                                                  directory_suite=test_execution.suite)
             # check if test_or_suite value matches an existing test case
             elif utils.test_case_exists(root_path, test_execution.project,
                                         args.test_or_suite):
