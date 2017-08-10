@@ -40,6 +40,12 @@ class RunCommand(BaseCommand):
                             nargs='*', choices=['firefox', 'chrome', 'remote-chrome', 'remote-firefox'],
                             type=str, metavar='Web Drivers',
                             help="Web Drivers")
+        parser.add_argument('--debug', action='store_true',
+                            default=False,
+                            help="Run test in debug mode")
+        parser.add_argument('--minimize', action='store_true',
+                            default=False,
+                            help="Minimize driver window")
         parser.add_argument('--timestamp', action='store', nargs='?', type=str,
                             metavar='Timestamp', help="Timestamp")
 
@@ -47,6 +53,8 @@ class RunCommand(BaseCommand):
         test_execution.thread_amount = args.threads
         test_execution.drivers = args.drivers
         test_execution.timestamp = args.timestamp
+        test_execution.debug = args.debug
+        test_execution.minimize = args.minimize
 
         root_path = test_execution.root_path
 

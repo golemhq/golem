@@ -80,11 +80,13 @@ function addFirstStepInput(targetSection){
     section.append(
         "<div class='step'> \
             <div class='step-numbering'></div> \
-            <div class='col-sm-3 step-input-container'> \
+            <div class='col-sm-3 step-input-container step-first-input-container'> \
                 <div class='input-group'> \
                     <input type='text' class='form-control step-first-input' \
                         placeholder='action'> \
                 </div> \
+            </div> \
+            <div class='params col-sm-6'> \
             </div> \
             <div class='step-remove-icon'> \
                 <a href='javascript:void(0)' onclick='deleteStep(this);'> \
@@ -229,16 +231,26 @@ function stepFirstInputChange(elem){
 
         if(parameter.type == 'value'){
             var customClass = 'value-input';
+            var input = "<input type='text' class='form-control \
+                                    parameter-input "+customClass+"' \
+                                    placeholder='"+parameter.name+"'>";
+        }
+        else if(parameter.type == 'multiline-value'){
+            var customClass = 'multiline-value-input';
+            var input = "<textarea type='text' class='form-control \
+                            parameter-input "+customClass+"' \
+                            placeholder='"+parameter.name+"' rows='2'></textarea>";
         }
         else if(parameter.type == 'element'){
             var customClass = 'element-input';
+            var input = "<input type='text' class='form-control \
+                                    parameter-input "+customClass+"' \
+                                    placeholder='"+parameter.name+"'>";
         }
         
-        var newInput = $("<div class='col-sm-3 step-input-container parameter-container'> \
+        var newInput = $("<div class='col-sm-6 step-input-container parameter-container'> \
                             <div class='input-group'> \
-                                <input type='text' class='form-control \
-                                    parameter-input "+customClass+"' \
-                                    placeholder='"+parameter.name+"' onchange=''> \
+                            "+input+" \
                             </div> \
                         </div>");
 
@@ -246,7 +258,7 @@ function stepFirstInputChange(elem){
             unsavedChanges = true;
         });
 
-        step.append(newInput);
+        step.find('.params').append(newInput);
 
         // five focus to the first parameter input
         step.find(".parameter-input").first().focus();
@@ -271,8 +283,8 @@ function startAllValueInputAutocomplete(){
 
     for(value in allValues){
         lookup.push({
-            'value': allValues[value].name,
-            'data': allValues[value].name
+            'value': 'data.' + allValues[value].name,
+            'data': 'data.' + allValues[value].name
         })        
     }
 

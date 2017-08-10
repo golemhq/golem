@@ -150,9 +150,11 @@ def get_files_in_directory_dotted_path(base_path):
 
 def get_test_data(workspace, project, full_test_case_name):
     '''Test cases can have multiple sets of data
-    This method generates a dict for each set and returns
-    a list of dicts'''
-    data_dict_list = []
+    This method generates a list of data objects'''
+    data_list = []
+
+    class data:
+        pass
 
     # check if CSV file == test case name exists
     test, parents = separate_file_from_parents(full_test_case_name)
@@ -165,11 +167,23 @@ def get_test_data(workspace, project, full_test_case_name):
         with open(data_file_path, 'r', encoding='utf8') as csv_file:
             dict_reader = csv.DictReader(csv_file)
             for data_set in dict_reader:
-                data_dict_list.append(data_set)
+                new_data_obj = data()
+                for key, value in data_set.items():
+                    setattr(new_data_obj, key, value)
+                data_list.append(new_data_obj)
+    
+    if not data_list:
+        data_list.append(data())
+    return data_list
 
-    if not data_dict_list:
-        data_dict_list = []
+
+def get_test_data_dict_list(workspace, projects, full_test_case_name):
+    data_dict_list = []
+    data_list = get_test_data(workspace, projects, full_test_case_name)
+    for l in data_list:
+        data_dict_list.append(vars(l))
     return data_dict_list
+
 
 
 def get_suite_test_cases(workspace, project, suite):

@@ -20,16 +20,16 @@ def _parse_step(step):
         param_pairs = []
         inside_param = False
         current_start = 0
-
+        print('PARAM STRING', params_string)
         for i in range(len(params_string)):
             is_last_char = i == len(params_string) -1
             is_higher_level_comma = False
             if params_string[i] == ',' and not inside_param:
                 is_higher_level_comma = True
 
-            if params_string[i] == '(':
+            if params_string[i] == '(' or params_string[i] == '{':
                 inside_param = True
-            elif inside_param and params_string[i] == ')':
+            elif inside_param and (params_string[i] == ')' or params_string[i] == '}'):
                 inside_param = False
             
             if is_higher_level_comma:
@@ -46,11 +46,12 @@ def _parse_step(step):
         print(param_list)
         for param in param_list:
 
-            if 'data[' in param:
-                data_re = re.compile("[\'|\"](?P<data>.*)[\'|\"]")
-                g = data_re.search(param)
-                clean_param_list.append(g.group('data'))
-            elif '(' in param and ')' in param:
+            # if 'data[' in param:
+            #     data_re = re.compile("[\'|\"](?P<data>.*)[\'|\"]")
+            #     g = data_re.search(param)
+            #     clean_param_list.append(g.group('data'))
+            print('PARAM', param)
+            if '(' in param and ')' in param:
                 clean_param_list.append(param)
             else:
                 clean_param_list.append(param.replace('\'', '').replace('"', ''))
@@ -165,12 +166,17 @@ def format_parameters(step, root_path, project, parents, test_case_name, stored_
             else:
                 # is not a page object,
                 # identify if its a value or element parameter
-                is_data_var = data.is_data_variable(root_path, project, parents,
-                                                    test_case_name, parameter)
+                
+                # is_data_var = data.is_data_variable(root_path, project, parents,
+                #                                     test_case_name, parameter)
+
+                is_data_var = 'data.' in parameter
+
                 is_in_stored_keys = parameter in stored_keys
                 action_is_store = action == 'store'
                 if (is_data_var or is_in_stored_keys) and not action_is_store:
-                    this_parameter_string = 'data[\'{}\']'.format(parameter)
+                    # this_parameter_string = 'data[\'{}\']'.format(parameter)
+                    this_parameter_string = parameter
                 else:
                     if action in ['wait', 'select_by_index']:
                         this_parameter_string = parameter

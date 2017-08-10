@@ -26,6 +26,14 @@ def run_test(workspace, project, test_name, test_data, driver,
     from golem.core import execution_logger
     from golem.core import actions
 
+    # convert test_data to data obj
+    # TODO convert data dict to data obj
+    class data:
+        pass
+    new_data_class = data()
+    for key, value in test_data.items():
+        setattr(new_data_class, key, value)
+
     execution_logger.get_logger(report_directory,
                                 settings['console_log_level'],
                                 settings['file_log_level'],
@@ -35,8 +43,8 @@ def run_test(workspace, project, test_name, test_data, driver,
     execution_logger.logger.info('Driver: {}'.format(driver))
     if test_data:
         data_string = '\n'
-        for key in test_data.keys():
-            data_string += '    {}: {}\n'.format(key, test_data[key])
+        for key, value in test_data.items():
+            data_string += '    {}: {}\n'.format(key, value)
         execution_logger.logger.info('Using data: {}'.format(data_string))
 
     test_timestamp = utils.get_timestamp()
@@ -44,7 +52,7 @@ def run_test(workspace, project, test_name, test_data, driver,
 
     golem.core.project = project
     golem.core.workspace = workspace
-    golem.core.test_data = test_data
+    golem.core.test_data = new_data_class
     golem.core.driver_name = driver
     golem.core.set_settings(settings)
     golem.core.report_directory = report_directory
@@ -86,8 +94,8 @@ def run_test(workspace, project, test_name, test_data, driver,
         result['result'] = 'fail'
         result['error'] = traceback.format_exc()
         try:
-            if settings['screenshot_on_error']:
-                actions.capture('error')
+            if settings['screenshot_on_error'] and golem.core.driver:
+                    actions.capture('error')
         except:
             # if the test failed and driver is not available
             # capture screenshot is not possible, continue
@@ -100,7 +108,8 @@ def run_test(workspace, project, test_name, test_data, driver,
             test_module.teardown(golem.core.test_data)
         else:
             execution_logger.logger.info('Test does not have a teardown function')
-            actions.close()
+            if golem.core.driver:
+                actions.close()
     except:
         result['result'] = 'fail'
         result['error'] += '\n\nteardown failed'
@@ -124,5 +133,5 @@ def run_test(workspace, project, test_name, test_data, driver,
     execution_logger.steps = []
     execution_logger.screenshots = {}
 
-    report.generate_report(report_directory, test_name, test_data, result)
-    return result
+    report.generate_report(report_directory, test_name, golem.core.test_data, result)
+    return

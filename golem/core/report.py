@@ -30,6 +30,21 @@ def generate_report(report_directory, test_case_name, test_data, result):
     if result['error']:
         short_error = '\n'.join(result['error'].split('\n')[-2:])
 
+    serializable_data = {}
+    for key, value in vars(test_data).items():
+        try:
+            json.dumps('{"{}":"{}"}'.format(key, value))
+            serializable_data[key] = value
+        except:
+            serializable_data[key] = repr(value)
+
+    class MyEncoder(json.JSONEncoder):
+        def default(self, obj):
+            # if not isinstance(obj, Tree):
+            #     return super(MyEncoder, self).default(obj)
+
+            return obj
+
     report = {
         'test_case': test_case_name,
         'result': result['result'],
@@ -39,7 +54,8 @@ def generate_report(report_directory, test_case_name, test_data, result):
         'short_error': short_error,
         'test_elapsed_time': result['test_elapsed_time'],
         'test_timestamp': result['test_timestamp'],
-        'browser': result['browser']
+        'browser': result['browser'],
+        'test_data': serializable_data
     }
     
     with open(json_report_path, 'w', encoding='utf-8') as json_file:

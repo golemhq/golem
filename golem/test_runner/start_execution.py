@@ -100,14 +100,12 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
     execution_list = []
     for test_case in test_list:
         data_sets = utils.get_test_data(workspace, project, test_case)
-        if not data_sets:
-            data_sets = [{}]
         for data_set in data_sets:
             for driver in drivers:
                 execution_list.append(
                     {
                         'test_name': test_case,
-                        'data_set': data_set,
+                        'data_set': vars(data_set),
                         'driver': driver,
                         'report_directory': None
                     }
@@ -123,7 +121,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
                                                           test_execution.timestamp)
         test['report_directory'] = report_directory
 
-    debug = True
+    debug = test_execution.debug
 
     if debug:
         if threads == 1 and len(execution_list) == 1:

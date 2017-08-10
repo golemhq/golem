@@ -81,10 +81,6 @@ def string_to_time(time_string):
 def get_global_actions():
     global_actions = [
         {
-            'name': 'add_step',
-            'parameters': [{'name': 'message', 'type': 'value'}]
-        },
-        {
             'name': 'capture',
             'parameters': [{'name': 'message (optional)', 'type': 'value'}]
         },
@@ -97,8 +93,24 @@ def get_global_actions():
             'parameters': []
         },
         {
-            'name': 'go to',
+            'name': 'get',
+            'parameters': [{'name': 'url', 'type': 'value'},
+                           {'name': 'headers', 'type': 'multiline-value'},
+                           {'name': 'params', 'type': 'value'}]
+        },
+        {
+            'name': 'navigate',
             'parameters': [{'name': 'url', 'type': 'value'}]
+        },
+        # {
+        #     'name': 'go to',
+        #     'parameters': [{'name': 'url', 'type': 'value'}]
+        # },
+        {
+            'name': 'post',
+            'parameters': [{'name': 'url', 'type': 'value'},
+                           {'name': 'headers', 'type': 'value'},
+                           {'name': 'data', 'type': 'value'}]
         },
         {
             'name': 'random',
@@ -123,6 +135,10 @@ def get_global_actions():
             'name': 'send keys',
             'parameters': [{'name': 'element', 'type': 'element'},
                            {'name': 'value', 'type': 'value'}]
+        },
+        {
+            'name': 'step',
+            'parameters': [{'name': 'message', 'type': 'value'}]
         },
         {
             'name': 'store',

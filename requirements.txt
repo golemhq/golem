@@ -4,3 +4,4 @@ selenium==3.4.3
 pytest
 sphinx
 recommonmark
+requests==2.17.3

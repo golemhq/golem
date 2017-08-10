@@ -69,6 +69,9 @@ def get_or_create_webdriver(*args):
             driver = webdriver.Remote(command_executor='http://localhost:4444/wd/hub',
                                       desired_capabilities=DesiredCapabilities.FIREFOX)
     
+    # if settings.minimize:
+    #     driver.set_window_position(-3000, 0)
+    # else:
     driver.maximize_window()
 
     return driver

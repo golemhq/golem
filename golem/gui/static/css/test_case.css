@@ -85,3 +85,12 @@ html {
 	border-right: 0px;
 }
 
+.params {
+	padding-left: 0px;
+	padding-right: 0px;
+	width: 60%;
+}
+
+.step-first-input-container {
+	width: 30%;
+}

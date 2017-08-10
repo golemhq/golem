@@ -16,7 +16,7 @@ def multiprocess_executor(execution_list, processes=1, suite_name=None):
     for test in execution_list:
         print('{} in {} with the following data: {}'.format(test['test_name'],
                                                             test['driver'],
-                                                            dict(test['data_set'])))
+                                                            test['data_set']))
     # if not test_execution.timestamp:
     #     test_execution.timestamp = utils.get_timestamp()
 

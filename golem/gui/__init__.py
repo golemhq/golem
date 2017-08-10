@@ -117,7 +117,9 @@ def test_case_view(project, test_case_name):
 
     tc_name, parents = utils.separate_file_from_parents(test_case_name)
     test_case_contents = test_case.get_test_case_content(project, test_case_name)
-    test_data = utils.get_test_data(root_path, project, test_case_name)
+    test_data = utils.get_test_data_dict_list(root_path, project, test_case_name)
+
+    print(test_case_contents)
 
     return render_template('test_case.html', project=project,
                            test_case_contents=test_case_contents, test_case_name=tc_name,

@@ -101,7 +101,10 @@ def get_ejecucion_data(root_path, project, suite, execution):
             )
             new_test_case['start_date_time'] = start_date_time
             new_test_case['browser'] = report_data['browser']
+            new_test_case['data'] = report_data['test_data']
+
             execution_data['test_cases'].append(new_test_case)
+
     execution_data['total_cases_ok'] = total_cases_ok
     execution_data['total_cases'] = total_cases
 
@@ -158,6 +161,7 @@ def get_test_case_data(root_path, project, test, suite=None, execution=None,
 
         test_case_data['test_set'] = test_set
         test_case_data['execution'] = execution
+        test_case_data['data'] = report_data['test_data']
 
 
     log_path = os.path.join(test_case_dir, 'execution.log')

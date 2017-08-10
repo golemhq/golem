@@ -187,6 +187,7 @@ function addTestCaseToDetailTable(testCase){
 		}
 
 		testCaseRow.find("td.tc-name").html(testCase.name);
+		testCaseRow.find("td.tc-environment").html(testCase.data.environment);
 		testCaseRow.find("td.tc-browser").html(testCase.browser);
 		testCaseRow.find("td.tc-result").html(resultString);
 		testCaseRow.find("td.tc-time").html(testCase.test_elapsed_time + ' s');

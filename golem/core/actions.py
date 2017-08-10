@@ -11,6 +11,8 @@ import selenium
 from selenium.webdriver.common.keys import Keys
 #from PIL import Image
 
+import requests
+
 from golem import core
 from golem.core import execution_logger as logger
 from golem.core.exceptions import TextNotPresent, ElementNotFound
@@ -20,13 +22,13 @@ from golem.selenium.utils import get_selenium_object
 def _run_wait_hook():
     wait_hook = core.get_setting('wait_hook')
     if wait_hook:
-        wait('0.3')
+        time.sleep(0.3)
         start_time = time.time()
         extend_module = importlib.import_module('projects.{0}.extend'
                                                 .format(core.project))
         wait_hook_function = getattr(extend_module, wait_hook)
         wait_hook_function()
-        print('Wait hook waited for {} seconds'.format(time.time() - start_time))
+        logger.logger.debug('Wait hook waited for {} seconds'.format(time.time() - start_time))
 
 
 # def _wait_for_visible(element):
@@ -50,11 +52,7 @@ def _capture_or_add_step(message, screenshot_on_step):
     if screenshot_on_step:
         capture(message)
     else:
-        add_step(message)
-
-
-def add_step(message):
-    logger.steps.append(message)
+        step(message)
 
 
 def capture(message=''):
@@ -77,7 +75,7 @@ def capture(message=''):
     driver.get_screenshot_as_file(img_path)
 
     full_message = '{0}__{1}'.format(message, img_id)
-    add_step(full_message)
+    step(full_message)
 
 
 def click(element):
@@ -107,7 +105,16 @@ def debug():
 
 
 def go_to(url):
+    logger.logger.warning('go_to action is deprecated, use navigate() instead')
     step_message = 'Go to url: \'{0}\''.format(url)
+    driver = core.get_or_create_webdriver()
+    driver.get(url)
+    logger.logger.info(step_message)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
+
+
+def navigate(url):
+    step_message = 'Navigate to: \'{0}\''.format(url)
     driver = core.get_or_create_webdriver()
     driver.get(url)
     logger.logger.info(step_message)
@@ -177,9 +184,14 @@ def send_keys(element, text):
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
+def step(message):
+    logger.steps.append(message)
+
+
 def store(key, value):
     logger.logger.info('Store value {} in key {}'.format(value, key))
-    core.test_data[key] = value
+    # core.test_data[key] = value
+    setattr(core.test_data, key, value)
 
 
 def verify_exists(element):
@@ -260,12 +272,13 @@ def verify_text_in_element(element, text):
 
 
 def wait(seconds):
+    print(seconds)
     logger.logger.info('Waiting for {} seconds'.format(seconds))
     try:
-        to_int = int(seconds)
+        to_float = float(seconds)
     except:
         raise Exception('seconds value should be an integer')
-    time.sleep(to_int)
+    time.sleep(to_float)
 
 
 def wait_for_element_not_visible(element, timeout=20):
@@ -282,8 +295,7 @@ def wait_for_element_not_visible(element, timeout=20):
         logger.logger.debug('Element is still visible, waiting..')
         time.sleep(0.5)
         visible = test_object.is_displayed()
-        current_time = time.time()
-        if current_time - start_time > timeout:
+        if time.time() - start_time > timeout:
             timed_out = True
 
 
@@ -301,8 +313,7 @@ def wait_for_element_visible(element, timeout=20):
         logger.logger.debug('Element is not visible, waiting..')
         time.sleep(0.5)
         visible = test_object.is_displayed()
-        current_time = time.time()
-        if current_time - start_time > timeout:
+        if time.time() - start_time > timeout:
             timed_out = True
 
 
@@ -316,8 +327,38 @@ def wait_for_element_enabled(element, timeout=20):
         logger.logger.debug('Element is not enabled, waiting..')
         time.sleep(0.5)
         enabled = element.is_displayed()
-        current_time = time.time()
-        if current_time - start_time > timeout:
+        if time.time() - start_time > timeout:
             timed_out = True
 
+
+def get(url, headers={}, params={}):
+    step_message = 'Make GET request to {}'.format(url)
+    logger.logger.info(step_message)
+    _capture_or_add_step(step_message, False)
+    response = requests.get(url, headers=headers, params=params)
+    store('last_response', response)
+
+
+def post(url, headers={}, data={}):
+    step_message = 'Make POST request to {}'.format(url)
+    logger.logger.info(step_message)
+    _capture_or_add_step(step_message, False)
+    response = requests.post(url, data)
+    store('last_response', response)
+
+
+def verify_response_status_code(response, status_code):
+    if type(status_code) == str:
+        if status_code.isdigit():
+            status_code = int(status_code)
+    step_message = 'Verify response status code is {}'.format(status_code)
+    logger.logger.info(step_message)
+    _capture_or_add_step(step_message, False)
+    if not response.status_code == status_code:
+        raise Exception("Expected response status code to be {0} but was {1}"
+                        .format(status_code, response.status_code))
+
+
+def verify_response_content():
+    pass
 

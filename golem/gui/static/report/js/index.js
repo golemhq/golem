@@ -26,6 +26,8 @@ $(document).ready(function() {
 
 
 function loadProject(project, projectData){
+	console.log(projectData);
+
 	var projectContainer = $(".proyect-container.primer-proyecto").clone().removeClass('primer-proyecto');
 
 	// fill in project name
@@ -50,8 +52,10 @@ function loadProject(project, projectData){
 
 		// fill in last executions table
 		var index = 1;
+		console.log(suite);
 		for(e in projectData[suite]){
 			var execution = projectData[suite][e];
+			console.log(projectData[suite]);
 			var fila = tablaUltimasEjec.find("tr.primera-fila").clone().removeClass('primera-fila');
 			fila.find(".numero").html(index.toString());
 			fila.find(".fecha").html(getDateTimeFromTimestamp(execution));
@@ -89,7 +93,8 @@ function completarBarraPorcentaje(project, suite, execution, id, index){
 			suite: suite,
 			execution: execution
 		},
-		function( data ) {	
+		function( data ) {
+			console.log(data);
   			var okPercentage = data.execution_data.total_cases_ok * 100 / data.execution_data.total_cases;
 
   			$("#"+id).attr('data-transitiongoal', okPercentage);

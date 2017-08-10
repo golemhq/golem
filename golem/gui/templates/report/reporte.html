@@ -13,7 +13,7 @@
 			<!-- content-wrapper -->
 			<div id="columna-principal" class="col-md-10 col-md-offset-1 content-wrapper">
 				<div class="row">
-					<h1 class="titulo-pagina">{{project}} - {{suite}} <small>({{formatted_date}})</small></h1>
+					<h1 class="titulo-pagina"><a class="link-without-underline" href="/report/project/{{project}}/">{{project}}</a> - <a class="link-without-underline" href="/report/project/{{project}}/suite/{{suite}}/">{{suite}}</a> <small>({{formatted_date}})</small></h1>
 					<div class="col-md-12  proyect-container">
 						<!-- SECCION POR MODULO -->
 						<h3>General</h3>
@@ -127,6 +127,7 @@
 													<th>#</th>
 													<th class="module-col-header">Module</th>
 													<th>Test Case Name</th>
+													<th>Environment</th>
 													<th>Browser</th>
 													<th>Result</th>
 													<th>Time</th>
@@ -139,6 +140,7 @@
 													<td class="tc-number"></td>
 													<td class="tc-module"></td>
 													<td class="tc-name"></td>
+													<td class="tc-environment"></td>
 													<td class="tc-browser"></td>
 													<td class="tc-result"></td>
 													<td class="tc-time"></td>
