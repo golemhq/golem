@@ -1,5 +1,4 @@
 import csv
-import datetime
 import imp
 import importlib
 import shutil
@@ -9,6 +8,7 @@ import uuid
 
 from functools import reduce
 from collections import OrderedDict
+from datetime import datetime
 
 import golem
 
@@ -341,10 +341,15 @@ def get_project_settings(project, global_settings):
 
 def get_timestamp():
     time_format = "%Y.%m.%d.%H.%M.%S.%f"
-    timestamp = datetime.datetime.today().strftime(time_format)
+    timestamp = datetime.today().strftime(time_format)
     # remove last 3 decimal places from microseconds
     timestamp = timestamp[:-3]
     return timestamp
+
+
+def get_date_from_timestamp(timestamp):
+    date = datetime.strptime(timestamp, '%Y.%m.%d.%H.%M.%S.%f')
+    return date
 
 
 def test_case_exists(workspace, project, full_test_case_name):

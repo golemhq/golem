@@ -123,7 +123,7 @@ def new_test_case(root_path, project, parents, tc_name):
         "def test(data):\n"
         "    pass\n\n"
         "def teardown(data):\n"
-        "    close()\n\n")
+        "    pass\n\n")
     errors = []
     # check if a file already exists
     path = os.path.join(root_path, 'projects', project, 'tests',

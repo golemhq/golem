@@ -22,7 +22,8 @@ from golem.core import (utils,
                         suite,
                         data,
                         test_execution,
-                        changelog)
+                        changelog,
+                        lock)
 
 from . import gui_utils, user, report_parser
 
@@ -98,7 +99,7 @@ def project(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
     elif not utils.project_exists(root_path, project):
-        abort(404)
+        abort(404, 'This page does not exists.')
     else:
         test_cases = utils.get_test_cases(root_path, project)
         page_objects = utils.get_page_objects(root_path, project)
@@ -115,15 +116,19 @@ def test_case_view(project, test_case_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
 
-    tc_name, parents = utils.separate_file_from_parents(test_case_name)
-    test_case_contents = test_case.get_test_case_content(project, test_case_name)
-    test_data = utils.get_test_data_dict_list(root_path, project, test_case_name)
+    # check if the file is locked
+    is_locked_by = lock.is_file_locked(root_path, project, test_case_name)
+    print(is_locked_by, g.user.username)
+    if is_locked_by and is_locked_by != g.user.username:
+        abort(404, 'This file is locked by someone else.')
+    else:
+        tc_name, parents = utils.separate_file_from_parents(test_case_name)
+        test_case_contents = test_case.get_test_case_content(project, test_case_name)
+        test_data = utils.get_test_data_dict_list(root_path, project, test_case_name)
 
-    print(test_case_contents)
-
-    return render_template('test_case.html', project=project,
-                           test_case_contents=test_case_contents, test_case_name=tc_name,
-                           full_test_case_name=test_case_name, test_data=test_data)
+        return render_template('test_case.html', project=project,
+                               test_case_contents=test_case_contents, test_case_name=tc_name,
+                               full_test_case_name=test_case_name, test_data=test_data)
 
 
 @app.route("/p/<project>/test/<test_case_name>/code/")
@@ -476,6 +481,26 @@ def save_suite():
         return json.dumps('ok')
 
 
+@app.route("/lock_file/", methods=['POST'])
+def lock_file():
+    if request.method == 'POST':
+        project = request.form['project']
+        user_name = request.form['userName']
+        full_file_name = request.form['fullTestCaseName']
+        lock.lock_file(root_path, project, full_file_name, user_name)
+        return json.dumps('ok')
+
+
+@app.route("/unlock_file/", methods=['POST'])
+def unlock_file():
+    if request.method == 'POST':
+        project = request.form['project']
+        user_name = request.form['userName']
+        full_file_name = request.form['fullTestCaseName']
+        lock.unlock_file(root_path, project, full_file_name, user_name)
+        return json.dumps('ok')
+
+
 @app.route("/logout/")
 @login_required
 def logout():
@@ -595,8 +620,8 @@ def before_request():
 
 
 @app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
+def page_not_found(error):
+    return render_template('404.html', message=error.description), 404
 
 
 if __name__ == "__main__":

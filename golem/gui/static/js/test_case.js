@@ -37,6 +37,10 @@ $(document).ready(function() {
 
     // start sortable steps
     startSortableSteps();
+
+    // lock the file for current user
+    testManager.setFileLockInterval();
+    testManager.setUnlockFileOnUnload();
 });
 
 

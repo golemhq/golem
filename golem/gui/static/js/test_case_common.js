@@ -55,7 +55,7 @@ var testRunner = new function(){
              success: function(result) {
                 checkDelay += 100;
                 if(!result.complete){
-                    setTimeout(function(){
+                    setout(function(){
                         testRunner._checkAndRecheckStatus(project, fullTestCaseName, timestamp);
                     }, checkDelay, project, fullTestCaseName, timestamp);
                     
@@ -280,3 +280,45 @@ var header = new function(){
 
 }
 
+var testManager = new function(){
+
+    this.setFileLockInterval = function(){
+        testManager.lockFile();
+        setInterval(function(){testManager.lockFile();}, 60000);
+    }
+
+    this.lockFile = function(){
+        $.ajax({
+            url: "/lock_file/",
+            data: {
+                 "project": project,
+                 "userName": username,
+                 "fullTestCaseName": fullTestCaseName
+             },
+             dataType: 'json',
+             type: 'POST',
+             success: function(result) {}
+         });
+    }
+
+    this.setUnlockFileOnUnload = function(){
+        $( window ).bind('beforeunload', function() {
+            testManager.unlockFile();
+        });
+    }
+
+    this.unlockFile = function(){
+        $.ajax({
+            url: "/unlock_file/",
+            data: {
+                 "project": project,
+                 "userName": username,
+                 "fullTestCaseName": fullTestCaseName
+             },
+             dataType: 'json',
+             type: 'POST',
+             success: function(result) {}
+         });
+    }
+
+}
