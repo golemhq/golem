@@ -1,6 +1,7 @@
 import time
 import types
 
+import selenium
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -18,7 +19,8 @@ def _find_selenium_object(selector_type, selector_value, element_name, driver, r
         elif selector_type == 'css':
             test_object = driver.find_element_by_css_selector(selector_value)
         elif selector_type == 'text':
-            test_object = driver.find_element_by_css_selector("text[{}]".format(selector_value))
+            test_object = driver.find_element_by_css_selector(
+                                    "text[{}]".format(selector_value))
         elif selector_type == 'link_text':
             test_object = driver.find_element_by_link_text(selector_value)
         elif selector_type == 'partial_link_text':
@@ -30,7 +32,8 @@ def _find_selenium_object(selector_type, selector_value, element_name, driver, r
         elif selector_type == 'tag_name':
             test_object = driver.find_element_by_tag_name(selector_value)
         else:
-            raise IncorrectSelectorType('Selector {0} is not a valid option'.format(selector_type))
+            raise IncorrectSelectorType(
+                    'Selector {0} is not a valid option'.format(selector_type))
     except:
         time.sleep(0.5)
         end_time = time.time()
@@ -45,18 +48,30 @@ def _find_selenium_object(selector_type, selector_value, element_name, driver, r
 
 
 def get_selenium_object(elem, driver=None):
-    if not driver:
-        driver = core.get_or_create_webdriver()
-    test_object = None
-    implicit_wait = core.get_setting('implicit_wait')
-    selector_type = elem[0]
-    selector_value = elem[1]
-    element_name = ''
-    if len(elem) == 3:
-        element_name = elem[2]
-    test_object = _find_selenium_object(selector_type, selector_value, element_name,
-                                        driver, implicit_wait)
-    return test_object
+    is_webelement_descendant = (
+            selenium.webdriver.remote.webelement.WebElement in elem.__class__.__bases__)
+    is_webelement = type(elem) == selenium.webdriver.remote.webelement.WebElement
+    if is_webelement or is_webelement_descendant:
+        return elem
+    elif type(elem) == tuple:
+        if not driver:
+            driver = core.get_or_create_webdriver()
+        test_object = None
+        implicit_wait = core.get_setting('implicit_wait')
+        selector_type = elem[0]
+        selector_value = elem[1]
+        # if there is no 'element name' use the selector value instead
+        element_name = selector_value
+        if len(elem) == 3:
+            element_name = elem[2]
+        test_object = _find_selenium_object(selector_type, selector_value, element_name,
+                                            driver, implicit_wait)
+        test_object.selector_type = selector_type
+        test_object.selector_value = selector_value
+        test_object.name = element_name
+        return test_object
+    else:
+        raise Exception('Invalid element to get')
 
 
 def get_selenium_objects(elem, driver=None):
@@ -70,7 +85,8 @@ def get_selenium_objects(elem, driver=None):
     elif selector_type == 'css':
         test_objects = driver.find_elements_by_css_selector(selector_value)
     elif selector_type == 'text':
-        test_objects = driver.find_elements_by_css_selector("text[{}]".format(selector_value))
+        test_objects = driver.find_elements_by_css_selector(
+                                    "text[{}]".format(selector_value))
     elif selector_type == 'link_text':
         test_objects = driver.find_elements_by_link_text(selector_value)
     elif selector_type == 'partial_link_text':
@@ -82,7 +98,8 @@ def get_selenium_objects(elem, driver=None):
     elif selector_type == 'tag_name':
         test_objects = driver.find_elements_by_tag_name(selector_value)
     else:
-        raise IncorrectSelectorType('Selector {0} is not a valid option'.format(selector_type))
+        raise IncorrectSelectorType(
+            'Selector {0} is not a valid option'.format(selector_type))
     return test_objects
 
 
@@ -91,43 +108,45 @@ def get_test_or_suite_data(root_path, project, parents, test_case_name):
     return test_data
 
 
-def get_driver(driver_selected):
-    driver = None
+# def get_driver(driver_selected):
+#     driver = None
 
-    if driver_selected == 'firefox':
-        driver = webdriver.Firefox()
-    if driver_selected == 'chrome':
-        driver = webdriver.Chrome()
-    if driver_selected == 'ie':
-        driver = webdriver.Ie()
-    # if driver_selected == 'phantomjs':
-    #     if os.name == 'nt':
-    #         executable_path = os.path.join(golem.__path__[0], 'lib', 'phantom', 'phantomjs.exe')
-    #         driver = webdriver.PhantomJS(
-    #                             executable_path=executable_path)
-    #     else:
-    #         print('not implemented yet')
-    #         sys.exit()
-    return driver
+#     if driver_selected == 'firefox':
+#         driver = webdriver.Firefox()
+#     if driver_selected == 'chrome':
+#         driver = webdriver.Chrome()
+#     if driver_selected == 'ie':
+#         driver = webdriver.Ie()
+#     # if driver_selected == 'phantomjs':
+#     #     if os.name == 'nt':
+#     #         executable_path = os.path.join(golem.__path__[0], 'lib',
+#     #                           'phantom', 'phantomjs.exe')
+#     #         driver = webdriver.PhantomJS(
+#     #                             executable_path=executable_path)
+#     #     else:
+#     #         print('not implemented yet')
+#     #         sys.exit()
+#     return driver
 
 
-def _find(self, element_tuple=None, id=None, name=None, text=None, link_text=None, partial_link_text=None,
-         css=None, xpath=None, tag_name=None):
+def _find(self, element_tuple=None, id=None, name=None, text=None, link_text=None,
+          partial_link_text=None, css=None, xpath=None, tag_name=None):
     return element(element_tuple, id, name, text, link_text, partial_link_text, css,
                    xpath, tag_name)
 
 
-def _find_all(self, element_tuple=None, id=None, name=None, text=None, link_text=None, partial_link_text=None,
-             css=None, xpath=None, tag_name=None):
+def _find_all(self, element_tuple=None, id=None, name=None, text=None, link_text=None,
+              partial_link_text=None, css=None, xpath=None, tag_name=None):
     return elements(element_tuple, id, name, text, link_text, partial_link_text, css,
                     xpath, tag_name)
 
 
-def element(element_tuple=None,id=None, name=None, text=None, link_text=None,
+def element(element_tuple=None, id=None, name=None, text=None, link_text=None,
             partial_link_text=None, css=None, xpath=None, tag_name=None):
     webelement = None
+    selector = None
     if type(element_tuple) == tuple:
-        webelements = get_selenium_objects(element_tuple)
+        webelement = get_selenium_object(element_tuple)
     elif id:
         webelement = get_selenium_object(('id', id, 'element_name'))
     elif name:
@@ -137,7 +156,8 @@ def element(element_tuple=None,id=None, name=None, text=None, link_text=None,
     elif link_text:
         webelement = get_selenium_object(('link_text', link_text, 'element_name'))
     elif partial_link_text:
-        webelement = get_selenium_object(('partial_link_text', partial_link_text, 'element_name'))
+        webelement = get_selenium_object(('partial_link_text', partial_link_text,
+                                          'element_name'))
     elif css:
         webelement = get_selenium_object(('css', css, 'element_name'))
     elif xpath:
@@ -166,7 +186,8 @@ def elements(element_tuple=None, id=None, name=None, text=None, link_text=None,
     elif link_text:
         webelements = get_selenium_objects(('link_text', link_text, 'element_name'))
     elif partial_link_text:
-        webelements = get_selenium_objects(('partial_link_text', partial_link_text, 'element_name'))
+        webelements = get_selenium_objects(('partial_link_text', partial_link_text,
+                                            'element_name'))
     elif css:
         webelements = get_selenium_objects(('css', css, 'element_name'))
     elif xpath:

@@ -4,6 +4,7 @@ import importlib
 import shutil
 import json
 import os
+import sys
 import uuid
 
 from functools import reduce
@@ -184,6 +185,12 @@ def get_test_data_dict_list(workspace, projects, full_test_case_name):
         data_dict_list.append(vars(l))
     return data_dict_list
 
+
+def get_suite_module(workspace, project, suite):
+    suite_module = importlib.import_module(
+                                'projects.{0}.suites.{1}'.format(project, suite),
+                                package=None)
+    return suite_module
 
 
 def get_suite_test_cases(workspace, project, suite):
@@ -496,7 +503,13 @@ def reduced_settings_file_content():
 def create_test_dir(workspace):
     create_new_directory(path_list=[workspace], add_init=True)
     create_new_directory(path_list=[workspace, 'projects'], add_init=True)
-    create_new_directory(path_list=[workspace, 'drivers'], add_init=False)
+    # create_new_directory(path_list=[workspace, 'drivers'], add_init=False)
+
+    # copy drivers from golem/bin/drivers to test_dir/drivers
+    pkgdir = sys.modules['golem'].__path__[0]
+    sourcepath = os.path.join(pkgdir, 'bin', 'drivers')
+    destination_path = os.path.join(workspace, 'drivers')
+    shutil.copytree(sourcepath, destination_path)
     
     golem_py_content = ("import os\n"
                         "import sys\n"

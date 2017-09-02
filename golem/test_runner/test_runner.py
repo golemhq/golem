@@ -64,9 +64,11 @@ def run_test(workspace, project, test_name, test_data, driver,
             'projects.{0}.tests.{1}'.format(project, test_name))
 
         # import the page objects into the test module
-        for page in test_module.pages:
-            test_module = utils.generate_page_object_module(project, test_module,
-                                                            page, page.split('.'))
+        if hasattr(test_module, 'pages'):
+            for page in test_module.pages:
+                test_module = utils.generate_page_object_module(project, test_module,
+                                                                page, page.split('.'))
+        
         # import logger into the test module
         setattr(test_module, 'logger', golem.core.execution_logger)
         

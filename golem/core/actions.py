@@ -28,7 +28,8 @@ def _run_wait_hook():
                                                 .format(core.project))
         wait_hook_function = getattr(extend_module, wait_hook)
         wait_hook_function()
-        logger.logger.debug('Wait hook waited for {} seconds'.format(time.time() - start_time))
+        logger.logger.debug('Wait hook waited for {} seconds'
+                            .format(time.time() - start_time))
 
 
 # def _wait_for_visible(element):
@@ -80,8 +81,8 @@ def capture(message=''):
 
 def click(element):
     _run_wait_hook()
-    step_message = 'Click {0}'.format(element[2])
     element = get_selenium_object(element)
+    step_message = 'Click {0}'.format(element.name)
     element.click()
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
@@ -104,13 +105,13 @@ def debug():
         command = input()
 
 
-def go_to(url):
-    logger.logger.warning('go_to action is deprecated, use navigate() instead')
-    step_message = 'Go to url: \'{0}\''.format(url)
-    driver = core.get_or_create_webdriver()
-    driver.get(url)
-    logger.logger.info(step_message)
-    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
+# def go_to(url):
+#     logger.logger.warning('go_to action is deprecated, use navigate() instead')
+#     step_message = 'Go to url: \'{0}\''.format(url)
+#     driver = core.get_or_create_webdriver()
+#     driver.get(url)
+#     logger.logger.info(step_message)
+#     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
 def navigate(url):
@@ -146,9 +147,9 @@ def random(value):
 
 
 def select_by_index(element, index):
-    step_message = 'Select option of index {0} from element {1}'.format(index, element[2])
     _run_wait_hook()
     test_object = get_selenium_object(element)
+    step_message = 'Select option of index {0} from element {1}'.format(index, element.name)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_index(index)
     logger.logger.info(step_message)
@@ -156,9 +157,9 @@ def select_by_index(element, index):
 
 
 def select_by_text(element, text):
-    step_message = 'Select \'{0}\' from element {1}'.format(text, element[2])
     _run_wait_hook()
     test_object = get_selenium_object(element)
+    step_message = 'Select \'{0}\' from element {1}'.format(text, element.name)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_visible_text(text)
     logger.logger.info(step_message)
@@ -166,9 +167,9 @@ def select_by_text(element, text):
 
 
 def select_by_value(element, value):
-    step_message = 'Select \'{0}\' value from element {1}'.format(value, element[2])
     _run_wait_hook()
     test_object = get_selenium_object(element)
+    step_message = 'Select \'{0}\' value from element {1}'.format(value, element.name)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_value(value)
     logger.logger.info(step_message)
@@ -177,8 +178,8 @@ def select_by_value(element, value):
 
 def send_keys(element, text):
     _run_wait_hook()
-    step_message = 'Write \'{0}\' in element {1}'.format(text, element[2])
     element = get_selenium_object(element)
+    step_message = 'Write \'{0}\' in element {1}'.format(text, element.name)
     element.send_keys(text)
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
@@ -196,7 +197,7 @@ def store(key, value):
 
 def verify_exists(element):
     _run_wait_hook()
-    step_message = 'Verify that the element {} exists'.format(element[2])
+    step_message = 'Verify that the element exists'
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     test_object = get_selenium_object(element)
@@ -205,7 +206,7 @@ def verify_exists(element):
 def verify_is_enabled(element):
     _run_wait_hook()
     test_object = get_selenium_object(element)
-    step_message = 'Verify the element \'{0}\' is enabled'.format(element[2])
+    step_message = 'Verify the element \'{0}\' is enabled'.format(element.name)
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if not test_object.is_enabled():
@@ -215,7 +216,7 @@ def verify_is_enabled(element):
 def verify_is_not_enabled(element):
     _run_wait_hook()
     test_object = get_selenium_object(element)
-    step_message = 'Verify the element \'{0}\' is not enabled'.format(element[2])
+    step_message = 'Verify the element \'{0}\' is not enabled'.format(element.name)
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if test_object.is_enabled():
@@ -224,7 +225,7 @@ def verify_is_not_enabled(element):
 
 def verify_not_exists(element):
     _run_wait_hook()
-    step_message = 'Verify that the element {} does not exists'.format(element[2])
+    step_message = 'Verify that the element'
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     try:
@@ -240,13 +241,14 @@ def verify_selected_option(element, text):
     _run_wait_hook()
     test_object = get_selenium_object(element)
     select = selenium.webdriver.support.select.Select(test_object)
-    step_message = 'Verify selected option of element \'{0}\' is \'{1}\''.format(element[2], text)
+    step_message = 'Verify selected option of element \'{0}\' is \'{1}\''.format(
+                   element.name, text)
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if not select.first_selected_option.text == text:
         raise TextNotPresent('Option selected in element \'{0}\' '
                              'is not {1}'
-                             .format(element[2], text))
+                             .format(element.name, text))
 
 
 def verify_text(text):
@@ -263,12 +265,12 @@ def verify_text(text):
 def verify_text_in_element(element, text):
     _run_wait_hook()
     test_object = get_selenium_object(element)
-    step_message = 'Verify element \'{0}\' contains text \'{1}\''.format(element[2], text)
+    step_message = 'Verify element \'{0}\' contains text \'{1}\''.format(element.name, text)
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if text not in test_object.text:
         raise TextNotPresent("Text \'{0}\' was not found in element {1}"
-                             .format(text, element[2]))
+                             .format(text, element.name))
 
 
 def wait(seconds):
