@@ -117,18 +117,18 @@ def test_case_view(project, test_case_name):
         return render_template('not_permission.html')
 
     # check if the file is locked
-    is_locked_by = lock.is_file_locked(root_path, project, test_case_name)
-    print(is_locked_by, g.user.username)
-    if is_locked_by and is_locked_by != g.user.username:
-        abort(404, 'This file is locked by someone else.')
-    else:
-        tc_name, parents = utils.separate_file_from_parents(test_case_name)
-        test_case_contents = test_case.get_test_case_content(project, test_case_name)
-        test_data = utils.get_test_data_dict_list(root_path, project, test_case_name)
+    # is_locked_by = lock.is_file_locked(root_path, project, test_case_name)
+    # print(is_locked_by, g.user.username)
+    # if is_locked_by and is_locked_by != g.user.username:
+    #     abort(404, 'This file is locked by someone else.')
+    # else:
+    tc_name, parents = utils.separate_file_from_parents(test_case_name)
+    test_case_contents = test_case.get_test_case_content(project, test_case_name)
+    test_data = utils.get_test_data_dict_list(root_path, project, test_case_name)
 
-        return render_template('test_case.html', project=project,
-                               test_case_contents=test_case_contents, test_case_name=tc_name,
-                               full_test_case_name=test_case_name, test_data=test_data)
+    return render_template('test_case.html', project=project,
+                           test_case_contents=test_case_contents, test_case_name=tc_name,
+                           full_test_case_name=test_case_name, test_data=test_data)
 
 
 @app.route("/p/<project>/test/<test_case_name>/code/")
@@ -214,16 +214,20 @@ def new_project():
 
     if request.method == 'POST':
         project_name = request.form['projectName']
-        
+
+        project_name = project_name.strip().replace(' ', '_')
+
         errors = []
         if len(project_name) < 3:
-          errors.append('Project name is too short')
+            errors.append('Project name is too short')
         elif len(project_name) > 50:
-          errors.append('Project name is too long')
+            errors.append('Project name is too long')
+        elif len(project_name) != len(project_name.strip()):
+            errors.append('Leading and trailing spaces are not allowed')
         elif project_name in utils.get_projects(root_path):
-          errors.append('A project with that name already exists')
+            errors.append('A project with that name already exists')
         else:
-          utils.create_new_project(root_path, project_name)
+            utils.create_new_project(root_path, project_name)
         return json.dumps({'errors': errors, 'project_name': project_name})
 
 
@@ -365,51 +369,20 @@ def check_test_case_run_result():
 
         for data_set in sets:
 
-           
-
             report_path = os.path.join(path, data_set, 'report.json')
             if os.path.exists(report_path):
-
-
 
                 test_case_data = report_parser.get_test_case_data(root_path, project,
                                                               test_case_name, execution=timestamp,
                                                               test_set=data_set, is_single=True)
 
-                print(test_case_data)
-
-
                 result['reports'].append(test_case_data)
-
-
-
-                # with open(report_path) as report_file:    
-                #     report_data = json.load(report_file)
-                #     temp_steps = []
-                #     for step in report_data['steps']:
-                #         if len(step.split('__')) == 2:
-                #             this_step = {'message': step.split('__')[0],
-                #                          'screenshot': step.split('__')[1]}
-                #         else:
-                #             this_step = {'message': step,
-                #                          'screenshot': ''}
-                #         temp_steps.append(this_step)
-                #     report_data['steps'] = temp_steps
-                #     result['reports'].append(report_data)
 
             log_path = os.path.join(path, data_set, 'execution_console.log')
             if os.path.exists(log_path):
                 with open(log_path) as log_file:
                     log = log_file.readlines()
                     result['logs'].append(log)
-
-        # for data_set in sets:
-        #     new_path = os.path.join(path, sets[0])
-        #     report_path = os.path.join(new_path, 'report.json')
-        #     if os.path.exists(report_path):
-        #         with open(report_path) as report_file:    
-        #             report_data = json.load(report_file)
-        #             report_data['steps'] = [x.split('__')[0] for x in report_data['steps']]
 
         return json.dumps(result)
 
@@ -519,7 +492,7 @@ def report_index():
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:
-        return render_template('report/index.html', project='')
+        return render_template('report/report_dashboard.html', project='', suite='')
 
 
 @app.route("/report/project/<project>/")
@@ -528,7 +501,7 @@ def project_view(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:
-        return render_template('report/index.html', project=project)
+        return render_template('report/report_dashboard.html', project=project, suite='')
 
 
 @app.route("/report/project/<project>/suite/<suite>/")
@@ -537,7 +510,7 @@ def suite_report_view(project, suite):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:
-        return render_template('report/suite.html', project=project, suite=suite)
+        return render_template('report/report_dashboard.html', project=project, suite=suite)
 
 
 @app.route("/report/project/<project>/<suite>/<execution>/")
@@ -547,7 +520,7 @@ def execution_report(project, suite, execution):
         return render_template('not_permission.html')
     else:
         formatted_date = report_parser.get_start_date_time_from_timestamp(execution)
-        return render_template('report/reporte.html', project=project, suite=suite,
+        return render_template('report/execution_report.html', project=project, suite=suite,
                                execution=execution, formatted_date=formatted_date)
 
 
@@ -564,12 +537,14 @@ def sing_test_case(project, suite, execution, test_case, test_set):
                            test_case_data=test_case_data)
 
 
-@app.route("/report/get_ultimos_proyectos/", methods=['POST'])
-def get_ultimos_proyectos():
+@app.route("/report/get_last_executions/", methods=['POST'])
+def get_last_executions():
     if request.method == 'POST':
         project = request.form['project']
         suite = request.form['suite']
         limit = request.form['limit']
+        #if suite:
+
         project_data = report_parser.get_last_executions(root_path, project, suite, limit)
         return jsonify(projects=project_data)
 

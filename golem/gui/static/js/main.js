@@ -7,7 +7,9 @@ function displayErrorModal(errors){
     } 
     $("#errorList").html(ulContent);
     $("#errorModal").modal("show");
-    $("#errorModal .dismiss-modal").focus();
+    window.setTimeout(function(){
+        $("#errorModal .dismiss-modal").focus();
+    }, 500);
 }
 
 

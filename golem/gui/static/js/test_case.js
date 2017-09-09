@@ -39,8 +39,8 @@ $(document).ready(function() {
     startSortableSteps();
 
     // lock the file for current user
-    testManager.setFileLockInterval();
-    testManager.setUnlockFileOnUnload();
+    //testManager.setFileLockInterval();
+    //testManager.setUnlockFileOnUnload();
 });
 
 

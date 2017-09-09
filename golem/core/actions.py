@@ -159,7 +159,7 @@ def select_by_index(element, index):
 def select_by_text(element, text):
     _run_wait_hook()
     test_object = get_selenium_object(element)
-    step_message = 'Select \'{0}\' from element {1}'.format(text, element.name)
+    step_message = 'Select \'{0}\' from element {1}'.format(text, test_object.name)
     select = selenium.webdriver.support.select.Select(test_object)
     select.select_by_visible_text(text)
     logger.logger.info(step_message)
@@ -194,18 +194,18 @@ def store(key, value):
     # core.test_data[key] = value
     setattr(core.test_data, key, value)
 
-
+# TO DO
 def verify_exists(element):
     _run_wait_hook()
     step_message = 'Verify that the element exists'
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
-    test_object = get_selenium_object(element)
+    test_object = get_selenium_object(element, implicit_wait=1)
 
 
 def verify_is_enabled(element):
     _run_wait_hook()
-    test_object = get_selenium_object(element)
+    test_object = get_selenium_object(element, implicit_wait=1)
     step_message = 'Verify the element \'{0}\' is enabled'.format(element.name)
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
@@ -265,12 +265,12 @@ def verify_text(text):
 def verify_text_in_element(element, text):
     _run_wait_hook()
     test_object = get_selenium_object(element)
-    step_message = 'Verify element \'{0}\' contains text \'{1}\''.format(element.name, text)
+    step_message = 'Verify element \'{0}\' contains text \'{1}\''.format(test_object.name, text)
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if text not in test_object.text:
         raise TextNotPresent("Text \'{0}\' was not found in element {1}"
-                             .format(text, element.name))
+                             .format(text, test_object.name))
 
 
 def wait(seconds):
@@ -306,7 +306,8 @@ def wait_for_element_visible(element, timeout=20):
         timeout = int(timeout)
     except:
         raise Exception('Timeout should be digits only')
-    logger.logger.info('Waiting for element {} to be not visible'.format(element))
+    _run_wait_hook()
+    logger.logger.info('Waiting for element {} to be visible'.format(element))
     start_time = time.time()
     timed_out = False
     test_object = get_selenium_object(element)

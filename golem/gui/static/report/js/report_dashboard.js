@@ -4,12 +4,11 @@ var allProjectsData = {};
 
 
 $(document).ready(function() {            
-	
 	$.ajax({
-		url: "/report/get_ultimos_proyectos/",
+		url: "/report/get_last_executions/",
 		data: {
-            "project": globalProject,
-            "suite": '',
+            "project": projectName,
+            "suite": suiteName,
             "limit": 5
         },
         dataType: 'json',
@@ -20,62 +19,48 @@ $(document).ready(function() {
 	  		}
 	  	}
 	});
-
-
 });
 
 
 function loadProject(project, projectData){
-	console.log(projectData);
-
-	var projectContainer = $(".proyect-container.primer-proyecto").clone().removeClass('primer-proyecto');
-
-	// fill in project name
-	var projectLink = projectContainer.find(".project-name a")
-	projectLink.html(project);
-	projectLink.attr('href', '/report/project/' + project + '/')
-	projectContainer.attr('id', project);
+	if(suiteName)
+		var projectContainer = ReportDashboard.generateProjectContainerSingleSuite(project);
+	else
+		var projectContainer = ReportDashboard.generateProjectContainer(project);
+	
 	allProjectsData[project] = {};
 
 	for(suite in projectData){
-		var suiteContainer = projectContainer.find(".suite-container.primer-suite-container").clone().removeClass('primer-suite-container');
-		var loadSuiteUrl = "/report/project/"+project+"/suite/"+suite+"/";
-		suiteContainer.attr('id', suite);
-		suiteContainer.find(".suite-name a").html(suite);
 
+		if(suiteName.length > 0)
+			var suiteContainer = ReportDashboard.generateExecutionsContainerSingleSuite(project, suite);
+		else
+			var suiteContainer = ReportDashboard.generateExecutionsContainer(project, suite);
+		
 		allProjectsData[project][suite] = [ ['date', 'total', 'error']];
-
-		var tablaUltimasEjec = suiteContainer.find(".table.ultimas-ejecuciones");
-
-		suiteContainer.find(".suite-name a").attr('href', loadSuiteUrl);
-		suiteContainer.find(".seeAllLink").attr("href", loadSuiteUrl);
 
 		// fill in last executions table
 		var index = 1;
-		console.log(suite);
 		for(e in projectData[suite]){
 			var execution = projectData[suite][e];
-			console.log(projectData[suite]);
-			var fila = tablaUltimasEjec.find("tr.primera-fila").clone().removeClass('primera-fila');
-			fila.find(".numero").html(index.toString());
-			fila.find(".fecha").html(getDateTimeFromTimestamp(execution));
-			fila.find(".ambiente").html();
+			
+			var blueBarId = guidGenerator();
 
-			fila.attr('onclick', "document.location.href='/report/project/"+project+"/"+suite+"/"+execution+"/'");
+			var row = ReportDashboard.generateExecutionsTableRow({
+				project: project,
+				suite: suite,
+				execution: execution,
+				index: index.toString(),
+				dateTime: getDateTimeFromTimestamp(execution),
+				environment: '',
+				blueBarId: blueBarId});
 
-			var progressBarContainer = fila.find(".progress-bar-container");
+			completarBarraPorcentaje(project, suite, execution, blueBarId, index);
 
-			var barra_azul = progressBarContainer.find('.barra-azul');
-			var id = guidGenerator();
-			barra_azul.attr('id', id);
+			suiteContainer.find("tbody").append(row);
 
-			completarBarraPorcentaje(project, suite, execution, id, index);
-
-			tablaUltimasEjec.find("tbody").append(fila);
 			index += 1;
 		}
-		tablaUltimasEjec.find("tr.primera-fila").remove();
-
 		projectContainer.append(suiteContainer);
 	}
 
@@ -94,7 +79,6 @@ function completarBarraPorcentaje(project, suite, execution, id, index){
 			execution: execution
 		},
 		function( data ) {
-			console.log(data);
   			var okPercentage = data.execution_data.total_cases_ok * 100 / data.execution_data.total_cases;
 
   			$("#"+id).attr('data-transitiongoal', okPercentage);
@@ -128,8 +112,6 @@ function cargarGraficoHistorial(project, suite){
 	    //   ['Year', 'Sales', 'Expenses'],
 	    //   ['2013',  1000,      400],
 	    //   ['2014',  1170,      460],
-	    //   ['2015',  660,       1120],
-	    //   ['2016',  1030,      540]
 	    // ]);
 	    var container = $("#"+project+" #"+suite).find(".plot-chart-container")[0]
 
@@ -139,17 +121,23 @@ function cargarGraficoHistorial(project, suite){
 	      title: '',
 	      hAxis: {title: '',  titleTextStyle: {color: '#333'}},
 	      vAxis: {minValue: 0},
-	      height: 273,
+	      height: 218,
 	      backgroundColor: '#f9f9f9',
 	      animation: {
 	      	startup: true, 
 	      	duration: 700,
-	      	easing: 'in'},
-	      backgroundColor: {
-	      		fill: '#f9f9f9',
-	        	stroke: '#d3d3d3',
-	        	strokeWidth: 2,
-    	  	}
+	      	easing: 'in'
+	      },
+	      legend: {position: 'none'},
+	      chartArea: {
+	      	left: 5,
+	      	right: 5
+	      }
+	      // backgroundColor: {
+	      // 		fill: '#f9f9f9',
+	      //   	stroke: '#d3d3d3',
+	      //   	strokeWidth: 2,
+    	  // 	}
 	    };
 
 	    var chart = new google.visualization.AreaChart(container);

@@ -47,7 +47,7 @@ def _find_selenium_object(selector_type, selector_value, element_name, driver, r
     return test_object
 
 
-def get_selenium_object(elem, driver=None):
+def get_selenium_object(elem, driver=None, implicit_wait=None):
     is_webelement_descendant = (
             selenium.webdriver.remote.webelement.WebElement in elem.__class__.__bases__)
     is_webelement = type(elem) == selenium.webdriver.remote.webelement.WebElement
@@ -57,7 +57,8 @@ def get_selenium_object(elem, driver=None):
         if not driver:
             driver = core.get_or_create_webdriver()
         test_object = None
-        implicit_wait = core.get_setting('implicit_wait')
+        if implicit_wait is None:
+            implicit_wait = core.get_setting('implicit_wait')
         selector_type = elem[0]
         selector_value = elem[1]
         # if there is no 'element name' use the selector value instead
@@ -83,6 +84,7 @@ def get_selenium_objects(elem, driver=None):
     if selector_type == 'id':
         test_objects = driver.find_elements_by_id(selector_value)
     elif selector_type == 'css':
+        print('SELECTOR', selector_value)
         test_objects = driver.find_elements_by_css_selector(selector_value)
     elif selector_type == 'text':
         test_objects = driver.find_elements_by_css_selector(
@@ -103,35 +105,10 @@ def get_selenium_objects(elem, driver=None):
     return test_objects
 
 
-def get_test_or_suite_data(root_path, project, parents, test_case_name):
-    test_data = data.parse_test_data(root_path, project, parents, test_case_name)
-    return test_data
-
-
-# def get_driver(driver_selected):
-#     driver = None
-
-#     if driver_selected == 'firefox':
-#         driver = webdriver.Firefox()
-#     if driver_selected == 'chrome':
-#         driver = webdriver.Chrome()
-#     if driver_selected == 'ie':
-#         driver = webdriver.Ie()
-#     # if driver_selected == 'phantomjs':
-#     #     if os.name == 'nt':
-#     #         executable_path = os.path.join(golem.__path__[0], 'lib',
-#     #                           'phantom', 'phantomjs.exe')
-#     #         driver = webdriver.PhantomJS(
-#     #                             executable_path=executable_path)
-#     #     else:
-#     #         print('not implemented yet')
-#     #         sys.exit()
-#     return driver
-
-
 def _find(self, element_tuple=None, id=None, name=None, text=None, link_text=None,
           partial_link_text=None, css=None, xpath=None, tag_name=None):
-    return element(element_tuple, id, name, text, link_text, partial_link_text, css,
+    print('SELF', self)
+    return element(self, element_tuple, id, name, text, link_text, partial_link_text, css,
                    xpath, tag_name)
 
 
@@ -141,7 +118,7 @@ def _find_all(self, element_tuple=None, id=None, name=None, text=None, link_text
                     xpath, tag_name)
 
 
-def element(element_tuple=None, id=None, name=None, text=None, link_text=None,
+def element(element, element_tuple=None, id=None, name=None, text=None, link_text=None,
             partial_link_text=None, css=None, xpath=None, tag_name=None):
     webelement = None
     selector = None

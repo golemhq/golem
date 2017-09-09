@@ -23,8 +23,7 @@ var testRunner = new function(){
              },
              dataType: 'json',
              type: 'POST',
-             success: function(data) {
-                var timestamp = data;
+             success: function(timestamp) {
                 testRunner.checkTestCaseResult(project, fullTestCaseName, timestamp);
              },
              error: function() {}
@@ -37,11 +36,11 @@ var testRunner = new function(){
         $("#loaderContainer").show();
         $("#testResults").html('');
         $("#testResultLogs").html('');
-        checkDelay = 1500;
-        testRunner._checkAndRecheckStatus(project, fullTestCaseName, timestamp);
+        checkDelay = 1000;
+        testRunner._checkAndRecheckStatus(checkDelay, project, fullTestCaseName, timestamp);
     }
 
-    this._checkAndRecheckStatus = function(project, fullTestCaseName, timestamp){
+    this._checkAndRecheckStatus = function(checkDelay, project, fullTestCaseName, timestamp){
 
         $.ajax({
             url: "/check_test_case_run_result/",
@@ -55,8 +54,8 @@ var testRunner = new function(){
              success: function(result) {
                 checkDelay += 100;
                 if(!result.complete){
-                    setout(function(){
-                        testRunner._checkAndRecheckStatus(project, fullTestCaseName, timestamp);
+                    setTimeout(function(){
+                        testRunner._checkAndRecheckStatus(checkDelay, project, fullTestCaseName, timestamp);
                     }, checkDelay, project, fullTestCaseName, timestamp);
                     
                     if(result.logs.length){

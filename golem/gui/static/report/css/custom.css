@@ -5,47 +5,21 @@
 }
 
 
-.titulo-pagina {
+.page-title {
 	margin-top: 5px !important;
 	margin-bottom: 30px !important;
 }
 
-
-#columna-principal {
-	background-color: #ececec;
-
-	border-left: 0px;
-}
-
-
-
-
-
-.proyect-container { 
+.project-container { 
 	background-color: #f5f5f5;
 	border: 1px solid #e4e4e4;
 	margin-bottom: 15px;
 }
 
 
-.primer-proyecto{
-	display: none;
-}
-
-.primer-suite-container {
-	display: none;
-}
-
-
 .widget-historial canvas{
 	height: 250px;
 }
-
-.primera-fila {
-	display: none;
-}
-
-
 
 .progress-bar-container{
 	margin-bottom: 0px;
@@ -58,11 +32,11 @@
 }
 
 
-.ultimas-ejecuciones-tr {
+.last-execution-row {
 	cursor: pointer;
 }
 
-.ultimas-ejecuciones tbody td{
+.last-execution-table tbody td{
 	padding-top: 5px !important;
 	padding-bottom: 5px !important;
 }
@@ -90,10 +64,6 @@
 
 .modal-header {
 	padding-right: 10px;
-}
-
-.seeAllLink {
-	margin-right: 5px;
 }
 
 .link-without-underline, .link-without-underline:hover, .link-without-underline:visited, .link-without-underline:focus {

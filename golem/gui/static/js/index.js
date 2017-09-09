@@ -20,14 +20,14 @@ $(document).ready(function() {
 function createProject(){
     var input = $("#newProjectName");
     var projectName = input.val();
+    projectName = projectName.trim();
 
     if(projectName.length < 3){
         displayErrorModal(['Project name is too short']);
         return
     }
-    // validate spaces
-    if(projectName.indexOf(' ') > -1){
-        displayErrorModal(['Spaces are not allowed']);
+    if(!/^[\w\s]+$/i.test(projectName)){
+        displayErrorModal(['Only letters, numbers and underscore allowed']);
         return
     }
     // validate length

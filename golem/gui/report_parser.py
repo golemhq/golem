@@ -16,30 +16,34 @@ def get_last_executions(root_path, project, suite, limit):
     projects = []
 
     if project:
-        projects.append(project)
+        projects = [project]
     else:
         projects = os.walk(path).__next__()[1]
+    
     for project in projects:
         last_execution_data[project] = {}
         report_path = os.path.join(path, project, 'reports')
         executed_suites = []
-        if suite == '':
-            executed_suites = os.walk(report_path).__next__()[1]
-            if 'single_tests' in executed_suites:
-                executed_suites.remove('single_tests')
+        
+        if suite:
+            executed_suites = [suite]            
         else:
-            executed_suites.append(suite)
-        for su in executed_suites:
-            last_execution_data[project][su] = []
+            executed_suites = os.walk(report_path).__next__()[1]
+            executed_suites = [x for x in executed_suites if x != 'single_tests']
+            # if 'single_tests' in executed_suites:
+            #     executed_suites.remove('single_tests')
+        
+        for exec_suite in executed_suites:
+            last_execution_data[project][exec_suite] = []
             suite_executions = []
-            suite_path = os.path.join(report_path, su)
+            suite_path = os.path.join(report_path, exec_suite)
             suite_executions = os.walk(suite_path).__next__()[1]
             last_executions = sorted(suite_executions)
-            limit = int(limit)
-            if limit is not 0:
+            if not suite:
+                limit = int(limit)
                 last_executions = last_executions[-limit:]
             for execution in last_executions:
-                last_execution_data[project][su].append(execution)
+                last_execution_data[project][exec_suite].append(execution)
 
     return last_execution_data
 
