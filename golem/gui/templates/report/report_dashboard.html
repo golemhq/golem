@@ -1,25 +1,24 @@
-{% extends "report/base.html" %}
+{% extends "layout.html" %}
 
-{% block header_declarations %}
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script>
+{% block head_declarations %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}"/>  
+
+<!-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script> -->
+<!-- <script>
 google.charts.load('current', {'packages':['corechart']});
-</script>
+</script> -->
 {% endblock %}
 
 {% block content %}
 
-<div class="container">
-	<div class="row">
-		<div class="col-md-10 col-md-offset-1 content-wrapper all-projects-container">
-			<h1 class="page-title">Report Dashboard{% if project %} - {{project}}{% endif %}</h1>
-		</div>
-	</div>
+<div class="all-projects-container">
+	<h2 class="">Reports{% if project %} - {{project}}{% endif %}</h2>
 </div>
 
 {% endblock %}
 
-{% block page_footer_declarations %}
+{% block footer_declarations %}
 <script>
 	var projectName = '{{project}}';
 	var suiteName = '{{suite}}'

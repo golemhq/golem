@@ -1,15 +1,24 @@
 
 
-var allProjectsData = {};
+// var allProjectsData = {};
+
+var charts = {}
+var chartData = {}
 
 
-$(document).ready(function() {            
+$(document).ready(function() {
+
+	var limit;
+	if(projectName == "") limit = 5;
+	else if(suiteName == "") limit = 10
+	else limit = 50;
+
 	$.ajax({
 		url: "/report/get_last_executions/",
 		data: {
             "project": projectName,
             "suite": suiteName,
-            "limit": 5
+            "limit": limit
         },
         dataType: 'json',
         type: 'POST',
@@ -28,22 +37,26 @@ function loadProject(project, projectData){
 	else
 		var projectContainer = ReportDashboard.generateProjectContainer(project);
 	
-	allProjectsData[project] = {};
+	//allProjectsData[project] = {};
 
 	for(suite in projectData){
 
-		if(suiteName.length > 0)
+		if(suiteName)
 			var suiteContainer = ReportDashboard.generateExecutionsContainerSingleSuite(project, suite);
 		else
 			var suiteContainer = ReportDashboard.generateExecutionsContainer(project, suite);
 		
-		allProjectsData[project][suite] = [ ['date', 'total', 'error']];
+		//allProjectsData[project][suite] = [ ['date', 'total', 'error']];
 
 		// fill in last executions table
 		var index = 1;
+		var executions = []
+
 		for(e in projectData[suite]){
 			var execution = projectData[suite][e];
-			
+			var dateTime = utils.getDateTimeFromTimestamp(execution);
+			executions.push(dateTime)
+
 			var blueBarId = guidGenerator();
 
 			var row = ReportDashboard.generateExecutionsTableRow({
@@ -51,9 +64,10 @@ function loadProject(project, projectData){
 				suite: suite,
 				execution: execution,
 				index: index.toString(),
-				dateTime: getDateTimeFromTimestamp(execution),
+				dateTime: dateTime,
 				environment: '',
-				blueBarId: blueBarId});
+				blueBarId: blueBarId
+			});
 
 			completarBarraPorcentaje(project, suite, execution, blueBarId, index);
 
@@ -62,6 +76,54 @@ function loadProject(project, projectData){
 			index += 1;
 		}
 		projectContainer.append(suiteContainer);
+
+
+		// create chart for suite
+		var ctx = suiteContainer.find('canvas')[0].getContext('2d');
+		var chart = new Chart(ctx, {
+		    type: 'line',
+		    data: {
+		        labels: executions,
+		        datasets: [
+		        {
+		            label: "Failed",
+		            backgroundColor: 'rgb(217, 83, 79)',
+		            borderColor: 'rgb(217, 83, 79)',
+		            data: [],
+		        },
+		        {
+		            label: "Passed",
+		            backgroundColor: 'rgb(66, 139, 202)',
+		            borderColor: 'rgb(66, 139, 202)',
+		            data: [],
+		        },
+		    	]
+	    	},
+	    	options: {
+	    		scales: {
+		            yAxes: [{
+		                stacked: true,
+		                ticks: {
+		                    beginAtZero: true
+		                }
+		            }],
+		             xAxes: [{
+		                display: false
+		            }]
+		        },
+		        elements: {
+		            line: {
+		                tension: 0, // disables bezier curves
+		            },
+
+		        },
+		        maintainAspectRatio: false,
+	    	}
+		});
+
+		charts[project+suite] = chart;
+
+
 	}
 
 	projectContainer.show();
@@ -70,6 +132,8 @@ function loadProject(project, projectData){
 
 
 function completarBarraPorcentaje(project, suite, execution, id, index){
+	console.log('Execution', execution)
+	var dateTime = utils.getDateTimeFromTimestamp(execution);
 
 	$.post( 
 		"/report/get_execution_data/",
@@ -78,19 +142,26 @@ function completarBarraPorcentaje(project, suite, execution, id, index){
 			suite: suite,
 			execution: execution
 		},
-		function( data ) {
-  			var okPercentage = data.execution_data.total_cases_ok * 100 / data.execution_data.total_cases;
+		function( executionData ) {
+  			var okPercentage = executionData.total_cases_ok * 100 / executionData.total_cases;
 
   			$("#"+id).attr('data-transitiongoal', okPercentage);
 
   			animateProgressBar(id);
 
-  			allProjectsData[project][suite].push([
-  				index.toString(),
-  				data.execution_data.total_cases,
-  				data.execution_data.total_cases - data.execution_data.total_cases_ok]);
+  			// if(chartData[project+suite] === undefined){
+  			// 	chartData[project+suite] = {}
+  			// }
 
-  			cargarGraficoHistorial(project, suite);
+  			//chartData[project+suite][dateTime] = {passed: executionData.total_cases_ok};
+  			//chartData[project+suite] = und
+
+  			// allProjectsData[project][suite].push([
+  			// 	index.toString(),
+  			// 	data.execution_data.total_cases,
+  			// 	data.execution_data.total_cases - data.execution_data.total_cases_ok]);
+
+  			cargarGraficoHistorial(project, suite, dateTime, executionData.total_cases_ok, executionData.total_cases - executionData.total_cases_ok);
 		});
 }
 
@@ -101,61 +172,64 @@ function animateProgressBar(id){
 }
 
 
-function cargarGraficoHistorial(project, suite){
+function cargarGraficoHistorial(project, suite, label, passed, failed){
+	var indexOfLabel = charts[project+suite].data.labels.indexOf(label);
+
+	var indexOfDatasetLabelPassed = charts[project+suite].data.datasets.map(function(o) { return o.label; }).indexOf('Passed');
+	var indexOfDatasetLabelFailed = charts[project+suite].data.datasets.map(function(o) { return o.label; }).indexOf('Failed');
+
+	charts[project+suite].data.datasets[indexOfDatasetLabelPassed].data[indexOfLabel] = passed;
+	charts[project+suite].data.datasets[indexOfDatasetLabelFailed].data[indexOfLabel] = failed;
+
+	charts[project+suite].update();
+
+	return
 
 	// google charts might not be loaded yet
-	if(google.visualization != undefined && 
-		google.visualization.arrayToDataTable != undefined &&
-		google.visualization.AreaChart != undefined){
+	// if(google.visualization != undefined && 
+	// 	google.visualization.arrayToDataTable != undefined &&
+	// 	google.visualization.AreaChart != undefined){
 		
-		// var data = google.visualization.arrayToDataTable([
-	    //   ['Year', 'Sales', 'Expenses'],
-	    //   ['2013',  1000,      400],
-	    //   ['2014',  1170,      460],
-	    // ]);
-	    var container = $("#"+project+" #"+suite).find(".plot-chart-container")[0]
+	// 	// var data = google.visualization.arrayToDataTable([
+	//     //   ['Year', 'Sales', 'Expenses'],
+	//     //   ['2013',  1000,      400],
+	//     //   ['2014',  1170,      460],
+	//     // ]);
+	//     var container = $("#"+project+" #"+suite).find(".plot-chart-container")[0]
 
-		var data = google.visualization.arrayToDataTable( allProjectsData[project][suite] );
+	// 	var data = google.visualization.arrayToDataTable( allProjectsData[project][suite] );
 
-	    var options = {
-	      title: '',
-	      hAxis: {title: '',  titleTextStyle: {color: '#333'}},
-	      vAxis: {minValue: 0},
-	      height: 218,
-	      backgroundColor: '#f9f9f9',
-	      animation: {
-	      	startup: true, 
-	      	duration: 700,
-	      	easing: 'in'
-	      },
-	      legend: {position: 'none'},
-	      chartArea: {
-	      	left: 5,
-	      	right: 5
-	      }
-	      // backgroundColor: {
-	      // 		fill: '#f9f9f9',
-	      //   	stroke: '#d3d3d3',
-	      //   	strokeWidth: 2,
-    	  // 	}
-	    };
+	//     var options = {
+	//       title: '',
+	//       hAxis: {title: '',  titleTextStyle: {color: '#333'}},
+	//       vAxis: {minValue: 0},
+	//       height: 218,
+	//       backgroundColor: '#f9f9f9',
+	//       animation: {
+	//       	startup: true, 
+	//       	duration: 700,
+	//       	easing: 'in'
+	//       },
+	//       legend: {position: 'none'},
+	//       chartArea: {
+	//       	left: 5,
+	//       	right: 5
+	//       }
+	//       // backgroundColor: {
+	//       // 		fill: '#f9f9f9',
+	//       //   	stroke: '#d3d3d3',
+	//       //   	strokeWidth: 2,
+ //    	  // 	}
+	//     };
 
-	    var chart = new google.visualization.AreaChart(container);
-	    chart.draw(data, options);
-	}
-	else{
-		setTimeout(cargarGraficoHistorial, 100, project, suite)
+	//     var chart = new google.visualization.AreaChart(container);
+	//     chart.draw(data, options);
+	// }
+	// else{
+	// 	setTimeout(cargarGraficoHistorial, 100, project, suite)
 	    
-	}
+	// }
 }
-
-
-function getDateTimeFromTimestamp(timestamp){
-	var sp = timestamp.split('.');
-	var dateTimeString = sp[0]+'/'+sp[1]+'/'+sp[2]+' '+sp[3]+':'+sp[4];
-	return dateTimeString
-}
-
 
 function guidGenerator() {
     var S4 = function() {

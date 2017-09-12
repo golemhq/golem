@@ -5,7 +5,7 @@ var ReportDashboard = new function(){
     this.generateProjectContainer = function(projectName){
         var projectContainer = " \
             <div class='col-md-12 project-container' id='"+projectName+"'> \
-                <h3 class='project-name'> \
+                <h3 class='no-margin-top'> \
                     <a href='/report/project/"+projectName+"/' class='link-without-underline'>"+projectName+"</a> \
                 </h3> \
             </div>";
@@ -28,24 +28,28 @@ var ReportDashboard = new function(){
                                 class='link-without-underline'>"+suiteName+"</a> \
                         </span></h3> \
                     </div> \
-                    <div class='widget-content table-content col-sm-7'> \
-                        <div class='table-responsive last-execution-table'> \
-                            <table class='table'> \
-                                <thead> \
-                                    <tr> \
-                                        <th>#</th> \
-                                        <th>Date & Time</th> \
-                                        <th>Environment</th> \
-                                        <th>Result &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</th> \
-                                    </tr> \
-                                </thead> \
-                                <tbody></tbody> \
-                            </table> \
+                    <div class='flex-row'>\
+                        <div class='widget-content table-content col-sm-7'> \
+                            <div class='table-responsive last-execution-table'> \
+                                <table class='table no-margin-bottom'> \
+                                    <thead> \
+                                        <tr> \
+                                            <th>#</th> \
+                                            <th>Date & Time</th> \
+                                            <th>Environment</th> \
+                                            <th>Result &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</th> \
+                                        </tr> \
+                                    </thead> \
+                                    <tbody></tbody> \
+                                </table> \
+                            </div> \
                         </div> \
-                    </div> \
-                    <div class='col-sm-5'> \
-                        <div class='plot-chart-container'></div> \
-                    </div> \
+                        <div class='col-sm-5 table-content chart-container'> \
+                            <div class='chart-inner-container'>\
+                                <canvas></canvas>\
+                            </div>\
+                        </div> \
+                    </div>\
                 </div> \
             </div>";
         return $(executionsContainer)
@@ -56,11 +60,11 @@ var ReportDashboard = new function(){
             <div class='suite-container' id='"+suiteName+"'> \
                 <div class='widget widget-table'> \
                     <div class='' style='height: 218px'> \
-                        <div class='plot-chart-container'></div> \
+                        <canvas></canvas>\
                     </div> \
                     <div class='widget-content table-content'> \
                         <div class='table-responsive last-execution-table'> \
-                            <table class='table'> \
+                            <table class='table no-margin-bottom'> \
                                 <thead> \
                                     <tr> \
                                         <th>#</th> \

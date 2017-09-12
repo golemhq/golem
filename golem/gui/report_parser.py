@@ -8,7 +8,7 @@ def get_start_date_time_from_timestamp(timestamp):
     return date_time_string
 
 
-def get_last_executions(root_path, project, suite, limit):
+def get_last_executions(root_path, project=None, suite=None, limit=5):
     last_execution_data = {}
 
     path = os.path.join(root_path, 'projects')
@@ -39,20 +39,18 @@ def get_last_executions(root_path, project, suite, limit):
             suite_path = os.path.join(report_path, exec_suite)
             suite_executions = os.walk(suite_path).__next__()[1]
             last_executions = sorted(suite_executions)
-            if not suite:
-                limit = int(limit)
-                last_executions = last_executions[-limit:]
+            limit = int(limit)
+            last_executions = last_executions[-limit:]
             for execution in last_executions:
                 last_execution_data[project][exec_suite].append(execution)
 
     return last_execution_data
 
 
-def get_ejecucion_data(root_path, project, suite, execution):
+def get_execution_data(root_path, project, suite, execution):
     execution_data = {}
     total_cases_ok = 0
     total_cases = 0
-
     execution_dir = os.path.join(root_path, 'projects', project, 'reports',
                                  suite, execution)
 
@@ -110,6 +108,7 @@ def get_ejecucion_data(root_path, project, suite, execution):
             execution_data['test_cases'].append(new_test_case)
 
     execution_data['total_cases_ok'] = total_cases_ok
+    execution_data['total_cases_fail'] = total_cases - total_cases_ok
     execution_data['total_cases'] = total_cases
 
     return execution_data

@@ -1,12 +1,10 @@
 
 .main-container {
 	font-size: 17px;
-	padding-top: 0px;
 }
 
 
 .step-screenshot {
-	/*width: 100%;*/
 	margin-left: auto;
 	margin-right: auto;
 	width: 70%;
@@ -16,5 +14,5 @@
 .test_case_container {
 	padding-left: 30px;
 	padding-right: 30px;
-	padding-bottom: 20px;
+	padding-bottom: 15px;
 }

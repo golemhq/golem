@@ -2,6 +2,8 @@
 $(document).ready(function() {
     $('#testCasesTree').treed();
     $('#pagesTree').treed();
+
+    generateHealthChart(project);
 });
 
 
@@ -134,127 +136,6 @@ function addElement(event){
 }
 
 
-
-
-
-
-// function startAddNewPageObject(elem){
-//     var parent = $(elem).parent();
-//     console.log(parent);
-//     var input = $("<input class='new-page-object-input' type='text'>");
-//     $(input).blur(function() {
-//         //alert('blur')
-//         addNewPageObject($(this))
-//     });
-
-//     $(input).keyup(function(e) {
-//         if (e.which == 13) // Enter key
-//             //alert('keyup')
-//         addNewPageObject($(this));
-//     });
-
-//     parent.html('');
-//     parent.append(input);
-//     input.focus();
-// }
-
-
-// function addNewPageObject(input){
-//     var dottedBranches = getDottedBranches(input);
-//     var pageObjectName = input.val();
-//     if(pageObjectName.length == 0){
-//         console.log(input);
-//         input.get(0).parentElement.remove();
-//         return
-//     }
-//     // validate spaces
-//     if(pageObjectName.indexOf(' ') > -1){
-//         displayErrorModal(['Spaces are not allowed']);
-//         return
-//     }
-//     // validate length
-//     if(pageObjectName.length > 60){
-//         displayErrorModal(['Maximum length is 60 characters']);
-//         return
-//     }
-//     // validate there is no more than 1 slash
-//     if(pageObjectName.split('/').length -1 > 1){
-//         displayErrorModal(['Only one slash character is allowed']);
-//         return   
-//     }
-//     // validate if there is a slash it is trailing
-//     if(pageObjectName.split('/').length -1 == 1){
-//         if(pageObjectName.indexOf('/') != 0){
-//             displayErrorModal(['Directories should have a trailing slash character']);
-//             return
-//         }
-//     }
-//     if(pageObjectName.indexOf('/') > -1){
-//         // is a new directory
-//         $.ajax({
-//             url: "/new_directory_page_object/",
-//             data: {
-//                 "project": project,
-//                 "parents": dottedBranches,
-//                 "directoryName": pageObjectName
-//             },
-//             dataType: 'json',
-//             type: 'POST',
-//             success: function(data) {
-//                 if(data.errors.length == 0){
-//                     var li = $(".new-page-object-input").parent();
-//                     var ul = $(".new-page-object-input").parent().parent();
-//                     addBranchToTree(li, data.directory_name, 'page_object');
-//                     ul.append(
-//                         "<li><i class='glyphicon glyphicon-plus-sign'></i><a href='#' \
-//                             onclick='startAddNewPageObject(this)'> Add New</a></li>");
-//                 }
-//                 else{
-//                     displayErrorModal(data.errors);
-//                 }
-//             },
-//             error: function() {}
-//         });
-//     }
-//     else {
-//         $.ajax({
-//             url: "/new_page_object/",
-//             data: {
-//                 "project": project,
-//                 "parents": dottedBranches,
-//                 "pageObjectName": pageObjectName
-//             },
-//             dataType: 'json',
-//             type: 'POST',
-//             success: function(data) {
-//                 if(data.errors.length == 0){
-//                     var li = $(".new-page-object-input").parent();
-//                     var ul = $(".new-page-object-input").parent().parent();
-//                     if(dottedBranches.length > 0){
-//                         var urlForPO = dottedBranches+'.'+pageObjectName;
-//                     }
-//                     else{
-//                         var urlForPO = pageObjectName;
-//                     }
-//                     li.html("<a href='/p/"+data.project_name+"/page/"+urlForPO+"/'>"+data.page_object_name+"</a>");
-//                     ul.append(
-//                         "<li><i class='glyphicon glyphicon-plus-sign'></i><a href='#' \
-//                             onclick='startAddNewPageObject(this)'> Add New</a></li>");
-//                 }
-//                 else{
-//                     displayErrorModal(data.errors);
-//                 }
-
-//             },
-//             error: function() {
-                
-//             }
-//         });
-
-//     }
-// }
-
-
 function getParentsSeparatedByDots(elem){
     var dotted_branches = '';
     elem.parents('.branch').each(function(){
@@ -273,3 +154,104 @@ function removeTreeElement(elem){
     var parent = $(elem).parent().parent();
 }
 
+
+function generateHealthChart(projectName){
+    $.ajax({
+        url: "/report/get_project_health_data/",
+        data: {
+            "project": projectName,
+        },
+        dataType: 'json',
+        type: 'POST',
+        success: function( healthData ) { 
+            if($.isEmptyObject(healthData)){
+                $("#healthContainer").html("<div class='text-center' style='padding-top: 55px'>no data</div>");
+            }
+            else{
+                loadHealthData(healthData);
+            }
+        }
+    });
+}
+
+
+function loadHealthData(healthData){
+
+    var totalOk = 0;
+    var totalFail = 0;
+
+    var table = "\
+        <table id='healthTable' class='table no-margin-bottom last-execution-table'>\
+            <thead>\
+                <tr>\
+                    <th>Suite</th>\
+                    <th>Date &amp; Time</th>\
+                    <th>Result</th>\
+                </tr>\
+            </thead>\
+            <tbody>\
+            </tbody>\
+        </table>";
+    $("#healthTableContainer").append(table);
+
+    $.each(healthData, function(suite){
+        var okPercentage = healthData[suite].total_ok * 100 / healthData[suite].total;
+        totalOk += healthData[suite].total_ok;
+        totalFail += healthData[suite].total_fail;
+
+        var newRow = "\
+            <tr class='last-execution-row' onclick=''>\
+                <td class=''>"+suite+"</td>\
+                <td class=''>"+utils.getDateTimeFromTimestamp(healthData[suite].execution)+"</td>\
+                <td class=''>\
+                    <div class='progress progress-bar-container'>\
+                    <div aria-valuenow='10' style='width: 100%;' class='progress-bar progress-bar-danger barra-roja' data-transitiongoal='10'></div>\
+                    <div aria-valuenow='20' style='width: 50%;' class='progress-bar barra-azul' data-transitiongoal='"+okPercentage+"'></div>\
+                    </div>\
+                </td>\
+            </tr>";
+        newRow = $(newRow);
+
+        newRow.attr('onclick', "document.location.href='/report/project/"+project+"/"+suite+"/"+healthData[suite].execution+"/'");
+
+        $("#healthTable tbody").append(newRow);
+
+        setTimeout(function(){
+            newRow.find('.progress-bar.barra-azul').css('width', okPercentage+'%');
+        }, 1, newRow);
+
+    });
+
+    var ctx = document.getElementById('healthChartCanvas').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Passed', 'Failed'],
+            datasets: [
+                {
+                    data: [totalOk, totalFail],
+                    backgroundColor: [
+                        "rgb(66, 139, 202)",
+                        "rgb(217, 83, 79)",
+                    ],
+                    hoverBackgroundColor: [
+                        "rgb(66, 139, 202)",
+                        "rgb(217, 83, 79)"
+                    ]
+                }
+            ]
+        },
+        options: {
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            },
+            responsive: true,
+            maintainAspectRatio : true,
+        }
+    });
+
+    
+    
+
+}

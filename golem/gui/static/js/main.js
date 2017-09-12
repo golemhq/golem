@@ -21,3 +21,13 @@ function passIcon(){
 function failIcon(){
     return '<span class="fail-icon"><span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></span>';
 }
+
+
+const utils = new function(){
+
+    this.getDateTimeFromTimestamp = function(timestamp){
+        var sp = timestamp.split('.');
+        var dateTimeString = sp[0]+'/'+sp[1]+'/'+sp[2]+' '+sp[3]+':'+sp[4];
+        return dateTimeString
+    }
+}

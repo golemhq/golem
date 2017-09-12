@@ -12,54 +12,46 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap-theme.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr/toastr.min.css') }}" rel="stylesheet"/>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome/font-awesome.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 
     <!-- JQUERY -->
     <script src="{{ url_for('static', filename='js/jquery/jquery.min.js') }}"></script>
 
     <title>Golem</title>
-    
-    {% block head %}
+
+    {% block head_declarations %}
     {% endblock %} 
-		
-		
 </head>
 
 <body>
     <div class="container">
-        
         <div class="header clearfix">
-        <nav>
-          <ul class="nav nav-pills pull-right">
-            {% if g.user.is_authenticated %}
+            <nav>
+              <ul class="nav nav-pills pull-right">
+                {% if g.user.is_authenticated %}
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle user-dropdown" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ g.user.username }} <span class="caret"></span></a>
                   <ul class="dropdown-menu">
                     <li><a href="/logout/">Log out</a></li>
-                  </ul>
-                </li>
-            {% else %}
-                <li role="presentation"><a href="/login/">Log in</a></li>
-            {% endif %}
-          </ul>
-          <ul class="nav nav-pills pull-right">
-            <li class="">
-              <a href="/report/" role="button" aria-haspopup="true" aria-expanded="false">Reports</a>
+                </ul>
             </li>
-          </ul>
-        </nav>
-        <h3 class="text-muted"><a href="/" class="link-without-underline">Golem <small>Test Automation Framework</small></a></h3>
-      </div>
+            {% else %}
+            <li role="presentation"><a href="/login/">Log in</a></li>
+            {% endif %}
+        </ul>
+        <ul class="nav nav-pills pull-right">
+            <li class="">
+              <a href="/report/project/{{project}}/" role="button" aria-haspopup="true" aria-expanded="false">Reports</a>
+          </li>
+      </ul>
+  </nav>
+  <h3 class="text-muted"><a href="/" class="link-without-underline">Golem <small>Test Automation Framework</small></a></h3>
+</div>
 
-        {% block content %}
-        {% endblock %}
-
-        <!--
-        <footer class="footer">
-            <p>&copy; Casey 2015</p>
-        </footer>
-        -->
-    </div>
+{% block content %}
+{% endblock %}
+</div>
 
 <div class="modal fade" id="errorModal" tabindex="-1" role="dialog">
   <div class="modal-dialog">
@@ -67,25 +59,27 @@
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">Error</h4>
-      </div>
-      <div class="modal-body">
+    </div>
+    <div class="modal-body">
         <ul id="errorList">
         </ul>
-      </div>
-      <div class="modal-footer">
+    </div>
+    <div class="modal-footer">
         <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Continue</button>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
+    </div>
+</div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-    
+
 <script src="{{ url_for('static', filename='js/bootstrap/bootstrap.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script src="{{ url_for('static', filename='js/toastr/toastr.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chartJs/chart.min.js') }}"></script>
 <script>
   var username = "{{g.user.username}}";
 </script>
+{% block footer_declarations %}{% endblock %} 
 
 </body>
 

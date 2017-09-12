@@ -408,8 +408,6 @@ def change_test_name():
         except:
             return json.dumps('error')
 
-        
-
 
 @app.route("/run_suite/", methods=['POST'])
 def run_suite():
@@ -488,16 +486,27 @@ def logout():
 # REPORT INDEX
 @app.route("/report/")
 @login_required
-def report_index():
+def report_dashboard():
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:
         return render_template('report/report_dashboard.html', project='', suite='')
 
 
+# REPORT INDEX
+@app.route("/report2/")
+@login_required
+def report_index2():
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
+        return render_template('not_permission.html')
+    else:
+        return render_template('report/report_dashboard2.html', project='', suite='')
+
+
+
 @app.route("/report/project/<project>/")
 @login_required
-def project_view(project):
+def report_dashboard_project(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:
@@ -506,7 +515,7 @@ def project_view(project):
 
 @app.route("/report/project/<project>/suite/<suite>/")
 @login_required
-def suite_report_view(project, suite):
+def report_dashboard_suite(project, suite):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:
@@ -515,24 +524,47 @@ def suite_report_view(project, suite):
 
 @app.route("/report/project/<project>/<suite>/<execution>/")
 @login_required
-def execution_report(project, suite, execution):
+def report_execution(project, suite, execution):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:
         formatted_date = report_parser.get_start_date_time_from_timestamp(execution)
-        return render_template('report/execution_report.html', project=project, suite=suite,
+        return render_template('report/report_execution.html', project=project, suite=suite,
+                               execution=execution, formatted_date=formatted_date)
+
+
+@app.route("/report2/project/<project>/<suite>/<execution>/")
+@login_required
+def execution_report2(project, suite, execution):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
+        return render_template('not_permission.html')
+    else:
+        formatted_date = report_parser.get_start_date_time_from_timestamp(execution)
+        return render_template('report/execution_report2.html', project=project, suite=suite,
                                execution=execution, formatted_date=formatted_date)
 
 
 @app.route("/report/project/<project>/<suite>/<execution>/<test_case>/<test_set>/")
 @login_required
-def sing_test_case(project, suite, execution, test_case, test_set):
+def report_test(project, suite, execution, test_case, test_set):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     test_case_data = report_parser.get_test_case_data(root_path, project, test_case,
                                                       suite=suite, execution=execution,
                                                       test_set=test_set)
-    return render_template('report/test_case.html', project=project, suite=suite,
+    return render_template('report/report_test.html', project=project, suite=suite,
+                           execution=execution, test_case=test_case, test_set=test_set,
+                           test_case_data=test_case_data)
+
+@app.route("/report2/project/<project>/<suite>/<execution>/<test_case>/<test_set>/")
+@login_required
+def report_test2(project, suite, execution, test_case, test_set):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
+        return render_template('not_permission.html')
+    test_case_data = report_parser.get_test_case_data(root_path, project, test_case,
+                                                      suite=suite, execution=execution,
+                                                      test_set=test_set)
+    return render_template('report/report_test2.html', project=project, suite=suite,
                            execution=execution, test_case=test_case, test_set=test_set,
                            test_case_data=test_case_data)
 
@@ -556,8 +588,33 @@ def get_execution_data():
         project = request.form['project']
         suite = request.form['suite']
         execution = request.form['execution']
-        execution_data = report_parser.get_ejecucion_data(root_path, project, suite, execution)
-        return jsonify(execution_data=execution_data)
+        execution_data = report_parser.get_execution_data(root_path, project, suite, execution)
+        return jsonify(execution_data)
+
+
+@app.route("/report/get_project_health_data/", methods=['POST'])
+def get_project_health_data():
+    if request.method == 'POST':
+        project = request.form['project']
+        project_data = report_parser.get_last_executions(root_path, project=project, suite=None, limit=1)
+        
+        health_data = {}
+
+        for suite, executions in project_data[project].items():
+            execution_data = report_parser.get_execution_data(root_path,
+                                                              project,
+                                                              suite,
+                                                              executions[0])
+            print(execution_data['total_cases_ok'], execution_data['total_cases'])
+            health_data[suite] = {
+                'execution': executions[0],
+                'total': execution_data['total_cases'],
+                'total_ok': execution_data['total_cases_ok'],
+                'total_fail': execution_data['total_cases_fail']
+            }
+
+        return jsonify(health_data)
+
 
 
 @app.route('/report/screenshot/<project>/<suite>/<execution>/<test_case>/<test_set>/<scr>/')

@@ -1,5 +1,134 @@
 
+/*
 
+gray 1  #fafafa
+        #ededed
+        #e0e0e0
+        #d3d3d3
+        #c7c7c7
+*/
+
+
+.gray-1-background {
+    background-color: #fafafa; 
+}
+
+.gray-2-background {
+    background-color: #ededed; 
+}
+
+.gray-3-background {
+    background-color: #e0e0e0; 
+}
+
+.gray-4-background {
+    background-color: #d3d3d3; 
+}
+
+.gray-border-4 {
+    border: 1px solid #d3d3d3;
+}
+
+.no-padding-left {
+    padding-left: 0px;
+}
+
+.no-padding-right {
+    padding-right: 0px;
+}
+
+.padding-right-7-5 {
+    padding-right: 7.5px;
+}
+
+.padding-left-7-5 {
+    padding-left: 7.5px;
+}
+
+
+.last-execution-row {
+    cursor: pointer;
+}
+
+.last-execution-table td{
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+}
+
+.no-margin-bottom {
+    margin-bottom: 0px;
+}
+
+
+.flex-row {
+    display: flex;
+}
+
+.progress {
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    -ms-border-radius: 0;
+    -o-border-radius: 0;
+    border-radius: 0; 
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    background-color: #e2e2e2; 
+    position: relative;
+    height: 20px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    -webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+}
+
+
+.progress .progress-bar {
+    -webkit-transition-property: width;
+    -moz-transition-property: width;
+    -o-transition-property: width;
+    transition-property: width;
+    -webkit-transition-duration: 2s;
+    -moz-transition-duration: 2s;
+    -o-transition-duration: 2s;
+    transition-duration: 2s;
+    -webkit-transition-timing-function: ease;
+    -moz-transition-timing-function: ease;
+    -o-transition-timing-function: ease;
+    transition-timing-function: ease;
+
+    background-image: none;
+    background-image: none;
+    background-image: none; 
+    background-image: none;
+
+    position: absolute;
+    overflow: hidden;
+    line-height: 20px;
+}
+
+.progress-bar {
+    float: left;
+    width: 0;
+    height: 100%;
+    font-size: 12px;
+    color: #ffffff;
+    text-align: center;
+    background-color: #428bca;
+    -webkit-box-shadow: inset 0 -1px 0 rgba(0,0,0,0.15);
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.15);
+    -webkit-transition: width 0.6s ease;
+    transition: width 0.6s ease;
+}
+
+.progress-bar-danger {
+    background-color: #d9534f;
+}
+
+.progress-bar-container{
+    margin-bottom: 0px;
+}
 
 
 .header, .marketing, .footer {
@@ -124,4 +253,8 @@
 
 .pass-icon {
   color: green;
+}
+
+.no-margin-top {
+    margin-top: 0px;
 }

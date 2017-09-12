@@ -1,0 +1,29 @@
+{% extends "report/base.html" %}
+
+{% block header_declarations %}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+google.charts.load('current', {'packages':['corechart']});
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+	<div class="row">
+		<div class="col-md-10 col-md-offset-1 content-wrapper all-projects-container">
+			<h1 class="page-title">Report Dashboard{% if project %} - {{project}}{% endif %}</h1>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block page_footer_declarations %}
+<script>
+	var projectName = '{{project}}';
+	var suiteName = '{{suite}}'
+</script>
+<script src="{{ url_for('static', filename='report/js/report_dashboard2.js') }}"></script>
+<script src="{{ url_for('static', filename='report/js/report.js') }}"></script>
+{% endblock %}

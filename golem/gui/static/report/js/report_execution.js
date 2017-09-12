@@ -18,8 +18,8 @@ function getReportData(){
 			suite: suite,
 			execution: execution,
 		},
-		function( data ) {	
-  			loadReport(data.execution_data);
+		function(executionData) {	
+  			loadReport(executionData);
   		}
 	);
 	if(baseDelay <= 10000){
@@ -82,47 +82,16 @@ function updateModuleRowInGeneralTable(testCase){
 	var moduleRow = getModuleRow(testCase.module);
 	if(moduleRow === null){
 		// add a new row
-
-		// var testsInModule = getTestsInModule(testCase.module);
-		// var testsOkInModule = getTotalTestsOkInModule(testCase.module);
-		// var testsFailedInModule = testsInModule - testsOkInModule;
-		// var timeInModule = getTotalModuleTime(testCase.module);
-
-
 		var moduleRow = ExecutionsReport.generateModuleRow({
 			moduleName: testCase.module,
-			// totalTests: testsInModule,
-			// testPassed: testsOkInModule,
-			// testsFailed: testsFailedInModule,
-			// time: timeInModule+'s'
 		});
-
-		// moduleRow.find(".module").html(testCase.module);
-		// moduleRow.find(".total-tests").html(testsInModule);
-		// moduleRow.find(".tests-ok").html(testsOkInModule);
-		// moduleRow.find(".tests-failed").html(testsFailedInModule);
-		// moduleRow.find(".total-time").html(timeInModule + 's');
-
-		// var okPercentage = testsOkInModule * 100 / testsInModule;
-		// var barra_azul = moduleRow.find('.barra-azul');
-		// var id = new Date().getTime() + Math.random().toString(36).substring(7);
-		// barra_azul.attr('id', id);
-  		// 		barra_azul.attr('data-transitiongoal', okPercentage);
-
 		moduleRow.insertBefore("#totalRow");
-
-		//refreshNumbering();
-		
-		//setTimeout(animateProgressBar, 200, id);
 	}
-	
-
 	var testsInModule = getTestsInModule(testCase.module); //testCasesByModule[module].length;
 	var testsOkInModule = getTotalTestsOkInModule(testCase.module);
 	var testsFailedInModule = testsInModule - testsOkInModule;
 	var timeInModule = getTotalModuleTime(testCase.module);
 
-	//row.find(".module").html(testCase.module);
 	moduleRow.find(".total-tests").html(testsInModule);
 	moduleRow.find(".tests-ok").html(testsOkInModule);
 	moduleRow.find(".tests-failed").html(testsFailedInModule);

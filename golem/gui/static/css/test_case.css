@@ -8,14 +8,6 @@ html {
     width: 100%;
 }
 
-.light-gray-block {
-	background-color: #F8F8F8; 
-}
-
-.light-gray-block:hover {
-	background-color: white; 
-}
-
 .same-heigth-col {
     float: none;
     display: table-cell;
