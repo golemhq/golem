@@ -5,6 +5,7 @@ This module contains the method for running one test
 import importlib
 import time
 import traceback
+import signal
 
 import golem.core
 from golem.core import report, test_execution, utils
@@ -110,13 +111,24 @@ def run_test(workspace, project, test_name, test_data, driver,
             test_module.teardown(golem.core.test_data)
         else:
             execution_logger.logger.info('Test does not have a teardown function')
-            if golem.core.driver:
-                actions.close()
     except:
         result['result'] = 'fail'
         result['error'] += '\n\nteardown failed'
         result['error'] += '\n' + traceback.format_exc()
         execution_logger.logger.error('An error ocurred in the teardown:', exc_info=True)
+    
+    # if there is no teardown or teardown failed or it did not close the driver,
+    # let's try to close the driver manually
+    if golem.core.driver:
+        try:
+            golem.core.driver.quit()
+        except:
+            # if this fails, we have lost control over the webdriver window
+            # and we are not going to be able to close it
+            execution_logger.logger.error('There was an error closing the driver')
+            execution_logger.logger.error(traceback.format_exc())
+        finally:
+            golem.core.driver = None
 
     test_end_time = time.time()
     test_elapsed_time = round(test_end_time - test_start_time, 2)
@@ -128,12 +140,10 @@ def run_test(workspace, project, test_name, test_data, driver,
     result['steps'] = execution_logger.steps
     result['test_elapsed_time'] = test_elapsed_time
     result['test_timestamp'] = test_timestamp
-    # result['screenshots'] = execution_logger.screenshots
     result['browser'] = golem.core.get_selected_driver()
 
     execution_logger.description = None
     execution_logger.steps = []
     execution_logger.screenshots = {}
-
     report.generate_report(report_directory, test_name, golem.core.test_data, result)
     return

@@ -1,11 +1,13 @@
 import sys
 import os
+import types
 
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import WebDriverException
 
 from golem.core import execution_logger as logger
+from golem.selenium.utils import _find
 
 
 # values used during the execution of a test case
@@ -46,6 +48,20 @@ def get_or_create_webdriver(*args):
                     raise Exception(msg) from None
             else:
                 raise Exception('chrome_driver_path setting is not defined')
+        elif driver_selected == 'chrome-headless':
+            if settings['chrome_driver_path']:
+                try:
+                    options = webdriver.ChromeOptions()
+                    options.add_argument('headless')
+                    driver = webdriver.Chrome(executable_path=settings['chrome_driver_path'],
+                                              chrome_options=options)
+                except:
+                    msg = ('Could not start chrome driver using the path \'{}\', '
+                           'check the settings file.'.format(settings['chrome_driver_path']))
+                    logger.logger.error(msg)
+                    raise Exception(msg) from None
+            else:
+                raise Exception('chrome_driver_path setting is not defined')
         # if driver_selected == 'ie':
         #     driver = webdriver.Ie()
         # if driver_selected == 'phantomjs':
@@ -61,13 +77,23 @@ def get_or_create_webdriver(*args):
             #     print('not implemented yet')
             #     sys.exit()
         # maximize driver window by default (fix)
-        elif driver_selected == 'remote-chrome':
+        elif driver_selected == 'chrome-remote-headless':
+            options = webdriver.ChromeOptions()
+            options.add_argument('headless')
             os.environ["webdriver.chrome.driver"] = settings['chrome_driver_path']
-            driver = webdriver.Remote(command_executor='http://localhost:4444/wd/hub',
+            desired_capabilities = options.to_capabilities()
+            driver = webdriver.Remote(command_executor=settings['remote_url'],
+                                      desired_capabilities=desired_capabilities)
+        elif driver_selected == 'chrome-remote':
+            driver = webdriver.Remote(command_executor=settings['remote_url'],
                                       desired_capabilities=DesiredCapabilities.CHROME)
-        elif driver_selected == 'remote-firefox':
-            driver = webdriver.Remote(command_executor='http://localhost:4444/wd/hub',
+        elif driver_selected == 'firefox-remote':
+            driver = webdriver.Remote(command_executor=settings['remote_url'],
                                       desired_capabilities=DesiredCapabilities.FIREFOX)
+
+    # bind _find method to driver instance
+    driver.find = types.MethodType(_find, driver)
+    #webelement.find_all = types.MethodType(_find_all, webelement)
     
     # if settings.minimize:
     #     driver.set_window_position(-3000, 0)

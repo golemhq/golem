@@ -12,6 +12,7 @@ from collections import OrderedDict
 from datetime import datetime
 
 import golem
+from golem.core import settings_manager
 
 
 def _generate_dict_from_file_structure(full_path):
@@ -198,11 +199,11 @@ def get_suite_test_cases(workspace, project, suite):
     tests = []
     suite_module = importlib.import_module('projects.{0}.suites.{1}'.format(project, suite),
                                            package=None)
-    if '*' in suite_module.test_case_list:
+    if '*' in suite_module.tests:
         path = os.path.join(workspace, 'projects', project, 'tests')
         tests = get_files_in_directory_dotted_path(path)
     else:
-        for test in suite_module.test_case_list:
+        for test in suite_module.tests:
             if test[-1] == '*':
                 this_dir = os.path.join(test[:-2])
                 path = os.path.join(workspace, 'projects', project,
@@ -245,105 +246,6 @@ def get_suite_browsers(workspace, project, suite):
         browsers = suite_module.browsers
 
     return browsers
-
-
-def read_json_and_remove_comments(json_path):
-    """What if I want to store comments in a JSON file?
-    The parser is going to throw errors.
-    So pass a JSON file path to tthis function and it will read it, remove the comments
-    and then parse it.
-    Comment lines starting with '//' are ignored"""
-    with open(json_path, 'r') as settings_file:
-        file_lines = settings_file.readlines()
-        lines_without_comments = []
-        for line in file_lines:
-            if line.strip()[0:2] != '//' and len(line.strip()) > 0:
-                lines_without_comments.append(line)
-        file_content_without_comments = ''.join(lines_without_comments)
-        json_data = {}
-        try:
-            json_data = json.loads(file_content_without_comments)
-        except Exception as e:
-            print('There was an error reading settings file {}'.format(json_path))
-
-        return json_data
-
-
-def assign_settings_default_values(settings):
-    if not 'implicit_wait' in settings:
-        settings['implicit_wait'] = None
-    elif settings['implicit_wait'] == '':
-        settings['implicit_wait'] = None
-
-    if not 'screenshot_on_error' in settings:
-        settings['screenshot_on_error'] = True
-    elif settings['screenshot_on_error'] == '' or settings['screenshot_on_error'] == None:
-        settings['screenshot_on_error'] = True
-
-    if not 'screenshot_on_step' in settings:
-        settings['screenshot_on_step'] = False
-    elif settings['screenshot_on_step'] == '' or settings['screenshot_on_step'] == None:
-        settings['screenshot_on_step'] == False
-
-    if not 'wait_hook' in settings:
-        settings['wait_hook'] = None
-    elif settings['wait_hook'] == '':
-        settings['wait_hook'] == None
-
-    if not 'default_driver' in settings:
-        settings['default_driver'] = 'chrome'
-    elif settings['default_driver'] == '':
-        settings['default_driver'] == 'chrome'
-
-    if not 'chrome_driver_path' in settings:
-        settings['chrome_driver_path'] = None
-    elif settings['chrome_driver_path'] == '':
-        settings['chrome_driver_path'] == None
-
-    if not 'gecko_driver_path' in settings:
-        settings['gecko_driver_path'] = None
-    elif not settings['gecko_driver_path']:
-        settings['gecko_driver_path'] == None
-
-    if not 'console_log_level' in settings:
-        settings['console_log_level'] = 'INFO'
-    elif not settings['console_log_level']:
-        settings['console_log_level'] = 'INFO'
-
-    if not 'file_log_level' in settings:
-        settings['file_log_level'] = 'DEBUG'
-    elif not settings['file_log_level']:
-        settings['file_log_level'] = 'DEBUG'
-
-    if not 'log_all_events' in settings:
-        settings['log_all_events'] = True
-    elif settings['log_all_events'] == '' or settings['log_all_events'] == None:
-        settings['log_all_events'] = True
-
-    return settings
-
-
-def get_global_settings():
-    '''get global settings from root folder'''
-    settings = read_json_and_remove_comments('settings.json')
-    settings = assign_settings_default_values(settings)
-
-    return settings
-
-
-def get_project_settings(project, global_settings):
-    '''get project level settings from selected project folder,
-    this overrides any global settings'''
-    project_settings_path = os.path.join('projects', project, 'settings.json')
-    project_settings = {}
-    if os.path.isfile(project_settings_path):
-        project_settings = read_json_and_remove_comments(project_settings_path)
-    # merge and override global settings with project settings
-    for setting in project_settings:
-        if project_settings[setting]:
-            global_settings[setting] = project_settings[setting]
-
-    return global_settings
 
 
 def get_timestamp():
@@ -440,7 +342,7 @@ def create_new_project(workspace, project):
 
     settings_path = os.path.join(workspace, 'projects', project, 'settings.json')
     with open(settings_path, 'a') as settings_file:
-        settings_file.write(reduced_settings_file_content())
+        settings_file.write(settings_manager.reduced_settings_file_content())
 
 
 def create_demo_project(workspace):
@@ -448,56 +350,6 @@ def create_demo_project(workspace):
     source = os.path.join(golem.__path__[0], 'templates/demo_project')
     destination = os.path.join(workspace, 'projects', 'demo')
     shutil.copytree(source, destination)
-
-
-def settings_file_content():
-    settings_content = (
-        "// Place this settings file at the root of the test directory to\n"
-        "// impact all the projects\n"
-        "{\n"
-        "// Default time to wait looking for an element until it is found\n"
-        "\"implicit_wait\": 20,\n"
-        "\n"
-        "// Take a screenshot on error by default\n"
-        "\"screenshot_on_error\": true,\n"
-        "\n"
-        "// Take a screenshot on every step\n"
-        "\"screenshot_on_step\": false,\n"
-        "\n"
-        "// Custom wait method to use before each step, must be defined inside extend.py\n"
-        "\"wait_hook\": null,\n"
-        "\n"
-        "// Define the driver to use, unless overriden by the -d/--driver flag\n"
-        "\"default_driver\": \"chrome\",\n"
-        "\n"
-        "// Path to the chrome driver executable. By default it points to the "
-        "// \'drivers\' folder inside the test directory.\n"
-        "\"chrome_driver_path\": \"./drivers/chromedriver\",\n"
-        "\n"
-        "// Path to the gecko driver executable. This is used by Firefox.\n"
-        "// By default it points to the 'drivers' folder inside the test directory.\n"
-        "\"gecko_driver_path\": \"./drivers/geckodriver\",\n"
-        "\n"
-        "// Log level to console. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.\n"
-        "// Default option is INFO\n"
-        "\"console_log_level\": \"INFO\",\n"
-        "\n"
-        "// Log level to file. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.\n"
-        "// Default option is DEBUG\n"
-        "\"console_log_level\": \"DEBUG\",\n"
-        "\n"
-        "// Log all events, instead of just Golem events. Default is false\n"
-        "\"log_all_events\": false\n"
-        "}\n")
-    return settings_content
-
-
-def reduced_settings_file_content():
-    settings_content = (
-        "// Settings defined here will override global settings\n"
-        "{\n"
-        "}\n")
-    return settings_content
 
 
 def create_test_dir(workspace):
@@ -529,7 +381,7 @@ def create_test_dir(workspace):
     
     settings_path = os.path.join(workspace, 'settings.json')
     with open(settings_path, 'a') as settings_file:
-        settings_file.write(settings_file_content())
+        settings_file.write(settings_manager.settings_file_content())
 
     users_path = os.path.join(workspace, 'users.json')
     open(users_path, 'a').close()

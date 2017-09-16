@@ -41,8 +41,16 @@
             {% endif %}
         </ul>
         <ul class="nav nav-pills pull-right">
+          {% if project %}
+          <li class="">
+              <a href="/p/{{project}}/" role="button" aria-haspopup="true" aria-expanded="false">Project</a>
+          </li>
+          {% endif %}
             <li class="">
-              <a href="/report/project/{{project}}/" role="button" aria-haspopup="true" aria-expanded="false">Reports</a>
+              <a href="{% if project %}/report/project/{{project}}/{% else %}/report/{% endif %}" role="button" aria-haspopup="true" aria-expanded="false">Reports</a>
+          </li>
+          <li class="">
+              <a href="/p/{{project}}/settings/" role="button" aria-haspopup="true" aria-expanded="false">Settings</a>
           </li>
       </ul>
   </nav>

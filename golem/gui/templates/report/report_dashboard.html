@@ -13,7 +13,7 @@ google.charts.load('current', {'packages':['corechart']});
 {% block content %}
 
 <div class="all-projects-container">
-	<h2 class="">Reports{% if project %} - {{project}}{% endif %}</h2>
+	<h2 class="">Reports{% if project %} - {{project|replace("_", " ")}}{% endif %}</h2>
 </div>
 
 {% endblock %}

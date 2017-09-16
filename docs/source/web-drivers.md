@@ -17,6 +17,12 @@ To set it up for Golem to use, place it anywhere in your machine (you can use th
 "chrome_driver_path": "./drivers/chromedriver",
 ```
 
+## Chrome headless
+
+Chrome can run headless, requirements: chrome 58+, chromedriver 2.32+
+
+
+
 ##### Firefox
 
 Firefox used to work out of the box without the need of any extra driver server. Starting from Selenium 3.4, the Geckodriver server is required.

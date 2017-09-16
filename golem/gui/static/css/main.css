@@ -6,6 +6,7 @@ gray 1  #fafafa
         #e0e0e0
         #d3d3d3
         #c7c7c7
+        #b3b3b3
 */
 
 
@@ -46,9 +47,15 @@ gray 1  #fafafa
 }
 
 
-.last-execution-row {
+.cursor-pointer {
     cursor: pointer;
 }
+
+.progress-bar.pending {
+    background-color: #b3b3b3;
+}
+
+
 
 .last-execution-table td{
     padding-top: 3px !important;

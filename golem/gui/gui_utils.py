@@ -182,12 +182,39 @@ def get_global_actions():
         {
             'name': 'wait for element visible',
             'parameters': [{'name': 'element', 'type': 'element'},
-                           {'name': 'timeout', 'type': 'value'}]
+                           {'name': 'timeout (optional)', 'type': 'value'}]
+        },
+        {
+            'name': 'wait for element not visible',
+            'parameters': [{'name': 'element', 'type': 'element'},
+                           {'name': 'timeout (optional)', 'type': 'value'}]
         },
         {
             'name': 'wait for element enabled',
             'parameters': [{'name': 'element', 'type': 'element'},
-                           {'name': 'timeout', 'type': 'value'}]
+                           {'name': 'timeout (optional)', 'type': 'value'}]
         }
     ]
     return global_actions
+
+
+def get_supported_browsers_suggestions():
+    # supported_browsers = {
+    #     'suggestions': [
+    #         {'value': 'chrome', 'data': 'chrome'},
+    #         {'value': 'chrome-remote', 'data': 'chrome-remote'},
+    #         {'value': 'chrome-headless', 'data': 'chrome-headless'},
+    #         {'value': 'chrome-remote-headless', 'data': 'chrome-remote-headless'},
+    #         {'value': 'firefox', 'data': 'firefox'},
+    #         {'value': 'firefox-remote', 'data': 'firefox-remote'}
+    #     ]
+    # }
+    supported_browsers = [
+        'chrome',
+        'chrome-remote',
+        'chrome-headless',
+        'chrome-remote-headless',
+        'firefox',
+        'firefox-remote'
+    ]
+    return supported_browsers

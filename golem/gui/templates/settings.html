@@ -1,0 +1,56 @@
+{% extends "layout.html" %} 
+
+{% block head_declarations %} 
+
+<link rel="stylesheet" href="{{ url_for('static', filename='js/code_mirror/codemirror.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+
+{% endblock %} 
+
+{% block content %}
+
+
+
+<div class="col-lg-12">
+
+    <div class="col-sm-6 header-col">
+        <h3 id="pageObjectName">
+            <small>
+                <a href="/p/{{project}}/" class="link-without-underline">
+                    <span class="glyphicon glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+                </a>
+            </small>
+            {{project|replace("_", " ")}} - settings</h3>
+    </div>
+        
+    <div class="col-sm-6 text-right header-col" style="padding-top: 20px">
+        <button id="save" class="btn btn-default btn-sm" onclick="saveSettings();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="col-sm-10 col-sm-offset-1">
+        <h5>Project Settings</h5>
+        <div class="" id="settingsContainer">
+        </div>
+
+        <h5>Global Settings</h5>
+        <div class="" id="globalSettingsContainer">
+        </div>
+
+        <div style="margin-top: 15px"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Remember that project settings override global settings values.</div>
+        <br>
+    </div>
+</div>
+
+
+<script src="{{ url_for('static', filename='js/code_mirror/codemirror.js') }}"></script>
+<script src="{{ url_for('static', filename='js/code_mirror/javascript.js') }}"></script>
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+<script>
+    var project = "{{project}}";
+    var settingsCode = {{settings|tojson}};
+    var globalSettingsCode = {{global_settings|tojson}};
+</script>
+
+{% endblock %}

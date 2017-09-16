@@ -17,6 +17,7 @@ from flask_login import (LoginManager,
                          login_required)
 
 from golem.core import (utils,
+                        settings_manager,
                         test_case,
                         page_object,
                         suite,
@@ -37,7 +38,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 root_path = None
-
 
 # LOGIN VIEW
 @app.route('/login/', methods=['GET', 'POST'])
@@ -104,7 +104,7 @@ def project(project):
         test_cases = utils.get_test_cases(root_path, project)
         page_objects = utils.get_page_objects(root_path, project)
         suites = utils.get_suites(root_path, project)
-        return render_template('project.html', test_cases=test_cases, project=project,
+        return render_template('project_dashboard.html', test_cases=test_cases, project=project,
                                page_objects=page_objects, suites=suites)
 
 
@@ -140,7 +140,7 @@ def test_case_code_view(project, test_case_name):
 
     tc_name, parents = utils.separate_file_from_parents(test_case_name)
     test_case_contents = test_case.get_test_case_content(project, test_case_name)
-    test_data = utils.get_test_data(root_path, project, test_case_name)
+    test_data = utils.get_test_data_dict_list(root_path, project, test_case_name)
 
     return render_template('test_case_code.html', project=project, 
                            test_case_contents=test_case_contents, test_case_name=tc_name,
@@ -183,7 +183,7 @@ def new_tree_element():
 
         if is_dir:
             elem_name = elem_name.replace('/', '')
-
+        print('NAME', elem_name)
         for c in elem_name:
             if not c.isalnum() and not c in ['-', '_']:
                 errors.append('Only letters, numbers, \'-\' and \'_\' are allowed')
@@ -368,14 +368,11 @@ def check_test_case_run_result():
         result['complete'] = report_parser.is_execution_finished(path, sets)
 
         for data_set in sets:
-
             report_path = os.path.join(path, data_set, 'report.json')
             if os.path.exists(report_path):
-
                 test_case_data = report_parser.get_test_case_data(root_path, project,
                                                               test_case_name, execution=timestamp,
                                                               test_set=data_set, is_single=True)
-
                 result['reports'].append(test_case_data)
 
             log_path = os.path.join(path, data_set, 'execution_console.log')
@@ -452,6 +449,31 @@ def save_suite():
         return json.dumps('ok')
 
 
+@app.route("/p/<project>/settings/")
+def settings_view(project):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+    global_settings = settings_manager.get_global_settings_as_string()
+    project_settings = settings_manager.get_project_settings_as_string(project)
+    return render_template('settings.html', project=project,
+                           global_settings=global_settings, settings=project_settings)
+
+
+@app.route("/save_settings/", methods=['POST'])
+def save_settings():
+    if request.method == 'POST':
+        projectname = request.json['project']
+        project_settings = request.json['projectSettings']
+        global_settings = request.json['globalSettings']
+        result = {
+            'result': 'ok',
+            'errors': []
+        }
+        settings_manager.save_settings(root_path, projectname,
+                                       project_settings, global_settings)
+        return json.dumps(result)
+
+
 @app.route("/lock_file/", methods=['POST'])
 def lock_file():
     if request.method == 'POST':
@@ -470,6 +492,12 @@ def unlock_file():
         full_file_name = request.form['fullTestCaseName']
         lock.unlock_file(root_path, project, full_file_name, user_name)
         return json.dumps('ok')
+
+
+@app.route("/get_supported_browsers/", methods=['POST'])
+def get_supported_browsers():
+    return json.dumps(gui_utils.get_supported_browsers_suggestions())
+
 
 
 @app.route("/logout/")
@@ -657,7 +685,5 @@ def page_not_found(error):
 
 
 if __name__ == "__main__":
-
-    global_settings = gui_utils.read_global_settings()
 
     app.run(host='0.0.0.0', debug=True)

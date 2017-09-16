@@ -1,7 +1,9 @@
 
 var allTestCases = {};
-var maxNumberOfSubModules = 0;
+//var maxNumberOfSubModules = 0;
 var baseDelay = 2000;
+
+var suiteFinished = false;
 
 
 $(document).ready(function() {            
@@ -10,7 +12,6 @@ $(document).ready(function() {
 
 
 function getReportData(){
-
 	$.post(
 		"/report/get_execution_data/",
 		{ 
@@ -20,61 +21,97 @@ function getReportData(){
 		},
 		function(executionData) {	
   			loadReport(executionData);
+  			if(executionData.total_pending == 0){ suiteFinished = true }
   		}
 	);
 	if(baseDelay <= 10000){
 		baseDelay += 50;
 	}
-	setTimeout(function(){
-		getReportData()
-	}, baseDelay);
+	if(!suiteFinished){
+		setTimeout(function(){getReportData()}, baseDelay);
+	}
 }
 
 
 function loadReport(execution_data){
 	for(tc in execution_data.test_cases){
-		addTestToDetailTable(execution_data.test_cases[tc]);
+		var test = execution_data.test_cases[tc];
+		var row = $("#"+test.test_set);
+		if(row.length == 0){
+			addTestToDetailTable(test);
+		}
+		else if(row.attr('pending') == 'pending' && test.result != 'pending'){
+			loadTestRowResult(test);
+		}
 	}
 }
 
 function addTestToDetailTable(test){
-	// is this test case already added to the table?
-	if(allTestCases[test.test_set] == undefined ){
-		// this test case is not added yet
-		var numbering = $(".table.test-list-table tbody tr").length + 1;
 
-		if(test.result === 'pass')
-			var resultString = passIcon() + ' ' +test.result;
-		else if(test.result == 'fail')
-			var resultString = failIcon() + ' ' + test.result;	
+	// this test case is not added yet
 
-		var testRow = ExecutionsReport.generateTestRow({
-			numbering: numbering,
-			module: test.module,
-			name: test.name,
-			environment: test.data.environment,
-			browser: test.browser,
-			result: resultString,
-			elapsedTime: test.test_elapsed_time});
+	var numbering = $(".table.test-list-table tbody tr").length + 1;
 
-		var link = "/report/project/"+project+"/"+suite+"/"+execution+"/"+test.full_name+"/"+test.test_set+"/";
-		testRow.attr('onclick', "document.location.href='"+link+"'");
+	if(test.result == 'pass')
+		var resultString = passIcon() + ' ' + test.result;
+	else if(test.result == 'fail')
+		var resultString = failIcon() + ' ' + test.result;
+	else if(test.result == 'pending')
+		var resultString = 'pending';
 
-		testRow.find('td.link a').attr('href', link)
+	var testRow = ExecutionsReport.generateTestRow({
+		testSet: test.test_set,
+		numbering: numbering,
+		module: test.module,
+		name: test.name,
+		//environment: '', //	test.data.environment,
+		//browser: test.browser,
+		result: resultString,
+		//elapsedTime: test.test_elapsed_time
+	});
 
-		$(".test-list-table tbody").append(testRow);
+	var link = "/report/project/"+project+"/"+suite+"/"+execution+"/"+test.full_name+"/"+test.test_set+"/";
+	testRow.attr('onclick', "document.location.href='"+link+"'");
+	testRow.find('td.link a').attr('href', link)
 
-		// add this test case to allTestCases
-		allTestCases[test.test_set] = test;
+	$(".test-list-table tbody").append(testRow);
 
-		// refresh the general table
-		refreshGeneralTable();
+	//add this test case to allTestCases
+	allTestCases[test.test_set] = test;
 
-		// The module in the general table should be updated
-		updateModuleRowInGeneralTable(test);
-	}	
+	if(test.result != 'pending'){
+		loadTestRowResult(test);
+	}
+
+	updateModuleRowInGeneralTable(test);
+	refreshGeneralTable();
 }
 
+
+function loadTestRowResult(test){
+	var row = $("#"+test.test_set);
+
+	if(test.result == 'pass')
+		var resultString = passIcon() + ' ' + test.result;
+	else if(test.result == 'fail')
+		var resultString = failIcon() + ' ' + test.result;
+
+	row.find('.test-result').html(resultString);
+	row.find('.test-browser').html(test.browser);
+	row.find('.test-environment').html(test.data.environment);
+	row.find('.test-time').html(test.test_elapsed_time);
+
+	//add this test case to allTestCases
+	allTestCases[test.test_set] = test;
+
+	//refresh the general table
+	refreshGeneralTable();
+
+	//The module in the general table should be updated
+	updateModuleRowInGeneralTable(test);
+
+	row.removeAttr('pending');
+}
 
 
 function updateModuleRowInGeneralTable(testCase){
@@ -88,8 +125,8 @@ function updateModuleRowInGeneralTable(testCase){
 		moduleRow.insertBefore("#totalRow");
 	}
 	var testsInModule = getTestsInModule(testCase.module); //testCasesByModule[module].length;
-	var testsOkInModule = getTotalTestsOkInModule(testCase.module);
-	var testsFailedInModule = testsInModule - testsOkInModule;
+	var testsOkInModule = getTestsInModuleWithResult(testCase.module, 'pass');
+	var testsFailedInModule = getTestsInModuleWithResult(testCase.module, 'fail');
 	var timeInModule = getTotalModuleTime(testCase.module);
 
 	moduleRow.find(".total-tests").html(testsInModule);
@@ -98,20 +135,23 @@ function updateModuleRowInGeneralTable(testCase){
 	moduleRow.find(".total-time").html(timeInModule + ' s');
 
 	var okPercentage = testsOkInModule * 100 / testsInModule;
-	var barra_azul = moduleRow.find('.barra-azul');
-	var id = new Date().getTime() + Math.random().toString(36).substring(7);
-	barra_azul.attr('id', id);
-	barra_azul.attr('data-transitiongoal', okPercentage);
-
-	setTimeout(animateProgressBar, 200, id);
+	var failPercentage = testsFailedInModule * 100 / testsInModule + okPercentage;
+	
+	var okBar = moduleRow.find('.ok-bar');
+	var failBar = moduleRow.find('.fail-bar');
+	
+	//var id = new Date().getTime() + Math.random().toString()
+	setTimeout(animateProgressBar, 100, okBar, okPercentage);
+	setTimeout(animateProgressBar, 100, failBar, failPercentage);
 }
 
 
 function refreshGeneralTable(){
 	// fill in total row
 	var totalTestCases = getTotalTestCases();
-	var totalTestsOk = getTotalTestsOk();
-	var totalTestsFailed = totalTestCases - totalTestsOk;
+	var totalTestsOk = getTotalTestsWithResult('pass');
+	var totalTestsFailed = getTotalTestsWithResult('fail');
+	//var totalTestsFailed = totalTestCases - totalTestsOk;
 	var totalTime = getTotalTime();
 
 	var totalRow = $("#totalRow");
@@ -121,11 +161,15 @@ function refreshGeneralTable(){
 	totalRow.find(".total-time").html(totalTime + ' s');
 	
 	var okPercentage = totalTestsOk * 100 / totalTestCases;
-	var barra_azul = totalRow.find('.barra-azul');
-	var id = new Date().getTime() + Math.random().toString(36).substring(7);
-	barra_azul.attr('id', id);
-	barra_azul.attr('data-transitiongoal', okPercentage);
-	setTimeout(animateProgressBar, 10, id);
+	var failPercentage = totalTestsFailed * 100 / totalTestCases + okPercentage;
+
+	var okBar = totalRow.find('.ok-bar');
+	var failBar = totalRow.find('.fail-bar');
+	//var id = new Date().getTime() + Math.random().toString(36).substring(7);
+	//barra_azul.attr('id', id);
+	//barra_azul.attr('data-transitiongoal', okPercentage);
+	setTimeout(animateProgressBar, 10, okBar, okPercentage);
+	setTimeout(animateProgressBar, 10, failBar, failPercentage);
 }
 
 
@@ -133,21 +177,26 @@ function refreshGeneralTable(){
 
 // =================
 
-function animateProgressBar(id){
-	var goal = $("#"+id).attr('data-transitiongoal');
-	$("#"+id).css('width', goal + '%');
+// function animateProgressBar(id){
+// 	var goal = $("#"+id).attr('data-transitiongoal');
+// 	$("#"+id).css('width', goal + '%');
+// }
+
+function animateProgressBar(bar, percentage){
+	// var goal = $("#"+id).attr('data-transitiongoal');
+	// $("#"+id).css('width', goal + '%');
+	bar.css('width', percentage+'%');
 }
 
-
-function getMaxNumberOfSubModules(testCases){
-	var maxAmount = 0;
-	for(t in testCases){
-		if(testCases[t].sub_modules.length > maxAmount){
-			maxAmount = testCases[t].sub_modules.length;
-		}
-	}
-	return maxAmount
-}
+// function getMaxNumberOfSubModules(testCases){
+// 	var maxAmount = 0;
+// 	for(t in testCases){
+// 		if(testCases[t].sub_modules.length > maxAmount){
+// 			maxAmount = testCases[t].sub_modules.length;
+// 		}
+// 	}
+// 	return maxAmount
+// }
 
 
 function getTestsInModule(module){
@@ -161,10 +210,10 @@ function getTestsInModule(module){
 }
 
 
-function getTotalTestsOkInModule(module){
+function getTestsInModuleWithResult(module, result){
 	var totalOk = 0;
 	for(t in allTestCases){
-		if(allTestCases[t].module == module && allTestCases[t].result == 'pass'){
+		if(allTestCases[t].module == module && allTestCases[t].result == result){
 			totalOk++;
 		}
 	}
@@ -191,14 +240,13 @@ function getTotalTestCases(){
     return size;
 }
 
-function getTotalTestsOk(){
+function getTotalTestsWithResult(result){
 	var totalOk = 0;
     for (key in allTestCases) {
-        if (allTestCases[key].result == 'pass') totalOk++;
+        if (allTestCases[key].result == result) totalOk++;
     }
     return totalOk;
 }
-
 
 function getTotalTime(){
 	var totalTime = 0;
@@ -220,15 +268,15 @@ function getModuleRow(module){
 }
 
 
-function refreshNumbering(){
-	var numbering = 0;
+// function refreshNumbering(){
+// 	var numbering = 0;
 
-	var rows = $(".table.general-table tbody tr");
-	for(r in rows){
-		$(rows[r]).find('td.module-number').html(numbering);
-		numbering++
-	}
-}
+// 	var rows = $(".table.general-table tbody tr");
+// 	for(r in rows){
+// 		$(rows[r]).find('td.module-number').html(numbering);
+// 		numbering++
+// 	}
+//}
 
 
 

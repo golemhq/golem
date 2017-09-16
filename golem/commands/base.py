@@ -1,5 +1,9 @@
 import os
-from golem.core import utils, test_case, suite as suite_module
+
+from golem.core import (utils,
+                        test_case,
+                        settings_manager,
+                        suite as suite_module)
 from golem.test_runner import start_execution
 from golem.gui import gui_start
 
@@ -37,7 +41,7 @@ class RunCommand(BaseCommand):
                             metavar='amount of threads for parallel execution',
                             help="amount of threads for parallel execution")
         parser.add_argument('-d', '--drivers', action='store',
-                            nargs='*', choices=['firefox', 'chrome', 'remote-chrome', 'remote-firefox'],
+                            nargs='*', choices=['firefox', 'chrome', 'chrome-remote', 'chrome-headless', 'chrome-remote-headless', 'firefox-remote'],
                             type=str, metavar='Web Drivers',
                             help="Web Drivers")
         parser.add_argument('--debug', action='store_true',
@@ -70,9 +74,10 @@ class RunCommand(BaseCommand):
             )
         else:
             test_execution.project = args.project
-            test_execution.settings = utils.get_project_settings(
+            test_execution.settings = settings_manager.get_project_settings(
                 args.project,
                 test_execution.settings)
+            print(test_execution.settings)
             # check if test_or_suite value is present
             if not args.test_or_suite:
                 msg = ['Usage: {}'.format(self._parser.usage),

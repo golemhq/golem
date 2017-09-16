@@ -23,7 +23,6 @@ def create_report_directory(workspace, project, test_case_name, suite_name, time
 
 
 def generate_report(report_directory, test_case_name, test_data, result):
-    
     json_report_path = os.path.join(report_directory, 'report.json')
 
     short_error = ''
@@ -37,13 +36,6 @@ def generate_report(report_directory, test_case_name, test_data, result):
             serializable_data[key] = value
         except:
             serializable_data[key] = repr(value)
-
-    class MyEncoder(json.JSONEncoder):
-        def default(self, obj):
-            # if not isinstance(obj, Tree):
-            #     return super(MyEncoder, self).default(obj)
-
-            return obj
 
     report = {
         'test_case': test_case_name,
@@ -60,9 +52,3 @@ def generate_report(report_directory, test_case_name, test_data, result):
     
     with open(json_report_path, 'w', encoding='utf-8') as json_file:
         json.dump(report, json_file, indent=4)
-
-    # save screenshots
-    # no longer needed, screenshots are saved to disk when they are captured
-    # for scr in result['screenshots']:
-    #     img_filename = '{}.png'.format(scr)
-    #     result['screenshots'][scr].save(os.path.join(report_directory, img_filename))

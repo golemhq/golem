@@ -6,7 +6,7 @@ var ReportDashboard = new function(){
         var projectContainer = " \
             <div class='col-md-12 project-container' id='"+projectName+"'> \
                 <h3 class='no-margin-top'> \
-                    <a href='/report/project/"+projectName+"/' class='link-without-underline'>"+projectName+"</a> \
+                    <a href='/report/project/"+projectName.replace('_',' ')+"/' class='link-without-underline'>"+projectName+"</a> \
                 </h3> \
             </div>";
         return $(projectContainer)
@@ -14,7 +14,7 @@ var ReportDashboard = new function(){
 
     this.generateProjectContainerSingleSuite = function(projectName){
         var projectContainer = " \
-            <div class='col-md-12 project-container' id='"+projectName+"'></div>";
+            <div class='col-md-12 project-container' id='"+projectName.replace('_',' ')+"'></div>";
         return $(projectContainer)
     };
 
@@ -84,7 +84,7 @@ var ReportDashboard = new function(){
 
     this.generateExecutionsTableRow = function(data){
         var row = "\
-            <tr class='last-execution-row'> \
+            <tr class='cursor-pointer'> \
                 <td class='numero'>"+data.index+"</td> \
                 <td class='fecha'>"+data.dateTime+"</td> \
                 <td class='ambiente'>"+data.environment+"</td> \
@@ -110,14 +110,14 @@ var ExecutionsReport = new function(){
 
     this.generateTestRow = function(data){
         var row = "\
-            <tr class='primera-fila'>\
+            <tr id='"+data.testSet+"' pending='pending' class='cursor-pointer'>\
                 <td class='tc-number'>"+data.numbering+"</td>\
                 <td class='tc-module'>"+data.module+"</td>\
                 <td class='tc-name'>"+data.name+"</td>\
-                <td class='tc-environment'>"+data.environment+"</td>\
-                <td class='tc-browser'>"+data.browser+"</td>\
-                <td class='tc-result'>"+data.result+"</td>\
-                <td class='tc-time'>"+data.elapsedTime+"</td>\
+                <td class='test-environment'></td>\
+                <td class='test-browser'></td>\
+                <td class='test-result'>"+data.result+"</td>\
+                <td class='test-time'></td>\
                 <td class='link'><a href='' target='blank'>\
                     <span class='glyphicon glyphicon-new-window' aria-hidden='true'></span></a></td>\
             </tr>";
@@ -133,11 +133,13 @@ var ExecutionsReport = new function(){
                 <td class='tests-failed'>"+data.testsFailed+"</td>\
                 <td class='percentage'>\
                     <div class='progress'>\
-                        <div aria-valuenow='10' style='width: 100%;' \
-                            class='progress-bar progress-bar-danger' \
+                        <div aria-valuenow='20' style='width: 100%;' \
+                            class='progress-bar pending' data-transitiongoal='20'></div>\
+                        <div aria-valuenow='10' style='width: 0%;' \
+                            class='progress-bar progress-bar-danger fail-bar' \
                             data-transitiongoal='10'></div>\
-                        <div aria-valuenow='20' style='width: 50%;' \
-                            class='progress-bar barra-azul' data-transitiongoal='20'></div>\
+                        <div aria-valuenow='20' style='width: 0%;' \
+                            class='progress-bar ok-bar' data-transitiongoal='20'></div>\
                     </div>\
                 </td>\
                 <td class='total-time'></td>\
