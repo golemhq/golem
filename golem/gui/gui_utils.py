@@ -6,27 +6,25 @@ import subprocess
 from golem.core import utils
 
 
-def new_directory_test_case(root_path, project, parents, directory_name):
-    parents_joined = os.sep.join(parents)
+def new_directory_test_case(root_path, project, parents, test_name):
+    parents = os.sep.join(parents)
     errors = []
-    if directory_already_exists(root_path, project, 'tests', parents, directory_name):
+    if directory_already_exists(root_path, project, 'tests', parents, test_name):
         errors.append('A directory with that name already exists')
-
-    if not errors:
+    else:
         utils.create_new_directory(path_list=[root_path, 'projects', project, 'tests',
-                                   parents_joined, directory_name], add_init=True)
+                                   parents, test_name], add_init=True)
     return errors
 
 
-def new_directory_page_object(root_path, project, parents, directory_name):
-    parents_joined = os.sep.join(parents)
+def new_directory_page_object(root_path, project, parents, page_name):
+    parents = os.sep.join(parents)
     errors = []
-    if directory_already_exists(root_path, project, 'pages', parents_joined, directory_name):
+    if directory_already_exists(root_path, project, 'pages', parents, page_name):
         errors.append('A directory with that name already exists')
-    
-    if not errors:
+    else:
         utils.create_new_directory(path_list=[root_path, 'projects', project, 'pages',
-                                   parents_joined, directory_name], add_init=True)
+                                   parents, page_name], add_init=True)
     return errors
 
 
@@ -102,10 +100,6 @@ def get_global_actions():
             'name': 'navigate',
             'parameters': [{'name': 'url', 'type': 'value'}]
         },
-        # {
-        #     'name': 'go to',
-        #     'parameters': [{'name': 'url', 'type': 'value'}]
-        # },
         {
             'name': 'post',
             'parameters': [{'name': 'url', 'type': 'value'},
@@ -155,6 +149,22 @@ def get_global_actions():
         },
         {
             'name': 'verify is not enabled',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
+            'name': 'verify is not selected',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
+            'name': 'verify is not visible',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
+            'name': 'verify is selected',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
+            'name': 'verify is visible',
             'parameters': [{'name': 'element', 'type': 'element'}]
         },
         {

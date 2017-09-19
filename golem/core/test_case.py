@@ -7,6 +7,11 @@ from golem.core import utils, data, page_object
 
 
 def _parse_step(step):
+    # ('a')                 -> ['a']
+    # ('a', 'b')            -> ['a', 'b']
+    # ('a, b, c')           -> ['a, b, c']
+    # (('a', 'b', 'c'))     -> ['(\'a\', \'b\', \'c\')']
+    print(step)
     method_name = step.split('(', 1)[0].strip()
     if not '.' in method_name:
         method_name = method_name.replace('_', ' ')
@@ -19,12 +24,22 @@ def _parse_step(step):
         param_list = []
         param_pairs = []
         inside_param = False
+        inside_string = False
+        string_char = ''
         current_start = 0
         print('PARAM STRING', params_string)
         for i in range(len(params_string)):
             is_last_char = i == len(params_string) -1
             is_higher_level_comma = False
-            if params_string[i] == ',' and not inside_param:
+            
+            if params_string[i] == '\'':
+                if not inside_string:
+                    inside_string = True
+                    string_char = '\''
+                elif string_char == '\'':
+                    inside_string = False
+
+            if params_string[i] == ',' and not inside_param and not inside_string:
                 is_higher_level_comma = True
 
             if params_string[i] == '(' or params_string[i] == '{':

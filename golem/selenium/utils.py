@@ -47,55 +47,34 @@ def _find_selenium_element(root, selector_type, selector_value, element_name, re
     return webelement
 
 
-# def _get_selenium_object(root, element_tuple, implicit_wait=None):
-#     if type(element_tuple) == tuple:
-#         webelement = None
-#         if implicit_wait is None:
-#             implicit_wait = core.get_setting('implicit_wait')
-#         selector_type = element_tuple[0]
-#         selector_value = element_tuple[1]
-#         # if there is no 'element name' use the selector value instead
-#         element_name = selector_value
-#         if len(element_tuple) == 3:
-#             element_name = element_tuple[2]
-#         webelement = _find_selenium_object(root, selector_type, selector_value,
-#                                             element_name, implicit_wait)
-#         webelement.selector_type = selector_type
-#         webelement.selector_value = selector_value
-#         webelement.name = element_name
-#         return webelement
+# def get_selenium_objects(elem, driver=None):
+#     if not driver:
+#         driver = core.get_or_create_webdriver()
+#     selector_type = elem[0]
+#     selector_value = elem[1]
+#     test_objects = []
+#     if selector_type == 'id':
+#         test_objects = driver.find_elements_by_id(selector_value)
+#     elif selector_type == 'css':
+#         print('SELECTOR', selector_value)
+#         test_objects = driver.find_elements_by_css_selector(selector_value)
+#     elif selector_type == 'text':
+#         test_objects = driver.find_elements_by_css_selector(
+#                                     "text[{}]".format(selector_value))
+#     elif selector_type == 'link_text':
+#         test_objects = driver.find_elements_by_link_text(selector_value)
+#     elif selector_type == 'partial_link_text':
+#         test_objects = driver.find_elements_by_partial_link_text(selector_value)
+#     elif selector_type == 'name':
+#         test_objects = driver.find_elements_by_name(selector_value)
+#     elif selector_type == 'xpath':
+#         test_objects = driver.find_elements_by_xpath(selector_value)
+#     elif selector_type == 'tag_name':
+#         test_objects = driver.find_elements_by_tag_name(selector_value)
 #     else:
-#         raise Exception('Invalid element to get')
-
-
-def get_selenium_objects(elem, driver=None):
-    if not driver:
-        driver = core.get_or_create_webdriver()
-    selector_type = elem[0]
-    selector_value = elem[1]
-    test_objects = []
-    if selector_type == 'id':
-        test_objects = driver.find_elements_by_id(selector_value)
-    elif selector_type == 'css':
-        print('SELECTOR', selector_value)
-        test_objects = driver.find_elements_by_css_selector(selector_value)
-    elif selector_type == 'text':
-        test_objects = driver.find_elements_by_css_selector(
-                                    "text[{}]".format(selector_value))
-    elif selector_type == 'link_text':
-        test_objects = driver.find_elements_by_link_text(selector_value)
-    elif selector_type == 'partial_link_text':
-        test_objects = driver.find_elements_by_partial_link_text(selector_value)
-    elif selector_type == 'name':
-        test_objects = driver.find_elements_by_name(selector_value)
-    elif selector_type == 'xpath':
-        test_objects = driver.find_elements_by_xpath(selector_value)
-    elif selector_type == 'tag_name':
-        test_objects = driver.find_elements_by_tag_name(selector_value)
-    else:
-        raise IncorrectSelectorType(
-            'Selector {0} is not a valid option'.format(selector_type))
-    return test_objects
+#         raise IncorrectSelectorType(
+#             'Selector {0} is not a valid option'.format(selector_type))
+#     return test_objects
 
 
 def _find(self, element_tuple=None, id=None, name=None, text=None, link_text=None,
@@ -148,9 +127,74 @@ def _find(self, element_tuple=None, id=None, name=None, text=None, link_text=Non
 
 
 def _find_all(self, element_tuple=None, id=None, name=None, text=None, link_text=None,
-              partial_link_text=None, css=None, xpath=None, tag_name=None):
-    return elements(element_tuple, id, name, text, link_text, partial_link_text, css,
-                    xpath, tag_name)
+              partial_link_text=None, css=None, xpath=None, tag_name=None, timeout=0):
+    webelements = []
+    selector_type = None
+    selector_value = None
+    element_name = None
+    if type(element_tuple) == tuple:
+        selector_type = element_tuple[0]
+        selector_value = element_name = element_tuple[1]
+        if selector_type == 'id':
+            id = selector_value
+        elif selector_type == 'css':
+            css = selector_value
+        elif selector_type == 'text':
+            text = selector_value
+        elif selector_type == 'link_text':
+            link_text = selector_value
+        elif selector_type == 'partial_link_text':
+            partial_link_text = selector_value
+        elif selector_type == 'name':
+            name = selector_value
+        elif selector_type == 'xpath':
+            xpath = selector_value
+        elif selector_type == 'tag_name':
+            tag_name = selector_value
+    if id:
+        selector_type = 'id'
+        selector_value = element_name = id
+        webelements = self.find_elements_by_id(id)
+    elif css:
+        selector_type = 'css'
+        selector_value = element_name = css
+        webelements = self.find_elements_by_css_selector(css)
+    elif text:
+        selector_type = 'text'
+        selector_value = element_name = text
+        webelements = self.find_elements_by_css_selector(
+                                    "text[{}]".format(text))
+    elif link_text:
+        selector_type = 'link_text'
+        selector_value = element_name = link_text
+        webelements = self.find_elements_by_link_text(link_text)
+    elif partial_link_text:
+        selector_type = 'partial_link_text'
+        selector_value = element_name = partial_link_text
+        webelements = self.find_elements_by_partial_link_text(partial_link_text)
+    elif name:
+        selector_type = 'name'
+        selector_value = element_name = name
+        webelements = self.find_elements_by_name(name)
+    elif xpath:
+        selector_type = 'xpath'
+        selector_value = element_name = xpath
+        webelements = self.find_elements_by_xpath(xpath)
+    elif tag_name:
+        selector_type = 'tag_name'
+        selector_value = element_name = tag_name
+        webelements = self.find_elements_by_tag_name(tag_name)
+    else:
+        raise IncorrectSelectorType('Incorrect selector provided')
+
+    for elem in webelements:
+        elem.selector_type = selector_type
+        elem.selector_value = selector_value
+        elem.name = element_name
+        elem.find = types.MethodType(_find, elem)
+        elem.find_all = types.MethodType(_find_all, elem)
+
+    return webelements
 
 
 def element(*args, **kwargs):

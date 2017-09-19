@@ -9,7 +9,8 @@ $(document).ready(function() {
       //theme: "default",
       lineNumbers: true,
       styleActiveLine: true,
-      matchBrackets: true
+      matchBrackets: true,
+      indentWithTabs: false
     });
 
     // set unsaved changes watcher
@@ -42,15 +43,13 @@ function savePageObject(){
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
         type: 'POST',
-        success: function(data) {
-            console.log(data);
-            if(data === 'ok'){
+        success: function(error) {
+            if(error === ''){
                 toastr.options = {
                     "positionClass": "toast-top-center",
                     "timeOut": "3000",
                     "hideDuration": "100"}
                 toastr.success("Page "+pageObjectName+" saved");
-
                 codeEditor.markClean();
             }
             else{
@@ -58,7 +57,7 @@ function savePageObject(){
                     "positionClass": "toast-top-center",
                     "timeOut": "3000",
                     "hideDuration": "100"}
-                toastr.error(data);
+                toastr.error(error);
             }
         },
         error: function() {

@@ -1,11 +1,82 @@
 
 $(document).ready(function() {
+
+    getTests(project);
+    getPages(project);
+    getSuites(project);
+
     $('#testCasesTree').treed();
     $('#pagesTree').treed();
 
     generateHealthChart(project);
 });
 
+
+function getTests(projectName){
+    $.ajax({
+        url: "/project/get_tests/",
+        data: {
+            "project": projectName
+        },
+        dataType: 'json',
+        type: 'POST',
+        success: function(tests) {
+            $("#testCasesTree").append(Project.newElementForm());
+            loadTreeElements($("#testCasesTree"), tests.sub_elements, 'test');
+        },
+    });
+}
+
+
+function getPages(projectName){
+    $.ajax({
+        url: "/project/get_pages/",
+        data: {
+            "project": projectName
+        },
+        dataType: 'json',
+        type: 'POST',
+        success: function(pages) {
+            $("#pagesTree").append(Project.newElementForm());
+            loadTreeElements($("#pagesTree"), pages.sub_elements, 'page');
+        },
+    });
+}
+
+
+function getSuites(projectName){
+    $.ajax({
+        url: "/project/get_suites/",
+        data: {
+            "project": projectName
+        },
+        dataType: 'json',
+        type: 'POST',
+        success: function(suites) {
+            $("#suitesTree").append(Project.newElementForm());
+            loadTreeElements($("#suitesTree"), suites.sub_elements, 'suite');
+        },
+    });
+}
+
+
+function loadTreeElements(rootElement, elements, elementType){
+    elements.forEach(function(element){
+        if(element.type == 'file'){
+            var elementUrl = "/p/"+project+"/"+elementType+"/"+element.dot_path+"/";
+            var uiElement = Project.generateNewElement({
+                name: element.name,
+                url: elementUrl,
+                dotPath: element.dot_path, 
+                type: elementType});
+        }
+        else if(element.type == 'directory'){
+            var uiElement = Project.addBranchToTree(element.name, '');
+            loadTreeElements(uiElement.find('ul'), element.sub_elements, elementType);
+        }
+        rootElement.children().last().before(uiElement);
+    });
+}
 
 function displayNewElementForm(elem){
     var parent = $(elem).parent().parent();
@@ -19,25 +90,20 @@ function addElement(event){
     var input = $(event.target);
     var elementType = '';
     var urlPrefixForElementType = '';
-    var inputClass = '';
-    if(input.hasClass('new-test-case')){
+
+    var closestTree = input.closest('.tree')
+    if(closestTree.hasClass('test-tree')){
         elementType = 'test';
-        urlPrefixForElementType = 'test';
-        inputClass = 'new-test-case';
     }
-    else if(input.hasClass('new-page-object')){
+    else if(closestTree.hasClass('page-tree')){
         elementType = 'page';
-        urlPrefixForElementType = 'page';
-        inputClass = 'new-page-object';
     }
-    else if(input.hasClass('new-suite')){
+    else if(closestTree.hasClass('suite-tree')){
         elementType = 'suite';
-        urlPrefixForElementType = 'suite';
-        inputClass = 'new-suite';
     }
 
-    var parentsSeparetedByDots = getParentsSeparatedByDots(input);
     var elementName = input.val().trim();
+    var fullPath = getElementFullPath(input, elementName);
     var isDir = false;
     if(elementName.indexOf('/') > -1){
         isDir = true;
@@ -51,11 +117,6 @@ function addElement(event){
         input.parent().parent().find(".display-new-element-link").show();
         return
     }
-    // // validate spaces
-    // if(elementName.indexOf(' ') > -1){
-    //     displayErrorModal(['Spaces are not allowed']);
-    //     return
-    // }
 
     // replace inner spaces with underscores
     elementName = elementName.replace(/ /g, '_');
@@ -89,46 +150,30 @@ function addElement(event){
             "project": project,
             "elementType": elementType,
             "isDir": isDir,
-            "parents": parentsSeparetedByDots,
-            "elementName": elementName
+            "fullPath": fullPath,
         },
         dataType: 'json',
         type: 'POST',
         success: function(data) {
             if(data.errors.length == 0){
-
-                // add new li for the element
-                var lastLi = input.parent().parent().parent().find("li").last();
-                lastLi.before("<li class='tree-element'></li>");
-                var newLi = lastLi.prev();
-
-                if(data.is_dir){
-                    //var li = input.parent().parent();
-                    addBranchToTree(newLi, data.element_name, inputClass);
-
-                    // input.parent().hide();
-                    // input.parent().parent().find(".display-new-element-link").show();
+                var parentUl = input.parent().parent().parent();
+                if(data.element.is_directory){
+                    var branch = Project.addBranchToTree(data.element.name);
+                    parentUl.children().last().before(branch);
                 }
                 else{
-                    if(parentsSeparetedByDots.length > 0){
-                        var urlForTeseCase = parentsSeparetedByDots + '.' + data.element_name;
-                    }
-                    else{
-                        var urlForTeseCase = data.element_name;
-                    }
-                    newLi.html("<a href='/p/"+data.project_name+"/"+urlPrefixForElementType+"/"+urlForTeseCase+"/'>"+data.element_name+"</a> \
-                                <span class='pull-right tree-element-buttons'> \
-                                    <button onclick=''><i class='glyphicon glyphicon-edit'></i></button> \
-                                    <button><i class='glyphicon glyphicon-copy'></i></button> \
-                                    <button onclick='deleteElementPrompt(this)'><i class='glyphicon glyphicon-remove'></i></button> \
-                                </span>");
+                    var elementUrl = "/p/"+data.project_name+"/"+data.element.type+"/"+data.element.full_path+"/";
+                    var uiElement = Project.generateNewElement({
+                        name: data.element.name,
+                        url: elementUrl,
+                        dotPath: data.element.full_path, 
+                        type: data.element.type});
+                    parentUl.children().last().before(uiElement);
                 }
-
                 // reset the form, hide the form and display the add new link
                 input.val("");
                 input.parent().hide();
                 input.parent().parent().find(".display-new-element-link").show();
-                
             }
             else{
                 displayErrorModal(data.errors);
@@ -136,11 +181,10 @@ function addElement(event){
         },
         error: function() {}
     });
-
 }
 
 
-function getParentsSeparatedByDots(elem){
+function getElementFullPath(elem, elementName){
     var dotted_branches = '';
     elem.parents('.branch').each(function(){
         if(dotted_branches.length == 0){
@@ -150,7 +194,10 @@ function getParentsSeparatedByDots(elem){
             dotted_branches = $(this).find('a').html() + '.' + dotted_branches;
         }
     });
-    return dotted_branches
+    if(dotted_branches.length == 0)
+        return elementName
+    else
+        return dotted_branches + '.' + elementName
 }
 
 
@@ -200,6 +247,7 @@ function loadHealthData(healthData){
 
     $.each(healthData, function(suite){
         var okPercentage = healthData[suite].total_ok * 100 / healthData[suite].total;
+        var failPercentage = healthData[suite].total_fail * 100 / healthData[suite].total + okPercentage;
         totalOk += healthData[suite].total_ok;
         totalFail += healthData[suite].total_fail;
 
@@ -208,10 +256,7 @@ function loadHealthData(healthData){
                 <td class=''>"+suite+"</td>\
                 <td class=''>"+utils.getDateTimeFromTimestamp(healthData[suite].execution)+"</td>\
                 <td class=''>\
-                    <div class='progress progress-bar-container'>\
-                    <div aria-valuenow='10' style='width: 100%;' class='progress-bar progress-bar-danger barra-roja' data-transitiongoal='10'></div>\
-                    <div aria-valuenow='20' style='width: 50%;' class='progress-bar barra-azul' data-transitiongoal='"+okPercentage+"'></div>\
-                    </div>\
+                    "+reportUtils.generateProgressBars()+"\
                 </td>\
             </tr>";
         newRow = $(newRow);
@@ -220,10 +265,10 @@ function loadHealthData(healthData){
 
         $("#healthTable tbody").append(newRow);
 
-        setTimeout(function(){
-            newRow.find('.progress-bar.barra-azul').css('width', okPercentage+'%');
-        }, 1, newRow);
-
+        var okBar = newRow.find('.ok-bar');
+        var failBar = newRow.find('.fail-bar');
+        utils.animateProgressBar(okBar, okPercentage)
+        utils.animateProgressBar(failBar, failPercentage)
     });
 
     var ctx = document.getElementById('healthChartCanvas').getContext('2d');
@@ -257,6 +302,117 @@ function loadHealthData(healthData){
 }
 
 
-function deleteElementPrompt(elem){
-    console.log($(elem));
+function deleteElementConfirm(elementDeleteButton){
+    var element =  $(elementDeleteButton).parent().parent();
+    var elemFullPath = element.attr('fullpath');
+    var elemType = element.attr('type');
+    var message = 'Are you sure you want to delete <strong>' + elemFullPath + '</strong>?';
+    var callback = function(){
+        deleteElement(element, elemFullPath, elemType);
+    }
+    displayConfirmModal('Delete', message, callback);
+
+}
+
+function deleteElement(element, fullPath, elemType){
+    $.ajax({
+        url: "/delete_element/",
+        data: {
+            "project": project,
+            "elemType": elemType,
+            "fullPath": fullPath
+        },
+        dataType: 'json',
+        type: 'POST',
+        success: function(errors) {
+            if(errors.length == 0){
+                element.remove();
+                toastr.options = {
+                "positionClass": "toast-top-center",
+                "timeOut": "2000",
+                "hideDuration": "100"}
+                toastr.success("File "+fullPath+" was removed")
+            }
+            else{
+                toastr.options = {
+                    "positionClass": "toast-top-center",
+                    "timeOut": "2000",
+                    "hideDuration": "100"}
+                toastr.error('There was an error removing file');
+            }
+        },
+    });
+}
+
+
+function duplicateElementPrompt(elementDuplicateButton){
+    var element =  $(elementDuplicateButton).parent().parent();
+    var elemFullPath = element.attr('fullpath');
+    var elemType = element.attr('type');
+    var title = 'Duplicate file';
+    var message = 'Create a duplicate of <i>'+elemFullPath+'</i>. Enter a name for the new file..';
+    var inputValue = elemFullPath;
+    var callback = function(){
+        duplicateFile(elemFullPath, elemType, element);
+    }
+    displayPromptModal(title, message, inputValue, callback)
+}
+
+
+function duplicateFile(elemFullPath, elemType, originalElement){
+    var newFileFullPath = $("#promptModalInput").val();
+    if(newFileFullPath === elemFullPath){
+        // new file name is the same as original
+        // don't show error message, do nothing
+        return
+    }
+
+    $.ajax({
+        url: "/duplicate_element/",
+        data: {
+            "project": project,
+            "elemType": elemType,
+            "fullPath": elemFullPath,
+            "newFileFullPath": newFileFullPath
+        },
+        dataType: 'json',
+        type: 'POST',
+        success: function(errors) {
+            if(errors.length == 0){
+                var nameSplit = newFileFullPath.split('.');
+                var name = nameSplit[nameSplit.length-1];
+                var elementUrl = "/p/"+project+"/"+elemType+"/"+newFileFullPath+"/";
+                var uiElement = Project.generateNewElement({
+                    name: name,
+                    url: elementUrl,
+                    dotPath: newFileFullPath, 
+                    type: elemType});
+                var ul = originalElement.closest('ul');
+                ul.children().last().before(uiElement);
+                toastr.options = {
+                "positionClass": "toast-top-center",
+                "timeOut": "2000",
+                "hideDuration": "100"}
+                toastr.success("File was copied")
+            }
+            else{
+                toastr.options = {
+                    "positionClass": "toast-top-center",
+                    "timeOut": "2000",
+                    "hideDuration": "100"}
+                toastr.error('There was an error duplicating the file');
+            }
+            $("#promptModal").modal("hide");
+            $("#promptModal button.confirm").unbind('click');
+        },
+        error: function(){
+            toastr.options = {
+                "positionClass": "toast-top-center",
+                "timeOut": "2000",
+                "hideDuration": "100"}
+            toastr.error('There was an error duplicating the file');
+            $("#promptModal").modal('hide');
+            $("#promptModal button.confirm").unbind('click');
+        }
+    });
 }

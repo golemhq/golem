@@ -57,7 +57,7 @@ function loadProject(project, projectData){
 			var dateTime = utils.getDateTimeFromTimestamp(execution);
 			executions.push(dateTime)
 
-			var blueBarId = guidGenerator();
+			//var blueBarId = guidGenerator();
 
 			var row = ReportDashboard.generateExecutionsTableRow({
 				project: project,
@@ -65,11 +65,12 @@ function loadProject(project, projectData){
 				execution: execution,
 				index: index.toString(),
 				dateTime: dateTime,
-				environment: '',
-				blueBarId: blueBarId
+				environment: ''
 			});
 
-			completarBarraPorcentaje(project, suite, execution, blueBarId, index);
+			var okBar = row.find('.ok-bar');
+			var failBar = row.find('.fail-bar');
+			completarBarraPorcentaje(project, suite, execution, okBar, failBar, index);
 
 			suiteContainer.find("tbody").append(row);
 
@@ -122,8 +123,6 @@ function loadProject(project, projectData){
 		});
 
 		charts[project+suite] = chart;
-
-
 	}
 
 	projectContainer.show();
@@ -131,8 +130,7 @@ function loadProject(project, projectData){
 }
 
 
-function completarBarraPorcentaje(project, suite, execution, id, index){
-	console.log('Execution', execution)
+function completarBarraPorcentaje(project, suite, execution, okBar, failBar, index){
 	var dateTime = utils.getDateTimeFromTimestamp(execution);
 
 	$.post( 
@@ -144,10 +142,9 @@ function completarBarraPorcentaje(project, suite, execution, id, index){
 		},
 		function( executionData ) {
   			var okPercentage = executionData.total_cases_ok * 100 / executionData.total_cases;
-
-  			$("#"+id).attr('data-transitiongoal', okPercentage);
-
-  			animateProgressBar(id);
+			var failPercentage = executionData.total_cases_fail * 100 / executionData.total_cases + okPercentage;
+  			utils.animateProgressBar(okBar, okPercentage);
+  			utils.animateProgressBar(failBar, failPercentage);
 
   			// if(chartData[project+suite] === undefined){
   			// 	chartData[project+suite] = {}
@@ -166,10 +163,17 @@ function completarBarraPorcentaje(project, suite, execution, id, index){
 }
 
 
-function animateProgressBar(id){
-	var goal = $("#"+id).attr('data-transitiongoal');
-	$("#"+id).css('width', goal + '%');
-}
+// function animateProgressBar(id){
+// 	var goal = $("#"+id).attr('data-transitiongoal');
+// 	$("#"+id).css('width', goal + '%');
+// }
+
+// function animateProgressBar(bar, percentage){
+// 	// var goal = $("#"+id).attr('data-transitiongoal');
+// 	// $("#"+id).css('width', goal + '%');
+// 	bar.css('width', percentage+'%');
+// }
+
 
 
 function cargarGraficoHistorial(project, suite, label, passed, failed){
@@ -231,9 +235,9 @@ function cargarGraficoHistorial(project, suite, label, passed, failed){
 	// }
 }
 
-function guidGenerator() {
-    var S4 = function() {
-       return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-    };
-    return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
-}
+// function guidGenerator() {
+//     var S4 = function() {
+//        return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+//     };
+//     return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+// }

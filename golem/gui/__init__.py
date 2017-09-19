@@ -101,11 +101,52 @@ def project(project):
     elif not utils.project_exists(root_path, project):
         abort(404, 'This page does not exists.')
     else:
-        test_cases = utils.get_test_cases(root_path, project)
-        page_objects = utils.get_page_objects(root_path, project)
+        return render_template('project_dashboard.html', project=project)
+
+
+@app.route("/project/get_tests/", methods=['POST'])
+def get_tests():
+    if request.method == 'POST':
+        project = request.form['project']
+        tests = utils.get_test_cases(root_path, project)
+        return json.dumps(tests)
+
+
+@app.route("/project/get_pages/", methods=['POST'])
+def get_pages():
+    if request.method == 'POST':
+        project = request.form['project']
+        pages = utils.get_pages(root_path, project)
+        return json.dumps(pages)
+
+
+@app.route("/project/get_suites/", methods=['POST'])
+def get_suite():
+    if request.method == 'POST':
+        project = request.form['project']
         suites = utils.get_suites(root_path, project)
-        return render_template('project_dashboard.html', test_cases=test_cases, project=project,
-                               page_objects=page_objects, suites=suites)
+        return json.dumps(suites)
+
+
+@app.route("/delete_element/", methods=['POST'])
+def delete_element():
+    if request.method == 'POST':
+        project = request.form['project']
+        elem_type = request.form['elemType']
+        full_path = request.form['fullPath']
+        errors = utils.delete_element(root_path, project, elem_type, full_path)
+        return json.dumps(errors)
+
+@app.route("/duplicate_element/", methods=['POST'])
+def duplicate_element():
+    if request.method == 'POST':
+        project = request.form['project']
+        elem_type = request.form['elemType']
+        full_path = request.form['fullPath']
+        new_file_full_path = request.form['newFileFullPath']
+        errors = utils.duplicate_element(root_path, project, elem_type,
+                                         full_path, new_file_full_path)
+        return json.dumps(errors)
 
 
 # TEST CASE VIEW
@@ -172,41 +213,38 @@ def new_tree_element():
         project = request.form['project']
         elem_type = request.form['elementType']
         is_dir = json.loads(request.form['isDir'])
-        parents = request.form['parents']
-        parent_list = parents.split('.')
-        elem_name = request.form['elementName']
-        full_elem_name = elem_name
-        if parents:
-            full_elem_name = '{}.{}'.format(parents, elem_name)
-
+        full_path = request.form['fullPath'].split('.')
+        element_name = full_path[-1]
+        parents = full_path[:-1]
         errors = []
 
         if is_dir:
-            elem_name = elem_name.replace('/', '')
-        print('NAME', elem_name)
-        for c in elem_name:
+            element_name = element_name.replace('/', '')
+        for c in element_name:
             if not c.isalnum() and not c in ['-', '_']:
                 errors.append('Only letters, numbers, \'-\' and \'_\' are allowed')
                 break
-
         if not errors:
             if elem_type == 'test_dir':
-                errors = gui_utils.new_directory_test_case(root_path, project, parent_list,
-                                                           elem_name)
+                errors = gui_utils.new_directory_test_case(root_path, project, parents, element_name)
             elif elem_type == 'page_dir':
-                errors = gui_utils.new_directory_page_object(root_path, project, parent_list,
-                                                             elem_name)
+                errors = gui_utils.new_directory_page_object(root_path, project, parents, element_name)
             elif elem_type == 'test':
-                errors = test_case.new_test_case(root_path, project, parent_list, elem_name)
+                errors = test_case.new_test_case(root_path, project, parents, element_name)
                 changelog.log_change(root_path, project, 'CREATE', 'test',
-                                     full_elem_name, g.user.username)
+                                     full_path, g.user.username)
             elif elem_type == 'page':
-                errors = page_object.new_page_object(root_path, project, parent_list, elem_name)
+                errors = page_object.new_page_object(root_path, project, parents, element_name)
             elif elem_type == 'suite':
-                errors = suite.new_suite(root_path, project, elem_name)
-
+                errors = suite.new_suite(root_path, project, element_name)
+        element = {
+            'name': element_name,
+            'full_path': '.'.join(full_path),
+            'type': elem_type,
+            'is_directory': is_dir
+        }
         return json.dumps({'errors': errors, 'project_name': project,
-                           'element_name': elem_name, 'is_dir': is_dir})
+                           'element': element})
 
 
 @app.route("/new_project/", methods=['POST'])
@@ -281,17 +319,10 @@ def save_page_object_code():
         projectname = request.json['project']
         page_object_name = request.json['pageObjectName']
         content = request.json['content']
-        result = {
-            'result': 'ok',
-            'errors': []
-        }
         error = utils.code_syntax_is_valid(content)
-        if error:
-            result['result'] = 'error'
-        else:
-            page_object.save_page_object_code(root_path, projectname,
-                                              page_object_name, content)
-        return json.dumps(result)
+        page_object.save_page_object_code(root_path, projectname,
+                                          page_object_name, content)
+        return json.dumps(error)
 
 
 @app.route("/save_test_case/", methods=['POST'])
@@ -429,7 +460,7 @@ def suite_view(project, suite):
     browsers = ', '.join(browsers)
     default_browser = test_execution.settings['default_driver']
 
-    return render_template('suite.html', project=project, all_test_cases=all_test_cases,
+    return render_template('suite.html', project=project, all_test_cases=all_test_cases['sub_elements'],
                            selected_tests=selected_tests, suite=suite, worker_amount=worker_amount,
                            browsers=browsers, default_browser=default_browser)
 

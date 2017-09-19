@@ -141,8 +141,10 @@ function updateModuleRowInGeneralTable(testCase){
 	var failBar = moduleRow.find('.fail-bar');
 	
 	//var id = new Date().getTime() + Math.random().toString()
-	setTimeout(animateProgressBar, 100, okBar, okPercentage);
-	setTimeout(animateProgressBar, 100, failBar, failPercentage);
+	// setTimeout(animateProgressBar, 100, okBar, okPercentage);
+	// setTimeout(animateProgressBar, 100, failBar, failPercentage);
+	utils.animateProgressBar(okBar, okPercentage);
+	utils.animateProgressBar(failBar, failPercentage);
 }
 
 
@@ -168,8 +170,11 @@ function refreshGeneralTable(){
 	//var id = new Date().getTime() + Math.random().toString(36).substring(7);
 	//barra_azul.attr('id', id);
 	//barra_azul.attr('data-transitiongoal', okPercentage);
-	setTimeout(animateProgressBar, 10, okBar, okPercentage);
-	setTimeout(animateProgressBar, 10, failBar, failPercentage);
+	//setTimeout(animateProgressBar, 10, okBar, okPercentage);
+	//setTimeout(animateProgressBar, 10, failBar, failPercentage);
+
+	utils.animateProgressBar(okBar, okPercentage);
+	utils.animateProgressBar(failBar, failPercentage);
 }
 
 
@@ -182,11 +187,11 @@ function refreshGeneralTable(){
 // 	$("#"+id).css('width', goal + '%');
 // }
 
-function animateProgressBar(bar, percentage){
-	// var goal = $("#"+id).attr('data-transitiongoal');
-	// $("#"+id).css('width', goal + '%');
-	bar.css('width', percentage+'%');
-}
+// function animateProgressBar(bar, percentage){
+// 	// var goal = $("#"+id).attr('data-transitiongoal');
+// 	// $("#"+id).css('width', goal + '%');
+// 	bar.css('width', percentage+'%');
+// }
 
 // function getMaxNumberOfSubModules(testCases){
 // 	var maxAmount = 0;

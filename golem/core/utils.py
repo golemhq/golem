@@ -15,83 +15,122 @@ import golem
 from golem.core import settings_manager
 
 
-def _generate_dict_from_file_structure(full_path):
-    """Generates a dictionary with the preserved structure of a given
-    directory (with its files and subdirectories).
-    Files are stored in tuples, with the first element being the name
-    of the file without its extention and the second element
-    the dotted path to the file.
+# def _generate_dict_from_file_structure(full_path):
+#     """Generates a dictionary with the preserved structure of a given
+#     directory (with its files and subdirectories).
+#     Files are stored in tuples, with the first element being the name
+#     of the file without its extention and the second element
+#     the dotted path to the file.
 
-    For example, given the following directory:
-    test/
-         subdir1/
-                 subdir2/
-                         file5
-                 file3
-                 file4
+#     For example, given the following directory:
+#     test/
+#          subdir1/
+#                  subdir2/
+#                          file5
+#                  file3
+#                  file4
 
-         file1
-         file2
+#          file1
+#          file2
 
-    The result will be:
-    test = {
-        'subdir1': {
-            'subdir2': {
-                'subdir2': {
-                    ('file5', 'subdir1.subdir2.file5'): None,
-                },
-                ('file3', 'subdir1.file3'): None,
-                ('file4', 'subdir1.file4'): None,
-        },
-        ('file1', 'file1'): None,
-        ('file2', 'file2'): None,
+#     The result will be:
+#     test = {
+#         'subdir1': {
+#             'subdir2': {
+#                 'subdir2': {
+#                     ('file5', 'subdir1.subdir2.file5'): None,
+#                 },
+#                 ('file3', 'subdir1.file3'): None,
+#                 ('file4', 'subdir1.file4'): None,
+#         },
+#         ('file1', 'file1'): None,
+#         ('file2', 'file2'): None,
+#     }
+#     """
+#     root_dir = os.path.basename(os.path.normpath(full_path))
+
+#     dir_tree = OrderedDict()
+#     start = full_path.rfind(os.sep) + 1
+
+#     for path, dirs, files in os.walk(full_path):
+#         folders = path[start:].split(os.sep)
+#         # remove __init__.py from list of files
+#         if '__init__.py' in files:
+#             files.remove('__init__.py')
+#         # mac OS creates '.DS_store' files
+#         if '.DS_Store' in files:
+#             files.remove('.DS_Store')
+#         # remove files that are not .py extension and remove extensions
+#         filenames = [x[:-3] for x in files if x.split('.')[1] == 'py']
+#         filename_filepath_duple_list = []
+#         # remove root_dir form folders
+#         folders_without_root_dir = [x for x in folders if x != root_dir]
+#         for f in filenames:
+#             file_with_dotted_path = '.'.join(folders_without_root_dir + [f])
+#             filename_filepath_duple_list.append((f, file_with_dotted_path))
+#         subdir_dict = OrderedDict.fromkeys(filename_filepath_duple_list)
+#         parent = reduce(OrderedDict.get, folders[:-1], dir_tree)
+#         parent.update({folders[-1]: subdir_dict})
+
+#         # this code is added to give support to python 2.7
+#         # support for python 2.7 has been dropped
+#         # which does not have move_to_end method
+#         # if not hasattr(OrderedDict, 'move_to_end'):
+#         #     def move_to_end(self, key, last=True):
+#         #         link_prev, link_next, key = link = self._OrderedDict__map[key]
+#         #         link_prev[1] = link_next
+#         #         link_next[0] = link_prev
+#         #         root = self._OrderedDict__root
+#         #         if last:
+#         #             last = root[0]
+#         #             link[0] = last
+#         #             link[1] = root
+#         #             last[1] = root[0] = link
+#         #     OrderedDict.move_to_end = move_to_end
+#         # end of python 2.7 support code
+
+#         parent.move_to_end(folders[-1], last=False)
+#     dir_tree = dir_tree[root_dir]
+#     return dir_tree
+
+
+def _directory_element(elem_type, name, full_path, dot_path=None):
+    element = {
+        'type': elem_type,
+        'name': name,
+        'full_path': full_path,
+        'dot_path': dot_path,
+        'sub_elements': []
     }
-    """
-    root_dir = os.path.basename(os.path.normpath(full_path))
+    return element
 
-    dir_tree = OrderedDict()
-    start = full_path.rfind(os.sep) + 1
 
-    for path, dirs, files in os.walk(full_path):
-        folders = path[start:].split(os.sep)
-        # remove __init__.py from list of files
-        if '__init__.py' in files:
-            files.remove('__init__.py')
-        # mac OS creates '.DS_store' files
-        if '.DS_Store' in files:
-            files.remove('.DS_Store')
-        # remove files that are not .py extension and remove extensions
-        filenames = [x[:-3] for x in files if x.split('.')[1] == 'py']
-        filename_filepath_duple_list = []
-        # remove root_dir form folders
-        folders_without_root_dir = [x for x in folders if x != root_dir]
-        for f in filenames:
-            file_with_dotted_path = '.'.join(folders_without_root_dir + [f])
-            filename_filepath_duple_list.append((f, file_with_dotted_path))
-        subdir_dict = OrderedDict.fromkeys(filename_filepath_duple_list)
-        parent = reduce(OrderedDict.get, folders[:-1], dir_tree)
-        parent.update({folders[-1]: subdir_dict})
+def _generate_dict_from_file_structure(full_path, original_path=None):
+    root_dir_name = os.path.basename(os.path.normpath(full_path))
+    if not original_path:
+        original_path = full_path
+    element = _directory_element('directory', root_dir_name, full_path)
 
-        # this code is added to give support to python 2.7
-        # support for python 2.7 has been dropped
-        # which does not have move_to_end method
-        # if not hasattr(OrderedDict, 'move_to_end'):
-        #     def move_to_end(self, key, last=True):
-        #         link_prev, link_next, key = link = self._OrderedDict__map[key]
-        #         link_prev[1] = link_next
-        #         link_next[0] = link_prev
-        #         root = self._OrderedDict__root
-        #         if last:
-        #             last = root[0]
-        #             link[0] = last
-        #             link[1] = root
-        #             last[1] = root[0] = link
-        #     OrderedDict.move_to_end = move_to_end
-        # end of python 2.7 support code
+    all_sub_elements = os.listdir(full_path)
+    files = []
+    directories = []
+    for elem in all_sub_elements:
+        if os.path.isdir(os.path.join(full_path, elem)):
+            directories.append(elem)
+        else:
+            if not elem in ['__init__.py', '.DS_Store']:
+                files.append(os.path.splitext(elem)[0])
+    for directory in directories:
+        element['sub_elements'].append(_generate_dict_from_file_structure(os.path.join(full_path, directory), original_path))           
+    for filename in files:
+        full_file_path = os.path.join(full_path, filename)
 
-        parent.move_to_end(folders[-1], last=False)
-    dir_tree = dir_tree[root_dir]
-    return dir_tree
+        rel_file_path = os.path.relpath(full_file_path, original_path)
+        dot_file_path = rel_file_path.replace('/', '.')
+        file_element = _directory_element('file', filename, full_file_path, dot_file_path)
+        element['sub_elements'].append(file_element)
+
+    return element
 
 
 def get_test_cases(workspace, project):
@@ -100,19 +139,15 @@ def get_test_cases(workspace, project):
     return test_cases
 
 
-def get_page_objects(workspace, project):
+def get_pages(workspace, project):
     path = os.path.join(workspace, 'projects', project, 'pages')
-    page_objects = _generate_dict_from_file_structure(path)
-    return page_objects
+    pages = _generate_dict_from_file_structure(path)
+    return pages
 
 
 def get_suites(workspace, project):
     path = os.path.join(workspace, 'projects', project, 'suites')
-    suites = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
-    if '__init__.py' in suites:
-        suites.remove('__init__.py')
-    # remove files that are not .py extension and remove extensions
-    suites = [x[:-3] for x in suites if x.split('.')[1] == 'py']
+    suites = _generate_dict_from_file_structure(path)
     return suites
 
 
@@ -420,5 +455,82 @@ def code_syntax_is_valid(code):
     try:
         compile(code, '<string>', 'exec')
     except Exception as e:
-        error = e
+        error = 'syntax error'
     return error
+
+
+def delete_element(workspace, project, element_type, full_path):
+    if element_type == 'test':
+        folder = 'tests'
+    elif element_type == 'page':
+        folder = 'pages'
+    elif element_type == 'suite':
+        folder = 'suites'
+    else:
+        raise Exception('Incorrect element type')
+
+    errors = []
+    path = os.path.join(workspace, 'projects', project, folder,
+                        full_path.replace('.', os.sep) + '.py')
+    if not os.path.exists(path):
+        errors.append('File {} does not exist'.format(full_path))
+    else:
+        try:
+            os.remove(path)
+        except:
+            errors.append('There was an error removing file {}'.format(full_path))
+
+    if element_type == 'test':
+        data_path = os.path.join(workspace, 'projects', project, 'data',
+                                 full_path.replace('.', os.sep) + '.csv')
+        try:
+            os.remove(data_path)
+        except:
+            pass
+
+    return errors
+
+
+def duplicate_element(workspace, project, element_type, original_file_dot_path,
+                      new_file_dot_path):
+    errors = []
+    if element_type == 'test':
+        folder = 'tests'
+    elif element_type == 'page':
+        folder = 'pages'
+    elif element_type == 'suite':
+        folder = 'suites'
+    else:
+        errors.append('Element type is incorrect')
+    if not errors:
+        if original_file_dot_path == new_file_dot_path:
+            errors.append('New file cannot be the same as the original')
+        else:
+
+            root_path = os.path.join(workspace, 'projects', project)
+            original_file_rel_path = original_file_dot_path.replace('.', os.sep) + '.py'
+            original_file_full_path = os.path.join(root_path, folder, original_file_rel_path)
+            new_file_rel_path = new_file_dot_path.replace('.', os.sep) + '.py'
+            new_file_full_path = os.path.join(root_path, folder, new_file_rel_path)
+            if os.path.exists(new_file_full_path):
+                errors.append('A file with that name already exists')
+
+    if not errors:
+        try:
+            shutil.copyfile(original_file_full_path, new_file_full_path)
+        except:
+            errors.append('There was an error creating the new file')
+        
+    if not errors and element_type == 'test':
+        try:
+            original_data_rel_path = original_file_dot_path.replace('.', os.sep) + '.csv'
+            original_data_full_path = os.path.join(root_path, 'data', original_data_rel_path)
+            new_data_rel_path = new_file_dot_path.replace('.', os.sep) + '.csv'
+            new_data_full_path = os.path.join(root_path, 'data', new_data_rel_path)
+            shutil.copyfile(original_data_full_path, new_data_full_path)
+        except:
+            pass
+        
+    return errors
+
+

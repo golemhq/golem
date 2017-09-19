@@ -2,6 +2,7 @@
 
 
 $(document).ready(function() {
+
     $('#testCasesTree').treed();
 
     $("#allTestCasesCheckbox").change(function(){
@@ -306,7 +307,7 @@ function runSuite(){
          type: 'POST',
          success: function(data) {
             var url = '/report/project/' + project + '/' + suite + '/' + data + '/';
-            toastr.info('Running suite ' + suite + " - <a target='_blank' href='" + url + "'>open</a>");
+            toastr.info('Running suite ' + suite + " - <a href='" + url + "'>open</a>");
          },
          error: function() {}
      });

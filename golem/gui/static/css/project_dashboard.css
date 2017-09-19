@@ -1,6 +1,16 @@
 .box-container{
     margin-bottom: 15px;
-    padding: 10px;
+    /*padding: 10px;*/
+}
+
+@media (min-width: 768px){
+    .left-column{
+        padding-left: 0px;
+        padding-right: 0px
+    }
+    .right-column{
+        padding-right: 0px
+    }
 }
 
 .tree, .tree ul {

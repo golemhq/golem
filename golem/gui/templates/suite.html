@@ -54,24 +54,22 @@
         
         <div class="clearfix"></div> 
         <br>       
-
         <ul id="suiteTests" class="tree" style="padding-left: 15px">
             <input type="checkbox" id="allTestCasesCheckbox" class="select-testcase-checkbox" style="margin-top: 0px !important;">
             <h4> Test Cases</h4>
             <ul id="testCasesTree">
-                {%- for key, value in all_test_cases.items() recursive %}
+                 {%- for elem in all_test_cases recursive %}
                     <li>
-                        {%- if value is mapping -%}
+                        {%- if elem.type == 'directory' -%}
                            <input type="checkbox" name="checkbox" class="select-testcase-checkbox">
-                            <a href="#" class="branch-name">{{key}}</a>
-                            <ul>{{ loop(value.items()) }}</ul>
+                            <a href="#" class="branch-name">{{ elem.name }}</a>
+                            <ul>{{ loop(elem.sub_elements) }}</ul>
                         {%- else %}
-                            <label><input type="checkbox" name="checkbox" class="select-testcase-checkbox"><span class="node-name">{{ key.0 }}</span></label>
+                            <label><input type="checkbox" name="checkbox" class="select-testcase-checkbox"><span class="node-name">{{ elem.name }}</span></label>
                         {%- endif %}
                     </li>
                 {%- endfor %}
-
-        </ul>
+            </ul>
 
         <div class="clearfix"></div>
 

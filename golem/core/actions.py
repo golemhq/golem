@@ -8,6 +8,7 @@ import random as rand
 
 import selenium
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 import requests
 
 from golem import core
@@ -100,6 +101,16 @@ def debug():
         print('running {}'.format(command))
         eval(command)
         command = input()
+
+
+def mouse_hover(element):
+    _run_wait_hook()
+    driver = get_driver()
+    webelement = driver.find(element)
+    step_message = 'Mouse hover element \'{0}\''.format(webelement.name)
+    logger.logger.info(step_message)
+    ActionChains(driver).move_to_element(webelement).perform()
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
 def navigate(url):
@@ -212,6 +223,46 @@ def verify_is_not_enabled(element):
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if webelement.is_enabled():
         raise Exception('Element is enabled')
+
+
+def verify_is_not_selected(element):
+    _run_wait_hook()
+    webelement = get_driver().find(element)
+    step_message = 'Verify the element \'{0}\' is not selected'.format(webelement.name)
+    logger.logger.info(step_message)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
+    if webelement.is_selected():
+        raise Exception('Element is selected')
+
+
+def verify_is_not_visible(element):
+    _run_wait_hook()
+    webelement = get_driver().find(element)
+    step_message = 'Verify the element \'{0}\' is not visible'.format(webelement.name)
+    logger.logger.info(step_message)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
+    if webelement.is_displayed():
+        raise Exception('Element is visible')
+
+
+def verify_is_selected(element):
+    _run_wait_hook()
+    webelement = get_driver().find(element)
+    step_message = 'Verify the element \'{0}\' is selected'.format(webelement.name)
+    logger.logger.info(step_message)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
+    if not webelement.is_selected():
+        raise Exception('Element is not selected')
+
+
+def verify_is_visible(element):
+    _run_wait_hook()
+    webelement = get_driver().find(element)
+    step_message = 'Verify the element \'{0}\' is visible'.format(webelement.name)
+    logger.logger.info(step_message)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
+    if not webelement.is_displayed():
+        raise Exception('Element is not visible')
 
 
 def verify_not_exists(element):

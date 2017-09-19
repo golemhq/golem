@@ -89,14 +89,7 @@ var ReportDashboard = new function(){
                 <td class='fecha'>"+data.dateTime+"</td> \
                 <td class='ambiente'>"+data.environment+"</td> \
                 <td class='resultado'> \
-                    <div class='progress progress-bar-container'> \
-                        <div aria-valuenow='10' style='width: 100%;'\
-                            class='progress-bar progress-bar-danger barra-roja'\
-                            data-transitiongoal='10'></div>\
-                        <div aria-valuenow='20' style='width: 50%;' \
-                            class='progress-bar barra-azul' \
-                            data-transitiongoal='20' id='"+data.blueBarId+"'></div>\
-                    </div>\
+                    "+reportUtils.generateProgressBars()+"\
                 </td>\
             </tr>";
         row = $(row);
@@ -132,15 +125,7 @@ var ExecutionsReport = new function(){
                 <td class='tests-ok'>"+data.testsPassed+"</td>\
                 <td class='tests-failed'>"+data.testsFailed+"</td>\
                 <td class='percentage'>\
-                    <div class='progress'>\
-                        <div aria-valuenow='20' style='width: 100%;' \
-                            class='progress-bar pending' data-transitiongoal='20'></div>\
-                        <div aria-valuenow='10' style='width: 0%;' \
-                            class='progress-bar progress-bar-danger fail-bar' \
-                            data-transitiongoal='10'></div>\
-                        <div aria-valuenow='20' style='width: 0%;' \
-                            class='progress-bar ok-bar' data-transitiongoal='20'></div>\
-                    </div>\
+                    "+reportUtils.generateProgressBars()+"\
                 </td>\
                 <td class='total-time'></td>\
             </tr>";
