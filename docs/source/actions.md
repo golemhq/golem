@@ -4,10 +4,6 @@ Golem Actions
 Golem comes with predefined actions that cover almost all the needs to write tests. They are self-documenting. The entire list of available actions is the following:
 
 
-- **add_step(message)**
-
-Logs a new step to be displayed in the report later
-
 - **capture(message='')**
 
 Take a screenshot of the browser, the message is optional
@@ -62,6 +58,10 @@ select_by_value(elem, 'CA')
 - **send_keys(element, text)**
 
 Send key strokes to the element
+
+- **step(message)**
+
+Logs a new step to be displayed in the report later
 
 - **store(key, value)**
 

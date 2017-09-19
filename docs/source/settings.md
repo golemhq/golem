@@ -35,6 +35,10 @@ Path to the chrome driver executable. By default it points to the *drivers* fold
 
 Path to the gecko driver executable. By default it points to the *drivers* folder inside the test dir.
 
+- *remote_url*
+
+the URL to use when connecting to a remote webdriver, for example, when using selenium grid. Default is 'http://localhost:4444/wd/hub'
+
 - *wait_hook*
 
 Custom wait method to use for every action, that can be specific to each application. It must be defined inside extend.py

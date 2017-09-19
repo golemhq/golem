@@ -1,95 +1,136 @@
 import csv
-import datetime
 import imp
 import importlib
 import shutil
 import json
 import os
+import sys
 import uuid
 
 from functools import reduce
 from collections import OrderedDict
+from datetime import datetime
 
 import golem
+from golem.core import settings_manager
 
 
-def _generate_dict_from_file_structure(full_path):
-    """Generates a dictionary with the preserved structure of a given
-    directory (with its files and subdirectories).
-    Files are stored in tuples, with the first element being the name
-    of the file without its extention and the second element
-    the dotted path to the file.
+# def _generate_dict_from_file_structure(full_path):
+#     """Generates a dictionary with the preserved structure of a given
+#     directory (with its files and subdirectories).
+#     Files are stored in tuples, with the first element being the name
+#     of the file without its extention and the second element
+#     the dotted path to the file.
 
-    For example, given the following directory:
-    test/
-         subdir1/
-                 subdir2/
-                         file5
-                 file3
-                 file4
+#     For example, given the following directory:
+#     test/
+#          subdir1/
+#                  subdir2/
+#                          file5
+#                  file3
+#                  file4
 
-         file1
-         file2
+#          file1
+#          file2
 
-    The result will be:
-    test = {
-        'subdir1': {
-            'subdir2': {
-                'subdir2': {
-                    ('file5', 'subdir1.subdir2.file5'): None,
-                },
-                ('file3', 'subdir1.file3'): None,
-                ('file4', 'subdir1.file4'): None,
-        },
-        ('file1', 'file1'): None,
-        ('file2', 'file2'): None,
+#     The result will be:
+#     test = {
+#         'subdir1': {
+#             'subdir2': {
+#                 'subdir2': {
+#                     ('file5', 'subdir1.subdir2.file5'): None,
+#                 },
+#                 ('file3', 'subdir1.file3'): None,
+#                 ('file4', 'subdir1.file4'): None,
+#         },
+#         ('file1', 'file1'): None,
+#         ('file2', 'file2'): None,
+#     }
+#     """
+#     root_dir = os.path.basename(os.path.normpath(full_path))
+
+#     dir_tree = OrderedDict()
+#     start = full_path.rfind(os.sep) + 1
+
+#     for path, dirs, files in os.walk(full_path):
+#         folders = path[start:].split(os.sep)
+#         # remove __init__.py from list of files
+#         if '__init__.py' in files:
+#             files.remove('__init__.py')
+#         # mac OS creates '.DS_store' files
+#         if '.DS_Store' in files:
+#             files.remove('.DS_Store')
+#         # remove files that are not .py extension and remove extensions
+#         filenames = [x[:-3] for x in files if x.split('.')[1] == 'py']
+#         filename_filepath_duple_list = []
+#         # remove root_dir form folders
+#         folders_without_root_dir = [x for x in folders if x != root_dir]
+#         for f in filenames:
+#             file_with_dotted_path = '.'.join(folders_without_root_dir + [f])
+#             filename_filepath_duple_list.append((f, file_with_dotted_path))
+#         subdir_dict = OrderedDict.fromkeys(filename_filepath_duple_list)
+#         parent = reduce(OrderedDict.get, folders[:-1], dir_tree)
+#         parent.update({folders[-1]: subdir_dict})
+
+#         # this code is added to give support to python 2.7
+#         # support for python 2.7 has been dropped
+#         # which does not have move_to_end method
+#         # if not hasattr(OrderedDict, 'move_to_end'):
+#         #     def move_to_end(self, key, last=True):
+#         #         link_prev, link_next, key = link = self._OrderedDict__map[key]
+#         #         link_prev[1] = link_next
+#         #         link_next[0] = link_prev
+#         #         root = self._OrderedDict__root
+#         #         if last:
+#         #             last = root[0]
+#         #             link[0] = last
+#         #             link[1] = root
+#         #             last[1] = root[0] = link
+#         #     OrderedDict.move_to_end = move_to_end
+#         # end of python 2.7 support code
+
+#         parent.move_to_end(folders[-1], last=False)
+#     dir_tree = dir_tree[root_dir]
+#     return dir_tree
+
+
+def _directory_element(elem_type, name, full_path, dot_path=None):
+    element = {
+        'type': elem_type,
+        'name': name,
+        'full_path': full_path,
+        'dot_path': dot_path,
+        'sub_elements': []
     }
-    """
-    root_dir = os.path.basename(os.path.normpath(full_path))
+    return element
 
-    dir_tree = OrderedDict()
-    start = full_path.rfind(os.sep) + 1
 
-    for path, dirs, files in os.walk(full_path):
-        folders = path[start:].split(os.sep)
-        # remove __init__.py from list of files
-        if '__init__.py' in files:
-            files.remove('__init__.py')
-        # mac OS creates '.DS_store' files
-        if '.DS_Store' in files:
-            files.remove('.DS_Store')
-        # remove files that are not .py extension and remove extensions
-        filenames = [x[:-3] for x in files if x.split('.')[1] == 'py']
-        filename_filepath_duple_list = []
-        # remove root_dir form folders
-        folders_without_root_dir = [x for x in folders if x != root_dir]
-        for f in filenames:
-            file_with_dotted_path = '.'.join(folders_without_root_dir + [f])
-            filename_filepath_duple_list.append((f, file_with_dotted_path))
-        subdir_dict = OrderedDict.fromkeys(filename_filepath_duple_list)
-        parent = reduce(OrderedDict.get, folders[:-1], dir_tree)
-        parent.update({folders[-1]: subdir_dict})
+def _generate_dict_from_file_structure(full_path, original_path=None):
+    root_dir_name = os.path.basename(os.path.normpath(full_path))
+    if not original_path:
+        original_path = full_path
+    element = _directory_element('directory', root_dir_name, full_path)
 
-        # this code is added to give support to python 2.7
-        # support for python 2.7 has been dropped
-        # which does not have move_to_end method
-        # if not hasattr(OrderedDict, 'move_to_end'):
-        #     def move_to_end(self, key, last=True):
-        #         link_prev, link_next, key = link = self._OrderedDict__map[key]
-        #         link_prev[1] = link_next
-        #         link_next[0] = link_prev
-        #         root = self._OrderedDict__root
-        #         if last:
-        #             last = root[0]
-        #             link[0] = last
-        #             link[1] = root
-        #             last[1] = root[0] = link
-        #     OrderedDict.move_to_end = move_to_end
-        # end of python 2.7 support code
+    all_sub_elements = os.listdir(full_path)
+    files = []
+    directories = []
+    for elem in all_sub_elements:
+        if os.path.isdir(os.path.join(full_path, elem)):
+            directories.append(elem)
+        else:
+            if not elem in ['__init__.py', '.DS_Store']:
+                files.append(os.path.splitext(elem)[0])
+    for directory in directories:
+        element['sub_elements'].append(_generate_dict_from_file_structure(os.path.join(full_path, directory), original_path))           
+    for filename in files:
+        full_file_path = os.path.join(full_path, filename)
 
-        parent.move_to_end(folders[-1], last=False)
-    dir_tree = dir_tree[root_dir]
-    return dir_tree
+        rel_file_path = os.path.relpath(full_file_path, original_path)
+        dot_file_path = rel_file_path.replace('/', '.')
+        file_element = _directory_element('file', filename, full_file_path, dot_file_path)
+        element['sub_elements'].append(file_element)
+
+    return element
 
 
 def get_test_cases(workspace, project):
@@ -98,19 +139,15 @@ def get_test_cases(workspace, project):
     return test_cases
 
 
-def get_page_objects(workspace, project):
+def get_pages(workspace, project):
     path = os.path.join(workspace, 'projects', project, 'pages')
-    page_objects = _generate_dict_from_file_structure(path)
-    return page_objects
+    pages = _generate_dict_from_file_structure(path)
+    return pages
 
 
 def get_suites(workspace, project):
     path = os.path.join(workspace, 'projects', project, 'suites')
-    suites = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
-    if '__init__.py' in suites:
-        suites.remove('__init__.py')
-    # remove files that are not .py extension and remove extensions
-    suites = [x[:-3] for x in suites if x.split('.')[1] == 'py']
+    suites = _generate_dict_from_file_structure(path)
     return suites
 
 
@@ -150,9 +187,11 @@ def get_files_in_directory_dotted_path(base_path):
 
 def get_test_data(workspace, project, full_test_case_name):
     '''Test cases can have multiple sets of data
-    This method generates a dict for each set and returns
-    a list of dicts'''
-    data_dict_list = []
+    This method generates a list of data objects'''
+    data_list = []
+
+    class data:
+        pass
 
     # check if CSV file == test case name exists
     test, parents = separate_file_from_parents(full_test_case_name)
@@ -165,11 +204,29 @@ def get_test_data(workspace, project, full_test_case_name):
         with open(data_file_path, 'r', encoding='utf8') as csv_file:
             dict_reader = csv.DictReader(csv_file)
             for data_set in dict_reader:
-                data_dict_list.append(data_set)
+                new_data_obj = data()
+                for key, value in data_set.items():
+                    setattr(new_data_obj, key, value)
+                data_list.append(new_data_obj)
+    
+    if not data_list:
+        data_list.append(data())
+    return data_list
 
-    if not data_dict_list:
-        data_dict_list = []
+
+def get_test_data_dict_list(workspace, projects, full_test_case_name):
+    data_dict_list = []
+    data_list = get_test_data(workspace, projects, full_test_case_name)
+    for l in data_list:
+        data_dict_list.append(vars(l))
     return data_dict_list
+
+
+def get_suite_module(workspace, project, suite):
+    suite_module = importlib.import_module(
+                                'projects.{0}.suites.{1}'.format(project, suite),
+                                package=None)
+    return suite_module
 
 
 def get_suite_test_cases(workspace, project, suite):
@@ -177,11 +234,11 @@ def get_suite_test_cases(workspace, project, suite):
     tests = []
     suite_module = importlib.import_module('projects.{0}.suites.{1}'.format(project, suite),
                                            package=None)
-    if '*' in suite_module.test_case_list:
+    if '*' in suite_module.tests:
         path = os.path.join(workspace, 'projects', project, 'tests')
         tests = get_files_in_directory_dotted_path(path)
     else:
-        for test in suite_module.test_case_list:
+        for test in suite_module.tests:
             if test[-1] == '*':
                 this_dir = os.path.join(test[:-2])
                 path = os.path.join(workspace, 'projects', project,
@@ -226,111 +283,17 @@ def get_suite_browsers(workspace, project, suite):
     return browsers
 
 
-def read_json_and_remove_comments(json_path):
-    """What if I want to store comments in a JSON file?
-    The parser is going to throw errors.
-    So pass a JSON file path to tthis function and it will read it, remove the comments
-    and then parse it.
-    Comment lines starting with '//' are ignored"""
-    with open(json_path, 'r') as settings_file:
-        file_lines = settings_file.readlines()
-        lines_without_comments = []
-        for line in file_lines:
-            if line.strip()[0:2] != '//' and len(line.strip()) > 0:
-                lines_without_comments.append(line)
-        file_content_without_comments = ''.join(lines_without_comments)
-        json_data = {}
-        try:
-            json_data = json.loads(file_content_without_comments)
-        except Exception as e:
-            print('There was an error reading settings file {}'.format(json_path))
-
-        return json_data
-
-
-def assign_settings_default_values(settings):
-    if not 'implicit_wait' in settings:
-        settings['implicit_wait'] = None
-    elif settings['implicit_wait'] == '':
-        settings['implicit_wait'] = None
-
-    if not 'screenshot_on_error' in settings:
-        settings['screenshot_on_error'] = True
-    elif settings['screenshot_on_error'] == '' or settings['screenshot_on_error'] == None:
-        settings['screenshot_on_error'] = True
-
-    if not 'screenshot_on_step' in settings:
-        settings['screenshot_on_step'] = False
-    elif settings['screenshot_on_step'] == '' or settings['screenshot_on_step'] == None:
-        settings['screenshot_on_step'] == False
-
-    if not 'wait_hook' in settings:
-        settings['wait_hook'] = None
-    elif settings['wait_hook'] == '':
-        settings['wait_hook'] == None
-
-    if not 'default_driver' in settings:
-        settings['default_driver'] = 'chrome'
-    elif settings['default_driver'] == '':
-        settings['default_driver'] == 'chrome'
-
-    if not 'chrome_driver_path' in settings:
-        settings['chrome_driver_path'] = None
-    elif settings['chrome_driver_path'] == '':
-        settings['chrome_driver_path'] == None
-
-    if not 'gecko_driver_path' in settings:
-        settings['gecko_driver_path'] = None
-    elif not settings['gecko_driver_path']:
-        settings['gecko_driver_path'] == None
-
-    if not 'console_log_level' in settings:
-        settings['console_log_level'] = 'INFO'
-    elif not settings['console_log_level']:
-        settings['console_log_level'] = 'INFO'
-
-    if not 'file_log_level' in settings:
-        settings['file_log_level'] = 'DEBUG'
-    elif not settings['file_log_level']:
-        settings['file_log_level'] = 'DEBUG'
-
-    if not 'log_all_events' in settings:
-        settings['log_all_events'] = True
-    elif settings['log_all_events'] == '' or settings['log_all_events'] == None:
-        settings['log_all_events'] = True
-
-    return settings
-
-
-def get_global_settings():
-    '''get global settings from root folder'''
-    settings = read_json_and_remove_comments('settings.json')
-    settings = assign_settings_default_values(settings)
-
-    return settings
-
-
-def get_project_settings(project, global_settings):
-    '''get project level settings from selected project folder,
-    this overrides any global settings'''
-    project_settings_path = os.path.join('projects', project, 'settings.json')
-    project_settings = {}
-    if os.path.isfile(project_settings_path):
-        project_settings = read_json_and_remove_comments(project_settings_path)
-    # merge and override global settings with project settings
-    for setting in project_settings:
-        if project_settings[setting]:
-            global_settings[setting] = project_settings[setting]
-
-    return global_settings
-
-
 def get_timestamp():
     time_format = "%Y.%m.%d.%H.%M.%S.%f"
-    timestamp = datetime.datetime.today().strftime(time_format)
+    timestamp = datetime.today().strftime(time_format)
     # remove last 3 decimal places from microseconds
     timestamp = timestamp[:-3]
     return timestamp
+
+
+def get_date_from_timestamp(timestamp):
+    date = datetime.strptime(timestamp, '%Y.%m.%d.%H.%M.%S.%f')
+    return date
 
 
 def test_case_exists(workspace, project, full_test_case_name):
@@ -414,7 +377,7 @@ def create_new_project(workspace, project):
 
     settings_path = os.path.join(workspace, 'projects', project, 'settings.json')
     with open(settings_path, 'a') as settings_file:
-        settings_file.write(reduced_settings_file_content())
+        settings_file.write(settings_manager.reduced_settings_file_content())
 
 
 def create_demo_project(workspace):
@@ -424,60 +387,16 @@ def create_demo_project(workspace):
     shutil.copytree(source, destination)
 
 
-def settings_file_content():
-    settings_content = (
-        "// Place this settings file at the root of the test directory to\n"
-        "// impact all the projects\n"
-        "{\n"
-        "// Default time to wait looking for an element until it is found\n"
-        "\"implicit_wait\": 20,\n"
-        "\n"
-        "// Take a screenshot on error by default\n"
-        "\"screenshot_on_error\": true,\n"
-        "\n"
-        "// Take a screenshot on every step\n"
-        "\"screenshot_on_step\": false,\n"
-        "\n"
-        "// Custom wait method to use before each step, must be defined inside extend.py\n"
-        "\"wait_hook\": null,\n"
-        "\n"
-        "// Define the driver to use, unless overriden by the -d/--driver flag\n"
-        "\"default_driver\": \"chrome\",\n"
-        "\n"
-        "// Path to the chrome driver executable. By default it points to the "
-        "// \'drivers\' folder inside the test directory.\n"
-        "\"chrome_driver_path\": \"./drivers/chromedriver\",\n"
-        "\n"
-        "// Path to the gecko driver executable. This is used by Firefox.\n"
-        "// By default it points to the 'drivers' folder inside the test directory.\n"
-        "\"gecko_driver_path\": \"./drivers/geckodriver\",\n"
-        "\n"
-        "// Log level to console. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.\n"
-        "// Default option is INFO\n"
-        "\"console_log_level\": \"INFO\",\n"
-        "\n"
-        "// Log level to file. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.\n"
-        "// Default option is DEBUG\n"
-        "\"console_log_level\": \"DEBUG\",\n"
-        "\n"
-        "// Log all events, instead of just Golem events. Default is false\n"
-        "\"log_all_events\": false\n"
-        "}\n")
-    return settings_content
-
-
-def reduced_settings_file_content():
-    settings_content = (
-        "// Settings defined here will override global settings\n"
-        "{\n"
-        "}\n")
-    return settings_content
-
-
 def create_test_dir(workspace):
     create_new_directory(path_list=[workspace], add_init=True)
     create_new_directory(path_list=[workspace, 'projects'], add_init=True)
-    create_new_directory(path_list=[workspace, 'drivers'], add_init=False)
+    # create_new_directory(path_list=[workspace, 'drivers'], add_init=False)
+
+    # copy drivers from golem/bin/drivers to test_dir/drivers
+    pkgdir = sys.modules['golem'].__path__[0]
+    sourcepath = os.path.join(pkgdir, 'bin', 'drivers')
+    destination_path = os.path.join(workspace, 'drivers')
+    shutil.copytree(sourcepath, destination_path)
     
     golem_py_content = ("import os\n"
                         "import sys\n"
@@ -497,7 +416,7 @@ def create_test_dir(workspace):
     
     settings_path = os.path.join(workspace, 'settings.json')
     with open(settings_path, 'a') as settings_file:
-        settings_file.write(settings_file_content())
+        settings_file.write(settings_manager.settings_file_content())
 
     users_path = os.path.join(workspace, 'users.json')
     open(users_path, 'a').close()
@@ -536,5 +455,82 @@ def code_syntax_is_valid(code):
     try:
         compile(code, '<string>', 'exec')
     except Exception as e:
-        error = e
+        error = 'syntax error'
     return error
+
+
+def delete_element(workspace, project, element_type, full_path):
+    if element_type == 'test':
+        folder = 'tests'
+    elif element_type == 'page':
+        folder = 'pages'
+    elif element_type == 'suite':
+        folder = 'suites'
+    else:
+        raise Exception('Incorrect element type')
+
+    errors = []
+    path = os.path.join(workspace, 'projects', project, folder,
+                        full_path.replace('.', os.sep) + '.py')
+    if not os.path.exists(path):
+        errors.append('File {} does not exist'.format(full_path))
+    else:
+        try:
+            os.remove(path)
+        except:
+            errors.append('There was an error removing file {}'.format(full_path))
+
+    if element_type == 'test':
+        data_path = os.path.join(workspace, 'projects', project, 'data',
+                                 full_path.replace('.', os.sep) + '.csv')
+        try:
+            os.remove(data_path)
+        except:
+            pass
+
+    return errors
+
+
+def duplicate_element(workspace, project, element_type, original_file_dot_path,
+                      new_file_dot_path):
+    errors = []
+    if element_type == 'test':
+        folder = 'tests'
+    elif element_type == 'page':
+        folder = 'pages'
+    elif element_type == 'suite':
+        folder = 'suites'
+    else:
+        errors.append('Element type is incorrect')
+    if not errors:
+        if original_file_dot_path == new_file_dot_path:
+            errors.append('New file cannot be the same as the original')
+        else:
+
+            root_path = os.path.join(workspace, 'projects', project)
+            original_file_rel_path = original_file_dot_path.replace('.', os.sep) + '.py'
+            original_file_full_path = os.path.join(root_path, folder, original_file_rel_path)
+            new_file_rel_path = new_file_dot_path.replace('.', os.sep) + '.py'
+            new_file_full_path = os.path.join(root_path, folder, new_file_rel_path)
+            if os.path.exists(new_file_full_path):
+                errors.append('A file with that name already exists')
+
+    if not errors:
+        try:
+            shutil.copyfile(original_file_full_path, new_file_full_path)
+        except:
+            errors.append('There was an error creating the new file')
+        
+    if not errors and element_type == 'test':
+        try:
+            original_data_rel_path = original_file_dot_path.replace('.', os.sep) + '.csv'
+            original_data_full_path = os.path.join(root_path, 'data', original_data_rel_path)
+            new_data_rel_path = new_file_dot_path.replace('.', os.sep) + '.csv'
+            new_data_full_path = os.path.join(root_path, 'data', new_data_rel_path)
+            shutil.copyfile(original_data_full_path, new_data_full_path)
+        except:
+            pass
+        
+    return errors
+
+

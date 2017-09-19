@@ -6,27 +6,25 @@ import subprocess
 from golem.core import utils
 
 
-def new_directory_test_case(root_path, project, parents, directory_name):
-    parents_joined = os.sep.join(parents)
+def new_directory_test_case(root_path, project, parents, test_name):
+    parents = os.sep.join(parents)
     errors = []
-    if directory_already_exists(root_path, project, 'tests', parents, directory_name):
+    if directory_already_exists(root_path, project, 'tests', parents, test_name):
         errors.append('A directory with that name already exists')
-
-    if not errors:
+    else:
         utils.create_new_directory(path_list=[root_path, 'projects', project, 'tests',
-                                   parents_joined, directory_name], add_init=True)
+                                   parents, test_name], add_init=True)
     return errors
 
 
-def new_directory_page_object(root_path, project, parents, directory_name):
-    parents_joined = os.sep.join(parents)
+def new_directory_page_object(root_path, project, parents, page_name):
+    parents = os.sep.join(parents)
     errors = []
-    if directory_already_exists(root_path, project, 'pages', parents_joined, directory_name):
+    if directory_already_exists(root_path, project, 'pages', parents, page_name):
         errors.append('A directory with that name already exists')
-    
-    if not errors:
+    else:
         utils.create_new_directory(path_list=[root_path, 'projects', project, 'pages',
-                                   parents_joined, directory_name], add_init=True)
+                                   parents, page_name], add_init=True)
     return errors
 
 
@@ -81,10 +79,6 @@ def string_to_time(time_string):
 def get_global_actions():
     global_actions = [
         {
-            'name': 'add_step',
-            'parameters': [{'name': 'message', 'type': 'value'}]
-        },
-        {
             'name': 'capture',
             'parameters': [{'name': 'message (optional)', 'type': 'value'}]
         },
@@ -97,8 +91,20 @@ def get_global_actions():
             'parameters': []
         },
         {
-            'name': 'go to',
+            'name': 'get',
+            'parameters': [{'name': 'url', 'type': 'value'},
+                           {'name': 'headers', 'type': 'multiline-value'},
+                           {'name': 'params', 'type': 'value'}]
+        },
+        {
+            'name': 'navigate',
             'parameters': [{'name': 'url', 'type': 'value'}]
+        },
+        {
+            'name': 'post',
+            'parameters': [{'name': 'url', 'type': 'value'},
+                           {'name': 'headers', 'type': 'value'},
+                           {'name': 'data', 'type': 'value'}]
         },
         {
             'name': 'random',
@@ -125,6 +131,10 @@ def get_global_actions():
                            {'name': 'value', 'type': 'value'}]
         },
         {
+            'name': 'step',
+            'parameters': [{'name': 'message', 'type': 'value'}]
+        },
+        {
             'name': 'store',
             'parameters': [{'name': 'key', 'type': 'value'},
                            {'name': 'value', 'type': 'value'}]
@@ -139,6 +149,22 @@ def get_global_actions():
         },
         {
             'name': 'verify is not enabled',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
+            'name': 'verify is not selected',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
+            'name': 'verify is not visible',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
+            'name': 'verify is selected',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
+            'name': 'verify is visible',
             'parameters': [{'name': 'element', 'type': 'element'}]
         },
         {
@@ -166,12 +192,39 @@ def get_global_actions():
         {
             'name': 'wait for element visible',
             'parameters': [{'name': 'element', 'type': 'element'},
-                           {'name': 'timeout', 'type': 'value'}]
+                           {'name': 'timeout (optional)', 'type': 'value'}]
+        },
+        {
+            'name': 'wait for element not visible',
+            'parameters': [{'name': 'element', 'type': 'element'},
+                           {'name': 'timeout (optional)', 'type': 'value'}]
         },
         {
             'name': 'wait for element enabled',
             'parameters': [{'name': 'element', 'type': 'element'},
-                           {'name': 'timeout', 'type': 'value'}]
+                           {'name': 'timeout (optional)', 'type': 'value'}]
         }
     ]
     return global_actions
+
+
+def get_supported_browsers_suggestions():
+    # supported_browsers = {
+    #     'suggestions': [
+    #         {'value': 'chrome', 'data': 'chrome'},
+    #         {'value': 'chrome-remote', 'data': 'chrome-remote'},
+    #         {'value': 'chrome-headless', 'data': 'chrome-headless'},
+    #         {'value': 'chrome-remote-headless', 'data': 'chrome-remote-headless'},
+    #         {'value': 'firefox', 'data': 'firefox'},
+    #         {'value': 'firefox-remote', 'data': 'firefox-remote'}
+    #     ]
+    # }
+    supported_browsers = [
+        'chrome',
+        'chrome-remote',
+        'chrome-headless',
+        'chrome-remote-headless',
+        'firefox',
+        'firefox-remote'
+    ]
+    return supported_browsers

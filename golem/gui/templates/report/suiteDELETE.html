@@ -1,0 +1,96 @@
+{% extends "report/base.html" %}
+
+{% block header_declarations %}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<script>
+google.charts.load('current', {'packages':['corechart']});
+</script>
+
+{% endblock %}
+
+
+{% block content %}
+
+<!-- BOTTOM: LEFT NAV AND RIGHT MAIN CONTENT -->
+<div class="bottom">
+	<div class="container">
+		<div class="row">
+
+			<!-- content-wrapper -->
+			<div id="columna-principal" class="col-md-10 col-md-offset-1 content-wrapper">
+
+				<div class="row all-projects-container">
+					<h1 class="page-title"><a class="link-without-underline" href="/report/project/{{project}}/">{{project}}</a></h1>
+					<!-- Project Container -->
+					<div class="col-md-12  proyect-container primer-proyecto">
+						<div class="col-md-12">
+							<h3 class="project-name"></h3>
+						</div>
+						<!-- Suite Container -->
+						<div class="suite-container primer-suite-container">
+							<div class="col-md-12 ultimas-ejecuciones-container">
+								<div class="widget widget-table">
+									<div class="widget-header">
+										<h3><i class="fa fa-table"></i><span class="suite-name"></span> - all executions</h3>
+									</div>
+									<div class="widget-content table-content">
+										
+										<div class="col-md-10 col-md-offset-1">
+											<div class="plot-chart-container"></div>
+										</div>
+										
+										<div class="table-responsive">
+											<table class="table ultimas-ejecuciones">
+												<thead>
+													<tr>
+														<th>#</th>
+														<th>Date & Time</th>
+														<th>Environment</th>
+														<th>Result</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr class="primera-fila ultimas-ejecuciones-tr">
+														<td class="numero"></td>
+														<td class="fecha"></td>
+														<td class="ambiente"></td>
+														<td class="resultado">
+															<div class="progress progress-bar-container">
+																<div aria-valuenow="10" style="width: 100%;" class="progress-bar progress-bar-danger barra-roja" data-transitiongoal="10"></div>	
+																<div aria-valuenow="20" style="width: 50%;" class="progress-bar barra-azul" data-transitiongoal="20"></div>
+															</div>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					
+					</div> <!-- end Suite Container -->	
+				
+				</div><!-- end project container -->	
+
+			</div> <!-- end all project container -->	
+			
+		</div>
+	</div>
+</div>
+
+<div id="container1"></div>
+
+
+{% endblock %}
+
+
+
+{% block page_footer_declarations %}
+<script>
+	var project = '{{project}}';
+	var suite = '{{suite}}';
+</script>
+<script src="{{ url_for('static', filename='report/js/suite.js') }}"></script>
+{% endblock %}

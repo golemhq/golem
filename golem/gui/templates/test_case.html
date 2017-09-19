@@ -1,6 +1,6 @@
 {% extends "layout.html" %} 
 
-{% block head %} 
+{% block head_declarations %} 
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/test_case.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_common.css') }}">
@@ -39,12 +39,12 @@
     <div class="clearfix"></div>
 
     <div id="descriptionPageObjectsContainer" style="display: table; width: 100%">
-        <div class="col-sm-6 same-heigth-col light-gray-block" id="descriptionContainer" style="border: 1px solid #e0e0e0;">
+        <div class="col-sm-6 same-heigth-col gray-1-background" id="descriptionContainer" style="border: 1px solid #e0e0e0;">
             <h4>Description</h4>
             <textarea id="description" class="form-control" rows="3">{{test_case_contents.description }}</textarea>
         </div>
 
-        <div class="col-sm-6 same-heigth-col light-gray-block" id="pageObjectsContainerContainer" style="border-top: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
+        <div class="col-sm-6 same-heigth-col gray-1-background" id="pageObjectsContainerContainer" style="border-top: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
 
             <h4>Pages</h4>
             <div id="pageObjectsContainer">
@@ -81,11 +81,11 @@
 
     <div class="clearfix"></div>
 
-    <div class="col-sm-12 light-gray-block" id="stepsContainerContainer" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
+    <div class="col-sm-12 gray-1-background" id="stepsContainerContainer" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
 
         <!-- setup -->
         {% if not test_case_contents.steps.setup %}
-        <div id="showSetupLink" class="col-sm-12 text-center" style="margin-top: 10px">
+        <div id="showSetupLink" class="col-sm-12 text-center" style="padding-top: 10px">
             <a href="javascript:void(0)" class="text-muted link-without-underline" onclick="showSetupSteps()">Show Setup</a>
         </div>
         {% endif %}
@@ -101,20 +101,21 @@
                     {% for step in test_case_contents.steps.setup %}
                         <div class='step'>
                             <div class="step-numbering">{{loop.index}}</div>
-                            <div class='col-sm-3 step-input-container'>
+                            <div class='col-sm-3 step-input-container step-first-input-container'>
                                 <div class='input-group'>
                                     <input type='text' class='form-control step-first-input'
                                 placeholder='action' onchange='' value="{{step.method_name}}">
                                 </div>
                             </div>
-
-                            {% for parameter in step.parameters %}
-                                <div class='col-sm-3 step-input-container parameter-container'>
-                                    <div class='input-group'>
-                                        <input type='text' class='form-control parameter-input' placeholder='' value='{{ parameter }}'>
+                            <div class="params col-sm-6">
+                                {% for parameter in step.parameters %}
+                                    <div class='col-sm-6 step-input-container parameter-container'>
+                                        <div class='input-group'>
+                                            <input type='text' class='form-control parameter-input' placeholder='' value='{{parameter}}'>
+                                        </div>
                                     </div>
-                                </div>
-                            {% endfor %}
+                                {% endfor %}
+                            </div>
                             <div class="step-remove-icon">
                                 <a href="javascript:void(0)" onclick="deleteStep(this);">
                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
@@ -126,10 +127,12 @@
                 {% else %}
                     <div class='step'>
                         <div class="step-numbering">1</div>
-                        <div class='col-sm-3 step-input-container'>
+                        <div class='col-sm-3 step-input-container step-first-input-container'>
                             <div class='input-group'>
                                 <input type='text' class='form-control step-first-input' placeholder='action' onchange='' value="">
                             </div>
+                        </div>
+                        <div class="params col-sm-6">
                         </div>
                         <div class="step-remove-icon">
                             <a href="javascript:void(0)" onclick="deleteStep(this);">
@@ -153,21 +156,27 @@
                 {% for step in test_case_contents.steps.test %}
                 <div class='step'>
                     <div class="step-numbering">{{loop.index}}</div>
-                    <div class='col-sm-3 step-input-container'>
+                    <div class='col-sm-3 step-input-container step-first-input-container'>
                         <div class='input-group'>
                             <input type='text' class='form-control step-first-input'
                             placeholder='action' onchange='' value="{{step.method_name}}">
                         </div>
                     </div>
 
-                    {% for parameter in step.parameters %}
-                    <div class='col-sm-3 step-input-container parameter-container'>
-                        <div class='input-group'>
-                            <input type='text' class='form-control parameter-input'
-                            placeholder='' value='{{ parameter }}'>
+                    <div class="params col-sm-6">
+
+                        {% for parameter in step.parameters %}
+                        <div class='col-sm-6 step-input-container parameter-container'>
+                            <div class='input-group'>
+                                <input type='text' class='form-control parameter-input' placeholder='' value='{{parameter}}'>
+                                <!-- {% if parameter.type == 'value' %}
+                                    <input type='text' class='form-control parameter-input'
+                                placeholder='' value='{{parameter}}'>
+                                {% endif %} -->
+                            </div>
                         </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
 
                     <div class="step-remove-icon">
                         <a href="javascript:void(0)" onclick="deleteStep(this);">
@@ -179,11 +188,18 @@
             {% else %}
             <div class='step'>
                 <div class="step-numbering">1</div>
-                <div class='col-sm-3 step-input-container'>
+                <div class='col-sm-3 step-input-container step-first-input-container'>
                     <div class='input-group'>
                         <input type='text' class='form-control step-first-input'
                         placeholder='action' onchange='' value="">
                     </div>
+                </div>
+                <div class="params col-sm-6">
+                </div>
+                <div class="step-remove-icon">
+                    <a href="javascript:void(0)" onclick="deleteStep(this);">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    </a>
                 </div>
             </div>
             {% endif %}
@@ -195,7 +211,7 @@
         </div>
 
         <!-- teardown -->
-        <div id="showTeardownLink" class="col-sm-12 text-center" style="margin-top: 10px">
+        <div id="showTeardownLink" class="col-sm-12 text-center" style="padding-top: 10px">
             <a href="javascript:void(0)" class="text-muted link-without-underline" onclick="showTeardownSteps()">Show Teardown</a>
         </div>
         <div id="teardownSteps" class="clearfix" style="display: none">
@@ -206,21 +222,24 @@
                     {% for step in test_case_contents.steps.teardown %}
                     <div class='step'>
                         <div class="step-numbering">{{loop.index}}</div>
-                        <div class='col-sm-3 step-input-container'>
+                        <div class='col-sm-3 step-input-container step-first-input-container'>
                             <div class='input-group'>
                                 <input type='text' class='form-control step-first-input'
                                 placeholder='action' onchange='' value="{{step.method_name}}">
                             </div>
                         </div>
 
-                        {% for parameter in step.parameters %}
-                        <div class='col-sm-3 step-input-container parameter-container'>
-                            <div class='input-group'>
-                                <input type='text' class='form-control parameter-input'
-                                placeholder='' value='{{ parameter }}'>
+                        <div class="params col-sm-6">
+
+                            {% for parameter in step.parameters %}
+                            <div class='col-sm-6 step-input-container parameter-container'>
+                                <div class='input-group'>
+                                    <input type='text' class='form-control parameter-input'
+                                    placeholder='' value='{{ parameter }}'>
+                                </div>
                             </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
 
                         <div class="step-remove-icon">
                             <a href="javascript:void(0)" onclick="deleteStep(this);">
@@ -234,10 +253,12 @@
                 {% else %}
                     <div class='step'>
                         <div class="step-numbering">1</div>
-                        <div class='col-sm-3 step-input-container'>
+                        <div class='col-sm-3 step-input-container step-first-input-container'>
                             <div class='input-group'>
                                 <input type='text' class='form-control step-first-input' placeholder='action' onchange='' value="">
                             </div>
+                        </div>
+                        <div class="params col-sm-6">
                         </div>
                         <div class="step-remove-icon">
                             <a href="javascript:void(0)" onclick="deleteStep(this);">
@@ -256,15 +277,14 @@
 
     <div class="clearfix"></div>
 
-    <div class="col-sm-12 light-gray-block" id="datosContainerContainer" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
+    <div class="col-sm-12 gray-1-background" id="datosContainerContainer" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
 
         <h4>Data</h4>
         <div id="datosContainer">
 
             <div id="datos">
                 <table class="table table-bordered table-condensed" id="dataTable"> 
-                    
-                    {% if test_data %}
+                    {% if test_data[0] %}
                     <thead> 
                         <tr> 
                             <th class="index">#</th> 
@@ -381,6 +401,7 @@
 
       </div>
       <div class="modal-footer">
+        <button type="button" class="btn btn-default" onclick="testRunner.runTestCase()">Re-run Test</button>
         <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Dismiss</button>
       </div>
     </div><!-- /.modal-content -->

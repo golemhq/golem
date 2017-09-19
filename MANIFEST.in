@@ -23,3 +23,5 @@ include golem/gui/static/report/js/plugins/stat/flot/*
 
 include golem/gui/templates/*
 include golem/gui/templates/report/*
+
+include golem/bin/drivers/*

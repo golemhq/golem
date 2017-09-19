@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block head_declarations %}
+<link href="{{ url_for('static', filename='css/report.css') }}" rel="stylesheet" type="text/css" media="screen">
+{% endblock %}
+
+{% block content %}
+
+
+<div class="content-wrapper">
+	<h2><a class="link-without-underline" href="/report/project/{{project}}/">{{project|replace("_", " ")}}</a> - <a class="link-without-underline" href="/report/project/{{project}}/suite/{{suite}}/">{{suite|replace("_", " ")}}</a> <small>({{formatted_date}})</small></h2>
+	<div class="col-md-12 project-container">
+		<h3 class="no-margin-top">General</h3>
+		<div class="widget widget-table">
+			<div class="widget-content">
+				<div class="table-responsive">
+					<table class="table general-table">
+						<thead>
+							<tr>
+								<th>Module</th>
+								<th>Total Tests</th>
+								<th>Tests Ok</th>
+								<th>Tests Failed</th>
+								<th>Percentage</th>
+								<th>Total Time</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="total-row" id="totalRow">
+								<td class="module">Total</td>
+								<td class="total-tests"></td>
+								<td class="tests-ok"></td>
+								<td class="tests-failed"></td>
+								<td class="percentage">
+									<div class="progress">
+										<div aria-valuenow="10" style="width: 100%;" class="progress-bar pending" data-transitiongoal="10"></div>
+										<div aria-valuenow="10" style="width: 0%;" class="progress-bar progress-bar-danger fail-bar" data-transitiongoal="10"></div>	
+										<div aria-valuenow="20" style="width: 0%;" class="progress-bar ok-bar" data-transitiongoal="20"></div>
+									</div>
+								</td>
+								<td class="total-time"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>						
+		<h3 class="no-margin-top">Detail</h3>
+		<div class="widget widget-table">
+			<div class="widget-content">
+				<div class="table-responsive">
+					<table class="table test-list-table">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Module</th>
+								<th>Test Case Name</th>
+								<th>Environment</th>
+								<th>Browser</th>
+								<th>Result</th>
+								<th>Time</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block footer_declarations %}
+
+<script type="text/javascript">
+	var project = '{{project}}';
+	var suite = '{{suite}}';
+	var execution = '{{execution}}';
+</script>
+<script src="{{ url_for('static', filename='report/js/report.js') }}"></script>
+<script src="{{ url_for('static', filename='report/js/report_execution.js') }}"></script>
+{% endblock %}

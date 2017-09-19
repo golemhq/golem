@@ -7,6 +7,11 @@ from golem.core import utils, data, page_object
 
 
 def _parse_step(step):
+    # ('a')                 -> ['a']
+    # ('a', 'b')            -> ['a', 'b']
+    # ('a, b, c')           -> ['a, b, c']
+    # (('a', 'b', 'c'))     -> ['(\'a\', \'b\', \'c\')']
+    print(step)
     method_name = step.split('(', 1)[0].strip()
     if not '.' in method_name:
         method_name = method_name.replace('_', ' ')
@@ -19,17 +24,27 @@ def _parse_step(step):
         param_list = []
         param_pairs = []
         inside_param = False
+        inside_string = False
+        string_char = ''
         current_start = 0
-
+        print('PARAM STRING', params_string)
         for i in range(len(params_string)):
             is_last_char = i == len(params_string) -1
             is_higher_level_comma = False
-            if params_string[i] == ',' and not inside_param:
+            
+            if params_string[i] == '\'':
+                if not inside_string:
+                    inside_string = True
+                    string_char = '\''
+                elif string_char == '\'':
+                    inside_string = False
+
+            if params_string[i] == ',' and not inside_param and not inside_string:
                 is_higher_level_comma = True
 
-            if params_string[i] == '(':
+            if params_string[i] == '(' or params_string[i] == '{':
                 inside_param = True
-            elif inside_param and params_string[i] == ')':
+            elif inside_param and (params_string[i] == ')' or params_string[i] == '}'):
                 inside_param = False
             
             if is_higher_level_comma:
@@ -46,11 +61,12 @@ def _parse_step(step):
         print(param_list)
         for param in param_list:
 
-            if 'data[' in param:
-                data_re = re.compile("[\'|\"](?P<data>.*)[\'|\"]")
-                g = data_re.search(param)
-                clean_param_list.append(g.group('data'))
-            elif '(' in param and ')' in param:
+            # if 'data[' in param:
+            #     data_re = re.compile("[\'|\"](?P<data>.*)[\'|\"]")
+            #     g = data_re.search(param)
+            #     clean_param_list.append(g.group('data'))
+            print('PARAM', param)
+            if '(' in param and ')' in param:
                 clean_param_list.append(param)
             else:
                 clean_param_list.append(param.replace('\'', '').replace('"', ''))
@@ -122,7 +138,7 @@ def new_test_case(root_path, project, parents, tc_name):
         "def test(data):\n"
         "    pass\n\n"
         "def teardown(data):\n"
-        "    close()\n\n")
+        "    pass\n\n")
     errors = []
     # check if a file already exists
     path = os.path.join(root_path, 'projects', project, 'tests',
@@ -165,12 +181,17 @@ def format_parameters(step, root_path, project, parents, test_case_name, stored_
             else:
                 # is not a page object,
                 # identify if its a value or element parameter
-                is_data_var = data.is_data_variable(root_path, project, parents,
-                                                    test_case_name, parameter)
+                
+                # is_data_var = data.is_data_variable(root_path, project, parents,
+                #                                     test_case_name, parameter)
+
+                is_data_var = 'data.' in parameter
+
                 is_in_stored_keys = parameter in stored_keys
                 action_is_store = action == 'store'
                 if (is_data_var or is_in_stored_keys) and not action_is_store:
-                    this_parameter_string = 'data[\'{}\']'.format(parameter)
+                    # this_parameter_string = 'data[\'{}\']'.format(parameter)
+                    this_parameter_string = parameter
                 else:
                     if action in ['wait', 'select_by_index']:
                         this_parameter_string = parameter

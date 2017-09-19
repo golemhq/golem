@@ -1,6 +1,6 @@
 {% extends "layout.html" %} 
 
-{% block head %} 
+{% block head_declarations %} 
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/suite.css') }}">
 
@@ -10,21 +10,6 @@
 
 <div>
 	
-
-    <!--
-    <div id="tc_toolbar">
-
-        <button name="save" id="save" onclick="saveTestCase();">Save</button>
-        <label>
-            <input type="checkbox" name="autosave" id="autosave" checked="checked" autocomplete="off">Autosave
-        </label>
-        <span>|</span>
-        <span id="changesSavedNotification">All changes saved</span>
-
-
-    </div>-->
-
-
     <div class="col-sm-8 col-sm-offset-2" id="datosContainerContainer">
 
         <div class="col-sm-6 header-col">
@@ -47,15 +32,15 @@
         <h4>Settings</h4>
 
         <form class="form-horizontal">
-        <div class="col-sm-6">
-            <div class="input-group form-group">
+        <div class="col-sm-12">
+            <div class="input-group form-group" style="width: 100%;">
                 <label for="browsers" class="col-sm-3 control-label">Browsers</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control" id="browsers" value="{{ browsers if browsers else default_browser}}" placeholder="list of browsers">
+                    <input type="text" class="form-control" id="browsers" value="{{ browsers if browsers else ''}}" placeholder="list of browsers">
                 </div>
             </div> 
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-12">
 
             <div class="input-group form-group">
             <label for="workers" class="col-sm-3 control-label">Workers</label>
@@ -69,24 +54,22 @@
         
         <div class="clearfix"></div> 
         <br>       
-
         <ul id="suiteTests" class="tree" style="padding-left: 15px">
             <input type="checkbox" id="allTestCasesCheckbox" class="select-testcase-checkbox" style="margin-top: 0px !important;">
             <h4> Test Cases</h4>
             <ul id="testCasesTree">
-                {%- for key, value in all_test_cases.items() recursive %}
+                 {%- for elem in all_test_cases recursive %}
                     <li>
-                        {%- if value is mapping -%}
+                        {%- if elem.type == 'directory' -%}
                            <input type="checkbox" name="checkbox" class="select-testcase-checkbox">
-                            <a href="#" class="branch-name">{{key}}</a>
-                            <ul>{{ loop(value.items()) }}</ul>
+                            <a href="#" class="branch-name">{{ elem.name }}</a>
+                            <ul>{{ loop(elem.sub_elements) }}</ul>
                         {%- else %}
-                            <label><input type="checkbox" name="checkbox" class="select-testcase-checkbox"><span class="node-name">{{ key.0 }}</span></label>
+                            <label><input type="checkbox" name="checkbox" class="select-testcase-checkbox"><span class="node-name">{{ elem.name }}</span></label>
                         {%- endif %}
                     </li>
                 {%- endfor %}
-
-        </ul>
+            </ul>
 
         <div class="clearfix"></div>
 
@@ -94,12 +77,9 @@
 
 </div>
 
+<script src="{{ url_for('static', filename='js/jquery-autocomplete/jquery.autocomplete.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/treeview.js') }}"></script>
-
 <script src="{{ url_for('static', filename='js/suite.js') }}"></script>
-
-<!-- <script src="{{ url_for('static', filename='js/jquery-autocomplete/jquery.autocomplete.min.js') }}"></script> -->
-
 <script>
     var project = "{{project}}";
     var suite = "{{suite}}";

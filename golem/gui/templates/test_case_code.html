@@ -1,6 +1,6 @@
 {% extends "layout.html" %} 
 
-{% block head %} 
+{% block head_declarations %} 
 
 <link rel="stylesheet" href="{{ url_for('static', filename='js/code_mirror/codemirror.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_code.css') }}">
@@ -42,8 +42,7 @@
 
             <div id="datos">
                 <table class="table table-bordered table-condensed" id="dataTable"> 
-                    
-                    {% if test_data %}
+                    {% if test_data[0] %}
                     <thead> 
                         <tr> 
                             <th class="index">#</th> 

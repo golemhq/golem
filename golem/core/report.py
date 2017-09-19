@@ -23,12 +23,19 @@ def create_report_directory(workspace, project, test_case_name, suite_name, time
 
 
 def generate_report(report_directory, test_case_name, test_data, result):
-    
     json_report_path = os.path.join(report_directory, 'report.json')
 
     short_error = ''
     if result['error']:
         short_error = '\n'.join(result['error'].split('\n')[-2:])
+
+    serializable_data = {}
+    for key, value in vars(test_data).items():
+        try:
+            json.dumps('{"{}":"{}"}'.format(key, value))
+            serializable_data[key] = value
+        except:
+            serializable_data[key] = repr(value)
 
     report = {
         'test_case': test_case_name,
@@ -39,14 +46,9 @@ def generate_report(report_directory, test_case_name, test_data, result):
         'short_error': short_error,
         'test_elapsed_time': result['test_elapsed_time'],
         'test_timestamp': result['test_timestamp'],
-        'browser': result['browser']
+        'browser': result['browser'],
+        'test_data': serializable_data
     }
     
     with open(json_report_path, 'w', encoding='utf-8') as json_file:
         json.dump(report, json_file, indent=4)
-
-    # save screenshots
-    # no longer needed, screenshots are saved to disk when they are captured
-    # for scr in result['screenshots']:
-    #     img_filename = '{}.png'.format(scr)
-    #     result['screenshots'][scr].save(os.path.join(report_directory, img_filename))

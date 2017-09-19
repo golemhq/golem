@@ -11,12 +11,12 @@ from golem.core import test_execution, utils
 from golem.test_runner.test_runner import run_test
 
 
-def multiprocess_executor(execution_list, processes=1, suite_name=None):
+def multiprocess_executor(execution_list, processes=1):
     print('Executing:')
     for test in execution_list:
         print('{} in {} with the following data: {}'.format(test['test_name'],
                                                             test['driver'],
-                                                            dict(test['data_set'])))
+                                                            test['data_set']))
     # if not test_execution.timestamp:
     #     test_execution.timestamp = utils.get_timestamp()
 

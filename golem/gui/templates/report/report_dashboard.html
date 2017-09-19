@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block head_declarations %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}"/>  
+
+<!-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script> -->
+<!-- <script>
+google.charts.load('current', {'packages':['corechart']});
+</script> -->
+{% endblock %}
+
+{% block content %}
+
+<div class="all-projects-container">
+	<h2 class="">Reports{% if project %} - {{project|replace("_", " ")}}{% endif %}</h2>
+</div>
+
+{% endblock %}
+
+{% block footer_declarations %}
+<script>
+	var projectName = '{{project}}';
+	var suiteName = '{{suite}}'
+</script>
+<script src="{{ url_for('static', filename='report/js/report_dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='report/js/report.js') }}"></script>
+{% endblock %}

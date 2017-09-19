@@ -24,7 +24,8 @@ def save_test_data(root_path, project, full_test_case_name, test_data):
 
 def is_data_variable(root_path, project, parents, test_case_name, parameter_name):
     full_path = parents + [test_case_name]
-    test_data = utils.get_test_data(root_path, project, '.'.join(full_path))
+    test_data = utils.get_test_data_dict_list(root_path, project, '.'.join(full_path))
+    print('TEST DATA IN IS DATA VARIABLE', test_data)
     if test_data:
         if parameter_name in test_data[0].keys():
             return True

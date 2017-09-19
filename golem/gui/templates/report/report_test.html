@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+
+{% block head_declarations %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}"/>
+<link href="{{ url_for('static', filename='report/css/test_case.css') }}" rel="stylesheet" type="text/css" media="screen">
+{% endblock %}
+
+{% block content %}
+
+<div class="col-md-10 col-md-offset-1">
+	<h2>Test: {{test_case_data.name|replace("_", " ")}}</h2>
+<div class="col-md-12 project-container main-container test_case_container" id="testDetails">
+		<h3 class="no-margin-top">Details</h3>
+		<div class="row">
+			<div class="col-xs-2">Description</div>
+			<div class="col-xs-10">{{test_case_data.description}}</div>
+			<div class="clearfix"></div>
+			{% if test_case_data.module %}
+			<div class="col-xs-2">Module</div>
+			<div class="col-xs-10">{{test_case_data.module}}</div>
+			{% endif %}
+			{% if test_case_data.sub_modules %}
+				<div class="col-xs-2">Submodules</div>
+				{% for sub in test_case_data.sub_modules %}
+				<div class="col-xs-10">{{sub}}</div>
+				{% endfor %}
+			{% endif %}
+			<div class="col-xs-2">Result</div>
+			<div class="col-xs-10">{{test_case_data.result}} 
+			{%if test_case_data.result == 'pass' %}
+				<span class="pass-icon"><span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span></span>
+			{%else%}
+				<span class="fail-icon"><span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></span>
+			{% endif %}
+			</div>
+			{% if test_case_data.url %}
+			<div class="col-xs-2">URL</div>
+			<div class="col-xs-10">{{test_case_data.url}}</div>
+			{% endif %}
+			<div class="col-xs-2">Browser</div>
+			<div class="col-xs-10">{{test_case_data.browser}}</div>
+			<div class="col-xs-2">Start Time</div>
+			<div class="col-xs-10">{{test_case_data.start_date_time}}</div>
+			<div class="col-xs-2">Elapsed Time</div>
+			<div class="col-xs-10">{{test_case_data.test_elapsed_time}} seconds</div>
+			<div class="clearfix"></div>
+			{% if test_case_data.short_error %}
+				<div class="col-xs-2">Error</div>
+				<div class="col-xs-10" style="word-wrap: break-word;">{{test_case_data.short_error}}</div>
+			{% endif %}
+			<div class="col-xs-2">Test Data</div>
+			<div class="col-xs-10">{{test_case_data.data}}</div>
+		</div>
+	</div>
+
+	<div class="col-md-12 project-container main-container test_case_container" id="steps">
+		<h3 class="no-margin-top">Steps</h3>
+		{% for step in test_case_data.steps %}
+			<div class="step">
+				<span>{{loop.index}}.</span>
+				{% if step.screenshot %}
+					<span class="hand-icon" data-toggle="collapse" data-target="#{{step.screenshot}}" aria-expanded="false" aria-controls="{{step.screenshot}}">{{step.message}} <span class="glyphicon glyphicon-picture" aria-hidden="true"></span></span>
+					<div class="collapse text-center" id="{{step.screenshot}}">
+						<img class="step-screenshot hand-icon" src="/report/screenshot/{{project}}/{{suite}}/{{execution}}/{{test_case}}/{{test_set}}/{{step.screenshot}}/" onclick="expandImg(event);">
+					</div>
+				{% else %}
+					{{step.message}}
+				{% endif %}
+			</div>
+		{% endfor %}
+	</div>
+
+	<div class="col-md-12 project-container main-container test_case_container" id="log">
+		<h3 class="no-margin-top">Log</h3>
+		<div id="logLines" style="font-family: monospace; font-size: 14px;">
+			{% for line in test_case_data.log %}
+				<div class="step">
+					<span>{{line}}</span>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block footer_declarations %}
+<script type="text/javascript">
+	var project = '{{project}}';
+	var suite = '{{suite}}';
+	var execution = '{{execution}}';
+	var testCase = '{{test_case}}';
+</script>
+<script src="{{ url_for('static', filename='report/js/report_test.js') }}"></script>
+{% endblock %}

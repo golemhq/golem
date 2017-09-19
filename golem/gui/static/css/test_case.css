@@ -8,14 +8,6 @@ html {
     width: 100%;
 }
 
-.light-gray-block {
-	background-color: #F8F8F8; 
-}
-
-.light-gray-block:hover {
-	background-color: white; 
-}
-
 .same-heigth-col {
     float: none;
     display: table-cell;
@@ -85,3 +77,12 @@ html {
 	border-right: 0px;
 }
 
+.params {
+	padding-left: 0px;
+	padding-right: 0px;
+	width: 60%;
+}
+
+.step-first-input-container {
+	width: 30%;
+}

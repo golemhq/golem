@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block head_declarations %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/project_dashboard.css') }}">
+	{{ super() }}
+{% endblock %} 
+
+{% block content %}
+
+<div class="row" style="padding-right: 15px; padding-left: 15px">
+	
+<!-- 	<div class="col-md-12">
+		<div class="col-sm-6 left-column no-padding-right">
+			<div class="col-md-12" style="background-color: gray; margin-bottom: 15px">content</div>
+			<div class="col-md-12" style="background-color: gray">content</div>
+		</div>
+		<div class="col-sm-6 right-column no-padding-right">
+			<div class="col-md-12" style="background-color: gray; margin-bottom: 15px">content</div>
+			<div class="col-md-12" style="background-color: gray">content</div>
+
+		</div>
+	</div> -->
+
+
+	<!-- <div class="col-md-12"> -->
+		<div class="col-sm-12 left-column">
+			<h3>{{project|replace("_", " ")}}</h3>
+		</div>
+		<div class="col-sm-6 left-column">
+			<div id="testsContainer" class="col-sm-12 box-container gray-border-3">
+				<span><strong>Test Cases</strong></span>
+				<ul id="testCasesTree" class='test-tree'></ul>
+			</div>
+			<div id="pagesContainer" class="col-sm-12 box-container gray-border-3">
+				<span><strong>Pages</strong></span>
+				<ul id="pagesTree" class='page-tree'></ul>
+			</div>
+		</div>
+		<div class="col-sm-6 right-column">
+			<div id="suitesContainer" class="col-sm-12 box-container gray-border-3">
+				<span><strong>Test Suites</strong></span>
+				<ul id="suitesTree" class="tree suite-tree"></ul>
+			</div>
+
+			<div id="healthContainer" class="col-sm-12 box-container gray-border-3" style="min-height: 150px">
+				<div id="healthChartContainer" style="width: 50%; min-width: 200px; min-height: 200px; margin-left: auto; margin-right: auto">
+					<canvas id="healthChartCanvas"></canvas>
+				</div>
+				<div id="healthTableContainer" class="table-responsive last-execution-table">
+				</div>
+			</div>
+
+		</div>
+	<!-- </div> -->
+</div>
+
+<script src="{{ url_for('static', filename='js/treeview.js') }}"></script>
+<script src="{{ url_for('static', filename='js/project.js') }}"></script>
+<script src="{{ url_for('static', filename='js/project_dashboard.js') }}"></script>
+<script>
+	var project = '{{project}}';
+</script>
+{% endblock %}

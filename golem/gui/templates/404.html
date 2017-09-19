@@ -4,7 +4,7 @@
 Login
 {% endblock %} 
 
-{% block head %}
+{% block head_declarations %}
 {{ super() }}
 {% endblock %} 
 
@@ -12,8 +12,8 @@ Login
 
 <div class="row">
 	<div class="col-md-6 col-md-offset-3 text-center">
-		<h4>This page does not exists.</h4>
-		<a class="btn btn-default" href="/">Go back</a>
+		<h4>{{message}}</h4>
+		<button class="btn btn-default" onclick="window.history.back();">Go back</button>
 	</div>
 </div>
 

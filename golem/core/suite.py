@@ -26,7 +26,7 @@ def save_suite(root_path, project, suite, test_cases, workers, browsers):
         f.write('\n')
         f.write('workers = {}'.format(workers))
         f.write('\n\n')
-        f.write('test_case_list = {}\n'.format(_format_list_items(test_cases)))
+        f.write('tests = {}\n'.format(_format_list_items(test_cases)))
 
 
 def new_suite(root_path, project, suite_name):
@@ -41,7 +41,7 @@ def new_suite(root_path, project, suite_name):
         test_case_content = ('\n'
                              'browsers = []\n\n'
                              'workers = 1\n\n'
-                             'test_case_list = []\n')
+                             'tests = []\n')
         with open(suite_full_path, 'w') as f:
             f.write(test_case_content)
     return errors

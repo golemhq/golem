@@ -1,5 +1,8 @@
 
+
+
 $(document).ready(function() {
+
     $('#testCasesTree').treed();
 
     $("#allTestCasesCheckbox").change(function(){
@@ -31,6 +34,20 @@ $(document).ready(function() {
             checkBranchTestCases(li, this.checked)
         }
     });
+
+
+    $.ajax({
+        url: "/get_supported_browsers/",
+        data: {},
+        dataType: 'json',
+        type: 'POST',
+        success: function(browserSuggestions) {
+            startBrowsersAutocomplete(browserSuggestions);
+        },
+        error: function() {
+        }
+    });
+
 });
 
 
@@ -181,7 +198,9 @@ function saveTestSuite(){
     var browsers = [];
     if($("#browsers").val().length > 0){
         $($("#browsers").val().split(',')).each(function(){
-            browsers.push(this.trim());
+            if(this.trim().length > 0){
+                browsers.push(this.trim());
+            }
         });
     }
 
@@ -288,9 +307,24 @@ function runSuite(){
          type: 'POST',
          success: function(data) {
             var url = '/report/project/' + project + '/' + suite + '/' + data + '/';
-            toastr.info('Running suite ' + suite + " - <a target='_blank' href='" + url + "'>open</a>");
+            toastr.info('Running suite ' + suite + " - <a href='" + url + "'>open</a>");
          },
          error: function() {}
      });
 
 }
+
+
+function startBrowsersAutocomplete(browserSuggestions){
+    console.log(browserSuggestions);
+    $('#browsers').autocomplete({
+        lookup: browserSuggestions,
+        minChars: 0,
+        delimiter: ', ',
+        triggerSelectOnValidInput: false,
+        onSelect: function (suggestion) {
+            $('#browsers').val($('#browsers').val()+', ');
+        }
+    });
+}
+

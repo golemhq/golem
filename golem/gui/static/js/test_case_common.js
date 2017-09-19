@@ -23,8 +23,7 @@ var testRunner = new function(){
              },
              dataType: 'json',
              type: 'POST',
-             success: function(data) {
-                var timestamp = data;
+             success: function(timestamp) {
                 testRunner.checkTestCaseResult(project, fullTestCaseName, timestamp);
              },
              error: function() {}
@@ -37,11 +36,11 @@ var testRunner = new function(){
         $("#loaderContainer").show();
         $("#testResults").html('');
         $("#testResultLogs").html('');
-        checkDelay = 1500;
-        testRunner._checkAndRecheckStatus(project, fullTestCaseName, timestamp);
+        checkDelay = 1000;
+        testRunner._checkAndRecheckStatus(checkDelay, project, fullTestCaseName, timestamp);
     }
 
-    this._checkAndRecheckStatus = function(project, fullTestCaseName, timestamp){
+    this._checkAndRecheckStatus = function(checkDelay, project, fullTestCaseName, timestamp){
 
         $.ajax({
             url: "/check_test_case_run_result/",
@@ -56,7 +55,7 @@ var testRunner = new function(){
                 checkDelay += 100;
                 if(!result.complete){
                     setTimeout(function(){
-                        testRunner._checkAndRecheckStatus(project, fullTestCaseName, timestamp);
+                        testRunner._checkAndRecheckStatus(checkDelay, project, fullTestCaseName, timestamp);
                     }, checkDelay, project, fullTestCaseName, timestamp);
                     
                     if(result.logs.length){
@@ -280,3 +279,45 @@ var header = new function(){
 
 }
 
+var testManager = new function(){
+
+    this.setFileLockInterval = function(){
+        testManager.lockFile();
+        setInterval(function(){testManager.lockFile();}, 60000);
+    }
+
+    this.lockFile = function(){
+        $.ajax({
+            url: "/lock_file/",
+            data: {
+                 "project": project,
+                 "userName": username,
+                 "fullTestCaseName": fullTestCaseName
+             },
+             dataType: 'json',
+             type: 'POST',
+             success: function(result) {}
+         });
+    }
+
+    this.setUnlockFileOnUnload = function(){
+        $( window ).bind('beforeunload', function() {
+            testManager.unlockFile();
+        });
+    }
+
+    this.unlockFile = function(){
+        $.ajax({
+            url: "/unlock_file/",
+            data: {
+                 "project": project,
+                 "userName": username,
+                 "fullTestCaseName": fullTestCaseName
+             },
+             dataType: 'json',
+             type: 'POST',
+             success: function(result) {}
+         });
+    }
+
+}
