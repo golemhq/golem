@@ -230,6 +230,7 @@ function loadHealthData(healthData){
 
     var totalOk = 0;
     var totalFail = 0;
+    var totalPending = 0;
 
     var table = "\
         <table id='healthTable' class='table no-margin-bottom last-execution-table'>\
@@ -250,7 +251,7 @@ function loadHealthData(healthData){
         var failPercentage = healthData[suite].total_fail * 100 / healthData[suite].total + okPercentage;
         totalOk += healthData[suite].total_ok;
         totalFail += healthData[suite].total_fail;
-
+        totalPending += healthData[suite].total_pending;
         var newRow = "\
             <tr class='cursor-pointer' onclick=''>\
                 <td class=''>"+suite+"</td>\
@@ -275,17 +276,19 @@ function loadHealthData(healthData){
     var chart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Passed', 'Failed'],
+            labels: ['Passed', 'Failed', 'Pending'],
             datasets: [
                 {
-                    data: [totalOk, totalFail],
+                    data: [totalOk, totalFail, totalPending],
                     backgroundColor: [
                         "rgb(66, 139, 202)",
                         "rgb(217, 83, 79)",
+                        "#b3b3b3"
                     ],
                     hoverBackgroundColor: [
                         "rgb(66, 139, 202)",
-                        "rgb(217, 83, 79)"
+                        "rgb(217, 83, 79)",
+                        "#b3b3b3"
                     ]
                 }
             ]

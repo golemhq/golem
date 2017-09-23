@@ -1,10 +1,9 @@
 
 var allTestCases = {};
-//var maxNumberOfSubModules = 0;
 var baseDelay = 2000;
 
 var suiteFinished = false;
-
+var netTime;
 
 $(document).ready(function() {            
 	getReportData();
@@ -20,8 +19,11 @@ function getReportData(){
 			execution: execution,
 		},
 		function(executionData) {	
+  			if(executionData.has_finished){
+  				suiteFinished = true;
+  				netTime = executionData.net_elapsed_time;
+  			}
   			loadReport(executionData);
-  			if(executionData.total_pending == 0){ suiteFinished = true }
   		}
 	);
 	if(baseDelay <= 10000){
@@ -47,9 +49,7 @@ function loadReport(execution_data){
 }
 
 function addTestToDetailTable(test){
-
 	// this test case is not added yet
-
 	var numbering = $(".table.test-list-table tbody tr").length + 1;
 
 	if(test.result == 'pass')
@@ -132,17 +132,15 @@ function updateModuleRowInGeneralTable(testCase){
 	moduleRow.find(".total-tests").html(testsInModule);
 	moduleRow.find(".tests-ok").html(testsOkInModule);
 	moduleRow.find(".tests-failed").html(testsFailedInModule);
-	moduleRow.find(".total-time").html(timeInModule + ' s');
+	//moduleRow.find(".total-time").html(timeInModule + ' s');
+	//moduleRow.find(".total-time").html('');
 
 	var okPercentage = testsOkInModule * 100 / testsInModule;
 	var failPercentage = testsFailedInModule * 100 / testsInModule + okPercentage;
 	
 	var okBar = moduleRow.find('.ok-bar');
 	var failBar = moduleRow.find('.fail-bar');
-	
-	//var id = new Date().getTime() + Math.random().toString()
-	// setTimeout(animateProgressBar, 100, okBar, okPercentage);
-	// setTimeout(animateProgressBar, 100, failBar, failPercentage);
+
 	utils.animateProgressBar(okBar, okPercentage);
 	utils.animateProgressBar(failBar, failPercentage);
 }
@@ -161,48 +159,17 @@ function refreshGeneralTable(){
 	totalRow.find(".tests-ok").html(totalTestsOk);
 	totalRow.find(".tests-failed").html(totalTestsFailed);
 	totalRow.find(".total-time").html(totalTime + ' s');
+	totalRow.find(".net-time").html(netTime + ' s');
 	
 	var okPercentage = totalTestsOk * 100 / totalTestCases;
 	var failPercentage = totalTestsFailed * 100 / totalTestCases + okPercentage;
 
 	var okBar = totalRow.find('.ok-bar');
 	var failBar = totalRow.find('.fail-bar');
-	//var id = new Date().getTime() + Math.random().toString(36).substring(7);
-	//barra_azul.attr('id', id);
-	//barra_azul.attr('data-transitiongoal', okPercentage);
-	//setTimeout(animateProgressBar, 10, okBar, okPercentage);
-	//setTimeout(animateProgressBar, 10, failBar, failPercentage);
 
 	utils.animateProgressBar(okBar, okPercentage);
 	utils.animateProgressBar(failBar, failPercentage);
 }
-
-
-
-
-// =================
-
-// function animateProgressBar(id){
-// 	var goal = $("#"+id).attr('data-transitiongoal');
-// 	$("#"+id).css('width', goal + '%');
-// }
-
-// function animateProgressBar(bar, percentage){
-// 	// var goal = $("#"+id).attr('data-transitiongoal');
-// 	// $("#"+id).css('width', goal + '%');
-// 	bar.css('width', percentage+'%');
-// }
-
-// function getMaxNumberOfSubModules(testCases){
-// 	var maxAmount = 0;
-// 	for(t in testCases){
-// 		if(testCases[t].sub_modules.length > maxAmount){
-// 			maxAmount = testCases[t].sub_modules.length;
-// 		}
-// 	}
-// 	return maxAmount
-// }
-
 
 function getTestsInModule(module){
 	var tests = 0;
@@ -271,19 +238,3 @@ function getModuleRow(module){
 	});
 	return row
 }
-
-
-// function refreshNumbering(){
-// 	var numbering = 0;
-
-// 	var rows = $(".table.general-table tbody tr");
-// 	for(r in rows){
-// 		$(rows[r]).find('td.module-number').html(numbering);
-// 		numbering++
-// 	}
-//}
-
-
-
-
-

@@ -1,5 +1,5 @@
-from golem.core import actions
-from golem.selenium.utils import element, elements
+from golem import actions
+from golem.selenium import element, elements
 
 
 new_page_button = ('css', "#pagesTree .display-new-element-link a", 'new_page_button')

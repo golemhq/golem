@@ -6,7 +6,7 @@ var ReportDashboard = new function(){
         var projectContainer = " \
             <div class='col-md-12 project-container' id='"+projectName+"'> \
                 <h3 class='no-margin-top'> \
-                    <a href='/report/project/"+projectName.replace('_',' ')+"/' class='link-without-underline'>"+projectName+"</a> \
+                    <a href='/report/project/"+projectName+"/' class='link-without-underline'>"+projectName.replace('_',' ')+"</a> \
                 </h3> \
             </div>";
         return $(projectContainer)

@@ -6,11 +6,11 @@ var Project = new function(){
             <li class='tree-element' fullpath='"+element.dotPath+"' type='"+element.type+"'>\
                 <a href='"+element.url+"'>"+element.name+"</a> \
                 <span class='pull-right tree-element-buttons'> \
-                    <button onclick=''><i class='glyphicon glyphicon-edit'></i></button> \
                     <button onclick='duplicateElementPrompt(this)'><i class='glyphicon glyphicon-copy'></i></button> \
                     <button onclick='deleteElementConfirm(this)'><i class='glyphicon glyphicon-remove'></i></button> \
                 </span>\
             </li>";
+            //<button onclick=''><i class='glyphicon glyphicon-edit'></i></button> \
         return $(li)
     }
 

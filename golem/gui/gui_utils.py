@@ -91,6 +91,10 @@ def get_global_actions():
             'parameters': []
         },
         {
+            'name': 'debug',
+            'parameters': []
+        },
+        {
             'name': 'get',
             'parameters': [{'name': 'url', 'type': 'value'},
                            {'name': 'headers', 'type': 'multiline-value'},
@@ -105,6 +109,11 @@ def get_global_actions():
             'parameters': [{'name': 'url', 'type': 'value'},
                            {'name': 'headers', 'type': 'value'},
                            {'name': 'data', 'type': 'value'}]
+        },
+        {
+            'name': 'press key',
+            'parameters': [{'name': 'element', 'type': 'element'},
+                           {'name': 'key', 'type': 'value'}]
         },
         {
             'name': 'random',

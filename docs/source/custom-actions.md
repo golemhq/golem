@@ -53,7 +53,7 @@ To use the default golem actions inside a function, you can do the following:
 
 **some_page.py**
 ```python
-from golem.core import actions
+from golem import actions
 
 
 my_input = ('id', 'myInput')

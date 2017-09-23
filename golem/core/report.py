@@ -4,16 +4,37 @@ import os
 import uuid
 
 
-def create_report_directory(workspace, project, test_case_name, suite_name, timestamp):
+def create_suite_execution_directory(workspace, project, suite_name, timestamp):
+    execution_directory = os.path.join(workspace, 'projects', project, 'reports',
+                                       suite_name, timestamp)
+    if not os.path.isdir(execution_directory):
+        try:
+            os.makedirs(execution_directory)
+        except:
+            pass
+    return execution_directory
+
+
+def create_test_execution_directory(workspace, project, test_name, timestamp):
+    execution_directory = os.path.join(workspace, 'projects', project, 'reports',
+                                          'single_tests', test_name, timestamp)
+    if not os.path.isdir(execution_directory):
+        try:
+            os.makedirs(execution_directory)
+        except:
+            pass
+    return execution_directory
+
+
+def create_report_directory(execution_directory, test_case_name, is_suite):
     set_name = 'set_' + str(uuid.uuid4())[:6]
 
     # create suite execution folder in reports directory
-    if suite_name:
-        report_directory = os.path.join(workspace, 'projects', project, 'reports',
-                                        suite_name, timestamp, test_case_name, set_name)
+    if is_suite:
+        report_directory = os.path.join(execution_directory, test_case_name, set_name)
     else:
-        report_directory = os.path.join(workspace, 'projects', project, 'reports',
-                                        'single_tests', test_case_name, timestamp, set_name)
+        report_directory = os.path.join(execution_directory, set_name)
+        
     if not os.path.isdir(report_directory):
         try:
             os.makedirs(report_directory)

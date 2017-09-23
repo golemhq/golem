@@ -2,9 +2,11 @@
 import time
 import uuid
 import os
+import sys
 import importlib
 import string
 import random as rand
+import traceback
 
 import selenium
 from selenium.webdriver.common.keys import Keys
@@ -14,7 +16,7 @@ import requests
 from golem import core
 from golem.core import execution_logger as logger
 from golem.core.exceptions import TextNotPresent, ElementNotFound
-from golem.selenium.utils import get_driver
+from golem.selenium import get_driver
 
 
 def _run_wait_hook():
@@ -94,13 +96,29 @@ def close():
 
 
 def debug():
-    print('Entering interactive debug mode')
-    print('Type exit to stop')
-    command = input()
-    while command != 'exit':
-        print('running {}'.format(command))
-        eval(command)
-        command = input()
+    # print('Entering interactive debug mode')
+    # print('Type exit to stop')
+    # command = input()
+    # while command != 'exit':
+    #     try:
+    #         eval(command)
+    #     except:
+    #         print("Unexpected error:", traceback.format_exc())
+    #     command = input()
+    
+    import readline # optional, will allow Up/Down/History in the console
+    import code
+    def console_exit():
+        raise SystemExit
+    vars = globals().copy()
+    vars.update(locals())
+    vars['exit'] = console_exit
+    banner = 'Entering interactive debug mode\nType exit() to stop'
+    shell = code.InteractiveConsole(vars)
+    try:
+        shell.interact(banner=banner)
+    except SystemExit:
+        pass
 
 
 def mouse_hover(element):
@@ -110,7 +128,7 @@ def mouse_hover(element):
     step_message = 'Mouse hover element \'{0}\''.format(webelement.name)
     logger.logger.info(step_message)
     ActionChains(driver).move_to_element(webelement).perform()
-    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
+    #_capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
 
 def navigate(url):
@@ -129,7 +147,7 @@ def press_key(element, key):
     if key == 'RETURN' or key == 'ENTER':
         webelement.send_keys(Keys.RETURN);
     else:
-        raise Exception('Key value is invalid')
+        raise Exception('Key value {} is invalid'.format(key))
 
 
 def random(value):

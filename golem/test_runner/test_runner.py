@@ -25,7 +25,7 @@ def run_test(workspace, project, test_name, test_data, driver,
     }
 
     from golem.core import execution_logger
-    from golem.core import actions
+    from golem import actions
 
     # convert test_data to data obj
     # TODO convert data dict to data obj
@@ -74,8 +74,8 @@ def run_test(workspace, project, test_name, test_data, driver,
         setattr(test_module, 'logger', golem.core.execution_logger)
         
         # import actions into the test module
-        for action in dir(golem.core.actions):
-            setattr(test_module, action, getattr(golem.core.actions, action))
+        for action in dir(golem.actions):
+            setattr(test_module, action, getattr(golem.actions, action))
 
         # log description
         if hasattr(test_module, 'description'):

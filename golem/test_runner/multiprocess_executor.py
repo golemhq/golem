@@ -4,35 +4,30 @@ parallel using multiprocessing.
 """
 import sys
 import os
+import time
 from multiprocessing import Pool
 from multiprocessing.pool import ApplyResult
 
 from golem.core import test_execution, utils
 from golem.test_runner.test_runner import run_test
+from golem.gui import report_parser
 
 
-def multiprocess_executor(execution_list, processes=1):
+def multiprocess_executor(execution_list, is_suite, execution_directory, threads=1):
     print('Executing:')
     for test in execution_list:
         print('{} in {} with the following data: {}'.format(test['test_name'],
                                                             test['driver'],
                                                             test['data_set']))
-    # if not test_execution.timestamp:
-    #     test_execution.timestamp = utils.get_timestamp()
 
-    pool = Pool(processes=processes)
+    # 
+    start_time = time.time()
+
+    pool = Pool(processes=threads)
 
     results = []
 
     for test in execution_list:
-        # # generate a report directory for this test
-        # report_directory = report.create_report_directory(test_execution.root_path,
-        #                                                   test_execution.project,
-        #                                                   test['test_name'],
-        #                                                   suite_name, 
-        #                                                   test_execution.timestamp)
-
-        print(test['report_directory'])
 
         args = (test_execution.root_path,
                 test_execution.project,
@@ -53,3 +48,9 @@ def multiprocess_executor(execution_list, processes=1):
 
     pool.close()
     pool.join()
+
+    elapsed_time = round(time.time() - start_time, 2)
+    
+    # generate execution_result.json
+    report_parser.generate_execution_report(execution_directory, elapsed_time)
+

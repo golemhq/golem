@@ -1,5 +1,5 @@
-from golem.core import actions
-from golem.selenium.utils import elements
+from golem import actions
+from golem.selenium import elements
 
 
 create_project_button = ('css', "#projectCreationButton button", 'Create Project button')

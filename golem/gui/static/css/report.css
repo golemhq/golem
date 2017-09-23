@@ -131,7 +131,7 @@
 }
 
 .chart-inner-container {
-    /*height: 212px;*/
+    height: 212px;
     position: relative;
     top: 50%;
     transform: translateY(-50%);

@@ -7,7 +7,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import WebDriverException
 
 from golem.core import execution_logger as logger
-from golem.selenium.utils import _find
+from golem.selenium import _find, _find_all
 
 
 # values used during the execution of a test case
@@ -90,10 +90,12 @@ def get_or_create_webdriver(*args):
         elif driver_selected == 'firefox-remote':
             driver = webdriver.Remote(command_executor=settings['remote_url'],
                                       desired_capabilities=DesiredCapabilities.FIREFOX)
+        else:
+            raise Exception('Error: {} is not a valid driver'.format(driver_selected))
 
     # bind _find method to driver instance
     driver.find = types.MethodType(_find, driver)
-    #webelement.find_all = types.MethodType(_find_all, webelement)
+    driver.find_all = types.MethodType(_find_all, driver)
     
     # if settings.minimize:
     #     driver.set_window_position(-3000, 0)

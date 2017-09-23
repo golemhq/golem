@@ -314,12 +314,12 @@ def test_suite_exists(workspace, project, full_test_suite_name):
 
 def display_tree_structure_command_line(structure, lvl=0):
     """Displays a directory tree structure to the command line"""
-    for key, value in structure.items():
-        if type(key) is tuple:
-            print('{}> {}'.format(' ' * lvl * 4, key[0]))
+    for element in structure:
+        if element['type'] == 'file':
+            print('{}{}'.format(' ' * lvl * 2, element['name']))
         else:
-            print('{}{}/'.format(' ' * lvl * 4, key))
-            display_tree_structure_command_line(value, lvl + 1)
+            print('{}{}/'.format(' ' * lvl * 2, element['name']))
+            display_tree_structure_command_line(element['sub_elements'], lvl + 1)
 
 
 def separate_file_from_parents(full_filename):
