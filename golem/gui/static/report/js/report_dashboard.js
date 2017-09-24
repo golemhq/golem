@@ -47,7 +47,7 @@ function loadProject(project, projectData){
 		for(e in projectData[suite]){
 			var execution = projectData[suite][e];
 			var dateTime = utils.getDateTimeFromTimestamp(execution);
-			executions.push(dateTime)
+			executions.push(execution)
 
 			var row = ReportDashboard.generateExecutionsTableRow({
 				project: project,
@@ -109,6 +109,13 @@ function loadProject(project, projectData){
 		                tension: 0, // disables bezier curves
 		            }
 		        },
+		        tooltips: {
+		        	callbacks: {
+		        		title: function(tooltipItems, data) {
+					       return utils.getDateTimeFromTimestamp(data.labels[tooltipItems[0].index]);
+					     }
+                	}
+		        },
 		        maintainAspectRatio: false,
 	    	}
 		});
@@ -119,7 +126,7 @@ function loadProject(project, projectData){
 
 
 function loadChartAndBars(project, suite, execution, okBar, failBar, index){
-	var dateTime = utils.getDateTimeFromTimestamp(execution);
+	//var dateTime = utils.getDateTimeFromTimestamp(execution);
 
 	$.post( 
 		"/report/get_execution_data/",
@@ -129,7 +136,6 @@ function loadChartAndBars(project, suite, execution, okBar, failBar, index){
 			execution: execution
 		},
 		function( executionData ) {
-			console.log(executionData);
   			var okPercentage = executionData.total_cases_ok * 100 / executionData.total_cases;
 			var failPercentage = executionData.total_cases_fail * 100 / executionData.total_cases + okPercentage;
   			utils.animateProgressBar(okBar, okPercentage);
@@ -138,7 +144,7 @@ function loadChartAndBars(project, suite, execution, okBar, failBar, index){
   			updateChart({
   				project: project,
   				suite: suite,
-  				label: dateTime,
+  				label: execution,
   				totalOk: executionData.total_cases_ok,
   				totalFailed: executionData.total_cases_fail,
   				totalPending: executionData.total_pending
