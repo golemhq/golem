@@ -5,17 +5,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Managing Test Data &#8212; Golem 0.1.0a3 documentation</title>
-    
+    <title>Managing Test Data &#8212; Golem 0.1.15 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.0a3',
+        VERSION:     '0.1.15',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -27,7 +24,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Using Pages" href="using-pages.html" />
+    <link rel="next" title="Using Page Objects" href="using-page-objects.html" />
     <link rel="prev" title="Adding Tests" href="adding-tests.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -56,10 +53,10 @@
 <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Search an article in Wikipedia&#39;</span>
 
 <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-    <span class="n">go_to</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;URL&#39;</span><span class="p">])</span>
-    <span class="n">send_keys</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;searchInput&#39;</span><span class="p">),</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;search_value&#39;</span><span class="p">])</span>
+    <span class="n">go_to</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">URL</span><span class="p">)</span>
+    <span class="n">send_keys</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;searchInput&#39;</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">search_value</span><span class="p">)</span>
     <span class="n">click</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;searchButton&#39;</span><span class="p">))</span>
-    <span class="n">verify_text_in_element</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;firstHeading&#39;</span><span class="p">),</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;article_title&#39;</span><span class="p">])</span>
+    <span class="n">verify_text_in_element</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;firstHeading&#39;</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">article_title</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">teardown</span><span class="p">():</span>
     <span class="n">close</span><span class="p">()</span>
@@ -122,7 +119,7 @@
 <div class="admonition note">
     <p class="first admonition-title">Check this out</p>
     <p>In the third and fourth rows we used a different URL, so we can even point the same test to different environments by just changing the data sets.</p>
-</div><p>Next, go to <a class="reference external" href="using-pages.html">Using Pages</a></p>
+</div><p>Next, go to <a class="reference external" href="using-page-objects.html">Using Page Objects</a></p>
 </div>
 </div>
 
@@ -156,7 +153,7 @@
 <li class="toctree-l1"><a class="reference internal" href="quick-start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adding-tests.html">Adding Tests</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Managing Test Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="using-pages.html">Using Pages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using-page-objects.html">Using Page Objects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="suites.html">Suites</a></li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="custom-actions.html">Custom Actions</a></li>
@@ -164,6 +161,7 @@
 <li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interactive-mode.html">Interactive Mode</a></li>
 </ul>
 
 <div class="relations">
@@ -171,7 +169,7 @@
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="adding-tests.html" title="previous chapter">Adding Tests</a></li>
-      <li>Next: <a href="using-pages.html" title="next chapter">Using Pages</a></li>
+      <li>Next: <a href="using-page-objects.html" title="next chapter">Using Page Objects</a></li>
   </ul></li>
 </ul>
 </div>
@@ -193,7 +191,7 @@
       &copy;2017, Luciano Puccio.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

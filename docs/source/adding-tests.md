@@ -83,7 +83,7 @@ And seeing it with the Web Module:
 
 <div class="admonition note">
     <p class="first admonition-title">Note</p>
-    <p>Selenium 3 needs to have the browser's web drivers configured (Firefox used to work out of the box but not anymore).
+    <p>Golem (using Selenium) needs the webdriver executables. You have to download the latest webdriver executables and place them where Golem can find them (by default, in the <i>test_directory/drivers</i> folder).</p>
     <p>To learn how to configure the drivers check the <a href="web-drivers.html">Web Drivers page</a>.</p>
 </div>
 
@@ -94,9 +94,9 @@ python golem.py run <project_name> validate_article_title
 ```
 
 
-**Golem actions:**
+##### Golem Actions
 
-In the previous example, *go_to*, *send_keys*, *click*, and *verify_text...* are Golem actions. Check out [the entire list of actions](actions.html).
+In the previous example, *go_to*, *send_keys*, *click*, and *verify_text...* are Golem actions. Check out [the entire list of actions](actions.html) for more information.
 
 <br>
 

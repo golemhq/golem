@@ -393,7 +393,8 @@ def check_test_case_run_result():
 
         if os.path.isdir(path):
             for elem in os.listdir(path):
-                sets.append(elem)  
+                if os.path.isdir(os.path.join(path, elem)):
+                    sets.append(elem) 
 
         # is execution finished?
         result['complete'] = report_parser.is_execution_finished(path, sets)

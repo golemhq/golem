@@ -1,6 +1,6 @@
 .box-container{
     margin-bottom: 15px;
-    /*padding: 10px;*/
+    padding: 10px;
 }
 
 @media (min-width: 768px){

@@ -167,3 +167,7 @@
     color: inherit;
 }
 
+.general-table td, .test-list-table td {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+}

@@ -394,9 +394,9 @@ def create_test_dir(workspace):
 
     # copy drivers from golem/bin/drivers to test_dir/drivers
     pkgdir = sys.modules['golem'].__path__[0]
-    sourcepath = os.path.join(pkgdir, 'bin', 'drivers')
-    destination_path = os.path.join(workspace, 'drivers')
-    shutil.copytree(sourcepath, destination_path)
+    #sourcepath = os.path.join(pkgdir, 'bin', 'drivers')
+    #destination_path = os.path.join(workspace, 'drivers')
+    #shutil.copytree(sourcepath, destination_path)
     
     golem_py_content = ("import os\n"
                         "import sys\n"
@@ -412,7 +412,6 @@ def create_test_dir(workspace):
     golem_py_path = os.path.join(workspace, 'golem.py')
     with open(golem_py_path, 'a') as golem_py_file:
         golem_py_file.write(golem_py_content)
-
     
     settings_path = os.path.join(workspace, 'settings.json')
     with open(settings_path, 'a') as settings_file:

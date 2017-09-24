@@ -12,7 +12,7 @@
 	
     <div class="col-sm-8 col-sm-offset-2" id="datosContainerContainer">
 
-        <div class="col-sm-6 header-col">
+        <div class="col-xs-6 header-col">
             <h3 id="pageObjectName">
                 <small>
                     <a href="/p/{{project}}/" class="link-without-underline">
@@ -22,7 +22,7 @@
             {{suite}}</h3>
         </div>
 
-        <div class="col-sm-6 text-right header-col" style="padding-top: 20px">
+        <div class="col-xs-6 text-right header-col" style="padding-top: 20px">
             <button id="runTest" class="btn btn-default btn-sm" onclick="runSuite()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Suite</button>
             <button id="save" class="btn btn-default btn-sm" onclick="saveTestSuite();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
         </div>
@@ -32,21 +32,21 @@
         <h4>Settings</h4>
 
         <form class="form-horizontal">
-        <div class="col-sm-12">
-            <div class="input-group form-group" style="width: 100%;">
-                <label for="browsers" class="col-sm-3 control-label">Browsers</label>
-                <div class="col-sm-9">
+        <div>
+            <div class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Browsers</div>
+            <div class="input-group form-group col-xs-10" style="">    
+                <!-- <div class="col-sm-9"> -->
                     <input type="text" class="form-control" id="browsers" value="{{ browsers if browsers else ''}}" placeholder="list of browsers">
-                </div>
+                <!-- </div> -->
             </div> 
         </div>
-        <div class="col-sm-12">
-
-            <div class="input-group form-group">
-            <label for="workers" class="col-sm-3 control-label">Workers</label>
-                <div class="col-sm-9">
+        <div>
+            <div for="workers" class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Workers</div>
+            <div class="input-group form-group col-sm-3">
+            
+               <!--  <div class="col-sm-9"> -->
                     <input type="number" class="form-control" id="workers" value="{{worker_amount}}" placeholder="Amount of workers">
-                </div> 
+                <!-- </div>  -->
             </div>
         </div>
 

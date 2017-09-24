@@ -58,6 +58,17 @@ def generate_report(report_directory, test_case_name, test_data, result):
         except:
             serializable_data[key] = repr(value)
 
+    browser = result['browser']
+    output_browser = result['browser']
+    if browser == 'chrome-remote':
+        output_browser = 'chrome (remote)'
+    if browser == 'chrome-headless':
+        output_browser = 'chrome (headless)'
+    if browser == 'chrome-remote-headless':
+        output_browser = 'chrome (remote, headless)'
+    if browser == 'firefox-remote':
+        output_browser = 'firefox (remote)'
+
     report = {
         'test_case': test_case_name,
         'result': result['result'],
@@ -67,7 +78,7 @@ def generate_report(report_directory, test_case_name, test_data, result):
         'short_error': short_error,
         'test_elapsed_time': result['test_elapsed_time'],
         'test_timestamp': result['test_timestamp'],
-        'browser': result['browser'],
+        'browser': output_browser,
         'test_data': serializable_data
     }
     

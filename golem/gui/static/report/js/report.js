@@ -128,6 +128,7 @@ var ExecutionsReport = new function(){
                     "+reportUtils.generateProgressBars()+"\
                 </td>\
                 <td class='total-time'></td>\
+                <td class='net-time'></td>\
             </tr>";
         return $(row)
     }

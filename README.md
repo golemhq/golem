@@ -57,21 +57,32 @@ pip install golem-framework
 
 Read the full installation guide here: [http://golem-framework.readthedocs.io/en/latest/installation.html](golem-framework.readthedocs.io/en/latest/installation.html)
 
+
+
 Quick Start
 --------------------------------------
 
-Create a test directory anywhere in your machine:
+**Create a test directory anywhere in your machine**
 
 ```
-golem-admin createdirectory <directory_name>
+golem-admin createdirectory <test_directory>
 ```
 
-Start the Web Module:
+**Download the latest webdriver executables** 
+Note: Golem needs the latest webdrivers in order to work, by default, it will pick up the executables placed in the <test_directory>/drivers directory, this setting can be overriden from the settings.
+The latests versions of the webdrivers can be found here:
+* Chrome: (https://sites.google.com/a/chromium.org/chromedriver/)
+* Firefox: (https://github.com/mozilla/geckodriver/releases)
+
+For more information check [this page](http://golem-framework.readthedocs.io/en/latest/web-drivers.html) of the documentation.
+
+**Start the Web Module**
 
 ```
-cd <directory_name>
+cd <test_directory>
 python golem.py gui
 ```
+
 
 The Web Module can be accessed at http://localhost:5000/
 

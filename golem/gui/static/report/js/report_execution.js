@@ -3,7 +3,7 @@ var allTestCases = {};
 var baseDelay = 2000;
 
 var suiteFinished = false;
-var netTime;
+var netTime = undefined;
 
 $(document).ready(function() {            
 	getReportData();
@@ -99,7 +99,7 @@ function loadTestRowResult(test){
 	row.find('.test-result').html(resultString);
 	row.find('.test-browser').html(test.browser);
 	row.find('.test-environment').html(test.data.environment);
-	row.find('.test-time').html(test.test_elapsed_time);
+	row.find('.test-time').html(formatTimeOutput(test.test_elapsed_time));
 
 	//add this test case to allTestCases
 	allTestCases[test.test_set] = test;
@@ -158,8 +158,10 @@ function refreshGeneralTable(){
 	totalRow.find(".total-tests").html(totalTestCases);
 	totalRow.find(".tests-ok").html(totalTestsOk);
 	totalRow.find(".tests-failed").html(totalTestsFailed);
-	totalRow.find(".total-time").html(totalTime + ' s');
-	totalRow.find(".net-time").html(netTime + ' s');
+	totalRow.find(".total-time").html(formatTimeOutput(totalTime));
+	if(netTime != undefined){
+		totalRow.find(".net-time").html(formatTimeOutput(netTime));
+	}
 	
 	var okPercentage = totalTestsOk * 100 / totalTestCases;
 	var failPercentage = totalTestsFailed * 100 / totalTestCases + okPercentage;
@@ -237,4 +239,30 @@ function getModuleRow(module){
 		}
 	});
 	return row
+}
+
+function formatTimeOutput(seconds){
+	var final = '';
+	var min;
+	var sec;
+	var ms;
+	if(seconds >= 60){
+		min = Math.floor(seconds/60);
+		min = Math.round(min * 10) / 10;
+		remainder = seconds % 60
+		if(remainder != 0){
+			sec = remainder;
+			sec = Math.round(sec * 10) / 10;
+		}
+	}
+	else{
+		sec = Math.round(seconds * 10) / 10;
+	}
+	if(min != undefined){
+		final += min + 'm '
+	}
+	if(sec != undefined){
+		final += sec + 's'
+	}
+	return final
 }

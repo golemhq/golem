@@ -5,17 +5,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Golem &#8212; Golem 0.1.0a3 documentation</title>
-    
+    <title>Golem &#8212; Golem 0.1.15 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.0a3',
+        VERSION:     '0.1.15',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -45,13 +42,15 @@
             
   <div class="section" id="golem">
 <h1>Golem<a class="headerlink" href="#golem" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quick-start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adding-tests.html">Adding Tests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="managing-test-data.html">Managing Test Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="using-pages.html">Using Pages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using-page-objects.html">Using Page Objects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="suites.html">Suites</a></li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="custom-actions.html">Custom Actions</a></li>
@@ -59,7 +58,29 @@
 <li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interactive-mode.html">Interactive Mode</a></li>
 </ul>
+</div>
+</div>
+<div class="section" id="intro">
+<h2>Intro<a class="headerlink" href="#intro" title="Permalink to this headline">¶</a></h2>
+<p>Golem is a complete test automation tool and framework for end-to-end testing. It creates powerful, robust and maintainable test suites , yet, it is easy to pick up and learn even without a lot of programming knowledge. It is based on Selenium Webdriver and it can be extended using Python.</p>
+<p><strong>It can:</strong></p>
+<ul class="simple">
+<li>Use the Page Object pattern</li>
+<li>Write tests with multi data sets (data-driven)</li>
+<li>Run tests in parallel.</li>
+<li>Test APIs</li>
+<li>Run tests remotely (Selenium Grid or a cloud testing provider)</li>
+<li>It can be executed from Jenkins or any other CI tool</li>
+</ul>
+<p><strong>It has:</strong></p>
+<ul class="simple">
+<li>A complete GUI module (a web application) to write and execute tests</li>
+<li>A reporting engine and a web reports module</li>
+<li>An interactive console</li>
+</ul>
+<p>Next, go to <a class="reference external" href="installation.html">installation</a>.</p>
 </div>
 </div>
 
@@ -93,7 +114,7 @@
 <li class="toctree-l1"><a class="reference internal" href="quick-start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adding-tests.html">Adding Tests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="managing-test-data.html">Managing Test Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="using-pages.html">Using Pages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using-page-objects.html">Using Page Objects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="suites.html">Suites</a></li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="custom-actions.html">Custom Actions</a></li>
@@ -101,6 +122,7 @@
 <li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interactive-mode.html">Interactive Mode</a></li>
 </ul>
 
 <div class="relations">
@@ -129,7 +151,7 @@
       &copy;2017, Luciano Puccio.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

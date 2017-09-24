@@ -17,9 +17,9 @@ To install on Mac OS follow this instructions: [Installing Python 3 on Mac OS X]
 
 - Linux:
 
-Debian 8 and Ubuntu 14.04 comes with Python 3.4 installed, newer Linux distributions might come with newer Python versions. 
+Debian 8 and Ubuntu 14.04 comes with Python 3.4 pre-installed, newer Linux distributions might come with newer Python versions. 
 
-Since Linux tends to have both Python 2 and 3 installed alongside, the command to execute the latter should be 'python3' instead of just 'python'.
+Since Linux tends to have both Python 2 and 3 installed alongside eachother, the command to execute the latter should be 'python3' instead of just 'python'.
 
 **PIP**
 

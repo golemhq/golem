@@ -14,6 +14,16 @@ golem-admin createdirectory <directory_name>
 This will create a folder that will contain all subsequent projects.
 
 
+##### Download the Webdriver Executables
+
+Golem needs the latest webdrivers in order to work, by default, it will pick up the executables placed in the *<test_directory>/drivers directory*, this setting can be overriden from the settings.
+The latests versions of the webdrivers can be found here:
+* Chrome: [https://sites.google.com/a/chromium.org/chromedriver/](https://sites.google.com/a/chromium.org/chromedriver/)
+* Firefox: [https://github.com/mozilla/geckodriver/releases](https://github.com/mozilla/geckodriver/releases)
+
+For more detailed information, check [this page](web-drivers.html)
+
+
 ##### Start the Web Module
 
 To start the Golem Web Module, run the following command:

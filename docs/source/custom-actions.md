@@ -11,7 +11,7 @@ Consider the case of making a login to a web application. It usually takes 3 or 
 
 **login.py**
 ```python
-from golem.core import actions
+from golem import actions
 
 
 username_input = ('id', "username", 'username')
@@ -80,7 +80,7 @@ Let's see an example using *element()*, *elements()*, *find()* and *find_all()*:
 
 **some_page.py**
 ```python
-from golem.selenium.utils import element, elements
+from golem.selenium import element, elements
 
 
 def verify_page_title(title_text):
@@ -152,7 +152,7 @@ With Golem this is quite easy to do, check the following example:
 
 **results_page.py**
 ```python
-from golem.selenium.utils import element
+from golem.selenium import element
 
 
 def verify_wolf_name(owner, wolf_name):

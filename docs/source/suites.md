@@ -22,7 +22,7 @@ tests = [
 
 ```
 
-![suite example](_static/img/suite-example.png "Suite Example")
+<img class="border-image" src="_images/suite-example.png">
 
 <div class="admonition note">
     <p class="first admonition-title">Note</p>
@@ -32,7 +32,7 @@ tests = [
 
 ##### Test Parallelization
 
-The 'workers = 2' tells Golem how many tests should be executed at the same time. Default is one (one at a time). How many tests can be parallelized depends on your test infrastructure
+The 'workers = 2' tells Golem how many tests should be executed at the same time. Default is one (one at a time). How many tests can be parallelized depends on your test infrastructure.
 
 
 Next, go to [Actions](actions.html)

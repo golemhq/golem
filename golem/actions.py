@@ -56,6 +56,38 @@ def _capture_or_add_step(message, screenshot_on_step):
         step(message)
 
 
+def assert_contains(element, value):
+    step_message = 'Assert that {0} contains {1}'.format(element, value)
+    logger.logger.info(step_message)
+    _capture_or_add_step(step_message, False)
+    if not value in element:
+        raise Exception('Expected {} to contain {}'.format(element, value))
+
+
+def assert_equals(actual_value, expected_value):
+    step_message = 'Assert that {0} equals {1}'.format(actual_value, expected_value)
+    logger.logger.info(step_message)
+    _capture_or_add_step(step_message, False)
+    if not actual_value == expected_value:
+        raise Exception('Expected {} to equal {}'.format(actual_value, expected_value))
+
+
+def assert_false(condition):
+    step_message = 'Assert that {0} is false'.format(condition)
+    logger.logger.info(step_message)
+    _capture_or_add_step(step_message, False)
+    if condition == True:
+        raise Exception('Expected {} to be false'.format(condition))
+
+
+def assert_true(condition):
+    step_message = 'Assert that {0} is true'.format(condition)
+    logger.logger.info(step_message)
+    _capture_or_add_step(step_message, False)
+    if not condition == True:
+        raise Exception('Expected {} to be true'.format(condition))
+
+
 def capture(message=''):
     _run_wait_hook() 
     logger.logger.info('Take screenshot {}'.format(message))
@@ -211,7 +243,7 @@ def store(key, value):
     # core.test_data[key] = value
     setattr(core.test_data, key, value)
 
-# TO DO
+
 def verify_exists(element):
     _run_wait_hook()
     step_message = 'Verify that the element exists'
@@ -358,6 +390,21 @@ def wait_for_element_not_visible(element, timeout=20):
             timed_out = True
 
 
+def wait_for_element_enabled(element, timeout=20):
+    logger.logger.info('Waiting for element {} to be enabled'.format(element))
+    start_time = time.time()
+    timed_out = False
+    webelement = get_driver().find(element)
+    enabled = webelement.is_enabled()
+    while not enabled:
+        logger.logger.debug('Element is not enabled, waiting..')
+        time.sleep(0.5)
+        enabled = webelement.is_displayed()
+        if time.time() - start_time > timeout:
+            timed_out = True
+
+
+
 def wait_for_element_visible(element, timeout=20):
     try:
         timeout = int(timeout)
@@ -371,20 +418,6 @@ def wait_for_element_visible(element, timeout=20):
     while not webelement.is_displayed() and not timed_out:
         logger.logger.debug('Element is not visible, waiting..')
         time.sleep(0.5)
-        if time.time() - start_time > timeout:
-            timed_out = True
-
-
-def wait_for_element_enabled(element, timeout=20):
-    logger.logger.info('Waiting for element {} to be enabled'.format(element))
-    start_time = time.time()
-    timed_out = False
-    webelement = get_driver().find(element)
-    enabled = webelement.is_enabled()
-    while not enabled:
-        logger.logger.debug('Element is not enabled, waiting..')
-        time.sleep(0.5)
-        enabled = webelement.is_displayed()
         if time.time() - start_time > timeout:
             timed_out = True
 

@@ -1,0 +1,196 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Using Page Objects &#8212; Golem 0.1.15 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.15',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Suites" href="suites.html" />
+    <link rel="prev" title="Managing Test Data" href="managing-test-data.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="using-page-objects">
+<span id="using-page-objects"></span><h1>Using Page Objects<a class="headerlink" href="#using-page-objects" title="Permalink to this headline">¶</a></h1>
+<p>If you remember from the previous example, each time the test interacted with a web element (an HTML tag), the selector for that element was defined inside the same test. That is going to lead only to trouble down the road.</p>
+<p>Imagine what would happen when the application under tests changes. If a selector for a web element changes and that web element is used in hundreds of tests, it would need to be fixed in all the tests, one by one, consuming a lot of time.</p>
+<div class="section" id="defining-page-objects">
+<span id="defining-page-objects"></span><h2>Defining Page Objects<a class="headerlink" href="#defining-page-objects" title="Permalink to this headline">¶</a></h2>
+<p>It is a good practice to keep selectors of the web elements outside of the test, and declared once in a single place. That place should be a <strong>Page Object</strong>.</p>
+<p>A Page Object represents an entire page of the application (or a part of a page, like the header or the menu). Inside that Page Object, you can define the selectors for all the web elements that your test is going to interact with.</p>
+<p>You can also define complex actions that the tests can perform inside that page, this take the form of fuctions. More on this later.</p>
+<p>Let's see an example, consider the previous test:</p>
+<p><strong>validate_article_title.py</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>
+<span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Search an article in Wikipedia&#39;</span>
+
+<span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">go_to</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">URL</span><span class="p">)</span>
+    <span class="n">send_keys</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;searchInput&#39;</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">search_value</span><span class="p">)</span>
+    <span class="n">click</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;searchButton&#39;</span><span class="p">))</span>
+    <span class="n">verify_text_in_element</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;firstHeading&#39;</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">article_title</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">teardown</span><span class="p">():</span>
+    <span class="n">close</span><span class="p">()</span>
+
+</pre></div>
+</div>
+<p>Let's extract all the selectors and put them inside Page Objects. For this, we create two page objects, the first will be the 'header' page object, as it's the same header for every page of the application. The second page object will be the 'article' page.</p>
+<p><strong>header.py</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>
+<span class="n">search_input</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;searchInput&#39;</span><span class="p">,</span> <span class="s1">&#39;Search input&#39;</span><span class="p">)</span>
+
+<span class="n">search_button</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;searchButton&#39;</span><span class="p">,</span> <span class="s1">&#39;Search button&#39;</span><span class="p">)</span>
+
+</pre></div>
+</div>
+<p><strong>article.py</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>
+<span class="n">title</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;firstHeading&#39;</span><span class="p">,</span> <span class="s1">&#39;Title&#39;</span><span class="p">)</span>
+
+</pre></div>
+</div>
+<p>These pages, as seen with the Web Module, look like this:</p>
+<p><img class="border-image" src="_images/header-page.png"></p>
+<p><img class="border-image" src="_images/article-page.png"></p>
+</div>
+<div class="section" id="using-pages-inside-tests">
+<span id="using-pages-inside-tests"></span><h2>Using pages inside tests<a class="headerlink" href="#using-pages-inside-tests" title="Permalink to this headline">¶</a></h2>
+<p>Having these two pages defined, we can use them in our test, and refactor it as follows:</p>
+<p><strong>validate_article_title.py</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>
+<span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Search an article in Wikipedia&#39;</span>
+
+<span class="n">pages</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;header&#39;</span><span class="p">,</span> <span class="s1">&#39;article&#39;</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">go_to</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">URL</span><span class="p">)</span>
+    <span class="n">send_keys</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">search_input</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">search_value</span><span class="p">)</span>
+    <span class="n">click</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">search_button</span><span class="p">)</span>
+    <span class="n">verify_text_in_element</span><span class="p">(</span><span class="n">article</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">article_title</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">teardown</span><span class="p">():</span>
+    <span class="n">close</span><span class="p">()</span>
+
+</pre></div>
+</div>
+<p>And from the Web Module:</p>
+<p><img alt="test with pages" src="_images/test-with-pages.png" /></p>
+<p><strong>Explanation</strong></p>
+<p>With this change, the 'Search input', 'Search button' and 'Article Title' elements are defined in a separate file from the test itself. A test that needs to interact with this element, just needs to import the page object and referece it, reducing the required time to write new tests. In the future, if the HTML of that element changes, only the selector defined in the page object needs to be updated, the test code would remain the same.</p>
+<p>Next, go to <a class="reference external" href="suites.html">Suites</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Golem</a></h1>
+
+
+
+<p class="blurb">test automation framework</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=lucianopuccio&repo=golem&type=star&count=False&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quick-start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adding-tests.html">Adding Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="managing-test-data.html">Managing Test Data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using Page Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="suites.html">Suites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom-actions.html">Custom Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the-cli.html">The CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interactive-mode.html">Interactive Mode</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="managing-test-data.html" title="previous chapter">Managing Test Data</a></li>
+      <li>Next: <a href="suites.html" title="next chapter">Suites</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Luciano Puccio.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/using-page-objects.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

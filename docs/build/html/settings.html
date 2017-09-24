@@ -5,17 +5,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Settings &#8212; Golem 0.1.0a3 documentation</title>
-    
+    <title>Settings &#8212; Golem 0.1.15 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.0a3',
+        VERSION:     '0.1.15',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -66,19 +63,35 @@
 <ul class="simple">
 <li><em>default_driver</em></li>
 </ul>
-<p>Define the driver to use unless overriden by the -d/--driver flag. Default is 'chrome'. Valid options are: firefox, chrome, TBD</p>
+<p>Define the driver to use unless overriden by the -d/--driver flag. Default is 'chrome'. Valid options are: firefox, chrome, chrome-remote, firefox-remote, chrome-headless, chrome-remote-headless.</p>
 <ul class="simple">
 <li><em>chrome_driver_path</em></li>
 </ul>
-<p>Path to the chrome driver executable. By default it points to the <em>drivers</em> folder inside the test dir.</p>
+<p>Path to the chrome driver executable. By default it points to the <em>drivers</em> folder inside the test directory.</p>
 <ul class="simple">
 <li><em>gecko_driver_path</em></li>
 </ul>
-<p>Path to the gecko driver executable. By default it points to the <em>drivers</em> folder inside the test dir.</p>
+<p>Path to the gecko driver executable. By default it points to the <em>drivers</em> folder inside the test directory.</p>
+<ul class="simple">
+<li><em>remote_url</em></li>
+</ul>
+<p>the URL to use when connecting to a remote webdriver, for example, when using selenium grid. Default is 'http://localhost:4444/wd/hub'</p>
 <ul class="simple">
 <li><em>wait_hook</em></li>
 </ul>
 <p>Custom wait method to use for every action, that can be specific to each application. It must be defined inside extend.py</p>
+<ul class="simple">
+<li><em>console_log_level</em></li>
+</ul>
+<p>Default is 'INFO'</p>
+<ul class="simple">
+<li><em>file_log_level</em></li>
+</ul>
+<p>Default is 'DEBUG'</p>
+<ul class="simple">
+<li><em>log_all_events</em></li>
+</ul>
+<p>Default is false</p>
 <p><br></p>
 <p>Next, go to <a class="reference external" href="web-drivers.html">Web Drivers</a></p>
 </div>
@@ -113,7 +126,7 @@
 <li class="toctree-l1"><a class="reference internal" href="quick-start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adding-tests.html">Adding Tests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="managing-test-data.html">Managing Test Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="using-pages.html">Using Pages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using-page-objects.html">Using Page Objects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="suites.html">Suites</a></li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="custom-actions.html">Custom Actions</a></li>
@@ -121,6 +134,7 @@
 <li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Settings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interactive-mode.html">Interactive Mode</a></li>
 </ul>
 
 <div class="relations">
@@ -150,7 +164,7 @@
       &copy;2017, Luciano Puccio.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

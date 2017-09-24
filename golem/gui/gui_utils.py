@@ -79,6 +79,24 @@ def string_to_time(time_string):
 def get_global_actions():
     global_actions = [
         {
+            'name': 'assert contains',
+            'parameters': [{'name': 'element', 'type': 'value'},
+                           {'name': 'value', 'type': 'value'}]
+        },
+        {
+            'name': 'assert equals',
+            'parameters': [{'name': 'actual value', 'type': 'value'},
+                           {'name': 'expected value', 'type': 'value'}]
+        },
+        {
+            'name': 'assert false',
+            'parameters': [{'name': 'condition', 'type': 'value'}]
+        },
+        {
+            'name': 'assert true',
+            'parameters': [{'name': 'condition', 'type': 'value'}]
+        },
+        {
             'name': 'capture',
             'parameters': [{'name': 'message (optional)', 'type': 'value'}]
         },

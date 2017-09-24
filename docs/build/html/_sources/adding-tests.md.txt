@@ -56,7 +56,7 @@ The **teardown** function is always executed, even if the other functions fail. 
 
 ##### A test example
 
-Next is a bare minimum test that navigates to 'en.wikipedia.org', searches an article and validates that the Title of the article is correct.
+Next is a bare minimum test that navigates to 'en.wikipedia.org', searches an article and validates that the title of the article is correct.
 
 
 **validate_article_title.py**
@@ -83,8 +83,8 @@ And seeing it with the Web Module:
 
 <div class="admonition note">
     <p class="first admonition-title">Note</p>
-    <p>Selenium 3 needs to have the browsers web drivers configured (previously Firefox used to work out of the box but not anymore).
-    <p>To learn how to configure the drivers check the <a href="web-drivers.html">Web Elements page</a>.</p>
+    <p>Golem (using Selenium) needs the webdriver executables. You have to download the latest webdriver executables and place them where Golem can find them (by default, in the <i>test_directory/drivers</i> folder).</p>
+    <p>To learn how to configure the drivers check the <a href="web-drivers.html">Web Drivers page</a>.</p>
 </div>
 
 To run the test just press the 'Run Test' button in the Web Module. The test can also be run using the command line with the following command:
@@ -94,9 +94,9 @@ python golem.py run <project_name> validate_article_title
 ```
 
 
-**Golem actions:**
+##### Golem Actions
 
-In the previous example, *go_to*, *send_keys*, *click*, and *verify_text...* are Golem actions. Check out [the entire list of actions](actions.html).
+In the previous example, *go_to*, *send_keys*, *click*, and *verify_text...* are Golem actions. Check out [the entire list of actions](actions.html) for more information.
 
 <br>
 
