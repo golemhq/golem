@@ -22,7 +22,7 @@ tests = [
 
 ```
 
-<img class="border-image" src="_images/suite-example.png">
+<img class="border-image" src="_static/img/suite-example.png">
 
 <div class="admonition note">
     <p class="first admonition-title">Note</p>

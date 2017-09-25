@@ -51,9 +51,9 @@ title = ('id', 'firstHeading', 'Title')
 
 These pages, as seen with the Web Module, look like this:
 
-<img class="border-image" src="_images/header-page.png">
+<img class="border-image" src="_static/img/header-page.png">
 
-<img class="border-image" src="_images/article-page.png">
+<img class="border-image" src="_static/img/article-page.png">
 
 ##### Using pages inside tests
 
