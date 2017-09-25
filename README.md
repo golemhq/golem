@@ -46,22 +46,22 @@ Screen Captures
 
 **Project Dashboard**
 <p align="center">
-    <img width="600" src="./images/project-dashboard.png" />
+    <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/project-dashboard.png" />
 </p>
 
 **Test Editor**
 <p align="center">
-    <img width="600" src="./images/test-case.png" />
+    <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/test-case.png" />
 </p>
 
 **Report Dashboard**
 <p align="center">
-    <img width="600" src="./images/report-dashboard.png" />
+    <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/report-dashboard.png" />
 </p>
 
 **Execution Report**
 <p align="center">
-    <img width="600" src="./images/execution-report.png" />
+    <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/execution-report.png" />
 </p>
 
 
