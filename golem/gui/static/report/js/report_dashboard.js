@@ -28,7 +28,7 @@ $(document).ready(function() {
 
 
 function loadProject(project, projectData){
-	if(suiteName)
+	if(suiteName || projectName)
 		var projectContainer = ReportDashboard.generateProjectContainerSingleSuite(project);
 	else
 		var projectContainer = ReportDashboard.generateProjectContainer(project);

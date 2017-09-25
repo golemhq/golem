@@ -32,12 +32,37 @@ Golem is a complete test automation tool and framework for end-to-end testing. I
 
 ## Contents
 
+* [Screen Captures](#screen-captures)
 * [Pre-requisites](#pre-requisites)
 * [Installation](#installation)
 * [Quick Start](#quick-start)
 * [Documentation](#documentation)
 * [Roadmap](#roadmap)
 * [License](#license)
+
+
+Screen Captures
+--------------------------------------
+
+**Project Dashboard**
+<p align="center">
+    <img width="600" src="./images/project-dashboard.png" />
+</p>
+
+**Test Editor**
+<p align="center">
+    <img width="600" src="./images/test-case.png" />
+</p>
+
+**Report Dashboard**
+<p align="center">
+    <img width="600" src="./images/report-dashboard.png" />
+</p>
+
+**Execution Report**
+<p align="center">
+    <img width="600" src="./images/execution-report.png" />
+</p>
 
 
 Pre-requisites
@@ -56,7 +81,6 @@ pip install golem-framework
 ```
 
 Read the full installation guide here: [http://golem-framework.readthedocs.io/en/latest/installation.html](golem-framework.readthedocs.io/en/latest/installation.html)
-
 
 
 Quick Start

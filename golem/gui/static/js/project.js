@@ -73,7 +73,7 @@ var Project = new function(){
                     onblur='addElement(event);' onkeyup='if(event.keyCode==13){addElement(event)}'>\
             </span>\
             <span class='display-new-element-link'>\
-                <a href='javascript:void(0)' onclick='displayNewElementForm(this)'><i class='glyphicon glyphicon-plus-sign'></i> Add New</a>\
+                <a href='javascript:void(0)' onclick='displayNewElementForm(this)'><i class='glyphicon glyphicon-plus-sign'></i> Add</a>\
             </span>\
         </li>";
         return li
