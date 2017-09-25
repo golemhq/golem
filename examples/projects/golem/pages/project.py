@@ -6,6 +6,8 @@ new_page_button = ('css', "#pagesTree .display-new-element-link a", 'new_page_bu
 
 new_page_input = ('css', '#pagesTree .new-element-form', 'new_pages_input')
 
+error_modal = ('id', 'errorModal', 'Error modal')
+
 
 def click_pages_add_new(path=''):
     split_path = []
@@ -55,3 +57,13 @@ def verify_page_exists(full_path):
     list_of_lis = elements(css=list_of_lis_selector)
     if not dir_name in [x.text for x in list_of_lis]:
         raise Exception('Page {} was not found'.format(dir_name))
+
+
+def verify_error_message(error_message):
+    actions.step('Verify that the error {} is displayed'.format(error_message))
+    actions.wait_for_element_visible(error_modal)
+    errors = elements(css='#errorList>li')
+    for error in errors:
+        if error.text == error_message:
+            return
+    raise Exception('Error message {} was not found'.format(error_message))
