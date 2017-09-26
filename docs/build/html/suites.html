@@ -5,17 +5,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Suites &#8212; Golem 0.1.0a3 documentation</title>
-    
+    <title>Suites &#8212; Golem 0.1.16 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.0a3',
+        VERSION:     '0.1.16',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -28,7 +25,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Golem Actions" href="actions.html" />
-    <link rel="prev" title="Using Pages" href="using-pages.html" />
+    <link rel="prev" title="Using Page Objects" href="using-page-objects.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -62,13 +59,13 @@
 
 </pre></div>
 </div>
-<p><img alt="suite example" src="_images/suite-example.png" /></p>
+<p><img class="border-image" src="_static/img/suite-example.png"></p>
 <div class="admonition note">
     <p class="first admonition-title">Note</p>
-    <p>This suite will execute all maked tests, once per each browser defined and test set</p>
+    <p>This suite will execute all marked tests, once per each browser and test set</p>
 </div><div class="section" id="test-parallelization">
 <span id="test-parallelization"></span><h2>Test Parallelization<a class="headerlink" href="#test-parallelization" title="Permalink to this headline">¶</a></h2>
-<p>The 'workers = 2' tells Golem how many tests should be executed at the same time. How many tests can be parallelized depends on your test infrastructure</p>
+<p>The 'workers = 2' tells Golem how many tests should be executed at the same time. Default is one (one at a time). How many tests can be parallelized depends on your test infrastructure.</p>
 <p>Next, go to <a class="reference external" href="actions.html">Actions</a></p>
 </div>
 </div>
@@ -103,7 +100,7 @@
 <li class="toctree-l1"><a class="reference internal" href="quick-start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adding-tests.html">Adding Tests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="managing-test-data.html">Managing Test Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="using-pages.html">Using Pages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using-page-objects.html">Using Page Objects</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Suites</a></li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="custom-actions.html">Custom Actions</a></li>
@@ -111,13 +108,14 @@
 <li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interactive-mode.html">Interactive Mode</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="using-pages.html" title="previous chapter">Using Pages</a></li>
+      <li>Previous: <a href="using-page-objects.html" title="previous chapter">Using Page Objects</a></li>
       <li>Next: <a href="actions.html" title="next chapter">Golem Actions</a></li>
   </ul></li>
 </ul>
@@ -140,7 +138,7 @@
       &copy;2017, Luciano Puccio.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

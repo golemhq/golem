@@ -131,7 +131,7 @@
 }
 
 .chart-inner-container {
-    /*height: 212px;*/
+    height: 212px;
     position: relative;
     top: 50%;
     transform: translateY(-50%);
@@ -167,3 +167,7 @@
     color: inherit;
 }
 
+.general-table td, .test-list-table td {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+}

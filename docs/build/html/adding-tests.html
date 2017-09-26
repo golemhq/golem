@@ -5,17 +5,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Adding Tests &#8212; Golem 0.1.0a3 documentation</title>
-    
+    <title>Adding Tests &#8212; Golem 0.1.16 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.0a3',
+        VERSION:     '0.1.16',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -86,7 +83,7 @@
 </div>
 <div class="section" id="a-test-example">
 <span id="a-test-example"></span><h2>A test example<a class="headerlink" href="#a-test-example" title="Permalink to this headline">¶</a></h2>
-<p>Next is a bare minimum test that navigates to 'en.wikipedia.org', searches an article and validates that the Title of the article is correct.</p>
+<p>Next is a bare minimum test that navigates to 'en.wikipedia.org', searches an article and validates that the title of the article is correct.</p>
 <p><strong>validate_article_title.py</strong></p>
 <div class="highlight-python"><div class="highlight"><pre><span></span>
 <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Search an article in Wikipedia&#39;</span>
@@ -109,14 +106,16 @@
 <span id="run-the-test"></span><h2>Run the test<a class="headerlink" href="#run-the-test" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
     <p class="first admonition-title">Note</p>
-    <p>Selenium 3 needs to have the browsers web drivers configured (previously Firefox used to work out of the box but not anymore).
-    <p>To learn how to configure the drivers check the <a href="web-drivers.html">Web Elements page</a>.</p>
+    <p>Golem (using Selenium) needs the webdriver executables. You have to download the latest webdriver executables and place them where Golem can find them (by default, in the <i>test_directory/drivers</i> folder).</p>
+    <p>To learn how to configure the drivers check the <a href="web-drivers.html">Web Drivers page</a>.</p>
 </div><p>To run the test just press the 'Run Test' button in the Web Module. The test can also be run using the command line with the following command:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">golem</span><span class="o">.</span><span class="n">py</span> <span class="n">run</span> <span class="o">&lt;</span><span class="n">project_name</span><span class="o">&gt;</span> <span class="n">validate_article_title</span>
 </pre></div>
 </div>
-<p><strong>Golem actions:</strong></p>
-<p>In the previous example, <em>go_to</em>, <em>send_keys</em>, <em>click</em>, and <em>verify_text...</em> are Golem actions. Check out <a class="reference external" href="actions.html">the entire list of actions</a>.</p>
+</div>
+<div class="section" id="golem-actions">
+<span id="golem-actions"></span><h2>Golem Actions<a class="headerlink" href="#golem-actions" title="Permalink to this headline">¶</a></h2>
+<p>In the previous example, <em>go_to</em>, <em>send_keys</em>, <em>click</em>, and <em>verify_text...</em> are Golem actions. Check out <a class="reference external" href="actions.html">the entire list of actions</a> for more information.</p>
 <p><br></p>
 <p>Next, go to <a class="reference external" href="managing-test-data.html">Managing Test Data</a></p>
 </div>
@@ -152,7 +151,7 @@
 <li class="toctree-l1"><a class="reference internal" href="quick-start.html">Quick Start</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Adding Tests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="managing-test-data.html">Managing Test Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="using-pages.html">Using Pages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using-page-objects.html">Using Page Objects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="suites.html">Suites</a></li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Golem Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="custom-actions.html">Custom Actions</a></li>
@@ -160,6 +159,7 @@
 <li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Interactive-mode.html">Interactive Mode</a></li>
 </ul>
 
 <div class="relations">
@@ -189,7 +189,7 @@
       &copy;2017, Luciano Puccio.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

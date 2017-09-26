@@ -19,3 +19,11 @@ tr:nth-child(even) {
 p.note {
     
 }
+
+.border-image {
+    border: 1px solid #d3d3d3;
+    padding: 10px;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}

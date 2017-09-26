@@ -31,6 +31,12 @@ class RunCommand(BaseCommand):
     cmd = 'run'
 
     def add_arguments(self, parser):
+        driver_choices = ['firefox',
+                          'chrome', 
+                          'chrome-remote',
+                          'chrome-headless', 
+                          'chrome-remote-headless',
+                          'firefox-remote']
         parser.add_argument('project', default='',
                             nargs='?', help="project name")
         parser.add_argument('test_or_suite', nargs='?',
@@ -41,9 +47,9 @@ class RunCommand(BaseCommand):
                             metavar='amount of threads for parallel execution',
                             help="amount of threads for parallel execution")
         parser.add_argument('-d', '--drivers', action='store',
-                            nargs='*', choices=['firefox', 'chrome', 'chrome-remote', 'chrome-headless', 'chrome-remote-headless', 'firefox-remote'],
+                            nargs='*', choices=driver_choices,
                             type=str, metavar='Web Drivers',
-                            help="Web Drivers")
+                            default=[], help="Web Drivers")
         parser.add_argument('--debug', action='store_true',
                             default=False,
                             help="Run test in debug mode")
@@ -52,78 +58,150 @@ class RunCommand(BaseCommand):
                             help="Minimize driver window")
         parser.add_argument('--timestamp', action='store', nargs='?', type=str,
                             metavar='Timestamp', help="Timestamp")
+        parser.add_argument('-i', '--interactive', action='store_true', default=False,
+                            help="Interactive mode")
 
     def run(self, test_execution, args):
         test_execution.thread_amount = args.threads
         test_execution.drivers = args.drivers
         test_execution.timestamp = args.timestamp
-        test_execution.debug = args.debug
+        test_execution.interactive = args.interactive
         test_execution.minimize = args.minimize
 
         root_path = test_execution.root_path
 
-        if not args.project:
-            msg = ['Usage:', self._parser.usage, '\nProjects:']
-            for proj in utils.get_projects(root_path):
-                msg.append('> {}'.format(proj))
-            raise CommandException('\n'.join(msg))
-        elif not args.project in utils.get_projects(root_path):
-            raise CommandException(
-                'Error: the project {0} does not exist'.format(
-                    args.project)
-            )
-        else:
-            test_execution.project = args.project
-            test_execution.settings = settings_manager.get_project_settings(
-                args.project,
-                test_execution.settings)
-            print(test_execution.settings)
-            # check if test_or_suite value is present
-            if not args.test_or_suite:
-                msg = ['Usage: {}'.format(self._parser.usage),
-                       'Test Cases:']
-                test_cases = utils.get_test_cases(root_path,
-                                                  test_execution.project)
-                # TODO FIX TO SHOW THIS ON Exception
-                utils.display_tree_structure_command_line(test_cases)
-                msg.append('Test Suites:')
-                test_suites = utils.get_suites(root_path, test_execution.project)
-                for suite in test_suites:
-                    msg.append('> ' + suite)
-                raise CommandException(msg)
-            # check if test_or_suite value matches an existing test suite
-            elif utils.test_suite_exists(root_path, test_execution.project,
-                                         args.test_or_suite):
-                test_execution.suite = args.test_or_suite
-                # execute test suite
-                start_execution.run_test_or_suite(root_path,
-                                                  test_execution.project,
-                                                  suite=test_execution.suite)
+        if args.project and args.test_or_suite:
 
-            # check if test_or_suite value matches a first level directory
-            # in the test cases directory. this allows to execute all the
-            # test cases in a directory as a test suite
-            elif utils.is_first_level_directory(root_path,
-                                                test_execution.project,
-                                                args.test_or_suite):
-                test_execution.suite = args.test_or_suite
-                # execute test suite
-                start_execution.run_test_or_suite(root_path,
-                                                  test_execution.project,
-                                                  directory_suite=test_execution.suite)
-            # check if test_or_suite value matches an existing test case
-            elif utils.test_case_exists(root_path, test_execution.project,
-                                        args.test_or_suite):
-                test_execution.test = args.test_or_suite
-                # execute test case
-                start_execution.run_test_or_suite(root_path,
-                                                  test_execution.project,
-                                                  test=test_execution.test)
+            if not args.project in utils.get_projects(root_path):
+                msg = ['Error: the project {0} does not exist'.format(args.project),
+                       '',
+                       'Usage:', self._parser.usage,
+                       '',
+                       'Projects:']
+                for proj in utils.get_projects(root_path):
+                    msg.append('  {}'.format(proj))
+                raise CommandException('\n'.join(msg))
             else:
-                # test_or_suite does not match any existing suite or test
-                raise CommandException(
-                    'Error: the value {0} does not match an existing '
-                    'suite or test'.format(args.test_or_suite))
+                test_execution.project = args.project
+                test_execution.settings = settings_manager.get_project_settings(
+                                                            args.project,
+                                                            test_execution.settings)
+
+                if utils.test_suite_exists(root_path, test_execution.project,
+                                           args.test_or_suite):
+                    test_execution.suite = args.test_or_suite
+                    # execute test suite
+                    start_execution.run_test_or_suite(root_path,
+                                                      test_execution.project,
+                                                      suite=test_execution.suite)
+                elif utils.test_case_exists(root_path, test_execution.project,
+                                            args.test_or_suite):
+                    test_execution.test = args.test_or_suite
+                    # execute test case
+                    start_execution.run_test_or_suite(root_path,
+                                                      test_execution.project,
+                                                      test=test_execution.test)
+                else:
+                    # test_or_suite does not match any existing suite or test
+                    msg = [('Error: the value {0} does not match an existing '
+                            'suite or test'.format(args.test_or_suite)),
+                            '',
+                            'Usage:', self._parser.usage]
+                    raise CommandException('\n'.join(msg))
+        
+        elif not args.project and not args.test_or_suite and test_execution.interactive:
+            from golem.test_runner import interactive
+            interactive.interactive(test_execution.settings, test_execution.drivers[0])
+
+        elif not args.project:
+            msg = ['Usage:',
+                   self._parser.usage,
+                   '',
+                   'Projects:']
+            for proj in utils.get_projects(root_path):
+                msg.append('  {}'.format(proj))
+            raise CommandException('\n'.join(msg))
+
+        elif args.project and not args.test_or_suite:
+            msg = ['Usage: {}'.format(self._parser.usage),
+                   '',
+                   'Test Cases:']
+            print('\n'.join(msg))
+            test_cases = utils.get_test_cases(root_path,
+                                              args.project)
+            utils.display_tree_structure_command_line(test_cases['sub_elements'])
+            print('\nTest Suites:')
+            test_suites = utils.get_suites(root_path, args.project)
+            for suite in test_suites['sub_elements']:
+                print('  ' + suite['name'])
+            raise CommandException()
+        else:
+            # test_or_suite does not match any existing suite or test
+            raise CommandException(
+                'Error: the value {0} does not match an existing '
+                'suite or test'.format(args.test_or_suite))
+
+        # if not args.project:
+        #     msg = ['Usage:', self._parser.usage, '\nProjects:']
+        #     for proj in utils.get_projects(root_path):
+        #         msg.append('> {}'.format(proj))
+        #     raise CommandException('\n'.join(msg))
+        # elif not args.project in utils.get_projects(root_path):
+        #     raise CommandException(
+        #         'Error: the project {0} does not exist'.format(
+        #             args.project)
+        #     )
+        # else:
+        #     test_execution.project = args.project
+        #     test_execution.settings = settings_manager.get_project_settings(
+        #         args.project,
+        #         test_execution.settings)
+        #     # check if test_or_suite value is present
+        #     if not args.test_or_suite:
+        #         msg = ['Usage: {}'.format(self._parser.usage),
+        #                'Test Cases:']
+        #         test_cases = utils.get_test_cases(root_path,
+        #                                           test_execution.project)
+        #         # TODO FIX TO SHOW THIS ON Exception
+        #         utils.display_tree_structure_command_line(test_cases)
+        #         msg.append('Test Suites:')
+        #         test_suites = utils.get_suites(root_path, test_execution.project)
+        #         for suite in test_suites:
+        #             msg.append('> ' + suite)
+        #         raise CommandException(msg)
+        #     # check if test_or_suite value matches an existing test suite
+        #     elif utils.test_suite_exists(root_path, test_execution.project,
+        #                                  args.test_or_suite):
+        #         test_execution.suite = args.test_or_suite
+        #         # execute test suite
+        #         start_execution.run_test_or_suite(root_path,
+        #                                           test_execution.project,
+        #                                           suite=test_execution.suite)
+
+        #     # check if test_or_suite value matches a first level directory
+        #     # in the test cases directory. this allows to execute all the
+        #     # test cases in a directory as a test suite
+        #     elif utils.is_first_level_directory(root_path,
+        #                                         test_execution.project,
+        #                                         args.test_or_suite):
+        #         test_execution.suite = args.test_or_suite
+        #         # execute test suite
+        #         start_execution.run_test_or_suite(root_path,
+        #                                           test_execution.project,
+        #                                           directory_suite=test_execution.suite)
+        #     # check if test_or_suite value matches an existing test case
+        #     elif utils.test_case_exists(root_path, test_execution.project,
+        #                                 args.test_or_suite):
+        #         test_execution.test = args.test_or_suite
+        #         # execute test case
+        #         start_execution.run_test_or_suite(root_path,
+        #                                           test_execution.project,
+        #                                           test=test_execution.test)
+        #     else:
+        #         # test_or_suite does not match any existing suite or test
+        #         raise CommandException(
+        #             'Error: the value {0} does not match an existing '
+        #             'suite or test'.format(args.test_or_suite))
 
 
 class GuiCommand(BaseCommand):

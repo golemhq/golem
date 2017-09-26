@@ -1,4 +1,4 @@
-from golem.core import actions
+from golem import actions
 from golem.selenium.utils import elements
 
 
@@ -35,7 +35,7 @@ def verify_error_message(error_message):
 
 
 def access_project(project_name):
-    actions.add_step('Access project {}'.format(project_name))
+    actions.step('Access project {}'.format(project_name))
     items = elements(project_list_item)
     for item in items:
         if item.text == project_name:

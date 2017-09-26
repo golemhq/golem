@@ -1,4 +1,4 @@
-from golem.core import actions
+from golem import actions
 
 
 username_input = ('id', "username", 'username')

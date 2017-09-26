@@ -10,5 +10,17 @@
         "report_projects": [
             "*"
         ]
+    },
+    {
+        "id": "dfdfdfsdfsf",
+        "username": "luciano",
+        "password": "luciano",
+        "is_admin": true,
+        "gui_projects": [
+            "*"
+        ],
+        "report_projects": [
+            "*"
+        ]
     }
 ]

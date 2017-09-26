@@ -1,10 +1,6 @@
 
-
-// var allProjectsData = {};
-
 var charts = {}
 var chartData = {}
-
 
 $(document).ready(function() {
 
@@ -32,12 +28,10 @@ $(document).ready(function() {
 
 
 function loadProject(project, projectData){
-	if(suiteName)
+	if(suiteName || projectName)
 		var projectContainer = ReportDashboard.generateProjectContainerSingleSuite(project);
 	else
 		var projectContainer = ReportDashboard.generateProjectContainer(project);
-	
-	//allProjectsData[project] = {};
 
 	for(suite in projectData){
 
@@ -46,8 +40,6 @@ function loadProject(project, projectData){
 		else
 			var suiteContainer = ReportDashboard.generateExecutionsContainer(project, suite);
 		
-		//allProjectsData[project][suite] = [ ['date', 'total', 'error']];
-
 		// fill in last executions table
 		var index = 1;
 		var executions = []
@@ -55,9 +47,7 @@ function loadProject(project, projectData){
 		for(e in projectData[suite]){
 			var execution = projectData[suite][e];
 			var dateTime = utils.getDateTimeFromTimestamp(execution);
-			executions.push(dateTime)
-
-			//var blueBarId = guidGenerator();
+			executions.push(execution)
 
 			var row = ReportDashboard.generateExecutionsTableRow({
 				project: project,
@@ -67,17 +57,13 @@ function loadProject(project, projectData){
 				dateTime: dateTime,
 				environment: ''
 			});
-
 			var okBar = row.find('.ok-bar');
 			var failBar = row.find('.fail-bar');
-			completarBarraPorcentaje(project, suite, execution, okBar, failBar, index);
-
+			loadChartAndBars(project, suite, execution, okBar, failBar, index);
 			suiteContainer.find("tbody").append(row);
-
 			index += 1;
 		}
 		projectContainer.append(suiteContainer);
-
 
 		// create chart for suite
 		var ctx = suiteContainer.find('canvas')[0].getContext('2d');
@@ -86,18 +72,24 @@ function loadProject(project, projectData){
 		    data: {
 		        labels: executions,
 		        datasets: [
-		        {
-		            label: "Failed",
-		            backgroundColor: 'rgb(217, 83, 79)',
-		            borderColor: 'rgb(217, 83, 79)',
-		            data: [],
-		        },
-		        {
-		            label: "Passed",
-		            backgroundColor: 'rgb(66, 139, 202)',
-		            borderColor: 'rgb(66, 139, 202)',
-		            data: [],
-		        },
+			        {
+			            label: "Failed",
+			            backgroundColor: 'rgb(217, 83, 79)',
+			            borderColor: 'rgb(217, 83, 79)',
+			            data: [],
+			        },
+			        {
+			            label: "Passed",
+			            backgroundColor: 'rgb(66, 139, 202)',
+			            borderColor: 'rgb(66, 139, 202)',
+			            data: [],
+			        },
+			        {
+			            label: "Pending",
+			            backgroundColor: '#b3b3b3',
+			            borderColor: '#b3b3b3',
+			            data: [],
+			        }
 		    	]
 	    	},
 	    	options: {
@@ -115,23 +107,26 @@ function loadProject(project, projectData){
 		        elements: {
 		            line: {
 		                tension: 0, // disables bezier curves
-		            },
-
+		            }
+		        },
+		        tooltips: {
+		        	callbacks: {
+		        		title: function(tooltipItems, data) {
+					       return utils.getDateTimeFromTimestamp(data.labels[tooltipItems[0].index]);
+					     }
+                	}
 		        },
 		        maintainAspectRatio: false,
 	    	}
 		});
-
 		charts[project+suite] = chart;
 	}
-
-	projectContainer.show();
 	$(".all-projects-container").append(projectContainer);
 }
 
 
-function completarBarraPorcentaje(project, suite, execution, okBar, failBar, index){
-	var dateTime = utils.getDateTimeFromTimestamp(execution);
+function loadChartAndBars(project, suite, execution, okBar, failBar, index){
+	//var dateTime = utils.getDateTimeFromTimestamp(execution);
 
 	$.post( 
 		"/report/get_execution_data/",
@@ -146,98 +141,30 @@ function completarBarraPorcentaje(project, suite, execution, okBar, failBar, ind
   			utils.animateProgressBar(okBar, okPercentage);
   			utils.animateProgressBar(failBar, failPercentage);
 
-  			// if(chartData[project+suite] === undefined){
-  			// 	chartData[project+suite] = {}
-  			// }
-
-  			//chartData[project+suite][dateTime] = {passed: executionData.total_cases_ok};
-  			//chartData[project+suite] = und
-
-  			// allProjectsData[project][suite].push([
-  			// 	index.toString(),
-  			// 	data.execution_data.total_cases,
-  			// 	data.execution_data.total_cases - data.execution_data.total_cases_ok]);
-
-  			cargarGraficoHistorial(project, suite, dateTime, executionData.total_cases_ok, executionData.total_cases - executionData.total_cases_ok);
+  			updateChart({
+  				project: project,
+  				suite: suite,
+  				label: execution,
+  				totalOk: executionData.total_cases_ok,
+  				totalFailed: executionData.total_cases_fail,
+  				totalPending: executionData.total_pending
+  			});
 		});
 }
 
 
-// function animateProgressBar(id){
-// 	var goal = $("#"+id).attr('data-transitiongoal');
-// 	$("#"+id).css('width', goal + '%');
-// }
+function updateChart(data){
+	var chart = charts[data.project+data.suite];
+	var indexOfLabel = chart.data.labels.indexOf(data.label);
 
-// function animateProgressBar(bar, percentage){
-// 	// var goal = $("#"+id).attr('data-transitiongoal');
-// 	// $("#"+id).css('width', goal + '%');
-// 	bar.css('width', percentage+'%');
-// }
+	var indexOfDatasetLabelPassed = chart.data.datasets.map(function(o) { return o.label; }).indexOf('Passed');
+	var indexOfDatasetLabelFailed = chart.data.datasets.map(function(o) { return o.label; }).indexOf('Failed');
+	var indexOfDatasetLabelPending = chart.data.datasets.map(function(o) { return o.label; }).indexOf('Pending');
 
+	chart.data.datasets[indexOfDatasetLabelPassed].data[indexOfLabel] = data.totalOk;
+	chart.data.datasets[indexOfDatasetLabelFailed].data[indexOfLabel] = data.totalFailed;
+	chart.data.datasets[indexOfDatasetLabelPending].data[indexOfLabel] = data.totalPending;
 
-
-function cargarGraficoHistorial(project, suite, label, passed, failed){
-	var indexOfLabel = charts[project+suite].data.labels.indexOf(label);
-
-	var indexOfDatasetLabelPassed = charts[project+suite].data.datasets.map(function(o) { return o.label; }).indexOf('Passed');
-	var indexOfDatasetLabelFailed = charts[project+suite].data.datasets.map(function(o) { return o.label; }).indexOf('Failed');
-
-	charts[project+suite].data.datasets[indexOfDatasetLabelPassed].data[indexOfLabel] = passed;
-	charts[project+suite].data.datasets[indexOfDatasetLabelFailed].data[indexOfLabel] = failed;
-
-	charts[project+suite].update();
-
+	chart.update();
 	return
-
-	// google charts might not be loaded yet
-	// if(google.visualization != undefined && 
-	// 	google.visualization.arrayToDataTable != undefined &&
-	// 	google.visualization.AreaChart != undefined){
-		
-	// 	// var data = google.visualization.arrayToDataTable([
-	//     //   ['Year', 'Sales', 'Expenses'],
-	//     //   ['2013',  1000,      400],
-	//     //   ['2014',  1170,      460],
-	//     // ]);
-	//     var container = $("#"+project+" #"+suite).find(".plot-chart-container")[0]
-
-	// 	var data = google.visualization.arrayToDataTable( allProjectsData[project][suite] );
-
-	//     var options = {
-	//       title: '',
-	//       hAxis: {title: '',  titleTextStyle: {color: '#333'}},
-	//       vAxis: {minValue: 0},
-	//       height: 218,
-	//       backgroundColor: '#f9f9f9',
-	//       animation: {
-	//       	startup: true, 
-	//       	duration: 700,
-	//       	easing: 'in'
-	//       },
-	//       legend: {position: 'none'},
-	//       chartArea: {
-	//       	left: 5,
-	//       	right: 5
-	//       }
-	//       // backgroundColor: {
-	//       // 		fill: '#f9f9f9',
-	//       //   	stroke: '#d3d3d3',
-	//       //   	strokeWidth: 2,
- //    	  // 	}
-	//     };
-
-	//     var chart = new google.visualization.AreaChart(container);
-	//     chart.draw(data, options);
-	// }
-	// else{
-	// 	setTimeout(cargarGraficoHistorial, 100, project, suite)
-	    
-	// }
 }
-
-// function guidGenerator() {
-//     var S4 = function() {
-//        return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-//     };
-//     return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
-// }

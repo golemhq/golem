@@ -4,16 +4,37 @@ import os
 import uuid
 
 
-def create_report_directory(workspace, project, test_case_name, suite_name, timestamp):
+def create_suite_execution_directory(workspace, project, suite_name, timestamp):
+    execution_directory = os.path.join(workspace, 'projects', project, 'reports',
+                                       suite_name, timestamp)
+    if not os.path.isdir(execution_directory):
+        try:
+            os.makedirs(execution_directory)
+        except:
+            pass
+    return execution_directory
+
+
+def create_test_execution_directory(workspace, project, test_name, timestamp):
+    execution_directory = os.path.join(workspace, 'projects', project, 'reports',
+                                          'single_tests', test_name, timestamp)
+    if not os.path.isdir(execution_directory):
+        try:
+            os.makedirs(execution_directory)
+        except:
+            pass
+    return execution_directory
+
+
+def create_report_directory(execution_directory, test_case_name, is_suite):
     set_name = 'set_' + str(uuid.uuid4())[:6]
 
     # create suite execution folder in reports directory
-    if suite_name:
-        report_directory = os.path.join(workspace, 'projects', project, 'reports',
-                                        suite_name, timestamp, test_case_name, set_name)
+    if is_suite:
+        report_directory = os.path.join(execution_directory, test_case_name, set_name)
     else:
-        report_directory = os.path.join(workspace, 'projects', project, 'reports',
-                                        'single_tests', test_case_name, timestamp, set_name)
+        report_directory = os.path.join(execution_directory, set_name)
+        
     if not os.path.isdir(report_directory):
         try:
             os.makedirs(report_directory)
@@ -37,6 +58,17 @@ def generate_report(report_directory, test_case_name, test_data, result):
         except:
             serializable_data[key] = repr(value)
 
+    browser = result['browser']
+    output_browser = result['browser']
+    if browser == 'chrome-remote':
+        output_browser = 'chrome (remote)'
+    if browser == 'chrome-headless':
+        output_browser = 'chrome (headless)'
+    if browser == 'chrome-remote-headless':
+        output_browser = 'chrome (remote, headless)'
+    if browser == 'firefox-remote':
+        output_browser = 'firefox (remote)'
+
     report = {
         'test_case': test_case_name,
         'result': result['result'],
@@ -46,7 +78,7 @@ def generate_report(report_directory, test_case_name, test_data, result):
         'short_error': short_error,
         'test_elapsed_time': result['test_elapsed_time'],
         'test_timestamp': result['test_timestamp'],
-        'browser': result['browser'],
+        'browser': output_browser,
         'test_data': serializable_data
     }
     

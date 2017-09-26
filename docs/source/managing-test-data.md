@@ -15,10 +15,10 @@ Let's rewrite the previous example but extracting all the data values outside of
 description = 'Search an article in Wikipedia'
 
 def test(data):
-    go_to(data['URL'])
-    send_keys(('id', 'searchInput'), data['search_value'])
+    go_to(data.URL)
+    send_keys(('id', 'searchInput'), data.search_value)
     click(('id', 'searchButton'))
-    verify_text_in_element(('id', 'firstHeading'), data['article_title'])
+    verify_text_in_element(('id', 'firstHeading'), data.article_title)
 
 def teardown():
     close()
@@ -100,4 +100,4 @@ Using that data file, Golem will run the same test 4 times, using each time a di
     <p>In the third and fourth rows we used a different URL, so we can even point the same test to different environments by just changing the data sets.</p>
 </div>
 
-Next, go to [Using Pages](using-pages.html)
+Next, go to [Using Page Objects](using-page-objects.html)

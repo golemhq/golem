@@ -13,9 +13,20 @@ Used to generate a new test directory.
 
 ##### Commands for golem.py:
 
-**python golem.py run project \<test\>|\<suite\> [-t|--threads -d|--driver]**
+**python golem.py run project \<test\>|\<suite\> [-t|--threads -d|--driver -i|--interactive]**
 
-Run a test case or test suite from a project. Threads indicates the amount of test cases to execute in parallel, default is 1. Driver indicates wich driver to use to run the tests, options are: firefox, chrome, default is firefox. Chrome requires chrome_driver_path setting to be defined in the settings file.
+Run a test case or test suite from a project. 
+
+Threads indicates the amount of test cases to execute in parallel, default is 1. 
+
+Driver indicates wich browser driver to use, options are: chrome, firefox, chrome-remote, chrome-headless, chrome-remote-headless, firefox-remote, default is chrome, it accepts one or more browsers, like so:
+
+```
+>python golem.py run project_name test_name -d firefox chrome
+```
+
+Note: the test will be run once per each browser defined.
+
 
 **python golem.py gui [-p|--port -o|--open]**
 

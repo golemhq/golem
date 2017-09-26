@@ -393,7 +393,8 @@ def check_test_case_run_result():
 
         if os.path.isdir(path):
             for elem in os.listdir(path):
-                sets.append(elem)  
+                if os.path.isdir(os.path.join(path, elem)):
+                    sets.append(elem) 
 
         # is execution finished?
         result['complete'] = report_parser.is_execution_finished(path, sets)
@@ -647,7 +648,10 @@ def get_execution_data():
         project = request.form['project']
         suite = request.form['suite']
         execution = request.form['execution']
-        execution_data = report_parser.get_execution_data(root_path, project, suite, execution)
+        execution_data = report_parser.get_execution_data(workspace=root_path,
+                                                          project=project,
+                                                          suite=suite,
+                                                          execution=execution)
         return jsonify(execution_data)
 
 
@@ -660,16 +664,16 @@ def get_project_health_data():
         health_data = {}
 
         for suite, executions in project_data[project].items():
-            execution_data = report_parser.get_execution_data(root_path,
-                                                              project,
-                                                              suite,
-                                                              executions[0])
-            print(execution_data['total_cases_ok'], execution_data['total_cases'])
+            execution_data = report_parser.get_execution_data(workspace=root_path,
+                                                              project=project,
+                                                              suite=suite,
+                                                              execution=executions[0])
             health_data[suite] = {
                 'execution': executions[0],
                 'total': execution_data['total_cases'],
                 'total_ok': execution_data['total_cases_ok'],
-                'total_fail': execution_data['total_cases_fail']
+                'total_fail': execution_data['total_cases_fail'],
+                'total_pending': execution_data['total_pending']
             }
 
         return jsonify(health_data)

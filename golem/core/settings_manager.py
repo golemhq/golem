@@ -38,7 +38,7 @@ def settings_file_content():
         "",
         "// Log level to file. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.",
         "// Default option is DEBUG",
-        "\"console_log_level\": \"DEBUG\",",
+        "\"file_log_level\": \"DEBUG\",",
         "",
         "// Log all events, instead of just Golem events. Default is false",
         "\"log_all_events\": false",

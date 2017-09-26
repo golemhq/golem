@@ -75,6 +75,9 @@ gray 1  #fafafa
     margin-bottom: 0px;
 }
 
+.margin-bottom-5 {
+    margin-bottom: 5px;
+}
 
 .flex-row {
     display: flex;

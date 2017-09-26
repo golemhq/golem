@@ -16,10 +16,12 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
     drivers = []
     suite_module = None
     report_suite_name = None
+    is_suite = False
 
     # get test list
     if test:
         tests = [test]
+        report_suite_name = 'single_tests'
     elif suite:
         tests = utils.get_suite_test_cases(workspace, project, suite)      
         suite_amount_workers = utils.get_suite_amount_of_workers(workspace, project, suite)
@@ -28,9 +30,11 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
                                               test_execution.project,
                                               suite)
         report_suite_name = suite
+        is_suite = True
     elif directory_suite:
         tests = utils.get_directory_suite_test_cases(workspace, project, directory_suite)
         report_suite_name = directory_suite
+        is_suite = True
     else:
         sys.exit("ERROR: invalid arguments for run_test_or_suite()")
 
@@ -73,15 +77,24 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
                         'report_directory': None
                     }
                 )
-
+    if is_suite:
+        execution_directory = report.create_suite_execution_directory(
+                                    test_execution.root_path,
+                                    test_execution.project,
+                                    report_suite_name,
+                                    test_execution.timestamp)
+    else:
+        execution_directory = report.create_test_execution_directory(
+                                        test_execution.root_path,
+                                        test_execution.project,
+                                        test,
+                                        test_execution.timestamp)
     # 
     for test in execution_list:
         # generate a report directory for this test
-        report_directory = report.create_report_directory(test_execution.root_path,
-                                                          test_execution.project,
+        report_directory = report.create_report_directory(execution_directory,
                                                           test['test_name'],
-                                                          report_suite_name, 
-                                                          test_execution.timestamp)
+                                                          is_suite)
         test['report_directory'] = report_directory
 
 
@@ -89,22 +102,19 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
         if hasattr(suite_module, 'before'):
             suite_module.before()
 
-
-    debug = test_execution.debug
-
-    if debug:
-        if threads == 1 and len(execution_list) == 1:
-            # run single test without threading
-            test = execution_list[0]
-            run_test(test_execution.root_path, test_execution.project,
-                     test['test_name'], test['data_set'],
-                     test['driver'], test_execution.settings,
-                     test['report_directory'])
+    if test_execution.interactive and threads == 1:
+        if threads == 1:
+            # run tests serially
+            for test in execution_list:
+                run_test(test_execution.root_path, test_execution.project,
+                         test['test_name'], test['data_set'],
+                         test['driver'], test_execution.settings,
+                         test['report_directory'])
         else:
-            print('Error: to run in debug mode, only one test in a single thread is required')
+            print('Error: to run in debug mode, threads must equal one')
     else:
         # run list of tests using threading
-        multiprocess_executor(execution_list, threads)
+        multiprocess_executor(execution_list, is_suite, execution_directory, threads)
 
     if suite:
         if hasattr(suite_module, 'after'):
