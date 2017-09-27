@@ -5,17 +5,10 @@ the end of the execution to the report generator
 import logging
 import os
 
-import golem.core
-
 
 logger = None
-
 description = None
-
 steps = []
-
-#screenshots = {}
-
 
 def _get_log_level(log_level_string):
     log_level = ''
@@ -34,7 +27,7 @@ def _get_log_level(log_level_string):
     return log_level
 
 
-def get_logger(log_directory=None, console_log_level='DEBUG', 
+def get_logger(log_directory=None, console_log_level='DEBUG',
                file_log_level='DEBUG', log_all_events=False):
     global logger
     if log_all_events:
@@ -67,4 +60,3 @@ def get_logger(log_directory=None, console_log_level='DEBUG',
         file_formatter = logging.Formatter(file_format_string, "%H:%M:%S")
         file_handler.setFormatter(file_formatter)
         logger.addHandler(file_handler)
-

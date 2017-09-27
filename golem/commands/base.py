@@ -32,9 +32,9 @@ class RunCommand(BaseCommand):
 
     def add_arguments(self, parser):
         driver_choices = ['firefox',
-                          'chrome', 
+                          'chrome',
                           'chrome-remote',
-                          'chrome-headless', 
+                          'chrome-headless',
                           'chrome-remote-headless',
                           'firefox-remote']
         parser.add_argument('project', default='',
@@ -83,10 +83,8 @@ class RunCommand(BaseCommand):
                 raise CommandException('\n'.join(msg))
             else:
                 test_execution.project = args.project
-                test_execution.settings = settings_manager.get_project_settings(
-                                                            args.project,
-                                                            test_execution.settings)
-
+                test_execution.settings = settings_manager.get_project_settings(args.project,
+                                                                                test_execution.settings)
                 if utils.test_suite_exists(root_path, test_execution.project,
                                            args.test_or_suite):
                     test_execution.suite = args.test_or_suite
@@ -108,7 +106,7 @@ class RunCommand(BaseCommand):
                             '',
                             'Usage:', self._parser.usage]
                     raise CommandException('\n'.join(msg))
-        
+
         elif not args.project and not args.test_or_suite and test_execution.interactive:
             from golem.test_runner import interactive
             interactive.interactive(test_execution.settings, test_execution.cli_drivers)
@@ -141,68 +139,6 @@ class RunCommand(BaseCommand):
                 'Error: the value {0} does not match an existing '
                 'suite or test'.format(args.test_or_suite))
 
-        # if not args.project:
-        #     msg = ['Usage:', self._parser.usage, '\nProjects:']
-        #     for proj in utils.get_projects(root_path):
-        #         msg.append('> {}'.format(proj))
-        #     raise CommandException('\n'.join(msg))
-        # elif not args.project in utils.get_projects(root_path):
-        #     raise CommandException(
-        #         'Error: the project {0} does not exist'.format(
-        #             args.project)
-        #     )
-        # else:
-        #     test_execution.project = args.project
-        #     test_execution.settings = settings_manager.get_project_settings(
-        #         args.project,
-        #         test_execution.settings)
-        #     # check if test_or_suite value is present
-        #     if not args.test_or_suite:
-        #         msg = ['Usage: {}'.format(self._parser.usage),
-        #                'Test Cases:']
-        #         test_cases = utils.get_test_cases(root_path,
-        #                                           test_execution.project)
-        #         # TODO FIX TO SHOW THIS ON Exception
-        #         utils.display_tree_structure_command_line(test_cases)
-        #         msg.append('Test Suites:')
-        #         test_suites = utils.get_suites(root_path, test_execution.project)
-        #         for suite in test_suites:
-        #             msg.append('> ' + suite)
-        #         raise CommandException(msg)
-        #     # check if test_or_suite value matches an existing test suite
-        #     elif utils.test_suite_exists(root_path, test_execution.project,
-        #                                  args.test_or_suite):
-        #         test_execution.suite = args.test_or_suite
-        #         # execute test suite
-        #         start_execution.run_test_or_suite(root_path,
-        #                                           test_execution.project,
-        #                                           suite=test_execution.suite)
-
-        #     # check if test_or_suite value matches a first level directory
-        #     # in the test cases directory. this allows to execute all the
-        #     # test cases in a directory as a test suite
-        #     elif utils.is_first_level_directory(root_path,
-        #                                         test_execution.project,
-        #                                         args.test_or_suite):
-        #         test_execution.suite = args.test_or_suite
-        #         # execute test suite
-        #         start_execution.run_test_or_suite(root_path,
-        #                                           test_execution.project,
-        #                                           directory_suite=test_execution.suite)
-        #     # check if test_or_suite value matches an existing test case
-        #     elif utils.test_case_exists(root_path, test_execution.project,
-        #                                 args.test_or_suite):
-        #         test_execution.test = args.test_or_suite
-        #         # execute test case
-        #         start_execution.run_test_or_suite(root_path,
-        #                                           test_execution.project,
-        #                                           test=test_execution.test)
-        #     else:
-        #         # test_or_suite does not match any existing suite or test
-        #         raise CommandException(
-        #             'Error: the value {0} does not match an existing '
-        #             'suite or test'.format(args.test_or_suite))
-
 
 class GuiCommand(BaseCommand):
     cmd = 'gui'
@@ -219,10 +155,10 @@ class GuiCommand(BaseCommand):
         #                     default=False,
         #                     help="Start the gui application in debug mode")
 
-    def run(self, test_execution, args):
+    def run(self, args):
         port_number = args.port
         # debug = args.debug
-        # Note, some features won't work if the golem gui is not 
+        # Note, some features won't work if the golem gui is not
         # started with debug = True
         debug = True
         gui_start.run_gui(port_number, debug, args.open)

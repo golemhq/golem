@@ -343,7 +343,7 @@ def get_page_objects():
     if request.method == 'POST':
         project = request.form['project']
         path = os.path.join(root_path, 'projects', project, 'pages')
-        page_objects = utils.get_files_in_directory_dotted_path(path)
+        page_objects = utils.get_files_in_directory_dot_path(path)
         return json.dumps(page_objects)
 
 
@@ -602,8 +602,7 @@ def save_settings():
             'result': 'ok',
             'errors': []
         }
-        settings_manager.save_settings(root_path, projectname,
-                                       project_settings, global_settings)
+        settings_manager.save_settings(projectname, project_settings, global_settings)
         return json.dumps(result)
 
 

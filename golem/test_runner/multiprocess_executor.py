@@ -2,13 +2,11 @@
 The multiprocess_executor method runs all the test cases provided in
 parallel using multiprocessing.
 """
-import sys
-import os
 import time
 from multiprocessing import Pool
 from multiprocessing.pool import ApplyResult
 
-from golem.core import test_execution, utils
+from golem.core import test_execution
 from golem.test_runner.test_runner import run_test
 from golem.gui import report_parser
 
@@ -19,8 +17,6 @@ def multiprocess_executor(execution_list, is_suite, execution_directory, threads
         print('{} in {} with the following data: {}'.format(test['test_name'],
                                                             test['driver'],
                                                             test['data_set']))
-
-    # 
     start_time = time.time()
 
     pool = Pool(processes=threads)
@@ -50,7 +46,6 @@ def multiprocess_executor(execution_list, is_suite, execution_directory, threads
     pool.join()
 
     elapsed_time = round(time.time() - start_time, 2)
-    
+
     # generate execution_result.json
     report_parser.generate_execution_report(execution_directory, elapsed_time)
-

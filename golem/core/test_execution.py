@@ -8,8 +8,12 @@ test = None
 
 suite = None
 
-settings = None
+settings = {}
 
 thread_amount = None
 
 timestamp = None
+
+cli_drivers = []
+
+interactive = False

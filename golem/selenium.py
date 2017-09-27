@@ -1,12 +1,9 @@
 import time
 import types
 
-import selenium
-from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
 
 from golem import core
-from golem.core import data
 from golem.core.exceptions import IncorrectSelectorType, ElementNotFound
 
 
@@ -19,8 +16,7 @@ def _find_selenium_element(root, selector_type, selector_value, element_name, re
         elif selector_type == 'css':
             webelement = root.find_element_by_css_selector(selector_value)
         elif selector_type == 'text':
-            webelement = root.find_element_by_css_selector(
-                                    "text[{}]".format(selector_value))
+            webelement = root.find_element_by_css_selector("text[{}]".format(selector_value))
         elif selector_type == 'link_text':
             webelement = root.find_element_by_link_text(selector_value)
         elif selector_type == 'partial_link_text':
@@ -32,8 +28,7 @@ def _find_selenium_element(root, selector_type, selector_value, element_name, re
         elif selector_type == 'tag_name':
             webelement = root.find_element_by_tag_name(selector_value)
         else:
-            raise IncorrectSelectorType(
-                    'Selector {0} is not a valid option'.format(selector_type))
+            raise IncorrectSelectorType('Selector {0} is not a valid option'.format(selector_type))
     except:
         time.sleep(0.5)
         end_time = time.time()
@@ -91,18 +86,18 @@ def _find(self, element=None, id=None, name=None, text=None, link_text=None,
     selector_value = None
     element_name = None
 
-    if timeout == None:
+    if timeout is None:
         timeout = core.get_setting('implicit_wait')
 
 
-    if type(element) == WebElement:
+    if isinstance(element, WebElement):
         webelement = element
     else:
-        if type(element) == tuple:
+        if isinstance(element, tuple):
             selector_type = element[0]
             selector_value = element[1]
             element_name = element[2] if len(element) == 3 else element[1]
-        elif type(element) == str:
+        elif isinstance(element, str):
             selector_type = 'css'
             selector_value = element
             element_name = element
@@ -144,12 +139,12 @@ def _find(self, element=None, id=None, name=None, text=None, link_text=None,
 
 
 def _find_all(self, element=None, id=None, name=None, text=None, link_text=None,
-              partial_link_text=None, css=None, xpath=None, tag_name=None, timeout=0):
+              partial_link_text=None, css=None, xpath=None, tag_name=None):
     webelements = []
     selector_type = None
     selector_value = None
     element_name = None
-    if type(element) == tuple:
+    if isinstance(element, tuple):
         selector_type = element[0]
         selector_value = element_name = element[1]
         if selector_type == 'id':
@@ -168,7 +163,7 @@ def _find_all(self, element=None, id=None, name=None, text=None, link_text=None,
             xpath = selector_value
         elif selector_type == 'tag_name':
             tag_name = selector_value
-    elif type(element) == str:
+    elif isinstance(element, str):
         selector_type = 'css'
         selector_value = element_name = element
         webelements = self.find_elements_by_css_selector(element)
@@ -183,8 +178,7 @@ def _find_all(self, element=None, id=None, name=None, text=None, link_text=None,
     elif text:
         selector_type = 'text'
         selector_value = element_name = text
-        webelements = self.find_elements_by_css_selector(
-                                    "text[{}]".format(text))
+        webelements = self.find_elements_by_css_selector("text[{}]".format(text))
     elif link_text:
         selector_type = 'link_text'
         selector_value = element_name = link_text

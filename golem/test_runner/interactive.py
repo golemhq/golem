@@ -3,6 +3,7 @@ from golem.core import utils
 from golem import actions
 from golem.actions import *
 from golem.selenium import *
+# TODO remove wild card import
 
 
 def interactive(settings, cli_drivers):

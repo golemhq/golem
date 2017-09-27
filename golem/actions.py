@@ -2,11 +2,9 @@
 import time
 import uuid
 import os
-import sys
 import importlib
 import string
 import random as rand
-import traceback
 
 import selenium
 from selenium.webdriver.common.keys import Keys
@@ -76,7 +74,7 @@ def assert_false(condition):
     step_message = 'Assert that {0} is false'.format(condition)
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, False)
-    if condition == True:
+    if condition:
         raise Exception('Expected {} to be false'.format(condition))
 
 
@@ -84,23 +82,23 @@ def assert_true(condition):
     step_message = 'Assert that {0} is true'.format(condition)
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, False)
-    if not condition == True:
+    if not condition:
         raise Exception('Expected {} to be true'.format(condition))
 
 
 def capture(message=''):
-    _run_wait_hook() 
+    _run_wait_hook()
     logger.logger.info('Take screenshot {}'.format(message))
     driver = get_driver()
     # print('SHOULD SAVE SCREENSHOT IN', core.report_directory)
-    
+
     # store img in memory and save to disk when at the end
     # when the report is generated
     # Note: this solution uses pillow
     # img = Image.open(io.BytesIO(driver.get_screenshot_as_png()))
     # img_id = str(uuid.uuid4())[:8]
     # logger.screenshots[img_id] = img
-    
+
     # store image at this point, the target directory is already
     # created since the beginning of the test, stored in golem.gore.report_directory
     img_id = str(uuid.uuid4())[:8]
@@ -141,11 +139,11 @@ def debug():
     import code
     def console_exit():
         raise SystemExit
-    vars = globals().copy()
-    vars.update(locals())
-    vars['exit'] = console_exit
+    vars_copy = globals().copy()
+    vars_copy.update(locals())
+    vars_copy['exit'] = console_exit
     banner = 'Entering interactive debug mode\nType exit() to stop'
-    shell = code.InteractiveConsole(vars)
+    shell = code.InteractiveConsole(vars_copy)
     try:
         shell.interact(banner=banner)
     except SystemExit:
@@ -176,7 +174,7 @@ def press_key(element, key):
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     webelement = get_driver().find(element)
     if key == 'RETURN' or key == 'ENTER':
-        webelement.send_keys(Keys.RETURN);
+        webelement.send_keys(Keys.RETURN)
     else:
         raise Exception('Key value {} is invalid'.format(key))
 
@@ -332,8 +330,8 @@ def verify_selected_option(element, text):
     _run_wait_hook()
     webelement = get_driver().find(element)
     select = selenium.webdriver.support.select.Select(webelement)
-    step_message = 'Verify selected option of element \'{0}\' is \'{1}\''.format(
-                   webelement.name, text)
+    step_message = ('Verify selected option of element \'{0}\''
+                    ' is \'{1}\''.format(webelement.name, text))
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if not select.first_selected_option.text == text:
@@ -349,8 +347,7 @@ def verify_text(text):
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     if text not in driver.page_source:
-        raise TextNotPresent(
-                    "Text '{}' was not found in the page".format(text))
+        raise TextNotPresent("Text '{}' was not found in the page".format(text))
 
 
 def verify_text_in_element(element, text):
@@ -395,7 +392,7 @@ def wait_for_element_enabled(element, timeout=20):
     timed_out = False
     webelement = get_driver().find(element)
     enabled = webelement.is_enabled()
-    while not enabled:
+    while not enabled and not timed_out:
         logger.logger.debug('Element is not enabled, waiting..')
         time.sleep(0.5)
         enabled = webelement.is_displayed()
@@ -429,16 +426,16 @@ def get(url, headers={}, params={}):
     store('last_response', response)
 
 
-def post(url, headers={}, data={}):
+def post(url, headers={}, params={}):
     step_message = 'Make POST request to {}'.format(url)
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, False)
-    response = requests.post(url, data)
+    response = requests.post(url, headers=headers, params=params)
     store('last_response', response)
 
 
 def verify_response_status_code(response, status_code):
-    if type(status_code) == str:
+    if isinstance(status_code, str):
         if status_code.isdigit():
             status_code = int(status_code)
     step_message = 'Verify response status code is {}'.format(status_code)
@@ -451,4 +448,3 @@ def verify_response_status_code(response, status_code):
 
 def verify_response_content():
     pass
-

@@ -1,7 +1,7 @@
 """Main point of entrance to the application"""
 
 import argparse
-from .core import utils, test_execution
+from .core import test_execution
 from .core.settings_manager import get_global_settings
 from . import commands
 

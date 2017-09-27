@@ -15,5 +15,5 @@ def log_change(workspace, project, action, file_type, file_name, username):
     path = os.path.join(workspace, 'projects', project, 'changelog')
     with open(path, 'a+') as file:
         file.write('{0} {1} {2} {3} by {4}\n'.format(timestamp, action, file_type,
-                                           file_name, username))
+                                                     file_name, username))
         

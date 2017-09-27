@@ -1,4 +1,3 @@
-import csv
 import datetime
 import os
 import subprocess
@@ -12,8 +11,8 @@ def new_directory_test_case(root_path, project, parents, test_name):
     if directory_already_exists(root_path, project, 'tests', parents, test_name):
         errors.append('A directory with that name already exists')
     else:
-        utils.create_new_directory(path_list=[root_path, 'projects', project, 'tests',
-                                   parents, test_name], add_init=True)
+        path_list = [root_path, 'projects', project, 'tests', parents, test_name]
+        utils.create_new_directory(path_list=path_list, add_init=True)
     return errors
 
 
@@ -23,15 +22,15 @@ def new_directory_page_object(root_path, project, parents, page_name):
     if directory_already_exists(root_path, project, 'pages', parents, page_name):
         errors.append('A directory with that name already exists')
     else:
-        utils.create_new_directory(path_list=[root_path, 'projects', project, 'pages',
-                                   parents, page_name], add_init=True)
+        path_list = [root_path, 'projects', project, 'pages', parents, page_name]
+        utils.create_new_directory(path_list=path_list, add_init=True)
     return errors
 
 
 def run_test_case(project, test_case_name):
     timestamp = utils.get_timestamp()
-    subprocess.Popen(['python', 'golem.py', 'run', project, test_case_name,
-                     '--timestamp', timestamp])
+    param_list = ['python', 'golem.py', 'run', project, test_case_name, '--timestamp', timestamp]
+    subprocess.Popen(param_list)
     return timestamp
 
 
@@ -41,30 +40,11 @@ def run_suite(project, suite_name):
     return timestamp
 
 
-def get_time_span(task_id):
-
-    path = os.path.join('results', '{0}.csv'.format(task_id))
-    if not os.path.isfile(path):
-        log_to_file('an error')
-        return
-    else: 
-        with open(path, 'r') as f:
-            reader = csv.DictReader(f, delimiter=';') 
-            last_row = list(reader)[-1]
-            exec_time = string_to_time(last_row['time'])
-            time_delta = datetime.datetime.now() - exec_time
-            total_seconds = time_delta.total_seconds()
-            return total_seconds
-
-
 def directory_already_exists(root_path, project, root_dir, parents, dir_name):
     parents_joined = os.sep.join(parents)
     directory_path = os.path.join(root_path, 'projects', project, root_dir,
                                   parents_joined, dir_name)
-    if os.path.exists(directory_path):
-        return True
-    else:
-        return False
+    return bool(os.path.exists(directory_path))
 
 
 def time_to_string():

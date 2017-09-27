@@ -1,14 +1,12 @@
 """
 This module contains the method for running one test
 """
-
 import importlib
 import time
 import traceback
-import signal
 
 import golem.core
-from golem.core import report, test_execution, utils
+from golem.core import report, utils
 
 
 def run_test(workspace, project, test_name, test_data, driver,
@@ -28,10 +26,11 @@ def run_test(workspace, project, test_name, test_data, driver,
     from golem import actions
 
     # convert test_data to data obj
-    # TODO convert data dict to data obj
-    class data:
-        pass
-    new_data_class = data()
+    class Data:
+        def __init__():
+            pass
+
+    new_data_class = Data()
     for key, value in test_data.items():
         setattr(new_data_class, key, value)
 
@@ -59,7 +58,7 @@ def run_test(workspace, project, test_name, test_data, driver,
     golem.core.report_directory = report_directory
 
     test_module = None
-    
+
     try:
         test_module = importlib.import_module(
             'projects.{0}.tests.{1}'.format(project, test_name))
@@ -69,10 +68,10 @@ def run_test(workspace, project, test_name, test_data, driver,
             for page in test_module.pages:
                 test_module = utils.generate_page_object_module(project, test_module,
                                                                 page, page.split('.'))
-        
+
         # import logger into the test module
         setattr(test_module, 'logger', golem.core.execution_logger)
-        
+
         # import actions into the test module
         for action in dir(golem.actions):
             setattr(test_module, action, getattr(golem.actions, action))
@@ -82,7 +81,7 @@ def run_test(workspace, project, test_name, test_data, driver,
             golem.core.execution_logger.description = test_module.description
         else:
             execution_logger.logger.info('Test does not have description')
-        
+
         # run setup method
         if hasattr(test_module, 'setup'):
             test_module.setup(golem.core.test_data)
@@ -98,7 +97,7 @@ def run_test(workspace, project, test_name, test_data, driver,
         result['error'] = traceback.format_exc()
         try:
             if settings['screenshot_on_error'] and golem.core.driver:
-                    actions.capture('error')
+                actions.capture('error')
         except:
             # if the test failed and driver is not available
             # capture screenshot is not possible, continue
@@ -116,7 +115,7 @@ def run_test(workspace, project, test_name, test_data, driver,
         result['error'] += '\n\nteardown failed'
         result['error'] += '\n' + traceback.format_exc()
         execution_logger.logger.error('An error ocurred in the teardown:', exc_info=True)
-    
+
     # if there is no teardown or teardown failed or it did not close the driver,
     # let's try to close the driver manually
     if golem.core.driver:

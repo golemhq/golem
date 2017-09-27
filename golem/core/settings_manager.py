@@ -63,7 +63,7 @@ def read_json_and_remove_comments(json_path):
         json_data = {}
         try:
             json_data = json.loads(file_content_without_comments)
-        except Exception as e:
+        except Exception:
             print('There was an error reading file {}'.format(json_path))
 
         return json_data
@@ -85,38 +85,38 @@ def assign_settings_default_values(settings):
 
     if not 'screenshot_on_error' in settings:
         settings['screenshot_on_error'] = True
-    elif settings['screenshot_on_error'] == '' or settings['screenshot_on_error'] == None:
+    elif settings['screenshot_on_error'] == '' or settings['screenshot_on_error'] is None:
         settings['screenshot_on_error'] = True
 
     if not 'screenshot_on_step' in settings:
         settings['screenshot_on_step'] = False
-    elif settings['screenshot_on_step'] == '' or settings['screenshot_on_step'] == None:
-        settings['screenshot_on_step'] == False
+    elif settings['screenshot_on_step'] == '' or settings['screenshot_on_step'] is None:
+        settings['screenshot_on_step'] = False
 
     if not 'wait_hook' in settings:
         settings['wait_hook'] = None
     elif settings['wait_hook'] == '':
-        settings['wait_hook'] == None
+        settings['wait_hook'] = None
 
     if not 'default_driver' in settings:
         settings['default_driver'] = 'chrome'
     elif settings['default_driver'] == '':
-        settings['default_driver'] == 'chrome'
+        settings['default_driver'] = 'chrome'
 
     if not 'chrome_driver_path' in settings:
         settings['chrome_driver_path'] = None
     elif settings['chrome_driver_path'] == '':
-        settings['chrome_driver_path'] == None
+        settings['chrome_driver_path'] = None
 
     if not 'gecko_driver_path' in settings:
         settings['gecko_driver_path'] = None
     elif not settings['gecko_driver_path']:
-        settings['gecko_driver_path'] == None
+        settings['gecko_driver_path'] = None
 
     if not 'remote_url' in settings:
         settings['remote_url'] = None
     elif not settings['remote_url']:
-        settings['remote_url'] == None
+        settings['remote_url'] = None
 
     if not 'console_log_level' in settings:
         settings['console_log_level'] = 'INFO'
@@ -130,7 +130,7 @@ def assign_settings_default_values(settings):
 
     if not 'log_all_events' in settings:
         settings['log_all_events'] = True
-    elif settings['log_all_events'] == '' or settings['log_all_events'] == None:
+    elif settings['log_all_events'] == '' or settings['log_all_events'] is None:
         settings['log_all_events'] = True
 
     return settings
@@ -176,7 +176,7 @@ def get_project_settings(project, global_settings):
     return global_settings
 
 
-def save_settings(root_path, project, project_settings, global_settings):
+def save_settings(project, project_settings, global_settings):
     settings_path = os.path.join('settings.json')
     with open(settings_path, 'w') as global_settings_file:
         global_settings_file.write(global_settings)
@@ -185,4 +185,3 @@ def save_settings(root_path, project, project_settings, global_settings):
     with open(project_path, 'w') as project_settings_file:
         project_settings_file.write(project_settings)
     return
-

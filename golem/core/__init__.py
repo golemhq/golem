@@ -20,7 +20,7 @@ test_data = None
 report_directory = None
 
 
-def get_or_create_webdriver(*args):
+def get_or_create_webdriver():
     global settings
     global driver
     if not driver:
@@ -96,7 +96,7 @@ def get_or_create_webdriver(*args):
     # bind _find method to driver instance
     driver.find = types.MethodType(_find, driver)
     driver.find_all = types.MethodType(_find_all, driver)
-    
+
     # if settings.minimize:
     #     driver.set_window_position(-3000, 0)
     # else:
@@ -106,7 +106,7 @@ def get_or_create_webdriver(*args):
 
 
 def reset_driver_object():
-    global driver 
+    global driver
     driver = None
 
 
