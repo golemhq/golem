@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 
     <!-- JQUERY -->
-    <script src="{{ url_for('static', filename='js/jquery/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/external/jquery.min.js') }}"></script>
 
     <title>Golem</title>
 
@@ -118,10 +118,10 @@
 </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-<script src="{{ url_for('static', filename='js/bootstrap/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/toastr.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/chart.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-<script src="{{ url_for('static', filename='js/toastr/toastr.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/chartJs/chart.min.js') }}"></script>
 <script>
   var username = "{{g.user.username}}";
 </script>

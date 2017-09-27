@@ -533,3 +533,17 @@ def duplicate_element(workspace, project, element_type, original_file_dot_path,
     return errors
 
 
+def choose_driver_by_precedence(cli_drivers=[], suite_drivers=[],
+                                settings_default_driver=None):
+    chosen_drivers = []
+    if cli_drivers:
+        chosen_drivers = cli_drivers
+    elif suite_drivers:
+        chosen_drivers = suite_drivers
+    elif settings_default_driver:
+        chosen_drivers = [settings_default_driver]
+    else:
+        chosen_drivers = ['chrome']  # hardcoded default
+    return chosen_drivers
+
+

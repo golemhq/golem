@@ -63,7 +63,7 @@ class RunCommand(BaseCommand):
 
     def run(self, test_execution, args):
         test_execution.thread_amount = args.threads
-        test_execution.drivers = args.drivers
+        test_execution.cli_drivers = args.drivers
         test_execution.timestamp = args.timestamp
         test_execution.interactive = args.interactive
         test_execution.minimize = args.minimize
@@ -111,7 +111,7 @@ class RunCommand(BaseCommand):
         
         elif not args.project and not args.test_or_suite and test_execution.interactive:
             from golem.test_runner import interactive
-            interactive.interactive(test_execution.settings, test_execution.drivers[0])
+            interactive.interactive(test_execution.settings, test_execution.cli_drivers)
 
         elif not args.project:
             msg = ['Usage:',

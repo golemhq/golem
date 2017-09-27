@@ -1,0 +1,31 @@
+include MANIFEST.in
+include LICENSE
+
+include golem/gui/static/css/*
+include golem/gui/static/css/bootstrap/*
+include golem/gui/static/css/fonts/*
+include golem/gui/static/css/jquery-ui/*
+include golem/gui/static/css/toastr/*
+include golem/gui/static/img/*
+include golem/gui/static/js/*
+include golem/gui/static/js/bootstrap/*
+include golem/gui/static/js/jquery/*
+include golem/gui/static/js/jquery-autocomplete/*
+include golem/gui/static/js/sortable/*
+include golem/gui/static/js/toastr/*
+include golem/gui/static/js/code_mirror/*
+include golem/gui/static/js/chartjs/*
+
+
+include golem/gui/static/report/css/*
+include golem/gui/static/report/fonts/*
+include golem/gui/static/report/js/*
+include golem/gui/static/report/js/bootstrap/*
+include golem/gui/static/report/js/jquery/*
+include golem/gui/static/report/js/plugins/datatable/*
+include golem/gui/static/report/js/plugins/stat/flot/*
+
+include golem/gui/templates/*
+include golem/gui/templates/report/*
+
+include golem/bin/drivers/*

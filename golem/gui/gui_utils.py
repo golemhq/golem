@@ -101,6 +101,10 @@ def get_global_actions():
             'parameters': [{'name': 'message (optional)', 'type': 'value'}]
         },
         {
+            'name': 'clear',
+            'parameters': [{'name': 'element', 'type': 'element'}]
+        },
+        {
             'name': 'click',
             'parameters': [{'name': 'element', 'type': 'element'}]
         },

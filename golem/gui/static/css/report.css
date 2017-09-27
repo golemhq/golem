@@ -171,3 +171,11 @@
     padding-top: 4px !important;
     padding-bottom: 4px !important;
 }
+
+
+.step-screenshot {
+    margin-left: auto;
+    margin-right: auto;
+    width: 70%;
+    border: 1px solid lightgray;
+}
