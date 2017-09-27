@@ -3,15 +3,14 @@
 
 ## [Unreleased]
 
-## [1.0.0] - 2017-09-26
+## [0.1.22] - 2017-09-27
 ### Added
-- clear to golem.actions
+- Added clear action to golem.actions
 
-### Changed
-- lorem ipsum
+### Fixed
+- Missing js files in manifest.in
 
-### Removed
-- lorem ipsum
+
 
 ### Added
 ### Changed
