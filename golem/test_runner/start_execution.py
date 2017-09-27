@@ -45,15 +45,9 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
     elif suite_amount_workers:
         threads = suite_amount_workers
     
-    # get drivers
-    if test_execution.drivers:
-        drivers = test_execution.drivers
-    elif suite_drivers:
-        drivers = suite_drivers
-    elif not drivers and 'default_driver' in test_execution.settings:
-        drivers = [test_execution.settings['default_driver']]
-    else:
-        drivers = ['chrome']
+    drivers = utils.choose_driver_by_precedence(cli_drivers=test_execution.cli_drivers,
+                                                suite_drivers=suite_drivers,
+                                                settings_default_driver=test_execution.settings['default_driver'])
 
     # timestamp is passed when the test is executed from the GUI,
     # otherwise, a timestamp should be generated at this point
@@ -63,7 +57,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
 
     # get test data for each test present in the list of tests
     # for each test in the list, for each data set and driver combination
-    # append an entry to the execution_list dictionary
+    # append an entry to the execution_list
     execution_list = []
     for test_case in tests:
         data_sets = utils.get_test_data(workspace, project, test_case)

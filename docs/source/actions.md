@@ -10,6 +10,11 @@ Golem comes with predefined actions that cover almost all the needs to write tes
 Take a screenshot of the browser, the message is optional
 
 
+**clear(element)**
+
+Clear element
+
+
 **click(element)**
 
 Perform a mouse click

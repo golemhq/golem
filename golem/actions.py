@@ -111,6 +111,15 @@ def capture(message=''):
     step(full_message)
 
 
+def clear(element):
+    _run_wait_hook()
+    webelement = get_driver().find(element)
+    step_message = 'Clear {0} element'.format(webelement.name)
+    webelement.clear()
+    logger.logger.info(step_message)
+    _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
+
+
 def click(element):
     _run_wait_hook()
     webelement = get_driver().find(element)
@@ -128,17 +137,7 @@ def close():
 
 
 def debug():
-    # print('Entering interactive debug mode')
-    # print('Type exit to stop')
-    # command = input()
-    # while command != 'exit':
-    #     try:
-    #         eval(command)
-    #     except:
-    #         print("Unexpected error:", traceback.format_exc())
-    #     command = input()
-    
-    import readline # optional, will allow Up/Down/History in the console
+    import readline  # optional, will allow Up/Down/History in the console
     import code
     def console_exit():
         raise SystemExit
