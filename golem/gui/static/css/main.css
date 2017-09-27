@@ -83,6 +83,10 @@ gray 1  #fafafa
     display: flex;
 }
 
+.font-17 {
+    font-size: 17px
+}
+
 .progress {
     -webkit-border-radius: 0;
     -moz-border-radius: 0;

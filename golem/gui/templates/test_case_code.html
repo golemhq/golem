@@ -2,7 +2,7 @@
 
 {% block head_declarations %} 
 
-<link rel="stylesheet" href="{{ url_for('static', filename='js/code_mirror/codemirror.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/codemirror.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_code.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_common.css') }}">
 
@@ -166,8 +166,8 @@
 </div><!-- /.modal -->
 
 
-<script src="{{ url_for('static', filename='js/code_mirror/codemirror.js') }}"></script>
-<script src="{{ url_for('static', filename='js/code_mirror/python.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/codemirror.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/python.js') }}"></script>
 <script src="{{ url_for('static', filename='js/test_case_code.js') }}"></script>
 <script src="{{ url_for('static', filename='js/test_case_common.js') }}"></script>
 <script>

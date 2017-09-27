@@ -84,7 +84,7 @@ def login():
         return render_template('login.html', next_url=next_url, errors=[])
 
 
-# INDEX
+# INDEX VIEW
 @app.route("/")
 @login_required
 def index():
@@ -92,7 +92,7 @@ def index():
     return render_template('index.html', projects=projects)
 
 
-# PROJECT VIEW
+# PROJECT DASHBOARD VIEW
 @app.route("/p/<project>/")
 @login_required
 def project(project):
@@ -102,6 +102,194 @@ def project(project):
         abort(404, 'This page does not exists.')
     else:
         return render_template('project_dashboard.html', project=project)
+
+
+# TEST CASE VIEW
+@app.route("/p/<project>/test/<test_case_name>/")
+@login_required
+def test_case_view(project, test_case_name):
+    # check if user has permissions for this project
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+
+    # check if the file is locked
+    # is_locked_by = lock.is_file_locked(root_path, project, test_case_name)
+    # print(is_locked_by, g.user.username)
+    # if is_locked_by and is_locked_by != g.user.username:
+    #     abort(404, 'This file is locked by someone else.')
+    # else:
+    tc_name, parents = utils.separate_file_from_parents(test_case_name)
+    test_case_contents = test_case.get_test_case_content(project, test_case_name)
+    test_data = utils.get_test_data_dict_list(root_path, project, test_case_name)
+
+    return render_template('test_case.html', project=project,
+                           test_case_contents=test_case_contents, test_case_name=tc_name,
+                           full_test_case_name=test_case_name, test_data=test_data)
+
+
+# TEST CASE CODE VIEW
+@app.route("/p/<project>/test/<test_case_name>/code/")
+@login_required
+def test_case_code_view(project, test_case_name):
+    # check if user has permissions for this project
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+
+    tc_name, parents = utils.separate_file_from_parents(test_case_name)
+    test_case_contents = test_case.get_test_case_content(project, test_case_name)
+    test_data = utils.get_test_data_dict_list(root_path, project, test_case_name)
+
+    return render_template('test_case_code.html', project=project, 
+                           test_case_contents=test_case_contents, test_case_name=tc_name,
+                           full_test_case_name=test_case_name, test_data=test_data)
+
+
+# PAGE OBJECT VIEW
+@app.route("/p/<project>/page/<full_page_name>/")
+@login_required
+def page_view(project, full_page_name):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+
+    page_object_data = page_object.get_page_object_content(root_path, project, full_page_name)
+
+    return render_template('page_object.html', project=project, page_object_data=page_object_data,
+                           page_name=full_page_name)
+
+
+# PAGE OBJECT CODE VIEW
+@app.route("/p/<project>/page/<full_page_name>/code/")
+@login_required
+def page_code_view(project, full_page_name):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+    page_object_data = page_object.get_page_object_content(root_path, project, full_page_name)
+    return render_template('page_object_code.html', project=project,
+                           page_object_data=page_object_data, page_name=full_page_name)
+
+
+# SUITE VIEW
+@app.route("/p/<project>/suite/<suite>/")
+def suite_view(project, suite):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+
+    all_test_cases = utils.get_test_cases(root_path, project)
+    selected_tests = utils.get_suite_test_cases(root_path, project, suite)
+    worker_amount = utils.get_suite_amount_of_workers(root_path, project, suite)
+    browsers = utils.get_suite_browsers(root_path, project, suite)
+    browsers = ', '.join(browsers)
+    default_browser = test_execution.settings['default_driver']
+
+    return render_template('suite.html', project=project, all_test_cases=all_test_cases['sub_elements'],
+                           selected_tests=selected_tests, suite=suite, worker_amount=worker_amount,
+                           browsers=browsers, default_browser=default_browser)
+
+
+# SETTINGS VIEW
+@app.route("/p/<project>/settings/")
+def settings_view(project):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+    global_settings = settings_manager.get_global_settings_as_string()
+    project_settings = settings_manager.get_project_settings_as_string(project)
+    return render_template('settings.html', project=project,
+                           global_settings=global_settings, settings=project_settings)
+
+
+# LOGOUT VIEW
+@app.route("/logout/")
+@login_required
+def logout():
+    logout_user()
+    return redirect('/')
+
+
+########
+# REPORT
+########
+
+# REPORT DASHBOARD VIEW
+@app.route("/report/")
+@login_required
+def report_dashboard():
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
+        return render_template('not_permission.html')
+    else:
+        return render_template('report_dashboard.html', project='', suite='')
+
+
+# REPORT DASHBOARD PROJECT VIEW
+@app.route("/report/project/<project>/")
+@login_required
+def report_dashboard_project(project):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
+        return render_template('not_permission.html')
+    else:
+        return render_template('report_dashboard.html', project=project, suite='')
+
+
+# REPORT DASHBOARD SUITE VIEW
+@app.route("/report/project/<project>/suite/<suite>/")
+@login_required
+def report_dashboard_suite(project, suite):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
+        return render_template('not_permission.html')
+    else:
+        return render_template('report_dashboard.html', project=project, suite=suite)
+
+
+# REPORT EXECUTION VIEW
+@app.route("/report/project/<project>/<suite>/<execution>/")
+@login_required
+def report_execution(project, suite, execution):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
+        return render_template('not_permission.html')
+    else:
+        formatted_date = report_parser.get_start_date_time_from_timestamp(execution)
+        return render_template('report_execution.html', project=project, suite=suite,
+                               execution=execution, formatted_date=formatted_date)
+
+
+# REPORT TEST VIEW
+@app.route("/report/project/<project>/<suite>/<execution>/<test_case>/<test_set>/")
+@login_required
+def report_test(project, suite, execution, test_case, test_set):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
+        return render_template('not_permission.html')
+    test_case_data = report_parser.get_test_case_data(root_path, project, test_case,
+                                                      suite=suite, execution=execution,
+                                                      test_set=test_set)
+    return render_template('report_test.html', project=project, suite=suite,
+                           execution=execution, test_case=test_case, test_set=test_set,
+                           test_case_data=test_case_data)
+
+
+# TEST SCREENSHOT
+@app.route('/report/screenshot/<project>/<suite>/<execution>/<test_case>/<test_set>/<scr>/')
+def screenshot_file(project, suite, execution, test_case, test_set, scr):
+    screenshot_path = os.path.join(root_path, 'projects', project, 'reports',
+                                   suite, execution, test_case, test_set)
+    return send_from_directory(screenshot_path, '{}.png'.format(scr))
+
+
+# TEST SCREENSHOT UNUSED
+# TODO
+@app.route('/test/screenshot/<project>/<test>/<execution>/<test_set>/<scr>/')
+def screenshot_file2(project, test, execution, test_set, scr):
+    screenshot_path = os.path.join(root_path, 'projects', project, 'reports',
+                                   'single_tests', test, execution, test_set)
+    return send_from_directory(screenshot_path, '{}.png'.format(scr))
+
+
+###############
+# END OF REPORT
+###############
+
+
+#####
+# API
+#####
 
 
 @app.route("/project/get_tests/", methods=['POST'])
@@ -137,6 +325,7 @@ def delete_element():
         errors = utils.delete_element(root_path, project, elem_type, full_path)
         return json.dumps(errors)
 
+
 @app.route("/duplicate_element/", methods=['POST'])
 def duplicate_element():
     if request.method == 'POST':
@@ -147,45 +336,6 @@ def duplicate_element():
         errors = utils.duplicate_element(root_path, project, elem_type,
                                          full_path, new_file_full_path)
         return json.dumps(errors)
-
-
-# TEST CASE VIEW
-@app.route("/p/<project>/test/<test_case_name>/")
-@login_required
-def test_case_view(project, test_case_name):
-    # check if user has permissions for this project
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
-        return render_template('not_permission.html')
-
-    # check if the file is locked
-    # is_locked_by = lock.is_file_locked(root_path, project, test_case_name)
-    # print(is_locked_by, g.user.username)
-    # if is_locked_by and is_locked_by != g.user.username:
-    #     abort(404, 'This file is locked by someone else.')
-    # else:
-    tc_name, parents = utils.separate_file_from_parents(test_case_name)
-    test_case_contents = test_case.get_test_case_content(project, test_case_name)
-    test_data = utils.get_test_data_dict_list(root_path, project, test_case_name)
-
-    return render_template('test_case.html', project=project,
-                           test_case_contents=test_case_contents, test_case_name=tc_name,
-                           full_test_case_name=test_case_name, test_data=test_data)
-
-
-@app.route("/p/<project>/test/<test_case_name>/code/")
-@login_required
-def test_case_code_view(project, test_case_name):
-    # check if user has permissions for this project
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
-        return render_template('not_permission.html')
-
-    tc_name, parents = utils.separate_file_from_parents(test_case_name)
-    test_case_contents = test_case.get_test_case_content(project, test_case_name)
-    test_data = utils.get_test_data_dict_list(root_path, project, test_case_name)
-
-    return render_template('test_case_code.html', project=project, 
-                           test_case_contents=test_case_contents, test_case_name=tc_name,
-                           full_test_case_name=test_case_name, test_data=test_data)
 
 
 @app.route("/get_page_objects/", methods=['POST'])
@@ -269,6 +419,23 @@ def new_project():
         return json.dumps({'errors': errors, 'project_name': project_name})
 
 
+@app.route("/save_test_case_code/", methods=['POST'])
+def save_test_case_code():
+
+    if request.method == 'POST':
+        projectname = request.json['project']
+        test_case_name = request.json['testCaseName']
+        test_data = request.json['testData']
+        content = request.json['content']
+
+        print(test_data)
+
+        data.save_test_data(root_path, projectname, test_case_name, test_data)
+        test_case.save_test_case_code(root_path, projectname, test_case_name, content)
+
+        return json.dumps('ok')
+
+
 @app.route("/get_global_actions/", methods=['POST'])
 def get_global_actions():
 
@@ -277,31 +444,8 @@ def get_global_actions():
         return json.dumps(global_actions)
 
 
-@app.route("/p/<project>/page/<full_page_name>/")
-@login_required
-def page_view(project, full_page_name):
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
-        return render_template('not_permission.html')
-
-    page_object_data = page_object.get_page_object_content(root_path, project, full_page_name)
-
-    return render_template('page_object.html', project=project, page_object_data=page_object_data,
-                           page_name=full_page_name)
-
-
-@app.route("/p/<project>/page/<full_page_name>/code/")
-@login_required
-def page_code_view(project, full_page_name):
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
-        return render_template('not_permission.html')
-    page_object_data = page_object.get_page_object_content(root_path, project, full_page_name)
-    return render_template('page_object_code.html', project=project,
-                           page_object_data=page_object_data, page_name=full_page_name)
-
-
 @app.route("/save_page_object/", methods=['POST'])
 def save_page_object():
-
     if request.method == 'POST':
         projectname = request.json['project']
         page_object_name = request.json['pageObjectName']
@@ -325,6 +469,19 @@ def save_page_object_code():
         return json.dumps(error)
 
 
+
+@app.route("/run_test_case/", methods=['POST'])
+def run_test_case():
+    if request.method == 'POST':
+        project = request.form['project']
+        test_name = request.form['testCaseName']
+
+        timestamp = gui_utils.run_test_case(project, test_name)
+
+        changelog.log_change(root_path, project, 'RUN', 'test', test_name, g.user.username)
+        return json.dumps(timestamp)
+
+
 @app.route("/save_test_case/", methods=['POST'])
 def save_test_case():
 
@@ -344,35 +501,6 @@ def save_test_case():
         changelog.log_change(root_path, project, 'MODIFY', 'test', test_name,
                               g.user.username)
         return json.dumps('ok')
-
-
-@app.route("/save_test_case_code/", methods=['POST'])
-def save_test_case_code():
-
-    if request.method == 'POST':
-        projectname = request.json['project']
-        test_case_name = request.json['testCaseName']
-        test_data = request.json['testData']
-        content = request.json['content']
-
-        print(test_data)
-
-        data.save_test_data(root_path, projectname, test_case_name, test_data)
-        test_case.save_test_case_code(root_path, projectname, test_case_name, content)
-
-        return json.dumps('ok')
-
-
-@app.route("/run_test_case/", methods=['POST'])
-def run_test_case():
-    if request.method == 'POST':
-        project = request.form['project']
-        test_name = request.form['testCaseName']
-
-        timestamp = gui_utils.run_test_case(project, test_name)
-
-        changelog.log_change(root_path, project, 'RUN', 'test', test_name, g.user.username)
-        return json.dumps(timestamp)
 
 
 @app.route("/check_test_case_run_result/", methods=['POST'])
@@ -449,23 +577,6 @@ def run_suite():
         return json.dumps(timestamp)
 
 
-@app.route("/p/<project>/suite/<suite>/")
-def suite_view(project, suite):
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
-        return render_template('not_permission.html')
-
-    all_test_cases = utils.get_test_cases(root_path, project)
-    selected_tests = utils.get_suite_test_cases(root_path, project, suite)
-    worker_amount = utils.get_suite_amount_of_workers(root_path, project, suite)
-    browsers = utils.get_suite_browsers(root_path, project, suite)
-    browsers = ', '.join(browsers)
-    default_browser = test_execution.settings['default_driver']
-
-    return render_template('suite.html', project=project, all_test_cases=all_test_cases['sub_elements'],
-                           selected_tests=selected_tests, suite=suite, worker_amount=worker_amount,
-                           browsers=browsers, default_browser=default_browser)
-
-
 @app.route("/save_suite/", methods=['POST'])
 def save_suite():
 
@@ -479,16 +590,6 @@ def save_suite():
         suite.save_suite(root_path, project, suite_name, test_cases, workers, browsers)
 
         return json.dumps('ok')
-
-
-@app.route("/p/<project>/settings/")
-def settings_view(project):
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
-        return render_template('not_permission.html')
-    global_settings = settings_manager.get_global_settings_as_string()
-    project_settings = settings_manager.get_project_settings_as_string(project)
-    return render_template('settings.html', project=project,
-                           global_settings=global_settings, settings=project_settings)
 
 
 @app.route("/save_settings/", methods=['POST'])
@@ -532,111 +633,12 @@ def get_supported_browsers():
 
 
 
-@app.route("/logout/")
-@login_required
-def logout():
-    logout_user()
-    return redirect('/')
-
-
-########
-# REPORT
-########
-
-# REPORT INDEX
-@app.route("/report/")
-@login_required
-def report_dashboard():
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
-        return render_template('not_permission.html')
-    else:
-        return render_template('report/report_dashboard.html', project='', suite='')
-
-
-# REPORT INDEX
-@app.route("/report2/")
-@login_required
-def report_index2():
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
-        return render_template('not_permission.html')
-    else:
-        return render_template('report/report_dashboard2.html', project='', suite='')
-
-
-
-@app.route("/report/project/<project>/")
-@login_required
-def report_dashboard_project(project):
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
-        return render_template('not_permission.html')
-    else:
-        return render_template('report/report_dashboard.html', project=project, suite='')
-
-
-@app.route("/report/project/<project>/suite/<suite>/")
-@login_required
-def report_dashboard_suite(project, suite):
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
-        return render_template('not_permission.html')
-    else:
-        return render_template('report/report_dashboard.html', project=project, suite=suite)
-
-
-@app.route("/report/project/<project>/<suite>/<execution>/")
-@login_required
-def report_execution(project, suite, execution):
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
-        return render_template('not_permission.html')
-    else:
-        formatted_date = report_parser.get_start_date_time_from_timestamp(execution)
-        return render_template('report/report_execution.html', project=project, suite=suite,
-                               execution=execution, formatted_date=formatted_date)
-
-
-@app.route("/report2/project/<project>/<suite>/<execution>/")
-@login_required
-def execution_report2(project, suite, execution):
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
-        return render_template('not_permission.html')
-    else:
-        formatted_date = report_parser.get_start_date_time_from_timestamp(execution)
-        return render_template('report/execution_report2.html', project=project, suite=suite,
-                               execution=execution, formatted_date=formatted_date)
-
-
-@app.route("/report/project/<project>/<suite>/<execution>/<test_case>/<test_set>/")
-@login_required
-def report_test(project, suite, execution, test_case, test_set):
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
-        return render_template('not_permission.html')
-    test_case_data = report_parser.get_test_case_data(root_path, project, test_case,
-                                                      suite=suite, execution=execution,
-                                                      test_set=test_set)
-    return render_template('report/report_test.html', project=project, suite=suite,
-                           execution=execution, test_case=test_case, test_set=test_set,
-                           test_case_data=test_case_data)
-
-@app.route("/report2/project/<project>/<suite>/<execution>/<test_case>/<test_set>/")
-@login_required
-def report_test2(project, suite, execution, test_case, test_set):
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
-        return render_template('not_permission.html')
-    test_case_data = report_parser.get_test_case_data(root_path, project, test_case,
-                                                      suite=suite, execution=execution,
-                                                      test_set=test_set)
-    return render_template('report/report_test2.html', project=project, suite=suite,
-                           execution=execution, test_case=test_case, test_set=test_set,
-                           test_case_data=test_case_data)
-
-
 @app.route("/report/get_last_executions/", methods=['POST'])
 def get_last_executions():
     if request.method == 'POST':
         project = request.form['project']
         suite = request.form['suite']
         limit = request.form['limit']
-        #if suite:
-
         project_data = report_parser.get_last_executions(root_path, project, suite, limit)
         return jsonify(projects=project_data)
 
@@ -675,29 +677,17 @@ def get_project_health_data():
                 'total_fail': execution_data['total_cases_fail'],
                 'total_pending': execution_data['total_pending']
             }
-
         return jsonify(health_data)
 
 
-
-@app.route('/report/screenshot/<project>/<suite>/<execution>/<test_case>/<test_set>/<scr>/')
-def screenshot_file(project, suite, execution, test_case, test_set, scr):
-    screenshot_path = os.path.join(root_path, 'projects', project, 'reports',
-                                   suite, execution, test_case, test_set)
-    return send_from_directory(screenshot_path, '{}.png'.format(scr))
+############
+# END OF API
+############
 
 
-@app.route('/test/screenshot/<project>/<test>/<execution>/<test_set>/<scr>/')
-def screenshot_file2(project, test, execution, test_set, scr):
-    screenshot_path = os.path.join(root_path, 'projects', project, 'reports',
-                                   'single_tests', test, execution, test_set)
-    return send_from_directory(screenshot_path, '{}.png'.format(scr))
-
-
-###############
-# END OF REPORT
-###############
-
+#########
+# GENERAL
+#########
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -717,6 +707,11 @@ def before_request():
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('404.html', message=error.description), 404
+
+
+################
+# END OF GENERAL
+################
 
 
 if __name__ == "__main__":
