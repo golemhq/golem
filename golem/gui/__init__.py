@@ -246,7 +246,7 @@ def report_execution(project, suite, execution):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:
-        formatted_date = report_parser.get_start_date_time_from_timestamp(execution)
+        formatted_date = report_parser.get_date_time_from_timestamp(execution)
         return render_template('report_execution.html', project=project, suite=suite,
                                execution=execution, formatted_date=formatted_date)
 

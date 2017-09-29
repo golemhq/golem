@@ -155,7 +155,7 @@ class GuiCommand(BaseCommand):
         #                     default=False,
         #                     help="Start the gui application in debug mode")
 
-    def run(self, args):
+    def run(self, test_execution, args):
         port_number = args.port
         # debug = args.debug
         # Note, some features won't work if the golem gui is not

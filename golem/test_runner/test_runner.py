@@ -27,7 +27,7 @@ def run_test(workspace, project, test_name, test_data, driver,
 
     # convert test_data to data obj
     class Data:
-        def __init__():
+        def __init__(self):
             pass
 
     new_data_class = Data()

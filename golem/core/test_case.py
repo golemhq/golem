@@ -273,7 +273,6 @@ def save_test_case(root_path, project, full_test_case_name, description,
         if test_steps['test']:
             for step in test_steps['test']:
                 parameters_formatted = format_parameters(step, root_path, project,
-                                                         parents, tc_name,
                                                          test_stored_keys)
                 f.write('    {0}({1})\n'
                         .format(step['action'].replace(' ', '_'),
@@ -286,7 +285,6 @@ def save_test_case(root_path, project, full_test_case_name, description,
         if test_steps['teardown']:
             for step in test_steps['teardown']:
                 parameters_formatted = format_parameters(step, root_path, project,
-                                                         parents, tc_name,
                                                          teardown_stored_keys)
                 f.write('    {0}({1})\n'
                         .format(step['action'].replace(' ', '_'),

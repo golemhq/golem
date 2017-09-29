@@ -61,6 +61,7 @@
 {% endblock %}
 </div>
 
+<!-- Error Modal -->
 <div class="modal fade" id="errorModal" tabindex="-1" role="dialog">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -75,11 +76,11 @@
     <div class="modal-footer">
         <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Continue</button>
     </div>
-</div><!-- /.modal-content -->
-</div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+</div>
+</div>
+</div>
 
-
+<!-- Confirm Modal -->
 <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -93,10 +94,11 @@
         <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">No</button>
         <button type="button" class="btn btn-primary confirm">Delete</button>
     </div>
-</div><!-- /.modal-content -->
-</div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+</div>
+</div>
+</div>
 
+<!-- Prompt Modal -->
 <div class="modal fade" id="promptModal" tabindex="-1" role="dialog">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -114,9 +116,23 @@
         <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Cancel</button>
         <button type="button" id="prompSaveButton" class="btn btn-primary confirm">Save</button>
     </div>
-</div><!-- /.modal-content -->
-</div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+</div>
+</div>
+</div>
+
+<!-- Screenshot Modal -->
+<div class="modal fade screenshot-modal" id="screenshotModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog screenshot-modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <img id="expandedScreenshot">
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="{{ url_for('static', filename='js/external/bootstrap.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/toastr.min.js') }}"></script>
