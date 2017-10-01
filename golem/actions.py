@@ -120,6 +120,7 @@ def clear(element):
 
 def click(element):
     _run_wait_hook()
+    print('CLICK ACTION')
     webelement = get_driver().find(element)
     step_message = 'Click {0}'.format(webelement.name)
     webelement.click()
@@ -226,7 +227,14 @@ def send_keys(element, text):
     _run_wait_hook()
     webelement = get_driver().find(element)
     step_message = 'Write \'{0}\' in element {1}'.format(text, webelement.name)
-    webelement.send_keys(text)
+    print('DRIVER NAME', core.driver_name)
+    # TODO chrome driver drops some characters when calling send_keys
+    if core.driver_name in ['chrome', 'chrome-headless', 'chrome-remote']:
+        for c in text:
+            webelement.send_keys(c)
+            time.sleep(0.1)
+    else:
+        webelement.send_keys(text)
     logger.logger.info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
 
@@ -370,27 +378,102 @@ def wait(seconds):
     time.sleep(to_float)
 
 
+def wait_for_element_exists(element, timeout=20):
+#     try:
+#         timeout = int(timeout)
+#     except:
+#         raise Exception('Timeout should be digits only')
+#     logger.logger.info('Waiting for element {} to not exist'.format(element))
+#     webelement = None
+#     start_time = time.time()
+#     while not webelement and (time.time() - start_time) < timeout:
+#         try:
+#             webelement = get_driver().find(element, timeout=3)
+#         except:
+#             print('wait_for_element_exists')
+
+    start_time = time.time()
+    still_exists = True
+    remaining_time = time.time() - start_time
+    print('conditions', still_exists, remaining_time < timeout)
+    while still_exists and remaining_time < timeout:
+        print('ELEMENT STILL exist WAITING...', time.time() - start_time)
+        time.sleep(0.5)
+        remaining_time = time.time() - start_time
+        try:
+            webelement = get_driver().find(element, timeout=0)
+        except:
+            still_exists = False
+            print('ELEMENT NOT FOUND, probably because it stop existing')
+        print('conditions', still_exists, remaining_time < timeout)
+    print('ELEMENT NO LONGER EXISTS')
+    # else:
+    #     logger.logger.debug('Element {} was not found, continuing...'.format(element)) 
+
+
+def wait_for_element_not_exist(element, timeout=20):
+    try:
+        timeout = int(timeout)
+    except:
+        raise Exception('Timeout should be digits only')
+    logger.logger.info('Waiting for element {} to not exist'.format(element))
+    webelement = None
+    try:
+        webelement = get_driver().find(element, timeout=3)
+    except:
+        print('wait_for_element_not_exist, element already does not exist')
+        return
+    start_time = time.time()
+    still_exists = True
+    remaining_time = time.time() - start_time
+    print('conditions', still_exists, remaining_time < timeout)
+    while still_exists and remaining_time < timeout:
+        print('ELEMENT STILL exist WAITING...', time.time() - start_time)
+        time.sleep(0.5)
+        remaining_time = time.time() - start_time
+        try:
+            webelement = get_driver().find(element, timeout=0)
+        except:
+            still_exists = False
+            print('ELEMENT NOT FOUND, probably because it stop existing')
+        print('conditions', still_exists, remaining_time < timeout)
+    print('ELEMENT NO LONGER EXISTS')
+    # else:
+    #     logger.logger.debug('Element {} was not found, continuing...'.format(element)) 
+
+
 def wait_for_element_not_visible(element, timeout=20):
     try:
         timeout = int(timeout)
     except:
         raise Exception('Timeout should be digits only')
     logger.logger.info('Waiting for element {} to be not visible'.format(element))
-    start_time = time.time()
-    timed_out = False
-    webelement = get_driver().find(element)
-    while webelement.is_displayed() and not timed_out:
-        logger.logger.debug('Element is still visible, waiting..')
-        time.sleep(0.5)
-        if time.time() - start_time > timeout:
-            timed_out = True
+    webelement = None
+    try:
+        webelement = get_driver().find(element, timeout=3)
+    except:
+        print('wait_for_element_not_visible, element not found')
+        pass
+    if webelement:
+        start_time = time.time()
+        timed_out = False
+        while webelement.is_displayed() and not timed_out:
+            print('ELEMENT IS STILL VISIBLE WAITING...', webelement.is_displayed(), time.time() - start_time)
+            logger.logger.debug('Element is still visible, waiting..')
+            time.sleep(0.5)
+            if time.time() - start_time > timeout:
+                timed_out = True
+    else:
+        logger.logger.debug('Element {} was not found, continuing...'.format(element)) 
 
 
 def wait_for_element_enabled(element, timeout=20):
     logger.logger.info('Waiting for element {} to be enabled'.format(element))
     start_time = time.time()
     timed_out = False
-    webelement = get_driver().find(element)
+    #webelement = None
+    #try:
+    webelement = get_driver().find(element, timeout)
     enabled = webelement.is_enabled()
     while not enabled and not timed_out:
         logger.logger.debug('Element is not enabled, waiting..')

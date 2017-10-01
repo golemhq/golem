@@ -50,7 +50,7 @@
               <a href="{% if project %}/report/project/{{project}}/{% else %}/report/{% endif %}" role="button" aria-haspopup="true" aria-expanded="false">Reports</a>
           </li>
           <li class="">
-              <a href="/p/{{project}}/settings/" role="button" aria-haspopup="true" aria-expanded="false">Settings</a>
+              <a href="{% if project %}/p/{{project}}/settings/{% else %}/settings/{% endif %}" role="button" aria-haspopup="true" aria-expanded="false">Settings</a>
           </li>
       </ul>
   </nav>

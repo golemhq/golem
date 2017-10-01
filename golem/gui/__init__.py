@@ -151,7 +151,7 @@ def page_view(project, full_page_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
 
-    page_object_data = page_object.get_page_object_content(root_path, project, full_page_name)
+    page_object_data = page_object.get_page_object_content(project, full_page_name)
 
     return render_template('page_object.html', project=project, page_object_data=page_object_data,
                            page_name=full_page_name)
@@ -163,7 +163,7 @@ def page_view(project, full_page_name):
 def page_code_view(project, full_page_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
-    page_object_data = page_object.get_page_object_content(root_path, project, full_page_name)
+    page_object_data = page_object.get_page_object_content(project, full_page_name)
     return render_template('page_object_code.html', project=project,
                            page_object_data=page_object_data, page_name=full_page_name)
 
@@ -186,9 +186,19 @@ def suite_view(project, suite):
                            browsers=browsers, default_browser=default_browser)
 
 
-# SETTINGS VIEW
+# GLOBAL SETTINGS VIEW
+@app.route("/settings/")
+def global_settings():
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+    global_settings = settings_manager.get_global_settings_as_string()
+    return render_template('settings.html', project=None,
+                           global_settings=global_settings, settings=None)
+
+
+# PROJECT SETTINGS VIEW
 @app.route("/p/<project>/settings/")
-def settings_view(project):
+def project_settings(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
     global_settings = settings_manager.get_global_settings_as_string()

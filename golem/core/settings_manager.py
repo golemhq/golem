@@ -181,7 +181,8 @@ def save_settings(project, project_settings, global_settings):
     with open(settings_path, 'w') as global_settings_file:
         global_settings_file.write(global_settings)
 
-    project_path = os.path.join(os.path.join('projects', project, 'settings.json'))
-    with open(project_path, 'w') as project_settings_file:
-        project_settings_file.write(project_settings)
+    if project is not None and project_settings is not None:
+        project_path = os.path.join('projects', project, 'settings.json')
+        with open(project_path, 'w') as project_settings_file:
+            project_settings_file.write(project_settings)
     return

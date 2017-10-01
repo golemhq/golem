@@ -28,8 +28,8 @@ def get_or_create_webdriver():
         if driver_selected == 'firefox':
             if settings['gecko_driver_path']:
                 try:
-                    os.environ["webdriver.gecko.driver"] = settings['gecko_driver_path']
-                    driver = webdriver.Firefox()
+                    #os.environ["webdriver.gecko.driver"] = settings['gecko_driver_path']
+                    driver = webdriver.Firefox(executable_path=settings['gecko_driver_path'])
                 except:
                     msg = ('Could not start firefox driver using the path \'{}\', '
                            'check the settings file.'.format(settings['gecko_driver_path']))
@@ -49,10 +49,12 @@ def get_or_create_webdriver():
             else:
                 raise Exception('chrome_driver_path setting is not defined')
         elif driver_selected == 'chrome-headless':
+            print('CHROME HEADELESS!!!')
             if settings['chrome_driver_path']:
                 try:
                     options = webdriver.ChromeOptions()
                     options.add_argument('headless')
+                    options.add_argument('--window-size=1600,1600')
                     driver = webdriver.Chrome(executable_path=settings['chrome_driver_path'],
                                               chrome_options=options)
                 except:
@@ -78,6 +80,7 @@ def get_or_create_webdriver():
             #     sys.exit()
         # maximize driver window by default (fix)
         elif driver_selected == 'chrome-remote-headless':
+            print('CHROME REMOTE HEADELESS!!!')
             options = webdriver.ChromeOptions()
             options.add_argument('headless')
             os.environ["webdriver.chrome.driver"] = settings['chrome_driver_path']

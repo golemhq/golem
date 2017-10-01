@@ -8,6 +8,7 @@ from golem.core.exceptions import IncorrectSelectorType, ElementNotFound
 
 
 def _find_selenium_element(root, selector_type, selector_value, element_name, remaining_time):
+    print('NOT FOUND YET', remaining_time)
     webelement = None
     start_time = time.time()
     try:
@@ -29,19 +30,24 @@ def _find_selenium_element(root, selector_type, selector_value, element_name, re
             webelement = root.find_element_by_tag_name(selector_value)
         else:
             raise IncorrectSelectorType('Selector {0} is not a valid option'.format(selector_type))
+        print('FOUND!!')
     except:
         time.sleep(0.5)
         end_time = time.time()
         remaining_time = remaining_time - (end_time - start_time)
+        print('REMAINING TIME', remaining_time)
         if remaining_time > 0:
             webelement = _find_selenium_element(root, selector_type, selector_value,
                                                 element_name, remaining_time)
         else:
             raise ElementNotFound('Element {0} not found using selector {1}:\'{2}\''
                                   .format(element_name, selector_type, selector_value))
+    
+    # Use remaining time to check if element is visible (displayed)
     remaining_time = remaining_time - (time.time() - start_time)
     while not webelement.is_displayed() and remaining_time > 0:
         # Element is not visible yet
+        print('ELEMENT IS NOT VISIBLE', remaining_time)
         time.sleep(0.5)
         remaining_time = remaining_time - (time.time() - start_time)
         

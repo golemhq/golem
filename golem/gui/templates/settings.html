@@ -2,7 +2,7 @@
 
 {% block head_declarations %} 
 
-<link rel="stylesheet" href="{{ url_for('static', filename='js/code_mirror/codemirror.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/codemirror.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
 
 {% endblock %} 
@@ -20,7 +20,7 @@
                     <span class="glyphicon glyphicon glyphicon-menu-left" aria-hidden="true"></span>
                 </a>
             </small>
-            {{project|replace("_", " ")}} - settings</h3>
+            {% if project %}{{project|replace("_", " ")}} - {% endif %} settings</h3>
     </div>
         
     <div class="col-sm-6 text-right header-col" style="padding-top: 20px">
@@ -30,12 +30,12 @@
     <div class="clearfix"></div>
 
     <div class="col-sm-10 col-sm-offset-1">
-        <h5>Project Settings</h5>
-        <div class="" id="settingsContainer">
+        <div class="" id="settingsContainer" style="display: none">
+            <h5>Project Settings</h5>
         </div>
 
-        <h5>Global Settings</h5>
         <div class="" id="globalSettingsContainer">
+            <h5>Global Settings</h5>
         </div>
 
         <div style="margin-top: 15px"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Remember that project settings override global settings values.</div>
@@ -48,7 +48,7 @@
 <script src="{{ url_for('static', filename='js/external/code_mirror/javascript.js') }}"></script>
 <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
 <script>
-    var project = "{{project}}";
+    var project = {{project|tojson}};
     var settingsCode = {{settings|tojson}};
     var globalSettingsCode = {{global_settings|tojson}};
 </script>
