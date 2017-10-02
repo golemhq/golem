@@ -167,8 +167,8 @@ def navigate(url):
     driver.get(url)
     logger().info(step_message)
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
-
-
+    
+    
 def press_key(element, key):
     step_message = 'Press key: {}'.format(key)
     logger().info(step_message)
@@ -176,6 +176,14 @@ def press_key(element, key):
     webelement = get_driver().find(element)
     if key == 'RETURN' or key == 'ENTER':
         webelement.send_keys(Keys.RETURN)
+    elif key == 'UP':
+        webelement.send_keys(Keys.UP)
+    elif key == 'DOWN':
+        webelement.send_keys(Keys.DOWN)
+    elif key == 'LEFT':
+        webelement.send_keys(Keys.LEFT)
+    elif key == 'RIGHT':
+        webelement.send_keys(Keys.RIGHT)
     else:
         raise Exception('Key value {} is invalid'.format(key))
 
