@@ -176,15 +176,15 @@ def press_key(element, key):
     _capture_or_add_step(step_message, core.settings['screenshot_on_step'])
     webelement = get_driver().find(element)
     if key == 'RETURN' or key == 'ENTER':
-        webelement.send_keys(Keys.RETURN);
+        webelement.send_keys(Keys.RETURN)
     elif key == 'UP':
-        webelement.send_keys(Keys.UP);
+        webelement.send_keys(Keys.UP)
     elif key == 'DOWN':
-        webelement.send_keys(Keys.DOWN);
+        webelement.send_keys(Keys.DOWN)
     elif key == 'LEFT':
-        webelement.send_keys(Keys.LEFT);
+        webelement.send_keys(Keys.LEFT)
     elif key == 'RIGHT':
-        webelement.send_keys(Keys.RIGHT);
+        webelement.send_keys(Keys.RIGHT)
     else:
         raise Exception('Key value {} is invalid'.format(key))
 
