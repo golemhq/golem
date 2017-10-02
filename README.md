@@ -37,6 +37,7 @@ Golem is a complete test automation tool and framework for end-to-end testing. I
 * [Installation](#installation)
 * [Quick Start](#quick-start)
 * [Documentation](#documentation)
+* [Example Projects](#documentation)
 * [Roadmap](#roadmap)
 * [License](#license)
 
@@ -118,6 +119,11 @@ Documentation
 
 Read the full documentation here: [http://golem-framework.readthedocs.io/](http://golem-framework.readthedocs.io/)
 
+
+Example Projects
+--------------------------------------
+
+Here is a repo with example working projects usign Golem: [https://github.com/lucianopuccio/golem-demo](https://github.com/lucianopuccio/golem-demo)
 
 Roadmap
 --------------------------------------

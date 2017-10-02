@@ -362,7 +362,8 @@ def get_selected_page_object_elements():
     if request.method == 'POST':
         project = request.form['project']
         page_name = request.form['pageObject']
-        po_elements = page_object.get_page_object_content(root_path, project, page_name)
+        po_elements = page_object.get_page_object_content(project, page_name)
+        print(po_elements)
         return json.dumps(po_elements)
 
 

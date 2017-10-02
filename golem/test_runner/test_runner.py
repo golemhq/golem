@@ -23,7 +23,9 @@ def run_test(workspace, project, test_name, test_data, driver,
     }
 
     from golem.core import execution_logger
+    from golem.core.execution_logger import logger
     from golem import actions
+    from golem.core import execution
 
     # convert test_data to data obj
     class Data:
@@ -34,18 +36,20 @@ def run_test(workspace, project, test_name, test_data, driver,
     for key, value in test_data.items():
         setattr(new_data_class, key, value)
 
+    execution.data = new_data_class
+
     execution_logger.get_logger(report_directory,
                                 settings['console_log_level'],
                                 settings['file_log_level'],
                                 settings['log_all_events'])
 
-    execution_logger.logger.info('Test execution started: {}'.format(test_name))
-    execution_logger.logger.info('Driver: {}'.format(driver))
+    logger().info('Test execution started: {}'.format(test_name))
+    logger().info('Driver: {}'.format(driver))
     if test_data:
         data_string = '\n'
         for key, value in test_data.items():
             data_string += '    {}: {}\n'.format(key, value)
-        execution_logger.logger.info('Using data: {}'.format(data_string))
+        logger().info('Using data: {}'.format(data_string))
 
     test_timestamp = utils.get_timestamp()
     test_start_time = time.time()
@@ -80,13 +84,13 @@ def run_test(workspace, project, test_name, test_data, driver,
         if hasattr(test_module, 'description'):
             golem.core.execution_logger.description = test_module.description
         else:
-            execution_logger.logger.info('Test does not have description')
+            logger().info('Test does not have description')
 
         # run setup method
         if hasattr(test_module, 'setup'):
             test_module.setup(golem.core.test_data)
         else:
-            execution_logger.logger.info('Test does not have setup function')
+            logger().info('Test does not have setup function')
 
         if hasattr(test_module, 'test'):
             test_module.test(golem.core.test_data)
@@ -103,18 +107,18 @@ def run_test(workspace, project, test_name, test_data, driver,
             # capture screenshot is not possible, continue
             pass
 
-        execution_logger.logger.error('An error ocurred:', exc_info=True)
+        logger().error('An error ocurred:', exc_info=True)
 
     try:
         if hasattr(test_module, 'teardown'):
             test_module.teardown(golem.core.test_data)
         else:
-            execution_logger.logger.info('Test does not have a teardown function')
+            logger().info('Test does not have a teardown function')
     except:
         result['result'] = 'fail'
         result['error'] += '\n\nteardown failed'
         result['error'] += '\n' + traceback.format_exc()
-        execution_logger.logger.error('An error ocurred in the teardown:', exc_info=True)
+        logger().error('An error ocurred in the teardown:', exc_info=True)
 
     # if there is no teardown or teardown failed or it did not close the driver,
     # let's try to close the driver manually
@@ -124,8 +128,8 @@ def run_test(workspace, project, test_name, test_data, driver,
         except:
             # if this fails, we have lost control over the webdriver window
             # and we are not going to be able to close it
-            execution_logger.logger.error('There was an error closing the driver')
-            execution_logger.logger.error(traceback.format_exc())
+            logger().error('There was an error closing the driver')
+            logger().error(traceback.format_exc())
         finally:
             golem.core.driver = None
 
@@ -133,7 +137,7 @@ def run_test(workspace, project, test_name, test_data, driver,
     test_elapsed_time = round(test_end_time - test_start_time, 2)
 
     if not result['error']:
-        execution_logger.logger.info('Test passed')
+        logger().info('Test passed')
 
     result['description'] = execution_logger.description
     result['steps'] = execution_logger.steps
@@ -141,7 +145,7 @@ def run_test(workspace, project, test_name, test_data, driver,
     result['test_timestamp'] = test_timestamp
     result['browser'] = golem.core.get_selected_driver()
 
-    execution_logger.description = None
+    description = None
     execution_logger.steps = []
     execution_logger.screenshots = {}
     report.generate_report(report_directory, test_name, golem.core.test_data, result)
