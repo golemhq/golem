@@ -177,13 +177,13 @@ def press_key(element, key):
     webelement = get_driver().find(element)
     if key == 'RETURN' or key == 'ENTER':
         webelement.send_keys(Keys.RETURN);
-    if key == 'UP':
+    elif key == 'UP':
         webelement.send_keys(Keys.UP);
-    if key == 'DOWN':
+    elif key == 'DOWN':
         webelement.send_keys(Keys.DOWN);
-    if key == 'LEFT':
+    elif key == 'LEFT':
         webelement.send_keys(Keys.LEFT);
-    if key == 'RIGHT':
+    elif key == 'RIGHT':
         webelement.send_keys(Keys.RIGHT);
     else:
         raise Exception('Key value {} is invalid'.format(key))
