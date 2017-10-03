@@ -8,24 +8,25 @@ from selenium.common.exceptions import WebDriverException
 
 from golem.core import execution_logger as logger
 from golem.selenium import _find, _find_all
-
+from golem import execution
 
 # values used during the execution of a test case
-driver = None
-driver_name = None
-settings = None
-project = None
-workspace = None
-test_data = None
-report_directory = None
+# driver = None
+# driver_name = None
+# settings = None
+# project = None
+# workspace = None
+# report_directory = None
 
 
 def get_or_create_webdriver():
-    global settings
-    global driver
+    driver = execution.driver
     if not driver:
-        driver_selected = get_selected_driver()
-        if driver_selected == 'firefox':
+        driver = None
+        # driver_selected = get_selected_driver()
+        driver_name = execution.driver_name
+        settings = execution.settings
+        if driver_name == 'firefox':
             if settings['gecko_driver_path']:
                 try:
                     #os.environ["webdriver.gecko.driver"] = settings['gecko_driver_path']
@@ -37,7 +38,7 @@ def get_or_create_webdriver():
                     raise Exception(msg) from None
             else:
                 raise Exception('gecko_driver_path setting is not defined')
-        elif driver_selected == 'chrome':
+        elif driver_name == 'chrome':
             if settings['chrome_driver_path']:
                 try:
                     driver = webdriver.Chrome(executable_path=settings['chrome_driver_path'])
@@ -48,8 +49,7 @@ def get_or_create_webdriver():
                     raise Exception(msg) from None
             else:
                 raise Exception('chrome_driver_path setting is not defined')
-        elif driver_selected == 'chrome-headless':
-            print('CHROME HEADELESS!!!')
+        elif driver_name == 'chrome-headless':
             if settings['chrome_driver_path']:
                 try:
                     options = webdriver.ChromeOptions()
@@ -79,22 +79,23 @@ def get_or_create_webdriver():
             #     print('not implemented yet')
             #     sys.exit()
         # maximize driver window by default (fix)
-        elif driver_selected == 'chrome-remote-headless':
-            print('CHROME REMOTE HEADELESS!!!')
+        elif driver_name == 'chrome-remote-headless':
             options = webdriver.ChromeOptions()
             options.add_argument('headless')
             os.environ["webdriver.chrome.driver"] = settings['chrome_driver_path']
             desired_capabilities = options.to_capabilities()
             driver = webdriver.Remote(command_executor=settings['remote_url'],
                                       desired_capabilities=desired_capabilities)
-        elif driver_selected == 'chrome-remote':
+        elif driver_name == 'chrome-remote':
             driver = webdriver.Remote(command_executor=settings['remote_url'],
                                       desired_capabilities=DesiredCapabilities.CHROME)
-        elif driver_selected == 'firefox-remote':
+        elif driver_name == 'firefox-remote':
             driver = webdriver.Remote(command_executor=settings['remote_url'],
                                       desired_capabilities=DesiredCapabilities.FIREFOX)
         else:
-            raise Exception('Error: {} is not a valid driver'.format(driver_selected))
+            raise Exception('Error: {} is not a valid driver'.format(driver_name))
+
+    execution.driver = driver
 
     # bind _find method to driver instance
     driver.find = types.MethodType(_find, driver)
@@ -105,30 +106,30 @@ def get_or_create_webdriver():
     # else:
     driver.maximize_window()
 
-    return driver
+    return execution.driver
 
 
-def reset_driver_object():
-    global driver
-    driver = None
+# def reset_driver_object():
+#     global driver
+#     driver = None
 
 
-def set_settings(settings_):
-    global settings
-    settings = settings_
+# def set_settings(settings_):
+#     global settings
+#     settings = settings_
 
 
-def get_setting(setting):
-    if setting in settings:
-        return settings[setting]
-    else:
-        return False
+# def get_setting(setting):
+#     if setting in settings:
+#         return settings[setting]
+#     else:
+#         return False
 
-
-def get_selected_driver():
-    global driver_name
-    if driver_name:
-        driver_selected = driver_name
-    else:
-        driver_selected = 'chrome'
-    return driver_selected
+# TODO not needed, default driver is set in start execution
+# def get_selected_driver():
+#     global driver_name
+#     if driver_name:
+#         driver_selected = driver_name
+#     else:
+#         driver_selected = 'chrome'
+#     return driver_selected

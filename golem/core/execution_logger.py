@@ -1,18 +1,7 @@
 """
-This module holds the result data of a step to be passed at
-the end of the execution to the report generator
 """
 import logging
 import os
-
-
-logger_obj = None
-description = None
-steps = []
-
-
-def logger():
-    return logger_obj
 
 
 def _get_log_level(log_level_string):
@@ -34,19 +23,19 @@ def _get_log_level(log_level_string):
 
 def get_logger(log_directory=None, console_log_level='DEBUG',
                file_log_level='DEBUG', log_all_events=False):
-    global logger_obj
+    logger = None
     if log_all_events:
-        logger_obj = logging.getLogger()
+        logger = logging.getLogger()
     else:
-        logger_obj = logging.getLogger('golem')
-    logger_obj.setLevel(logging.DEBUG)
+        logger = logging.getLogger('golem')
+    logger.setLevel(logging.DEBUG)
     # add stream handler
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(_get_log_level(console_log_level))
     stream_format_string = '%(asctime)s %(levelname)s %(message)s'
     stream_formatter = logging.Formatter(stream_format_string, "%H:%M:%S")
     stream_handler.setFormatter(stream_formatter)
-    logger_obj.addHandler(stream_handler)
+    logger.addHandler(stream_handler)
     # add file handler
     if log_directory:
         # file log for execution output
@@ -56,7 +45,7 @@ def get_logger(log_directory=None, console_log_level='DEBUG',
         file_format_string = '%(asctime)s %(name)s %(levelname)s %(message)s'
         file_formatter = logging.Formatter(file_format_string)
         file_handler.setFormatter(file_formatter)
-        logger_obj.addHandler(file_handler)
+        logger.addHandler(file_handler)
         # file log for console output
         log_file = os.path.join(log_directory, 'execution_console.log')
         file_handler = logging.FileHandler(log_file)
@@ -64,4 +53,6 @@ def get_logger(log_directory=None, console_log_level='DEBUG',
         file_format_string = '%(asctime)s.%(msecs)03d %(levelname)s %(message)s'
         file_formatter = logging.Formatter(file_format_string, "%H:%M:%S")
         file_handler.setFormatter(file_formatter)
-        logger_obj.addHandler(file_handler)
+        logger.addHandler(file_handler)
+    return logger
+
