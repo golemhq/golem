@@ -1,22 +1,9 @@
+""" The Execution class contains data specific of a single execution
+that must be shared among other modules such as the test data, the webdriver
+object, etc.
+The instance of Execution is added to sys.modules to simplify the public API.
+"""
 import sys
-
-
-# driver = None
-
-# driver_name = None
-# settings = None
-# project = None
-# workspace = None
-
-# # data object used in the execution
-# data = None
-
-# report_directory = None
-# description = None
-
-# # list of steps gathered throughout the execution
-# steps = []
-
 
 
 class Execution:

@@ -19,7 +19,8 @@ def multiprocess_executor(execution_list, is_suite, execution_directory, threads
                                                             test['data_set']))
     start_time = time.time()
 
-    pool = Pool(processes=threads)
+    # TODO test that a worker is used once and then replaced
+    pool = Pool(processes=threads, maxtasksperchild=1)
 
     results = []
 

@@ -487,7 +487,9 @@ def post(url, headers={}, params={}):
     step_message = 'Make POST request to {}'.format(url)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
-    response = requests.post(url, headers=headers, params=params)
+    print(params)
+    response = requests.post(url, headers=headers, data=params)
+    print(response)
     store('last_response', response)
 
 

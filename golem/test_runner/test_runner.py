@@ -1,12 +1,12 @@
 """
-This module contains the method for running one test
+This module contains the method for running one test (one execution)
+i.e.: one test with a single test set
 """
 import sys
 import importlib
 import time
 import traceback
 
-import golem.core
 from golem.core import report, utils
 
 
@@ -74,8 +74,8 @@ def run_test(workspace, project, test_name, test_data, driver,
         setattr(test_module, 'logger', execution.logger)
 
         # import actions into the test module
-        for action in dir(golem.actions):
-            setattr(test_module, action, getattr(golem.actions, action))
+        for action in dir(actions):
+            setattr(test_module, action, getattr(actions, action))
 
         # log description
         if hasattr(test_module, 'description'):
@@ -110,7 +110,7 @@ def run_test(workspace, project, test_name, test_data, driver,
         if hasattr(test_module, 'teardown'):
             test_module.teardown(execution.data)
         else:
-            logger().info('Test does not have a teardown function')
+            logger.info('Test does not have a teardown function')
     except:
         result['result'] = 'fail'
         result['error'] += '\n\nteardown failed'
@@ -144,6 +144,7 @@ def run_test(workspace, project, test_name, test_data, driver,
 
     # remove golem.execution from sys.modules to guarantee thread safety
     #sys.modules['golem.execution'] = None
-    del sys.modules['golem.execution']
+    
     report.generate_report(report_directory, test_name, execution.data, result)
+    del execution
     return

@@ -48,6 +48,13 @@ $(document).ready(function() {
         }
     });
 
+
+    updateTestCount();
+
+    $("input[type='checkbox']").change(function(){
+        updateTestCount();
+    });
+
 });
 
 
@@ -244,6 +251,17 @@ function getAllCheckedTests(){
 }
 
 
+function getAllTestAmount(){
+    var len = $(".test-checkbox").length;
+    return len
+}
+
+
+function getCheckedTestAmount(){
+    return $(".test-checkbox:checked").length;
+}
+
+
 function getAllCheckedTestsInALevel(rootUl, testCaseList){
     var lis = rootUl.children('li');
     lis.each(function(){
@@ -327,4 +345,13 @@ function startBrowsersAutocomplete(browserSuggestions){
         }
     });
 }
+
+
+function updateTestCount(){
+    var totalCheckedTests = getCheckedTestAmount();
+    var totalTests = getAllTestAmount();
+
+    $("#testCount").html(totalCheckedTests+"/"+totalTests);
+}
+
 

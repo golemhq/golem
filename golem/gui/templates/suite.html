@@ -35,18 +35,13 @@
         <div>
             <div class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Browsers</div>
             <div class="input-group form-group col-xs-10" style="">    
-                <!-- <div class="col-sm-9"> -->
-                    <input type="text" class="form-control" id="browsers" value="{{ browsers if browsers else ''}}" placeholder="list of browsers">
-                <!-- </div> -->
+                <input type="text" class="form-control" id="browsers" value="{{ browsers if browsers else ''}}" placeholder="list of browsers">
             </div> 
         </div>
         <div>
             <div for="workers" class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Workers</div>
             <div class="input-group form-group col-sm-3">
-            
-               <!--  <div class="col-sm-9"> -->
-                    <input type="number" class="form-control" id="workers" value="{{worker_amount}}" placeholder="Amount of workers">
-                <!-- </div>  -->
+                <input type="number" class="form-control" id="workers" value="{{worker_amount}}" placeholder="Amount of workers">
             </div>
         </div>
 
@@ -56,16 +51,16 @@
         <br>       
         <ul id="suiteTests" class="tree" style="padding-left: 15px">
             <input type="checkbox" id="allTestCasesCheckbox" class="select-testcase-checkbox" style="margin-top: 0px !important;">
-            <h4> Test Cases</h4>
+            <h4> Test Cases <small id="testCount"></small></h4>
             <ul id="testCasesTree">
                  {%- for elem in all_test_cases recursive %}
                     <li>
                         {%- if elem.type == 'directory' -%}
-                           <input type="checkbox" name="checkbox" class="select-testcase-checkbox">
+                            <input type="checkbox" name="checkbox" class="select-testcase-checkbox">
                             <a href="#" class="branch-name">{{ elem.name }}</a>
                             <ul>{{ loop(elem.sub_elements) }}</ul>
                         {%- else %}
-                            <label><input type="checkbox" name="checkbox" class="select-testcase-checkbox"><span class="node-name">{{ elem.name }}</span></label>
+                            <label><input type="checkbox" name="checkbox" class="select-testcase-checkbox test-checkbox"><span class="node-name">{{ elem.name }}</span></label>
                         {%- endif %}
                     </li>
                 {%- endfor %}

@@ -1,14 +1,16 @@
 import time
 import types
 
+from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.common.exceptions import WebDriverException
 
-from golem import core
 from golem.core.exceptions import IncorrectSelectorType, ElementNotFound
+from golem import execution
 
 
 def _find_selenium_element(root, selector_type, selector_value, element_name, remaining_time):
-    print('NOT FOUND YET', remaining_time)
     webelement = None
     start_time = time.time()
     try:
@@ -29,14 +31,15 @@ def _find_selenium_element(root, selector_type, selector_value, element_name, re
         elif selector_type == 'tag_name':
             webelement = root.find_element_by_tag_name(selector_value)
         else:
-            raise IncorrectSelectorType('Selector {0} is not a valid option'.format(selector_type))
-        print('FOUND!!')
+            msg = 'Selector {0} is not a valid option'.format(selector_type)
+            raise IncorrectSelectorType(msg)
+        execution.logger.debug('Element found')
     except:
         time.sleep(0.5)
         end_time = time.time()
         remaining_time = remaining_time - (end_time - start_time)
-        print('REMAINING TIME', remaining_time)
         if remaining_time > 0:
+            execution.logger.debug('Element not found yet, remaining time: {}'.format(remaining_time))
             webelement = _find_selenium_element(root, selector_type, selector_value,
                                                 element_name, remaining_time)
         else:
@@ -47,41 +50,14 @@ def _find_selenium_element(root, selector_type, selector_value, element_name, re
     remaining_time = remaining_time - (time.time() - start_time)
     while not webelement.is_displayed() and remaining_time > 0:
         # Element is not visible yet
-        print('ELEMENT IS NOT VISIBLE', remaining_time)
+        execution.logger.debug('Element still not visible, waiting')
         time.sleep(0.5)
         remaining_time = remaining_time - (time.time() - start_time)
+
+    if not webelement.is_displayed():
+        execution.logger.debug('Element not visible, continuing anyway')
         
     return webelement
-
-
-# def get_selenium_objects(elem, driver=None):
-#     if not driver:
-#         driver = core.get_or_create_webdriver()
-#     selector_type = elem[0]
-#     selector_value = elem[1]
-#     test_objects = []
-#     if selector_type == 'id':
-#         test_objects = driver.find_elements_by_id(selector_value)
-#     elif selector_type == 'css':
-#         print('SELECTOR', selector_value)
-#         test_objects = driver.find_elements_by_css_selector(selector_value)
-#     elif selector_type == 'text':
-#         test_objects = driver.find_elements_by_css_selector(
-#                                     "text[{}]".format(selector_value))
-#     elif selector_type == 'link_text':
-#         test_objects = driver.find_elements_by_link_text(selector_value)
-#     elif selector_type == 'partial_link_text':
-#         test_objects = driver.find_elements_by_partial_link_text(selector_value)
-#     elif selector_type == 'name':
-#         test_objects = driver.find_elements_by_name(selector_value)
-#     elif selector_type == 'xpath':
-#         test_objects = driver.find_elements_by_xpath(selector_value)
-#     elif selector_type == 'tag_name':
-#         test_objects = driver.find_elements_by_tag_name(selector_value)
-#     else:
-#         raise IncorrectSelectorType(
-#             'Selector {0} is not a valid option'.format(selector_type))
-#     return test_objects
 
 
 def _find(self, element=None, id=None, name=None, text=None, link_text=None,
@@ -93,7 +69,7 @@ def _find(self, element=None, id=None, name=None, text=None, link_text=None,
     element_name = None
 
     if timeout is None:
-        timeout = core.get_setting('implicit_wait')
+        timeout = execution.settings['implicit_wait']
 
 
     if isinstance(element, WebElement):
@@ -169,11 +145,13 @@ def _find_all(self, element=None, id=None, name=None, text=None, link_text=None,
             xpath = selector_value
         elif selector_type == 'tag_name':
             tag_name = selector_value
+        else:
+            raise Exception('Incorrect element {}'.format(element))
     elif isinstance(element, str):
         selector_type = 'css'
         selector_value = element_name = element
-        webelements = self.find_elements_by_css_selector(element)
-    elif id:
+    
+    if id:
         selector_type = 'id'
         selector_value = element_name = id
         webelements = self.find_elements_by_id(id)
@@ -221,16 +199,98 @@ def _find_all(self, element=None, id=None, name=None, text=None, link_text=None,
 def element(*args, **kwargs):
     if len(args) == 1:
         kwargs['element'] = args[0]
-    webelement = core.get_or_create_webdriver().find(**kwargs)
+    webelement = get_driver().find(**kwargs)
     return webelement
 
 
 def elements(*args, **kwargs):
     if len(args) == 1:
         kwargs['element'] = args[0]
-    webelement = core.get_or_create_webdriver().find_all(**kwargs)
+    webelement = get_driver().find_all(**kwargs)
     return webelement
 
 
 def get_driver():
-    return core.get_or_create_webdriver()
+    driver = execution.driver
+    if not driver:
+        driver = None
+        driver_name = execution.driver_name
+        settings = execution.settings
+        if driver_name == 'firefox':
+            if settings['gecko_driver_path']:
+                try:
+                    driver = webdriver.Firefox(executable_path=settings['gecko_driver_path'])
+                except:
+                    msg = ('Could not start firefox driver using the path \'{}\', '
+                           'check the settings file.'.format(settings['gecko_driver_path']))
+                    execution.logger.error(msg)
+                    raise Exception(msg) from None
+            else:
+                raise Exception('gecko_driver_path setting is not defined')
+        elif driver_name == 'chrome':
+            if settings['chrome_driver_path']:
+                try:
+                    driver = webdriver.Chrome(executable_path=settings['chrome_driver_path'])
+                except:
+                    msg = ('Could not start chrome driver using the path \'{}\', '
+                           'check the settings file.'.format(settings['chrome_driver_path']))
+                    execution.logger.error(msg)
+                    raise Exception(msg) from None
+            else:
+                raise Exception('chrome_driver_path setting is not defined')
+        elif driver_name == 'chrome-headless':
+            if settings['chrome_driver_path']:
+                try:
+                    options = webdriver.ChromeOptions()
+                    options.add_argument('headless')
+                    options.add_argument('--window-size=1600,1600')
+                    driver = webdriver.Chrome(executable_path=settings['chrome_driver_path'],
+                                              chrome_options=options)
+                except:
+                    msg = ('Could not start chrome driver using the path \'{}\', '
+                           'check the settings file.'.format(settings['chrome_driver_path']))
+                    execution.logger.error(msg)
+                    raise Exception(msg) from None
+            else:
+                raise Exception('chrome_driver_path setting is not defined')
+        # if driver_selected == 'ie':
+        #     driver = webdriver.Ie()
+        # if driver_selected == 'phantomjs':
+        #     if os.name == 'nt':
+        #         executable_path = os.path.join(
+        #                                     golem.__path__[0],
+        #                                     'lib',
+        #                                     'phantom',
+        #                                     'phantomjs.exe')
+        #         driver = webdriver.PhantomJS(
+        #                             executable_path=executable_path)
+            # else:
+            #     print('not implemented yet')
+            #     sys.exit()
+        # maximize driver window by default (fix)
+        elif driver_name == 'chrome-remote-headless':
+            options = webdriver.ChromeOptions()
+            options.add_argument('headless')
+            os.environ["webdriver.chrome.driver"] = settings['chrome_driver_path']
+            desired_capabilities = options.to_capabilities()
+            driver = webdriver.Remote(command_executor=settings['remote_url'],
+                                      desired_capabilities=desired_capabilities)
+        elif driver_name == 'chrome-remote':
+            driver = webdriver.Remote(command_executor=settings['remote_url'],
+                                      desired_capabilities=DesiredCapabilities.CHROME)
+        elif driver_name == 'firefox-remote':
+            driver = webdriver.Remote(command_executor=settings['remote_url'],
+                                      desired_capabilities=DesiredCapabilities.FIREFOX)
+        else:
+            raise Exception('Error: {} is not a valid driver'.format(driver_name))
+
+        driver.maximize_window()
+        
+    execution.driver = driver
+
+    # bind _find method to driver instance
+    driver.find = types.MethodType(_find, driver)
+    driver.find_all = types.MethodType(_find_all, driver)
+
+    return execution.driver
+
