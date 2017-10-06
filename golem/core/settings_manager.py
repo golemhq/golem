@@ -99,9 +99,9 @@ def assign_settings_default_values(settings):
         settings['wait_hook'] = None
 
     if not 'default_browser' in settings:
-        settings['default_driver'] = 'chrome'
-    elif settings['default_driver'] == '':
-        settings['default_driver'] = 'chrome'
+        settings['default_browser'] = 'chrome'
+    elif settings['default_browser'] == '':
+        settings['default_browser'] = 'chrome'
 
     if not 'chromedriver_path' in settings:
         settings['chromedriver_path'] = None

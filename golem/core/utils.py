@@ -421,6 +421,11 @@ def create_test_dir(workspace):
     open(users_path, 'a').close()
     create_user(workspace, 'admin', 'admin', True, ["*"], ["*"])
 
+    print('New golem test directory created at {}'.format(workspace))
+    print('Use credentials to access the GUI module:')
+    print('user: admin')
+    print('password: admin')
+
 
 def create_user(workspace, username, password, is_admin, projects, reports):
     errors = []
