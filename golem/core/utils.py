@@ -390,7 +390,7 @@ def create_demo_project(workspace):
 def create_test_dir(workspace):
     create_new_directory(path_list=[workspace], add_init=True)
     create_new_directory(path_list=[workspace, 'projects'], add_init=True)
-    # create_new_directory(path_list=[workspace, 'drivers'], add_init=False)
+    create_new_directory(path_list=[workspace, 'drivers'], add_init=False)
 
     # copy drivers from golem/bin/drivers to test_dir/drivers
     pkgdir = sys.modules['golem'].__path__[0]
