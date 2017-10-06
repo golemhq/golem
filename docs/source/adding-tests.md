@@ -96,7 +96,7 @@ python golem.py run <project_name> validate_article_title
 
 ##### Golem Actions
 
-In the previous example, *go_to*, *send_keys*, *click*, and *verify_text...* are Golem actions. Check out [the entire list of actions](actions.html) for more information.
+In the previous example, *go_to*, *send_keys*, *click*, and *verify_text...* are Golem actions. Check out [the entire list of actions](golem-actions.html) for more information.
 
 <br>
 

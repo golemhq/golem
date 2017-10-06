@@ -14,9 +14,9 @@ def save_test_data(root_path, project, full_test_case_name, test_data):
         if not os.path.exists(data_directory_path):
             os.makedirs(data_directory_path)
         if not os.path.isfile(data_file_path):
-            new_file = open(data_file_path, 'w+').close()
-        with open(data_file_path, 'w') as f:
-            writer = csv.DictWriter(f, fieldnames=test_data[0].keys(), lineterminator='\n')
+            open(data_file_path, 'w+').close()
+        with open(data_file_path, 'w') as data_file:
+            writer = csv.DictWriter(data_file, fieldnames=test_data[0].keys(), lineterminator='\n')
             writer.writeheader()
             for row in test_data:
                 writer.writerow(row)
@@ -25,7 +25,6 @@ def save_test_data(root_path, project, full_test_case_name, test_data):
 def is_data_variable(root_path, project, parents, test_case_name, parameter_name):
     full_path = parents + [test_case_name]
     test_data = utils.get_test_data_dict_list(root_path, project, '.'.join(full_path))
-    print('TEST DATA IN IS DATA VARIABLE', test_data)
     if test_data:
         if parameter_name in test_data[0].keys():
             return True

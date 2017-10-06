@@ -14,7 +14,7 @@ To set it up for Golem to use, place it anywhere in your machine (you can use th
 
 **settings.json**
 ```
-"chrome_driver_path": "./drivers/chromedriver",
+"chromedriver_path": "./drivers/chromedriver",
 ```
 
 #### Chrome headless
@@ -34,7 +34,7 @@ The Geckodriver should be in the system path. Golem can manually replace this wi
 
 **settings.json**
 ```
-gecko_driver_path": "./drivers/geckodriver",
+geckodriver_path": "./drivers/geckodriver",
 ```
 
 Next, go to [Interactive Mode](interactive-mode.html)

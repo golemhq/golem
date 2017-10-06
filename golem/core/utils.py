@@ -7,8 +7,6 @@ import os
 import sys
 import uuid
 
-from functools import reduce
-from collections import OrderedDict
 from datetime import datetime
 
 import golem
@@ -121,7 +119,9 @@ def _generate_dict_from_file_structure(full_path, original_path=None):
             if not elem in ['__init__.py', '.DS_Store']:
                 files.append(os.path.splitext(elem)[0])
     for directory in directories:
-        element['sub_elements'].append(_generate_dict_from_file_structure(os.path.join(full_path, directory), original_path))           
+        _ = _generate_dict_from_file_structure(os.path.join(full_path, directory),
+                                               original_path)
+        element['sub_elements'].append(_)
     for filename in files:
         full_file_path = os.path.join(full_path, filename)
 
@@ -162,7 +162,7 @@ def project_exists(workspace, project):
     return project in get_projects(workspace)
 
 
-def get_files_in_directory_dotted_path(base_path):
+def get_files_in_directory_dot_path(base_path):
     '''
     generate a list of all the files inside a directory and
     subdirectories with the relative path as a dotted string.
@@ -190,8 +190,9 @@ def get_test_data(workspace, project, full_test_case_name):
     This method generates a list of data objects'''
     data_list = []
 
-    class data:
-        pass
+    class Data:
+        def __init__(self):
+            pass
 
     # check if CSV file == test case name exists
     test, parents = separate_file_from_parents(full_test_case_name)
@@ -204,46 +205,45 @@ def get_test_data(workspace, project, full_test_case_name):
         with open(data_file_path, 'r', encoding='utf8') as csv_file:
             dict_reader = csv.DictReader(csv_file)
             for data_set in dict_reader:
-                new_data_obj = data()
+                new_data_obj = Data()
                 for key, value in data_set.items():
                     setattr(new_data_obj, key, value)
                 data_list.append(new_data_obj)
-    
+
     if not data_list:
-        data_list.append(data())
+        data_list.append(Data())
     return data_list
 
 
 def get_test_data_dict_list(workspace, projects, full_test_case_name):
     data_dict_list = []
     data_list = get_test_data(workspace, projects, full_test_case_name)
-    for l in data_list:
-        data_dict_list.append(vars(l))
+    for data in data_list:
+        data_dict_list.append(vars(data))
     return data_dict_list
 
 
 def get_suite_module(workspace, project, suite):
-    suite_module = importlib.import_module(
-                                'projects.{0}.suites.{1}'.format(project, suite),
-                                package=None)
+    module_name = 'projects.{0}.suites.{1}'.format(project, suite)
+    suite_module = importlib.import_module(module_name, package=None)
     return suite_module
 
 
 def get_suite_test_cases(workspace, project, suite):
     '''Return a list with all the test cases of a given suite'''
     tests = []
-    suite_module = importlib.import_module('projects.{0}.suites.{1}'.format(project, suite),
-                                           package=None)
+    module_name = 'projects.{0}.suites.{1}'.format(project, suite)
+    suite_module = importlib.import_module(module_name, package=None)
     if '*' in suite_module.tests:
         path = os.path.join(workspace, 'projects', project, 'tests')
-        tests = get_files_in_directory_dotted_path(path)
+        tests = get_files_in_directory_dot_path(path)
     else:
         for test in suite_module.tests:
             if test[-1] == '*':
                 this_dir = os.path.join(test[:-2])
                 path = os.path.join(workspace, 'projects', project,
                                     'tests', this_dir)
-                this_dir_tests = get_files_in_directory_dotted_path(path)
+                this_dir_tests = get_files_in_directory_dot_path(path)
                 this_dir_tests = ['{}.{}'.format(this_dir, x) for x in this_dir_tests]
                 tests = tests + this_dir_tests
             else:
@@ -257,7 +257,7 @@ def get_directory_suite_test_cases(workspace, project, suite):
     tests = list()
 
     path = os.path.join(workspace, 'projects', project, 'tests', suite)
-    tests = get_files_in_directory_dotted_path(path)
+    tests = get_files_in_directory_dot_path(path)
     tests = ['.'.join((suite, x)) for x in tests]
 
     return tests
@@ -397,7 +397,7 @@ def create_test_dir(workspace):
     #sourcepath = os.path.join(pkgdir, 'bin', 'drivers')
     #destination_path = os.path.join(workspace, 'drivers')
     #shutil.copytree(sourcepath, destination_path)
-    
+
     golem_py_content = ("import os\n"
                         "import sys\n"
                         "\n\n"
@@ -412,7 +412,7 @@ def create_test_dir(workspace):
     golem_py_path = os.path.join(workspace, 'golem.py')
     with open(golem_py_path, 'a') as golem_py_file:
         golem_py_file.write(golem_py_content)
-    
+
     settings_path = os.path.join(workspace, 'settings.json')
     with open(settings_path, 'a') as settings_file:
         settings_file.write(settings_manager.settings_file_content())
@@ -424,7 +424,7 @@ def create_test_dir(workspace):
 
 def create_user(workspace, username, password, is_admin, projects, reports):
     errors = []
-    with open(os.path.join(workspace, 'users.json')) as users_file:    
+    with open(os.path.join(workspace, 'users.json')) as users_file:
         try:
             user_data = json.load(users_file)
         except:
@@ -519,7 +519,7 @@ def duplicate_element(workspace, project, element_type, original_file_dot_path,
             shutil.copyfile(original_file_full_path, new_file_full_path)
         except:
             errors.append('There was an error creating the new file')
-        
+
     if not errors and element_type == 'test':
         try:
             original_data_rel_path = original_file_dot_path.replace('.', os.sep) + '.csv'
@@ -529,11 +529,11 @@ def duplicate_element(workspace, project, element_type, original_file_dot_path,
             shutil.copyfile(original_data_full_path, new_data_full_path)
         except:
             pass
-        
+
     return errors
 
 
-def choose_driver_by_precedence(cli_drivers=[], suite_drivers=[],
+def choose_driver_by_precedence(cli_drivers=None, suite_drivers=None,
                                 settings_default_driver=None):
     chosen_drivers = []
     if cli_drivers:
@@ -545,5 +545,3 @@ def choose_driver_by_precedence(cli_drivers=[], suite_drivers=[],
     else:
         chosen_drivers = ['chrome']  # hardcoded default
     return chosen_drivers
-
-

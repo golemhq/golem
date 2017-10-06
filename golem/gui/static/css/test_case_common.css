@@ -61,11 +61,11 @@
     }
 }
 
-.modal {
+#testRunModal.modal {
 	top: 10%!important;
 }
 
-.modal-body {
+#testRunModal.modal-body {
 	max-height: calc(90vh - 200px);
 	overflow-y: auto;
 }

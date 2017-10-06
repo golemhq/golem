@@ -60,7 +60,7 @@
 				{% if step.screenshot %}
 					<span class="hand-icon" data-toggle="collapse" data-target="#{{step.screenshot}}" aria-expanded="false" aria-controls="{{step.screenshot}}">{{step.message}} <span class="glyphicon glyphicon-picture" aria-hidden="true"></span></span>
 					<div class="collapse text-center" id="{{step.screenshot}}">
-						<img class="step-screenshot hand-icon" src="/report/screenshot/{{project}}/{{suite}}/{{execution}}/{{test_case}}/{{test_set}}/{{step.screenshot}}/" onclick="expandImg(event);">
+						<img class="step-screenshot hand-icon" src="/report/screenshot/{{project}}/{{suite}}/{{execution}}/{{test_case}}/{{test_set}}/{{step.screenshot}}/" onclick="reportUtils.expandImg(event);">
 					</div>
 				{% else %}
 					{{step.message}}
@@ -80,19 +80,6 @@
 		</div>
 	</div>
 </div>
-
-<div class="modal fade" id="screenshotModal" tabindex="-1" role="dialog">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-			</div>
-			<div class="modal-body">
-				<img id="expandedScreenshot">
-			</div>
-		</div><!-- /.modal-content -->
-	</div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
 {% endblock %}
 
 {% block footer_declarations %}
@@ -102,5 +89,5 @@
 	var execution = '{{execution}}';
 	var testCase = '{{test_case}}';
 </script>
-<script src="{{ url_for('static', filename='js/report_test.js') }}"></script>
+<!-- <script src="{{ url_for('static', filename='js/report_test.js') }}"></script> -->
 {% endblock %}

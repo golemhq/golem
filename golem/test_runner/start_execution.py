@@ -23,7 +23,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
         tests = [test]
         report_suite_name = 'single_tests'
     elif suite:
-        tests = utils.get_suite_test_cases(workspace, project, suite)      
+        tests = utils.get_suite_test_cases(workspace, project, suite)
         suite_amount_workers = utils.get_suite_amount_of_workers(workspace, project, suite)
         suite_drivers = utils.get_suite_browsers(workspace, project, suite)
         suite_module = utils.get_suite_module(test_execution.root_path,
@@ -44,10 +44,11 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
         threads = test_execution.thread_amount
     elif suite_amount_workers:
         threads = suite_amount_workers
-    
+
+    settings_default_driver = test_execution.settings['default_browser']
     drivers = utils.choose_driver_by_precedence(cli_drivers=test_execution.cli_drivers,
                                                 suite_drivers=suite_drivers,
-                                                settings_default_driver=test_execution.settings['default_driver'])
+                                                settings_default_driver=settings_default_driver)
 
     # timestamp is passed when the test is executed from the GUI,
     # otherwise, a timestamp should be generated at this point
@@ -72,18 +73,16 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
                     }
                 )
     if is_suite:
-        execution_directory = report.create_suite_execution_directory(
-                                    test_execution.root_path,
-                                    test_execution.project,
-                                    report_suite_name,
-                                    test_execution.timestamp)
+        execution_directory = report.create_suite_execution_directory(test_execution.root_path,
+                                                                      test_execution.project,
+                                                                      report_suite_name,
+                                                                      test_execution.timestamp)
     else:
-        execution_directory = report.create_test_execution_directory(
-                                        test_execution.root_path,
-                                        test_execution.project,
-                                        test,
-                                        test_execution.timestamp)
-    # 
+        execution_directory = report.create_test_execution_directory(test_execution.root_path,
+                                                                     test_execution.project,
+                                                                     test,
+                                                                     test_execution.timestamp)
+    #
     for test in execution_list:
         # generate a report directory for this test
         report_directory = report.create_report_directory(execution_directory,
@@ -113,4 +112,3 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
     if suite:
         if hasattr(suite_module, 'after'):
             suite_module.after()
-

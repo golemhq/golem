@@ -6,8 +6,8 @@ import inspect
 from golem.core import utils
 
 
-def get_page_object_content(root_path, project, full_po_name):
-    po, parents = utils.separate_file_from_parents(full_po_name)
+def get_page_object_content(project, full_po_name):
+    # TODO REMOVE _, parents = utils.separate_file_from_parents(full_po_name)
 
     modulex = importlib.import_module('projects.{0}.pages.{1}'.format(project, full_po_name))
     variable_list = [item for item in dir(modulex) if not item.startswith("__")]
@@ -20,7 +20,7 @@ def get_page_object_content(root_path, project, full_po_name):
     try:
         source_code = inspect.getsource(modulex)
     except:
-        pass
+        print('Parsing of {} failed'.format(full_po_name))
     code_line_list = source_code.split('\n')
     for line in code_line_list:
         if 'import' in line:
@@ -33,7 +33,9 @@ def get_page_object_content(root_path, project, full_po_name):
                 'function_name': var_name,
                 'full_function_name': ''.join([full_po_name, '.', var_name]),
                 'description': inspect.getdoc(variable),
-                'arguments': inspect.getargspec(variable).args,
+                # TODO REMOVE 'arguments': inspect.getargspec(variable).args,
+                #'arguments': inspect.signature(variable).parameters.keys(),
+                'arguments': list(dict(inspect.signature(variable).parameters).keys()),
                 'code': inspect.getsource(variable)
             }
             function_list.append(new_function)
@@ -68,40 +70,37 @@ def save_page_object(root_path, project, full_page_name, elements, functions, im
     page_name, parents = utils.separate_file_from_parents(full_page_name)
     page_object_path = os.path.join(root_path, 'projects', project, 'pages',
                                     os.sep.join(parents), '{}.py'.format(page_name))
-    with open(page_object_path, 'w', encoding='utf-8') as f:
+    with open(page_object_path, 'w', encoding='utf-8') as po_file:
         for line in import_lines:
-            f.write("{}\n".format(line))
+            po_file.write("{}\n".format(line))
         for element in elements:
             # replace the spaces with underlines of the element name
             if ' ' in element['name']:
                 element['name'] = element['name'].replace(' ', '_')
             element['value'] = element['value'].replace('"', '\\"').replace("'", "\\'")
             print(element['value'])
-            f.write("\n\n{0} = ('{1}', \'{2}\', '{3}')".format(element['name'],
-                                                               element['selector'],
-                                                               element['value'],
-                                                               element['display_name']))
+            po_file.write("\n\n{0} = ('{1}', \'{2}\', '{3}')".format(element['name'],
+                                                                     element['selector'],
+                                                                     element['value'],
+                                                                     element['display_name']))
         for func in functions:
-            f.write('\n\n' + func)
+            po_file.write('\n\n' + func)
 
 
 def save_page_object_code(root_path, project, full_page_name, content):
     page_name, parents = utils.separate_file_from_parents(full_page_name)
     page_path = os.path.join(root_path, 'projects', project, 'pages',
-                                    os.sep.join(parents), '{}.py'.format(page_name))
-    with open(page_path, 'w', encoding='utf-8') as f:
-        f.write(content)
+                             os.sep.join(parents), '{}.py'.format(page_name))
+    with open(page_path, 'w', encoding='utf-8') as po_file:
+        po_file.write(content)
 
 
 def is_page_object(parameter, root_path, project):
     # identify if a parameter is a page object
     path = os.path.join(root_path, 'projects', project, 'pages')
-    page_objects = utils.get_files_in_directory_dotted_path(path)
+    page_objects = utils.get_files_in_directory_dot_path(path)
     page_object_chain = '.'.join(parameter.split('.')[:-1])
-    if page_object_chain in page_objects:
-        return True
-    else:
-        return False
+    return bool(page_object_chain in page_objects)
 
 
 def new_page_object(root_path, project, parents, po_name):
@@ -115,7 +114,7 @@ def new_page_object(root_path, project, parents, po_name):
         parents_joined = os.sep.join(parents)
         base_path = os.path.join(root_path, 'projects', project, 'pages')
         page_object_path = os.path.join(base_path, parents_joined)
-        
+
         # create the directory structure (with __init__.py files) if it does not exist
         if not os.path.exists(page_object_path):
             for parent in parents:
@@ -124,6 +123,6 @@ def new_page_object(root_path, project, parents, po_name):
 
         page_object_full_path = os.path.join(page_object_path, po_name + '.py')
 
-        with open(page_object_full_path, 'w') as f:
-            f.write('')
+        with open(page_object_full_path, 'w') as po_file:
+            po_file.write('')
     return errors

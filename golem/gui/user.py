@@ -2,7 +2,7 @@ import json
 import os
 
 
-class User: 
+class User:
     id = None
     username = None
     is_admin = False
@@ -31,7 +31,7 @@ class User:
 
 
 def user_exists(username, root_path):
-    with open(os.path.join(root_path, 'users.json')) as users_file:    
+    with open(os.path.join(root_path, 'users.json')) as users_file:
         user_data = json.load(users_file)
         for user in user_data:
             if user['username'] == username:
@@ -40,19 +40,16 @@ def user_exists(username, root_path):
 
 
 def password_is_correct(username, password, root_path):
-    with open(os.path.join(root_path, 'users.json')) as users_file:    
+    with open(os.path.join(root_path, 'users.json')) as users_file:
         user_data = json.load(users_file)
         for user in user_data:
             if user['username'] == username:
-                if user['password'] == password:
-                    return True
-                else:
-                    return False
+                return bool(user['password'] == password)
         return False
 
 
 def get_user(user_id, root_path):
-    with open(os.path.join(root_path, 'users.json')) as users_file:    
+    with open(os.path.join(root_path, 'users.json')) as users_file:
         user_data = json.load(users_file)
         for user in user_data:
             if user['id'] == user_id:
@@ -64,7 +61,7 @@ def get_user(user_id, root_path):
 
 
 def has_permissions_to_project(user_id, project, root_path, module='gui'):
-    with open(os.path.join(root_path, 'users.json')) as users_file:    
+    with open(os.path.join(root_path, 'users.json')) as users_file:
         user_data = json.load(users_file)
         has_permission = False
         for user in user_data:
@@ -82,7 +79,7 @@ def has_permissions_to_project(user_id, project, root_path, module='gui'):
 
 
 def is_admin(user_id, root_path):
-    with open(os.path.join(root_path, 'users.json')) as users_file:    
+    with open(os.path.join(root_path, 'users.json')) as users_file:
         user_data = json.load(users_file)
         for user in user_data:
             if user['id'] == user_id:

@@ -18,15 +18,15 @@ def settings_file_content():
         "\"wait_hook\": null,",
         "",
         "// Define the driver to use, unless overriden by the -d/--driver flag",
-        "\"default_driver\": \"chrome\",",
+        "\"default_browser\": \"chrome\",",
         "",
         "// Path to the chrome driver executable. By default it points to the",
         "// \'drivers\' folder inside the test directory.",
-        "\"chrome_driver_path\": \"./drivers/chromedriver\",",
+        "\"chromedriver_path\": \"./drivers/chromedriver\",",
         "",
         "// Path to the gecko driver executable. This is used by Firefox.",
         "// By default it points to the 'drivers' folder inside the test directory.",
-        "\"gecko_driver_path\": \"./drivers/geckodriver\",",
+        "\"geckodriver_path\": \"./drivers/geckodriver\",",
         "",
         "// URLRemote URL : the URL to use when connecting to a remote webdriver",
         "// for example, using selenium grid",
@@ -63,7 +63,7 @@ def read_json_and_remove_comments(json_path):
         json_data = {}
         try:
             json_data = json.loads(file_content_without_comments)
-        except Exception as e:
+        except Exception:
             print('There was an error reading file {}'.format(json_path))
 
         return json_data
@@ -85,38 +85,38 @@ def assign_settings_default_values(settings):
 
     if not 'screenshot_on_error' in settings:
         settings['screenshot_on_error'] = True
-    elif settings['screenshot_on_error'] == '' or settings['screenshot_on_error'] == None:
+    elif settings['screenshot_on_error'] == '' or settings['screenshot_on_error'] is None:
         settings['screenshot_on_error'] = True
 
     if not 'screenshot_on_step' in settings:
         settings['screenshot_on_step'] = False
-    elif settings['screenshot_on_step'] == '' or settings['screenshot_on_step'] == None:
-        settings['screenshot_on_step'] == False
+    elif settings['screenshot_on_step'] == '' or settings['screenshot_on_step'] is None:
+        settings['screenshot_on_step'] = False
 
     if not 'wait_hook' in settings:
         settings['wait_hook'] = None
     elif settings['wait_hook'] == '':
-        settings['wait_hook'] == None
+        settings['wait_hook'] = None
 
-    if not 'default_driver' in settings:
+    if not 'default_browser' in settings:
         settings['default_driver'] = 'chrome'
     elif settings['default_driver'] == '':
-        settings['default_driver'] == 'chrome'
+        settings['default_driver'] = 'chrome'
 
-    if not 'chrome_driver_path' in settings:
-        settings['chrome_driver_path'] = None
-    elif settings['chrome_driver_path'] == '':
-        settings['chrome_driver_path'] == None
+    if not 'chromedriver_path' in settings:
+        settings['chromedriver_path'] = None
+    elif settings['chromedriver_path'] == '':
+        settings['chromedriver_path'] = None
 
-    if not 'gecko_driver_path' in settings:
-        settings['gecko_driver_path'] = None
-    elif not settings['gecko_driver_path']:
-        settings['gecko_driver_path'] == None
+    if not 'geckodriver_path' in settings:
+        settings['geckodriver_path'] = None
+    elif not settings['geckodriver_path']:
+        settings['geckodriver_path'] = None
 
     if not 'remote_url' in settings:
         settings['remote_url'] = None
     elif not settings['remote_url']:
-        settings['remote_url'] == None
+        settings['remote_url'] = None
 
     if not 'console_log_level' in settings:
         settings['console_log_level'] = 'INFO'
@@ -130,7 +130,7 @@ def assign_settings_default_values(settings):
 
     if not 'log_all_events' in settings:
         settings['log_all_events'] = True
-    elif settings['log_all_events'] == '' or settings['log_all_events'] == None:
+    elif settings['log_all_events'] == '' or settings['log_all_events'] is None:
         settings['log_all_events'] = True
 
     return settings
@@ -176,13 +176,13 @@ def get_project_settings(project, global_settings):
     return global_settings
 
 
-def save_settings(root_path, project, project_settings, global_settings):
+def save_settings(project, project_settings, global_settings):
     settings_path = os.path.join('settings.json')
     with open(settings_path, 'w') as global_settings_file:
         global_settings_file.write(global_settings)
 
-    project_path = os.path.join(os.path.join('projects', project, 'settings.json'))
-    with open(project_path, 'w') as project_settings_file:
-        project_settings_file.write(project_settings)
+    if project is not None and project_settings is not None:
+        project_path = os.path.join('projects', project, 'settings.json')
+        with open(project_path, 'w') as project_settings_file:
+            project_settings_file.write(project_settings)
     return
-

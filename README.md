@@ -37,6 +37,7 @@ Golem is a complete test automation tool and framework for end-to-end testing. I
 * [Installation](#installation)
 * [Quick Start](#quick-start)
 * [Documentation](#documentation)
+* [Example Projects](#documentation)
 * [Roadmap](#roadmap)
 * [License](#license)
 
@@ -53,6 +54,13 @@ Screen Captures
 <p align="center">
     <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/test-case.png" />
 </p>
+
+
+**Test as Pure Python Code**
+<p align="center">
+    <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/example-test-code.png" />
+</p>
+
 
 **Report Dashboard**
 <p align="center">
@@ -118,6 +126,11 @@ Documentation
 
 Read the full documentation here: [http://golem-framework.readthedocs.io/](http://golem-framework.readthedocs.io/)
 
+
+Example Projects
+--------------------------------------
+
+Here is a repo with example working projects usign Golem: [https://github.com/lucianopuccio/golem-demo](https://github.com/lucianopuccio/golem-demo)
 
 Roadmap
 --------------------------------------

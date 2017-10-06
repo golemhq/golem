@@ -1,11 +1,12 @@
-import threading, webbrowser
+import threading
+import webbrowser
 
 from golem.core import test_execution
 from golem import gui
 
 
 def open_app_in_browser(url):
-    browser = webbrowser.open(url, new=2)
+    webbrowser.open(url, new=2)
 
 
 def run_gui(port, debug, open_app):
@@ -15,5 +16,3 @@ def run_gui(port, debug, open_app):
     if open_app:
         threading.Timer(1.25, open_app_in_browser, args=[url]).start()
     gui.app.run(debug=debug, host=host, port=port)
-
-

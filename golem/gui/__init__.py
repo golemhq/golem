@@ -151,7 +151,7 @@ def page_view(project, full_page_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
 
-    page_object_data = page_object.get_page_object_content(root_path, project, full_page_name)
+    page_object_data = page_object.get_page_object_content(project, full_page_name)
 
     return render_template('page_object.html', project=project, page_object_data=page_object_data,
                            page_name=full_page_name)
@@ -163,7 +163,7 @@ def page_view(project, full_page_name):
 def page_code_view(project, full_page_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
-    page_object_data = page_object.get_page_object_content(root_path, project, full_page_name)
+    page_object_data = page_object.get_page_object_content(project, full_page_name)
     return render_template('page_object_code.html', project=project,
                            page_object_data=page_object_data, page_name=full_page_name)
 
@@ -186,9 +186,19 @@ def suite_view(project, suite):
                            browsers=browsers, default_browser=default_browser)
 
 
-# SETTINGS VIEW
+# GLOBAL SETTINGS VIEW
+@app.route("/settings/")
+def global_settings():
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+    global_settings = settings_manager.get_global_settings_as_string()
+    return render_template('settings.html', project=None,
+                           global_settings=global_settings, settings=None)
+
+
+# PROJECT SETTINGS VIEW
 @app.route("/p/<project>/settings/")
-def settings_view(project):
+def project_settings(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
     global_settings = settings_manager.get_global_settings_as_string()
@@ -246,7 +256,7 @@ def report_execution(project, suite, execution):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:
-        formatted_date = report_parser.get_start_date_time_from_timestamp(execution)
+        formatted_date = report_parser.get_date_time_from_timestamp(execution)
         return render_template('report_execution.html', project=project, suite=suite,
                                execution=execution, formatted_date=formatted_date)
 
@@ -343,7 +353,7 @@ def get_page_objects():
     if request.method == 'POST':
         project = request.form['project']
         path = os.path.join(root_path, 'projects', project, 'pages')
-        page_objects = utils.get_files_in_directory_dotted_path(path)
+        page_objects = utils.get_files_in_directory_dot_path(path)
         return json.dumps(page_objects)
 
 
@@ -352,7 +362,8 @@ def get_selected_page_object_elements():
     if request.method == 'POST':
         project = request.form['project']
         page_name = request.form['pageObject']
-        po_elements = page_object.get_page_object_content(root_path, project, page_name)
+        po_elements = page_object.get_page_object_content(project, page_name)
+        print(po_elements)
         return json.dumps(po_elements)
 
 
@@ -602,8 +613,7 @@ def save_settings():
             'result': 'ok',
             'errors': []
         }
-        settings_manager.save_settings(root_path, projectname,
-                                       project_settings, global_settings)
+        settings_manager.save_settings(projectname, project_settings, global_settings)
         return json.dumps(result)
 
 

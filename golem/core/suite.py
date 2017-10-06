@@ -1,9 +1,4 @@
-import importlib
 import os
-import types
-import inspect
-
-from golem.core import utils
 
 
 def _format_list_items(list_items):
@@ -19,14 +14,14 @@ def _format_list_items(list_items):
 
 def save_suite(root_path, project, suite, test_cases, workers, browsers):
     suite_path = os.path.join(root_path, 'projects', project, 'suites',
-                                    '{}.py'.format(suite))
-    with open(suite_path, 'w', encoding='utf-8') as f:
-        f.write('\n\n')
-        f.write('browsers = {}\n'.format(_format_list_items(browsers)))
-        f.write('\n')
-        f.write('workers = {}'.format(workers))
-        f.write('\n\n')
-        f.write('tests = {}\n'.format(_format_list_items(test_cases)))
+                              '{}.py'.format(suite))
+    with open(suite_path, 'w', encoding='utf-8') as suite_file:
+        suite_file.write('\n\n')
+        suite_file.write('browsers = {}\n'.format(_format_list_items(browsers)))
+        suite_file.write('\n')
+        suite_file.write('workers = {}'.format(workers))
+        suite_file.write('\n\n')
+        suite_file.write('tests = {}\n'.format(_format_list_items(test_cases)))
 
 
 def new_suite(root_path, project, suite_name):
@@ -42,7 +37,6 @@ def new_suite(root_path, project, suite_name):
                              'browsers = []\n\n'
                              'workers = 1\n\n'
                              'tests = []\n')
-        with open(suite_full_path, 'w') as f:
-            f.write(test_case_content)
+        with open(suite_full_path, 'w') as suite_file:
+            suite_file.write(test_case_content)
     return errors
-

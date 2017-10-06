@@ -3,7 +3,7 @@ import re
 import importlib
 import inspect
 
-from golem.core import utils, data, page_object
+from golem.core import utils, page_object
 
 
 def _parse_step(step):
@@ -31,7 +31,7 @@ def _parse_step(step):
         for i in range(len(params_string)):
             is_last_char = i == len(params_string) -1
             is_higher_level_comma = False
-            
+
             if params_string[i] == '\'':
                 if not inside_string:
                     inside_string = True
@@ -46,13 +46,13 @@ def _parse_step(step):
                 inside_param = True
             elif inside_param and (params_string[i] == ')' or params_string[i] == '}'):
                 inside_param = False
-            
+
             if is_higher_level_comma:
                 param_pairs.append((current_start, i))
                 current_start = i + 1
             elif is_last_char:
                 param_pairs.append((current_start, i+1))
-                current_start = i + 2            
+                current_start = i + 2
 
         for pair in param_pairs:
             param_list.append(params_string[pair[0]:pair[1]])
@@ -111,7 +111,7 @@ def get_test_case_content(project, test_case_name):
     teardown_function_code = getattr(test_module, 'teardown', None)
     if teardown_function_code:
         teardown_steps = _get_parsed_steps(teardown_function_code)
-    
+
     test_contents['description'] = description
     test_contents['pages'] = pages
     test_contents['steps'] = {
@@ -159,14 +159,14 @@ def new_test_case(root_path, project, parents, tc_name):
         if not os.path.exists(data_path):
             os.makedirs(data_path)
         data_full_path = os.path.join(data_path, tc_name + '.csv')
-        with open(test_case_full_path, 'w') as f:
-            f.write(test_case_content)
-        with open(data_full_path, 'w') as f:
-            f.write('')
+        with open(test_case_full_path, 'w') as test_file:
+            test_file.write(test_case_content)
+        with open(data_full_path, 'w') as data_file:
+            data_file.write('')
     return errors
 
 
-def format_parameters(step, root_path, project, parents, test_case_name, stored_keys):
+def format_parameters(step, root_path, project, stored_keys):
     parameters = step['parameters']
     action = step['action'].replace(' ', '_')
     formatted_parameters = []
@@ -181,7 +181,6 @@ def format_parameters(step, root_path, project, parents, test_case_name, stored_
             else:
                 # is not a page object,
                 # identify if its a value or element parameter
-                
                 # is_data_var = data.is_data_variable(root_path, project, parents,
                 #                                     test_case_name, parameter)
 
@@ -207,8 +206,8 @@ def format_parameters(step, root_path, project, parents, test_case_name, stored_
 
 def format_page_object_string(page_objects):
     po_string = ''
-    for po in page_objects:
-        po_string = po_string + " '" + po + "',\n" + " " * 8
+    for page in page_objects:
+        po_string = po_string + " '" + page + "',\n" + " " * 8
     po_string = "[{}]".format(po_string.strip()[:-1])
     return po_string
 
@@ -242,11 +241,11 @@ def save_test_case(root_path, project, full_test_case_name, description,
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
     test_case_path = os.path.join(root_path, 'projects', project, 'tests',
                                   os.sep.join(parents), '{}.py'.format(tc_name))
-    setup_stored_keys = get_stored_keys(test_steps['setup']) 
+    setup_stored_keys = get_stored_keys(test_steps['setup'])
     test_stored_keys = get_stored_keys(test_steps['test'])
     teardown_stored_keys = get_stored_keys(test_steps['teardown'])
 
-    
+
     formatted_description = format_description(description)
 
     with open(test_case_path, 'w', encoding='utf-8') as f:
@@ -262,7 +261,6 @@ def save_test_case(root_path, project, full_test_case_name, description,
         if test_steps['setup']:
             for step in test_steps['setup']:
                 parameters_formatted = format_parameters(step, root_path, project,
-                                                         parents, tc_name,
                                                          setup_stored_keys)
                 f.write('    {0}({1})\n'
                         .format(step['action'].replace(' ', '_'),
@@ -275,7 +273,6 @@ def save_test_case(root_path, project, full_test_case_name, description,
         if test_steps['test']:
             for step in test_steps['test']:
                 parameters_formatted = format_parameters(step, root_path, project,
-                                                         parents, tc_name,
                                                          test_stored_keys)
                 f.write('    {0}({1})\n'
                         .format(step['action'].replace(' ', '_'),
@@ -288,7 +285,6 @@ def save_test_case(root_path, project, full_test_case_name, description,
         if test_steps['teardown']:
             for step in test_steps['teardown']:
                 parameters_formatted = format_parameters(step, root_path, project,
-                                                         parents, tc_name,
                                                          teardown_stored_keys)
                 f.write('    {0}({1})\n'
                         .format(step['action'].replace(' ', '_'),
@@ -301,5 +297,5 @@ def save_test_case_code(root_path, project, full_test_case_name, content):
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
     test_case_path = os.path.join(root_path, 'projects', project, 'tests',
                                   os.sep.join(parents), '{}.py'.format(tc_name))
-    with open(test_case_path, 'w', encoding='utf-8') as f:
-        f.write(content)
+    with open(test_case_path, 'w', encoding='utf-8') as test_file:
+        test_file.write(content)

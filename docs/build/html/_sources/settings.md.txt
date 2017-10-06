@@ -23,15 +23,15 @@ Take a screenshot on error by default. Default is True.
 
 Take a screenshot on every step. Default is False.
 
-- *default_driver*
+- *default_browser*
 
 Define the driver to use unless overriden by the -d/--driver flag. Default is 'chrome'. Valid options are: firefox, chrome, chrome-remote, firefox-remote, chrome-headless, chrome-remote-headless.
 
-- *chrome_driver_path*
+- *chromedriver_path*
 
 Path to the chrome driver executable. By default it points to the *drivers* folder inside the test directory.
 
-- *gecko_driver_path*
+- *geckodriver_path*
 
 Path to the gecko driver executable. By default it points to the *drivers* folder inside the test directory.
 

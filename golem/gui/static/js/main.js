@@ -105,6 +105,11 @@ var reportUtils = new function(){
             </div>";
         return progressBars
     }
+
+    this.expandImg = function(e){
+        $("#expandedScreenshot").attr('src', e.srcElement.src);
+        $("#screenshotModal").modal('show');
+    }
 }
 
 

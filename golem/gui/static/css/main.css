@@ -281,3 +281,26 @@ gray 1  #fafafa
 .no-margin-top {
     margin-top: 0px;
 }
+
+
+/*Screenshot Modal*/
+
+.modal-dialog.screenshot-modal-dialog {
+    width: 90%;
+    padding-top: 0px;
+}
+
+#expandedScreenshot {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+.screenshot-modal .modal-header .close {
+    font-size: 28px;
+    margin-top: -12px;
+}
+
+.screenshot-modal .modal-header {
+    padding-right: 10px;
+}

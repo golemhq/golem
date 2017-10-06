@@ -43,3 +43,5 @@ It is posible to start a quick interactive mode by not providing a project and t
 
 This will start an interactive console with a clean slate.
 
+
+Next, go to [Golem Public API](golem-api.html)
