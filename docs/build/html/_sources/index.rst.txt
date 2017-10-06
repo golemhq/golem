@@ -14,13 +14,14 @@ Contents
    managing-test-data
    using-page-objects
    suites
-   actions
+   golem-actions
    custom-actions
    the-cli
    the-web-module
    settings
    web-drivers
    Interactive-mode
+   golem-api
 
 
 Intro

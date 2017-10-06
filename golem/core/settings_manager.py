@@ -18,15 +18,15 @@ def settings_file_content():
         "\"wait_hook\": null,",
         "",
         "// Define the driver to use, unless overriden by the -d/--driver flag",
-        "\"default_driver\": \"chrome\",",
+        "\"default_browser\": \"chrome\",",
         "",
         "// Path to the chrome driver executable. By default it points to the",
         "// \'drivers\' folder inside the test directory.",
-        "\"chrome_driver_path\": \"./drivers/chromedriver\",",
+        "\"chromedriver_path\": \"./drivers/chromedriver\",",
         "",
         "// Path to the gecko driver executable. This is used by Firefox.",
         "// By default it points to the 'drivers' folder inside the test directory.",
-        "\"gecko_driver_path\": \"./drivers/geckodriver\",",
+        "\"geckodriver_path\": \"./drivers/geckodriver\",",
         "",
         "// URLRemote URL : the URL to use when connecting to a remote webdriver",
         "// for example, using selenium grid",
@@ -98,20 +98,20 @@ def assign_settings_default_values(settings):
     elif settings['wait_hook'] == '':
         settings['wait_hook'] = None
 
-    if not 'default_driver' in settings:
+    if not 'default_browser' in settings:
         settings['default_driver'] = 'chrome'
     elif settings['default_driver'] == '':
         settings['default_driver'] = 'chrome'
 
-    if not 'chrome_driver_path' in settings:
-        settings['chrome_driver_path'] = None
-    elif settings['chrome_driver_path'] == '':
-        settings['chrome_driver_path'] = None
+    if not 'chromedriver_path' in settings:
+        settings['chromedriver_path'] = None
+    elif settings['chromedriver_path'] == '':
+        settings['chromedriver_path'] = None
 
-    if not 'gecko_driver_path' in settings:
-        settings['gecko_driver_path'] = None
-    elif not settings['gecko_driver_path']:
-        settings['gecko_driver_path'] = None
+    if not 'geckodriver_path' in settings:
+        settings['geckodriver_path'] = None
+    elif not settings['geckodriver_path']:
+        settings['geckodriver_path'] = None
 
     if not 'remote_url' in settings:
         settings['remote_url'] = None

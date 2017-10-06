@@ -35,4 +35,4 @@ tests = [
 The 'workers = 2' tells Golem how many tests should be executed at the same time. Default is one (one at a time). How many tests can be parallelized depends on your test infrastructure.
 
 
-Next, go to [Actions](actions.html)
+Next, go to [Golem Actions](golem-actions.html)

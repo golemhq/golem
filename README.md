@@ -55,6 +55,13 @@ Screen Captures
     <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/test-case.png" />
 </p>
 
+
+**Test as Pure Python Code**
+<p align="center">
+    <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/example-test-code.png" />
+</p>
+
+
 **Report Dashboard**
 <p align="center">
     <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/report-dashboard.png" />

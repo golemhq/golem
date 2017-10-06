@@ -31,7 +31,7 @@ class RunCommand(BaseCommand):
     cmd = 'run'
 
     def add_arguments(self, parser):
-        driver_choices = ['firefox',
+        browser_choices = ['firefox',
                           'chrome',
                           'chrome-remote',
                           'chrome-headless',
@@ -46,9 +46,9 @@ class RunCommand(BaseCommand):
                             nargs='?', default=0, type=int,
                             metavar='amount of threads for parallel execution',
                             help="amount of threads for parallel execution")
-        parser.add_argument('-d', '--drivers', action='store',
-                            nargs='*', choices=driver_choices,
-                            type=str, metavar='Web Drivers',
+        parser.add_argument('-b', '--browsers', action='store',
+                            nargs='*', choices=browser_choices,
+                            type=str, metavar='Browser(s)',
                             default=[], help="Web Drivers")
         parser.add_argument('--debug', action='store_true',
                             default=False,
@@ -63,7 +63,7 @@ class RunCommand(BaseCommand):
 
     def run(self, test_execution, args):
         test_execution.thread_amount = args.threads
-        test_execution.cli_drivers = args.drivers
+        test_execution.cli_drivers = args.browsers
         test_execution.timestamp = args.timestamp
         test_execution.interactive = args.interactive
         test_execution.minimize = args.minimize

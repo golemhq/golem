@@ -10,7 +10,7 @@ import traceback
 from golem.core import report, utils
 
 
-def run_test(workspace, project, test_name, test_data, driver,
+def run_test(workspace, project, test_name, test_data, browser_name,
              settings, report_directory):
     ''' runs a single test case by name'''
     result = {
@@ -20,7 +20,7 @@ def run_test(workspace, project, test_name, test_data, driver,
         'steps': [],
         'test_elapsed_time': None,
         'test_timestamp': None,
-        'browser': driver
+        'browser': browser_name
     }
 
     from golem.core import execution_logger
@@ -42,7 +42,7 @@ def run_test(workspace, project, test_name, test_data, driver,
     execution.logger = logger
 
     logger.info('Test execution started: {}'.format(test_name))
-    logger.info('Driver: {}'.format(driver))
+    logger.info('Browser: {}'.format(browser_name))
     if test_data:
         data_string = '\n'
         for key, value in test_data.items():
@@ -54,7 +54,7 @@ def run_test(workspace, project, test_name, test_data, driver,
 
     execution.project = project
     execution.workspace = workspace
-    execution.driver_name = driver
+    execution.browser_name = browser_name
     execution.settings = settings
     execution.report_directory = report_directory
 
@@ -97,7 +97,7 @@ def run_test(workspace, project, test_name, test_data, driver,
         result['result'] = 'fail'
         result['error'] = traceback.format_exc()
         try:
-            if settings['screenshot_on_error'] and execution.driver:
+            if settings['screenshot_on_error'] and execution.browser:
                 actions.capture('error')
         except:
             # if the test failed and driver is not available
@@ -119,16 +119,16 @@ def run_test(workspace, project, test_name, test_data, driver,
 
     # if there is no teardown or teardown failed or it did not close the driver,
     # let's try to close the driver manually
-    if execution.driver:
+    if execution.browser:
         try:
-            execution.driver.quit()
+            execution.browser.quit()
         except:
             # if this fails, we have lost control over the webdriver window
             # and we are not going to be able to close it
             logger.error('There was an error closing the driver')
             logger.error(traceback.format_exc())
         finally:
-            execution.driver = None
+            execution.browser = None
 
     test_end_time = time.time()
     test_elapsed_time = round(test_end_time - test_start_time, 2)
@@ -140,7 +140,7 @@ def run_test(workspace, project, test_name, test_data, driver,
     result['steps'] = execution.steps
     result['test_elapsed_time'] = test_elapsed_time
     result['test_timestamp'] = test_timestamp
-    result['browser'] = execution.driver_name
+    result['browser'] = execution.browser_name
 
     # remove golem.execution from sys.modules to guarantee thread safety
     #sys.modules['golem.execution'] = None

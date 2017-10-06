@@ -9,16 +9,15 @@ import sys
 class Execution:
 
     def __init__(self):
-        self.driver = None
+        self.browser = None
         self.steps = []
-        self.driver_name = None
+        self.browser_name = None
         self.settings = None
         self.project = None
         self.workspace = None
         self.data = None
         self.report_directory = None
         self.description = None
-        self.steps = []
         self.logger = None
 
 

@@ -45,7 +45,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
     elif suite_amount_workers:
         threads = suite_amount_workers
 
-    settings_default_driver = test_execution.settings['default_driver']
+    settings_default_driver = test_execution.settings['default_browser']
     drivers = utils.choose_driver_by_precedence(cli_drivers=test_execution.cli_drivers,
                                                 suite_drivers=suite_drivers,
                                                 settings_default_driver=settings_default_driver)

@@ -12,8 +12,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 import requests
 
 from golem.core.exceptions import TextNotPresent, ElementNotFound
-from golem.selenium import get_driver
-from golem import selenium
+from golem.browser import get_browser
+from golem import browser
 from golem import execution
 
 
@@ -45,7 +45,7 @@ def assert_contains(element, value):
         raise Exception('Expected {} to contain {}'.format(element, value))
 
 
-def assert_equals(actual_value, expected_value):
+def assert_equals(actual, expected):
     step_message = 'Assert that {0} equals {1}'.format(actual_value, expected_value)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
@@ -72,7 +72,7 @@ def assert_true(condition):
 def capture(message=''):
     _run_wait_hook()
     execution.logger.info('Take screenshot {}'.format(message))
-    driver = get_driver()
+    driver = get_browser()
     # store image at this point, the target directory is already
     # created since the beginning of the test, stored in golem.core.report_directory
     img_id = str(uuid.uuid4())[:8]
@@ -85,7 +85,7 @@ def capture(message=''):
 
 def clear(element):
     _run_wait_hook()
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     step_message = 'Clear {0} element'.format(webelement.name)
     webelement.clear()
     execution.logger.info(step_message)
@@ -94,7 +94,7 @@ def clear(element):
 
 def click(element):
     _run_wait_hook()
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     step_message = 'Click {0}'.format(webelement.name)
     webelement.click()
     execution.logger.info(step_message)
@@ -103,9 +103,9 @@ def click(element):
 
 def close():
     execution.logger.info('Close driver')
-    driver = get_driver()
+    driver = get_browser()
     driver.quit()
-    execution.driver = None
+    execution.browser = None
 
 
 def debug():
@@ -126,7 +126,7 @@ def debug():
 
 def mouse_hover(element):
     _run_wait_hook()
-    driver = get_driver()
+    driver = get_browser()
     webelement = driver.find(element)
     step_message = 'Mouse hover element \'{0}\''.format(webelement.name)
     execution.logger.info(step_message)
@@ -136,7 +136,7 @@ def mouse_hover(element):
 
 def navigate(url):
     step_message = 'Navigate to: \'{0}\''.format(url)
-    driver = get_driver()
+    driver = get_browser()
     driver.get(url)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -146,7 +146,7 @@ def press_key(element, key):
     step_message = 'Press key: {}'.format(key)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     if key == 'RETURN' or key == 'ENTER':
         webelement.send_keys(Keys.RETURN)
     elif key == 'UP':
@@ -176,7 +176,7 @@ def random(value):
 
 def select_by_index(element, index):
     _run_wait_hook()
-    webelement = get_driver.find(element)
+    webelement = get_browser().find(element)
     step_message = 'Select option of index {0} from element {1}'.format(index, webelement.name)
     select = selenium.webdriver.support.select.Select(webelement)
     select.select_by_index(index)
@@ -186,7 +186,7 @@ def select_by_index(element, index):
 
 def select_by_text(element, text):
     _run_wait_hook()
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     step_message = 'Select \'{0}\' from element {1}'.format(text, webelement.name)
     select = selenium.webdriver.support.select.Select(webelement)
     select.select_by_visible_text(text)
@@ -196,7 +196,7 @@ def select_by_text(element, text):
 
 def select_by_value(element, value):
     _run_wait_hook()
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     step_message = 'Select \'{0}\' value from element {1}'.format(value, webelement.name)
     select = selenium.webdriver.support.select.Select(webelement)
     select.select_by_value(value)
@@ -206,10 +206,10 @@ def select_by_value(element, value):
 
 def send_keys(element, text):
     _run_wait_hook()
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     step_message = 'Write \'{0}\' in element {1}'.format(text, webelement.name)
     # TODO chrome driver drops some characters when calling send_keys
-    if execution.driver_name in ['chrome', 'chrome-headless', 'chrome-remote']:
+    if execution.browser_name in ['chrome', 'chrome-headless', 'chrome-remote']:
         for c in text:
             webelement.send_keys(c)
             time.sleep(0.1)
@@ -234,14 +234,14 @@ def verify_exists(element):
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
     try:
-        webelement = get_driver().find(element, timeout=1)
+        webelement = get_browser().find(element, timeout=1)
     except:
         raise ElementNotFound('Element {} does not exist'.format(element))
 
 
 def verify_is_enabled(element):
     _run_wait_hook()
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     step_message = 'Verify the element \'{0}\' is enabled'.format(webelement.name)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -251,7 +251,7 @@ def verify_is_enabled(element):
 
 def verify_is_not_enabled(element):
     _run_wait_hook()
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     step_message = 'Verify the element \'{0}\' is not enabled'.format(webelement.name)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -261,7 +261,7 @@ def verify_is_not_enabled(element):
 
 def verify_is_not_selected(element):
     _run_wait_hook()
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     step_message = 'Verify the element \'{0}\' is not selected'.format(webelement.name)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -271,7 +271,7 @@ def verify_is_not_selected(element):
 
 def verify_is_not_visible(element):
     _run_wait_hook()
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     step_message = 'Verify the element \'{0}\' is not visible'.format(webelement.name)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -281,7 +281,7 @@ def verify_is_not_visible(element):
 
 def verify_is_selected(element):
     _run_wait_hook()
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     step_message = 'Verify the element \'{0}\' is selected'.format(webelement.name)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -291,7 +291,7 @@ def verify_is_selected(element):
 
 def verify_is_visible(element):
     _run_wait_hook()
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     step_message = 'Verify the element \'{0}\' is visible'.format(webelement.name)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -305,7 +305,7 @@ def verify_not_exists(element):
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
     try:
-        webelement = get_driver().find(element)
+        webelement = get_browser().find(element)
         if webelement:
             raise Exception('Element {} exists and should not'
                             .format(webelement.name))
@@ -315,7 +315,7 @@ def verify_not_exists(element):
 
 def verify_selected_option(element, text):
     _run_wait_hook()
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     select = selenium.webdriver.support.select.Select(webelement)
     step_message = ('Verify selected option of element \'{0}\''
                     ' is \'{1}\''.format(webelement.name, text))
@@ -329,7 +329,7 @@ def verify_selected_option(element, text):
 
 def verify_text(text):
     _run_wait_hook()
-    driver = get_driver()
+    driver = get_browser()
     step_message = 'Verify \'{0}\' is present in page'.format(text)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -339,7 +339,7 @@ def verify_text(text):
 
 def verify_text_in_element(element, text):
     _run_wait_hook()
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     step_message = 'Verify element \'{0}\' contains text \'{1}\''.format(webelement.name, text)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -367,7 +367,7 @@ def wait(seconds):
 # #     start_time = time.time()
 # #     while not webelement and (time.time() - start_time) < timeout:
 # #         try:
-# #             webelement = get_driver().find(element, timeout=3)
+# #             webelement = get_browser().find(element, timeout=3)
 # #         except:
 # #             print('wait_for_element_exists')
 
@@ -378,7 +378,7 @@ def wait(seconds):
 #         time.sleep(0.5)
 #         remaining_time = time.time() - start_time
 #         try:
-#             webelement = get_driver().find(element, timeout=0)
+#             webelement = get_browser().find(element, timeout=0)
 #         except:
 #             still_exists = False
 #     # else:
@@ -399,7 +399,7 @@ def wait_for_element_not_exist(element, timeout=20):
     execution.logger.info('Waiting for element {} to not exist'.format(element))
     webelement = None
     try:
-        s = get_driver().find(element, timeout=3)
+        s = get_browser().find(element, timeout=3)
     except:
         execution.logger.debug('Element already does not exist, continuing...')
         return
@@ -411,7 +411,7 @@ def wait_for_element_not_exist(element, timeout=20):
         time.sleep(0.5)
         remaining_time = time.time() - start_time
         try:
-            webelement = get_driver().find(element, timeout=0)
+            webelement = get_browser().find(element, timeout=0)
         except:
             still_exists = False
             execution.logger.debug('Element stopped existing')
@@ -426,7 +426,7 @@ def wait_for_element_not_visible(element, timeout=20):
     execution.logger.info('Waiting for element {} to be not visible'.format(element))
     webelement = None
     try:
-        webelement = get_driver().find(element, timeout=3)
+        webelement = get_browser().find(element, timeout=3)
     except:
         execution.logger.debug('Element is already not visible, continuing...')
         return
@@ -447,7 +447,7 @@ def wait_for_element_enabled(element, timeout=20):
     timed_out = False
     #webelement = None
     #try:
-    webelement = get_driver().find(element, timeout)
+    webelement = get_browser().find(element, timeout)
     enabled = webelement.is_enabled()
     while not enabled and not timed_out:
         execution.logger.debug('Element is not enabled, waiting..')
@@ -467,7 +467,7 @@ def wait_for_element_visible(element, timeout=20):
     execution.logger.info('Waiting for element {} to be visible'.format(element))
     start_time = time.time()
     timed_out = False
-    webelement = get_driver().find(element)
+    webelement = get_browser().find(element)
     while not webelement.is_displayed() and not timed_out:
         execution.logger.debug('Element is not visible, waiting..')
         time.sleep(0.5)
@@ -505,5 +505,5 @@ def verify_response_status_code(response, status_code):
                         .format(status_code, response.status_code))
 
 
-def verify_response_content():
-    pass
+# def verify_response_content():
+#     pass

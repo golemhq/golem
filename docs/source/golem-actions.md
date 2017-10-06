@@ -3,211 +3,229 @@ Golem Actions
 
 Golem comes with predefined actions that cover almost all the needs to write tests. They are self-documenting. The entire list of available actions is the following:
 
-##### Selenium Actions
 
-**capture(message='')**
+### Browser Actions
+
+
+##### capture(message='')
 
 Take a screenshot of the browser, the message is optional
 
 
-**click(element)**
+##### clear(element)
+
+Clear element
+
+
+##### click(element)
 
 Perform a mouse click
 
 
-**close()**
+##### close()
 
 Closes the webdriver browser
 
 
-**mouse_hover(element)**
+##### mouse_hover(element)
 
 Perform a mouse hover on the element
 
 
-**navigate(url)**
+##### navigate(url)
 
 Navigate to a URL
 
 
-**press_key(element, key)**
+#####press_key(element, key)
 
 Press the given keyboard key on the element. Options are:
 
 * ENTER/RETURN
+* UP
+* DOWN
+* LEFT
+* RIGHT
 
 
-**select_by_index(element, text)**
+##### select_by_index(element, text)
 
 Select an option from a \<select\> element by the index of the option
 
 
-**select_by_text(element, text)**
+##### select_by_text(element, text)
 
 Select an option from a \<select\> element by the option text
 
 
-**select_by_value(element, value)**
+##### select_by_value(element, value)
 
 Select an option from a \<select\> element by the option value. 
 
 For example, given:
 
 ```
-<select>
+<select id="countrySelect">
     <option value="CA">Canada</option>
     <option value="US">United States</option>
     <option value="MX">Mexico</option>
 </select>
 ```
 
-To select the first option You could use:
+To select the first option use:
 
 ```
-select_by_index(elem, 0)
-select_by_text(elem, 'Canada')
-select_by_value(elem, 'CA')
+select_by_index('#countrySelect', 0)
+select_by_text('#countrySelect', 'Canada')
+select_by_value('#countrySelect', 'CA')
 ```
 
 
-**send_keys(element, text)**
+##### send_keys(element, text)
 
 Send key strokes to the element
 
 
-**verify_exists(element)**
+##### verify_exists(element)
 
 Verify an element exists in the page
 
 
-**verify_is_enabled(element)**
+##### verify_is_enabled(element)
 
 Verify that an element is enabled
 
 
-**verify_is_not_enabled(element)**
+##### verify_is_not_enabled(element)
 
 Verify that an element is not enabled
 
 
-**verify_is_not_selected(element)**
+##### verify_is_not_selected(element)
 
 Verify that an element is not selected, i.e: a checkbox
 
 
-**verify_is_not_visible(element)**
+##### verify_is_not_visible(element)
 
 Verify that an element is not visible
 
 
-**verify_is_selected(element)**
+##### verify_is_selected(element)
 
 Verify that an element is selected, i.e.: a checkbox
 
 
-**verify_is_visible(element)**
+##### verify_is_visible(element)
 
 Verify that an element is visible
 
 
-**verify_not_exists(element)**
+##### verify_not_exists(element)
 
 Verify that an element does not exist in the page
 
 
-**verify_selected_option(element, text)**
+##### verify_selected_option(element, text)
 
 Verify that the option selected in a \<select\> is the one given (by the option text)
 
 
-**verify_text(text)**
+##### verify_text(text)
 
 Verify that the given text is present anywhere on the page (in the entire DOM)
 
 
-**verify_text_in_element(element, text)**
+##### verify_text_in_element(element, text)
 
 Verify that an element contains the given text.
 
 
-**wait_for_element_not_visible(element, timeout=20)**
+##### wait_for_element_not_exist(element, timeout=20)
 
-Pause execution for the given amount of seconds until the element is no longer visible (default is 20 seconds)
-
-
-**wait_for_element_enabled(element, timeout=20)**
-
-Pause execution for the given amount of seconds until the element is enabled (default is 20 seconds)
+Wait until the element does not exists in the DOM anymore
 
 
-**wait_for_element_visible(element, timeout=20)**
+##### wait_for_element_not_visible(element, timeout=20)
 
-Pause execution for the given amount of seconds until the element is visible (default is 20 seconds)
-
-
-##### Other Actions
+Wait until the element is not visible anymore
 
 
-**assert_contains(element, value)**
+##### wait_for_element_enabled(element, timeout=20)
 
-Assert that element contains value.
-
-
-**assert_equals(actual_value, expected_value)**
-
-Assert that actual_value, expected_value
+Wait until the element is enabled
 
 
-**assert_false(condition)**
+##### wait_for_element_visible(element, timeout=20)
 
-Assert that condition is false
-
-
-**assert_true(condition)**
-
-Assert that condition is true
+Wait until the element is visible
 
 
-**debug()**
+### General Actions
+
+
+##### assert_contains(element, value)
+
+Assert that the element contains the value
+
+
+##### assert_equals(actual, expected)
+
+Assert that the actual value equals the expected value
+
+
+##### assert_false(condition)
+
+Assert that the condition is false
+
+
+##### assert_true(condition)
+
+Assert that the condition is true
+
+
+##### debug()
 
 Starts an interactive console at this point of the test. The test should be run with the '-i' flag, otherwise it will be ignored. See [Interactive Mode](Interactive-mode.html) for more details.
 
 
-**random(args)**
+##### random(args)
 
 Generate a random string. Options:
 
 * 'c' generate a random lowercase letter
 * 'd' generate a random digit
 
-For example: random('ccdd') => 'ab12'
+For example: random('cccddd') => 'aeg147'
 
 
-**step(message)**
+##### step(message)
 
 Logs a new step to be displayed in the report later
 
 
-**store(key, value)**
+##### store(key, value)
 
-Store a value in the given key for later use. The value is going to be available through the data dictionary.
+Store a value in the given key for later use. Th_e value is going to be available through the data dictionary.
 
 
-**wait(seconds)**
+##### wait(seconds)
 
 Pause execution for the given amount of seconds
 
 
-##### API
+### API Actions
 
-**get(url, headers, data)**
+##### get(url, headers, data)
 
 Perform a get HTTP request to the URL, with the given headers and data. The response is stored in 'data.last_response'
 
 
-**post(url, headers, data)**
+##### post(url, headers, data)
 
 Perform a post HTTP request to the URL, with the given headers and data. The response is stored in 'data.last_response'
+
+
 
 
 Next, go to [Custom Actions](custom-actions.html)
