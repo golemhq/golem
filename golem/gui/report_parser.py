@@ -37,6 +37,7 @@ def get_last_executions(root_path, project=None, suite=None, limit=5):
             last_execution_data[project][exec_suite] = []
             suite_executions = []
             suite_path = os.path.join(report_path, exec_suite)
+            print('SUITE PATH', suite_path)
             suite_executions = os.walk(suite_path).__next__()[1]
             last_executions = sorted(suite_executions)
             limit = int(limit)

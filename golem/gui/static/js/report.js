@@ -93,7 +93,7 @@ var ReportDashboard = new function(){
                 </td>\
             </tr>";
         row = $(row);
-        row.attr('onclick', "document.location.href='/report/project/"+data.project+"/"+data.suite+"/"+data.execution+"/'");
+        row.attr('onclick', "document.location.href='/report/project/"+data.project+"/suite/"+data.suite+"/"+data.execution+"/'");
         return row
     };
 }

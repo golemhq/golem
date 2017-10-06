@@ -262,7 +262,7 @@ function loadHealthData(healthData){
             </tr>";
         newRow = $(newRow);
 
-        newRow.attr('onclick', "document.location.href='/report/project/"+project+"/"+suite+"/"+healthData[suite].execution+"/'");
+        newRow.attr('onclick', "document.location.href='/report/project/"+project+"/suite/"+suite+"/"+healthData[suite].execution+"/'");
 
         $("#healthTable tbody").append(newRow);
 

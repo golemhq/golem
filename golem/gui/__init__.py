@@ -179,7 +179,7 @@ def suite_view(project, suite):
     worker_amount = utils.get_suite_amount_of_workers(root_path, project, suite)
     browsers = utils.get_suite_browsers(root_path, project, suite)
     browsers = ', '.join(browsers)
-    default_browser = test_execution.settings['default_driver']
+    default_browser = test_execution.settings['default_browser']
 
     return render_template('suite.html', project=project, all_test_cases=all_test_cases['sub_elements'],
                            selected_tests=selected_tests, suite=suite, worker_amount=worker_amount,
@@ -250,7 +250,7 @@ def report_dashboard_suite(project, suite):
 
 
 # REPORT EXECUTION VIEW
-@app.route("/report/project/<project>/<suite>/<execution>/")
+@app.route("/report/project/<project>/suite/<suite>/<execution>/")
 @login_required
 def report_execution(project, suite, execution):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):

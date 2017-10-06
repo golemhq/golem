@@ -324,7 +324,7 @@ function runSuite(){
          dataType: 'json',
          type: 'POST',
          success: function(data) {
-            var url = '/report/project/' + project + '/' + suite + '/' + data + '/';
+            var url = '/report/project/' + project + '/suite/' + suite + '/' + data + '/';
             toastr.info('Running suite ' + suite + " - <a href='" + url + "'>open</a>");
          },
          error: function() {}
