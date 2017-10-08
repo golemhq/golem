@@ -27,9 +27,15 @@ def new_directory_page_object(root_path, project, parents, page_name):
     return errors
 
 
-def run_test_case(project, test_case_name):
+def run_test_case(project, test_case_name, environment):
     timestamp = utils.get_timestamp()
-    param_list = ['python', 'golem.py', 'run', project, test_case_name, '--timestamp', timestamp]
+    param_list = ['python', 'golem.py','run',
+                  project,
+                  test_case_name,
+                  '--timestamp', timestamp]
+    if environment:
+        param_list.append('--environments')
+        param_list.append(environment)
     subprocess.Popen(param_list)
     return timestamp
 

@@ -3,13 +3,44 @@
 var testRunner = new function(){
     
     this.runTestCase = function(){
+
+        $("button#runTest").blur();
+
         if(unsavedChanges)
-            saveTestCase(true);
+            saveTestCase({runAfter: true});
         else
-            testRunner._doRunTestCase();
+            //testRunner._doRunTestCase();
+            testRunner.askForEnvBeforeRun()
     };
 
-    this._doRunTestCase = function(){
+    this.askForEnvBeforeRun = function(){
+        $.ajax({
+            url: "/get_environments/",
+            data: {
+                project: project
+            },
+            dataType: 'json',
+            type: 'POST',
+            success: function(environments) {
+                console.log(environments);
+                if(environments.length > 1){
+                    // should ask the user which env
+                    var callback = function(environment){
+                        testRunner._doRunTestCase(environment);
+                    }
+                    displaySelectPromptModal('Select Environment', '', environments, callback)
+                }
+                else{
+                    // should not ask the user which env
+                    testRunner._doRunTestCase();
+                }
+            }
+        });
+    }
+
+    this._doRunTestCase = function(environment){
+        environment = environment || '';
+        console.log('Running test in env:', environment);
         toastr.options = {
             "positionClass": "toast-top-center",
             "timeOut": "3000",
@@ -20,6 +51,7 @@ var testRunner = new function(){
             data: {
                  "project": project,
                  "testCaseName": fullTestCaseName,
+                 "environment": environment
              },
              dataType: 'json',
              type: 'POST',
@@ -109,7 +141,7 @@ var testRunner = new function(){
             else{
                 var resultIcon = '<span class="fail-icon"><span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></span>';
             }
-            report.append('<span><strong>Result:</strong> ' + thisReport.result + ' ' + resultIcon + '</span><br>');
+            report.append('<span><strong>Result:</strong> '+thisReport.result+' ' + resultIcon + '</span><br>');
             report.append('<span><strong>Error:</strong> ' + thisReport.short_error + '</span><br>');
             report.append('<span><strong>Elapsed Time:</strong> ' + thisReport.test_elapsed_time + '</span><br>');
             report.append('<span><strong>Browser:<strong> ' + thisReport.browser + '</span><br>');

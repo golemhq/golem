@@ -64,6 +64,54 @@ function displayPromptModal(title, description, inputValue, callback){
 }
 
 
+// How to use the select prompt modal:
+// Call displaySelectPromptModal(title, description, options, callback),
+//
+// When the user selects an option from the select, the callback function is called.
+// Pass an anonymous function as callback in order to include parameters with it,
+// example:
+// var callback = function(){
+//     myCustomFunction(param1, param2);
+// }
+function displaySelectPromptModal(title, description, options, callback){
+    $("#selectPromptModal .modal-title").html(title);
+    $("#selectPromptModal .modal-body .description").html(description);
+    
+    $("#selectPromptSelect").html('');
+    $.each(options, function(i){
+        var itemval = "<option value='"+options[i]+"'>"+options[i]+"</option>";
+        $("#selectPromptSelect").append(itemval)
+    });
+
+    $("#selectPromptModal button.confirm").focus();
+    
+    $("#selectPromptModal").modal("show");
+
+    $('#selectPromptModal').on('shown.bs.modal', function () {
+        // window.setTimeout(function(){
+        //     $("#selectPromptModal button.confirm").focus();
+        // }, 500);
+        $("#selectPromptModal button.confirm").focus();
+    });
+
+    var confirm = function(){
+        var selectedVal = $("#selectPromptSelect").val();
+        callback(selectedVal);
+        $("#selectPromptModal").modal("hide");
+        $("#selectPromptSelect").unbind('change');
+        $("#selectPromptSelect").unbind('change');
+        $("#promptModal button.confirm").unbind('click');
+        $("#selectPromptModal button.confirm").unbind('click');
+    }
+
+    $("#selectPromptSelect").change(function(){
+        confirm();
+    });
+    $("#selectPromptModal button.confirm").click(function(){
+        confirm();
+    })
+}
+
 function passIcon(){
     return '<span class="pass-icon"><span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span></span>'
 }

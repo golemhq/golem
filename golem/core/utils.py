@@ -190,10 +190,6 @@ def get_test_data(workspace, project, full_test_case_name):
     This method generates a list of data objects'''
     data_list = []
 
-    class Data:
-        def __init__(self):
-            pass
-
     # check if CSV file == test case name exists
     test, parents = separate_file_from_parents(full_test_case_name)
     data_file_path = os.path.join(workspace, 'projects', project,
@@ -205,13 +201,11 @@ def get_test_data(workspace, project, full_test_case_name):
         with open(data_file_path, 'r', encoding='utf8') as csv_file:
             dict_reader = csv.DictReader(csv_file)
             for data_set in dict_reader:
-                new_data_obj = Data()
-                for key, value in data_set.items():
-                    setattr(new_data_obj, key, value)
-                data_list.append(new_data_obj)
+                new_data_dict = {}
+                data_list.append(dict(data_set))
 
     if not data_list:
-        data_list.append(Data())
+        data_list.append({})
     return data_list
 
 
@@ -219,7 +213,7 @@ def get_test_data_dict_list(workspace, projects, full_test_case_name):
     data_dict_list = []
     data_list = get_test_data(workspace, projects, full_test_case_name)
     for data in data_list:
-        data_dict_list.append(vars(data))
+        data_dict_list.append(data)
     return data_dict_list
 
 
@@ -275,12 +269,22 @@ def get_suite_amount_of_workers(workspace, project, suite):
 
 def get_suite_browsers(workspace, project, suite):
     browsers = []
-    suite_module = importlib.import_module('projects.{0}.suites.{1}'.format(project, suite),
-                                           package=None)
+    module_name = 'projects.{0}.suites.{1}'.format(project, suite)
+    suite_module = importlib.import_module(module_name, package=None)
     if hasattr(suite_module, 'browsers'):
         browsers = suite_module.browsers
 
     return browsers
+
+
+def get_suite_environments(workspace, project, suite):
+    environments = []
+    module_name = 'projects.{0}.suites.{1}'.format(project, suite)
+    suite_module = importlib.import_module(module_name, package=None)
+    if hasattr(suite_module, 'environments'):
+        environments = suite_module.environments
+
+    return environments
 
 
 def get_timestamp():
@@ -378,6 +382,10 @@ def create_new_project(workspace, project):
     settings_path = os.path.join(workspace, 'projects', project, 'settings.json')
     with open(settings_path, 'a') as settings_file:
         settings_file.write(settings_manager.reduced_settings_file_content())
+
+    environments_path = os.path.join(workspace, 'projects', project, 'environments.json')
+    with open(environments_path, 'a') as environments_file:
+        environments_file.write('{}')
 
 
 def create_demo_project(workspace):

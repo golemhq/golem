@@ -3,7 +3,7 @@ var Project = new function(){
 
     this.generateNewElement = function(element){
         var li = "\
-            <li class='tree-element' fullpath='"+element.dotPath+"' type='"+element.type+"'>\
+            <li class='tree-element' fullpath='"+element.dotPath+"' name='"+element.name+"' type='"+element.type+"'>\
                 <a href='"+element.url+"'>"+element.name+"</a> \
                 <span class='pull-right tree-element-buttons'> \
                     <button onclick='duplicateElementPrompt(this)'><i class='glyphicon glyphicon-copy'></i></button> \
@@ -18,7 +18,7 @@ var Project = new function(){
         var openedClass = 'glyphicon-folder-open';
         var closedClass = 'glyphicon-folder-close';
         var li = "\
-            <li class='tree-element branch'>\
+            <li class='tree-element branch' name='"+branchName+"'>\
                 <a href='#'>"+branchName+"</a> \
                 <span class='pull-right tree-element-buttons'> \
                 </span> \

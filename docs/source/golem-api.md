@@ -151,3 +151,4 @@ The values are:
 - **logger**: the logger of the current execution
 
 
+Next, go to [Managing Environments](environments.html)

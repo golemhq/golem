@@ -37,7 +37,6 @@ def get_last_executions(root_path, project=None, suite=None, limit=5):
             last_execution_data[project][exec_suite] = []
             suite_executions = []
             suite_path = os.path.join(report_path, exec_suite)
-            print('SUITE PATH', suite_path)
             suite_executions = os.walk(suite_path).__next__()[1]
             last_executions = sorted(suite_executions)
             limit = int(limit)
@@ -83,6 +82,7 @@ def parse_execution_data(execution_directory=None, workspace=None,
                 'test_elapsed_time': '',
                 'browser': '',
                 'data': '',
+                'environment': ''
             }
             total_cases += 1
             new_test_case['test_set'] = test_set
@@ -129,6 +129,7 @@ def parse_execution_data(execution_directory=None, workspace=None,
                 new_test_case['start_date_time'] = start_date_time
                 new_test_case['browser'] = report_data['browser']
                 new_test_case['data'] = report_data['test_data']
+                new_test_case['environment'] = report_data['environment']
 
                 execution_data['test_cases'].append(new_test_case)
 
@@ -196,6 +197,7 @@ def get_test_case_data(root_path, project, test, suite=None, execution=None,
             test_case_data['error'] = report_data['error']
             test_case_data['short_error'] = report_data['short_error']
             test_case_data['browser'] = report_data['browser']
+            test_case_data['environment'] = report_data['environment']
             steps = []
             for step in report_data['steps']:
                 if '__' in step:

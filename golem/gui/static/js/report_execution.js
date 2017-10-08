@@ -64,7 +64,7 @@ function addTestToDetailTable(test){
 		numbering: numbering,
 		module: test.module,
 		name: test.name,
-		//environment: '', //	test.data.environment,
+		environment: test.env,
 		//browser: test.browser,
 		result: resultString,
 		//elapsedTime: test.test_elapsed_time
@@ -89,6 +89,7 @@ function addTestToDetailTable(test){
 
 
 function loadTestRowResult(test){
+	console.log(test);
 	var row = $("#"+test.test_set);
 
 	if(test.result == 'pass')
@@ -98,7 +99,7 @@ function loadTestRowResult(test){
 
 	row.find('.test-result').html(resultString);
 	row.find('.test-browser').html(test.browser);
-	row.find('.test-environment').html(test.data.environment);
+	row.find('.test-environment').html(test.environment);
 	row.find('.test-time').html(formatTimeOutput(test.test_elapsed_time));
 
 	//add this test case to allTestCases

@@ -483,11 +483,11 @@ function getSelectedPageObjectElements(){
 }
 
 
-function saveTestCase(runAfter){
-    runAfter = runAfter || false;
-    if(!unsavedChanges){
-        return
-    }
+function saveTestCase(config){
+    runAfter = config.runAfter || false;
+    // if(!unsavedChanges){
+    //     return
+    // }
     var description = $("#description").val();
     var pageObjects = getSelectedPageObjects();
     
@@ -541,7 +541,8 @@ function saveTestCase(runAfter){
                 "hideDuration": "100"}
             toastr.success("Test "+testCaseName+" saved")
             if(runAfter){
-                testRunner.runTestCase();
+                //testRunner.runTestCase();
+                testRunner.askForEnvBeforeRun();
             }
         },
         error: function() {
@@ -653,7 +654,7 @@ function deleteStep(elem){
 
 function loadCodeView(){
     if(unsavedChanges){
-        saveTestCase();
+        saveTestCase({runAfter: false});
     }
     unsavedChanges = false;
     // redirect to gui view

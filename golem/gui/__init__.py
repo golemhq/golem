@@ -18,6 +18,7 @@ from flask_login import (LoginManager,
 
 from golem.core import (utils,
                         settings_manager,
+                        environment_manager,
                         test_case,
                         page_object,
                         suite,
@@ -180,10 +181,18 @@ def suite_view(project, suite):
     browsers = utils.get_suite_browsers(root_path, project, suite)
     browsers = ', '.join(browsers)
     default_browser = test_execution.settings['default_browser']
-
-    return render_template('suite.html', project=project, all_test_cases=all_test_cases['sub_elements'],
-                           selected_tests=selected_tests, suite=suite, worker_amount=worker_amount,
-                           browsers=browsers, default_browser=default_browser)
+    environments = utils.get_suite_environments(root_path, project, suite)
+    environments = ', '.join(environments)
+    
+    return render_template('suite.html',
+                           project=project,
+                           all_test_cases=all_test_cases['sub_elements'],
+                           selected_tests=selected_tests,
+                           suite=suite,
+                           worker_amount=worker_amount,
+                           browsers=browsers,
+                           default_browser=default_browser,
+                           environments=environments)
 
 
 # GLOBAL SETTINGS VIEW
@@ -205,6 +214,17 @@ def project_settings(project):
     project_settings = settings_manager.get_project_settings_as_string(project)
     return render_template('settings.html', project=project,
                            global_settings=global_settings, settings=project_settings)
+
+
+# PROJECT SETTINGS VIEW
+@app.route("/p/<project>/environments/")
+def environments_view(project):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+    #global_settings = settings_manager.get_global_settings_as_string()
+    environment_data = environment_manager.get_environments_as_string(project)
+    return render_template('environments.html', project=project,
+                           environment_data=environment_data)
 
 
 # LOGOUT VIEW
@@ -486,10 +506,11 @@ def run_test_case():
     if request.method == 'POST':
         project = request.form['project']
         test_name = request.form['testCaseName']
+        environment = request.form['environment']
 
-        timestamp = gui_utils.run_test_case(project, test_name)
+        timestamp = gui_utils.run_test_case(project, test_name, environment)
 
-        changelog.log_change(root_path, project, 'RUN', 'test', test_name, g.user.username)
+        #changelog.log_change(root_path, project, 'RUN', 'test', test_name, g.user.username)
         return json.dumps(timestamp)
 
 
@@ -597,8 +618,10 @@ def save_suite():
         test_cases = request.json['testCases']
         workers = request.json['workers']
         browsers = request.json['browsers']
+        environments = request.json['environments']
 
-        suite.save_suite(root_path, project, suite_name, test_cases, workers, browsers)
+        suite.save_suite(root_path, project, suite_name, test_cases,
+                         workers, browsers, environments)
 
         return json.dumps('ok')
 
@@ -614,6 +637,19 @@ def save_settings():
             'errors': []
         }
         settings_manager.save_settings(projectname, project_settings, global_settings)
+        return json.dumps(result)
+
+
+@app.route("/save_environments/", methods=['POST'])
+def save_environments():
+    if request.method == 'POST':
+        projectname = request.json['project']
+        env_data = request.json['environmentData']
+        result = {
+            'result': 'ok',
+            'errors': []
+        }
+        environment_manager.save_environments(projectname, env_data)
         return json.dumps(result)
 
 
@@ -641,6 +677,11 @@ def unlock_file():
 def get_supported_browsers():
     return json.dumps(gui_utils.get_supported_browsers_suggestions())
 
+
+@app.route("/get_environments/", methods=['POST'])
+def get_environments():
+    project = request.form['project']
+    return json.dumps(environment_manager.get_envs(project))
 
 
 @app.route("/report/get_last_executions/", methods=['POST'])

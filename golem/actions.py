@@ -45,7 +45,7 @@ def assert_contains(element, value):
         raise Exception('Expected {} to contain {}'.format(element, value))
 
 
-def assert_equals(actual, expected):
+def assert_equals(actual_value, expected_value):
     step_message = 'Assert that {0} equals {1}'.format(actual_value, expected_value)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
@@ -78,6 +78,9 @@ def capture(message=''):
     img_id = str(uuid.uuid4())[:8]
     img_path = os.path.join(execution.report_directory, '{}.png'.format(img_id))
     driver.get_screenshot_as_file(img_path)
+
+    if len(message) == 0:
+        message = 'Screenshot'
 
     full_message = '{0}__{1}'.format(message, img_id)
     step(full_message)
@@ -172,6 +175,11 @@ def random(value):
             random_string += char
     execution.logger.info('Random value generated: {}'.format(random_string))
     return random_string
+
+
+# TODO
+def refresh_page():
+    get_browser().refresh()
 
 
 def select_by_index(element, index):

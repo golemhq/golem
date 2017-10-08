@@ -48,6 +48,19 @@ $(document).ready(function() {
         }
     });
 
+    $.ajax({
+        url: "/get_environments/",
+        data: {
+            project: project
+        },
+        dataType: 'json',
+        type: 'POST',
+        success: function(environments) {
+            startEnvironmentsAutocomplete(environments);
+        },
+        error: function() {
+        }
+    });
 
     updateTestCount();
 
@@ -211,6 +224,15 @@ function saveTestSuite(){
         });
     }
 
+    var environments = [];
+    if($("#environments").val().length > 0){
+        $($("#environments").val().split(',')).each(function(){
+            if(this.trim().length > 0){
+                environments.push(this.trim());
+            }
+        });
+    }
+
     var workers = $("#workers").val();
     var testCases = getAllCheckedTests();
     $.ajax({
@@ -219,6 +241,7 @@ function saveTestSuite(){
                 "project": project,
                 "suite": suite,
                 "browsers": browsers,
+                "environments": environments,
                 "workers": workers,
                 "testCases": testCases
             }),
@@ -334,7 +357,6 @@ function runSuite(){
 
 
 function startBrowsersAutocomplete(browserSuggestions){
-    console.log(browserSuggestions);
     $('#browsers').autocomplete({
         lookup: browserSuggestions,
         minChars: 0,
@@ -346,6 +368,18 @@ function startBrowsersAutocomplete(browserSuggestions){
     });
 }
 
+
+function startEnvironmentsAutocomplete(environments){
+    $('#environments').autocomplete({
+        lookup: environments,
+        minChars: 0,
+        delimiter: ', ',
+        triggerSelectOnValidInput: false,
+        onSelect: function (suggestion) {
+            $('#environments').val($('#environments').val()+', ');
+        }
+    });
+}
 
 function updateTestCount(){
     var totalCheckedTests = getCheckedTestAmount();

@@ -38,6 +38,12 @@
 			{% endif %}
 			<div class="col-xs-2">Browser</div>
 			<div class="col-xs-10">{{test_case_data.browser}}</div>
+			<!-- environment -->
+			{% if test_case_data.environment %}
+			<div class="col-xs-2">Environment</div>
+			<div class="col-xs-10">{{test_case_data.environment}}</div>
+			<div class="clearfix"></div>
+			{% endif %}
 			<div class="col-xs-2">Start Time</div>
 			<div class="col-xs-10">{{test_case_data.start_date_time}}</div>
 			<div class="col-xs-2">Elapsed Time</div>

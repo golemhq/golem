@@ -39,6 +39,12 @@
             </div> 
         </div>
         <div>
+            <div class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Environments</div>
+            <div class="input-group form-group col-xs-10" style="">    
+                <input type="text" class="form-control" id="environments" value="{{ environments if environments else ''}}" placeholder="list of environments">
+            </div> 
+        </div>
+        <div>
             <div for="workers" class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Workers</div>
             <div class="input-group form-group col-sm-3">
                 <input type="number" class="form-control" id="workers" value="{{worker_amount}}" placeholder="Amount of workers">

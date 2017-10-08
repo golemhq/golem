@@ -50,12 +50,16 @@ class RunCommand(BaseCommand):
                             nargs='*', choices=browser_choices,
                             type=str, metavar='Browser(s)',
                             default=[], help="Web Drivers")
-        parser.add_argument('--debug', action='store_true',
-                            default=False,
-                            help="Run test in debug mode")
-        parser.add_argument('--minimize', action='store_true',
-                            default=False,
-                            help="Minimize driver window")
+        parser.add_argument('-e', '--environments', action='store',
+                            nargs='*',type=str,
+                            metavar='Environment(s)',
+                            default=[], help="Environments")
+        # parser.add_argument('--debug', action='store_true',
+        #                     default=False,
+        #                     help="Run test in debug mode")
+        # parser.add_argument('--minimize', action='store_true',
+        #                     default=False,
+        #                     help="Minimize driver window")
         parser.add_argument('--timestamp', action='store', nargs='?', type=str,
                             metavar='Timestamp', help="Timestamp")
         parser.add_argument('-i', '--interactive', action='store_true', default=False,
@@ -64,9 +68,10 @@ class RunCommand(BaseCommand):
     def run(self, test_execution, args):
         test_execution.thread_amount = args.threads
         test_execution.cli_drivers = args.browsers
+        test_execution.cli_environments = args.environments
         test_execution.timestamp = args.timestamp
         test_execution.interactive = args.interactive
-        test_execution.minimize = args.minimize
+        # test_execution.minimize = args.minimize
 
         root_path = test_execution.root_path
 

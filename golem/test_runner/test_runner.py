@@ -28,10 +28,22 @@ def run_test(workspace, project, test_name, test_data, browser_name,
     from golem import execution
 
     # convert test_data to data obj
-    class Data:
-        def __init__(self, data):
-            for key, value in data.items():
-                setattr(self, key, value)
+    # class Data:
+    #     def __init__(self, data):
+    #         for key, value in data.items():
+    #             setattr(self, key, value)
+
+
+    class Data(dict):
+        """dot notation access to dictionary attributes"""
+        def __getattr__(*args):
+            val = dict.get(*args)
+            #print(val)
+            return Data(val) if type(val) is dict else val
+
+        __setattr__ = dict.__setitem__
+        __delattr__ = dict.__delitem__
+
 
     execution.data = Data(test_data)
 
@@ -41,12 +53,19 @@ def run_test(workspace, project, test_name, test_data, browser_name,
                                          settings['log_all_events'])
     execution.logger = logger
 
+    # Print execution info to console
     logger.info('Test execution started: {}'.format(test_name))
     logger.info('Browser: {}'.format(browser_name))
+    if 'env' in test_data:
+        if 'name' in test_data['env']:
+            logger.info('Environment: {}'.format(test_data['env']['name']))
     if test_data:
         data_string = '\n'
         for key, value in test_data.items():
-            data_string += '    {}: {}\n'.format(key, value)
+            if key == 'env':
+                data_string += '    {}: {}\n'.format('url', value['url'])
+            else:
+                data_string += '    {}: {}\n'.format(key, value)
         logger.info('Using data: {}'.format(data_string))
 
     test_timestamp = utils.get_timestamp()
@@ -61,6 +80,8 @@ def run_test(workspace, project, test_name, test_data, browser_name,
     test_module = None
 
     try:
+        if '/' in test_name:
+            test_name = test_name.replace('/', '.')
         test_module = importlib.import_module(
             'projects.{0}.tests.{1}'.format(project, test_name))
 

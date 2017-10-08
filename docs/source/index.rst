@@ -22,6 +22,7 @@ Contents
    web-drivers
    Interactive-mode
    golem-api
+   environments
 
 
 Intro

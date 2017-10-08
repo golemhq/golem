@@ -1,25 +1,9 @@
-var projectSettingsEditor = null;
-var globalSettingsEditor = null;
+var environmentsEditor = null;
 
 
-$(document).ready(function() {  
-console.log(settingsCode);    
-  if(settingsCode != null){
-    $("#settingsContainer").show();
-   projectSettingsEditor = CodeMirror($("#settingsContainer")[0], {
-      value: settingsCode,
-      mode: "application/ld+json",
-      lineNumbers: true,
-      styleActiveLine: true,
-      matchBrackets: true,
-      autoCloseBrackets: true,
-      lineWrapping: true
-    });
-
-  }
-
-   globalSettingsEditor = CodeMirror($("#globalSettingsContainer")[0], {
-      value: globalSettingsCode,
+$(document).ready(function() {      
+   environmentsEditor = CodeMirror($("#environmentsContainer")[0], {
+      value: environmentData,
       mode: "application/ld+json",
       lineNumbers: true,
       styleActiveLine: true,
@@ -33,20 +17,14 @@ console.log(settingsCode);
 });
 
 
-function saveSettings(){
-
-    var projectSettings = null;
-    if(projectSettingsEditor != null){
-      projectSettings = projectSettingsEditor.getValue();
-    }
-    var globalSettings = globalSettingsEditor.getValue();
+function saveEnvironments(){
+    var environments = environmentsEditor.getValue();
 
     $.ajax({
-        url: "/save_settings/",
+        url: "/save_environments/",
         data: JSON.stringify({
                 "project": project,
-                "projectSettings": projectSettings,
-                "globalSettings": globalSettings
+                "environmentData": environments
             }),
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
@@ -58,9 +36,7 @@ function saveSettings(){
                     "timeOut": "2000",
                     "hideDuration": "100"}
                 toastr.success("Settings saved");
-
-                if(projectSettingsEditor != null) projectSettingsEditor.markClean();
-                globalSettingsEditor.markClean();
+                environmentsEditor.markClean();
             }
             else{
                 toastr.options = {
@@ -78,12 +54,7 @@ function saveSettings(){
 
 function watchForUnsavedChanges(){
     window.addEventListener("beforeunload", function (e) {
-        if(projectSettingsEditor != null)
-          var projectSettingsIsClean = projectSettingsEditor.isClean();
-        else
-          var projectSettingsIsClean = true;
-        var globalSettingsIsClean = globalSettingsEditor.isClean();
-        if(!globalSettingsIsClean || !projectSettingsIsClean){
+        if(!environmentsEditor.isClean()){
             var confirmationMessage = 'There are unsaved changes';
             (e || window.event).returnValue = confirmationMessage; //Gecko + IE
             return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.

@@ -2,7 +2,7 @@
 """
 import sys
 
-from golem.core import test_execution, utils, report
+from golem.core import test_execution, utils, report, environment_manager
 from golem.test_runner.multiprocess_executor import multiprocess_executor, run_test
 
 
@@ -13,6 +13,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
     threads = 1
     suite_amount_workers = None
     suite_drivers = None
+    suite_envs = []
     drivers = []
     suite_module = None
     report_suite_name = None
@@ -26,6 +27,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
         tests = utils.get_suite_test_cases(workspace, project, suite)
         suite_amount_workers = utils.get_suite_amount_of_workers(workspace, project, suite)
         suite_drivers = utils.get_suite_browsers(workspace, project, suite)
+        suite_envs = utils.get_suite_environments(workspace, project, suite)
         suite_module = utils.get_suite_module(test_execution.root_path,
                                               test_execution.project,
                                               suite)
@@ -56,6 +58,25 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
     if not test_execution.timestamp:
         test_execution.timestamp = utils.get_timestamp()
 
+    #######
+    project_envs = environment_manager.get_envs(project)
+
+    envs = []
+    if test_execution.cli_environments:
+        # use the environments passed through command line if available
+        envs = test_execution.cli_environments
+    elif suite_envs:
+        # use the environments defined in the suite
+        envs = suite_envs
+    elif project_envs:
+        # if there are available envs, try to use the first by default
+        envs = [project_envs[0]]
+    else:
+        # execute using a blank environment
+        envs = ['']
+
+    envs_data = environment_manager.get_environment_data(project)
+
     # get test data for each test present in the list of tests
     # for each test in the list, for each data set and driver combination
     # append an entry to the execution_list
@@ -63,15 +84,22 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
     for test_case in tests:
         data_sets = utils.get_test_data(workspace, project, test_case)
         for data_set in data_sets:
-            for driver in drivers:
-                execution_list.append(
-                    {
-                        'test_name': test_case,
-                        'data_set': vars(data_set),
-                        'driver': driver,
-                        'report_directory': None
-                    }
-                )
+            for env in envs:
+                if env in envs_data:
+                    env_data = envs_data[env]
+                    ## adding env_data to data_set
+                    data_set['env'] = env_data
+                    data_set['env']['name'] = env
+                for driver in drivers:
+                    execution_list.append(
+                        {
+                            'test_name': test_case,
+                            'data_set': data_set,
+                            'driver': driver,
+                            'report_directory': None
+                        }
+                    )
+
     if is_suite:
         execution_directory = report.create_suite_execution_directory(test_execution.root_path,
                                                                       test_execution.project,

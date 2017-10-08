@@ -3,7 +3,7 @@
 {% block head_declarations %} 
 
 <link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/codemirror.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/json_code_editor.css') }}">
 
 {% endblock %} 
 
@@ -30,11 +30,11 @@
     <div class="clearfix"></div>
 
     <div class="col-sm-10 col-sm-offset-1">
-        <div class="" id="settingsContainer" style="display: none">
+        <div class="codeEditorContainer" id="settingsContainer" style="display: none">
             <h5>Project Settings</h5>
         </div>
 
-        <div class="" id="globalSettingsContainer">
+        <div class="codeEditorContainer" id="globalSettingsContainer">
             <h5>Global Settings</h5>
         </div>
 

@@ -122,6 +122,7 @@ def _find(self, element=None, id=None, name=None, text=None, link_text=None,
 
 def _find_all(self, element=None, id=None, name=None, text=None, link_text=None,
               partial_link_text=None, css=None, xpath=None, tag_name=None):
+
     webelements = []
     selector_type = None
     selector_value = None
@@ -148,6 +149,7 @@ def _find_all(self, element=None, id=None, name=None, text=None, link_text=None,
         else:
             raise Exception('Incorrect element {}'.format(element))
     elif isinstance(element, str):
+        css = element
         selector_type = 'css'
         selector_value = element_name = element
     

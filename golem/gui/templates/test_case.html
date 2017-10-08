@@ -32,7 +32,7 @@
 
             <button id="loadCodeButton" class="btn btn-default btn-sm" onclick="loadCodeView()"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Code<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></button>
             
-            <button id="save" class="btn btn-default btn-sm" onclick="saveTestCase();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+            <button id="save" class="btn btn-default btn-sm" onclick="saveTestCase({runAfter: false});"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
         </div>
     </div>
 
@@ -144,7 +144,7 @@
             </div>
             
             <div class="clearfix"></div>
-            <button class="btn btn-default btn-sm" style="margin-left: 21px;" onclick="addFirstStepInput('setup');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
+            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="addFirstStepInput('setup');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
 
         </div>
         
@@ -205,7 +205,7 @@
             {% endif %}
             </div>
             <div class="clearfix"></div>
-            <button class="btn btn-default btn-sm" style="margin-left: 21px;" onclick="addFirstStepInput('test');">
+            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="addFirstStepInput('test');">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step
             </button>
         </div>
@@ -270,7 +270,7 @@
             </div>
 
             <div class="clearfix"></div>
-            <button class="btn btn-default btn-sm" style="margin-left: 21px;" onclick="addFirstStepInput('teardown');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
+            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="addFirstStepInput('teardown');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
         </div>
 
     </div>

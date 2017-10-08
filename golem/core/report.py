@@ -51,13 +51,17 @@ def generate_report(report_directory, test_case_name, test_data, result):
         short_error = '\n'.join(result['error'].split('\n')[-2:])
 
     serializable_data = {}
-    for key, value in vars(test_data).items():
+    for key, value in test_data.items():
         try:
             json.dumps('{"{}":"{}"}'.format(key, value))
             serializable_data[key] = value
         except:
             serializable_data[key] = repr(value)
-
+    
+    env_name = ''
+    if 'env' in test_data:
+        if 'name' in test_data.env:
+            env_name = test_data.env.name
     browser = result['browser']
     output_browser = result['browser']
     if browser == 'chrome-remote':
@@ -79,7 +83,8 @@ def generate_report(report_directory, test_case_name, test_data, result):
         'test_elapsed_time': result['test_elapsed_time'],
         'test_timestamp': result['test_timestamp'],
         'browser': output_browser,
-        'test_data': serializable_data
+        'test_data': serializable_data,
+        'environment': env_name
     }
 
     with open(json_report_path, 'w', encoding='utf-8') as json_file:

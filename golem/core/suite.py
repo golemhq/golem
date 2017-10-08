@@ -12,12 +12,14 @@ def _format_list_items(list_items):
     return list_string
 
 
-def save_suite(root_path, project, suite, test_cases, workers, browsers):
+def save_suite(root_path, project, suite, test_cases, workers, browsers, environments):
     suite_path = os.path.join(root_path, 'projects', project, 'suites',
                               '{}.py'.format(suite))
     with open(suite_path, 'w', encoding='utf-8') as suite_file:
         suite_file.write('\n\n')
         suite_file.write('browsers = {}\n'.format(_format_list_items(browsers)))
+        suite_file.write('\n')
+        suite_file.write('environments = {}\n'.format(_format_list_items(environments)))
         suite_file.write('\n')
         suite_file.write('workers = {}'.format(workers))
         suite_file.write('\n\n')
@@ -35,6 +37,7 @@ def new_suite(root_path, project, suite_name):
         suite_full_path = os.path.join(suite_path, suite_name + '.py')
         test_case_content = ('\n'
                              'browsers = []\n\n'
+                             'environments = []\n\n'
                              'workers = 1\n\n'
                              'tests = []\n')
         with open(suite_full_path, 'w') as suite_file:

@@ -3,6 +3,8 @@
 
 ## [Unreleased]
 
+
+## [0.2.1] - 2017-10-06
 ### Added
 - Documented the Golem Public API
 - UP, DOWN, LEFT, RIGHT options to actions.press_key (thanks to danielmaddern)

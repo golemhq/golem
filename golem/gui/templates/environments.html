@@ -1,0 +1,54 @@
+{% extends "layout.html" %} 
+
+{% block head_declarations %} 
+
+<link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/codemirror.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/json_code_editor.css') }}">
+
+{% endblock %} 
+
+{% block content %}
+
+<style>
+    .CodeMirror {
+        border: 1px solid #e0e0e0;
+        font-size:13px;
+        height: 400px;
+    }
+</style>
+<div class="col-lg-12">
+
+    <div class="col-sm-6 header-col">
+        <h3 id="pageObjectName">
+            <small>
+                <a href="/p/{{project}}/" class="link-without-underline">
+                    <span class="glyphicon glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+                </a>
+            </small>
+            {% if project %}{{project|replace("_", " ")}} - {% endif %} environments</h3>
+    </div>
+        
+    <div class="col-sm-6 text-right header-col" style="padding-top: 20px">
+        <button id="save" class="btn btn-default btn-sm" onclick="saveEnvironments();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="col-sm-10 col-sm-offset-1">
+
+        <div class="codeEditorContainer" id="environmentsContainer" style="height: 450px">
+            <h5>Environments</h5>
+        </div>
+    </div>
+</div>
+
+<script>
+    var project = '{{project}}';
+    var environmentData = {{environment_data|tojson}};
+</script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/codemirror.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/javascript.js') }}"></script>
+<script src="{{ url_for('static', filename='js/environments.js') }}"></script>
+
+
+{% endblock %}
