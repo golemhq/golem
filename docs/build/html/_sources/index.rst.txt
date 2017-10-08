@@ -19,7 +19,7 @@ Contents
    the-cli
    the-web-module
    settings
-   web-drivers
+   browser-web-drivers
    Interactive-mode
    golem-api
    environments

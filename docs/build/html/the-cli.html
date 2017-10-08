@@ -51,16 +51,21 @@
 </div>
 <div class="section" id="commands-for-golem-py">
 <span id="commands-for-golem-py"></span><h2>Commands for golem.py:<a class="headerlink" href="#commands-for-golem-py" title="Permalink to this headline">¶</a></h2>
-<p><strong>python golem.py run project &lt;test&gt;|&lt;suite&gt; [-t|--threads -d|--driver -i|--interactive]</strong></p>
+<p><strong>python golem.py run project &lt;test&gt;|&lt;suite&gt; [-t|--threads -b|--browsers -i|--interactive -e|--environments]</strong></p>
 <p>Run a test case or test suite from a project.</p>
 <p>Threads indicates the amount of test cases to execute in parallel, default is 1.</p>
-<p>Driver indicates wich browser driver to use, options are: chrome, firefox, chrome-remote, chrome-headless, chrome-remote-headless, firefox-remote, default is chrome, it accepts one or more browsers, like so:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">golem</span><span class="o">.</span><span class="n">py</span> <span class="n">run</span> <span class="n">project_name</span> <span class="n">test_name</span> <span class="o">-</span><span class="n">d</span> <span class="n">firefox</span> <span class="n">chrome</span>
+<p>Browsers indicates wich browser(s) to use, options are: chrome, firefox, chrome-remote, chrome-headless, chrome-remote-headless, firefox-remote, default is chrome, it accepts one or more browsers, like so:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">golem</span><span class="o">.</span><span class="n">py</span> <span class="n">run</span> <span class="n">project_name</span> <span class="n">test_name</span> <span class="o">-</span><span class="n">b</span> <span class="n">firefox</span> <span class="n">chrome</span>
 </pre></div>
 </div>
 <p>Note: the test will be run once per each browser defined.</p>
-<p><strong>python golem.py gui [-p|--port -o|--open]</strong></p>
-<p>Start Golem Web Module (GUI). Port indicates which port number to use, default is 5000. Open param navigates to the GUI module using the machine default browser.</p>
+<p>Environments can be a list of environments defined in the environments.json. If not provided it will try to use the first if possible.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">golem</span><span class="o">.</span><span class="n">py</span> <span class="n">run</span> <span class="n">project_name</span> <span class="n">test_name</span> <span class="o">-</span><span class="n">e</span> <span class="n">test</span> <span class="n">stage</span>
+</pre></div>
+</div>
+<p>See <a class="reference external" href="environments.html">Managing Environments</a> for more detail.</p>
+<p><strong>python golem.py gui [-p|--port]</strong></p>
+<p>Start Golem Web Module (GUI). Port indicates which port number to use, default is 5000.</p>
 <p><strong>python golem.py createproject &lt;project name&gt;</strong></p>
 <p>Creates a new project with the given name. Creates the base files and folders.</p>
 <p><strong>python golem.py createtest &lt;project name&gt; &lt;test name&gt;</strong></p>
@@ -111,7 +116,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">The CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
-<li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="browser-web-drivers.html">Browser Web Drivers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Interactive-mode.html">Interactive Mode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="golem-api.html">Golem Public API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="environments.html">Managing Environments</a></li>

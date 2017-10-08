@@ -24,11 +24,45 @@ class Test_get_test_cases:
                                 'test1')
         tests = utils.get_test_cases(test_directory_fixture['full_path'],
                                      project_fixture['project_name'])
-        expected_result = OrderedDict([('subdir1', OrderedDict([('subdir2',
-                                      OrderedDict([(('test3',
-                                      'subdir1.subdir2.test3'), None)])),
-                                      (('test2', 'subdir1.test2'), None)])),
-                                      (('test1', 'test1'), None)])
+
+        expected_result = {
+            'type': 'directory',
+            'name': 'tests',
+            'dot_path': None,
+            'sub_elements': [
+                {
+                    'type': 'directory',
+                    'name': 'subdir1',
+                    'dot_path': None,
+                    'sub_elements': [
+                        {
+                            'type': 'directory',
+                            'name': 'subdir2',
+                            'dot_path': None,
+                            'sub_elements': [
+                                {
+                                    'type': 'file',
+                                    'name': 'test3',
+                                    'dot_path': 'subdir1.subdir2.test3',
+                                    'sub_elements': []
+                                }
+                            ]
+                        },
+                        {
+                            'type': 'file',
+                            'name': 'test2',
+                            'dot_path': 'subdir1.test2', 'sub_elements': []
+                        }
+                    ]
+                },
+                {
+                    'type': 'file',
+                    'name': 'test1',
+                    'dot_path': 'test1',
+                    'sub_elements': []
+                }
+            ]
+        }
 
         assert tests == expected_result
 
@@ -48,13 +82,48 @@ class Test_get_page_objects:
                                   project_fixture['project_name'],
                                   [],
                                   'test1')
-        pages = utils.get_page_objects(test_directory_fixture['full_path'],
+        pages = utils.get_pages(test_directory_fixture['full_path'],
                                        project_fixture['project_name'])
-        expected_result = OrderedDict([('subdir1', OrderedDict([('subdir2',
-                                      OrderedDict([(('test3',
-                                      'subdir1.subdir2.test3'), None)])),
-                                      (('test2', 'subdir1.test2'), None)])),
-                                      (('test1', 'test1'), None)])
+
+        expected_result = {
+            'type': 'directory',
+            'name': 'pages',
+            'dot_path': None,
+            'sub_elements': [
+                {
+                    'type': 'directory',
+                    'name': 'subdir1',
+                    'dot_path': None,
+                    'sub_elements': [
+                        {
+                            'type': 'directory',
+                            'name': 'subdir2',
+                            'dot_path': None,
+                            'sub_elements': [
+                            {
+                                'type': 'file',
+                                'name': 'test3',
+                                'dot_path': 'subdir1.subdir2.test3',
+                                'sub_elements': []
+                            }
+                        ]
+                        },
+                        {
+                            'type': 'file',
+                            'name': 'test2',
+                            'dot_path': 'subdir1.test2',
+                            'sub_elements': []
+                        }
+                    ]
+                },
+                {
+                    'type': 'file',
+                    'name': 'test1',
+                    'dot_path': 'test1',
+                    'sub_elements': []
+                }
+            ]
+        }
 
         assert pages == expected_result
 
@@ -71,7 +140,25 @@ class Test_get_suites:
         
         suites = utils.get_suites(test_directory_fixture['full_path'],
                                   project_fixture['project_name'])
-        expected_result = ['suite1', 'suite2']
+        expected_result = {
+            'type': 'directory',
+            'name': 'suites',
+            'dot_path': None,
+            'sub_elements': [
+                {
+                    'type': 'file',
+                    'name': 'suite1',
+                    'dot_path': 'suite1',
+                    'sub_elements': []
+                },
+                {
+                    'type': 'file',
+                    'name': 'suite2',
+                    'dot_path': 'suite2',
+                    'sub_elements': []
+                }
+            ]
+        }
         assert suites == expected_result
 
 
@@ -82,9 +169,9 @@ class Test_get_projects:
         assert project_fixture['project_name'] in projects
 
 
-class Test_get_files_in_directory_dotted_path:
+class Test_get_files_in_directory_dot_path:
 
-    def test_get_files_in_directory_dotted_path(self, project_fixture, test_directory_fixture):
+    def test_get_files_in_directory_dot_path(self, project_fixture, test_directory_fixture):
         # create a new page object in pages folder
         page_object.new_page_object(test_directory_fixture['full_path'],
                                     project_fixture['project_name'],
@@ -99,7 +186,7 @@ class Test_get_files_in_directory_dotted_path:
                                  'projects',
                                  project_fixture['project_name'],
                                  'pages')
-        dotted_files = utils.get_files_in_directory_dotted_path(base_path)
+        dotted_files = utils.get_files_in_directory_dot_path(base_path)
         assert 'page1' in dotted_files
         assert 'dir.subdir.page2' in dotted_files
         assert len(dotted_files) == 2

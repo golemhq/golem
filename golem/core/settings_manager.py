@@ -28,6 +28,10 @@ def settings_file_content():
         "// By default it points to the 'drivers' folder inside the test directory.",
         "\"geckodriver_path\": \"./drivers/geckodriver\",",
         "",
+        "// Path to the ie driver executable. This is used by Internet Explorer.",
+        "// By default it points to the 'drivers' folder inside the test directory.",
+        "\"iedriver_path\": \"./drivers/iedriver.exe\",",
+        "",
         "// URLRemote URL : the URL to use when connecting to a remote webdriver",
         "// for example, using selenium grid",
         "\"remote_url\": \"http://localhost:4444/wd/hub\",",
@@ -112,6 +116,11 @@ def assign_settings_default_values(settings):
         settings['geckodriver_path'] = None
     elif not settings['geckodriver_path']:
         settings['geckodriver_path'] = None
+
+    if not 'iedriver_path' in settings:
+        settings['iedriver_path'] = None
+    elif not settings['iedriver_path']:
+        settings['iedriver_path'] = None
 
     if not 'remote_url' in settings:
         settings['remote_url'] = None

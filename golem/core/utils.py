@@ -96,7 +96,7 @@ def _directory_element(elem_type, name, full_path, dot_path=None):
     element = {
         'type': elem_type,
         'name': name,
-        'full_path': full_path,
+        # 'full_path': full_path,
         'dot_path': dot_path,
         'sub_elements': []
     }

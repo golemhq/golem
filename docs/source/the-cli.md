@@ -13,24 +13,32 @@ Used to generate a new test directory.
 
 ##### Commands for golem.py:
 
-**python golem.py run project \<test\>|\<suite\> [-t|--threads -d|--driver -i|--interactive]**
+**python golem.py run project \<test\>|\<suite\> [-t|--threads -b|--browsers -i|--interactive -e|--environments]**
 
 Run a test case or test suite from a project. 
 
 Threads indicates the amount of test cases to execute in parallel, default is 1. 
 
-Driver indicates wich browser driver to use, options are: chrome, firefox, chrome-remote, chrome-headless, chrome-remote-headless, firefox-remote, default is chrome, it accepts one or more browsers, like so:
+Browsers indicates wich browser(s) to use, options are: chrome, firefox, chrome-remote, chrome-headless, chrome-remote-headless, firefox-remote, default is chrome, it accepts one or more browsers, like so:
 
 ```
->python golem.py run project_name test_name -d firefox chrome
+>python golem.py run project_name test_name -b firefox chrome
 ```
 
 Note: the test will be run once per each browser defined.
 
+Environments can be a list of environments defined in the environments.json. If not provided it will try to use the first if possible.
 
-**python golem.py gui [-p|--port -o|--open]**
+```
+>python golem.py run project_name test_name -e test stage
+```
 
-Start Golem Web Module (GUI). Port indicates which port number to use, default is 5000. Open param navigates to the GUI module using the machine default browser.
+See [Managing Environments](environments.html) for more detail.
+
+
+**python golem.py gui [-p|--port]**
+
+Start Golem Web Module (GUI). Port indicates which port number to use, default is 5000.
 
 **python golem.py createproject \<project name\>**
 

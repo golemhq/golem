@@ -177,9 +177,12 @@ def random(value):
     return random_string
 
 
-# TODO
 def refresh_page():
+    _run_wait_hook()
+    step_message = 'Refresh page'
     get_browser().refresh()
+    execution.logger.info(step_message)
+    _capture_or_add_step(step_message, settings.settings['screenshot_on_step'])
 
 
 def select_by_index(element, index):

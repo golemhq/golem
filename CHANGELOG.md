@@ -3,6 +3,9 @@
 
 ## [Unreleased]
 
+### Added
+- Environments
+- 'refresh' action to golem action
 
 ## [0.2.1] - 2017-10-06
 ### Added
@@ -18,7 +21,7 @@
 
 ## [0.1.22] - 2017-09-27
 ### Added
-- Added 'clear' action to golem.actions
+- 'clear' action to golem.actions
 
 ### Fixed
 - Missing js files in manifest.in

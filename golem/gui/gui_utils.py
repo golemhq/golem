@@ -128,6 +128,10 @@ def get_global_actions():
             'parameters': [{'name': 'args', 'type': 'value'}]
         },
         {
+            'name': 'refresh_page',
+            'parameters': []
+        },
+        {
             'name': 'select by index',
             'parameters': [{'name': 'from element', 'type': 'element'},
                            {'name': 'index', 'type': 'value'}]

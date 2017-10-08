@@ -199,6 +199,11 @@ Generate a random string. Options:
 For example: random('cccddd') => 'aeg147'
 
 
+##### refresh_page()
+
+Refreshes the page
+
+
 ##### step(message)
 
 Logs a new step to be displayed in the report later

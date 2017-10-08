@@ -36,7 +36,9 @@ class RunCommand(BaseCommand):
                           'chrome-remote',
                           'chrome-headless',
                           'chrome-remote-headless',
-                          'firefox-remote']
+                          'firefox-remote',
+                          'ie',
+                          'ie-remote']
         parser.add_argument('project', default='',
                             nargs='?', help="project name")
         parser.add_argument('test_or_suite', nargs='?',
@@ -153,9 +155,9 @@ class GuiCommand(BaseCommand):
                             nargs='?', default=5000, type=int,
                             metavar='port number',
                             help="port number to use for Golem GUI")
-        parser.add_argument('-o', '--open', action='store_true',
-                            default=False,
-                            help="Open the GUI module in the browser")
+        # parser.add_argument('-o', '--open', action='store_true',
+        #                     default=False,
+        #                     help="Open the GUI module in the browser")
         # parser.add_argument('-d', '--debug', action='store_true',
         #                     default=False,
         #                     help="Start the gui application in debug mode")
@@ -166,7 +168,7 @@ class GuiCommand(BaseCommand):
         # Note, some features won't work if the golem gui is not
         # started with debug = True
         debug = True
-        gui_start.run_gui(port_number, debug, args.open)
+        gui_start.run_gui(port_number)
 
 
 class CreateProjectCommand(BaseCommand):

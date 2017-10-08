@@ -255,8 +255,20 @@ def get_browser():
                     raise Exception(msg) from None
             else:
                 raise Exception('chromedriver_path setting is not defined')
-        # if driver_selected == 'ie':
-        #     driver = webdriver.Ie()
+        elif driver_selected == 'ie':
+            if settings['iedriver_path']:
+                try:
+                    driver = webdriver.Ie(executable_path=settings['iedriver_path'])
+                except:
+                    msg = ('Could not start IE driver using the path \'{}\', '
+                           'check the settings file.'.format(settings['iedriver_path']))
+                    execution.logger.error(msg)
+                    raise Exception(msg) from None
+            else:
+                raise Exception('iedriver_path setting is not defined')
+        elif driver_name == 'ie-remote':
+            driver = webdriver.Remote(command_executor=settings['remote_url'],
+                                      desired_capabilities=DesiredCapabilities.IE)
         # if driver_selected == 'phantomjs':
         #     if os.name == 'nt':
         #         executable_path = os.path.join(
@@ -266,10 +278,9 @@ def get_browser():
         #                                     'phantomjs.exe')
         #         driver = webdriver.PhantomJS(
         #                             executable_path=executable_path)
-            # else:
-            #     print('not implemented yet')
-            #     sys.exit()
-        # maximize driver window by default (fix)
+        #     else:
+        #         print('not implemented yet')
+        #         sys.exit()
         elif driver_name == 'chrome-remote-headless':
             options = webdriver.ChromeOptions()
             options.add_argument('headless')
@@ -298,4 +309,3 @@ def get_browser():
     driver.find_all = types.MethodType(_find_all, driver)
 
     return execution.browser
-
