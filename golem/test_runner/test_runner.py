@@ -63,7 +63,8 @@ def run_test(workspace, project, test_name, test_data, browser_name,
         data_string = '\n'
         for key, value in test_data.items():
             if key == 'env':
-                data_string += '    {}: {}\n'.format('url', value['url'])
+                if 'url' in value:
+                    data_string += '    {}: {}\n'.format('url', value['url'])
             else:
                 data_string += '    {}: {}\n'.format(key, value)
         logger.info('Using data: {}'.format(data_string))

@@ -309,6 +309,7 @@ def screenshot_file(project, suite, execution, test_case, test_set, scr):
 def screenshot_file2(project, test, execution, test_set, scr):
     screenshot_path = os.path.join(root_path, 'projects', project, 'reports',
                                    'single_tests', test, execution, test_set)
+    print(screenshot_path)
     return send_from_directory(screenshot_path, '{}.png'.format(scr))
 
 

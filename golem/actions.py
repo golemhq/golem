@@ -9,6 +9,9 @@ import random as rand
 import selenium
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
 import requests
 
 from golem.core.exceptions import TextNotPresent, ElementNotFound
@@ -90,8 +93,8 @@ def clear(element):
     _run_wait_hook()
     webelement = get_browser().find(element)
     step_message = 'Clear {0} element'.format(webelement.name)
-    webelement.clear()
     execution.logger.info(step_message)
+    webelement.clear()
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
 
 
@@ -99,8 +102,8 @@ def click(element):
     _run_wait_hook()
     webelement = get_browser().find(element)
     step_message = 'Click {0}'.format(webelement.name)
-    webelement.click()
     execution.logger.info(step_message)
+    webelement.click()
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
 
 
@@ -220,12 +223,12 @@ def send_keys(element, text):
     webelement = get_browser().find(element)
     step_message = 'Write \'{0}\' in element {1}'.format(text, webelement.name)
     # TODO chrome driver drops some characters when calling send_keys
-    if execution.browser_name in ['chrome', 'chrome-headless', 'chrome-remote']:
-        for c in text:
-            webelement.send_keys(c)
-            time.sleep(0.1)
-    else:
-        webelement.send_keys(text)
+    # if execution.browser_name in ['chrome', 'chrome-headless', 'chrome-remote']:
+    #     for c in text:
+    #         webelement.send_keys(c)
+    #         time.sleep(0.1)
+    # else:
+    webelement.send_keys(text)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
 
@@ -403,6 +406,14 @@ def wait(seconds):
 #             still_exists = False
 #     # else:
 #     #     execution.logger.debug('Element {} was not found, continuing...'.format(element)) 
+
+
+def wait_for_element_clickable(element, timeout=20):
+    print('WAIT FOR ELEMENT CLICKABLE')
+    browser = get_browser()
+    element = WebDriverWait(browser, timeout).until(
+        EC.element_to_be_clickable())
+
 
 
 def wait_for_element_not_exist(element, timeout=20):

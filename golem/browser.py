@@ -37,7 +37,7 @@ def _find_webelement(root, selector_type, selector_value, element_name, remainin
     except:
         time.sleep(0.5)
         end_time = time.time()
-        remaining_time = remaining_time - (end_time - start_time)
+        remaining_time -= end_time - start_time
         if remaining_time > 0:
             execution.logger.debug('Element not found yet, remaining time: {}'.format(remaining_time))
             webelement = _find_webelement(root, selector_type, selector_value,

@@ -4,8 +4,10 @@
 ## [Unreleased]
 
 ### Added
-- Environments
-- 'refresh' action to golem action
+- Environments support
+- 'refresh' action to golem.actions
+- 'set_window_size' action to golem.actions (thanks to danielmaddern)
+- IE driver support
 
 ## [0.2.1] - 2017-10-06
 ### Added
