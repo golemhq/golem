@@ -65,7 +65,7 @@
 	top: 10%!important;
 }
 
-#testRunModal.modal-body {
+#testRunModal .modal-body {
 	max-height: calc(90vh - 200px);
 	overflow-y: auto;
 }

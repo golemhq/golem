@@ -22,13 +22,12 @@ var testRunner = new function(){
             dataType: 'json',
             type: 'POST',
             success: function(environments) {
-                console.log(environments);
                 if(environments.length > 1){
                     // should ask the user which env
                     var callback = function(environment){
                         testRunner._doRunTestCase(environment);
                     }
-                    displaySelectPromptModal('Select Environment', '', environments, callback)
+                    displaySelectPromptModal('Select Environment', '', environments, 'Run', callback)
                 }
                 else{
                     // should not ask the user which env
@@ -150,13 +149,14 @@ var testRunner = new function(){
             for(s in thisReport.steps){
                 var thisStep = thisReport.steps[s];
                 
+                console.log(thisReport);
 
                 if(thisStep.screenshot){
                     var msg = "<span class='hand-icon' data-toggle='collapse' data-target='#"+thisStep.screenshot+"' \
                         aria-expanded='false' aria-controls='"+thisStep.screenshot+"'>'"+thisStep.message+"' \
                         <span class='glyphicon glyphicon-picture' aria-hidden='true'></span></span> \
                     <div class='collapse text-center' id='"+ thisStep.screenshot + "'> \
-                        <img class='step-screenshot hand-icon' style='width: 100%;' src='/test/screenshot/"+ project +"/"+ thisReport.name +"/"+thisReport.execution+ "/"+thisReport.test_set+ "/"+ thisStep.screenshot +"/' onclick='reportUtils.expandImg(event);'> \
+                        <img class='step-screenshot hand-icon' style='width: 100%;' src='/test/screenshot/"+ project +"/"+ thisReport.full_name +"/"+thisReport.execution+ "/"+thisReport.test_set+ "/"+ thisStep.screenshot +"/' onclick='reportUtils.expandImg(event);'> \
                     </div>";
                 }
                 else{
