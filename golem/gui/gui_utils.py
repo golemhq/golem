@@ -152,6 +152,11 @@ def get_global_actions():
                            {'name': 'value', 'type': 'value'}]
         },
         {
+            'name': 'set window size',
+            'parameters': [{'name': 'width', 'type': 'value'},
+                           {'name': 'height', 'type': 'value'}]
+        },
+        {
             'name': 'step',
             'parameters': [{'name': 'message', 'type': 'value'}]
         },

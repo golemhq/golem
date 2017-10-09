@@ -230,6 +230,15 @@ def send_keys(element, text):
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
 
 
+def set_window_size(width, height):
+    _run_wait_hook()
+    browser = get_browser()
+    step_message = 'Set browser window size to {0}x, {1}y.'.format(width, height)
+    browser.set_window_size(width, height)
+    execution.logger.info(step_message)
+    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+
+
 def step(message):
     execution.steps.append(message)
 
