@@ -104,6 +104,10 @@ function addElement(event){
     }
 
     var elementName = input.val().trim();
+
+    // replace inner spaces with underscores
+    elementName = elementName.replace(/ /g, '_');
+    
     var fullPath = getElementFullPath(input, elementName);
     var isDir = false;
     if(elementName.indexOf('/') > -1){
@@ -118,9 +122,6 @@ function addElement(event){
         input.parent().parent().find(".display-new-element-link").show();
         return
     }
-
-    // replace inner spaces with underscores
-    elementName = elementName.replace(/ /g, '_');
 
     // validate length
     if(elementName.length > 60){

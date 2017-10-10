@@ -25,20 +25,21 @@ class Test_get_test_cases:
         tests = utils.get_test_cases(test_directory_fixture['full_path'],
                                      project_fixture['project_name'])
 
+
         expected_result = {
             'type': 'directory',
             'name': 'tests',
-            'dot_path': None,
+            'dot_path': '.',
             'sub_elements': [
                 {
                     'type': 'directory',
                     'name': 'subdir1',
-                    'dot_path': None,
+                    'dot_path': 'subdir1',
                     'sub_elements': [
                         {
                             'type': 'directory',
                             'name': 'subdir2',
-                            'dot_path': None,
+                            'dot_path': 'subdir1.subdir2',
                             'sub_elements': [
                                 {
                                     'type': 'file',
@@ -88,17 +89,17 @@ class Test_get_page_objects:
         expected_result = {
             'type': 'directory',
             'name': 'pages',
-            'dot_path': None,
+            'dot_path': '.',
             'sub_elements': [
                 {
                     'type': 'directory',
                     'name': 'subdir1',
-                    'dot_path': None,
+                    'dot_path': 'subdir1',
                     'sub_elements': [
                         {
                             'type': 'directory',
                             'name': 'subdir2',
-                            'dot_path': None,
+                            'dot_path': 'subdir1.subdir2',
                             'sub_elements': [
                             {
                                 'type': 'file',
@@ -143,7 +144,7 @@ class Test_get_suites:
         expected_result = {
             'type': 'directory',
             'name': 'suites',
-            'dot_path': None,
+            'dot_path': '.',
             'sub_elements': [
                 {
                     'type': 'file',

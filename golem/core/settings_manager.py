@@ -92,6 +92,11 @@ def assign_settings_default_values(settings):
     elif settings['screenshot_on_error'] == '' or settings['screenshot_on_error'] is None:
         settings['screenshot_on_error'] = True
 
+    if not 'screenshot_on_end' in settings:
+        settings['screenshot_on_end'] = False
+    elif settings['screenshot_on_end'] == '' or settings['screenshot_on_end'] is None:
+        settings['screenshot_on_end'] = False
+
     if not 'screenshot_on_step' in settings:
         settings['screenshot_on_step'] = False
     elif settings['screenshot_on_step'] == '' or settings['screenshot_on_step'] is None:

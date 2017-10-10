@@ -11,7 +11,6 @@ def _parse_step(step):
     # ('a', 'b')            -> ['a', 'b']
     # ('a, b, c')           -> ['a, b, c']
     # (('a', 'b', 'c'))     -> ['(\'a\', \'b\', \'c\')']
-    print(step)
     method_name = step.split('(', 1)[0].strip()
     if not '.' in method_name:
         method_name = method_name.replace('_', ' ')
@@ -27,7 +26,6 @@ def _parse_step(step):
         inside_string = False
         string_char = ''
         current_start = 0
-        print('PARAM STRING', params_string)
         for i in range(len(params_string)):
             is_last_char = i == len(params_string) -1
             is_higher_level_comma = False
@@ -58,14 +56,12 @@ def _parse_step(step):
             param_list.append(params_string[pair[0]:pair[1]])
 
         param_list = [x.strip() for x in param_list]
-        print(param_list)
         for param in param_list:
 
             # if 'data[' in param:
             #     data_re = re.compile("[\'|\"](?P<data>.*)[\'|\"]")
             #     g = data_re.search(param)
             #     clean_param_list.append(g.group('data'))
-            print('PARAM', param)
             if '(' in param and ')' in param:
                 clean_param_list.append(param)
             else:
@@ -167,6 +163,7 @@ def new_test_case(root_path, project, parents, tc_name):
 
 
 def format_parameters(step, root_path, project, stored_keys):
+    print(step)
     parameters = step['parameters']
     action = step['action'].replace(' ', '_')
     formatted_parameters = []
@@ -179,17 +176,11 @@ def format_parameters(step, root_path, project, stored_keys):
             elif 'random(' in parameter:
                 this_parameter_string = parameter
             else:
-                # is not a page object,
-                # identify if its a value or element parameter
-                # is_data_var = data.is_data_variable(root_path, project, parents,
-                #                                     test_case_name, parameter)
-
                 is_data_var = 'data.' in parameter
 
                 is_in_stored_keys = parameter in stored_keys
                 action_is_store = action == 'store'
                 if (is_data_var or is_in_stored_keys) and not action_is_store:
-                    # this_parameter_string = 'data[\'{}\']'.format(parameter)
                     this_parameter_string = parameter
                 else:
                     if action in ['wait', 'select_by_index']:

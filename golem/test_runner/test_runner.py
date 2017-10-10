@@ -115,6 +115,9 @@ def run_test(workspace, project, test_name, test_data, browser_name,
             test_module.test(execution.data)
         else:
             raise Exception('Test does not have test function')
+
+        if settings['screenshot_on_end'] and execution.browser:
+            actions.capture('test end')
     except:
         result['result'] = 'fail'
         result['error'] = traceback.format_exc()

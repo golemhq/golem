@@ -93,7 +93,6 @@ from golem.core import settings_manager
 
 
 def _directory_element(elem_type, name, dot_path=None):
-    print('DOT PATH', dot_path)
     element = {
         'type': elem_type,
         'name': name,

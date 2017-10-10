@@ -58,3 +58,31 @@ class Test__parse_step:
             parsed = test_case._parse_step(step['src'])
             assert step['expected'] == parsed
 
+
+class Test_format_parameters:
+    possible_inputs = [
+        {
+            'input': {'action': 'send keys', 'parameters': ["('id', 'searchInput')", 'automation']},
+            'expected': '(\'id\', \'searchInput\'), \'automation\''
+        },
+        {
+            'input': {'action': 'send keys', 'parameters': ["(\'id\', \"searchInput[attr=\'value\']\")"]},
+            'expected': '(\'id\', \"searchInput[attr=\'value\']\")'
+        },
+        # {
+        #     'input': {'action': 'send keys', 'parameters': ['\{\'a\': \'b\', \'c\': \'d\'\}']},
+        #     'expected': '\{\'a\': \'b\', \'c\': \'d\'\}'
+        # }
+    ]
+
+
+    
+
+
+    def test_format_parameters(self):
+        for step in self.possible_inputs:
+            parsed = test_case.format_parameters(step['input'], '', '', '')
+            print(parsed)
+            assert step['expected'] == parsed
+
+

@@ -19,6 +19,10 @@ Default time to wait looking for an element until it is found. Default is 20 sec
 
 Take a screenshot on error by default. Default is True.
 
+- *screenshot_on_end*
+
+Take a screenshot after 'test' function ends. Default is False.
+
 - *screenshot_on_step*
 
 Take a screenshot on every step. Default is False.

@@ -60,7 +60,6 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
 
     #######
     project_envs = environment_manager.get_envs(project)
-    print('SUITE ENVS', suite_envs)
     envs = []
     if test_execution.cli_environments:
         # use the environments passed through command line if available
@@ -75,7 +74,6 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
         # execute using a blank environment
         envs = ['']
 
-    print('ENVS', envs)
     envs_data = environment_manager.get_environment_data(project)
 
     # get test data for each test present in the list of tests
@@ -86,7 +84,6 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
         data_sets = utils.get_test_data(workspace, project, test_case)
         for data_set in data_sets:
             for env in envs:
-                print('ENV', env)
                 data_set_env = dict(data_set)
                 if env in envs_data:
                     env_data = envs_data[env]
@@ -94,7 +91,6 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
                     data_set_env['env'] = env_data
                     data_set_env['env']['name'] = env
                 for driver in drivers:
-                    print(data_set_env)
                     execution_list.append(
                         {
                             'test_name': test_case,
@@ -103,7 +99,6 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
                             'report_directory': None
                         }
                     )
-    print(execution_list)
 
     if is_suite:
         execution_directory = report.create_suite_execution_directory(test_execution.root_path,

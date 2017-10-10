@@ -27,7 +27,7 @@ function createProject(){
         return
     }
     if(!/^[\w\s]+$/i.test(projectName)){
-        displayErrorModal(['Only letters, numbers and underscore allowed']);
+        displayErrorModal(['Only letters, numbers and underscores are allowed']);
         return
     }
     // validate length

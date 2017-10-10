@@ -8,6 +8,7 @@
 - 'refresh' action to golem.actions
 - 'set_window_size' action to golem.actions (thanks to danielmaddern)
 - IE driver support
+- 'screenshot_on_end' setting
 
 ## [0.2.1] - 2017-10-06
 ### Added
