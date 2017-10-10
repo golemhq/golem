@@ -21,7 +21,7 @@ function getTests(projectName){
         dataType: 'json',
         type: 'POST',
         success: function(tests) {
-            $("#testCasesTree").append(Project.newElementForm());
+            $("#testCasesTree").append(Project.newElementForm('.'));
             loadTreeElements($("#testCasesTree"), tests.sub_elements, 'test');
         },
     });
@@ -37,7 +37,7 @@ function getPages(projectName){
         dataType: 'json',
         type: 'POST',
         success: function(pages) {
-            $("#pagesTree").append(Project.newElementForm());
+            $("#pagesTree").append(Project.newElementForm('.'));
             loadTreeElements($("#pagesTree"), pages.sub_elements, 'page');
         },
     });
@@ -53,7 +53,7 @@ function getSuites(projectName){
         dataType: 'json',
         type: 'POST',
         success: function(suites) {
-            $("#suitesTree").append(Project.newElementForm());
+            $("#suitesTree").append(Project.newElementForm('.'));
             loadTreeElements($("#suitesTree"), suites.sub_elements, 'suite');
         },
     });
@@ -62,6 +62,7 @@ function getSuites(projectName){
 
 function loadTreeElements(rootElement, elements, elementType){
     elements.forEach(function(element){
+        console.log(element)
         if(element.type == 'file'){
             var elementUrl = "/p/"+project+"/"+elementType+"/"+element.dot_path+"/";
             var uiElement = Project.generateNewElement({
@@ -71,7 +72,7 @@ function loadTreeElements(rootElement, elements, elementType){
                 type: elementType});
         }
         else if(element.type == 'directory'){
-            var uiElement = Project.addBranchToTree(element.name, '');
+            var uiElement = Project.addBranchToTree(element.name, element.dot_path);
             loadTreeElements(uiElement.find('ul'), element.sub_elements, elementType);
         }
         rootElement.children().last().before(uiElement);
@@ -158,7 +159,7 @@ function addElement(event){
             if(data.errors.length == 0){
                 var parentUl = input.parent().parent().parent();
                 if(data.element.is_directory){
-                    var branch = Project.addBranchToTree(data.element.name);
+                    var branch = Project.addBranchToTree(data.element.name, data.element.full_path);
                     parentUl.children().last().before(branch);
                 }
                 else{

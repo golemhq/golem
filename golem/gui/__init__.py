@@ -395,13 +395,16 @@ def new_tree_element():
         project = request.form['project']
         elem_type = request.form['elementType']
         is_dir = json.loads(request.form['isDir'])
-        full_path = request.form['fullPath'].split('.')
-        element_name = full_path[-1]
-        parents = full_path[:-1]
+        full_path = request.form['fullPath']
+        full_path = full_path.replace('/', '')
+        full_path_list = full_path.split('.')
+        element_name = full_path_list[-1]
+        parents = full_path_list[:-1]
         errors = []
 
-        if is_dir:
-            element_name = element_name.replace('/', '')
+        # if is_dir:
+        #     element_name = element_name.replace('/', '')
+
         for c in element_name:
             if not c.isalnum() and not c in ['-', '_']:
                 errors.append('Only letters, numbers, \'-\' and \'_\' are allowed')
@@ -421,7 +424,7 @@ def new_tree_element():
                 errors = suite.new_suite(root_path, project, element_name)
         element = {
             'name': element_name,
-            'full_path': '.'.join(full_path),
+            'full_path': full_path,
             'type': elem_type,
             'is_directory': is_dir
         }

@@ -14,16 +14,16 @@ var Project = new function(){
         return $(li)
     }
 
-    this.addBranchToTree = function(branchName, inputClass){
+    this.addBranchToTree = function(branchName, dot_path){
         var openedClass = 'glyphicon-folder-open';
         var closedClass = 'glyphicon-folder-close';
         var li = "\
-            <li class='tree-element branch' name='"+branchName+"'>\
+            <li class='tree-element branch' name='"+branchName+"' fullpath='"+dot_path+"'>\
                 <a href='#'>"+branchName+"</a> \
                 <span class='pull-right tree-element-buttons'> \
                 </span> \
                 <ul>\
-                    "+this.newElementForm()+"\
+                    "+this.newElementForm(dot_path)+"\
                 </ul>\
             </li>";
             //<button><i class='glyphicon glyphicon-edit'></i></button> \
@@ -65,15 +65,15 @@ var Project = new function(){
         return branch
     };
 
-    this.newElementForm = function(){
+    this.newElementForm = function(dot_path){
         var li = "\
-            <li>\
+            <li class='form-container' fullpath='"+dot_path+"'>\
             <span class='new-element-form' style='display: none;'>\
                 <input class='new-element-input new-test-case' type='text'\
                     onblur='addElement(event);' onkeyup='if(event.keyCode==13){addElement(event)}'>\
             </span>\
             <span class='display-new-element-link'>\
-                <a href='javascript:void(0)' onclick='displayNewElementForm(this)'><i class='glyphicon glyphicon-plus-sign'></i> Add</a>\
+                <a class='new-element-link' href='javascript:void(0)' onclick='displayNewElementForm(this)'><i class='glyphicon glyphicon-plus-sign'></i> Add</a>\
             </span>\
         </li>";
         return li

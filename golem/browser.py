@@ -1,5 +1,6 @@
 import time
 import types
+import traceback
 
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
@@ -226,6 +227,7 @@ def get_browser():
                     msg = ('Could not start firefox driver using the path \'{}\', '
                            'check the settings file.'.format(settings['geckodriver_path']))
                     execution.logger.error(msg)
+                    execution.logger.info(traceback.format_exc())
                     raise Exception(msg) from None
             else:
                 raise Exception('geckodriver_path setting is not defined')
@@ -237,6 +239,7 @@ def get_browser():
                     msg = ('Could not start chrome driver using the path \'{}\', '
                            'check the settings file.'.format(settings['chromedriver_path']))
                     execution.logger.error(msg)
+                    execution.logger.info(traceback.format_exc())
                     raise Exception(msg) from None
             else:
                 raise Exception('chromedriver_path setting is not defined')
@@ -252,6 +255,7 @@ def get_browser():
                     msg = ('Could not start chrome driver using the path \'{}\', '
                            'check the settings file.'.format(settings['chromedriver_path']))
                     execution.logger.error(msg)
+                    execution.logger.info(traceback.format_exc())
                     raise Exception(msg) from None
             else:
                 raise Exception('chromedriver_path setting is not defined')
@@ -263,6 +267,7 @@ def get_browser():
                     msg = ('Could not start IE driver using the path \'{}\', '
                            'check the settings file.'.format(settings['iedriver_path']))
                     execution.logger.error(msg)
+                    execution.logger.info(traceback.format_exc())
                     raise Exception(msg) from None
             else:
                 raise Exception('iedriver_path setting is not defined')

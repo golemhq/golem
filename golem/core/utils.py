@@ -92,11 +92,11 @@ from golem.core import settings_manager
 #     return dir_tree
 
 
-def _directory_element(elem_type, name, full_path, dot_path=None):
+def _directory_element(elem_type, name, dot_path=None):
+    print('DOT PATH', dot_path)
     element = {
         'type': elem_type,
         'name': name,
-        # 'full_path': full_path,
         'dot_path': dot_path,
         'sub_elements': []
     }
@@ -107,7 +107,9 @@ def _generate_dict_from_file_structure(full_path, original_path=None):
     root_dir_name = os.path.basename(os.path.normpath(full_path))
     if not original_path:
         original_path = full_path
-    element = _directory_element('directory', root_dir_name, full_path)
+    _ = os.path.relpath(full_path, original_path)
+    _ = _.replace('/', '.')
+    element = _directory_element('directory', root_dir_name, _)
 
     all_sub_elements = os.listdir(full_path)
     files = []
@@ -127,7 +129,7 @@ def _generate_dict_from_file_structure(full_path, original_path=None):
 
         rel_file_path = os.path.relpath(full_file_path, original_path)
         dot_file_path = rel_file_path.replace('/', '.')
-        file_element = _directory_element('file', filename, full_file_path, dot_file_path)
+        file_element = _directory_element('file', filename, dot_file_path)
         element['sub_elements'].append(file_element)
 
     return element

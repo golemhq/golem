@@ -184,8 +184,11 @@ def refresh_page():
     _run_wait_hook()
     step_message = 'Refresh page'
     get_browser().refresh()
+    #get_browser().execute_script("location.reload()")
+    #browser = get_browser()
+    #browser.get(browser.current_url);
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, settings.settings['screenshot_on_step'])
+    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
 
 
 def select_by_index(element, index):
@@ -195,7 +198,7 @@ def select_by_index(element, index):
     select = selenium.webdriver.support.select.Select(webelement)
     select.select_by_index(index)
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, settings.settings['screenshot_on_step'])
+    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
 
 
 def select_by_text(element, text):
@@ -251,6 +254,7 @@ def store(key, value):
     setattr(execution.data, key, value)
 
 
+# TODO rename to verify_element_exists
 def verify_exists(element):
     _run_wait_hook()
     step_message = 'Verify that the element exists'
