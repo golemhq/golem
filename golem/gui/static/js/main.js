@@ -16,8 +16,7 @@ function displayErrorModal(errors){
 // How to use the confirm modal:
 // Call displayConfirmModal(title, message, callback),
 //
-// The confirmModalIsConfirmed function resets and hides the modal, then 
-// runs the callback function.
+// When the Confirm Modal is confirmed the callback is called.
 // Pass an anonymous function as callback in order to include parameters with it,
 // example:
 // var callback = function(){
@@ -27,17 +26,16 @@ function displayConfirmModal(title, message, callback){
     $("#confirmModal .modal-title").html(title);
     $("#confirmModal .modal-body").html(message);
     $("#confirmModal button.confirm").click(function(){
-        confirmModalIsConfirmed(callback);
+        $("#confirmModal .modal-title").html('');
+        $("#confirmModal .modal-body").html('');
+        $("#confirmModal button.confirm").unbind('click');
+        $("#confirmModal").modal("hide");
+        callback();
     })
     $("#confirmModal").modal("show");
-}
-
-function confirmModalIsConfirmed(callback){
-    $("#confirmModal .modal-title").html('');
-    $("#confirmModal .modal-body").html('');
-    $("#confirmModal button.confirm").unbind('click');
-    $("#confirmModal").modal("hide");
-    callback();
+    $('#confirmModal').on('shown.bs.modal', function () {
+        $("#confirmModal button.confirm").focus();
+    });
 }
 
 
@@ -85,11 +83,8 @@ function displaySelectPromptModal(title, description, options, buttonLabel, call
         var itemval = "<option value='"+options[i]+"'>"+options[i]+"</option>";
         $("#selectPromptSelect").append(itemval)
     });
-
     $("#selectPromptModal button.confirm").focus();
-    
     $("#selectPromptModal").modal("show");
-
     $('#selectPromptModal').on('shown.bs.modal', function () {
         $("#selectPromptModal button.confirm").focus();
     });
@@ -104,9 +99,6 @@ function displaySelectPromptModal(title, description, options, buttonLabel, call
         $("#selectPromptModal button.confirm").unbind('click');
     }
 
-    // $("#selectPromptSelect").change(function(){
-    //     confirm();
-    // });
     $("#selectPromptModal button.confirm").click(function(){
         confirm();
     })

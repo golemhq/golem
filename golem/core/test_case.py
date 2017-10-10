@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import importlib
 import inspect
 
@@ -85,23 +86,50 @@ def _get_parsed_steps(function_code):
 
 
 def get_test_case_content(project, test_case_name):
-    test_contents = {}
+    test_contents = {
+        'description': '',
+        'pages': [],
+        'steps': {
+            'setup': [],
+            'test': [],
+            'teardown': []
+        },
+        'content': ''
+    }
+    
+    # add the 'project' directory to python path
+    sys.path.append(os.path.join(os.getcwd(), 'projects', project))
+
     test_module = importlib.import_module('projects.{0}.tests.{1}'
                                           .format(project, test_case_name))
+    
     # get description
     description = getattr(test_module, 'description', '')
+    
     # get list of pages
+    pages = []
     pages = getattr(test_module, 'pages', [])
+    
+    # code_line_list = source_code.split('\n')
+    # for line in code_line_list:
+    #     if 'import' in line:
+    #         import_lines.append(line)
+
+    # for item in inspect.getmembers(test_module):
+    #     print(item[0], isinstance(item[1], types.ModuleType))
+    
     # get setup steps
     setup_steps = []
     setup_function_code = getattr(test_module, 'setup', None)
     if setup_function_code:
         setup_steps = _get_parsed_steps(setup_function_code)
+    
     # get test steps
     test_steps = []
     test_function_code = getattr(test_module, 'test', None)
     if test_function_code:
         test_steps = _get_parsed_steps(test_function_code)
+    
     # get teardown steps
     teardown_steps = []
     teardown_function_code = getattr(test_module, 'teardown', None)
@@ -110,17 +138,14 @@ def get_test_case_content(project, test_case_name):
 
     test_contents['description'] = description
     test_contents['pages'] = pages
-    test_contents['steps'] = {
-        'setup': setup_steps,
-        'test' : test_steps,
-        'teardown': teardown_steps
-    }
-    content = ''
+    test_contents['steps']['setup'] = setup_steps
+    test_contents['steps']['test'] = test_steps
+    test_contents['steps']['teardown'] = teardown_steps
     try:
-        content = inspect.getsource(test_module)
+        test_contents['content'] = inspect.getsource(test_module)
     except:
         pass
-    test_contents['content'] = content
+    print(test_contents['steps'])
     return test_contents
 
 
@@ -163,7 +188,6 @@ def new_test_case(root_path, project, parents, tc_name):
 
 
 def format_parameters(step, root_path, project, stored_keys):
-    print(step)
     parameters = step['parameters']
     action = step['action'].replace(' ', '_')
     formatted_parameters = []

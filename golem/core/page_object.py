@@ -8,7 +8,7 @@ from golem.core import utils
 
 def get_page_object_content(project, full_po_name):
     # TODO REMOVE _, parents = utils.separate_file_from_parents(full_po_name)
-
+    
     modulex = importlib.import_module('projects.{0}.pages.{1}'.format(project, full_po_name))
     variable_list = [item for item in dir(modulex) if not item.startswith("__")]
     element_list = []
@@ -78,7 +78,6 @@ def save_page_object(root_path, project, full_page_name, elements, functions, im
             if ' ' in element['name']:
                 element['name'] = element['name'].replace(' ', '_')
             element['value'] = element['value'].replace('"', '\\"').replace("'", "\\'")
-            print(element['value'])
             po_file.write("\n\n{0} = ('{1}', \'{2}\', '{3}')".format(element['name'],
                                                                      element['selector'],
                                                                      element['value'],

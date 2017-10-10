@@ -3,6 +3,7 @@ This module contains the method for running one test (one execution)
 i.e.: one test with a single test set
 """
 import sys
+import os
 import importlib
 import time
 import traceback
@@ -28,12 +29,6 @@ def run_test(workspace, project, test_name, test_data, browser_name,
     from golem import execution
 
     # convert test_data to data obj
-    # class Data:
-    #     def __init__(self, data):
-    #         for key, value in data.items():
-    #             setattr(self, key, value)
-
-
     class Data(dict):
         """dot notation access to dictionary attributes"""
         def __getattr__(*args):
@@ -43,7 +38,6 @@ def run_test(workspace, project, test_name, test_data, browser_name,
 
         __setattr__ = dict.__setitem__
         __delattr__ = dict.__delitem__
-
 
     execution.data = Data(test_data)
 
@@ -71,12 +65,17 @@ def run_test(workspace, project, test_name, test_data, browser_name,
 
     test_timestamp = utils.get_timestamp()
     test_start_time = time.time()
-
     execution.project = project
     execution.workspace = workspace
     execution.browser_name = browser_name
     execution.settings = settings
     execution.report_directory = report_directory
+
+    # add the 'project' directory to python path
+    # so it's possible to make relative imports from the test
+    # example, some_test.py
+    # from pages import some_page
+    sys.path.append(os.path.join(workspace, 'projects', project))
 
     test_module = None
 
