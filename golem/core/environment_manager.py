@@ -3,34 +3,27 @@ import json
 
 
 def get_envs(project):
-    env_json_path = os.path.join('projects',
-                                 project,
-                                 'environments.json')
+    envs = []
+    env_json_path = os.path.join('projects', project, 'environments.json')
     if os.path.exists(env_json_path):
         with open(env_json_path) as json_file:
             env_data = json.load(json_file)
-    envs_retrieved = list(env_data.keys())
-    return envs_retrieved or ['']
+            envs = list(env_data.keys())
+    return envs
 
 
 def get_environment_data(project):
-    env_data = None
-    env_json_path = os.path.join('projects',
-                                 project,
-                                 'environments.json')
+    env_data = {}
+    env_json_path = os.path.join('projects', project, 'environments.json')
     if os.path.exists(env_json_path):
         with open(env_json_path) as json_file:
             env_data = json.load(json_file)
-
-
     return env_data
 
 
 def get_environments_as_string(project):
     env_data = ''
-    env_json_path = os.path.join('projects',
-                                 project,
-                                 'environments.json')
+    env_json_path = os.path.join('projects', project, 'environments.json')
     if os.path.isfile(env_json_path):
         with open(env_json_path) as json_file:
             env_data = json_file.read()

@@ -1,5 +1,23 @@
 
 
+window.onload = function () {
+
+     $('#sidebarCollapse').on('click', function () {
+         $('#sidebar').toggleClass('active');
+         if($('#sidebar').hasClass('active')){
+            document.cookie = "sidebarCollapsed=true";
+            localStorage.setItem('sidebarCollapse', true);
+         }
+         else{
+            document.cookie = "sidebarCollapsed=false";
+            localStorage.setItem('sidebarCollapse', false);
+         }
+         
+
+     });
+ };
+
+
 function displayErrorModal(errors){
     var ulContent = '';
     for(e in errors){

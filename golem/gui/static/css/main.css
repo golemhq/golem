@@ -1,4 +1,9 @@
 
+
+.container-fluid {
+    padding: 0px;
+}
+
 /*
 
 gray 1  #fafafa
@@ -64,6 +69,12 @@ gray 1  #fafafa
     background-color: #b3b3b3;
 }
 
+
+.same-heigth-col {
+    float: none;
+    display: table-cell;
+    vertical-align: top;
+}
 
 
 .last-execution-table td{

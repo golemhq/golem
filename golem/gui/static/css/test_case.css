@@ -8,11 +8,7 @@ html {
     width: 100%;
 }
 
-.same-heigth-col {
-    float: none;
-    display: table-cell;
-    vertical-align: top;
-}
+
 
 #stepsContainerContainer {
 	padding-bottom: 10px;

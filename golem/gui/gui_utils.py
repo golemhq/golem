@@ -251,6 +251,8 @@ def get_supported_browsers_suggestions():
         'chrome-headless',
         'chrome-remote-headless',
         'firefox',
-        'firefox-remote'
+        'firefox-remote',
+        'ie',
+        'ie-remote'
     ]
     return supported_browsers

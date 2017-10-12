@@ -62,7 +62,6 @@ function getSuites(projectName){
 
 function loadTreeElements(rootElement, elements, elementType){
     elements.forEach(function(element){
-        console.log(element)
         if(element.type == 'file'){
             var elementUrl = "/p/"+project+"/"+elementType+"/"+element.dot_path+"/";
             var uiElement = Project.generateNewElement({
@@ -297,7 +296,7 @@ function loadHealthData(healthData){
         },
         options: {
             animation: {
-                animateScale: true,
+                //animateScale: true,
                 animateRotate: true
             },
             responsive: true,
