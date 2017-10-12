@@ -200,7 +200,7 @@ def format_parameters(step, root_path, project, stored_keys):
             elif 'random(' in parameter:
                 this_parameter_string = parameter
             else:
-                is_data_var = 'data.' in parameter
+                is_data_var = 'data.' in parameter or 'data' in parameter
 
                 is_in_stored_keys = parameter in stored_keys
                 action_is_store = action == 'store'
