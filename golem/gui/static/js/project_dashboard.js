@@ -282,13 +282,13 @@ function loadHealthData(healthData){
                 {
                     data: [totalOk, totalFail, totalPending],
                     backgroundColor: [
-                        "rgb(66, 139, 202)",
-                        "rgb(217, 83, 79)",
+                        "#95BD65",
+                        "#fd5a3e",
                         "#b3b3b3"
                     ],
                     hoverBackgroundColor: [
-                        "rgb(66, 139, 202)",
-                        "rgb(217, 83, 79)",
+                        "#95BD65",
+                        "#fd5a3e",
                         "#b3b3b3"
                     ]
                 }
