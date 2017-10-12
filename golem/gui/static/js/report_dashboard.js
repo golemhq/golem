@@ -74,14 +74,14 @@ function loadProject(project, projectData){
 		        datasets: [
 			        {
 			            label: "Failed",
-			            backgroundColor: 'rgb(217, 83, 79)',
-			            borderColor: 'rgb(217, 83, 79)',
+			            backgroundColor: '#fd5a3e',
+			            borderColor: '#fd5a3e',
 			            data: [],
 			        },
 			        {
 			            label: "Passed",
-			            backgroundColor: 'rgb(66, 139, 202)',
-			            borderColor: 'rgb(66, 139, 202)',
+			            backgroundColor: '#95BD65',
+			            borderColor: '#95BD65',
 			            data: [],
 			        },
 			        {

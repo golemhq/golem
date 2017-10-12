@@ -135,10 +135,10 @@ var testRunner = new function(){
             var thisReport = reports[r];
             var report = $("<div class='report-result'></div>");
             if(thisReport.result === 'pass'){
-                var resultIcon = '<span class="pass-icon"><span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span></span>';
+                var resultIcon = passIcon()
             }
             else{
-                var resultIcon = '<span class="fail-icon"><span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></span>';
+                var resultIcon = failIcon()
             }
             report.append('<span><strong>Result:</strong> '+thisReport.result+' ' + resultIcon + '</span><br>');
             report.append('<span><strong>Error:</strong> ' + thisReport.short_error + '</span><br>');

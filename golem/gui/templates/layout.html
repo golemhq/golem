@@ -15,18 +15,25 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome/font-awesome.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/temp.css') }}">
+
     <!-- JQUERY -->
     <script src="{{ url_for('static', filename='js/external/jquery.min.js') }}"></script>
 
     <title>Golem</title>
 
     {% block head_declarations %}
-    {% endblock %} 
+    {% endblock %}
 </head>
 
 <body>
-  <div class="container">
-    <div class="header clearfix">
+
+
+
+  <div class="container-fluid">
+
+
+    <!-- <div class="header clearfix">
       <nav>
         <ul class="nav nav-pills pull-right">
           {% if g.user.is_authenticated %}
@@ -49,10 +56,6 @@
           <li class="">
             <a href="{% if project %}/report/project/{{project}}/{% else %}/report/{% endif %}" role="button" aria-haspopup="true" aria-expanded="false">Reports</a>
           </li>
-          <!-- <li class="">
-            <a href="{% if project %}/p/{{project}}/settings/{% else %}/settings/{% endif %}" role="button" aria-haspopup="true" aria-expanded="false">Settings</a>
-          </li>
- -->
           <ul class="nav nav-pills pull-right">
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Settings <span class="caret"></span></a>
@@ -70,10 +73,128 @@
         </ul>
       </nav>
     <h3 class="text-muted"><a href="/" class="link-without-underline">Golem <small>Test Automation Framework</small></a></h3>
-  </div>
+  </div> -->
 
-{% block content %}
-{% endblock %}
+
+
+<div class="wrapper">
+    <!-- Sidebar Holder -->
+    
+
+    <script>
+      if(localStorage.getItem('sidebarCollapse') == 'true'){
+        document.write("<nav id='sidebar' class='active'>")
+      }
+      else{
+        document.write("<nav id='sidebar'>") 
+      }
+    </script>
+    
+
+    <!-- <nav id="sidebar" class=""> -->
+        <div class="sidebar-header">
+            <a href="/">
+              <h3>Golem</h3>
+              <strong>G</strong>
+            </a>
+        </div>
+
+        <ul class="list-unstyled components">
+            {% if project%}
+            <li>
+                <a href="/p/{{project}}/">
+                    <i class="fa fa-home" aria-hidden="true"></i>
+                    Project
+                </a>
+            </li>
+            <li>
+                <a href="/p/{{project}}">
+                    <i class="glyphicon glyphicon-tasks"></i>
+                    Suites
+                </a>
+            </li>
+            <li>
+                <a href="/p/{{project}}/#tests">
+                    <i class="fa fa-file-code-o" aria-hidden="true"></i>
+                    Tests
+                </a>
+            </li>
+            <li>
+                <a href="/p/{{project}}/#pages">
+                    <i class="fa fa-book" aria-hidden="true"></i>
+                    Pages
+                </a>
+            </li>
+            <li>
+                <a href="/report/project/{{project}}/">
+                    <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                    Reports
+                </a>
+            </li>
+            <li>
+                <a href="/p/{{project}}/settings/">
+                    <i class="fa fa-cogs" aria-hidden="true"></i>
+                    Settings
+                </a>
+            </li>
+            <li>
+                <a href="/p/{{project}}/environments/">
+                    <i class="fa fa-sitemap" aria-hidden="true"></i>
+                    Environments
+                </a>
+            </li>
+            {% else %}
+            <li>
+                <a href="/report/">
+                    <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                    Reports
+                </a>
+            </li>
+            <li>
+                <a href="/settings/">
+                    <i class="fa fa-cogs" aria-hidden="true"></i>
+                    Settings
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+
+        <ul class="list-unstyled components">
+          {% if g.user.is_authenticated %}
+          <li>
+              <a href="#pageSubmenu" id="userMenu" data-toggle="collapse" aria-expanded="false">
+                  <i class="fa fa-user-circle-o" aria-hidden="true"></i>
+                  {{ g.user.username }}
+              </a>
+              <ul class="collapse list-unstyled" id="pageSubmenu">
+                  <li><a href="/logout/">Log out</a></li>
+              </ul>
+          </li>
+          {% else %}
+          <li>
+              <a href="/login/">
+                  <i class="glyphicon glyphicon-send"></i>
+                  Log in
+              </a>
+          </li>
+          {% endif %}
+        </ul>
+        
+
+        <ul class="list-unstyled">
+            <li>
+              <a href="#" id="sidebarCollapse" class="collapse-sidebar"><i class="glyphicon" aria-hidden="true"></i></a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Page Content Holder -->
+    <div id="content">
+      {% block content %}
+      {% endblock %}
+    </div>
+</div>
+
 </div>
 
 <!-- Error Modal -->

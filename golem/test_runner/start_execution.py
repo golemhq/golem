@@ -18,7 +18,6 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
     suite_module = None
     report_suite_name = None
     is_suite = False
-
     # get test list
     if test:
         tests = [test]
@@ -75,7 +74,6 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
         envs = ['']
 
     envs_data = environment_manager.get_environment_data(project)
-
     # get test data for each test present in the list of tests
     # for each test in the list, for each data set and driver combination
     # append an entry to the execution_list

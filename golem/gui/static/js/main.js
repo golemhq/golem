@@ -1,5 +1,23 @@
 
 
+window.onload = function () {
+
+     $('#sidebarCollapse').on('click', function () {
+         $('#sidebar').toggleClass('active');
+         if($('#sidebar').hasClass('active')){
+            document.cookie = "sidebarCollapsed=true";
+            localStorage.setItem('sidebarCollapse', true);
+         }
+         else{
+            document.cookie = "sidebarCollapsed=false";
+            localStorage.setItem('sidebarCollapse', false);
+         }
+         
+
+     });
+ };
+
+
 function displayErrorModal(errors){
     var ulContent = '';
     for(e in errors){
@@ -105,12 +123,12 @@ function displaySelectPromptModal(title, description, options, buttonLabel, call
 }
 
 function passIcon(){
-    return '<span class="pass-icon"><span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span></span>'
+    return '<span class="passed-green"><span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span></span>'
 }
 
 
 function failIcon(){
-    return '<span class="fail-icon"><span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></span>';
+    return '<span class="failed-red"><span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></span>';
 }
 
 
@@ -136,12 +154,12 @@ var reportUtils = new function(){
         var progressBars = "\
             <div class='progress'>\
                 <div aria-valuenow='20' style='width: 100%;' \
-                    class='progress-bar pending' data-transitiongoal='20'></div>\
+                    class='progress-bar pending-grey-background pending' data-transitiongoal='20'></div>\
                 <div aria-valuenow='10' style='width: 0%;' \
-                    class='progress-bar progress-bar-danger fail-bar' \
+                    class='progress-bar failed-red-background fail-bar' \
                     data-transitiongoal='10'></div>\
                 <div aria-valuenow='20' style='width: 0%;' \
-                    class='progress-bar ok-bar' data-transitiongoal='20'></div>\
+                    class='progress-bar passed-green-background ok-bar' data-transitiongoal='20'></div>\
             </div>";
         return progressBars
     }

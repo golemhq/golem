@@ -81,7 +81,9 @@ def login():
                 login_user(new_user)
                 return redirect(next_url)
     else:
-        next_url = request.args.get('next')
+        args_next = request.args.get('next')
+        next_url = args_next if args_next else '/'
+        print('NEXT URL', next_url)
         return render_template('login.html', next_url=next_url, errors=[])
 
 

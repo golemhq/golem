@@ -1,4 +1,9 @@
 
+
+.container-fluid {
+    padding: 0px;
+}
+
 /*
 
 gray 1  #fafafa
@@ -60,10 +65,12 @@ gray 1  #fafafa
     cursor: pointer;
 }
 
-.progress-bar.pending {
-    background-color: #b3b3b3;
-}
 
+.same-heigth-col {
+    float: none;
+    display: table-cell;
+    vertical-align: top;
+}
 
 
 .last-execution-table td{
@@ -267,15 +274,29 @@ gray 1  #fafafa
     padding-right: 5px;
 }
 
-
-
-.fail-icon {
-  color: red;
+.passed-green{
+    color: #95BD65;
 }
 
+.passed-green-background{
+    background-color: #95BD65;
+}
 
-.pass-icon {
-  color: green;
+.failed-red {
+    /*color: #E96A3D;*/
+    color: #fd5a3e;
+}
+
+.failed-red-background {
+    background-color: #fd5a3e;
+}
+
+.pending-grey {
+    color: #b3b3b3;
+}
+
+.pending-grey-background {
+    background-color: #b3b3b3;
 }
 
 .no-margin-top {

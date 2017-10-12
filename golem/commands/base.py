@@ -76,7 +76,6 @@ class RunCommand(BaseCommand):
         # test_execution.minimize = args.minimize
 
         root_path = test_execution.root_path
-
         if args.project and args.test_or_suite:
 
             if not args.project in utils.get_projects(root_path):
