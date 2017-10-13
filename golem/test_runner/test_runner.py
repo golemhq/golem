@@ -11,7 +11,7 @@ import traceback
 from golem.core import report, utils
 
 
-def run_test(workspace, project, test_name, test_data, browser_name,
+def run_test(workspace, project, test_name, test_data, browser,
              settings, report_directory):
     ''' runs a single test case by name'''
     result = {
@@ -21,7 +21,7 @@ def run_test(workspace, project, test_name, test_data, browser_name,
         'steps': [],
         'test_elapsed_time': None,
         'test_timestamp': None,
-        'browser': browser_name
+        'browser': '',
     }
 
     from golem.core import execution_logger
@@ -49,7 +49,7 @@ def run_test(workspace, project, test_name, test_data, browser_name,
 
     # Print execution info to console
     logger.info('Test execution started: {}'.format(test_name))
-    logger.info('Browser: {}'.format(browser_name))
+    logger.info('Browser: {}'.format(browser['name']))
     if 'env' in test_data:
         if 'name' in test_data['env']:
             logger.info('Environment: {}'.format(test_data['env']['name']))
@@ -67,7 +67,7 @@ def run_test(workspace, project, test_name, test_data, browser_name,
     test_start_time = time.time()
     execution.project = project
     execution.workspace = workspace
-    execution.browser_name = browser_name
+    execution.browser_definition = browser
     execution.settings = settings
     execution.report_directory = report_directory
 
@@ -164,7 +164,7 @@ def run_test(workspace, project, test_name, test_data, browser_name,
     result['steps'] = execution.steps
     result['test_elapsed_time'] = test_elapsed_time
     result['test_timestamp'] = test_timestamp
-    result['browser'] = execution.browser_name
+    result['browser'] = execution.browser_definition['name']
 
     # remove golem.execution from sys.modules to guarantee thread safety
     #sys.modules['golem.execution'] = None

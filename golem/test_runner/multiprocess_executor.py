@@ -15,7 +15,7 @@ def multiprocess_executor(execution_list, is_suite, execution_directory, threads
     print('Executing:')
     for test in execution_list:
         print('{} in {} with the following data: {}'.format(test['test_name'],
-                                                            test['driver'],
+                                                            test['driver']['name'],
                                                             test['data_set']))
     start_time = time.time()
 

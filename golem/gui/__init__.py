@@ -202,7 +202,7 @@ def suite_view(project, suite):
 def global_settings():
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
-    global_settings = settings_manager.get_global_settings_as_string()
+    global_settings = settings_manager.get_global_settings_as_string(root_path)
     return render_template('settings.html', project=None,
                            global_settings=global_settings, settings=None)
 
@@ -212,8 +212,8 @@ def global_settings():
 def project_settings(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
-    global_settings = settings_manager.get_global_settings_as_string()
-    project_settings = settings_manager.get_project_settings_as_string(project)
+    global_settings = settings_manager.get_global_settings_as_string(root_path)
+    project_settings = settings_manager.get_project_settings_as_string(root_path, project)
     return render_template('settings.html', project=project,
                            global_settings=global_settings, settings=project_settings)
 
@@ -223,7 +223,6 @@ def project_settings(project):
 def environments_view(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
-    #global_settings = settings_manager.get_global_settings_as_string()
     environment_data = environment_manager.get_environments_as_string(project)
     return render_template('environments.html', project=project,
                            environment_data=environment_data)
@@ -681,7 +680,11 @@ def unlock_file():
 
 @app.route("/get_supported_browsers/", methods=['POST'])
 def get_supported_browsers():
-    return json.dumps(gui_utils.get_supported_browsers_suggestions())
+    project = request.form['project']
+    settings = settings_manager.get_project_settings(root_path, project)
+    remote_browsers = settings_manager.get_remote_browsers(settings)
+    default_browsers = gui_utils.get_supported_browsers_suggestions()
+    return json.dumps(remote_browsers + default_browsers)
 
 
 @app.route("/get_environments/", methods=['POST'])

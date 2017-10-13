@@ -217,9 +217,12 @@ def get_browser():
     driver = execution.browser
     if not driver:
         driver = None
-        driver_name = execution.browser_name
+        browser_definition = execution.browser_definition
         settings = execution.settings
-        if driver_name == 'firefox':
+        if browser_definition['remote'] is True:
+            driver = webdriver.Remote(command_executor=settings['remote_url'],
+                                      desired_capabilities=browser_definition['capabilities'])
+        elif browser_definition['name'] == 'firefox':
             if settings['geckodriver_path']:
                 try:
                     driver = webdriver.Firefox(executable_path=settings['geckodriver_path'])
@@ -231,7 +234,7 @@ def get_browser():
                     raise Exception(msg) from None
             else:
                 raise Exception('geckodriver_path setting is not defined')
-        elif driver_name == 'chrome':
+        elif browser_definition['name'] == 'chrome':
             if settings['chromedriver_path']:
                 try:
                     driver = webdriver.Chrome(executable_path=settings['chromedriver_path'])
@@ -243,7 +246,7 @@ def get_browser():
                     raise Exception(msg) from None
             else:
                 raise Exception('chromedriver_path setting is not defined')
-        elif driver_name == 'chrome-headless':
+        elif browser_definition['name'] == 'chrome-headless':
             if settings['chromedriver_path']:
                 try:
                     options = webdriver.ChromeOptions()
@@ -259,7 +262,7 @@ def get_browser():
                     raise Exception(msg) from None
             else:
                 raise Exception('chromedriver_path setting is not defined')
-        elif driver_selected == 'ie':
+        elif browser_definition['name'] == 'ie':
             if settings['iedriver_path']:
                 try:
                     driver = webdriver.Ie(executable_path=settings['iedriver_path'])
@@ -271,22 +274,10 @@ def get_browser():
                     raise Exception(msg) from None
             else:
                 raise Exception('iedriver_path setting is not defined')
-        elif driver_name == 'ie-remote':
+        elif browser_definition['name'] == 'ie-remote':
             driver = webdriver.Remote(command_executor=settings['remote_url'],
                                       desired_capabilities=DesiredCapabilities.IE)
-        # if driver_selected == 'phantomjs':
-        #     if os.name == 'nt':
-        #         executable_path = os.path.join(
-        #                                     golem.__path__[0],
-        #                                     'lib',
-        #                                     'phantom',
-        #                                     'phantomjs.exe')
-        #         driver = webdriver.PhantomJS(
-        #                             executable_path=executable_path)
-        #     else:
-        #         print('not implemented yet')
-        #         sys.exit()
-        elif driver_name == 'chrome-remote-headless':
+        elif browser_definition['name'] == 'chrome-remote-headless':
             options = webdriver.ChromeOptions()
             options.add_argument('headless')
             #os.environ["webdriver.chrome.driver"] = settings['chromedriver_path']
@@ -296,14 +287,15 @@ def get_browser():
             driver = webdriver.Chrome(command_executor=settings['remote_url'],
                                       desired_capabilities=desired_capabilities,
                                       executable_path=settings['chromedriver_path'])
-        elif driver_name == 'chrome-remote':
+        elif browser_definition['name'] == 'chrome-remote':
+            print('URL',settings['remote_url'])
             driver = webdriver.Remote(command_executor=settings['remote_url'],
                                       desired_capabilities=DesiredCapabilities.CHROME)
-        elif driver_name == 'firefox-remote':
+        elif browser_definition['name'] == 'firefox-remote':
             driver = webdriver.Remote(command_executor=settings['remote_url'],
                                       desired_capabilities=DesiredCapabilities.FIREFOX)
         else:
-            raise Exception('Error: {} is not a valid driver'.format(driver_name))
+            raise Exception('Error: {} is not a valid driver'.format(browser_definition['name']))
 
         driver.maximize_window()
         

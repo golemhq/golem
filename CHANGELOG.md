@@ -9,6 +9,11 @@
 - 'set_window_size' action to golem.actions (thanks to danielmaddern)
 - IE driver support
 - 'screenshot_on_end' setting
+- The user can define remote browsers
+
+### Changed
+- New layout design
+
 
 ## [0.2.1] - 2017-10-06
 ### Added

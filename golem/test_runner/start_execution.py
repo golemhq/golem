@@ -2,8 +2,13 @@
 """
 import sys
 
-from golem.core import test_execution, utils, report, environment_manager
-from golem.test_runner.multiprocess_executor import multiprocess_executor, run_test
+from golem.core import (test_execution,
+                        utils,
+                        report,
+                        environment_manager,
+                        settings_manager)
+from golem.test_runner.multiprocess_executor import multiprocess_executor
+from golem.gui import gui_utils
 
 
 def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite=None):
@@ -50,7 +55,37 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
     drivers = utils.choose_driver_by_precedence(cli_drivers=test_execution.cli_drivers,
                                                 suite_drivers=suite_drivers,
                                                 settings_default_driver=settings_default_driver)
+    
+    # check if drivers are remote
+    remote_browsers = settings_manager.get_remote_browsers(test_execution.settings)
+    default_browsers = gui_utils.get_supported_browsers_suggestions()
+    drivers_temp = []
+    for driver in drivers:
+        if driver in remote_browsers:
+            remote_browser = test_execution.settings['remote_browsers'][driver]
+            _ = {
+                'name': remote_browser['browserName'],
+                'remote': True,
+                'capabilities': remote_browser
+            }
+            drivers_temp.append(_)
+        elif driver in default_browsers:
+            _ = {
+                'name': driver,
+                'remote': False,
+                'capabilities': None
+            }
+            drivers_temp.append(_)
+        else:
+            msg = ['Error: the browser {} is not defined\n'.format(driver),
+                   'available options are:\n',
+                   '\n'.join(default_browsers),
+                   '\n'.join(remote_browsers)]
+            #sys.exit('Error: the browser {} is not defined'.format(driver))
+            sys.exit(''.join(msg))
 
+    drivers = drivers_temp
+    
     # timestamp is passed when the test is executed from the GUI,
     # otherwise, a timestamp should be generated at this point
     # the timestamp is used to identify this unique execution of the test or suite

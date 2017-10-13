@@ -38,13 +38,13 @@ $(document).ready(function() {
 
     $.ajax({
         url: "/get_supported_browsers/",
-        data: {},
+        data: {
+            project: project
+        },
         dataType: 'json',
         type: 'POST',
         success: function(browserSuggestions) {
             startBrowsersAutocomplete(browserSuggestions);
-        },
-        error: function() {
         }
     });
 
@@ -57,8 +57,6 @@ $(document).ready(function() {
         type: 'POST',
         success: function(environments) {
             startEnvironmentsAutocomplete(environments);
-        },
-        error: function() {
         }
     });
 

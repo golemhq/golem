@@ -235,16 +235,6 @@ def get_global_actions():
 
 
 def get_supported_browsers_suggestions():
-    # supported_browsers = {
-    #     'suggestions': [
-    #         {'value': 'chrome', 'data': 'chrome'},
-    #         {'value': 'chrome-remote', 'data': 'chrome-remote'},
-    #         {'value': 'chrome-headless', 'data': 'chrome-headless'},
-    #         {'value': 'chrome-remote-headless', 'data': 'chrome-remote-headless'},
-    #         {'value': 'firefox', 'data': 'firefox'},
-    #         {'value': 'firefox-remote', 'data': 'firefox-remote'}
-    #     ]
-    # }
     supported_browsers = [
         'chrome',
         'chrome-remote',

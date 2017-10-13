@@ -1,5 +1,6 @@
 import json
 import os
+import traceback
 
 
 def settings_file_content():
@@ -51,26 +52,25 @@ def settings_file_content():
     return '\n'.join(settings_content)
 
 
-def read_json_and_remove_comments(json_path):
-    """What if I want to store comments in a JSON file?
-    The parser is going to throw errors.
-    So pass a JSON file path to tthis function and it will read it, remove the comments
-    and then parse it.
-    Comment lines starting with '//' are ignored"""
-    with open(json_path, 'r') as json_file:
+def read_json_with_comments(json_path):
+    """Receives a list of lines of a json file with '//' comments
+    Remove the commented lines and return a json loads of the result
+    """
+    file_lines = []
+    with open(json_path) as json_file:
         file_lines = json_file.readlines()
-        lines_without_comments = []
-        for line in file_lines:
-            if line.strip()[0:2] != '//' and len(line.strip()) > 0:
-                lines_without_comments.append(line)
-        file_content_without_comments = ''.join(lines_without_comments)
-        json_data = {}
-        try:
-            json_data = json.loads(file_content_without_comments)
-        except Exception:
-            print('There was an error reading file {}'.format(json_path))
-
-        return json_data
+    lines_without_comments = []
+    for line in file_lines:
+        if line.strip()[0:2] != '//' and len(line.strip()) > 0:
+            lines_without_comments.append(line)
+    file_content_without_comments = ''.join(lines_without_comments)
+    json_data = {}
+    try:
+        json_data = json.loads(file_content_without_comments)
+    except Exception:
+        print('There was an error reading file {}'.format(json_path))
+        print(traceback.format_exc())
+    return json_data
 
 
 def reduced_settings_file_content():
@@ -132,6 +132,11 @@ def assign_settings_default_values(settings):
     elif not settings['remote_url']:
         settings['remote_url'] = None
 
+    if not 'remote_browsers' in settings:
+        settings['remote_browsers'] = {}
+    elif not settings['remote_browsers']:
+        settings['remote_browsers'] = {}
+
     if not 'console_log_level' in settings:
         settings['console_log_level'] = 'INFO'
     elif not settings['console_log_level']:
@@ -150,43 +155,51 @@ def assign_settings_default_values(settings):
     return settings
 
 
-def get_global_settings():
-    '''get global settings from root folder'''
-    settings = read_json_and_remove_comments('settings.json')
-    settings = assign_settings_default_values(settings)
+def get_global_settings(workspace):
+    '''get global settings from workspace folder'''
+    settings_path = os.path.join(workspace, 'settings.json')
+    settings = {}
+    if os.path.exists(settings_path):
+        settings = read_json_with_comments(settings_path)
+        settings = assign_settings_default_values(settings)
+    else:
+        print('Warning: settings file is not present')
     return settings
 
 
-def get_global_settings_as_string():
-    settings_path = os.path.join('settings.json')
+def get_global_settings_as_string(workspace):
+    settings_path = os.path.join(workspace, 'settings.json')
     settings = ''
-    if os.path.isfile(settings_path):
+    if os.path.exists(settings_path):
         with open(settings_path) as settings_file:
             settings = settings_file.read()
     return settings
 
 
-def get_project_settings_as_string(project):
-    project_settings_path = os.path.join('projects', project, 'settings.json')
+def get_project_settings_as_string(workspace, project):
+    project_settings_path = os.path.join(workspace, 'projects',
+                                         project, 'settings.json')
     settings = ''
-    if os.path.isfile(project_settings_path):
+    if os.path.exists(project_settings_path):
         with open(project_settings_path) as settings_file:
             settings = settings_file.read()
     return settings
 
 
-def get_project_settings(project, global_settings):
+def get_project_settings(workspace, project):
     '''get project level settings from selected project folder,
     this overrides any global settings'''
-    project_settings_path = os.path.join('projects', project, 'settings.json')
+    global_settings = get_global_settings(workspace)
+    project_settings_path = os.path.join(workspace, 'projects',
+                                         project, 'settings.json')
     project_settings = {}
-    if os.path.isfile(project_settings_path):
-        project_settings = read_json_and_remove_comments(project_settings_path)
+    if os.path.exists(project_settings_path):
+        project_settings = read_json_with_comments(project_settings_path)
+        project_settings = assign_settings_default_values(project_settings)
     # merge and override global settings with project settings
     for setting in project_settings:
         if project_settings[setting]:
             global_settings[setting] = project_settings[setting]
-
     return global_settings
 
 
@@ -200,3 +213,8 @@ def save_settings(project, project_settings, global_settings):
         with open(project_path, 'w') as project_settings_file:
             project_settings_file.write(project_settings)
     return
+
+
+def get_remote_browsers(settings):
+    remote_browsers = list(settings['remote_browsers'].keys())
+    return remote_browsers

@@ -135,7 +135,10 @@ Here is a repo with example working projects usign Golem: [https://github.com/lu
 Roadmap
 --------------------------------------
 
-Integrate with Appium for mobile testing
+- Integrate with Appium for mobile testing
+- Better integration with Sauce Labs
+- Improve API test Golem actions
+- Video recording
 
 
 License

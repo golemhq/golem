@@ -62,6 +62,7 @@ def generate_report(report_directory, test_case_name, test_data, result):
     if 'env' in test_data:
         if 'name' in test_data.env:
             env_name = test_data.env.name
+
     browser = result['browser']
     output_browser = result['browser']
     if browser == 'chrome-remote':

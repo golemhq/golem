@@ -43,6 +43,31 @@ Path to the gecko driver executable. By default it points to the *drivers* folde
 
 the URL to use when connecting to a remote webdriver, for example, when using selenium grid. Default is 'http://localhost:4444/wd/hub'
 
+- *remote_browsers*
+
+Define a list of remote browsers with it's capabilities, required to run tests with Selenium Grid or another remote device provider such as SauceLabs.
+The minimum capabilities required are 'browserName', 'version' and 'platform', read [this](https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities) for more info.
+
+Example: settings.json
+```
+{
+
+"remote_browsers": {
+        "chrome_60_mac": {
+            "browserName": "chrome",
+            "version": "60.0",
+            "platform": "macOS 10.12"
+        },
+        "firefox_56_mac": {
+            "browserName": "firefox",
+            "version": "56.0",
+            "platform": "Windows 10"
+        }
+    }
+
+}
+```
+
 - *wait_hook*
 
 Custom wait method to use for every action, that can be specific to each application. It must be defined inside extend.py

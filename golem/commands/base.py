@@ -49,19 +49,13 @@ class RunCommand(BaseCommand):
                             metavar='amount of threads for parallel execution',
                             help="amount of threads for parallel execution")
         parser.add_argument('-b', '--browsers', action='store',
-                            nargs='*', choices=browser_choices,
+                            nargs='*', help="Which browsers to use",
                             type=str, metavar='Browser(s)',
-                            default=[], help="Web Drivers")
+                            default=[])
         parser.add_argument('-e', '--environments', action='store',
                             nargs='*',type=str,
                             metavar='Environment(s)',
                             default=[], help="Environments")
-        # parser.add_argument('--debug', action='store_true',
-        #                     default=False,
-        #                     help="Run test in debug mode")
-        # parser.add_argument('--minimize', action='store_true',
-        #                     default=False,
-        #                     help="Minimize driver window")
         parser.add_argument('--timestamp', action='store', nargs='?', type=str,
                             metavar='Timestamp', help="Timestamp")
         parser.add_argument('-i', '--interactive', action='store_true', default=False,
@@ -73,7 +67,6 @@ class RunCommand(BaseCommand):
         test_execution.cli_environments = args.environments
         test_execution.timestamp = args.timestamp
         test_execution.interactive = args.interactive
-        # test_execution.minimize = args.minimize
 
         root_path = test_execution.root_path
         if args.project and args.test_or_suite:
@@ -89,8 +82,7 @@ class RunCommand(BaseCommand):
                 raise CommandException('\n'.join(msg))
             else:
                 test_execution.project = args.project
-                test_execution.settings = settings_manager.get_project_settings(args.project,
-                                                                                test_execution.settings)
+                test_execution.settings = settings_manager.get_project_settings(root_path, args.project)
                 if utils.test_suite_exists(root_path, test_execution.project,
                                            args.test_or_suite):
                     test_execution.suite = args.test_or_suite
