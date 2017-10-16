@@ -65,6 +65,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
             remote_browser = test_execution.settings['remote_browsers'][driver]
             _ = {
                 'name': remote_browser['browserName'],
+                'full_name': driver,
                 'remote': True,
                 'capabilities': remote_browser
             }
@@ -72,6 +73,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
         elif driver in default_browsers:
             _ = {
                 'name': driver,
+                'full_name': '',
                 'remote': False,
                 'capabilities': None
             }
@@ -85,7 +87,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
             sys.exit(''.join(msg))
 
     drivers = drivers_temp
-    
+
     # timestamp is passed when the test is executed from the GUI,
     # otherwise, a timestamp should be generated at this point
     # the timestamp is used to identify this unique execution of the test or suite

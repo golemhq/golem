@@ -3,6 +3,8 @@
 
 ## [Unreleased]
 
+## [0.2.2] - 2017-10-16
+
 ### Added
 - Environments support
 - 'refresh' action to golem.actions

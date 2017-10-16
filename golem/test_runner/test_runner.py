@@ -165,6 +165,7 @@ def run_test(workspace, project, test_name, test_data, browser,
     result['test_elapsed_time'] = test_elapsed_time
     result['test_timestamp'] = test_timestamp
     result['browser'] = execution.browser_definition['name']
+    result['browser_full_name'] = execution.browser_definition['full_name']
 
     # remove golem.execution from sys.modules to guarantee thread safety
     #sys.modules['golem.execution'] = None

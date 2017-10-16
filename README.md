@@ -45,12 +45,7 @@ Golem is a complete test automation tool and framework for end-to-end testing. I
 Screen Captures
 --------------------------------------
 
-**Project Dashboard**
-<p align="center">
-    <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/project-dashboard.png" />
-</p>
-
-**Test Editor**
+**Test Builder**
 <p align="center">
     <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/test-case.png" />
 </p>
@@ -67,9 +62,16 @@ Screen Captures
     <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/report-dashboard.png" />
 </p>
 
+
 **Execution Report**
 <p align="center">
     <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/execution-report.png" />
+</p>
+
+
+**Test Execution Detail**
+<p align="center">
+    <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/test-execution-detail.png" />
 </p>
 
 

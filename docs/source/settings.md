@@ -58,7 +58,7 @@ Example: settings.json
             "version": "60.0",
             "platform": "macOS 10.12"
         },
-        "firefox_56_mac": {
+        "firefox_56_windows": {
             "browserName": "firefox",
             "version": "56.0",
             "platform": "Windows 10"

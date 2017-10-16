@@ -65,13 +65,15 @@ def generate_report(report_directory, test_case_name, test_data, result):
 
     browser = result['browser']
     output_browser = result['browser']
-    if browser == 'chrome-remote':
+    if result['browser_full_name']:
+        output_browser = '{} - {}'.format(result['browser'], result['browser_full_name'])
+    elif browser == 'chrome-remote':
         output_browser = 'chrome (remote)'
-    if browser == 'chrome-headless':
+    elif browser == 'chrome-headless':
         output_browser = 'chrome (headless)'
-    if browser == 'chrome-remote-headless':
+    elif browser == 'chrome-remote-headless':
         output_browser = 'chrome (remote, headless)'
-    if browser == 'firefox-remote':
+    elif browser == 'firefox-remote':
         output_browser = 'firefox (remote)'
 
     report = {
