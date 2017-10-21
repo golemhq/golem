@@ -27,6 +27,11 @@ Perform a mouse click
 Closes the webdriver browser
 
 
+##### get(url)
+
+Navigate to a URL, same as *navigate(url)*
+
+
 ##### mouse_hover(element)
 
 Perform a mouse hover on the element
@@ -219,16 +224,22 @@ Store a value in the given key for later use. Th_e value is going to be availabl
 Pause execution for the given amount of seconds
 
 
-### API Actions
+### API Actions (Alpha)
 
-##### get(url, headers, data)
+##### http_get(url, headers, params)
 
-Perform a get HTTP request to the URL, with the given headers and data. The response is stored in 'data.last_response'
+Perform an HTTP GET request to the URL, with the given headers and params. Headers and params must be Python dicts and are optional. The response is stored in 'data.last_response'
+
+Example:
+```
+http_get('http://google.com/')
+assert_equals(data.last_response.status_code, 200)
+```
 
 
-##### post(url, headers, data)
+##### http_post(url, headers, data)
 
-Perform a post HTTP request to the URL, with the given headers and data. The response is stored in 'data.last_response'
+Perform an HTTP POST request to the URL, with the given headers and data. Headers and params must be Python dicts and are optional. The response is stored in 'data.last_response'
 
 
 

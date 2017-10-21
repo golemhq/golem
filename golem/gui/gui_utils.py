@@ -104,19 +104,23 @@ def get_global_actions():
         },
         {
             'name': 'get',
+            'parameters': [{'name': 'url', 'type': 'value'}]
+        },
+        {
+            'name': 'http_get',
             'parameters': [{'name': 'url', 'type': 'value'},
                            {'name': 'headers', 'type': 'multiline-value'},
                            {'name': 'params', 'type': 'value'}]
         },
         {
-            'name': 'navigate',
-            'parameters': [{'name': 'url', 'type': 'value'}]
-        },
-        {
-            'name': 'post',
+            'name': 'http_post',
             'parameters': [{'name': 'url', 'type': 'value'},
                            {'name': 'headers', 'type': 'value'},
                            {'name': 'data', 'type': 'value'}]
+        },
+        {
+            'name': 'navigate',
+            'parameters': [{'name': 'url', 'type': 'value'}]
         },
         {
             'name': 'press key',

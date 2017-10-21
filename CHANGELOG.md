@@ -3,8 +3,12 @@
 
 ## [Unreleased]
 
+### Added
+- get(url) action for consistency with Selenium API
+
 ### Changed
-- It is required to surround strings with quotes
+- It is required to surround strings with quotes in test builder
+- Changed actions: get -> http_get and post -> http_post
 
 ## [0.2.2] - 2017-10-16
 

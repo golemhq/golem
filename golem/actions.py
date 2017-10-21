@@ -130,6 +130,10 @@ def debug():
         pass
 
 
+def get(url):
+    navigate(url)
+
+
 def mouse_hover(element):
     _run_wait_hook()
     driver = get_browser()
@@ -510,7 +514,7 @@ def wait_for_element_visible(element, timeout=20):
             timed_out = True
 
 
-def get(url, headers={}, params={}):
+def http_get(url, headers={}, params={}):
     step_message = 'Make GET request to {}'.format(url)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
@@ -518,7 +522,7 @@ def get(url, headers={}, params={}):
     store('last_response', response)
 
 
-def post(url, headers={}, data={}):
+def http_post(url, headers={}, data={}):
     step_message = 'Make POST request to {}'.format(url)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
