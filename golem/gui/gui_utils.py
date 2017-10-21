@@ -128,7 +128,7 @@ def get_global_actions():
             'parameters': [{'name': 'args', 'type': 'value'}]
         },
         {
-            'name': 'refresh_page',
+            'name': 'refresh page',
             'parameters': []
         },
         {

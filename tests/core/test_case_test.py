@@ -59,29 +59,69 @@ class Test__parse_step:
             assert step['expected'] == parsed
 
 
-class Test_format_parameters:
+class Test_format_parameter:
     possible_inputs = [
         {
-            'input': {'action': 'send keys', 'parameters': ["('id', 'searchInput')", 'automation']},
-            'expected': '(\'id\', \'searchInput\'), \'automation\''
+            'param': 'test',
+            'action': 'click',
+            'expected': 'test'
         },
         {
-            'input': {'action': 'send keys', 'parameters': ["(\'id\', \"searchInput[attr=\'value\']\")"]},
-            'expected': '(\'id\', \"searchInput[attr=\'value\']\")'
+            'param': '123',
+            'action': 'click',
+            'expected': 123
         },
+        {
+            'param': 'test test',
+            'action': 'click',
+            'expected': 'test test'
+        },
+        # {
+        #     'input': {'action': 'click', 'parameters': ["('id', 'searchInput')"]},
+        #     'expected': '(\'id\', \'searchInput\')'
+        # },
+        # {
+        #     'input': {'action': 'click', 'parameters': ["('id', 'searchInput', 'some name')"]},
+        #     'expected': '(\'id\', \'searchInput\', \'some name\')'
+        # },
+        # {
+        #     'input': {'action': 'click', 'parameters': ['some string']},
+        #     'expected': 'some string'
+        # },
+        # {
+        #     'input': {'action': 'click', 'parameters': ["some string"]},
+        #     'expected': 'some string'
+        # },
+        # {
+        #     'input': {'action': 'click', 'parameters': ['string one', 'string two']},
+        #     'expected': 'string one, string two'
+        # },
+        # {
+        #     'input': {'action': 'click', 'parameters': ["string 'inside' string"]},
+        #     'expected': 'string \'inside\' string'
+        # },
+        # {
+        #     'input': {'action': 'click', 'parameters': ['123']},
+        #     'expected': 123
+        # },
+        # {
+        #     'input': {'action': 'send keys', 'parameters': ["('id', 'searchInput')", 'automation']},
+        #     'expected': '(\'id\', \'searchInput\'), \'automation\''
+        # },
+        # {
+        #     'input': {'action': 'send keys', 'parameters': ["(\'id\', \"searchInput[attr=\'value\']\")"]},
+        #     'expected': '(\'id\', \"searchInput[attr=\'value\']\")'
+        # },
         # {
         #     'input': {'action': 'send keys', 'parameters': ['\{\'a\': \'b\', \'c\': \'d\'\}']},
         #     'expected': '\{\'a\': \'b\', \'c\': \'d\'\}'
         # }
     ]
 
-
-    
-
-
     def test_format_parameters(self):
+        param_formatter = test_case.Param_formatter('', '', '')
         for step in self.possible_inputs:
-            parsed = test_case.format_parameters(step['input'], '', '', '')
+            parsed = param_formatter.format_param(step['param'], step['action'])
             print(parsed)
             assert step['expected'] == parsed
 
