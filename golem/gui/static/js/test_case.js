@@ -59,7 +59,7 @@ var testCase = new function(){
                     </button> \
                 </span> \
                 <span class='input-group-btn'> \
-                    <button class='btn btn-default' type='button' onclick='deletePageObject(this)'> \
+                    <button class='btn btn-default' type='button' onclick='testCase.deletePageObject(this)'> \
                         <span class='glyphicon glyphicon-remove' aria-hidden='true'></span> \
                     </button> \
                 </span> \
@@ -528,11 +528,7 @@ function saveTestCase(config){
         type: 'POST',
         success: function(data) {
             unsavedChanges = false;
-            toastr.options = {
-                "positionClass": "toast-top-center",
-                "timeOut": "3000",
-                "hideDuration": "100"}
-            toastr.success("Test "+testCaseName+" saved")
+            utils.toast('success', "Test "+testCaseName+" saved", 3000);
             if(runAfter){
                 //testRunner.runTestCase();
                 testRunner.askForEnvBeforeRun();
@@ -692,7 +688,9 @@ function getThisStep(elem){
     if($(elem).find('.step-first-input').val().length > 0){
         thisStep.action = $(elem).find('.step-first-input').val();
         $(elem).find('.parameter-input').each(function(){
-            thisStep.parameters.push($(this).val());
+            if($(this).val().length > 0){
+                thisStep.parameters.push($(this).val());
+            }
         });
     }
     return thisStep

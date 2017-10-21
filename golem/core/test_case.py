@@ -103,7 +103,7 @@ def get_test_case_content(project, test_case_name):
 
     test_module = importlib.import_module('projects.{0}.tests.{1}'
                                           .format(project, test_case_name))
-    
+    print(test_module)
     # get description
     description = getattr(test_module, 'description', '')
     
@@ -146,6 +146,7 @@ def get_test_case_content(project, test_case_name):
         test_contents['content'] = inspect.getsource(test_module)
     except:
         pass
+    print('CONTENTS', test_contents)
     return test_contents
 
 

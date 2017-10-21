@@ -3,6 +3,9 @@
 
 ## [Unreleased]
 
+### Changed
+- It is required to surround strings with quotes
+
 ## [0.2.2] - 2017-10-16
 
 ### Added

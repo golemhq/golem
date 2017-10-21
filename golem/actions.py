@@ -518,12 +518,11 @@ def get(url, headers={}, params={}):
     store('last_response', response)
 
 
-def post(url, headers={}, params={}):
+def post(url, headers={}, data={}):
     step_message = 'Make POST request to {}'.format(url)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
-    print(params)
-    response = requests.post(url, headers=headers, data=params)
+    response = requests.post(url, headers=headers, data=data)
     print(response)
     store('last_response', response)
 

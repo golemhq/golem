@@ -13,19 +13,19 @@ class Test__parse_step:
         },
         {
             'src': 'action(\'value\')',
-            'expected': {'method_name': 'action', 'parameters': ['value']}
+            'expected': {'method_name': 'action', 'parameters': ["'value'"]}
         },
         {
             'src': 'action(\"double_quotes\")',
-            'expected': {'method_name': 'action', 'parameters': ['double_quotes']}
+            'expected': {'method_name': 'action', 'parameters': ['"double_quotes"']}
         },
         {
             'src': 'action(\'spaces spaces spaces\')',
-            'expected': {'method_name': 'action', 'parameters': ['spaces spaces spaces']}
+            'expected': {'method_name': 'action', 'parameters': ["'spaces spaces spaces'"]}
         },
         {
-            'src': 'action(\'one\', \'two\', \'three\')',
-            'expected': {'method_name': 'action', 'parameters': ['one', 'two', 'three']}
+        'src': 'action(\'one\', \'two\', \'three\')',
+            'expected': {'method_name': 'action', 'parameters': ["'one'", "'two'", "'three'"]}
         },
         {
             'src': 'action((\'this\', \'is a\', \'tuple\'))',
@@ -33,7 +33,7 @@ class Test__parse_step:
         },
         {
             'src': 'action((\'a\', \'b\', \'c\'), \'another\')',
-            'expected': {'method_name': 'action', 'parameters': ['(\'a\', \'b\', \'c\')', 'another']}
+            'expected': {'method_name': 'action', 'parameters': ['(\'a\', \'b\', \'c\')', "'another'"]}
         },
         {
             'src': 'action((\'two\', \'tuples\'), (\'a\', \'b\'))',
@@ -45,7 +45,7 @@ class Test__parse_step:
         },
         {
             'src': 'action(\'string, with, commas\')',
-            'expected': {'method_name': 'action', 'parameters': ['string, with, commas']}
+            'expected': {'method_name': 'action', 'parameters': ["'string, with, commas'"]}
         },
         {
             'src': 'some_page.some_action()',
@@ -59,70 +59,29 @@ class Test__parse_step:
             assert step['expected'] == parsed
 
 
-class Test_format_parameter:
-    possible_inputs = [
-        {
-            'param': 'test',
-            'action': 'click',
-            'expected': 'test'
-        },
-        {
-            'param': '123',
-            'action': 'click',
-            'expected': 123
-        },
-        {
-            'param': 'test test',
-            'action': 'click',
-            'expected': 'test test'
-        },
-        # {
-        #     'input': {'action': 'click', 'parameters': ["('id', 'searchInput')"]},
-        #     'expected': '(\'id\', \'searchInput\')'
-        # },
-        # {
-        #     'input': {'action': 'click', 'parameters': ["('id', 'searchInput', 'some name')"]},
-        #     'expected': '(\'id\', \'searchInput\', \'some name\')'
-        # },
-        # {
-        #     'input': {'action': 'click', 'parameters': ['some string']},
-        #     'expected': 'some string'
-        # },
-        # {
-        #     'input': {'action': 'click', 'parameters': ["some string"]},
-        #     'expected': 'some string'
-        # },
-        # {
-        #     'input': {'action': 'click', 'parameters': ['string one', 'string two']},
-        #     'expected': 'string one, string two'
-        # },
-        # {
-        #     'input': {'action': 'click', 'parameters': ["string 'inside' string"]},
-        #     'expected': 'string \'inside\' string'
-        # },
-        # {
-        #     'input': {'action': 'click', 'parameters': ['123']},
-        #     'expected': 123
-        # },
-        # {
-        #     'input': {'action': 'send keys', 'parameters': ["('id', 'searchInput')", 'automation']},
-        #     'expected': '(\'id\', \'searchInput\'), \'automation\''
-        # },
-        # {
-        #     'input': {'action': 'send keys', 'parameters': ["(\'id\', \"searchInput[attr=\'value\']\")"]},
-        #     'expected': '(\'id\', \"searchInput[attr=\'value\']\")'
-        # },
-        # {
-        #     'input': {'action': 'send keys', 'parameters': ['\{\'a\': \'b\', \'c\': \'d\'\}']},
-        #     'expected': '\{\'a\': \'b\', \'c\': \'d\'\}'
-        # }
-    ]
+# class Test_format_parameter:
+#     possible_inputs = [
+#         {
+#             'param': 'test',
+#             'expected': 'test'
+#         },
+#         {
+#             'param': '123',
+#             'action': 'click',
+#             'expected': 123
+#         },
+#         {
+#             'param': 'test test',
+#             'action': 'click',
+#             'expected': 'test test'
+#         }
+#     ]
 
-    def test_format_parameters(self):
-        param_formatter = test_case.Param_formatter('', '', '')
-        for step in self.possible_inputs:
-            parsed = param_formatter.format_param(step['param'], step['action'])
-            print(parsed)
-            assert step['expected'] == parsed
+#     def test_format_parameters(self):
+#         param_formatter = test_case.Param_formatter('', '', '')
+#         for step in self.possible_inputs:
+#             parsed = param_formatter.format_param(step['param'], step['action'])
+#             print(parsed)
+#             assert step['expected'] == parsed
 
 

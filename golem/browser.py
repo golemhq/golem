@@ -288,7 +288,6 @@ def get_browser():
                                       desired_capabilities=desired_capabilities,
                                       executable_path=settings['chromedriver_path'])
         elif browser_definition['name'] == 'chrome-remote':
-            print('URL',settings['remote_url'])
             driver = webdriver.Remote(command_executor=settings['remote_url'],
                                       desired_capabilities=DesiredCapabilities.CHROME)
         elif browser_definition['name'] == 'firefox-remote':
@@ -301,7 +300,7 @@ def get_browser():
         
     execution.browser = driver
 
-    # bind _find method to driver instance
+    # bind _find and _find_all methods to driver instance
     driver.find = types.MethodType(_find, driver)
     driver.find_all = types.MethodType(_find_all, driver)
 

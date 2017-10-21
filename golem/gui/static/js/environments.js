@@ -31,19 +31,11 @@ function saveEnvironments(){
         type: 'POST',
         success: function(data) {
             if(data.result === 'ok'){
-                toastr.options = {
-                    "positionClass": "toast-top-center",
-                    "timeOut": "2000",
-                    "hideDuration": "100"}
-                toastr.success("Settings saved");
+                utils.toast('success', "Settings saved", 2000);
                 environmentsEditor.markClean();
             }
             else{
-                toastr.options = {
-                    "positionClass": "toast-top-center",
-                    "timeOut": "3000",
-                    "hideDuration": "100"}
-                toastr.error(data);
+                utils.toast('error', data, 2000);
             }
         },
         error: function() {

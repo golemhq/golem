@@ -83,7 +83,6 @@ def login():
     else:
         args_next = request.args.get('next')
         next_url = args_next if args_next else '/'
-        print('NEXT URL', next_url)
         return render_template('login.html', next_url=next_url, errors=[])
 
 
@@ -310,7 +309,6 @@ def screenshot_file(project, suite, execution, test_case, test_set, scr):
 def screenshot_file2(project, test, execution, test_set, scr):
     screenshot_path = os.path.join(root_path, 'projects', project, 'reports',
                                    'single_tests', test, execution, test_set)
-    print(screenshot_path)
     return send_from_directory(screenshot_path, '{}.png'.format(scr))
 
 
@@ -385,7 +383,6 @@ def get_selected_page_object_elements():
         project = request.form['project']
         page_name = request.form['pageObject']
         po_elements = page_object.get_page_object_content(project, page_name)
-        print(po_elements)
         return json.dumps(po_elements)
 
 
@@ -463,8 +460,6 @@ def save_test_case_code():
         test_case_name = request.json['testCaseName']
         test_data = request.json['testData']
         content = request.json['content']
-
-        print(test_data)
 
         data.save_test_data(root_path, projectname, test_case_name, test_data)
         test_case.save_test_case_code(root_path, projectname, test_case_name, content)
