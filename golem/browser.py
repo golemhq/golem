@@ -5,6 +5,7 @@ import traceback
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException
 
 from golem.core.exceptions import IncorrectSelectorType, ElementNotFound
@@ -237,7 +238,9 @@ def get_browser():
         elif browser_definition['name'] == 'chrome':
             if settings['chromedriver_path']:
                 try:
-                    driver = webdriver.Chrome(executable_path=settings['chromedriver_path'])
+                    chrome_options = Options()
+                    chrome_options.add_argument('--start-maximized')
+                    driver = webdriver.Chrome(executable_path=settings['chromedriver_path'], chrome_options=chrome_options)
                 except:
                     msg = ('Could not start chrome driver using the path \'{}\', '
                            'check the settings file.'.format(settings['chromedriver_path']))
