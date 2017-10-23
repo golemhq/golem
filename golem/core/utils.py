@@ -6,6 +6,7 @@ import json
 import os
 import sys
 import uuid
+import traceback
 
 from datetime import datetime
 
@@ -559,3 +560,15 @@ def choose_driver_by_precedence(cli_drivers=None, suite_drivers=None,
     else:
         chosen_drivers = ['chrome']  # hardcoded default
     return chosen_drivers
+
+
+def load_json_from_file(filepath):
+    json_data = None
+    with open(filepath) as json_file:
+        try:
+            json_data = json.load(json_file)
+        except Exception as e:
+            msg = 'There was an error parsing file {}'.format(filepath)
+            print(traceback.format_exc())
+            raise Exception(msg).with_traceback(e.__traceback__)
+    return json_data
