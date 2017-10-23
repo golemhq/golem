@@ -416,11 +416,10 @@ def wait(seconds):
 #     #     execution.logger.debug('Element {} was not found, continuing...'.format(element)) 
 
 
-def wait_for_element_clickable(element, timeout=20):
-    print('WAIT FOR ELEMENT CLICKABLE')
-    browser = get_browser()
-    element = WebDriverWait(browser, timeout).until(
-        EC.element_to_be_clickable())
+# def wait_for_element_clickable(element, timeout=20):
+#     browser = get_browser()
+#     element = WebDriverWait(browser, timeout).until(
+#         EC.element_to_be_clickable())
 
 
 

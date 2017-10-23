@@ -13,7 +13,9 @@ from golem.gui import gui_utils
 
 def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite=None):
     '''run a test, a suite or a "directory suite"'''
-
+    # suitex = {
+    #     'tests': []
+    # }
     tests = []
     threads = 1
     suite_amount_workers = None
@@ -169,7 +171,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
         else:
             print('Error: to run in debug mode, threads must equal one')
     else:
-        # run list of tests using threading
+        # run list of tests using multiprocessing
         multiprocess_executor(execution_list, is_suite, execution_directory, threads)
 
     if suite:

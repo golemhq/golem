@@ -42,7 +42,7 @@ Perform a mouse hover on the element
 Navigate to a URL
 
 
-#####press_key(element, key)
+##### press_key(element, key)
 
 Press the given keyboard key on the element. Options are:
 

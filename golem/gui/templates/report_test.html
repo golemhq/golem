@@ -11,21 +11,15 @@
 <div class="col-md-12 project-container font-17" id="testDetails" style="padding-left: 30px; padding-right: 30px; padding-bottom: 15px;">
 		<h3 class="no-margin-top">Details</h3>
 		<div class="row">
-			<div class="col-xs-2">Description</div>
-			<div class="col-xs-10">{{test_case_data.description}}</div>
+			<div class="col-md-2 col-xs-3">Description</div>
+			<div class="col-md-10 col-xs-9">{{test_case_data.description}}</div>
 			<div class="clearfix"></div>
 			{% if test_case_data.module %}
-			<div class="col-xs-2">Module</div>
-			<div class="col-xs-10">{{test_case_data.module}}</div>
+			<div class="col-md-2 col-xs-3">Module</div>
+			<div class="col-md-10 col-xs-9">{{test_case_data.module}}</div>
 			{% endif %}
-			{% if test_case_data.sub_modules %}
-				<div class="col-xs-2">Submodules</div>
-				{% for sub in test_case_data.sub_modules %}
-				<div class="col-xs-10">{{sub}}</div>
-				{% endfor %}
-			{% endif %}
-			<div class="col-xs-2">Result</div>
-			<div class="col-xs-10">{{test_case_data.result}} 
+			<div class="col-md-2 col-xs-3">Result</div>
+			<div class="col-md-10 col-xs-9">{{test_case_data.result}} 
 			{%if test_case_data.result == 'pass' %}
 				<span class="passed-green"><span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span></span>
 			{%else%}
@@ -33,29 +27,29 @@
 			{% endif %}
 			</div>
 			{% if test_case_data.url %}
-			<div class="col-xs-2">URL</div>
-			<div class="col-xs-10">{{test_case_data.url}}</div>
+			<div class="col-md-2 col-xs-3">URL</div>
+			<div class="col-md-10 col-xs-9">{{test_case_data.url}}</div>
 			{% endif %}
-			<div class="col-xs-2">Browser</div>
-			<div class="col-xs-10">{{test_case_data.browser}}</div>
+			<div class="col-md-2 col-xs-3">Browser</div>
+			<div class="col-md-10 col-xs-9">{{test_case_data.browser}}</div>
 			<!-- environment -->
 			{% if test_case_data.environment %}
-			<div class="col-xs-2">Environment</div>
-			<div class="col-xs-10">{{test_case_data.environment}}</div>
+			<div class="col-md-2 col-xs-3">Environment</div>
+			<div class="col-md-10 col-xs-9">{{test_case_data.environment}}</div>
 			<div class="clearfix"></div>
 			{% endif %}
-			<div class="col-xs-2">Start Time</div>
-			<div class="col-xs-10">{{test_case_data.start_date_time}}</div>
-			<div class="col-xs-2">Elapsed Time</div>
-			<div class="col-xs-10">{{test_case_data.test_elapsed_time}} seconds</div>
+			<div class="col-md-2 col-xs-3">Start Time</div>
+			<div class="col-md-10 col-xs-9">{{test_case_data.start_date_time}}</div>
+			<div class="col-md-2 col-xs-3">Elapsed Time</div>
+			<div class="col-md-10 col-xs-9">{{test_case_data.test_elapsed_time}} seconds</div>
 			<div class="clearfix"></div>
 			{% if test_case_data.short_error %}
-				<div class="col-xs-2">Error</div>
-				<div class="col-xs-10" style="word-wrap: break-word;">{{test_case_data.short_error}}</div>
+				<div class="col-md-2 col-xs-3">Error</div>
+				<div class="col-md-10 col-xs-9" style="word-wrap: break-word;">{{test_case_data.short_error}}</div>
 			{% endif %}
 			<div class="clearfix"></div>
-			<div class="col-xs-2">Test Data</div>
-			<div class="col-xs-10">{{test_case_data.data}}</div>
+			<div class="col-md-2 col-xs-3">Test Data</div>
+			<div class="col-md-10 col-xs-9">{{test_case_data.data}}</div>
 		</div>
 	</div>
 

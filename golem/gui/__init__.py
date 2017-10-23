@@ -289,7 +289,7 @@ def report_test(project, suite, execution, test_case, test_set):
         return render_template('not_permission.html')
     test_case_data = report_parser.get_test_case_data(root_path, project, test_case,
                                                       suite=suite, execution=execution,
-                                                      test_set=test_set)
+                                                      test_set=test_set, is_single=False)
     return render_template('report_test.html', project=project, suite=suite,
                            execution=execution, test_case=test_case, test_set=test_set,
                            test_case_data=test_case_data)

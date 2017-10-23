@@ -339,7 +339,7 @@ function runSuite(){
          success: function(data) {
             var url = '/report/project/' + project + '/suite/' + suite + '/' + data + '/';
             let msg = 'Running suite ' + suite + " - <a href='" + url + "'>open</a>";
-            utils.toast('info', msg, 1500)
+            utils.toast('info', msg, 15000)
          },
          error: function() {}
      });

@@ -23,7 +23,7 @@ a, a:hover, a:focus {
     transition: all 0.3s;
 }
 
-.navbar {
+/*.navbar {
     padding: 15px 10px;
     background: #fff;
     border: none;
@@ -31,19 +31,20 @@ a, a:hover, a:focus {
     margin-bottom: 40px;
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
 }
+*/
 
-.navbar-btn {
+/*.navbar-btn {
     box-shadow: none;
     outline: none !important;
     border: none;
-}
+}*/
 
-.line {
+/*.line {
     width: 100%;
     height: 1px;
     border-bottom: 1px dashed #ddd;
     margin: 40px 0;
-}
+}*/
 
 #sidebar i, #sidebar span {
     display: inline-block;
@@ -58,8 +59,8 @@ a, a:hover, a:focus {
 }
 
 #sidebar {
-    min-width: 220px;
-    max-width: 220px;
+    min-width: 200px;
+    max-width: 200px;
     background: #7386D5;
     color: #fff;
     transition: all 0.3s;
@@ -71,7 +72,7 @@ a, a:hover, a:focus {
     padding: 15px;
     width: 100%;
     transition: all 0.3s;
-    margin-left: 220px;
+    margin-left: 200px;
     overflow-x: hidden;
 }
 
@@ -108,14 +109,14 @@ a, a:hover, a:focus {
 
 /*#sidebar.active ul li a {*/
 #wrapper.sidebar-collapsed #sidebar ul li a {    
-    padding: 10px 10px;
+    padding: 7px;
     text-align: center;
     font-size: 0.85em;
 }
 
 /*#sidebar.active ul li a i {*/
 #wrapper.sidebar-collapsed #sidebar ul li a i {
-    margin-right:  0;
+    margin-right: 0;
     display: block;
     font-size: 1.8em;
     margin-bottom: 5px;
@@ -123,7 +124,7 @@ a, a:hover, a:focus {
 
 /*#sidebar.active ul ul a {*/
 #wrapper.sidebar-collapsed #sidebar ul ul a {
-    padding: 10px !important;
+    padding: 7px !important;
 }
 
 #wrapper.sidebar-collapsed #sidebar a[aria-expanded="false"]::before, #wrapper.sidebar-collapsed #sidebar a[aria-expanded="true"]::before {
@@ -136,7 +137,7 @@ a, a:hover, a:focus {
 }
 
 #sidebar .sidebar-header {
-    padding: 20px;
+    padding: 15px;
     background: #6d7fcc;
 }
 
@@ -153,6 +154,7 @@ a, a:hover, a:focus {
 #sidebar ul.components {
     padding: 10px 0;
     border-bottom: 1px solid #47748b;
+    margin-bottom: 0px;
 }
 
 #sidebar ul li a {
@@ -231,6 +233,11 @@ a[aria-expanded="true"]::before {
         text-align: center;
         /*margin-left: -80px !important ;*/
     }
+
+    #content {
+        margin-left: 90px;
+    }
+
     a[aria-expanded="false"]::before, a[aria-expanded="true"]::before {
         top: auto;
         bottom: 5px;
@@ -258,7 +265,7 @@ a[aria-expanded="true"]::before {
     }
 
     #sidebar ul li a {
-        padding: 10px 10px;
+        padding: 7px;
         text-align: center;
         font-size: 0.85em;
     }

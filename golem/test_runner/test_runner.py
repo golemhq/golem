@@ -22,6 +22,8 @@ def run_test(workspace, project, test_name, test_data, browser,
         'test_elapsed_time': None,
         'test_timestamp': None,
         'browser': '',
+        'browser_full_name': '',
+        'set_name': '',
     }
 
     from golem.core import execution_logger
@@ -40,6 +42,15 @@ def run_test(workspace, project, test_name, test_data, browser,
         __delattr__ = dict.__delitem__
 
     execution.data = Data(test_data)
+
+    # set set_name
+    # set name is the value of 'set_name' if present in the data table
+    # if it is not present, use the value of the first column in the data table
+    # if there's no data in the data table, leave set_name as ''
+    if 'set_name' in test_data:
+        result['set_name'] = test_data['set_name']
+    elif test_data:
+        result['set_name'] = test_data[next(iter(test_data))]
 
     logger = execution_logger.get_logger(report_directory,
                                          settings['console_log_level'],
