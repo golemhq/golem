@@ -101,21 +101,52 @@ var ReportDashboard = new function(){
 
 var ExecutionsReport = new function(){
 
+    this.hasSetNameColumn = false;
+
     this.generateTestRow = function(data){
-        var row = "\
-            <tr id='"+data.testSet+"' pending='pending' class='cursor-pointer'>\
-                <td class='tc-number'>"+data.numbering+"</td>\
-                <td class='tc-module'>"+data.module+"</td>\
-                <td class='tc-name'>"+data.name+"</td>\
-                <td class='test-environment'></td>\
-                <td class='test-browser'></td>\
-                <td class='test-result'>"+data.result+"</td>\
-                <td class='test-time'></td>\
-                <td class='link'><a href='' target='blank'>\
-                    <span class='glyphicon glyphicon-new-window' aria-hidden='true'></span></a></td>\
-            </tr>";
+        if(ExecutionsReport.hasSetNameColumn){
+            var row = "\
+                <tr id='"+data.testSet+"' pending='pending' class='cursor-pointer'>\
+                    <td class='tc-number'>"+data.numbering+"</td>\
+                    <td class='tc-module'>"+data.module+"</td>\
+                    <td class='tc-name'>"+data.name+"</td>\
+                    <td class='set-name'></td>\
+                    <td class='test-environment'></td>\
+                    <td class='test-browser'></td>\
+                    <td class='test-result'>"+data.result+"</td>\
+                    <td class='test-time'></td>\
+                    <td class='link'><a href='' target='blank'>\
+                        <span class='glyphicon glyphicon-new-window' aria-hidden='true'></span></a></td>\
+                </tr>";
+        }
+        else{
+            var row = "\
+                <tr id='"+data.testSet+"' pending='pending' class='cursor-pointer'>\
+                    <td class='tc-number'>"+data.numbering+"</td>\
+                    <td class='tc-module'>"+data.module+"</td>\
+                    <td class='tc-name'>"+data.name+"</td>\
+                    <td class='test-environment'></td>\
+                    <td class='test-browser'></td>\
+                    <td class='test-result'>"+data.result+"</td>\
+                    <td class='test-time'></td>\
+                    <td class='link'><a href='' target='blank'>\
+                        <span class='glyphicon glyphicon-new-window' aria-hidden='true'></span></a></td>\
+                </tr>";
+        }
         return $(row)
     };
+
+    this.addSetNameColumnToTable = function(){
+        if(!$("table.test-list-table thead tr .set-name-header").length){
+            $("table.test-list-table thead tr .test-name-header").after("<th class='set-name-header'>Set Name</th>");
+        }
+        $("table.test-list-table tr").each(function(){
+            console.log($(this));
+            if(!$(this).find(".set-name").length){
+                $(this).find(".tc-name").after($("<td class='set-name'></td>"));
+            }
+        })
+    }
 
     this.generateModuleRow = function(data){
         var row = "\

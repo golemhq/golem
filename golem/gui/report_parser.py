@@ -130,7 +130,6 @@ def _parse_execution_data(execution_directory=None, workspace=None,
                 new_test_case['environment'] = report_data['environment']
                 # TODO, previous versions won't have set_name
                 # remove the if when retro-compatibility is not required
-                print('REPORT DATA', report_data)
                 if 'set_name' in report_data:
                     new_test_case['set_name'] = report_data['set_name']
 
@@ -215,7 +214,7 @@ def get_test_case_data(root_path, project, test, suite=None, execution=None,
             test_case_data['test_set'] = test_set
             test_case_data['execution'] = execution
             test_case_data['data'] = report_data['test_data']
-            if 'set_name' in report_data['set_name']:
+            if 'set_name' in report_data:
                 test_case_data['set_name'] = report_data['set_name']
 
     log_path = os.path.join(test_case_dir, 'execution.log')
