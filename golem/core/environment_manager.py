@@ -31,7 +31,14 @@ def get_environments_as_string(project):
 
 
 def save_environments(project, env_data):
-    environments_path = os.path.join('projects', project, 'environments.json')
-    with open(environments_path, 'w') as env_file:
-        env_file.write(env_data)
-    return
+    error = ''
+    if len(env_data):
+        try:
+            json.loads(env_data)
+        except:
+            error = 'must be valid JSON'
+    if not error:
+        environments_path = os.path.join('projects', project, 'environments.json')
+        with open(environments_path, 'w') as env_file:
+            env_file.write(env_data)
+    return error

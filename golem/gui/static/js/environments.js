@@ -29,13 +29,13 @@ function saveEnvironments(){
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
         type: 'POST',
-        success: function(data) {
-            if(data.result === 'ok'){
+        success: function(error) {
+            if(error.length == 0){
                 utils.toast('success', "Settings saved", 2000);
                 environmentsEditor.markClean();
             }
             else{
-                utils.toast('error', data, 2000);
+                utils.toast('error', error, 2000);
             }
         },
         error: function() {

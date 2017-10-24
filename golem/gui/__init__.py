@@ -645,12 +645,8 @@ def save_environments():
     if request.method == 'POST':
         projectname = request.json['project']
         env_data = request.json['environmentData']
-        result = {
-            'result': 'ok',
-            'errors': []
-        }
-        environment_manager.save_environments(projectname, env_data)
-        return json.dumps(result)
+        error = environment_manager.save_environments(projectname, env_data)
+        return json.dumps(error)
 
 
 @app.route("/lock_file/", methods=['POST'])
