@@ -28,17 +28,23 @@ Contains methods for interacting with a browser (a selenium webdriver instance)
 
 ### golem.browser.**get_browser()**
 
-Returns the browser instance (a Selenium Webdriver) with two extra methods: *find()* and *find_all()*. It is not required to explicitly open the browser, any golem action that requires a browser will open one if it is not already open and store it in *golem.execution.browser*. If a browser is already open, this method returns that browser.
+Returns the browser instance (a Selenium Webdriver) with two extra methods: *find()* and *find_all()*. It is not required to explicitly open the browser, any golem action that requires a browser will open one if it is not already open and store it in *golem.execution.browser*. If a browser is already open, this method will return that browser instance.
 
-The browser opened is defined can be defined in different places:
-- Command line run command, -b / --browsers flag
-- 'browsers' list in a suite
-- settings.json, "default_browser" option
+**Chosing a browser**
 
-In that order of precedence.
+The browser that is selected follows this order of precedence:
 
+1. Command line run command, -b / --browsers flag
+2. 'browsers' list in a suite
+3. settings.json, "default_browser" option
 
-**The extra methods are:**
+Example:
+
+```
+python golem.py run project test -b chrome firefox
+```
+
+**The extra browser methods:**
 
 #### browser.**find**([element, id, name, text, link_text,partial_link_text, css, xpath, tag_name, timeout])
 
@@ -140,7 +146,7 @@ The values are:
 
 
 - **browser**: the current browser instance, if it was already instantiated
-- **steps**: a list of steps gathered throught the execution. The steps end up in the report
+- **steps**: a list of steps gathered throughout the execution. The steps end up in the report
 - **browser_name**: the name of the browser selected for this single execution
 - **settings**: a dictionary of settings
 - **project**: the name of the current project

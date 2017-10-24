@@ -4,7 +4,7 @@ Browser Web Drivers
 
 ### Chrome
 
-To run tests using Chrome, the Chromedriver executable is needed.
+To run tests using Chrome locally, the Chromedriver executable is needed.
 
 ChromeDriver is a standalone server which implements WebDriver's wire protocol for Chromium. ChromeDriver is available for Chrome on Android and Chrome on Desktop (Mac, Linux, Windows and ChromeOS).  
 

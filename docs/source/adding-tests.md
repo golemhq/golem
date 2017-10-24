@@ -65,10 +65,10 @@ Next is a bare minimum test that navigates to 'en.wikipedia.org', searches an ar
 description = 'Search an article in Wikipedia'
 
 def test(data):
-    go_to('http://en.wikipedia.org/')
-    send_keys(('id', 'searchInput'), 'ostrich')
+    navigate('http://en.wikipedia.org/')
+    send_keys(('id', 'searchInput'), 'automation')
     click(('id', 'searchButton'))
-    verify_text_in_element(('id', 'firstHeading'), 'Common Ostrich')
+    verify_text_in_element(('id', 'firstHeading'), 'Automation')
 
 def teardown():
     close()
@@ -96,7 +96,7 @@ python golem.py run <project_name> validate_article_title
 
 ##### Golem Actions
 
-In the previous example, *go_to*, *send_keys*, *click*, and *verify_text...* are Golem actions. Check out [the entire list of actions](golem-actions.html) for more information.
+In the previous example, *navigate*, *send_keys*, *click*, and *verify_text...* are Golem actions. Check out [the entire list of actions](golem-actions.html) for more information.
 
 <br>
 

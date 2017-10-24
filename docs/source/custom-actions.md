@@ -15,9 +15,7 @@ from golem import actions
 
 
 username_input = ('id', "username", 'username')
-
 password_input = ('id', "password", 'password')
-
 login_button = ('css', "button[type='submit']", 'login_button')
 
 
@@ -70,17 +68,22 @@ def some_function(text):
 
 ##### Finding elements dynamically
 
-Sometimes you have to define selectors dynamically. For that, Golem provides two functions: *element()* and *elements()*. 
+Sometimes you have to define selectors dynamically. For that, Golem provides two helper functions: 
+- *element()*
+- *elements()*
 
-The first, *element()*, returns a pure selenium [WebElement](https://seleniumhq.github.io/selenium/docs/api/py/webdriver_remote/selenium.webdriver.remote.webelement.html#module-selenium.webdriver.remote.webelement) (equivalent to find_element_by_*). The WebElement returned has two added functions: *find()* and *find_all()* that let's you chain find funcions to search for elements and sub-elements.
 
-The second function, *elements()*, returns a list of selenium WebElements (equivalent to find_elements_by_*)
+The first function, **element()**, returns a pure selenium [WebElement](https://seleniumhq.github.io/selenium/docs/api/py/webdriver_remote/selenium.webdriver.remote.webelement.html#module-selenium.webdriver.remote.webelement) (equivalent to find_element_by_*). The WebElement returned has two added functions: *find()* and *find_all()* that let's you chain find funcions to search for elements and sub-elements.
 
-Let's see an example using *element()*, *elements()*, *find()* and *find_all()*:
+The second function, **elements()**, returns a list of selenium WebElements (equivalent to find_elements_by_*)
+
+**Using element() and elements()**
+
+Let's see an example using *element()*, *elements()*,  *find()* and *find_all()*:
 
 **some_page.py**
 ```python
-from golem.selenium import element, elements
+from golem.browser import element, elements
 
 
 def verify_page_title(title_text):
@@ -152,7 +155,7 @@ With Golem this is quite easy to do, check the following example:
 
 **results_page.py**
 ```python
-from golem.selenium import element
+from golem.browser import element
 
 
 def verify_wolf_name(owner, wolf_name):
@@ -161,21 +164,23 @@ def verify_wolf_name(owner, wolf_name):
         cells = row.find_all('td')
         if cells[0].text == owner:
             if cells[2].text == wolf_name:
+                # the name of the wolf is correct, test should continue
                 return
             else:
+                # the name of the wolf is incorrect, fail the test
                 raise Exception('Wolf name for {} is invalid'
                                 .format(owner))
-
-    raise Exception('Owner {} was not found in the table'
-                    .format(owner))
 ```
 
 *Explanation*:
 
-We define a function that receives two parameters: the name of the owner and the name of the wolf.
-In first place, we find all the rows of the table, and store them in a *rows* list.
-For each row in the *rows* list we search for all the cells of that row (*row.find_all('td')*) and store them in the *cells* list.
-Then we ask if the first cell value is equal to the name of the owner, if this is the case, this is the row we are looking for. We then ask if the third cell value is equal to the wolf name. This is the actual validation.
+1. We define a function that receives two parameters: the name of the owner and the name of the wolf.
+
+2. First we find all the rows of the table, and store them in a *rows* list.
+
+3. For each row in the *rows* list we search for all the cells of that row (*row.find_all('td')*) and store them in the *cells* list.
+
+4. Then we ask if the first cell value is equal to the name of the owner, if this is the case, this is the row we are looking for. We then ask if the third cell value is equal to the wolf name. This is the actual validation.
 
 
 Next, go to [The CLI](the-cli.html)

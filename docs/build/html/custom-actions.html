@@ -52,9 +52,7 @@
 
 
 <span class="n">username_input</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s2">&quot;username&quot;</span><span class="p">,</span> <span class="s1">&#39;username&#39;</span><span class="p">)</span>
-
 <span class="n">password_input</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s2">&quot;password&quot;</span><span class="p">,</span> <span class="s1">&#39;password&#39;</span><span class="p">)</span>
-
 <span class="n">login_button</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;css&#39;</span><span class="p">,</span> <span class="s2">&quot;button[type=&#39;submit&#39;]&quot;</span><span class="p">,</span> <span class="s1">&#39;login_button&#39;</span><span class="p">)</span>
 
 
@@ -99,12 +97,17 @@
 </div>
 <div class="section" id="finding-elements-dynamically">
 <span id="finding-elements-dynamically"></span><h2>Finding elements dynamically<a class="headerlink" href="#finding-elements-dynamically" title="Permalink to this headline">¶</a></h2>
-<p>Sometimes you have to define selectors dynamically. For that, Golem provides two functions: <em>element()</em> and <em>elements()</em>.</p>
-<p>The first, <em>element()</em>, returns a pure selenium <a class="reference external" href="https://seleniumhq.github.io/selenium/docs/api/py/webdriver_remote/selenium.webdriver.remote.webelement.html#module-selenium.webdriver.remote.webelement">WebElement</a> (equivalent to find_element_by_*). The WebElement returned has two added functions: <em>find()</em> and <em>find_all()</em> that let's you chain find funcions to search for elements and sub-elements.</p>
-<p>The second function, <em>elements()</em>, returns a list of selenium WebElements (equivalent to find_elements_by_*)</p>
-<p>Let's see an example using <em>element()</em>, <em>elements()</em>, <em>find()</em> and <em>find_all()</em>:</p>
+<p>Sometimes you have to define selectors dynamically. For that, Golem provides two helper functions:</p>
+<ul class="simple">
+<li><em>element()</em></li>
+<li><em>elements()</em></li>
+</ul>
+<p>The first function, <strong>element()</strong>, returns a pure selenium <a class="reference external" href="https://seleniumhq.github.io/selenium/docs/api/py/webdriver_remote/selenium.webdriver.remote.webelement.html#module-selenium.webdriver.remote.webelement">WebElement</a> (equivalent to find_element_by_*). The WebElement returned has two added functions: <em>find()</em> and <em>find_all()</em> that let's you chain find funcions to search for elements and sub-elements.</p>
+<p>The second function, <strong>elements()</strong>, returns a list of selenium WebElements (equivalent to find_elements_by_*)</p>
+<p><strong>Using element() and elements()</strong></p>
+<p>Let's see an example using <em>element()</em>, <em>elements()</em>,  <em>find()</em> and <em>find_all()</em>:</p>
 <p><strong>some_page.py</strong></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">golem.selenium</span> <span class="kn">import</span> <span class="n">element</span><span class="p">,</span> <span class="n">elements</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">golem.browser</span> <span class="kn">import</span> <span class="n">element</span><span class="p">,</span> <span class="n">elements</span>
 
 
 <span class="k">def</span> <span class="nf">verify_page_title</span><span class="p">(</span><span class="n">title_text</span><span class="p">):</span>
@@ -168,7 +171,7 @@
 <p>To sort this obstacle, the solution is to go through the table row by row and cell by cell looking for the exact row and cell that we need, no matter the actual location.</p>
 <p>With Golem this is quite easy to do, check the following example:</p>
 <p><strong>results_page.py</strong></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">golem.selenium</span> <span class="kn">import</span> <span class="n">element</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">golem.browser</span> <span class="kn">import</span> <span class="n">element</span>
 
 
 <span class="k">def</span> <span class="nf">verify_wolf_name</span><span class="p">(</span><span class="n">owner</span><span class="p">,</span> <span class="n">wolf_name</span><span class="p">):</span>
@@ -177,20 +180,21 @@
         <span class="n">cells</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">==</span> <span class="n">owner</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cells</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">==</span> <span class="n">wolf_name</span><span class="p">:</span>
+                <span class="c1"># the name of the wolf is correct, test should continue</span>
                 <span class="k">return</span>
             <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># the name of the wolf is incorrect, fail the test</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Wolf name for {} is invalid&#39;</span>
                                 <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">owner</span><span class="p">))</span>
-
-    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Owner {} was not found in the table&#39;</span>
-                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">owner</span><span class="p">))</span>
 </pre></div>
 </div>
 <p><em>Explanation</em>:</p>
-<p>We define a function that receives two parameters: the name of the owner and the name of the wolf.
-In first place, we find all the rows of the table, and store them in a <em>rows</em> list.
-For each row in the <em>rows</em> list we search for all the cells of that row (<em>row.find_all('td')</em>) and store them in the <em>cells</em> list.
-Then we ask if the first cell value is equal to the name of the owner, if this is the case, this is the row we are looking for. We then ask if the third cell value is equal to the wolf name. This is the actual validation.</p>
+<ol class="simple">
+<li>We define a function that receives two parameters: the name of the owner and the name of the wolf.</li>
+<li>First we find all the rows of the table, and store them in a <em>rows</em> list.</li>
+<li>For each row in the <em>rows</em> list we search for all the cells of that row (<em>row.find_all('td')</em>) and store them in the <em>cells</em> list.</li>
+<li>Then we ask if the first cell value is equal to the name of the owner, if this is the case, this is the row we are looking for. We then ask if the third cell value is equal to the wolf name. This is the actual validation.</li>
+</ol>
 <p>Next, go to <a class="reference external" href="the-cli.html">The CLI</a></p>
 </div>
 </div>
@@ -232,7 +236,7 @@ Then we ask if the first cell value is equal to the name of the owner, if this i
 <li class="toctree-l1"><a class="reference internal" href="the-cli.html">The CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
-<li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="browser-web-drivers.html">Browser Web Drivers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Interactive-mode.html">Interactive Mode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="golem-api.html">Golem Public API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="environments.html">Managing Environments</a></li>

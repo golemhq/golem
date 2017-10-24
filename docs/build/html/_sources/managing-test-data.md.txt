@@ -38,15 +38,14 @@ def teardown():
     <tbody>
         <tr>
             <td>http://en.wikipedia.org/</td>
-            <td>ostrich</td>
-            <td>Common Ostrich</td>
+            <td>automation</td>
+            <td>Automation</td>
         </tr>
     </tbody>
 </table>
 
 
-
-With this improvement, we don't have to modify the code each time the test values change. In the case of testing in different environments, we can quickly swap data files without modifying the tests themselves.
+With this improvement, we don't have to modify the code each time the test values change.
 
 With the Web Module, the result is the following:
 
@@ -56,7 +55,7 @@ With the Web Module, the result is the following:
 
 **Multiple data sets**
 
-What if we need to execute the same test, but with different values each time. That is, the steps of the test are the same, what changes is the data. In that case, with Golem you can add data sets (more rows to the data file) and Golem will automatically execute the same test using all the data sets provided
+If you need to execute the same test, but with different values each time (the steps are the same but the input and output values change) in Golem you can add more data sets (more rows to the data table). Golem will automatically execute the same test once per each row in the data table.
 
 
 For example, consider the previous data file, but with added rows:
@@ -72,8 +71,8 @@ For example, consider the previous data file, but with added rows:
     <tbody>
         <tr>
             <td>http://en.wikipedia.org/</td>
-            <td>ostrich</td>
-            <td>Common Ostrich</td>
+            <td>automation</td>
+            <td>Automation</td>
         </tr>
         <tr>
             <td>http://en.wikipedia.org/</td>
