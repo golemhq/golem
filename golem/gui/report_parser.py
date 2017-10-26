@@ -52,9 +52,9 @@ def _parse_execution_data(execution_directory=None, workspace=None,
     execution_data = {
         'test_cases': [],
         'total_cases_ok': 0,
+        'total_cases_fail': 0,
         'total_cases': 0,
         'total_pending': 0,
-        'total_failed': 0
     }
 
     if not execution_directory:
@@ -121,7 +121,7 @@ def _parse_execution_data(execution_directory=None, workspace=None,
                 if report_data['result'] == 'pass':
                     execution_data['total_cases_ok'] += 1
                 elif report_data['result'] == 'fail':
-                    execution_data['total_failed'] += 1
+                    execution_data['total_cases_fail'] += 1
                 new_test_case['test_elapsed_time'] = report_data['test_elapsed_time']
                 start_date_time = get_date_time_from_timestamp(report_data['test_timestamp'])
                 new_test_case['start_date_time'] = start_date_time

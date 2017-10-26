@@ -33,8 +33,6 @@ def get_page_object_content(project, full_po_name):
                 'function_name': var_name,
                 'full_function_name': ''.join([full_po_name, '.', var_name]),
                 'description': inspect.getdoc(variable),
-                # TODO REMOVE 'arguments': inspect.getargspec(variable).args,
-                #'arguments': inspect.signature(variable).parameters.keys(),
                 'arguments': list(dict(inspect.signature(variable).parameters).keys()),
                 'code': inspect.getsource(variable)
             }

@@ -35,7 +35,6 @@ def run_test(workspace, project, test_name, test_data, browser,
         """dot notation access to dictionary attributes"""
         def __getattr__(*args):
             val = dict.get(*args)
-            #print(val)
             return Data(val) if type(val) is dict else val
 
         __setattr__ = dict.__setitem__

@@ -103,22 +103,13 @@ def get_test_case_content(project, test_case_name):
 
     test_module = importlib.import_module('projects.{0}.tests.{1}'
                                           .format(project, test_case_name))
-    print(test_module)
     # get description
     description = getattr(test_module, 'description', '')
     
     # get list of pages
     pages = []
     pages = getattr(test_module, 'pages', [])
-    
-    # code_line_list = source_code.split('\n')
-    # for line in code_line_list:
-    #     if 'import' in line:
-    #         import_lines.append(line)
-
-    # for item in inspect.getmembers(test_module):
-    #     print(item[0], isinstance(item[1], types.ModuleType))
-    
+      
     # get setup steps
     setup_steps = []
     setup_function_code = getattr(test_module, 'setup', None)
@@ -146,7 +137,6 @@ def get_test_case_content(project, test_case_name):
         test_contents['content'] = inspect.getsource(test_module)
     except:
         pass
-    print('CONTENTS', test_contents)
     return test_contents
 
 
