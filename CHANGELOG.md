@@ -3,8 +3,11 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2017-10-16
+
 ### Added
 - get(url) action for consistency with Selenium API
+- Add set name to report, to differentiate when a single test is run with multiple data sets
 
 ### Changed
 - It is required to surround strings with quotes in test builder
