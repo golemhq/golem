@@ -75,10 +75,14 @@ def generate_report(report_directory, test_case_name, test_data, result):
         output_browser = 'chrome (remote, headless)'
     elif browser == 'firefox-remote':
         output_browser = 'firefox (remote)'
+
+    # cast steps to str
+    steps = [str(x) for x in result['steps']]
+
     report = {
         'test_case': test_case_name,
         'result': result['result'],
-        'steps': result['steps'],
+        'steps': steps,
         'description': result['description'],
         'error': result['error'],
         'short_error': short_error,

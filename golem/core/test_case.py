@@ -39,12 +39,19 @@ def _parse_step(step):
                 elif string_char == '\'':
                     inside_string = False
 
+            if params_string[i] == '\"':
+                if not inside_string:
+                    inside_string = True
+                    string_char = '\"'
+                elif string_char == '\"':
+                    inside_string = False
+
             if params_string[i] == ',' and not inside_param and not inside_string:
                 is_higher_level_comma = True
 
-            if params_string[i] == '(' or params_string[i] == '{':
+            if params_string[i] in ['(', '{', '[']:
                 inside_param = True
-            elif inside_param and (params_string[i] == ')' or params_string[i] == '}'):
+            elif inside_param and params_string[i] in [')', '}', ']']:
                 inside_param = False
 
             if is_higher_level_comma:

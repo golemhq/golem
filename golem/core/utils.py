@@ -7,7 +7,7 @@ import os
 import sys
 import uuid
 import traceback
-
+from ast import literal_eval
 from datetime import datetime
 
 import golem
@@ -203,8 +203,8 @@ def get_test_data(workspace, project, full_test_case_name):
         with open(data_file_path, 'r', encoding='utf8') as csv_file:
             dict_reader = csv.DictReader(csv_file)
             for data_set in dict_reader:
-                new_data_dict = {}
-                data_list.append(dict(data_set))
+                d = {k: literal_eval(v) for (k,v) in data_set.items()}
+                data_list.append(d)
 
     if not data_list:
         data_list.append({})
