@@ -76,10 +76,13 @@ def generate_report(report_directory, test_case_name, test_data, result):
     elif browser == 'firefox-remote':
         output_browser = 'firefox (remote)'
 
+    # cast steps to str
+    steps = [str(x) for x in result['steps']]
+
     report = {
         'test_case': test_case_name,
         'result': result['result'],
-        'steps': result['steps'],
+        'steps': steps,
         'description': result['description'],
         'error': result['error'],
         'short_error': short_error,
@@ -87,7 +90,8 @@ def generate_report(report_directory, test_case_name, test_data, result):
         'test_timestamp': result['test_timestamp'],
         'browser': output_browser,
         'test_data': serializable_data,
-        'environment': env_name
+        'environment': env_name,
+        'set_name': result['set_name']
     }
 
     with open(json_report_path, 'w', encoding='utf-8') as json_file:

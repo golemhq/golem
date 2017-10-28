@@ -331,18 +331,10 @@ function deleteElement(element, fullPath, elemType){
         success: function(errors) {
             if(errors.length == 0){
                 element.remove();
-                toastr.options = {
-                "positionClass": "toast-top-center",
-                "timeOut": "2000",
-                "hideDuration": "100"}
-                toastr.success("File "+fullPath+" was removed")
+                utils.toast('success', "File "+fullPath+" was removed", 2000)
             }
             else{
-                toastr.options = {
-                    "positionClass": "toast-top-center",
-                    "timeOut": "2000",
-                    "hideDuration": "100"}
-                toastr.error('There was an error removing file');
+                utils.toast('error', 'There was an error removing file', 2000)
             }
         },
     });
@@ -393,28 +385,16 @@ function duplicateFile(elemFullPath, elemType, originalElement){
                     type: elemType});
                 var ul = originalElement.closest('ul');
                 ul.children().last().before(uiElement);
-                toastr.options = {
-                "positionClass": "toast-top-center",
-                "timeOut": "2000",
-                "hideDuration": "100"}
-                toastr.success("File was copied")
+                utils.toast('success', 'File was copied', 2000)
             }
             else{
-                toastr.options = {
-                    "positionClass": "toast-top-center",
-                    "timeOut": "2000",
-                    "hideDuration": "100"}
-                toastr.error('There was an error duplicating the file');
+                utils.toat('error', 'There was an error duplicating the file', 2000);
             }
             $("#promptModal").modal("hide");
             $("#promptModal button.confirm").unbind('click');
         },
         error: function(){
-            toastr.options = {
-                "positionClass": "toast-top-center",
-                "timeOut": "2000",
-                "hideDuration": "100"}
-            toastr.error('There was an error duplicating the file');
+            utils.toast('error', 'There was an error duplicating the file', 2000)
             $("#promptModal").modal('hide');
             $("#promptModal button.confirm").unbind('click');
         }

@@ -75,15 +75,15 @@
     <tbody>
         <tr>
             <td>http://en.wikipedia.org/</td>
-            <td>ostrich</td>
-            <td>Common Ostrich</td>
+            <td>automation</td>
+            <td>Automation</td>
         </tr>
     </tbody>
-</table><p>With this improvement, we don't have to modify the code each time the test values change. In the case of testing in different environments, we can quickly swap data files without modifying the tests themselves.</p>
+</table><p>With this improvement, we don't have to modify the code each time the test values change.</p>
 <p>With the Web Module, the result is the following:</p>
 <p><img alt="test with data table" src="_images/test-with-data-table.png" /></p>
 <p><strong>Multiple data sets</strong></p>
-<p>What if we need to execute the same test, but with different values each time. That is, the steps of the test are the same, what changes is the data. In that case, with Golem you can add data sets (more rows to the data file) and Golem will automatically execute the same test using all the data sets provided</p>
+<p>If you need to execute the same test, but with different values each time (the steps are the same but the input and output values change) in Golem you can add more data sets (more rows to the data table). Golem will automatically execute the same test once per each row in the data table.</p>
 <p>For example, consider the previous data file, but with added rows:</p>
 <table>
     <thead>
@@ -96,8 +96,8 @@
     <tbody>
         <tr>
             <td>http://en.wikipedia.org/</td>
-            <td>ostrich</td>
-            <td>Common Ostrich</td>
+            <td>automation</td>
+            <td>Automation</td>
         </tr>
         <tr>
             <td>http://en.wikipedia.org/</td>
@@ -160,7 +160,7 @@
 <li class="toctree-l1"><a class="reference internal" href="the-cli.html">The CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
-<li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="browser-web-drivers.html">Browser Web Drivers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Interactive-mode.html">Interactive Mode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="golem-api.html">Golem Public API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="environments.html">Managing Environments</a></li>

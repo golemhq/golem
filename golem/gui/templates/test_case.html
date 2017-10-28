@@ -56,7 +56,7 @@
                             <button class="btn btn-default" type="button" onclick="openPageObjectInNewWindow(this)"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></button>
                         </span>
                         <span class="input-group-btn">
-                            <button class="btn btn-default" type="button" onclick="deletePageObject(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                            <button class="btn btn-default" type="button" onclick="testCase.deletePageObject(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
                         </span>
                     </div>
                     {% endfor %}
@@ -72,7 +72,7 @@
                     </div>
                     {% endif %}
                 </div>
-                <button class="btn btn-default btn-sm" onclick="addPOInput();">Add Page</button>
+                <button class="btn btn-default btn-sm" onclick="testCase.addPOInput();">Add Page</button>
             </div>
 
         </div>
@@ -144,7 +144,7 @@
             </div>
             
             <div class="clearfix"></div>
-            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="addFirstStepInput('setup');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
+            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="testCase.addFirstStepInput('setup');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
 
         </div>
         
@@ -205,7 +205,7 @@
             {% endif %}
             </div>
             <div class="clearfix"></div>
-            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="addFirstStepInput('test');">
+            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="testCase.addFirstStepInput('test');">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step
             </button>
         </div>
@@ -270,7 +270,7 @@
             </div>
 
             <div class="clearfix"></div>
-            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="addFirstStepInput('teardown');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
+            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="testCase.addFirstStepInput('teardown');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
         </div>
 
     </div>

@@ -1,6 +1,6 @@
 
-var pageObjects = [];
 var globalActions = [];
+var pageObjects = [];
 var selectedPageObjectsElements = [];
 var selectedPageObjectsFunctions = [];
 var unsavedChanges = false;
@@ -44,72 +44,71 @@ $(document).ready(function() {
 });
 
 
-function addPOInput(){
-    $("#pageObjects").append(
-        "<div class='input-group'> \
-            <input type='text' class='form-control custom-input \
-                page-objects-input page-objects-autocomplete'> \
-            <span class='input-group-btn input-middle-btn'> \
-                <button class='btn btn-default' type='button' \
-                    onclick='openPageObjectInNewWindow(this)'> \
-                        <span class='glyphicon glyphicon-new-window' aria-hidden='true'> \
-                        </span>\
-                </button> \
-            </span> \
-            <span class='input-group-btn'> \
-                <button class='btn btn-default' type='button' onclick='deletePageObject(this)'> \
-                    <span class='glyphicon glyphicon-remove' aria-hidden='true'></span> \
-                </button> \
-            </span> \
-        </div>");
+var testCase = new function(){
 
-    // give focus to the last input
-    $(".page-objects-input").last().focus();
+    this.addPOInput = function(){
+        $("#pageObjects").append(
+            "<div class='input-group'> \
+                <input type='text' class='form-control custom-input \
+                    page-objects-input page-objects-autocomplete'> \
+                <span class='input-group-btn input-middle-btn'> \
+                    <button class='btn btn-default' type='button' \
+                        onclick='openPageObjectInNewWindow(this)'> \
+                            <span class='glyphicon glyphicon-new-window' aria-hidden='true'> \
+                            </span>\
+                    </button> \
+                </span> \
+                <span class='input-group-btn'> \
+                    <button class='btn btn-default' type='button' onclick='testCase.deletePageObject(this)'> \
+                        <span class='glyphicon glyphicon-remove' aria-hidden='true'></span> \
+                    </button> \
+                </span> \
+            </div>");
 
-    startPageObjectsAutocomplete();
-}
-
-
-function addFirstStepInput(targetSection){
-
-    if(targetSection == 'setup'){
-        var section = $("#setupSteps .steps");
+        // give focus to the last input
+        $(".page-objects-input").last().focus();
+        startPageObjectsAutocomplete();
     }
-    else if(targetSection == 'test'){
-        var section = $("#testSteps .steps");
-    }
-    else if(targetSection == 'teardown'){
-        var section = $("#teardownSteps .steps");
-    }
-    section.append(
-        "<div class='step'> \
-            <div class='step-numbering'></div> \
-            <div class='col-sm-3 step-input-container step-first-input-container'> \
-                <div class='input-group'> \
-                    <input type='text' class='form-control step-first-input' \
-                        placeholder='action'> \
+
+    this.addFirstStepInput = function(targetSection){
+        if(targetSection == 'setup'){
+            var section = $("#setupSteps .steps");
+        }
+        else if(targetSection == 'test'){
+            var section = $("#testSteps .steps");
+        }
+        else if(targetSection == 'teardown'){
+            var section = $("#teardownSteps .steps");
+        }
+        section.append(
+            "<div class='step'> \
+                <div class='step-numbering'></div> \
+                <div class='col-sm-3 step-input-container step-first-input-container'> \
+                    <div class='input-group'> \
+                        <input type='text' class='form-control step-first-input' \
+                            placeholder='action'> \
+                    </div> \
                 </div> \
-            </div> \
-            <div class='params col-sm-6'> \
-            </div> \
-            <div class='step-remove-icon'> \
-                <a href='javascript:void(0)' onclick='deleteStep(this);'> \
-                    <span class='glyphicon glyphicon-remove' aria-hidden='true'></span> \
-                </a> \
-            </div> \
-        </div>");
+                <div class='params col-sm-6'> \
+                </div> \
+                <div class='step-remove-icon'> \
+                    <a href='javascript:void(0)' onclick='deleteStep(this);'> \
+                        <span class='glyphicon glyphicon-remove' aria-hidden='true'></span> \
+                    </a> \
+                </div> \
+            </div>");
 
-    // give focus to the last step action input
-    section.find(".step-first-input").last().focus();
+        // give focus to the last step action input
+        section.find(".step-first-input").last().focus();
 
-    fillStepNumbering();
-    startStepFirstInputAutocomplete();
-}
+        fillStepNumbering();
+        startStepFirstInputAutocomplete();
+    }
 
-
-function deletePageObject(elem){
-    $(elem).parent().parent().remove();
-    unsavedChanges = true;
+    this.deletePageObject = function(elem){
+        $(elem).parent().parent().remove();
+        unsavedChanges = true;
+    }
 }
 
 
@@ -153,7 +152,7 @@ function startPageObjectsAutocomplete(){
                 }
             })
             if(!theresEmptyInput){
-                addPOInput();
+                testCase.addPOInput();
             }
         },
         onSearchStart: function () {
@@ -380,12 +379,6 @@ function getLoadedDatos(){
 
 function getLoadedDatosWithValues(){
     var datos = [];
-    // $(".dato").each(function(){
-    //     datos.push({
-    //         'name': $(this).find(".dato-variable").val(),
-    //         'value': $(this).find(".dato-value").val()
-    //     });
-    // });
     $("#dataTable thead input").each(function(){
         if($(this).val() != ''){
             datos.push({
@@ -535,11 +528,7 @@ function saveTestCase(config){
         type: 'POST',
         success: function(data) {
             unsavedChanges = false;
-            toastr.options = {
-                "positionClass": "toast-top-center",
-                "timeOut": "3000",
-                "hideDuration": "100"}
-            toastr.success("Test "+testCaseName+" saved")
+            utils.toast('success', "Test "+testCaseName+" saved", 3000);
             if(runAfter){
                 //testRunner.runTestCase();
                 testRunner.askForEnvBeforeRun();
@@ -699,7 +688,9 @@ function getThisStep(elem){
     if($(elem).find('.step-first-input').val().length > 0){
         thisStep.action = $(elem).find('.step-first-input').val();
         $(elem).find('.parameter-input').each(function(){
-            thisStep.parameters.push($(this).val());
+            if($(this).val().length > 0){
+                thisStep.parameters.push($(this).val());
+            }
         });
     }
     return thisStep

@@ -3,13 +3,14 @@
 window.onload = function () {
 
      $('#sidebarCollapse').on('click', function () {
-         $('#sidebar').toggleClass('active');
-         if($('#sidebar').hasClass('active')){
-            document.cookie = "sidebarCollapsed=true";
+         //$('#sidebar').toggleClass('active');
+         $('#wrapper').toggleClass('sidebar-collapsed');
+         if($('#wrapper').hasClass('sidebar-collapsed')){
+            //document.cookie = "sidebarCollapsed=true";
             localStorage.setItem('sidebarCollapse', true);
          }
          else{
-            document.cookie = "sidebarCollapsed=false";
+            // document.cookie = "sidebarCollapsed=false";
             localStorage.setItem('sidebarCollapse', false);
          }
          
@@ -144,6 +145,20 @@ const utils = new function(){
         setTimeout(function(){
             bar.css('width', percentage+'%');
         }, 100);
+    }
+
+    this.toast = function(type, msg, duration){
+        toastr.options = {
+            "positionClass": "toast-top-center",
+            "timeOut": duration.toString(),
+            "hideDuration": "100"
+        }
+        if(type == 'success')
+            toastr.success(msg)
+        else if(type == 'error')
+            toastr.error(msg)
+        else if(type == 'info')
+            toastr.info(msg)
     }
 }
 

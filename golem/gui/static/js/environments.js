@@ -29,21 +29,13 @@ function saveEnvironments(){
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
         type: 'POST',
-        success: function(data) {
-            if(data.result === 'ok'){
-                toastr.options = {
-                    "positionClass": "toast-top-center",
-                    "timeOut": "2000",
-                    "hideDuration": "100"}
-                toastr.success("Settings saved");
+        success: function(error) {
+            if(error.length == 0){
+                utils.toast('success', "Settings saved", 2000);
                 environmentsEditor.markClean();
             }
             else{
-                toastr.options = {
-                    "positionClass": "toast-top-center",
-                    "timeOut": "3000",
-                    "hideDuration": "100"}
-                toastr.error(data);
+                utils.toast('error', error, 2000);
             }
         },
         error: function() {

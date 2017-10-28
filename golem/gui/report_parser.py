@@ -47,20 +47,19 @@ def get_last_executions(root_path, project=None, suite=None, limit=5):
     return last_execution_data
 
 
-def parse_execution_data(execution_directory=None, workspace=None,
+def _parse_execution_data(execution_directory=None, workspace=None,
                          project=None, suite=None, execution=None):
-    execution_data = {}
-    total_cases_ok = 0
-    total_cases = 0
-    total_pending = 0
-    total_failed = 0
+    execution_data = {
+        'test_cases': [],
+        'total_cases_ok': 0,
+        'total_cases_fail': 0,
+        'total_cases': 0,
+        'total_pending': 0,
+    }
 
     if not execution_directory:
         execution_directory = os.path.join(workspace, 'projects', project,
                                            'reports', suite, execution)
-
-    # ejecucion_data['modulo'] = modulo
-    execution_data['test_cases'] = []
 
     test_cases = os.walk(execution_directory).__next__()[1]
 
@@ -80,11 +79,13 @@ def parse_execution_data(execution_directory=None, workspace=None,
                 'full_name': '',
                 'result': '',
                 'test_elapsed_time': '',
+                'start_date_time': '',
                 'browser': '',
                 'data': '',
-                'environment': ''
+                'environment': '',
+                'set_name': ''
             }
-            total_cases += 1
+            execution_data['total_cases'] += 1
             new_test_case['test_set'] = test_set
             module = ''
             sub_modules = []
@@ -105,44 +106,44 @@ def parse_execution_data(execution_directory=None, workspace=None,
             # but the report.json may still not be generated
             report_json_path = os.path.join(test_set_path, 'report.json')
 
-            # if report.json exists, the test has finished
+            # check if the test has finished
             if not os.path.exists(report_json_path):
                 # test has not finished, add empty test case to the list
                 new_test_case['result'] = 'pending'
                 execution_data['test_cases'].append(new_test_case)
-                total_pending += 1
+                execution_data['total_pending'] += 1
 
             else:
                 # test has finished
                 with open(os.path.join(test_set_path, 'report.json'), 'r') as json_file:
                     report_data = json.load(json_file)
-
                 new_test_case['result'] = report_data['result']
                 if report_data['result'] == 'pass':
-                    total_cases_ok += 1
+                    execution_data['total_cases_ok'] += 1
                 elif report_data['result'] == 'fail':
-                    total_failed += 1
+                    execution_data['total_cases_fail'] += 1
                 new_test_case['test_elapsed_time'] = report_data['test_elapsed_time']
-                start_date_time = get_date_time_from_timestamp(
-                    report_data['test_timestamp']
-                )
+                start_date_time = get_date_time_from_timestamp(report_data['test_timestamp'])
                 new_test_case['start_date_time'] = start_date_time
                 new_test_case['browser'] = report_data['browser']
                 new_test_case['data'] = report_data['test_data']
                 new_test_case['environment'] = report_data['environment']
+                # TODO, previous versions won't have set_name
+                # remove the if when retro-compatibility is not required
+                if 'set_name' in report_data:
+                    new_test_case['set_name'] = report_data['set_name']
 
                 execution_data['test_cases'].append(new_test_case)
-
-    execution_data['total_cases_ok'] = total_cases_ok
-    execution_data['total_cases_fail'] = total_failed
-    execution_data['total_pending'] = total_pending
-    execution_data['total_cases'] = total_cases
 
     return execution_data
 
 
 def get_execution_data(execution_directory=None, workspace=None,
                        project=None, suite=None, execution=None):
+    """retrieve the data of all the tests of a suite execution.
+    from the execution_report.json if it exists else it parses
+    the tests one by one.
+    when the suite ends, the execution_report.json is generated"""
     has_finished = False
     if execution_directory:
         report_path = os.path.join(execution_directory, 'execution_report.json')
@@ -155,14 +156,15 @@ def get_execution_data(execution_directory=None, workspace=None,
             data = json.load(json_file)
             has_finished = True
     else:
-        data = parse_execution_data(execution_directory, workspace,
-                                    project, suite, execution)
+        data = _parse_execution_data(execution_directory, workspace,
+                                     project, suite, execution)
     data['has_finished'] = has_finished
     return data
 
 
 def get_test_case_data(root_path, project, test, suite=None, execution=None,
                        test_set=None, is_single=False):
+    """ retrieves all the date of a single test case execution"""
     test_case_data = {
         'log': [],
     }
@@ -212,6 +214,8 @@ def get_test_case_data(root_path, project, test, suite=None, execution=None,
             test_case_data['test_set'] = test_set
             test_case_data['execution'] = execution
             test_case_data['data'] = report_data['test_data']
+            if 'set_name' in report_data:
+                test_case_data['set_name'] = report_data['set_name']
 
     log_path = os.path.join(test_case_dir, 'execution.log')
     if os.path.exists(log_path):
@@ -235,14 +239,10 @@ def is_execution_finished(path, sets):
 
 
 def generate_execution_report(execution_directory, elapsed_time):
-    data = parse_execution_data(execution_directory=execution_directory)
+    """generate a json report of an entire suite execution so it is not
+    needed to parse the entire execution each time it is requested"""
+    data = _parse_execution_data(execution_directory=execution_directory)
     data['net_elapsed_time'] = elapsed_time
-    # exec_report = {
-    #     'total_ok': data['total_cases_ok'],
-    #     'total_pending': data['total_pending'],
-    #     'total_fail': data['total_cases_fail'],
-    #     'net_elapsed_time': elapsed_time
-    # }
     report_path = os.path.join(execution_directory, 'execution_report.json')
     with open(report_path, 'w', encoding='utf-8') as json_file:
         json.dump(data, json_file, indent=4)

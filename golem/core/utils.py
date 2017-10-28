@@ -6,7 +6,8 @@ import json
 import os
 import sys
 import uuid
-
+import traceback
+from ast import literal_eval
 from datetime import datetime
 
 import golem
@@ -202,8 +203,8 @@ def get_test_data(workspace, project, full_test_case_name):
         with open(data_file_path, 'r', encoding='utf8') as csv_file:
             dict_reader = csv.DictReader(csv_file)
             for data_set in dict_reader:
-                new_data_dict = {}
-                data_list.append(dict(data_set))
+                d = {k: literal_eval(v) for (k,v) in data_set.items()}
+                data_list.append(d)
 
     if not data_list:
         data_list.append({})
@@ -559,3 +560,15 @@ def choose_driver_by_precedence(cli_drivers=None, suite_drivers=None,
     else:
         chosen_drivers = ['chrome']  # hardcoded default
     return chosen_drivers
+
+
+def load_json_from_file(filepath):
+    json_data = None
+    with open(filepath) as json_file:
+        try:
+            json_data = json.load(json_file)
+        except Exception as e:
+            msg = 'There was an error parsing file {}'.format(filepath)
+            print(traceback.format_exc())
+            raise Exception(msg).with_traceback(e.__traceback__)
+    return json_data

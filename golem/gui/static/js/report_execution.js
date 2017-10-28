@@ -89,7 +89,6 @@ function addTestToDetailTable(test){
 
 
 function loadTestRowResult(test){
-	console.log(test);
 	var row = $("#"+test.test_set);
 
 	if(test.result == 'pass')
@@ -101,6 +100,11 @@ function loadTestRowResult(test){
 	row.find('.test-browser').html(test.browser);
 	row.find('.test-environment').html(test.environment);
 	row.find('.test-time').html(formatTimeOutput(test.test_elapsed_time));
+	if(test.set_name){
+		ExecutionsReport.hasSetNameColumn = true;
+		ExecutionsReport.addSetNameColumnToTable();
+		row.find('.set-name').html(test.set_name);
+	}
 
 	//add this test case to allTestCases
 	allTestCases[test.test_set] = test;

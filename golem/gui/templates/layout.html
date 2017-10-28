@@ -28,70 +28,26 @@
 
 <body>
 
-
-
   <div class="container-fluid">
 
 
-    <!-- <div class="header clearfix">
-      <nav>
-        <ul class="nav nav-pills pull-right">
-          {% if g.user.is_authenticated %}
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle user-dropdown" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ g.user.username }} <span class="caret"></span></a>
-            <ul class="dropdown-menu">
-              <li><a href="/logout/">Log out</a></li>
-            </ul>
-          </li>
-          {% else %}
-          <li role="presentation"><a href="/login/">Log in</a></li>
-          {% endif %}
-        </ul>
-        <ul class="nav nav-pills pull-right">
-          {% if project %}
-          <li class="">
-            <a href="/p/{{project}}/" role="button" aria-haspopup="true" aria-expanded="false">Project</a>
-          </li>
-          {% endif %}
-          <li class="">
-            <a href="{% if project %}/report/project/{{project}}/{% else %}/report/{% endif %}" role="button" aria-haspopup="true" aria-expanded="false">Reports</a>
-          </li>
-          <ul class="nav nav-pills pull-right">
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Settings <span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li>
-                  <a href="{% if project %}/p/{{project}}/settings/{% else %}/settings/{% endif %}" role="button" aria-haspopup="true" aria-expanded="false">Settings</a>
-                </li>
-                <li>
-                  <a href="/p/{{project}}/environments/">Environments</a>
-                </li>
-              </ul>
-            </li>
-          </ul>
+  <script>
+    if(localStorage.getItem('sidebarCollapse') == 'true'){
+      document.write("<div id='wrapper' class='sidebar-collapsed'>")
+    }
+    else{
+      document.write("<div id='wrapper'>") 
+    }
+  </script>
 
-        </ul>
-      </nav>
-    <h3 class="text-muted"><a href="/" class="link-without-underline">Golem <small>Test Automation Framework</small></a></h3>
-  </div> -->
-
-
-
-<div class="wrapper">
+<!-- <div class="wrapper"> -->
     <!-- Sidebar Holder -->
     
 
-    <script>
-      if(localStorage.getItem('sidebarCollapse') == 'true'){
-        document.write("<nav id='sidebar' class='active'>")
-      }
-      else{
-        document.write("<nav id='sidebar'>") 
-      }
-    </script>
+
     
 
-    <!-- <nav id="sidebar" class=""> -->
+    <nav id="sidebar" class="">
         <div class="sidebar-header">
             <a href="/">
               <h3>Golem</h3>

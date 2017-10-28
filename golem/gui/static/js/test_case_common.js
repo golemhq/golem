@@ -39,12 +39,7 @@ var testRunner = new function(){
 
     this._doRunTestCase = function(environment){
         environment = environment || '';
-        console.log('Running test in env:', environment);
-        toastr.options = {
-            "positionClass": "toast-top-center",
-            "timeOut": "3000",
-            "hideDuration": "100"}
-        toastr.info('Running test ' + testCaseName);
+        utils.toast('info', 'Running test ' + testCaseName, 3000);
         $.ajax({
             url: "/run_test_case/",
             data: {

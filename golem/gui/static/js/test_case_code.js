@@ -44,12 +44,7 @@ function saveTestCase(){
         type: 'POST',
         success: function(data) {
             unsavedChanges = false;
-            toastr.options = {
-                "positionClass": "toast-top-center",
-                "timeOut": "3000",
-                "hideDuration": "100"
-            }
-            toastr.success("Test "+testCaseName+" saved");
+            utils.toast('success', "Test "+testCaseName+" saved", 3000);
             unsavedChanges = false;
             codeEditor.markClean();
         },

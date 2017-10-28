@@ -45,19 +45,11 @@ function savePageObject(){
         type: 'POST',
         success: function(error) {
             if(error === ''){
-                toastr.options = {
-                    "positionClass": "toast-top-center",
-                    "timeOut": "3000",
-                    "hideDuration": "100"}
-                toastr.success("Page "+pageObjectName+" saved");
+                utils.toast('success', "Page "+pageObjectName+" saved", 3000)
                 codeEditor.markClean();
             }
             else{
-                toastr.options = {
-                    "positionClass": "toast-top-center",
-                    "timeOut": "3000",
-                    "hideDuration": "100"}
-                toastr.error(error);
+                utils.toast('error', error, 3000);
             }
         },
         error: function() {

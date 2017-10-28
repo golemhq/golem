@@ -11,7 +11,7 @@ def interactive(settings, cli_drivers):
 
     drivers = utils.choose_driver_by_precedence(cli_drivers=cli_drivers,
                                                 suite_drivers=[],
-                                                settings_default_driver=settings['default_driver'])
+                                                settings_default_driver=settings['default_browser'])
     execution.browser_name = drivers[0]
     #golem.core.set_settings(settings)
     execution.settings = settings

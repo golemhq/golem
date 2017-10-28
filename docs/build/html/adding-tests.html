@@ -89,10 +89,10 @@
 <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Search an article in Wikipedia&#39;</span>
 
 <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-    <span class="n">go_to</span><span class="p">(</span><span class="s1">&#39;http://en.wikipedia.org/&#39;</span><span class="p">)</span>
-    <span class="n">send_keys</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;searchInput&#39;</span><span class="p">),</span> <span class="s1">&#39;ostrich&#39;</span><span class="p">)</span>
+    <span class="n">navigate</span><span class="p">(</span><span class="s1">&#39;http://en.wikipedia.org/&#39;</span><span class="p">)</span>
+    <span class="n">send_keys</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;searchInput&#39;</span><span class="p">),</span> <span class="s1">&#39;automation&#39;</span><span class="p">)</span>
     <span class="n">click</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;searchButton&#39;</span><span class="p">))</span>
-    <span class="n">verify_text_in_element</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;firstHeading&#39;</span><span class="p">),</span> <span class="s1">&#39;Common Ostrich&#39;</span><span class="p">)</span>
+    <span class="n">verify_text_in_element</span><span class="p">((</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;firstHeading&#39;</span><span class="p">),</span> <span class="s1">&#39;Automation&#39;</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">teardown</span><span class="p">():</span>
     <span class="n">close</span><span class="p">()</span>
@@ -115,7 +115,7 @@
 </div>
 <div class="section" id="golem-actions">
 <span id="golem-actions"></span><h2>Golem Actions<a class="headerlink" href="#golem-actions" title="Permalink to this headline">¶</a></h2>
-<p>In the previous example, <em>go_to</em>, <em>send_keys</em>, <em>click</em>, and <em>verify_text...</em> are Golem actions. Check out <a class="reference external" href="golem-actions.html">the entire list of actions</a> for more information.</p>
+<p>In the previous example, <em>navigate</em>, <em>send_keys</em>, <em>click</em>, and <em>verify_text...</em> are Golem actions. Check out <a class="reference external" href="golem-actions.html">the entire list of actions</a> for more information.</p>
 <p><br></p>
 <p>Next, go to <a class="reference external" href="managing-test-data.html">Managing Test Data</a></p>
 </div>
@@ -158,7 +158,7 @@
 <li class="toctree-l1"><a class="reference internal" href="the-cli.html">The CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="the-web-module.html">The Web Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
-<li class="toctree-l1"><a class="reference internal" href="web-drivers.html">Web Drivers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="browser-web-drivers.html">Browser Web Drivers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Interactive-mode.html">Interactive Mode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="golem-api.html">Golem Public API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="environments.html">Managing Environments</a></li>

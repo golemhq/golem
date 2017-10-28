@@ -151,11 +151,7 @@ function savePageObject(){
         contentType: 'application/json; charset=utf-8',
         type: 'POST',
         success: function(data) {
-            toastr.options = {
-                "positionClass": "toast-top-center",
-                "timeOut": "3000",
-                "hideDuration": "100"}
-            toastr.success("Page "+pageObjectName+" saved");
+            utils.toast('success', "Page "+pageObjectName+" saved", 3000);
 
             unsavedChanges = false;
         },

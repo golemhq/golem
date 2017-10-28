@@ -247,11 +247,7 @@ function saveTestSuite(){
         contentType: 'application/json; charset=utf-8',
         type: 'POST',
         success: function(data) {
-            toastr.options = {
-                "positionClass": "toast-top-center",
-                "timeOut": "3000",
-                "hideDuration": "100"}
-            toastr.success("Suite "+suite+" saved");
+            utils.toast('success', "Suite "+suite+" saved", 3000)
         },
         error: function() {
         }
@@ -331,11 +327,7 @@ function getNodeFullPath(thisLi, nodeName){
 
 
 function runSuite(){
-
-    toastr.options = {
-        "positionClass": "toast-top-center",
-        "timeOut": "15000",
-        "hideDuration": "100"}    
+ 
     $.ajax({
         url: "/run_suite/",
         data: {
@@ -346,7 +338,8 @@ function runSuite(){
          type: 'POST',
          success: function(data) {
             var url = '/report/project/' + project + '/suite/' + suite + '/' + data + '/';
-            toastr.info('Running suite ' + suite + " - <a href='" + url + "'>open</a>");
+            let msg = 'Running suite ' + suite + " - <a href='" + url + "'>open</a>";
+            utils.toast('info', msg, 15000)
          },
          error: function() {}
      });

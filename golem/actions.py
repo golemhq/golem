@@ -130,6 +130,10 @@ def debug():
         pass
 
 
+def get(url):
+    navigate(url)
+
+
 def mouse_hover(element):
     _run_wait_hook()
     driver = get_browser()
@@ -412,11 +416,10 @@ def wait(seconds):
 #     #     execution.logger.debug('Element {} was not found, continuing...'.format(element)) 
 
 
-def wait_for_element_clickable(element, timeout=20):
-    print('WAIT FOR ELEMENT CLICKABLE')
-    browser = get_browser()
-    element = WebDriverWait(browser, timeout).until(
-        EC.element_to_be_clickable())
+# def wait_for_element_clickable(element, timeout=20):
+#     browser = get_browser()
+#     element = WebDriverWait(browser, timeout).until(
+#         EC.element_to_be_clickable())
 
 
 
@@ -510,7 +513,7 @@ def wait_for_element_visible(element, timeout=20):
             timed_out = True
 
 
-def get(url, headers={}, params={}):
+def http_get(url, headers={}, params={}):
     step_message = 'Make GET request to {}'.format(url)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
@@ -518,12 +521,11 @@ def get(url, headers={}, params={}):
     store('last_response', response)
 
 
-def post(url, headers={}, params={}):
+def http_post(url, headers={}, data={}):
     step_message = 'Make POST request to {}'.format(url)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
-    print(params)
-    response = requests.post(url, headers=headers, data=params)
+    response = requests.post(url, headers=headers, data=data)
     print(response)
     store('last_response', response)
 
