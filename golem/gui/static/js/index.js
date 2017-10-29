@@ -51,7 +51,7 @@ function createProject(){
         success: function(data) {
             if(data.errors.length == 0){
                 // add new li for the element
-                $("#projectList").append("<a href='/p/"+data.project_name+"/' class='list-group-item'>"+data.project_name+"</a>");
+                $("#projectList").append("<a href='/project/"+data.project_name+"/' class='list-group-item'>"+data.project_name+"</a>");
                 
                 $("#projectCreationForm").hide();
                 $("#projectCreationButton").show();

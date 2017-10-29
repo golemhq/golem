@@ -79,6 +79,6 @@ function loadGuiView(){
     unsavedChanges = false;
 
     // redirect to gui view
-    window.location.replace("/p/"+project+"/test/"+fullTestCaseName+"/");
+    window.location.replace("/project/"+project+"/test/"+fullTestCaseName+"/");
 }
 

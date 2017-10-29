@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block head_declarations %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/project_dashboard.css') }}">
+	{{ super() }}
+{% endblock %} 
+
+{% block content %}
+
+<div class="row" style="padding-right: 15px; padding-left: 15px">
+	
+	<div class="col-lg-10 col-lg-offset-1">
+
+		
+		<h3>{{project|replace("_", " ")}} - Tests</h3>
+		
+
+		<div id="testsContainer" class="col-md-12 box-container gray-border-3">
+			<ul id="testCasesTree" class='test-tree'></ul>
+		</div>
+		
+	</div>
+</div>
+
+<script src="{{ url_for('static', filename='js/external/treeview.js') }}"></script>
+<script src="{{ url_for('static', filename='js/project.js') }}"></script>
+<script src="{{ url_for('static', filename='js/project_tests.js') }}"></script>
+<script>
+	var project = '{{project}}';
+</script>
+{% endblock %}

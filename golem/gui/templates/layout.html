@@ -57,26 +57,28 @@
 
         <ul class="list-unstyled components">
             {% if project%}
-            <li>
+            
+           <!--  <li>
                 <a href="/p/{{project}}/">
                     <i class="fa fa-home" aria-hidden="true"></i>
                     Project
                 </a>
-            </li>
+            </li> -->
+            
             <li>
-                <a href="/p/{{project}}">
+                <a href="/project/{{project}}/suites/">
                     <i class="glyphicon glyphicon-tasks"></i>
                     Suites
                 </a>
             </li>
             <li>
-                <a href="/p/{{project}}/#tests">
+                <a href="/project/{{project}}/tests/">
                     <i class="fa fa-file-code-o" aria-hidden="true"></i>
                     Tests
                 </a>
             </li>
             <li>
-                <a href="/p/{{project}}/#pages">
+                <a href="/project/{{project}}/pages/">
                     <i class="fa fa-book" aria-hidden="true"></i>
                     Pages
                 </a>
@@ -88,13 +90,13 @@
                 </a>
             </li>
             <li>
-                <a href="/p/{{project}}/settings/">
+                <a href="/project/{{project}}/settings/">
                     <i class="fa fa-cogs" aria-hidden="true"></i>
                     Settings
                 </a>
             </li>
             <li>
-                <a href="/p/{{project}}/environments/">
+                <a href="/project/{{project}}/environments/">
                     <i class="fa fa-sitemap" aria-hidden="true"></i>
                     Environments
                 </a>

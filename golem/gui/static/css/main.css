@@ -221,6 +221,12 @@ gray 1  #fafafa
     outline: none;
 }
 
+.link-without-decoration, .link-without-decoration:hover, .link-without-decoration:visited, .link-without-decoration:focus {
+    text-decoration: none;
+    outline: none;
+    color: inherit;
+}
+
 .autocomplete-suggestions {
     background-color: white;
     border-left: 1px solid #CCCCCC;
@@ -324,4 +330,9 @@ gray 1  #fafafa
 
 .screenshot-modal .modal-header {
     padding-right: 10px;
+}
+
+
+#toast-container.toast-top-center>div {
+    width: 400px;
 }

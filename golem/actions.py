@@ -526,7 +526,6 @@ def http_post(url, headers={}, data={}):
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
     response = requests.post(url, headers=headers, data=data)
-    print(response)
     store('last_response', response)
 
 

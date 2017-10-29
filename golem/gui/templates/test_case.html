@@ -86,7 +86,7 @@
         <!-- setup -->
         {% if not test_case_contents.steps.setup %}
         <div id="showSetupLink" class="col-sm-12 text-center" style="padding-top: 10px">
-            <a href="javascript:void(0)" class="text-muted link-without-underline" onclick="showSetupSteps()">Show Setup</a>
+            <a href="javascript:void(0)" class="text-muted link-without-underline" onclick="showSetupSteps()">Setup</a>
         </div>
         {% endif %}
 
@@ -94,7 +94,7 @@
 
             <div class="steps" style="">
 
-                <h4>Setup</h4>
+                <a href="javascript:void(0)" onclick="collapseSetup()" class="link-without-decoration"><h4>Setup</h4></a>
 
                 {% if test_case_contents.steps.setup %}
 
@@ -212,11 +212,11 @@
 
         <!-- teardown -->
         <div id="showTeardownLink" class="col-sm-12 text-center" style="padding-top: 10px">
-            <a href="javascript:void(0)" class="text-muted link-without-underline" onclick="showTeardownSteps()">Show Teardown</a>
+            <a href="javascript:void(0)" class="text-muted link-without-underline" onclick="showTeardownSteps()">Teardown</a>
         </div>
         <div id="teardownSteps" class="clearfix" style="display: none">
             <div class="steps">
-                <h4>Teardown</h4>
+                <a href="javascript:void(0)" onclick="collapseTeardown()" class="link-without-decoration"><h4>Teardown</h4></a>
                 {% if test_case_contents.steps.teardown %}
 
                     {% for step in test_case_contents.steps.teardown %}

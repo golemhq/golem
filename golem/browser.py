@@ -111,14 +111,14 @@ def _find(self, element=None, id=None, name=None, text=None, link_text=None,
             selector_value = element_name = tag_name
         else:
             raise IncorrectSelectorType('Selector is not a valid option')
+    if not webelement:
         webelement = _find_webelement(self, selector_type, selector_value,
-                                            element_name, timeout)
-    webelement.selector_type = selector_type
-    webelement.selector_value = selector_value
-    webelement.name = element_name
-    webelement.find = types.MethodType(_find, webelement)
-    webelement.find_all = types.MethodType(_find_all, webelement)
-
+                                                element_name, timeout)
+        webelement.selector_type = selector_type
+        webelement.selector_value = selector_value
+        webelement.name = element_name
+        webelement.find = types.MethodType(_find, webelement)
+        webelement.find_all = types.MethodType(_find_all, webelement)
     return webelement
 
 

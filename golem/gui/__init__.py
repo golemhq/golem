@@ -94,8 +94,20 @@ def index():
     return render_template('index.html', projects=projects)
 
 
-# PROJECT DASHBOARD VIEW
-@app.route("/p/<project>/")
+# # PROJECT DASHBOARD VIEW
+# @app.route("/p/<project>/")
+# @login_required
+# def project(project):
+#     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+#         return render_template('not_permission.html')
+#     elif not utils.project_exists(root_path, project):
+#         abort(404, 'This page does not exists.')
+#     else:
+#         return render_template('project_dashboard.html', project=project)
+
+
+# PROJECT VIEW
+@app.route("/project/<project>/")
 @login_required
 def project(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
@@ -103,11 +115,47 @@ def project(project):
     elif not utils.project_exists(root_path, project):
         abort(404, 'This page does not exists.')
     else:
-        return render_template('project_dashboard.html', project=project)
+        return redirect('/project/{}/suites/'.format(project))
+
+
+# PROJECT TESTS VIEW
+@app.route("/project/<project>/tests/")
+@login_required
+def project_tests(project):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+    elif not utils.project_exists(root_path, project):
+        abort(404, 'This page does not exists.')
+    else:
+        return render_template('project_tests.html', project=project)
+
+
+# PROJECT SUITES VIEW
+@app.route("/project/<project>/suites/")
+@login_required
+def project_suites(project):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+    elif not utils.project_exists(root_path, project):
+        abort(404, 'This page does not exists.')
+    else:
+        return render_template('project_suites.html', project=project)
+
+
+# PROJECT PAGES VIEW
+@app.route("/project/<project>/pages/")
+@login_required
+def project_pages(project):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+    elif not utils.project_exists(root_path, project):
+        abort(404, 'This page does not exists.')
+    else:
+        return render_template('project_pages.html', project=project)
 
 
 # TEST CASE VIEW
-@app.route("/p/<project>/test/<test_case_name>/")
+@app.route("/project/<project>/test/<test_case_name>/")
 @login_required
 def test_case_view(project, test_case_name):
     # check if user has permissions for this project
@@ -130,7 +178,7 @@ def test_case_view(project, test_case_name):
 
 
 # TEST CASE CODE VIEW
-@app.route("/p/<project>/test/<test_case_name>/code/")
+@app.route("/project/<project>/test/<test_case_name>/code/")
 @login_required
 def test_case_code_view(project, test_case_name):
     # check if user has permissions for this project
@@ -147,7 +195,7 @@ def test_case_code_view(project, test_case_name):
 
 
 # PAGE OBJECT VIEW
-@app.route("/p/<project>/page/<full_page_name>/")
+@app.route("/project/<project>/page/<full_page_name>/")
 @login_required
 def page_view(project, full_page_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
@@ -160,7 +208,7 @@ def page_view(project, full_page_name):
 
 
 # PAGE OBJECT CODE VIEW
-@app.route("/p/<project>/page/<full_page_name>/code/")
+@app.route("/project/<project>/page/<full_page_name>/code/")
 @login_required
 def page_code_view(project, full_page_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
@@ -171,7 +219,7 @@ def page_code_view(project, full_page_name):
 
 
 # SUITE VIEW
-@app.route("/p/<project>/suite/<suite>/")
+@app.route("/project/<project>/suite/<suite>/")
 def suite_view(project, suite):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
@@ -207,7 +255,7 @@ def global_settings():
 
 
 # PROJECT SETTINGS VIEW
-@app.route("/p/<project>/settings/")
+@app.route("/project/<project>/settings/")
 def project_settings(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
@@ -218,7 +266,7 @@ def project_settings(project):
 
 
 # PROJECT SETTINGS VIEW
-@app.route("/p/<project>/environments/")
+@app.route("/project/<project>/environments/")
 def environments_view(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')

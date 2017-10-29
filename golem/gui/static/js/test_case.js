@@ -579,7 +579,7 @@ function checkIfFunctionIsInSelectedPageObjectFunctions(selectedFunctions, funct
 function openPageObjectInNewWindow(elem){
     var inputVal = $(elem).parent().parent().find('input').val();
     if(inputVal.length > 0){
-        var url = "/p/"+project+"/page/"+inputVal+"/";
+        var url = "/project/"+project+"/page/"+inputVal+"/";
         window.open(url, '_blank');
     }
 }
@@ -647,7 +647,7 @@ function loadCodeView(){
     }
     unsavedChanges = false;
     // redirect to gui view
-    window.location.replace("/p/"+project+"/test/"+fullTestCaseName+"/code/");
+    window.location.replace("/project/"+project+"/test/"+fullTestCaseName+"/code/");
 }
 
 
@@ -708,3 +708,13 @@ function getPageObjectsNotYetSelected(){
     return pageObjectsNotYetSelected
 }
 
+
+function collapseTeardown(){
+    $("#showTeardownLink").show();
+    $("#teardownSteps").slideUp('fast');   
+}
+
+function collapseSetup(){
+    $("#showSetupLink").show();
+    $("#setupSteps").slideUp('fast');
+}

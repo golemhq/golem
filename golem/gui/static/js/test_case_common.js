@@ -291,7 +291,7 @@ var header = new function(){
                     $("#testNameInput").hide();
                     $("#testName").html(newTestNameValue).show();
 
-                    var new_url = "/p/" + project + "/test/" + newTestNameValue + "/";
+                    var new_url = "/project/" + project + "/test/" + newTestNameValue + "/";
                     window.history.pushState("object or string", "", new_url);
                 }
                 else{

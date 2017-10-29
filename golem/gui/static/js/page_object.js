@@ -184,5 +184,5 @@ function loadCodeView(){
     unsavedChanges = false;
 
     // redirect to gui view
-    window.location.replace("/p/"+project+"/page/"+pageObjectName+"/code/");
+    window.location.replace("/project/"+project+"/page/"+pageObjectName+"/code/");
 }
