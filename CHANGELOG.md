@@ -3,6 +3,9 @@
 
 ## [Unreleased]
 
+### Changed
+- Split project dashboard into suites, tests and pages
+
 ## [0.3.0] - 2017-10-16
 
 ### Added

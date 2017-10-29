@@ -94,19 +94,7 @@ def index():
     return render_template('index.html', projects=projects)
 
 
-# # PROJECT DASHBOARD VIEW
-# @app.route("/p/<project>/")
-# @login_required
-# def project(project):
-#     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
-#         return render_template('not_permission.html')
-#     elif not utils.project_exists(root_path, project):
-#         abort(404, 'This page does not exists.')
-#     else:
-#         return render_template('project_dashboard.html', project=project)
-
-
-# PROJECT VIEW
+# PROJECT VIEW - redirecto to /project/suites/
 @app.route("/project/<project>/")
 @login_required
 def project(project):
