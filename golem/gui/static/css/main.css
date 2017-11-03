@@ -336,3 +336,11 @@ gray 1  #fafafa
 #toast-container.toast-top-center>div {
     width: 400px;
 }
+
+
+.sub-icon {
+    font-size: calc(100% - 5px);
+    color: white;
+    text-align: right;
+    top: 4px;
+}

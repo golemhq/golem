@@ -73,9 +73,10 @@ var Project = new function(){
                     onblur='Project.addElement(event);' onkeyup='if(event.keyCode==13){Project.addElement(event)}'>\
             </span>\
             <span class='display-new-element-link'>\
-                <a class='new-element-link' href='javascript:void(0)' onclick='Project.displayNewElementForm(this)'><i class='glyphicon glyphicon-plus-sign'></i> Add</a>\
-            </span>\
+                <a class='new-element-link' href='javascript:void(0)' onclick='Project.displayNewElementForm(this, \"file\")'><i class='glyphicon glyphicon-file'><i style='left: -3px' class='fa fa-plus-circle fa-stack-1x awesomeEntity sub-icon'/></i></a>\
+                <a class='new-directory-link' href='javascript:void(0)' onclick='Project.displayNewElementForm(this, \"directory\")'><i class='glyphicon glyphicon-folder-close'><i style='left: 0px' class='fa fa-plus-circle fa-stack-1x awesomeEntity sub-icon'/></i></a>\
         </li>";
+        //<a class='new-element-link' href='javascript:void(0)' onclick='Project.displayNewElementForm(this)'><i class='glyphicon glyphicon-plus-sign'></i> Add</a>\
         return li
     }
 
@@ -97,9 +98,9 @@ var Project = new function(){
         });
     }
 
-    this.displayNewElementForm = function(elem){
+    this.displayNewElementForm = function(elem, elemType){
         var parent = $(elem).parent().parent();
-        parent.find(".new-element-form").show().find("input").focus();
+        parent.find(".new-element-form").show().find("input").attr('elem-type', elemType).focus();
         parent.find(".display-new-element-link").hide();
     }
 
@@ -108,6 +109,7 @@ var Project = new function(){
         var input = $(event.target);
         var elementType = '';
         var urlPrefixForElementType = '';
+        var isDir = input.attr('elem-type') == 'directory';
 
         var closestTree = input.closest('.tree')
         if(closestTree.hasClass('test-tree')){
@@ -123,15 +125,20 @@ var Project = new function(){
         var elementName = input.val().trim();
 
         // replace inner spaces with underscores
-        elementName = elementName.replace(/ /g, '_');
+        //elementName = elementName.replace(/ /g, '_');
         
         var fullPath = Project.getElementFullPath(input, elementName);
-        var isDir = false;
-        if(elementName.indexOf('/') > -1){
-            isDir = true;
-            if(elementType == 'test') elementType = 'test_dir';
-            else if(elementType == 'page') elementType = 'page_dir';
-        }
+        // var isDir = false;
+        // if(elementName.indexOf('/') > -1){
+        //     isDir = true;
+        //     if(elementType == 'test') elementType = 'test_dir';
+        //     else if(elementType == 'page') elementType = 'page_dir';
+        // }
+        // if(elementName[elementName.length-1] == '/'){
+        //     isDir = true;
+        //     if(elementType == 'test') elementType = 'test_dir';
+        //     else if(elementType == 'page') elementType = 'page_dir';
+        // }
 
         if(elementName.length == 0){
             input.val('');
@@ -141,27 +148,30 @@ var Project = new function(){
         }
 
         // validate length
-        if(elementName.length > 60){
-            displayErrorModal(['Maximum length is 60 characters']);
+        if(elementName.length > 100){
+            displayErrorModal(['Maximum length is 100 characters']);
             return
         }
+
         // validate there is no more than 1 slash
-        if(elementName.split('/').length -1 > 1){
-            displayErrorModal(['Only one slash character is allowed']);
-            return   
-        }
+        // if(elementName.split('/').length -1 > 1){
+        //     displayErrorModal(['Only one slash character is allowed']);
+        //     return   
+        // }
+
         // validate there is no more than 1 slash
-        if(elementType == 'suite' &&  elementName.split('/').length -1 == 1){
-            displayErrorModal(['Suite names cannot contain slashes']);
-            return   
-        }
+        // if(elementType == 'suite' &&  elementName.indexOf('/') > -1){ //elementName.split('/').length -1 == 1){
+        //     displayErrorModal(['Suite names cannot contain slashes']);
+        //     return   
+        // }
+
         // validate if there is a slash it is trailing
-        if(isDir){
-            if(elementName.indexOf('/') != elementName.length-1){
-                displayErrorModal(['Directories should end with a trailing slash character']);
-                return
-            }
-        }
+        // if(isDir){
+        //     if(elementName.indexOf('/') != elementName.length-1){
+        //         displayErrorModal(['Directories should end with a trailing slash character']);
+        //         return
+        //     }
+        // }
         
         $.ajax({
             url: "/new_tree_element/",

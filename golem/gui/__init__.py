@@ -430,35 +430,48 @@ def new_tree_element():
         elem_type = request.form['elementType']
         is_dir = json.loads(request.form['isDir'])
         full_path = request.form['fullPath']
-        full_path = full_path.replace('/', '')
-        full_path_list = full_path.split('.')
-        element_name = full_path_list[-1]
-        parents = full_path_list[:-1]
+        
+        dot_path = full_path
+
         errors = []
 
-        # if is_dir:
-        #     element_name = element_name.replace('/', '')
+        full_path = full_path.split('.')
+        element_name = full_path.pop()
+        parents = full_path
 
+        element_name.replace(' ', '_')
+
+        # verify that the string only contains letters, numbers
+        # dashes or underscores
         for c in element_name:
             if not c.isalnum() and not c in ['-', '_']:
                 errors.append('Only letters, numbers, \'-\' and \'_\' are allowed')
                 break
+
         if not errors:
-            if elem_type == 'test_dir':
-                errors = gui_utils.new_directory_test_case(root_path, project, parents, element_name)
-            elif elem_type == 'page_dir':
-                errors = gui_utils.new_directory_page_object(root_path, project, parents, element_name)
-            elif elem_type == 'test':
-                errors = test_case.new_test_case(root_path, project, parents, element_name)
-                changelog.log_change(root_path, project, 'CREATE', 'test',
-                                     full_path, g.user.username)
+            if elem_type == 'test':
+                if is_dir:
+                    errors = gui_utils.new_directory(root_path, project, parents,
+                                                     element_name, dir_type='tests')
+                else:
+                    errors = test_case.new_test_case(root_path, project, parents, element_name)
+                    # changelog.log_change(root_path, project, 'CREATE', 'test',
+                    #                      full_path, g.user.username)
             elif elem_type == 'page':
-                errors = page_object.new_page_object(root_path, project, parents, element_name)
+                if is_dir:
+                    errors = gui_utils.new_directory(root_path, project, parents,
+                                                     element_name, dir_type='pages')
+                else:
+                    errors = page_object.new_page_object(root_path, project, parents, element_name)
             elif elem_type == 'suite':
-                errors = suite.new_suite(root_path, project, element_name)
+                if is_dir:
+                    errors = gui_utils.new_directory(root_path, project, parents,
+                                                     element_name, dir_type='suites')
+                else:
+                    errors = suite.new_suite(root_path, project, element_name)
         element = {
             'name': element_name,
-            'full_path': full_path,
+            'full_path': dot_path,
             'type': elem_type,
             'is_directory': is_dir
         }
@@ -765,6 +778,16 @@ def get_project_health_data():
                 'total_pending': execution_data['total_pending']
             }
         return jsonify(health_data)
+
+
+@app.route("/page/page_exists/", methods=['POST'])
+def page_exists():
+    if request.method == 'POST':
+        project = request.form['project']
+        full_page_name = request.form['fullPageName']
+
+        page_exists = page_object.page_exists(root_path, project, full_page_name)
+        return jsonify(page_exists)
 
 
 ############

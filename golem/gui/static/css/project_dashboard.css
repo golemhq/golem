@@ -3,7 +3,7 @@
     padding: 10px;
 }
 
-@media (min-width: 768px){
+/*@media (min-width: 768px){
     .left-column{
         padding-left: 0px;
         padding-right: 0px
@@ -11,6 +11,10 @@
     .right-column{
         padding-right: 0px
     }
+}*/
+
+.tree {
+    font-size: 16px
 }
 
 .tree, .tree ul {

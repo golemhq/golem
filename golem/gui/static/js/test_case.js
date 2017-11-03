@@ -23,8 +23,11 @@ $(document).ready(function() {
         startAllValueInputAutocomplete();
     });
 
-    $(".page-objects-input").blur(function() {
+    $(".page-objects-input").blur(function(e) {
         getSelectedPageObjectElements();
+
+        checkIfPageObjectExists(e);
+
     });
 
     $(".page-objects-input").keyup(function(e) {
@@ -155,11 +158,6 @@ function startPageObjectsAutocomplete(){
                 testCase.addPOInput();
             }
         },
-        onSearchStart: function () {
-        },
-        beforeRender: function (container) {},
-        onSearchComplete: function (query, suggestions) {
-        }
     });
 }
 
@@ -394,8 +392,7 @@ function getLoadedDatosWithValues(){
 function getGlobalActions(){
     $.ajax({
         url: "/get_global_actions/",
-        data: {
-        },
+        data: {},
         dataType: 'json',
         type: 'POST',
         success: function(data) {
@@ -718,3 +715,30 @@ function collapseSetup(){
     $("#showSetupLink").show();
     $("#setupSteps").slideUp('fast');
 }
+
+
+function checkIfPageObjectExists(input){
+    // var fullPageName = $(input).val();
+
+    // $.ajax({
+    //     url: "/page/page_exists/",
+    //     data: {
+    //         "project": project,
+    //         "pageObject": fullPageName
+    //     },
+    //     dataType: 'json',
+    //     type: 'POST',
+    //     success: function(pageExists) {
+    //         if(!pageExists){
+    //             // display prompt to create new page
+    //             var callback = function(){
+    //                 Project.deleteElement(element, elemFullPath, elemType);
+    //             }
+    //             displayConfirmModal('Create new page', 'Page '+elemFullPath+' does not exists, do you want to create it?')
+    //         }
+    //     }
+    // });
+
+}
+
+

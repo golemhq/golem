@@ -203,7 +203,13 @@ def get_test_data(workspace, project, full_test_case_name):
         with open(data_file_path, 'r', encoding='utf8') as csv_file:
             dict_reader = csv.DictReader(csv_file)
             for data_set in dict_reader:
-                d = {k: literal_eval(v) for (k,v) in data_set.items()}
+                # d = {k: literal_eval(v) for (k,v) in data_set.items()}
+                d = {}
+                for item in data_set.items():
+                    try:
+                        d[item[0]] = literal_eval(item[1])
+                    except:
+                        d[item[0]] = item[1]
                 data_list.append(d)
 
     if not data_list:
@@ -369,6 +375,13 @@ def create_new_directory(path_list=None, path=None, add_init=False):
         # add __init__.py file to make the new directory a python package
         init_path = os.path.join(path, '__init__.py')
         open(init_path, 'a').close()
+
+
+def create_new_directories(root_path, directories, add_init=False):
+    path = root_path
+    for directory in directories:
+        path = os.path.join(path, directory)
+        create_new_directory(path=path, add_init=add_init)
 
 
 def create_new_project(workspace, project):

@@ -5,26 +5,30 @@ import subprocess
 from golem.core import utils
 
 
-def new_directory_test_case(root_path, project, parents, test_name):
+def new_directory(root_path, project, parents, dir_name, dir_type):
+    """Creates a new directory for suites, tests or pages.
+    if the directory is inside other directories, these should already exist.
+    parents is a list of parent directories.
+    dir_type should be in: ['tests', 'suites', 'pages']"""
     parents = os.sep.join(parents)
+    path = os.path.join(root_path, 'projects', project, dir_type, parents, dir_name)
     errors = []
-    if directory_already_exists(root_path, project, 'tests', parents, test_name):
+    if os.path.exists(path):
         errors.append('A directory with that name already exists')
     else:
-        path_list = [root_path, 'projects', project, 'tests', parents, test_name]
-        utils.create_new_directory(path_list=path_list, add_init=True)
+        utils.create_new_directory(path=path, add_init=True)
     return errors
 
 
-def new_directory_page_object(root_path, project, parents, page_name):
-    parents = os.sep.join(parents)
-    errors = []
-    if directory_already_exists(root_path, project, 'pages', parents, page_name):
-        errors.append('A directory with that name already exists')
-    else:
-        path_list = [root_path, 'projects', project, 'pages', parents, page_name]
-        utils.create_new_directory(path_list=path_list, add_init=True)
-    return errors
+# def new_directory_page_object(root_path, project, parents, dir_name):
+#     parents = os.sep.join(parents)
+#     errors = []
+#     if directory_already_exists(root_path, project, 'pages', parents, dir_name):
+#         errors.append('A directory with that name already exists')
+#     else:
+#         path_list = [root_path, 'projects', project, 'pages', parents, dir_name]
+#         utils.create_new_directory(path_list=path_list, add_init=True)
+#     return errors
 
 
 def run_test_case(project, test_case_name, environment):
