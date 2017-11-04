@@ -23,21 +23,21 @@ function createProject(){
     projectName = projectName.trim();
 
     if(projectName.length < 3){
-        displayErrorModal(['Project name is too short']);
+        utils.displayErrorModal(['Project name is too short']);
         return
     }
     if(!/^[\w\s]+$/i.test(projectName)){
-        displayErrorModal(['Only letters, numbers and underscores are allowed']);
+        utils.displayErrorModal(['Only letters, numbers and underscores are allowed']);
         return
     }
     // validate length
     if(projectName.length > 50){
-        displayErrorModal(['Maximum length is 50 characters']);
+        utils.displayErrorModal(['Maximum length is 50 characters']);
         return
     }
     // validate there is no more than 1 slash
     if(projectName.split('/').length -1 >= 1){
-        displayErrorModal(['Slashes are not allowed']);
+        utils.displayErrorModal(['Slashes are not allowed']);
         return   
     }
     
@@ -58,7 +58,7 @@ function createProject(){
                 $("#newProjectName").val('');
             }
             else{
-                displayErrorModal(data.errors);
+                utils.displayErrorModal(data.errors);
             }
         },
         error: function() {}

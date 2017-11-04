@@ -39,21 +39,23 @@ def get_page_object_content(project, full_page_name):
             function_list.append(new_function)
         elif isinstance(variable, tuple):
             # this is a web element tuple
-            element_display_name = ''
-            if len(variable) >= 3:
-                element_display_name = variable[2]
-            new_element = {
-                'element_name': var_name,
-                'element_selector': variable[0],
-                'element_value': variable[1],
-                'element_display_name': element_display_name,
-                'element_full_name': ''.join([full_page_name, '.', var_name])
-            }
-            element_list.append(new_element)
-        elif isinstance(variable, types.ModuleType):
-            pass
+            if len(variable) >= 2:
+                element_display_name = ''
+                if len(variable) >= 3:
+                    element_display_name = variable[2]
+                new_element = {
+                    'element_name': var_name,
+                    'element_selector': variable[0],
+                    'element_value': variable[1],
+                    'element_display_name': element_display_name,
+                    'element_full_name': ''.join([full_page_name, '.', var_name])
+                }
+                element_list.append(new_element)
+        # elif isinstance(variable, types.ModuleType):
+        #     pass
         else:
-            print('ERROR', variable)
+            pass
+            # print('ERROR', variable)
     page_object_data = {
         'function_list': function_list,
         'element_list': element_list,
@@ -100,27 +102,32 @@ def is_page_object(parameter, root_path, project):
     return bool(page_object_chain in page_objects)
 
 
-def new_page_object(root_path, project, parents, page_name):
+def new_page_object(root_path, project, parents, page_name, add_parents=False):
+    """Create a new page object.
+    Parents is a list of directories and subdirectories where the page should be 
+    placed.
+    if add_parents is true, the parent directories will be added if they do not exist."""
     errors = []
-    path = os.path.join(root_path, 'projects', project, 'pages', os.sep.join(parents),
-                        '{}.py'.format(page_name))
-    if os.path.isfile(path):
-        errors.append('A file with that name already exists')
+
+    page_path = os.path.join(root_path, 'projects', project, 'pages',
+                             os.sep.join(parents), '{}.py'.format(page_name))
+
+    if os.path.isfile(page_path):
+        errors.append('A page file with that name already exists')
+    
+    if not errors:
+        base_path = path = os.path.join(root_path, 'projects', project,
+                                        'pages', os.sep.join(parents))
+        if not os.path.exists(base_path):
+            if add_parents:
+                for parent in parents:
+                    base_path = os.path.join(base_path, parent)
+                    utils.create_new_directory(path=base_path, add_init=True)
+            else:
+                errors.append('Directory for new page does not exist')
 
     if not errors:
-        parents_joined = os.sep.join(parents)
-        base_path = os.path.join(root_path, 'projects', project, 'pages')
-        page_object_path = os.path.join(base_path, parents_joined)
-
-        # create the directory structure (with __init__.py files) if it does not exist
-        if not os.path.exists(page_object_path):
-            for parent in parents:
-                base_path = os.path.join(base_path, parent)
-                utils.create_new_directory(path=base_path, add_init=True)
-
-        page_object_full_path = os.path.join(page_object_path, page_name + '.py')
-
-        with open(page_object_full_path, 'w') as po_file:
+        with open(page_path, 'w') as po_file:
             po_file.write('')
     return errors
 

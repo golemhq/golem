@@ -27,7 +27,7 @@ var testRunner = new function(){
                     var callback = function(environment){
                         testRunner._doRunTestCase(environment);
                     }
-                    displaySelectPromptModal('Select Environment', '', environments, 'Run', callback)
+                    utils.displaySelectPromptModal('Select Environment', '', environments, 'Run', callback)
                 }
                 else{
                     // should not ask the user which env

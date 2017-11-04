@@ -41,7 +41,7 @@
     <div id="descriptionPageObjectsContainer" style="display: table; width: 100%">
         <div class="col-sm-6 same-heigth-col gray-1-background" id="descriptionContainer" style="border: 1px solid #e0e0e0;">
             <h4>Description</h4>
-            <textarea id="description" class="form-control" rows="3">{{test_case_contents.description }}</textarea>
+            <textarea id="description" class="form-control no-border-radius" rows="3">{{test_case_contents.description }}</textarea>
         </div>
 
         <div class="col-sm-6 same-heigth-col gray-1-background" id="pageObjectsContainerContainer" style="border-top: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
@@ -51,28 +51,38 @@
                 <div id="pageObjects">
                     {% for page in test_case_contents.pages %}  
                     <div class="input-group">
-                        <input type="text" class="form-control custom-input page-objects-input page-objects-autocomplete" value="{{page}}">
+                        <input type="text" disabled class="form-control no-border-radius selected-page" value="{{page}}">
                         <span class="input-group-btn input-middle-btn">
                             <button class="btn btn-default" type="button" onclick="openPageObjectInNewWindow(this)"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></button>
                         </span>
                         <span class="input-group-btn">
-                            <button class="btn btn-default" type="button" onclick="testCase.deletePageObject(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                            <button class="btn btn-default no-border-radius" type="button" onclick="testCase.deletePageObject(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
                         </span>
                     </div>
                     {% endfor %}
+                </div>
+                <div>
+                    <!-- <div class="form-inline">
+                        <div class="form=group">
+                            <input type="text" class="form-control custom-input page-objects-input page-objects-autocomplete">
+                            <button class="btn btn-default btn-sm" onclick="testCase.addPOInput();"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>New Page</button>
+                        </div>
+                    </div> -->
                     
-                    <div class="input-group">
-                        <input type="text" class="form-control custom-input page-objects-input page-objects-autocomplete" value="{{po}}">
-                        <span class="input-group-btn input-middle-btn">
-                            <button class="btn btn-default" type="button" onclick="openPageObjectInNewWindow(this)"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></button>
-                        </span>
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" type="button" onclick="deletePageObject(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-                        </span>
+                    <!-- <input type="submit" value="Find" style="float: right" /> -->
+                    <button class="btn btn-default btn-sm no-border-radius" style="float: right; height:34px;" onclick="testCase.displayNewPagePrompt();"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> New Page</button>
+                    <div style="overflow: hidden; padding-right: .5em;">
+                        <!-- <input type="text" style="width: 100%;" /> -->
+                        <div class="input-group">
+                            <input type="text" style="width: 100%;" class="form-control custom-input page-objects-input page-objects-autocomplete" placeholder="import page">
+                        </div>
                     </div>
                     
+                   <!--  <div class="input-group">
+                        <input type="text" class="form-control custom-input page-objects-input page-objects-autocomplete">
+                    </div>
+                    <button class="btn btn-default btn-sm" onclick="testCase.addPOInput();">Add Page</button> -->
                 </div>
-                <button class="btn btn-default btn-sm" onclick="testCase.addPOInput();">Add Page</button>
             </div>
 
         </div>
@@ -144,7 +154,7 @@
             </div>
             
             <div class="clearfix"></div>
-            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="testCase.addFirstStepInput('setup');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
+            <button class="btn btn-default btn-sm add-step no-border-radius" style="margin-left: 21px;" onclick="testCase.addFirstStepInput('setup');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
 
         </div>
         
@@ -205,7 +215,7 @@
             {% endif %}
             </div>
             <div class="clearfix"></div>
-            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="testCase.addFirstStepInput('test');">
+            <button class="btn btn-default btn-sm add-step no-border-radius" style="margin-left: 21px;" onclick="testCase.addFirstStepInput('test');">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step
             </button>
         </div>
@@ -270,7 +280,7 @@
             </div>
 
             <div class="clearfix"></div>
-            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="testCase.addFirstStepInput('teardown');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
+            <button class="btn btn-default btn-sm add-step no-border-radius" style="margin-left: 21px;" onclick="testCase.addFirstStepInput('teardown');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
         </div>
 
     </div>

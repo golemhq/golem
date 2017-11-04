@@ -149,7 +149,7 @@ var Project = new function(){
 
         // validate length
         if(elementName.length > 100){
-            displayErrorModal(['Maximum length is 100 characters']);
+            utils.displayErrorModal(['Maximum length is 100 characters']);
             return
         }
 
@@ -180,6 +180,7 @@ var Project = new function(){
                 "elementType": elementType,
                 "isDir": isDir,
                 "fullPath": fullPath,
+                "addParents": false
             },
             dataType: 'json',
             type: 'POST',
@@ -205,7 +206,7 @@ var Project = new function(){
                     input.parent().parent().find(".display-new-element-link").show();
                 }
                 else{
-                    displayErrorModal(data.errors);
+                    utils.displayErrorModal(data.errors);
                 }
             },
             error: function() {}
@@ -237,7 +238,7 @@ var Project = new function(){
         var callback = function(){
             Project.deleteElement(element, elemFullPath, elemType);
         }
-        displayConfirmModal('Delete', message, callback);
+        utils.displayConfirmModal('Delete', message, callback);
 
     }
 
@@ -272,15 +273,16 @@ var Project = new function(){
         var title = 'Duplicate file';
         var message = 'Create a duplicate of <i>'+elemFullPath+'</i>. Enter a name for the new file..';
         var inputValue = elemFullPath;
-        var callback = function(){
-            Project.duplicateFile(elemFullPath, elemType, element);
+        var placeholderValue = '';
+        var callback = function(newFileFullPath){
+            Project.duplicateFile(elemFullPath, elemType, element, newFileFullPath);
         }
-        displayPromptModal(title, message, inputValue, callback)
+        utils.displayPromptModal(title, message, inputValue, placeholderValue, callback)
     }
 
 
-    this.duplicateFile = function(elemFullPath, elemType, originalElement){
-        var newFileFullPath = $("#promptModalInput").val();
+    this.duplicateFile = function(elemFullPath, elemType, originalElement, newFileFullPath){
+        //var newFileFullPath = $("#promptModalInput").val();
         if(newFileFullPath === elemFullPath){
             // new file name is the same as original
             // don't show error message, do nothing

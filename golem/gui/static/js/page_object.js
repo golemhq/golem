@@ -111,11 +111,11 @@ function savePageObject(){
             // validate the name is a valid python variable name
             var validChars = /^[0-9a-zA-Z\_]+$/;
             if(!name.match(validChars)){
-                displayErrorModal(['Element names should contain only letters, numbers and underscores']);
+                utils.displayErrorModal(['Element names should contain only letters, numbers and underscores']);
                 errors = true;
             }
             else if(!isNaN(name.charAt(0))){
-                displayErrorModal(['Element names should not begin with a digit']);
+                utils.displayErrorModal(['Element names should not begin with a digit']);
                 errors = true
             }
             else{

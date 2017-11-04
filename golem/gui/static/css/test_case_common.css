@@ -55,7 +55,7 @@
 /* execution modal */
 
 @media (min-width: 768px){
-	.modal-dialog {
+	.#testRunModal.modal {
     	width: 760px;
     	margin: 30px auto;
     }

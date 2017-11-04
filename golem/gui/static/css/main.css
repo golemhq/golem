@@ -344,3 +344,7 @@ gray 1  #fafafa
     text-align: right;
     top: 4px;
 }
+
+.no-border-radius {
+    border-radius: 0px;
+}

@@ -49,11 +49,11 @@ $(document).ready(function() {
 
 var testCase = new function(){
 
-    this.addPOInput = function(){
-        $("#pageObjects").append(
-            "<div class='input-group'> \
-                <input type='text' class='form-control custom-input \
-                    page-objects-input page-objects-autocomplete'> \
+    this.generatePageInput = function(pageName){
+        var pageInput = "\
+            <div class='input-group'> \
+                <input type='text' disabled class='form-control no-border-radius \
+                    selected-page' value='"+pageName+"'> \
                 <span class='input-group-btn input-middle-btn'> \
                     <button class='btn btn-default' type='button' \
                         onclick='openPageObjectInNewWindow(this)'> \
@@ -66,11 +66,8 @@ var testCase = new function(){
                         <span class='glyphicon glyphicon-remove' aria-hidden='true'></span> \
                     </button> \
                 </span> \
-            </div>");
-
-        // give focus to the last input
-        $(".page-objects-input").last().focus();
-        startPageObjectsAutocomplete();
+            </div>";
+        return pageInput
     }
 
     this.addFirstStepInput = function(targetSection){
@@ -112,6 +109,51 @@ var testCase = new function(){
         $(elem).parent().parent().remove();
         unsavedChanges = true;
     }
+
+    this.displayNewPagePrompt = function(){
+        var title = 'Add New Page';
+        var message = ''; //Create a duplicate of <i>'+elemFullPath+'</i>. Enter a name for the new file..';
+        var inputValue = '';
+        var placeholderValue = 'page name';
+        var callback = function(newPageName){
+            testCase.addNewPage(newPageName);
+        }
+        utils.displayPromptModal(title, message, inputValue, placeholderValue, callback);
+    }
+
+    this.addNewPage = function(newPageName){
+        $.ajax({
+            url: "/new_tree_element/",
+            data: {
+                "project": project,
+                "elementType": 'page',
+                "isDir": false,
+                "fullPath": newPageName,
+                "addParents": true,
+            },
+            dataType: 'json',
+            type: 'POST',
+            success: function(data) {
+                if(data.errors.length == 0){
+                    pageObjects.push({
+                        'value': data.element.full_path,
+                        'data': data.element.full_path,
+                    });
+                    testCase.addPageToList(data.element.full_path)
+                }
+                else{
+                    utils.displayErrorModal(data.errors);
+                }
+            }
+        });
+    }
+
+    this.addPageToList = function(pageName){
+        var newPageInput = testCase.generatePageInput(pageName);
+        $("#pageObjects").append(newPageInput);
+        getSelectedPageObjectElements();
+        unsavedChanges = true;
+    }
 }
 
 
@@ -141,22 +183,20 @@ function getPageObjects(){
 
 function startPageObjectsAutocomplete(){
     autocomplete = $(".page-objects-autocomplete").autocomplete({
-        lookup: getPageObjectsNotYetSelected(),
+        //lookup: getPageObjectsNotYetSelected(),
+        lookup: function (query, done) {
+        // Do Ajax call or lookup locally, when done,
+        // call the callback and pass your results:
+            var result = {
+                suggestions: getPageObjectsNotYetSelected()
+            };
+            done(result);
+        },
         minChars: 0,
+        noCache: true,
         onSelect: function (suggestion) {
-            getSelectedPageObjectElements();
-            unsavedChanges = true;
-
-            // shoud I add a new page input?
-            var theresEmptyInput = false;
-            $(".page-objects-input").each(function(){
-                if($(this).val() == ''){
-                    theresEmptyInput = true;
-                }
-            })
-            if(!theresEmptyInput){
-                testCase.addPOInput();
-            }
+            testCase.addPageToList(suggestion.value)
+            $("input.page-objects-input.page-objects-autocomplete").val('');
         },
     });
 }
@@ -546,7 +586,7 @@ function dataTableHeaderInputChange(){
 
 function getSelectedPageObjects(){
     var selectedPageObjects = [];
-    $(".page-objects-input").each(function(){
+    $(".selected-page").each(function(){
         if($(this).val().length > 0){
             selectedPageObjects.push($(this).val());
         }

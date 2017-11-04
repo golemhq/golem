@@ -82,3 +82,7 @@ html {
 .step-first-input-container {
 	width: 30%;
 }
+
+#pageObjects input.selected-page {
+	cursor: default;
+}

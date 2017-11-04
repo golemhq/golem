@@ -430,7 +430,9 @@ def new_tree_element():
         elem_type = request.form['elementType']
         is_dir = json.loads(request.form['isDir'])
         full_path = request.form['fullPath']
+        add_parents = request.form['addParents']
         
+        full_path = full_path.replace(' ', '_')
         dot_path = full_path
 
         errors = []
@@ -438,9 +440,6 @@ def new_tree_element():
         full_path = full_path.split('.')
         element_name = full_path.pop()
         parents = full_path
-
-        element_name.replace(' ', '_')
-
         # verify that the string only contains letters, numbers
         # dashes or underscores
         for c in element_name:
@@ -462,7 +461,8 @@ def new_tree_element():
                     errors = gui_utils.new_directory(root_path, project, parents,
                                                      element_name, dir_type='pages')
                 else:
-                    errors = page_object.new_page_object(root_path, project, parents, element_name)
+                    errors = page_object.new_page_object(root_path, project, parents,
+                                                         element_name, add_parents=add_parents)
             elif elem_type == 'suite':
                 if is_dir:
                     errors = gui_utils.new_directory(root_path, project, parents,

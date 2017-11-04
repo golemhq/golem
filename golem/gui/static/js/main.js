@@ -19,109 +19,7 @@ window.onload = function () {
  };
 
 
-function displayErrorModal(errors){
-    var ulContent = '';
-    for(e in errors){
-        ulContent += "<li>"+errors[e]+"</li>";
-    } 
-    $("#errorList").html(ulContent);
-    $("#errorModal").modal("show");
-    window.setTimeout(function(){
-        $("#errorModal .dismiss-modal").focus();
-    }, 500);
-}
 
-
-// How to use the confirm modal:
-// Call displayConfirmModal(title, message, callback),
-//
-// When the Confirm Modal is confirmed the callback is called.
-// Pass an anonymous function as callback in order to include parameters with it,
-// example:
-// var callback = function(){
-//     myCustomFunction(param1, param2);
-// }
-function displayConfirmModal(title, message, callback){
-    $("#confirmModal .modal-title").html(title);
-    $("#confirmModal .modal-body").html(message);
-    $("#confirmModal button.confirm").click(function(){
-        $("#confirmModal .modal-title").html('');
-        $("#confirmModal .modal-body").html('');
-        $("#confirmModal button.confirm").unbind('click');
-        $("#confirmModal").modal("hide");
-        callback();
-    })
-    $("#confirmModal").modal("show");
-    $('#confirmModal').on('shown.bs.modal', function () {
-        $("#confirmModal button.confirm").focus();
-    });
-}
-
-
-// How to use the prompt modal:
-// Call displayPromptModal(title, description, inputValue, callback),
-//
-// When the 'Save' button is clicked, the callback function is called.
-// Pass an anonymous function as callback in order to include parameters with it,
-// example:
-// var callback = function(){
-//     myCustomFunction(param1, param2);
-// }
-function displayPromptModal(title, description, inputValue, callback){
-    $("#promptModal .modal-title").html(title);
-    $("#promptModal .modal-body .description").html(description);
-    $("#promptModal .modal-body input").val(inputValue);
-    $("#promptModal button.confirm").click(function(){
-        callback();
-    })
-    $("#promptModal").modal("show");
-    $('#promptModal').on('shown.bs.modal', function () {
-        $('#promptModalInput').focus();
-    });
-}
-
-
-// How to use the select prompt modal:
-// Call displaySelectPromptModal(title, description, options, buttonLabel, callback),
-//
-// When the user selects an option from the select, the callback function is called.
-// Pass an anonymous function as callback in order to include parameters with it,
-// example:
-// var callback = function(){
-//     myCustomFunction(param1, param2);
-// }
-function displaySelectPromptModal(title, description, options, buttonLabel, callback){
-    buttonLabel = buttonLabel || 'Continue';
-    $("#selectPromptModal .modal-title").html(title);
-    $("#selectPromptModal .modal-body .description").html(description);
-    
-    $("#selectPromptContinueButton").html(buttonLabel);
-
-    $("#selectPromptSelect").html('');
-    $.each(options, function(i){
-        var itemval = "<option value='"+options[i]+"'>"+options[i]+"</option>";
-        $("#selectPromptSelect").append(itemval)
-    });
-    $("#selectPromptModal button.confirm").focus();
-    $("#selectPromptModal").modal("show");
-    $('#selectPromptModal').on('shown.bs.modal', function () {
-        $("#selectPromptModal button.confirm").focus();
-    });
-
-    var confirm = function(){
-        var selectedVal = $("#selectPromptSelect").val();
-        callback(selectedVal);
-        $("#selectPromptModal").modal("hide");
-        $("#selectPromptSelect").unbind('change');
-        $("#selectPromptSelect").unbind('change');
-        $("#promptModal button.confirm").unbind('click');
-        $("#selectPromptModal button.confirm").unbind('click');
-    }
-
-    $("#selectPromptModal button.confirm").click(function(){
-        confirm();
-    })
-}
 
 function passIcon(){
     return '<span class="passed-green"><span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span></span>'
@@ -160,6 +58,122 @@ const utils = new function(){
         else if(type == 'info')
             toastr.info(msg)
     }
+
+
+
+    this.displayErrorModal = function(errors){
+        var ulContent = '';
+        for(e in errors){
+            ulContent += "<li>"+errors[e]+"</li>";
+        } 
+        $("#errorList").html(ulContent);
+        $("#errorModal").modal("show");
+        window.setTimeout(function(){
+            $("#errorModal .dismiss-modal").focus();
+        }, 500);
+    }
+
+
+    // How to use the confirm modal:
+    // Call displayConfirmModal(title, message, callback),
+    //
+    // When the Confirm Modal is confirmed the callback is called.
+    // Pass an anonymous function as callback in order to include parameters with it,
+    // example:
+    // var callback = function(){
+    //     myCustomFunction(param1, param2);
+    // }
+    this.displayConfirmModal = function(title, message, callback){
+        $("#confirmModal .modal-title").html(title);
+        $("#confirmModal .modal-body").html(message);
+        $("#confirmModal button.confirm").click(function(){
+            $("#confirmModal .modal-title").html('');
+            $("#confirmModal .modal-body").html('');
+            $("#confirmModal button.confirm").unbind('click');
+            $("#confirmModal").modal("hide");
+            callback();
+        })
+        $("#confirmModal").modal("show");
+        $('#confirmModal').on('shown.bs.modal', function () {
+            $("#confirmModal button.confirm").focus();
+        });
+    }
+
+
+    // How to use the prompt modal:
+    // Call displayPromptModal(title, description, inputValue, callback),
+    //
+    // When the 'Save' button is clicked, the callback function is called.
+    // Pass an anonymous function as callback in order to include parameters with it,
+    // example:
+    // var callback = function(){
+    //     myCustomFunction(param1, param2);
+    // }
+    this.displayPromptModal = function(title, description, inputValue, inputPlaceholder, callback){
+        $("#promptModal .modal-title").html(title);
+        $("#promptModal .modal-body .description").html(description);
+        $("#promptModal .modal-body input").val(inputValue);
+        
+        $("#promptModal").modal("show");
+        $('#promptModal').on('shown.bs.modal', function () {
+            $('#promptModalInput').focus();
+        });
+
+        var sendValue = function(){
+            var sentValue = $("#promptModalInput").val();
+            callback(sentValue);
+            $("#promptModal").modal("hide");
+            $("#prompSaveButton").unbind('click');
+        }
+
+        $("#promptModal button.confirm").click(function(){
+            sendValue();
+        })
+    }
+
+
+    // How to use the select prompt modal:
+    // Call displaySelectPromptModal(title, description, options, buttonLabel, callback),
+    //
+    // When the user selects an option from the select, the callback function is called.
+    // Pass an anonymous function as callback in order to include parameters with it,
+    // example:
+    // var callback = function(){
+    //     myCustomFunction(param1, param2);
+    // }
+    this.displaySelectPromptModal = function(title, description, options, buttonLabel, callback){
+        buttonLabel = buttonLabel || 'Continue';
+        $("#selectPromptModal .modal-title").html(title);
+        $("#selectPromptModal .modal-body .description").html(description);
+        
+        $("#selectPromptContinueButton").html(buttonLabel);
+
+        $("#selectPromptSelect").html('');
+        $.each(options, function(i){
+            var itemval = "<option value='"+options[i]+"'>"+options[i]+"</option>";
+            $("#selectPromptSelect").append(itemval)
+        });
+        $("#selectPromptModal button.confirm").focus();
+        $("#selectPromptModal").modal("show");
+        $('#selectPromptModal').on('shown.bs.modal', function () {
+            $("#selectPromptModal button.confirm").focus();
+        });
+
+        var confirm = function(){
+            var selectedVal = $("#selectPromptSelect").val();
+            callback(selectedVal);
+            $("#selectPromptModal").modal("hide");
+            $("#selectPromptSelect").unbind('change');
+            $("#selectPromptSelect").unbind('change');
+            $("#selectPromptModal button.confirm").unbind('click');
+        }
+
+        $("#selectPromptModal button.confirm").click(function(){
+            confirm();
+        })
+    }
+
+
 }
 
 
