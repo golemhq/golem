@@ -55,41 +55,45 @@ function startAllSelectorInputAutocomplete(){
 function addPageObjectInput(){
     $("#elements").append(
         "<div class='element col-md-12 clearfix'> \
-            <div class='col-xs-3 no-pad-left padding-right-5'> \
-                <div class='input-group po-input-group'> \
-                    <input type='text' class='form-control element-name' value='' \
-                        placeholder='name'> \
+            <div style='width: calc(100% - 34px)'>\
+                <div class='col-xs-3 no-pad-left padding-right-5'> \
+                    <div class='input-group po-input-group'> \
+                        <input type='text' class='form-control element-name' value='' \
+                            placeholder='name'> \
+                    </div> \
                 </div> \
-            </div> \
-            <div class='col-xs-3 padding-left-5 padding-right-5'> \
-                <div class='input-group po-input-group'> \
-                    <input type='text' class='form-control element-selector' \
-                        value='' placeholder='selector'> \
+                <div class='col-xs-3 padding-left-5 padding-right-5'> \
+                    <div class='input-group po-input-group'> \
+                        <input type='text' class='form-control element-selector' \
+                            value='' placeholder='selector'> \
+                    </div> \
                 </div> \
-            </div> \
-            <div class='col-xs-3 padding-left-5 padding-right-5'> \
-                <div class='input-group po-input-group'> \
-                    <input type='text' class='form-control element-value' \
-                        value='' placeholder='value'> \
+                <div class='col-xs-3 padding-left-5 padding-right-5'> \
+                    <div class='input-group po-input-group'> \
+                        <input type='text' class='form-control element-value' \
+                            value='' placeholder='value'> \
+                    </div> \
                 </div> \
-            </div> \
-            <div class='col-xs-3 padding-left-5 no-pad-right'> \
-                <div class='input-group po-input-group'> \
-                    <input type='text' class='form-control element-display-name' \
-                        value='' placeholder='display name'> \
+                <div class='col-xs-3 padding-left-5 no-pad-right'> \
+                    <div class='input-group po-input-group'> \
+                        <input type='text' class='form-control element-display-name' \
+                            value='' placeholder='display name'> \
+                    </div> \
                 </div> \
-            </div> \
+            </div>\
+            <div class='step-remove-icon'>\
+                <a href='javascript:void(0)' onclick='deleteElement(this);'>\
+                    <span class='glyphicon glyphicon-remove' aria-hidden='true'></span>\
+                </a>\
+            </div>\
         </div>");
 
     // give focus to the last input
     $("#elements>div").last().find("input").first().focus();
-
     startAllSelectorInputAutocomplete();
-
     $(".element-name").keyup(function(){
         $(this).parent().parent().parent().find('.element-display-name').val($(this).val());
     });
-
     $("#elements input").on("change", function(){
         unsavedChanges = true;
     });
@@ -184,5 +188,14 @@ function loadCodeView(){
     unsavedChanges = false;
 
     // redirect to gui view
-    window.location.replace("/project/"+project+"/page/"+pageObjectName+"/code/");
+    //window.location.replace("/project/"+project+"/page/"+pageObjectName+"/code/");
+    var pathname = window.location.pathname;
+    window.location.replace(pathname + 'code/');
+}
+
+
+
+function deleteElement(elem){
+    $(elem).parent().parent().remove();
+    unsavedChanges = true;
 }

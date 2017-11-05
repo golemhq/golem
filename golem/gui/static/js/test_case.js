@@ -25,14 +25,16 @@ $(document).ready(function() {
 
     $(".page-objects-input").blur(function(e) {
         getSelectedPageObjectElements();
-
         checkIfPageObjectExists(e);
-
     });
 
     $(".page-objects-input").keyup(function(e) {
         if (e.which == 13) // Enter key
         getSelectedPageObjectElements();
+    });
+
+    $('#pageModal').on('hidden.bs.modal', function () {
+        getSelectedPageObjectElements()
     });
 
     // set unsaved changes watcher
@@ -54,6 +56,10 @@ var testCase = new function(){
             <div class='input-group'> \
                 <input type='text' disabled class='form-control no-border-radius \
                     selected-page' value='"+pageName+"'> \
+                <span class='input-group-btn input-middle-btn'>\
+                    <button class='btn btn-default' type='button' onclick='testCase.loadPageInModal(this)'>\
+                    <span class='glyphicon glyphicon-edit' aria-hidden='true'></span></button>\
+                </span>\
                 <span class='input-group-btn input-middle-btn'> \
                     <button class='btn btn-default' type='button' \
                         onclick='openPageObjectInNewWindow(this)'> \
@@ -153,6 +159,12 @@ var testCase = new function(){
         $("#pageObjects").append(newPageInput);
         getSelectedPageObjectElements();
         unsavedChanges = true;
+    }
+
+    this.loadPageInModal = function(elem){
+        var inputVal = $(elem).parent().parent().find('input').val();
+        $("#pageModalIframe").attr('src', '/project/'+project+'/page/'+inputVal+'/no_sidebar/');
+        $("#pageModal").modal('show');        
     }
 }
 

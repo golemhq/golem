@@ -26,7 +26,9 @@ function loadGuiView(){
     codeEditor.markClean();
 
     // redirect to gui view
-    window.location.replace("/project/"+project+"/page/"+pageObjectName+"/");
+    //window.location.replace("/project/"+project+"/page/"+pageObjectName+"/");
+    var pathname = window.location.pathname;
+    window.location.replace(pathname.replace('/code/', '/'));
 }
 
 

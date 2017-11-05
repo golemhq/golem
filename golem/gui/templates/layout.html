@@ -31,8 +31,17 @@
   <div class="container-fluid">
 
 
-  <script>
-    if(localStorage.getItem('sidebarCollapse') == 'true'){
+
+
+
+<!-- <div class="wrapper"> -->
+    <!-- Sidebar Holder -->
+
+<script>
+    if({% if no_sidebar %}true{%else%}false{%endif%}){
+      document.write("<div id='wrapper' class='no-sidebar'>") 
+    }
+    else if(localStorage.getItem('sidebarCollapse') == 'true'){
       document.write("<div id='wrapper' class='sidebar-collapsed'>")
     }
     else{
@@ -40,14 +49,7 @@
     }
   </script>
 
-<!-- <div class="wrapper"> -->
-    <!-- Sidebar Holder -->
-    
-
-
-    
-
-    <nav id="sidebar" class="">
+  <nav id="sidebar" class="">
         <div class="sidebar-header">
             <a href="/">
               <h3>Golem</h3>
@@ -145,9 +147,9 @@
             </li>
         </ul>
     </nav>
-
+    
     <!-- Page Content Holder -->
-    <div id="content">
+    <div id="content" class="container-fluid">
       {% block content %}
       {% endblock %}
     </div>

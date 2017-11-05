@@ -53,6 +53,9 @@
                     <div class="input-group">
                         <input type="text" disabled class="form-control no-border-radius selected-page" value="{{page}}">
                         <span class="input-group-btn input-middle-btn">
+                            <button class="btn btn-default" type="button" onclick="testCase.loadPageInModal(this)"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></button>
+                        </span>
+                        <span class="input-group-btn input-middle-btn">
                             <button class="btn btn-default" type="button" onclick="openPageObjectInNewWindow(this)"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></button>
                         </span>
                         <span class="input-group-btn">
@@ -414,6 +417,28 @@
         <button type="button" class="btn btn-default" onclick="testRunner.runTestCase()">Re-run Test</button>
         <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Dismiss</button>
       </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- page modal -->
+<div class="modal fade" id="pageModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" style>
+    <div class="modal-content">
+      <div class="modal-header" style="padding-top: 10px; padding-bottom: 5px; height: 41px;">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <!-- <h4 class="modal-title">a</h4> -->
+      </div>
+      <div class="modal-body">
+
+        <iframe id="pageModalIframe"></iframe>
+
+      </div>
+      <!-- <div class="modal-footer">
+        <button type="button" class="btn btn-default" onclick="testRunner.runTestCase()">Re-run Test</button>
+        <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Dismiss</button>
+      </div> -->
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->

@@ -21,3 +21,14 @@
 pre {
     margin-bottom: 0px;
 }
+
+.step-remove-icon {
+    float: right;
+    height: 34px;
+    line-height: 34px;
+    width: 16px;
+}
+
+.step-remove-icon a {
+    color: black;
+}

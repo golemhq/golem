@@ -188,11 +188,20 @@ def test_case_code_view(project, test_case_name):
 def page_view(project, full_page_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
-
     page_object_data = page_object.get_page_object_content(project, full_page_name)
-
     return render_template('page_object.html', project=project, page_object_data=page_object_data,
                            page_name=full_page_name)
+
+
+# PAGE OBJECT VIEW no sidebar
+@app.route("/project/<project>/page/<full_page_name>/no_sidebar/")
+@login_required
+def page_view_no_sidebar(project, full_page_name):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+    page_object_data = page_object.get_page_object_content(project, full_page_name)
+    return render_template('page_object.html', project=project, page_object_data=page_object_data,
+                           page_name=full_page_name, no_sidebar=True)
 
 
 # PAGE OBJECT CODE VIEW
@@ -205,6 +214,17 @@ def page_code_view(project, full_page_name):
     return render_template('page_object_code.html', project=project,
                            page_object_data=page_object_data, page_name=full_page_name)
 
+
+# PAGE OBJECT CODE VIEW no sidebar
+@app.route("/project/<project>/page/<full_page_name>/no_sidebar/code/")
+@login_required
+def page_code_view_no_sidebar(project, full_page_name):
+    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+        return render_template('not_permission.html')
+    page_object_data = page_object.get_page_object_content(project, full_page_name)
+    return render_template('page_object_code.html', project=project,
+                           page_object_data=page_object_data, page_name=full_page_name,
+                           no_sidebar=True)
 
 # SUITE VIEW
 @app.route("/project/<project>/suite/<suite>/")

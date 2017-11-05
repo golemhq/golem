@@ -86,3 +86,35 @@ html {
 #pageObjects input.selected-page {
 	cursor: default;
 }
+
+#pageModal.modal .modal-dialog{
+	width: auto;
+	margin: 10px;
+	height: 90%;
+
+}
+
+#pageModal.modal .modal-dialog .modal-content{
+	height: 100%;
+}
+
+#pageModal.modal .modal-dialog .modal-content .modal-body{
+	width: 100%;
+	height: calc(100% - 41px);
+	padding: 0px;
+}
+
+#pageModal #pageModalIframe {
+	border: none;
+	width: 100%;
+	height: 100%;
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+}
+
+@media (min-width: 900px){
+	#pageModal.modal .modal-dialog{
+    	width: 85%;
+    	margin: 30px auto;
+    }
+}

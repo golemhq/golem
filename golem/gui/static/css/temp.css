@@ -92,6 +92,13 @@ p {
     margin-left: 90px;
 }
 
+#wrapper.no-sidebar #sidebar {
+    display: none;
+}
+
+#wrapper.no-sidebar #content {
+    margin-left:0px;
+}
 
 /*#sidebar.active .sidebar-header h3, #sidebar.active .CTAs {*/
 #wrapper.sidebar-collapsed #sidebar .sidebar-header h3{
