@@ -489,37 +489,38 @@ function getPageObjectElements(){
     selectedPageObjectsElements = [];
 
     for(po in selectedPageObjects){
+        var thisPageName = selectedPageObjects[po];
         $.ajax({
             url: "/get_selected_page_object_elements/",
             data: {
                  "project": project,
-                 "pageObject": selectedPageObjects[po],
+                 "pageObject": thisPageName,
              },
              dataType: 'json',
              type: 'POST',
              success: function(data) {
-                // TODO, add elements and functions one by one
-
-                // check if element does no already exist in selected ...
-                if(data.element_list.length > 0){
-                    var elemIsInSelectedPOelems = elemIsInSelectedPageObjectElements(
-                                                        selectedPageObjectsElements,
-                                                        data.element_list[0].element_full_name)
-                    if(!elemIsInSelectedPOelems){
-                        selectedPageObjectsElements = selectedPageObjectsElements.concat(data.element_list);
-                        //startAllElementInputAutocomplete(); 
-                    }
+                if(data.error == 'page does not exist'){
+                    // mark page as not exist
+                    $("input[value='"+thisPageName+"']").addClass('not-exist');
+                    // $("input[value='"+thisPageName+"']").attr('data-toggle', 'tooltip');
+                    // $("input[value='"+thisPageName+"']").attr('title', 'tooltip');
+                    // $("input[value='"+thisPageName+"']").tooltip();
                 }
-                if(data.function_list.length > 0){
-                    var functionIsInSelectedFunctions = functionIsInSelectedPageObjectFunctions(
-                                                            selectedPageObjectsFunctions,
-                                                            data.function_list[0].function_name)
-                    if(!functionIsInSelectedFunctions){
-                        selectedPageObjectsFunctions = selectedPageObjectsFunctions.concat(data.function_list);
-                        startStepFirstInputAutocomplete();
-                    }
-                }
-                startAllElementInputAutocomplete();
+                else{
+                    // concat elements
+                    selectedPageObjectsElements = selectedPageObjectsElements.concat(data.content.element_list);
+                    // remove duplicates
+                    selectedPageObjectsElements = selectedPageObjectsElements.filter(function (x, i, a) { 
+                        return selectedPageObjectsElements.indexOf(x) == i; 
+                    });
+                    // concat functions
+                    selectedPageObjectsFunctions = selectedPageObjectsFunctions.concat(data.content.function_list);
+                    // remove duplicates
+                    selectedPageObjectsFunctions = selectedPageObjectsFunctions.filter(function (x, i, a) { 
+                        return selectedPageObjectsFunctions.indexOf(x) == i; 
+                    });
+                    startAllElementInputAutocomplete();
+                } 
              },
              error: function() {
              }
@@ -609,23 +610,23 @@ function getSelectedPageObjects(){
     return selectedPageObjects
 }
 
-function elemIsInSelectedPageObjectElements(selectedElements, elementName){
-    for(elem in selectedPageObjectsElements){
-        if(selectedPageObjectsElements[elem].element_full_name == elementName){
-            return true
-        }
-    }
-    return false
-}
+// function elemIsInSelectedPageObjectElements(selectedElements, elementName){
+//     for(elem in selectedPageObjectsElements){
+//         if(selectedPageObjectsElements[elem].element_full_name == elementName){
+//             return true
+//         }
+//     }
+//     return false
+// }
 
-function functionIsInSelectedPageObjectFunctions(selectedFunctions, functionName){
-    for(func in selectedPageObjectsFunctions){
-        if(selectedPageObjectsFunctions[func].function_name == functionName){
-            return true
-        }
-    }
-    return false
-}
+// function functionIsInSelectedPageObjectFunctions(selectedFunctions, functionName){
+//     for(func in selectedPageObjectsFunctions){
+//         if(selectedPageObjectsFunctions[func].function_name == functionName){
+//             return true
+//         }
+//     }
+//     return false
+// }
 
 
 function openPageObjectInNewWindow(elem){

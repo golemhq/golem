@@ -118,3 +118,8 @@ html {
     	margin: 30px auto;
     }
 }
+
+.not-exist {
+	/*border: solid 2px #d9534f;*/
+	box-shadow: inset 0px 0px 4px 1px #d9534f;
+}

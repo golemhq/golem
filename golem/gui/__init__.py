@@ -438,8 +438,15 @@ def get_selected_page_object_elements():
     if request.method == 'POST':
         project = request.form['project']
         page_name = request.form['pageObject']
-        po_elements = page_object.get_page_object_content(project, page_name)
-        return json.dumps(po_elements)
+        result = {
+            'error': None,
+            'content': []
+        }
+        if not page_object.page_exists(root_path, project, page_name):
+            result['error'] = 'page does not exist'
+        else:
+            result['content'] = page_object.get_page_object_content(project, page_name)
+        return json.dumps(result)
 
 
 @app.route("/new_tree_element/", methods=['POST'])

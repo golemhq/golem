@@ -6,6 +6,13 @@ import inspect
 from golem.core import utils
 
 
+
+def page_exists(root_path, project, full_page_name):
+    page_rel_path = os.sep.join(full_page_name.split('.'))
+    path = os.path.join(root_path, 'projects', project, 'pages', page_rel_path + '.py')
+    return os.path.isfile(path)
+
+
 def get_page_object_content(project, full_page_name):
     # TODO REMOVE _, parents = utils.separate_file_from_parents(full_page_name)
     
@@ -130,9 +137,3 @@ def new_page_object(root_path, project, parents, page_name, add_parents=False):
         with open(page_path, 'w') as po_file:
             po_file.write('')
     return errors
-
-
-def page_exists(root_path, project, full_page_name):
-    full_page_path = full_page_name.replace('.', os.sep)
-    path = os.path.join(root_path, 'projects', project, full_page_path + '.py')
-    return os.isfile(path)
