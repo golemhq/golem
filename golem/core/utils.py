@@ -401,6 +401,7 @@ def create_new_project(workspace, project):
     environments_path = os.path.join(workspace, 'projects', project, 'environments.json')
     with open(environments_path, 'a') as environments_file:
         environments_file.write('{}')
+    print('Project {} created'.format(project))
 
 
 def create_demo_project(workspace):

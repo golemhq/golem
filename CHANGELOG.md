@@ -5,6 +5,9 @@
 
 ### Changed
 - Split project dashboard into suites, tests and pages
+- Can add new pages from the test builder
+- Can edit pages from the test builder in a modal dialog
+- Add file button & add folder button in Suites, Tests and Pages
 
 ## [0.3.0] - 2017-10-16
 

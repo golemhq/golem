@@ -14,11 +14,6 @@ python golem.py createtest <project name> <test name>
 
 ![add-test](_static/img/add-test.png "Add Test")
 
-<div class="admonition note">
-    <p class="first admonition-title">Note</p>
-    <p>It is possible to add folders to the list by appending '/' at the end</p>
-</div>
-
 A new test created with either of these options will have the following structure:
 
 ```python

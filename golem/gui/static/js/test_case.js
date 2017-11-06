@@ -10,8 +10,8 @@ $(document).ready(function() {
 
     getGlobalActions();
     getPageObjects();
-    getSelectedPageObjectElements();
-    startAllElementInputAutocomplete();
+    getPageObjectElements();
+    //startAllElementInputAutocomplete();
     startAllValueInputAutocomplete();  
 
     $(".dato-variable").blur(function() {
@@ -24,17 +24,17 @@ $(document).ready(function() {
     });
 
     $(".page-objects-input").blur(function(e) {
-        getSelectedPageObjectElements();
+        getPageObjectElements();
         checkIfPageObjectExists(e);
     });
 
     $(".page-objects-input").keyup(function(e) {
         if (e.which == 13) // Enter key
-        getSelectedPageObjectElements();
+        getPageObjectElements();
     });
 
     $('#pageModal').on('hidden.bs.modal', function () {
-        getSelectedPageObjectElements()
+        getPageObjectElements()
     });
 
     // set unsaved changes watcher
@@ -157,7 +157,7 @@ var testCase = new function(){
     this.addPageToList = function(pageName){
         var newPageInput = testCase.generatePageInput(pageName);
         $("#pageObjects").append(newPageInput);
-        getSelectedPageObjectElements();
+        getPageObjectElements();
         unsavedChanges = true;
     }
 
@@ -316,7 +316,7 @@ function stepFirstInputChange(elem){
         // five focus to the first parameter input
         step.find(".parameter-input").first().focus();
 
-        getSelectedPageObjectElements()
+        getPageObjectElements();
 
         startAllValueInputAutocomplete();
 
@@ -483,7 +483,7 @@ function getPageObjectFunctionParameters(functionName){
 }
 
 
-function getSelectedPageObjectElements(){
+function getPageObjectElements(){
     var selectedPageObjects = getSelectedPageObjects();
 
     selectedPageObjectsElements = [];
@@ -502,21 +502,24 @@ function getSelectedPageObjectElements(){
 
                 // check if element does no already exist in selected ...
                 if(data.element_list.length > 0){
-                    if(! checkIfElementIsInSelectedPageObjectElements(
-                                selectedPageObjectsElements,
-                                data.element_list[0].element_full_name)){
+                    var elemIsInSelectedPOelems = elemIsInSelectedPageObjectElements(
+                                                        selectedPageObjectsElements,
+                                                        data.element_list[0].element_full_name)
+                    if(!elemIsInSelectedPOelems){
                         selectedPageObjectsElements = selectedPageObjectsElements.concat(data.element_list);
-                        startAllElementInputAutocomplete(); 
+                        //startAllElementInputAutocomplete(); 
                     }
                 }
                 if(data.function_list.length > 0){
-                    if(! checkIfFunctionIsInSelectedPageObjectFunctions(
-                                                    selectedPageObjectsFunctions,
-                                                    data.function_list[0].function_name)){
+                    var functionIsInSelectedFunctions = functionIsInSelectedPageObjectFunctions(
+                                                            selectedPageObjectsFunctions,
+                                                            data.function_list[0].function_name)
+                    if(!functionIsInSelectedFunctions){
                         selectedPageObjectsFunctions = selectedPageObjectsFunctions.concat(data.function_list);
                         startStepFirstInputAutocomplete();
                     }
                 }
+                startAllElementInputAutocomplete();
              },
              error: function() {
              }
@@ -606,7 +609,7 @@ function getSelectedPageObjects(){
     return selectedPageObjects
 }
 
-function checkIfElementIsInSelectedPageObjectElements(selectedElements, elementName){
+function elemIsInSelectedPageObjectElements(selectedElements, elementName){
     for(elem in selectedPageObjectsElements){
         if(selectedPageObjectsElements[elem].element_full_name == elementName){
             return true
@@ -615,7 +618,7 @@ function checkIfElementIsInSelectedPageObjectElements(selectedElements, elementN
     return false
 }
 
-function checkIfFunctionIsInSelectedPageObjectFunctions(selectedFunctions, functionName){
+function functionIsInSelectedPageObjectFunctions(selectedFunctions, functionName){
     for(func in selectedPageObjectsFunctions){
         if(selectedPageObjectsFunctions[func].function_name == functionName){
             return true

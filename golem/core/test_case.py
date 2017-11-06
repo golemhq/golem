@@ -182,6 +182,7 @@ def new_test_case(root_path, project, parents, tc_name):
             test_file.write(test_case_content)
         with open(data_full_path, 'w') as data_file:
             data_file.write('')
+        print('Test {} created for project {}'.format(tc_name, project))
     return errors
 
 

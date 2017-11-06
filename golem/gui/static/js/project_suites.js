@@ -31,7 +31,7 @@ function generateHealthChart(projectName){
         type: 'POST',
         success: function( healthData ) { 
             if($.isEmptyObject(healthData)){
-                $("#healthContainer").html("<div class='text-center' style='padding-top: 55px'>no data</div>");
+                $("#healthContainer").html("<div class='text-center' style='padding-top: 0px; color: darkgrey'>no previous executions</div>");
             }
             else{
                 loadHealthData(healthData);

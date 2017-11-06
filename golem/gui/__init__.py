@@ -488,7 +488,7 @@ def new_tree_element():
                     errors = gui_utils.new_directory(root_path, project, parents,
                                                      element_name, dir_type='suites')
                 else:
-                    errors = suite.new_suite(root_path, project, element_name)
+                    errors = suite.new_suite(root_path, project, parents, element_name)
         element = {
             'name': element_name,
             'full_path': dot_path,

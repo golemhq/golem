@@ -26,20 +26,19 @@ def save_suite(root_path, project, suite, test_cases, workers, browsers, environ
         suite_file.write('tests = {}\n'.format(_format_list_items(test_cases)))
 
 
-def new_suite(root_path, project, suite_name):
+def new_suite(root_path, project, parents, suite_name):
     errors = []
-    path = os.path.join(root_path, 'projects', project, 'suites', '{}.py'.format(suite_name))
+    path = os.path.join(root_path, 'projects', project, 'suites',
+                        os.sep.join(parents), '{}.py'.format(suite_name))
     if os.path.isfile(path):
         errors.append('A suite with that name already exists')
-
     if not errors:
-        suite_path = os.path.join(root_path, 'projects', project, 'suites')
-        suite_full_path = os.path.join(suite_path, suite_name + '.py')
-        test_case_content = ('\n'
-                             'browsers = []\n\n'
-                             'environments = []\n\n'
-                             'workers = 1\n\n'
-                             'tests = []\n')
-        with open(suite_full_path, 'w') as suite_file:
-            suite_file.write(test_case_content)
+        suite_content = ('\n'
+                         'browsers = []\n\n'
+                         'environments = []\n\n'
+                         'workers = 1\n\n'
+                         'tests = []\n')
+        with open(path, 'w') as suite_file:
+            suite_file.write(suite_content)
+        print('Suite {} created for project {}'.format(suite_name, project))
     return errors
