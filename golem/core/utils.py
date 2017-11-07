@@ -127,7 +127,7 @@ def _generate_dict_from_file_structure(full_path, original_path=None):
         full_file_path = os.path.join(full_path, filename)
 
         rel_file_path = os.path.relpath(full_file_path, original_path)
-        dot_file_path = rel_file_path.replace('/', '.')
+        dot_file_path = rel_file_path.replace(os.sep, '.')
         file_element = _directory_element('file', filename, dot_file_path)
         element['sub_elements'].append(file_element)
 

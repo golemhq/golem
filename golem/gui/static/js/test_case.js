@@ -12,6 +12,7 @@ $(document).ready(function() {
     getPageObjects();
     getPageObjectElements();
     //startAllElementInputAutocomplete();
+    startStepFirstInputAutocomplete();
     startAllValueInputAutocomplete();  
 
     $(".dato-variable").blur(function() {
@@ -25,7 +26,6 @@ $(document).ready(function() {
 
     $(".page-objects-input").blur(function(e) {
         getPageObjectElements();
-        checkIfPageObjectExists(e);
     });
 
     $(".page-objects-input").keyup(function(e) {
@@ -228,7 +228,7 @@ function startStepFirstInputAutocomplete(){
     for(f in selectedPageObjectsFunctions){
         lookup.push({
             'value': selectedPageObjectsFunctions[f].full_function_name,
-            'data': 'data'
+            'data': selectedPageObjectsFunctions[f].full_function_name
         })        
     }
 
@@ -242,12 +242,12 @@ function startStepFirstInputAutocomplete(){
             stepFirstInputChange($(this));
             unsavedChanges = true;
         },
-        onSelect: function (suggestion) {
-            // not this is not always called, 
-            // sometimes the onchange is called before
-            stepFirstInputChange($(this));
-            unsavedChanges = true;
-        },
+        // onSelect: function (suggestion) {
+        //     // not this is not always called, 
+        //     // sometimes the onchange is called before
+        //     stepFirstInputChange($(this));
+        //     unsavedChanges = true;
+        // },
         onSearchStart: function () {
         },
         beforeRender: function (container) {},
@@ -268,7 +268,7 @@ function stepFirstInputChange(elem){
         step.find('.parameter-container').remove();
     }
 
-    var pageObjects = getSelectedPageObjects();
+    // var pageObjects = getSelectedPageObjects();
 
     if(isInGlobalActions(elemValue)){
         // this is a global action
@@ -300,6 +300,12 @@ function stepFirstInputChange(elem){
                                     parameter-input "+customClass+"' \
                                     placeholder='"+parameter.name+"'>";
         }
+        // else if(parameter.type == 'custom-param'){
+        //     var customClass = 'element-input value-input';
+        //     var input = "<input type='text' class='form-control \
+        //                             parameter-input "+customClass+"' \
+        //                             placeholder='"+parameter.name+"'>";
+        // }
         
         var newInput = $("<div class='col-sm-6 step-input-container parameter-container'> \
                             <div class='input-group'> \
@@ -316,16 +322,14 @@ function stepFirstInputChange(elem){
         // five focus to the first parameter input
         step.find(".parameter-input").first().focus();
 
-        getPageObjectElements();
+        // getPageObjectElements();
 
         startAllValueInputAutocomplete();
-
+        startAllElementInputAutocomplete();
         unsavedChanges = true;      
     }
-
     return false
 }
-
 
 
 function startAllValueInputAutocomplete(){
@@ -465,6 +469,7 @@ function getGlobalActionParameters(actionName){
     return false
 }
 
+
 function getPageObjectFunctionParameters(functionName){
     for(a in selectedPageObjectsFunctions){
         if(selectedPageObjectsFunctions[a].full_function_name == functionName){
@@ -473,7 +478,7 @@ function getPageObjectFunctionParameters(functionName){
                 var thisArgument = selectedPageObjectsFunctions[a].arguments[p];
                 parameters.push({
                     name: thisArgument,
-                    type: 'value'
+                    type: 'element'
                 })
             }
             return parameters
@@ -487,6 +492,7 @@ function getPageObjectElements(){
     var selectedPageObjects = getSelectedPageObjects();
 
     selectedPageObjectsElements = [];
+    selectedPageObjectsFunctions = [];
 
     for(po in selectedPageObjects){
         var thisPageName = selectedPageObjects[po];
@@ -507,19 +513,21 @@ function getPageObjectElements(){
                     // $("input[value='"+thisPageName+"']").tooltip();
                 }
                 else{
+                    // TODO
                     // concat elements
                     selectedPageObjectsElements = selectedPageObjectsElements.concat(data.content.element_list);
                     // remove duplicates
-                    selectedPageObjectsElements = selectedPageObjectsElements.filter(function (x, i, a) { 
-                        return selectedPageObjectsElements.indexOf(x) == i; 
-                    });
+                    // selectedPageObjectsElements = selectedPageObjectsElements.filter(function (x, i, a) { 
+                    //     return selectedPageObjectsElements.indexOf(x) == i; 
+                    // });
                     // concat functions
                     selectedPageObjectsFunctions = selectedPageObjectsFunctions.concat(data.content.function_list);
                     // remove duplicates
-                    selectedPageObjectsFunctions = selectedPageObjectsFunctions.filter(function (x, i, a) { 
-                        return selectedPageObjectsFunctions.indexOf(x) == i; 
-                    });
+                    // selectedPageObjectsFunctions = selectedPageObjectsFunctions.filter(function (x, i, a) { 
+                    //     return selectedPageObjectsFunctions.indexOf(x) == i; 
+                    // });
                     startAllElementInputAutocomplete();
+                    startStepFirstInputAutocomplete();
                 } 
              },
              error: function() {
@@ -609,24 +617,6 @@ function getSelectedPageObjects(){
     })
     return selectedPageObjects
 }
-
-// function elemIsInSelectedPageObjectElements(selectedElements, elementName){
-//     for(elem in selectedPageObjectsElements){
-//         if(selectedPageObjectsElements[elem].element_full_name == elementName){
-//             return true
-//         }
-//     }
-//     return false
-// }
-
-// function functionIsInSelectedPageObjectFunctions(selectedFunctions, functionName){
-//     for(func in selectedPageObjectsFunctions){
-//         if(selectedPageObjectsFunctions[func].function_name == functionName){
-//             return true
-//         }
-//     }
-//     return false
-// }
 
 
 function openPageObjectInNewWindow(elem){
@@ -767,34 +757,9 @@ function collapseTeardown(){
     $("#teardownSteps").slideUp('fast');   
 }
 
+
 function collapseSetup(){
     $("#showSetupLink").show();
     $("#setupSteps").slideUp('fast');
 }
-
-
-function checkIfPageObjectExists(input){
-    // var fullPageName = $(input).val();
-
-    // $.ajax({
-    //     url: "/page/page_exists/",
-    //     data: {
-    //         "project": project,
-    //         "pageObject": fullPageName
-    //     },
-    //     dataType: 'json',
-    //     type: 'POST',
-    //     success: function(pageExists) {
-    //         if(!pageExists){
-    //             // display prompt to create new page
-    //             var callback = function(){
-    //                 Project.deleteElement(element, elemFullPath, elemType);
-    //             }
-    //             displayConfirmModal('Create new page', 'Page '+elemFullPath+' does not exists, do you want to create it?')
-    //         }
-    //     }
-    // });
-
-}
-
 
