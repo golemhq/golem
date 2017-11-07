@@ -116,24 +116,26 @@ def new_page_object(root_path, project, parents, page_name, add_parents=False):
     if add_parents is true, the parent directories will be added if they do not exist."""
     errors = []
 
-    page_path = os.path.join(root_path, 'projects', project, 'pages',
+    full_page_path = os.path.join(root_path, 'projects', project, 'pages',
                              os.sep.join(parents), '{}.py'.format(page_name))
 
-    if os.path.isfile(page_path):
+    if os.path.isfile(full_page_path):
         errors.append('A page file with that name already exists')
     
     if not errors:
-        base_path = path = os.path.join(root_path, 'projects', project,
-                                        'pages', os.sep.join(parents))
-        if not os.path.exists(base_path):
+        page_path = os.path.join(root_path, 'projects', project,
+                                 'pages', os.sep.join(parents))
+        if not os.path.exists(page_path):
             if add_parents:
+                base_path = os.path.join(root_path, 'projects', project, 'pages')
                 for parent in parents:
                     base_path = os.path.join(base_path, parent)
-                    utils.create_new_directory(path=base_path, add_init=True)
+                    if not os.path.exists(base_path):
+                        utils.create_new_directory(path=base_path, add_init=True)
             else:
                 errors.append('Directory for new page does not exist')
 
     if not errors:
-        with open(page_path, 'w') as po_file:
+        with open(full_page_path, 'w') as po_file:
             po_file.write('')
     return errors

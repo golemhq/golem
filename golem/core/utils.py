@@ -217,9 +217,9 @@ def get_test_data(workspace, project, full_test_case_name):
     return data_list
 
 
-def get_test_data_dict_list(workspace, projects, full_test_case_name):
+def get_test_data_dict_list(workspace, project, full_test_case_name):
     data_dict_list = []
-    data_list = get_test_data(workspace, projects, full_test_case_name)
+    data_list = get_test_data(workspace, project, full_test_case_name)
     for data in data_list:
         data_dict_list.append(data)
     return data_dict_list

@@ -5,28 +5,33 @@ from subprocess import call
 import pytest
 
 
+
 # this is deprecated, sould be @pytest.fixture
 # but travis uses an old version of pytest for python 3.4
-@pytest.yield_fixture(scope="class")
-def test_directory_fixture():    
+@pytest.yield_fixture(scope="session")
+def testdir_fixture():    
     base_dir = os.getcwd()
     test_dir_name = 'temp_directory1'
     full_path = os.path.join(base_dir, test_dir_name)
     if os.path.exists(full_path):
-      shutil.rmtree(test_dir_name)
+        shutil.rmtree(test_dir_name)
     call(['golem-admin', 'createdirectory', test_dir_name])
-    yield {'full_path': full_path,
-           'base_path': base_dir,
-           'test_directory_name': test_dir_name}
+    yield {
+            'path': full_path,
+            'base_path': base_dir,
+            'name': test_dir_name}
     os.chdir(base_dir)
-    shutil.rmtree(test_dir_name)
+    shutil.rmtree(test_dir_name, ignore_errors=True)
 
 
-@pytest.mark.usefixtures("test_directory")
-@pytest.yield_fixture(scope="class")
-def project_fixture(test_directory_fixture):
-	project_name = 'temp_project1'
-	os.chdir(test_directory_fixture['test_directory_name'])
-	call(['python', 'golem.py', 'createproject', project_name])
-	yield {'test_directory_fixture': test_directory_fixture,
-            'project_name': project_name}
+@pytest.mark.usefixtures("testdir_fixture")
+@pytest.yield_fixture(scope="session")
+def project_fixture(testdir_fixture):
+    project_name = 'temp_project1'
+    os.chdir(testdir_fixture['name'])
+    call(['python', 'golem.py', 'createproject', project_name])
+    yield {
+            'testdir_fixture': testdir_fixture,
+            'name': project_name}
+    os.chdir(os.path.join(testdir_fixture['path'], 'projects'))
+    shutil.rmtree(project_name)

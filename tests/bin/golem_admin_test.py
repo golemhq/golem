@@ -1,21 +1,19 @@
 import os
 
-from tests.fixtures import test_directory_fixture
+from tests.fixtures import testdir_fixture
 
 
 class Test_startdirectory:
 
-    def test_start_new_directory(self, test_directory_fixture):
-        assert os.path.isdir(test_directory_fixture['full_path'])
+    def test_start_new_directory(self, testdir_fixture):
+        assert os.path.isdir(testdir_fixture['path'])
 
-    def test_new_directory_contents(self, test_directory_fixture):
-        listdir = os.listdir(test_directory_fixture['full_path'])
+    def test_new_directory_contents(self, testdir_fixture):
+        listdir = os.listdir(testdir_fixture['path'])
         files = [name for name in listdir 
-                 if os.path.isfile(os.path.join(test_directory_fixture['full_path'],
-                                   name))]
+                 if os.path.isfile(os.path.join(testdir_fixture['path'], name))]
         dirs = [name for name in listdir 
-                 if os.path.isdir(os.path.join(test_directory_fixture['full_path'],
-                                  name))]
+                 if os.path.isdir(os.path.join(testdir_fixture['path'], name))]
         if '.DS_Store' in files:
             files.remove('.DS_Store')
         assert len(files) == 4
