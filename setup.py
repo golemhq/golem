@@ -48,7 +48,7 @@ setup(
     install_requires=['Flask==0.12.2',
                       'Flask-login==0.4.0',
                       'selenium==3.6.0',
-                      'requests==2.18.4'
+                      'requests==2.18.4',
                       ],
     tests_require=['pytest'],
     entry_points={

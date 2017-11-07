@@ -107,8 +107,7 @@ def _generate_dict_from_file_structure(full_path, original_path=None):
     root_dir_name = os.path.basename(os.path.normpath(full_path))
     if not original_path:
         original_path = full_path
-    _ = os.path.relpath(full_path, original_path)
-    _ = _.replace('/', '.')
+    _ = os.path.relpath(full_path, original_path).replace(os.sep, '.')
     element = _directory_element('directory', root_dir_name, _)
 
     all_sub_elements = os.listdir(full_path)
