@@ -114,13 +114,15 @@ def get_global_actions():
             'name': 'http_get',
             'parameters': [{'name': 'url', 'type': 'value'},
                            {'name': 'headers', 'type': 'multiline-value'},
-                           {'name': 'params', 'type': 'value'}]
+                           {'name': 'params', 'type': 'value'},
+                           {'name': 'verify SSL certificate', 'type': 'value'}]
         },
         {
             'name': 'http_post',
             'parameters': [{'name': 'url', 'type': 'value'},
                            {'name': 'headers', 'type': 'value'},
-                           {'name': 'data', 'type': 'value'}]
+                           {'name': 'data', 'type': 'value'},
+                           {'name': 'verify SSL certificate', 'type': 'value'}]
         },
         {
             'name': 'navigate',
