@@ -1,5 +1,7 @@
 import os
 import shutil
+import random
+import string
 from subprocess import call
 
 import pytest
@@ -35,3 +37,17 @@ def project_fixture(testdir_fixture):
             'name': project_name}
     os.chdir(os.path.join(testdir_fixture['path'], 'projects'))
     shutil.rmtree(project_name)
+
+
+@pytest.mark.usefixtures("testdir_fixture")
+@pytest.yield_fixture(scope="class")
+def random_project_fixture(testdir_fixture):
+    random_value = ''.join(random.choice(string.ascii_lowercase) for _ in range(4))
+    random_name = 'project_' + random_value
+    os.chdir(testdir_fixture['name'])
+    call(['python', 'golem.py', 'createproject', random_name])
+    yield {
+            'testdir_fixture': testdir_fixture,
+            'name': random_name}
+    os.chdir(os.path.join(testdir_fixture['path'], 'projects'))
+    shutil.rmtree(random_name)

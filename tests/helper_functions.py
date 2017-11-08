@@ -14,4 +14,3 @@ def create_random_project(workspace):
     random_name = 'project_' + random_value
     create_project(workspace, random_name)
     return random_name
-

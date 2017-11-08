@@ -15,7 +15,6 @@ def page_exists(root_path, project, full_page_name):
 
 def get_page_object_content(project, full_page_name):
     # TODO REMOVE _, parents = utils.separate_file_from_parents(full_page_name)
-    
     modulex = importlib.import_module('projects.{0}.pages.{1}'.format(project, full_page_name))
     variable_list = [item for item in dir(modulex) if not item.startswith("__")]
     element_list = []
@@ -40,7 +39,7 @@ def get_page_object_content(project, full_page_name):
                 'function_name': var_name,
                 'full_function_name': ''.join([full_page_name, '.', var_name]),
                 'description': inspect.getdoc(variable),
-                'arguments': list(dict(inspect.signature(variable).parameters).keys()),
+                'arguments': list(inspect.signature(variable).parameters),
                 'code': inspect.getsource(variable)
             }
             function_list.append(new_function)
