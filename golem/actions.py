@@ -130,6 +130,10 @@ def debug():
         pass
 
 
+def pdb_debug():
+    import pdb
+    pdb.set_trace()
+
 def get(url):
     navigate(url)
 
