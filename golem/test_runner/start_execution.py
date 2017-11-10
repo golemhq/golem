@@ -7,7 +7,7 @@ from golem.core import (test_execution,
                         report,
                         environment_manager,
                         settings_manager)
-from golem.test_runner.multiprocess_executor import multiprocess_executor
+from golem.test_runner.multiprocess_executor import multiprocess_executor, run_test
 from golem.gui import gui_utils
 
 
