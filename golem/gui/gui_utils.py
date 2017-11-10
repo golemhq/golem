@@ -107,10 +107,6 @@ def get_global_actions():
             'parameters': []
         },
         {
-            'name': 'pdb_debug',
-            'parameters': []
-        },
-        {
             'name': 'get',
             'parameters': [{'name': 'url', 'type': 'value'}]
         },
