@@ -513,19 +513,19 @@ def wait_for_element_visible(element, timeout=20):
             timed_out = True
 
 
-def http_get(url, headers={}, params={}):
+def http_get(url, headers={}, params={}, verify_ssl_cert=True):
     step_message = 'Make GET request to {}'.format(url)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
-    response = requests.get(url, headers=headers, params=params)
+    response = requests.get(url, headers=headers, params=params, verify=verify_ssl_cert)
     store('last_response', response)
 
 
-def http_post(url, headers={}, data={}):
+def http_post(url, headers={}, data={}, verify_ssl_cert=True):
     step_message = 'Make POST request to {}'.format(url)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
-    response = requests.post(url, headers=headers, data=data)
+    response = requests.post(url, headers=headers, data=data, verify=verify_ssl_cert)
     store('last_response', response)
 
 
