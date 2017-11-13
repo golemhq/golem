@@ -426,7 +426,6 @@ def duplicate_element():
 
 @app.route("/rename_element/", methods=['POST'])
 def rename_element():
-    # lalala
     if request.method == 'POST':
         project = request.form['project']
         elem_type = request.form['elemType']
@@ -677,8 +676,8 @@ def save_test_case():
         test_case.save_test_case(root_path, project, test_name, description,
                                  page_objects, test_steps)
 
-        changelog.log_change(root_path, project, 'MODIFY', 'test', test_name,
-                              g.user.username)
+        # changelog.log_change(root_path, project, 'MODIFY', 'test', test_name,
+        #                       g.user.username)
         return json.dumps('ok')
 
 
@@ -723,27 +722,27 @@ def check_test_case_run_result():
         return json.dumps(result)
 
 
-@app.route("/change_test_name/", methods=['POST'])
-def change_test_name():
-    # DELETE
-    if request.method == 'POST':
-        project = request.form['project']
-        test_name = request.form['testName']
-        new_test_name = request.form['newTestName']
+# @app.route("/change_test_name/", methods=['POST'])
+# def change_test_name():
+#     # DELETE
+#     if request.method == 'POST':
+#         project = request.form['project']
+#         test_name = request.form['testName']
+#         new_test_name = request.form['newTestName']
 
-        test, parents = utils.separate_file_from_parents(test_name)
-        current_path = os.path.join(root_path, 'projects', project, 'tests',
-                                    os.sep.join(parents), '{}.py'.format(test))
+#         test, parents = utils.separate_file_from_parents(test_name)
+#         current_path = os.path.join(root_path, 'projects', project, 'tests',
+#                                     os.sep.join(parents), '{}.py'.format(test))
 
-        test, parents = utils.separate_file_from_parents(new_test_name)
-        new_path = os.path.join(root_path, 'projects', project, 'tests',
-                                os.sep.join(parents), '{}.py'.format(test))
+#         test, parents = utils.separate_file_from_parents(new_test_name)
+#         new_path = os.path.join(root_path, 'projects', project, 'tests',
+#                                 os.sep.join(parents), '{}.py'.format(test))
 
-        try:
-            os.rename(current_path, new_path)
-            return json.dumps('ok')
-        except:
-            return json.dumps('error')
+#         try:
+#             os.rename(current_path, new_path)
+#             return json.dumps('ok')
+#         except:
+#             return json.dumps('error')
 
 
 @app.route("/run_suite/", methods=['POST'])
@@ -759,7 +758,7 @@ def run_suite():
 
 @app.route("/save_suite/", methods=['POST'])
 def save_suite():
-
+    # lalala
     if request.method == 'POST':
         project = request.json['project']
         suite_name = request.json['suite']

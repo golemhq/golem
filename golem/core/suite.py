@@ -1,5 +1,7 @@
 import os
 
+from golem.core import utils
+
 
 def _format_list_items(list_items):
     list_string = ''
@@ -13,8 +15,10 @@ def _format_list_items(list_items):
 
 
 def save_suite(root_path, project, suite, test_cases, workers, browsers, environments):
+    suite_name, parents = utils.separate_file_from_parents(suite)
+
     suite_path = os.path.join(root_path, 'projects', project, 'suites',
-                              '{}.py'.format(suite))
+                              os.sep.join(parents), '{}.py'.format(suite_name))
     with open(suite_path, 'w', encoding='utf-8') as suite_file:
         suite_file.write('\n\n')
         suite_file.write('browsers = {}\n'.format(_format_list_items(browsers)))

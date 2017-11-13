@@ -375,7 +375,6 @@ var Project = new function(){
                         originalElement.attr('name', name);
                         originalElement.find('a').attr('href', newURL);
                         originalElement.find('a').html(name);
-                        utils.toast('success', 'File was renamed', 2000)
                     }
                     else{
                         if(elemType == 'suite'){
@@ -391,6 +390,7 @@ var Project = new function(){
                             getPages(project);   
                         }
                     }
+                    utils.toast('success', 'File was renamed', 2000);
                 }
                 else{
                     utils.toast('error', error, 2000);
