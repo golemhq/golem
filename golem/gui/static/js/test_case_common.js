@@ -9,8 +9,7 @@ var testRunner = new function(){
         if(unsavedChanges)
             saveTestCase({runAfter: true});
         else
-            //testRunner._doRunTestCase();
-            testRunner.askForEnvBeforeRun()
+            testRunner.askForEnvBeforeRun();
     };
 
     this.askForEnvBeforeRun = function(){
@@ -51,8 +50,7 @@ var testRunner = new function(){
              type: 'POST',
              success: function(timestamp) {
                 testRunner.checkTestCaseResult(project, fullTestCaseName, timestamp);
-             },
-             error: function() {}
+             }
          });
     }
     
@@ -99,8 +97,7 @@ var testRunner = new function(){
                         testRunner.displayTestResults(result.reports);
                     }
                 }
-             },
-             error: function() {}
+             }
          });
     }
 
@@ -143,8 +140,6 @@ var testRunner = new function(){
             report.append("<ol style='margin-left: 20px'></ol>");
             for(s in thisReport.steps){
                 var thisStep = thisReport.steps[s];
-                
-                console.log(thisReport);
 
                 if(thisStep.screenshot){
                     var msg = "<span class='hand-icon' data-toggle='collapse' data-target='#"+thisStep.screenshot+"' \
@@ -255,37 +250,42 @@ var header = new function(){
         $("#testNameInput").show();
         $("#testName").hide();
         $("#testNameInput input").focus();
-
+        $("#testNameInput input").unbind('blur');
+        $("#testNameInput input").unbind('keyup');
         $("#testNameInput input").on('blur', function(e){
             header.saveEdition();
         });
-
         $("#testNameInput input").on('keyup', function(e){
             if(e.keyCode == '13') $(this).blur();
         });
-    }
+    };
 
     this.saveEdition = function(){
         var newTestNameValue = $("#testNameInput input").val();
-        console.log(newTestNameValue, fullTestCaseName);
+
+        newTestNameValue = newTestNameValue.trim();
+
         if(newTestNameValue == fullTestCaseName){
             $("#testNameInput").hide();
             $("#testName").show();
             return
         }
         // TO DO: validate
+        newTestNameValue = newTestNameValue.replace(' ', '_');
 
         $.ajax({
-            url: "/change_test_name/",
+            url: "/rename_element/",
             data: {
                  "project": project,
-                 "testName": fullTestCaseName,
-                 "newTestName": newTestNameValue
+                 "elemType": 'test',
+                 "fullFilename": fullTestCaseName,
+                 "newFullFilename": newTestNameValue,
+                 
              },
              dataType: 'json',
              type: 'POST',
-             success: function(result) {
-                if(result == 'ok'){
+             success: function(error) {
+                if(error.length == 0){
                     fullTestCaseName = newTestNameValue;
                     $("#testNameInput input").val('');
                     $("#testNameInput").hide();
@@ -295,15 +295,13 @@ var header = new function(){
                     window.history.pushState("object or string", "", new_url);
                 }
                 else{
+                    utils.toast('error', error, 2000);
                     $("#testNameInput").hide();
                     $("#testName").show();
                 }
              },
-             error: function() {}
          });
-
-    }
-
+    };
 }
 
 var testManager = new function(){

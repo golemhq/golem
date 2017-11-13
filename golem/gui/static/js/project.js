@@ -6,11 +6,11 @@ var Project = new function(){
             <li class='tree-element' fullpath='"+element.dotPath+"' name='"+element.name+"' type='"+element.type+"'>\
                 <a href='"+element.url+"'>"+element.name+"</a> \
                 <span class='pull-right tree-element-buttons'> \
-                    <button onclick='Project.duplicateElementPrompt(this)'><i class='glyphicon glyphicon-copy'></i></button> \
-                    <button onclick='Project.deleteElementConfirm(this)'><i class='glyphicon glyphicon-remove'></i></button> \
+                    <button class='rename-button' onclick='Project.renameFilePrompt(this)'><i class='glyphicon glyphicon-edit'></i></button> \
+                    <button class='duplicate-button' onclick='Project.duplicateElementPrompt(this)'><i class='glyphicon glyphicon-copy'></i></button> \
+                    <button class='delete-button' onclick='Project.deleteElementConfirm(this)'><i class='glyphicon glyphicon-remove'></i></button> \
                 </span>\
             </li>";
-            //<button onclick=''><i class='glyphicon glyphicon-edit'></i></button> \
         return $(li)
     }
 
@@ -270,8 +270,8 @@ var Project = new function(){
         var element =  $(elementDuplicateButton).parent().parent();
         var elemFullPath = element.attr('fullpath');
         var elemType = element.attr('type');
-        var title = 'Duplicate file';
-        var message = 'Create a duplicate of <i>'+elemFullPath+'</i>. Enter a name for the new file..';
+        var title = 'Copy file';
+        var message = 'Create a copy of <i>'+elemFullPath+'</i>. Enter a name for the new file...';
         var inputValue = elemFullPath;
         var placeholderValue = '';
         var callback = function(newFileFullPath){
@@ -314,15 +314,90 @@ var Project = new function(){
                     utils.toast('success', 'File was copied', 2000)
                 }
                 else{
-                    utils.toat('error', 'There was an error duplicating the file', 2000);
+                    utils.toast('error', 'There was an error duplicating the file', 2000);
                 }
-                $("#promptModal").modal("hide");
-                $("#promptModal button.confirm").unbind('click');
             },
             error: function(){
                 utils.toast('error', 'There was an error duplicating the file', 2000)
-                $("#promptModal").modal('hide');
-                $("#promptModal button.confirm").unbind('click');
+            }
+        });
+    }
+
+
+    this.renameFilePrompt = function(elementDuplicateButton){
+        var element =  $(elementDuplicateButton).parent().parent();
+        var elemFullPath = element.attr('fullpath');
+        var elemType = element.attr('type');
+        var title = 'Rename file';
+        var message = 'Enter a new name for this file...';
+        var inputValue = elemFullPath;
+        var placeholderValue = '';
+        var callback = function(newFileFullPath){
+            Project.renameFile(elemFullPath, elemType, element, newFileFullPath);
+        }
+        utils.displayPromptModal(title, message, inputValue, placeholderValue, callback)
+    }
+
+
+    this.renameFile = function(fullFilename, elemType, originalElement, newFullFilename){
+        if(newFullFilename === fullFilename){
+            // new file name is the same as original
+            // don't show error message, do nothing
+            return
+        }
+
+        newFullFilename =  newFullFilename.trim().replace(' ', '_');
+
+        var fullFilenameArray = fullFilename.split('.');
+        fullFilenameArray.pop();
+        var newFullFilenameArray = newFullFilename.split('.');
+        newFullFilenameArray.pop();
+
+        var sameParents = JSON.stringify(fullFilenameArray) == JSON.stringify(newFullFilenameArray);
+
+        $.ajax({
+            url: "/rename_element/",
+            data: {
+                "project": project,
+                "elemType": elemType,
+                "fullFilename": fullFilename,
+                "newFullFilename": newFullFilename
+            },
+            dataType: 'json',
+            type: 'POST',
+            success: function(error) {
+                if(error.length == 0){
+                    if(sameParents){
+                        var nameSplit = newFullFilename.split('.');
+                        var name = nameSplit[nameSplit.length-1];
+                        var newURL = "/project/"+project+"/"+elemType+"/"+newFullFilename+"/";
+                        originalElement.attr('fullpath', newFullFilename);
+                        originalElement.attr('name', name);
+                        originalElement.find('a').attr('href', newURL);
+                        originalElement.find('a').html(name);
+                        utils.toast('success', 'File was renamed', 2000)
+                    }
+                    else{
+                        if(elemType == 'suite'){
+                            $("#suitesTree").html('');
+                            getSuites(project);
+                        }
+                        else if(elemType == 'test'){
+                            $("#testCasesTree").html('');
+                            getTests(project);
+                        }
+                        else if(elemType == 'pages'){
+                            $("#pagesTree").html('');
+                            getPages(project);   
+                        }
+                    }
+                }
+                else{
+                    utils.toast('error', error, 2000);
+                }
+            },
+            error: function(){
+                utils.toast('error', 'There was an error duplicating the file', 2000)
             }
         });
     }

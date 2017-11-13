@@ -424,6 +424,77 @@ def duplicate_element():
         return json.dumps(errors)
 
 
+@app.route("/rename_element/", methods=['POST'])
+def rename_element():
+    # lalala
+    if request.method == 'POST':
+        project = request.form['project']
+        elem_type = request.form['elemType']
+        full_filename = request.form['fullFilename']
+        new_full_filename = request.form['newFullFilename']
+
+        error = ''
+
+        old_filename, old_parents = utils.separate_file_from_parents(full_filename)
+        new_filename, new_parents = utils.separate_file_from_parents(new_full_filename)
+
+        if len(new_filename) == 0:
+            error = 'File name cannot be empty'
+        else:
+            for c in new_full_filename.replace('.',''):
+                if not c.isalnum() and not c in ['-', '_']:
+                    error = 'Only letters, numbers, \'-\' and \'_\' are allowed'
+                    break
+
+        dir_type_name = ''
+        
+        if not error:
+            if elem_type == 'test':
+                dir_type_name = 'tests'
+            elif elem_type == 'page':
+                dir_type_name = 'pages'
+            elif elem_type == 'suite':
+                dir_type_name = 'suites'
+            
+            old_full_path = os.path.join(root_path, 'projects', project, dir_type_name,
+                                         os.sep.join(old_parents), old_filename + '.py')
+
+            new_dir_path = os.path.join(root_path, 'projects', project, dir_type_name,
+                                        os.sep.join(new_parents))
+
+            new_full_path = os.path.join(new_dir_path, new_filename + '.py')
+
+            if os.path.exists(new_full_path):
+                error = 'File {} already exists'.format(new_full_filename)
+
+        if not error:
+            # create new parents if they do not exist
+            if not os.path.exists(new_dir_path):
+                base_path = os.path.join(root_path, 'projects', project, dir_type_name)
+                for parent in new_parents:
+                    base_path = os.path.join(base_path, parent)
+                    if not os.path.exists(base_path):
+                        utils.create_new_directory(path=base_path, add_init=True)
+
+            # try:
+            os.rename(old_full_path, new_full_path)
+            # except:
+            #     error = 'There was an error renaming \'{}\' to \'{}\''.format(
+            #                 full_filename, new_full_filename)
+
+        if not error and elem_type == 'test':
+            try:
+                old_data_full_path = os.path.join(root_path, 'projects', project, 'data',
+                                                  os.sep.join(old_parents), old_filename + '.csv')
+                new_data_full_path = os.path.join(new_dir_path, new_filename + '.csv')
+                if os.path.exists(old_data_full_path):
+                    shutil.move(old_data_full_path, new_data_full_path)
+            except:
+                pass
+
+    return json.dumps(error)
+
+
 @app.route("/get_page_objects/", methods=['POST'])
 def get_page_objects():
     if request.method == 'POST':
@@ -654,6 +725,7 @@ def check_test_case_run_result():
 
 @app.route("/change_test_name/", methods=['POST'])
 def change_test_name():
+    # DELETE
     if request.method == 'POST':
         project = request.form['project']
         test_name = request.form['testName']

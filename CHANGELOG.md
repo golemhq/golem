@@ -3,6 +3,10 @@
 
 ## [Unreleased]
 
+### Added
+- Rename button for suites, tests and pages
+
+
 ## [0.3.1] - 2017-11-08
 
 ### Changed
