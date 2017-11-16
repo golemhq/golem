@@ -14,9 +14,9 @@ def page_exists(root_path, project, full_page_name):
 
 
 def get_page_object_content(project, full_page_name):
-    # TODO REMOVE _, parents = utils.separate_file_from_parents(full_page_name)
     modulex = importlib.import_module('projects.{0}.pages.{1}'.format(project, full_page_name))
-    variable_list = [item for item in dir(modulex) if not item.startswith("__")]
+    # get all the names of the module, ignoring the ones starting with '_'
+    variable_list = [item for item in dir(modulex) if not item.startswith("_")]
     element_list = []
     function_list = []
     import_lines = []
