@@ -19,13 +19,21 @@ Default time to wait looking for an element until it is found. Default is 20 sec
 
 Take a screenshot on error by default. Default is True.
 
+- *screenshot_on_step*
+
+Take a screenshot on every step. Default is False.
+
 - *screenshot_on_end*
 
 Take a screenshot after 'test' function ends. Default is False.
 
-- *screenshot_on_step*
+- *test_data*
 
-Take a screenshot on every step. Default is False.
+Where to store store test data. Options are: 'infile', 'csv'. Default is 'csv.'. With option 'infile' test data is stored inside the test file itself as a list of dictionaries. With option 'csv' test data is stored in csv file in the same folder as the test itself and with the same name as the test, e.g.: tests/some_test.py -> tests/some_test.csv
+
+- *wait_hook*
+
+Custom wait method to use for every action, that can be specific to each application. It must be defined inside extend.py
 
 - *default_browser*
 
@@ -67,10 +75,6 @@ Example: settings.json
 
 }
 ```
-
-- *wait_hook*
-
-Custom wait method to use for every action, that can be specific to each application. It must be defined inside extend.py
 
 - *console_log_level*
 

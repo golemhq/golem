@@ -17,6 +17,9 @@ SETTINGS_FILE_CONTENT = (
 // Take a screenshot at the end of every test
 "screenshot_on_end": false,
 
+// Where to store test data. Options are: 'infile', 'csv'. Default is 'csv'
+"test_data": "csv",
+
 // Custom wait method to use before each step, must be defined inside extend.py
 "wait_hook": null,
 
@@ -88,6 +91,7 @@ def assign_settings_default_values(settings):
         ('screenshot_on_error', True),
         ('screenshot_on_step', False),
         ('screenshot_on_end', False),
+        ('test_data', 'csv'),
         ('wait_hook', None),
         ('default_browser', 'chrome'),
         ('chromedriver_path', None),

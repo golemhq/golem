@@ -5,6 +5,7 @@
 
 ### Added
 - Rename button for suites, tests and pages
+- 'test_data' setting
 
 
 ## [0.3.1] - 2017-11-08
