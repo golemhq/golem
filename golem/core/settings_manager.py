@@ -3,53 +3,60 @@ import os
 import traceback
 
 
-def settings_file_content():
-    settings_content = (
-        "{",
-        "// Default time to wait looking for an element until it is found",
-        "\"implicit_wait\": 20,",
-        "",
-        "// Take a screenshot on error by default",
-        "\"screenshot_on_error\": true,",
-        "",
-        "// Take a screenshot on every step",
-        "\"screenshot_on_step\": false,",
-        "",
-        "// Custom wait method to use before each step, must be defined inside extend.py",
-        "\"wait_hook\": null,",
-        "",
-        "// Define the driver to use, unless overriden by the -d/--driver flag",
-        "\"default_browser\": \"chrome\",",
-        "",
-        "// Path to the chrome driver executable. By default it points to the",
-        "// \'drivers\' folder inside the test directory.",
-        "\"chromedriver_path\": \"./drivers/chromedriver\",",
-        "",
-        "// Path to the gecko driver executable. This is used by Firefox.",
-        "// By default it points to the 'drivers' folder inside the test directory.",
-        "\"geckodriver_path\": \"./drivers/geckodriver\",",
-        "",
-        "// Path to the ie driver executable. This is used by Internet Explorer.",
-        "// By default it points to the 'drivers' folder inside the test directory.",
-        "\"iedriver_path\": \"./drivers/iedriver.exe\",",
-        "",
-        "// URLRemote URL : the URL to use when connecting to a remote webdriver",
-        "// for example, using selenium grid",
-        "\"remote_url\": \"http://localhost:4444/wd/hub\",",
-        "",
-        "// Log level to console. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.",
-        "// Default option is INFO",
-        "\"console_log_level\": \"INFO\",",
-        "",
-        "// Log level to file. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.",
-        "// Default option is DEBUG",
-        "\"file_log_level\": \"DEBUG\",",
-        "",
-        "// Log all events, instead of just Golem events. Default is false",
-        "\"log_all_events\": false",
-        "}",
-        "")
-    return '\n'.join(settings_content)
+SETTINGS_FILE_CONTENT = (
+"""{
+// Default time to wait looking for an element until it is found
+"implicit_wait": 20,
+
+// Take a screenshot on error
+"screenshot_on_error": true,
+
+// Take a screenshot on every step
+"screenshot_on_step": false,
+
+// Take a screenshot at the end of every test
+"screenshot_on_end": false,
+
+// Custom wait method to use before each step, must be defined inside extend.py
+"wait_hook": null,
+
+// Define the driver to use, unless overriden by the -d/--driver flag
+"default_browser": "chrome",
+
+// Path to the chrome driver executable. By default it points to the
+// 'drivers' folder inside the test directory.
+"chromedriver_path": "./drivers/chromedriver",
+
+// Path to the gecko driver executable. This is used by Firefox.
+// By default it points to the 'drivers' folder inside the test directory.
+"geckodriver_path": "./drivers/geckodriver",
+
+// Path to the ie driver executable. This is used by Internet Explorer.
+// By default it points to the 'drivers' folder inside the test directory.
+"iedriver_path": "./drivers/iedriver.exe",
+
+// URLRemote URL : the URL to use when connecting to a remote webdriver
+// for example, using selenium grid
+"remote_url": "http://localhost:4444/wd/hub",
+
+// Log level to console. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.
+// Default option is INFO
+"console_log_level": "INFO",
+
+// Log level to file. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.
+// Default option is DEBUG
+"file_log_level": "DEBUG",
+
+// Log all events, instead of just Golem events. Default is false
+"log_all_events": "false"
+}
+""")
+
+REDUCED_SETTINGS_FILE_CONTENT = (
+"""// Settings defined here will override global settings
+{
+}
+""")
 
 
 def read_json_with_comments(json_path):
@@ -73,84 +80,31 @@ def read_json_with_comments(json_path):
     return json_data
 
 
-def reduced_settings_file_content():
-    settings_content = (
-        "// Settings defined here will override global settings\n"
-        "{\n"
-        "}\n")
-    return settings_content
-
-
 def assign_settings_default_values(settings):
-    if not 'implicit_wait' in settings:
-        settings['implicit_wait'] = None
-    elif settings['implicit_wait'] == '':
-        settings['implicit_wait'] = None
+    """ Verify that each setting value is present at least with
+    the default value""" 
+    defaults = [
+        ('implicit_wait', None),
+        ('screenshot_on_error', True),
+        ('screenshot_on_step', False),
+        ('screenshot_on_end', False),
+        ('wait_hook', None),
+        ('default_browser', 'chrome'),
+        ('chromedriver_path', None),
+        ('geckodriver_path', None),
+        ('iedriver_path', None),
+        ('remote_url', None),
+        ('remote_browsers', {}),
+        ('console_log_level', 'INFO'),
+        ('file_log_level', 'DEBUG'),
+        ('log_all_events', False)
+    ]
 
-    if not 'screenshot_on_error' in settings:
-        settings['screenshot_on_error'] = True
-    elif settings['screenshot_on_error'] == '' or settings['screenshot_on_error'] is None:
-        settings['screenshot_on_error'] = True
-
-    if not 'screenshot_on_end' in settings:
-        settings['screenshot_on_end'] = False
-    elif settings['screenshot_on_end'] == '' or settings['screenshot_on_end'] is None:
-        settings['screenshot_on_end'] = False
-
-    if not 'screenshot_on_step' in settings:
-        settings['screenshot_on_step'] = False
-    elif settings['screenshot_on_step'] == '' or settings['screenshot_on_step'] is None:
-        settings['screenshot_on_step'] = False
-
-    if not 'wait_hook' in settings:
-        settings['wait_hook'] = None
-    elif settings['wait_hook'] == '':
-        settings['wait_hook'] = None
-
-    if not 'default_browser' in settings:
-        settings['default_browser'] = 'chrome'
-    elif settings['default_browser'] == '':
-        settings['default_browser'] = 'chrome'
-
-    if not 'chromedriver_path' in settings:
-        settings['chromedriver_path'] = None
-    elif settings['chromedriver_path'] == '':
-        settings['chromedriver_path'] = None
-
-    if not 'geckodriver_path' in settings:
-        settings['geckodriver_path'] = None
-    elif not settings['geckodriver_path']:
-        settings['geckodriver_path'] = None
-
-    if not 'iedriver_path' in settings:
-        settings['iedriver_path'] = None
-    elif not settings['iedriver_path']:
-        settings['iedriver_path'] = None
-
-    if not 'remote_url' in settings:
-        settings['remote_url'] = None
-    elif not settings['remote_url']:
-        settings['remote_url'] = None
-
-    if not 'remote_browsers' in settings:
-        settings['remote_browsers'] = {}
-    elif not settings['remote_browsers']:
-        settings['remote_browsers'] = {}
-
-    if not 'console_log_level' in settings:
-        settings['console_log_level'] = 'INFO'
-    elif not settings['console_log_level']:
-        settings['console_log_level'] = 'INFO'
-
-    if not 'file_log_level' in settings:
-        settings['file_log_level'] = 'DEBUG'
-    elif not settings['file_log_level']:
-        settings['file_log_level'] = 'DEBUG'
-
-    if not 'log_all_events' in settings:
-        settings['log_all_events'] = True
-    elif settings['log_all_events'] == '' or settings['log_all_events'] is None:
-        settings['log_all_events'] = True
+    for default in defaults:
+        if not default[0] in settings:
+            settings[default[0]] = default[1]
+        elif settings[default[0]] in ['', None]:
+                settings[default[0]] = default[1]
 
     return settings
 

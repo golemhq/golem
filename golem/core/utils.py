@@ -395,7 +395,7 @@ def create_new_project(workspace, project):
 
     settings_path = os.path.join(workspace, 'projects', project, 'settings.json')
     with open(settings_path, 'a') as settings_file:
-        settings_file.write(settings_manager.reduced_settings_file_content())
+        settings_file.write(settings_manager.REDUCED_SETTINGS_FILE_CONTENT)
 
     environments_path = os.path.join(workspace, 'projects', project, 'environments.json')
     with open(environments_path, 'a') as environments_file:
@@ -438,7 +438,7 @@ def create_test_dir(workspace):
 
     settings_path = os.path.join(workspace, 'settings.json')
     with open(settings_path, 'a') as settings_file:
-        settings_file.write(settings_manager.settings_file_content())
+        settings_file.write(settings_manager.SETTINGS_FILE_CONTENT)
 
     users_path = os.path.join(workspace, 'users.json')
     open(users_path, 'a').close()
