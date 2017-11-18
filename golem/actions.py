@@ -375,8 +375,8 @@ def verify_text_in_element(element, text):
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
     if text not in webelement.text:
-        raise TextNotPresent("Text \'{0}\' was not found in element {1}"
-                             .format(text, webelement.name))
+        raise TextNotPresent("Text \'{0}\' was not found in element {1}. Text \'{2}\' was found."
+                             .format(text, webelement.name, webelement.text))
 
 
 def wait(seconds):
