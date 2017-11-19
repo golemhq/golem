@@ -22,7 +22,7 @@ from golem.core import (utils,
                         test_case,
                         page_object,
                         suite,
-                        data,
+                        test_data,
                         test_execution,
                         changelog,
                         lock)
@@ -157,12 +157,12 @@ def test_case_view(project, test_case_name):
     #     abort(404, 'This file is locked by someone else.')
     # else:
     tc_name, parents = utils.separate_file_from_parents(test_case_name)
-    test_case_contents = test_case.get_test_case_content(project, test_case_name)
-    test_data = utils.get_test_data_dict_list(root_path, project, test_case_name)
-
+    test_case_contents = test_case.get_test_case_content(root_path, project, test_case_name)
+    test_data_content = test_data.get_test_data(root_path, project, test_case_name)
+    
     return render_template('test_case.html', project=project,
                            test_case_contents=test_case_contents, test_case_name=tc_name,
-                           full_test_case_name=test_case_name, test_data=test_data)
+                           full_test_case_name=test_case_name, test_data=test_data_content)
 
 
 # TEST CASE CODE VIEW
@@ -174,8 +174,8 @@ def test_case_code_view(project, test_case_name):
         return render_template('not_permission.html')
 
     tc_name, parents = utils.separate_file_from_parents(test_case_name)
-    test_case_contents = test_case.get_test_case_content(project, test_case_name)
-    test_data = utils.get_test_data_dict_list(root_path, project, test_case_name)
+    test_case_contents = test_case.get_test_case_content(root_path, project, test_case_name)
+    test_data = test_data.get_test_data(root_path, project, test_case_name)
 
     return render_template('test_case_code.html', project=project, 
                            test_case_contents=test_case_contents, test_case_name=tc_name,
@@ -607,7 +607,7 @@ def save_test_case_code():
         test_data = request.json['testData']
         content = request.json['content']
 
-        data.save_test_data(root_path, projectname, test_case_name, test_data)
+        test_data.save_test_data(root_path, projectname, test_case_name, test_data)
         test_case.save_test_case_code(root_path, projectname, test_case_name, content)
 
         return json.dumps('ok')
@@ -668,10 +668,10 @@ def save_test_case():
         test_name = request.json['testCaseName']
         description = request.json['description']
         page_objects = request.json['pageObjects']
-        test_data = request.json['testData']
+        test_data_content = request.json['testData']
         test_steps = request.json['testSteps']
 
-        data.save_test_data(root_path, project, test_name, test_data)
+        test_data.save_test_data(root_path, project, test_name, test_data_content)
 
         test_case.save_test_case(root_path, project, test_name, description,
                                  page_objects, test_steps)
@@ -758,7 +758,6 @@ def run_suite():
 
 @app.route("/save_suite/", methods=['POST'])
 def save_suite():
-    # lalala
     if request.method == 'POST':
         project = request.json['project']
         suite_name = request.json['suite']

@@ -186,44 +186,6 @@ def get_files_in_directory_dot_path(base_path):
     return files_with_dotted_path
 
 
-def get_test_data(workspace, project, full_test_case_name):
-    '''Test cases can have multiple sets of data
-    This method generates a list of data objects'''
-    data_list = []
-
-    # check if CSV file == test case name exists
-    test, parents = separate_file_from_parents(full_test_case_name)
-    data_file_path = os.path.join(workspace, 'projects', project,
-                                  'data', os.sep.join(parents),
-                                  '{}.csv'.format(test))
-    if not os.path.exists(data_file_path):
-        print('Warning: No data file found for {}'.format(full_test_case_name))
-    else:
-        with open(data_file_path, 'r', encoding='utf8') as csv_file:
-            dict_reader = csv.DictReader(csv_file)
-            for data_set in dict_reader:
-                # d = {k: literal_eval(v) for (k,v) in data_set.items()}
-                d = {}
-                for item in data_set.items():
-                    try:
-                        d[item[0]] = literal_eval(item[1])
-                    except:
-                        d[item[0]] = item[1]
-                data_list.append(d)
-
-    if not data_list:
-        data_list.append({})
-    return data_list
-
-
-def get_test_data_dict_list(workspace, project, full_test_case_name):
-    data_dict_list = []
-    data_list = get_test_data(workspace, project, full_test_case_name)
-    for data in data_list:
-        data_dict_list.append(data)
-    return data_dict_list
-
-
 def get_suite_module(workspace, project, suite):
     module_name = 'projects.{0}.suites.{1}'.format(project, suite)
     suite_module = importlib.import_module(module_name, package=None)

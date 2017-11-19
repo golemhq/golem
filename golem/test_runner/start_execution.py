@@ -5,6 +5,7 @@ import sys
 from golem.core import (test_execution,
                         utils,
                         report,
+                        test_data,
                         environment_manager,
                         settings_manager)
 from golem.test_runner.multiprocess_executor import multiprocess_executor, run_test
@@ -118,7 +119,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
     # append an entry to the execution_list
     execution_list = []
     for test_case in tests:
-        data_sets = utils.get_test_data(workspace, project, test_case)
+        data_sets = test_data.get_test_data(workspace, project, test_case)
         for data_set in data_sets:
             for env in envs:
                 data_set_env = dict(data_set)

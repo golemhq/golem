@@ -2,7 +2,7 @@ import os
 from collections import OrderedDict
 from subprocess import call
 
-from golem.core import utils, data, page_object, test_case, suite
+from golem.core import utils, page_object, test_case, suite
 
 from tests.fixtures import project_fixture, testdir_fixture
 from tests import helper_functions
@@ -181,35 +181,6 @@ class Test_project_exists:
         exists = utils.project_exists(testdir_fixture['path'],
                                       project_fixture['name'])
         assert exists
-
-
-class Test_get_test_data_dict_list:
-
-    def test_get_test_data_dict_list(self, testdir_fixture, project_fixture):
-        input_data = [
-            {
-                'col1': 'a',
-                'col2': 'b'
-            },
-            {
-                'col1': 'c',
-                'col2': 'd',
-            }
-
-        ]
-        test_case.new_test_case(testdir_fixture['path'],
-                                project_fixture['name'],
-                                [],
-                                'test_get_data')
-        data.save_test_data(testdir_fixture['path'],
-                            project_fixture['name'],
-                            'test_get_data',
-                            input_data)
-        returned_data = utils.get_test_data_dict_list(testdir_fixture['path'],
-                                                      project_fixture['name'],
-                                                      'test_get_data')
-
-        assert returned_data == input_data
 
 
 class Test_get_files_in_directory_dot_path:

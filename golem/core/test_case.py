@@ -93,7 +93,7 @@ def _get_parsed_steps(function_code):
     return steps
 
 
-def get_test_case_content(project, test_case_name):
+def get_test_case_content(root_path, project, test_case_name):
     test_contents = {
         'description': '',
         'pages': [],
@@ -102,11 +102,12 @@ def get_test_case_content(project, test_case_name):
             'test': [],
             'teardown': []
         },
-        'content': ''
+        'content': '',
+        'data': []
     }
     
     # add the 'project' directory to python path
-    sys.path.append(os.path.join(os.getcwd(), 'projects', project))
+    sys.path.append(os.path.join(root_path, 'projects', project))
 
     test_module = importlib.import_module('projects.{0}.tests.{1}'
                                           .format(project, test_case_name))
@@ -114,7 +115,6 @@ def get_test_case_content(project, test_case_name):
     description = getattr(test_module, 'description', '')
     
     # get list of pages
-    pages = []
     pages = getattr(test_module, 'pages', [])
       
     # get setup steps
@@ -144,6 +144,10 @@ def get_test_case_content(project, test_case_name):
         test_contents['content'] = inspect.getsource(test_module)
     except:
         pass
+
+    # get test data
+    # test_data = test_data.get_test_data_dict_list(root_path, project, test_case_name)
+
     return test_contents
 
 
@@ -174,88 +178,18 @@ def new_test_case(root_path, project, parents, tc_name):
                 base_path = os.path.join(base_path, parent)
                 utils.create_new_directory(path=base_path, add_init=True)
         test_case_full_path = os.path.join(test_case_path, tc_name + '.py')
-        data_path = os.path.join(root_path, 'projects', project, 'data', parents_joined)
-        if not os.path.exists(data_path):
-            os.makedirs(data_path)
-        data_full_path = os.path.join(data_path, tc_name + '.csv')
+        # TODO remove create data file on test creation
+        # data_path = os.path.join(root_path, 'projects', project, 'data', parents_joined)
+        # if not os.path.exists(data_path):
+        #     os.makedirs(data_path)
+        # data_full_path = os.path.join(data_path, tc_name + '.csv')
         with open(test_case_full_path, 'w') as test_file:
             test_file.write(test_case_content)
-        with open(data_full_path, 'w') as data_file:
-            data_file.write('')
+        # TODO remove create data file on test creation
+        # with open(data_full_path, 'w') as data_file:
+        #     data_file.write('')
         print('Test {} created for project {}'.format(tc_name, project))
     return errors
-
-
-# class Param_formatter:
-
-#     def __init__(self, root_path, project, stored_keys):
-#         self.root_path = root_path
-#         self.project = project
-#         self.stored_keys = stored_keys
-
-    # def format_param(self, param, action):
-    #     result = ''
-    #     if page_object.is_page_object(param, self.root_path, self.project):
-    #         # it is a page object, leave as is
-    #         result = param
-    #     elif 'random(' in param:
-    #         result = param
-    #     else:
-    #         is_data_var = 'data' in param
-    #         is_in_stored_keys = param in self.stored_keys
-    #         action_is_store = action == 'store'
-    #         if (is_data_var or is_in_stored_keys) and not action_is_store:
-    #             result = param
-    #         else:
-    #             if action in ['wait', 'select_by_index']:
-    #                 result = param
-    #             elif param[0] == '(' and param[-1] == ')':
-    #                 result = param
-    #             else:
-    #                 result = '\'{}\''.format(param)
-    #     return result
-    
-    # def format_param2(self, param, action):
-    #     result = ''
-
-    #     # try:
-    #     #     evalued = literal_eval(param)
-    #     # except:
-    #     #     evalued = None
-
-    #     # if isinstance(evalued, str):
-    #     #     #return '\'{}\''.format(param)
-    #     #     # return '\'' + param + '\''
-    #     #     return param
-    #     # else:
-    #     #     return param
-    #     return param
-
-
-# def format_parameters(param, action, root_path, project, stored_keys):
-#     action = action.replace(' ', '_')
-#     this_parameter_string = ''
-#     if page_object.is_page_object(param, root_path, project):
-#         # it is a page object, leave as is
-#         this_parameter_string = param
-#     elif 'random(' in param:
-#         this_parameter_string = param
-#     else:
-#         is_data_var = 'data.' in param or 'data' in param
-
-#         is_in_stored_keys = param in stored_keys
-#         action_is_store = action == 'store'
-#         if (is_data_var or is_in_stored_keys) and not action_is_store:
-#             this_parameter_string = param
-#         else:
-#             if action in ['wait', 'select_by_index']:
-#                 this_parameter_string = param
-#             elif param[0] == '(' and param[-1] == ')':
-#                 this_parameter_string = param
-#             else:
-#                 this_parameter_string = '\'' + param + '\''
-
-#     return this_parameter_string
 
 
 def format_page_object_string(page_objects):
@@ -280,30 +214,12 @@ def format_description(description):
     return formatted_description
 
 
-# def get_stored_keys(steps):
-#     stored_keys = []
-#     for step in steps:
-#         parameters = step['parameters']
-#         action = step['action'].replace(' ', '_')
-#         if action == 'store':
-#             stored_keys.append(parameters[0])
-#     return stored_keys
-
-
 def save_test_case(root_path, project, full_test_case_name, description,
                    page_objects, test_steps):
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
     test_case_path = os.path.join(root_path, 'projects', project, 'tests',
                                   os.sep.join(parents), '{}.py'.format(tc_name))
-    # setup_stored_keys = get_stored_keys(test_steps['setup'])
-    # test_stored_keys = get_stored_keys(test_steps['test'])
-    # teardown_stored_keys = get_stored_keys(test_steps['teardown'])
-
-    # stored_keys = setup_stored_keys + test_stored_keys + teardown_stored_keys
-
     formatted_description = format_description(description)
-
-    # param_formatter = Param_formatter(root_path, project, stored_keys)
     
     with open(test_case_path, 'w', encoding='utf-8') as f:
         
@@ -314,7 +230,6 @@ def save_test_case(root_path, project, full_test_case_name, description,
         # write the list of pages
         f.write('pages = {}\n'.format(format_page_object_string(page_objects)))
         f.write('\n')
-
 
         # write the setup function
         f.write('def setup(data):\n')
