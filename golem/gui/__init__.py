@@ -18,14 +18,15 @@ from flask_login import (LoginManager,
 
 from golem.core import (utils,
                         settings_manager,
+                        io_manager,
                         environment_manager,
                         test_case,
                         page_object,
                         suite,
-                        test_data,
                         test_execution,
                         changelog,
                         lock)
+from golem.core import test_data as test_data_module
 
 from . import gui_utils, user, report_parser
 
@@ -68,7 +69,8 @@ def login():
             next_url = '/'
 
         if len(result['errors']) > 0:
-            return render_template('login.html', next_url=next_url, errors=result['errors'])
+            return render_template('login.html', next_url=next_url,
+                                   errors=result['errors'])
         else:
             new_user = user.User()
             new_user.username = username
@@ -94,7 +96,7 @@ def index():
     return render_template('index.html', projects=projects)
 
 
-# PROJECT VIEW - redirecto to /project/suites/
+# PROJECT VIEW - redirec to to /project/suites/
 @app.route("/project/<project>/")
 @login_required
 def project(project):
@@ -158,11 +160,11 @@ def test_case_view(project, test_case_name):
     # else:
     tc_name, parents = utils.separate_file_from_parents(test_case_name)
     test_case_contents = test_case.get_test_case_content(root_path, project, test_case_name)
-    test_data_content = test_data.get_test_data(root_path, project, test_case_name)
-    
+    test_data = test_data_module.get_test_data(root_path, project, test_case_name)
+    print(test_case_contents)
     return render_template('test_case.html', project=project,
                            test_case_contents=test_case_contents, test_case_name=tc_name,
-                           full_test_case_name=test_case_name, test_data=test_data_content)
+                           full_test_case_name=test_case_name, test_data=test_data)
 
 
 # TEST CASE CODE VIEW
@@ -175,11 +177,13 @@ def test_case_code_view(project, test_case_name):
 
     tc_name, parents = utils.separate_file_from_parents(test_case_name)
     test_case_contents = test_case.get_test_case_content(root_path, project, test_case_name)
-    test_data = test_data.get_test_data(root_path, project, test_case_name)
-
+    external_data = test_data_module.get_external_test_data(root_path, project,
+                                                            test_case_name)
+    test_data_setting = test_execution.settings['test_data']
     return render_template('test_case_code.html', project=project, 
                            test_case_contents=test_case_contents, test_case_name=tc_name,
-                           full_test_case_name=test_case_name, test_data=test_data)
+                           full_test_case_name=test_case_name, test_data=external_data,
+                           test_data_setting=test_data_setting)
 
 
 # PAGE OBJECT VIEW
@@ -189,8 +193,8 @@ def page_view(project, full_page_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
     page_object_data = page_object.get_page_object_content(project, full_page_name)
-    return render_template('page_object.html', project=project, page_object_data=page_object_data,
-                           page_name=full_page_name)
+    return render_template('page_object.html', project=project,
+                           page_object_data=page_object_data, page_name=full_page_name)
 
 
 # PAGE OBJECT VIEW no sidebar
@@ -200,8 +204,9 @@ def page_view_no_sidebar(project, full_page_name):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
     page_object_data = page_object.get_page_object_content(project, full_page_name)
-    return render_template('page_object.html', project=project, page_object_data=page_object_data,
-                           page_name=full_page_name, no_sidebar=True)
+    return render_template('page_object.html', project=project,
+                           page_object_data=page_object_data, page_name=full_page_name,
+                           no_sidebar=True)
 
 
 # PAGE OBJECT CODE VIEW
@@ -446,7 +451,6 @@ def rename_element():
                     break
 
         dir_type_name = ''
-        
         if not error:
             if elem_type == 'test':
                 dir_type_name = 'tests'
@@ -455,41 +459,83 @@ def rename_element():
             elif elem_type == 'suite':
                 dir_type_name = 'suites'
             
-            old_full_path = os.path.join(root_path, 'projects', project, dir_type_name,
-                                         os.sep.join(old_parents), old_filename + '.py')
-
-            new_dir_path = os.path.join(root_path, 'projects', project, dir_type_name,
-                                        os.sep.join(new_parents))
-
-            new_full_path = os.path.join(new_dir_path, new_filename + '.py')
-
-            if os.path.exists(new_full_path):
-                error = 'File {} already exists'.format(new_full_filename)
-
-        if not error:
-            # create new parents if they do not exist
-            if not os.path.exists(new_dir_path):
-                base_path = os.path.join(root_path, 'projects', project, dir_type_name)
-                for parent in new_parents:
-                    base_path = os.path.join(base_path, parent)
-                    if not os.path.exists(base_path):
-                        utils.create_new_directory(path=base_path, add_init=True)
-
-            # try:
-            os.rename(old_full_path, new_full_path)
-            # except:
-            #     error = 'There was an error renaming \'{}\' to \'{}\''.format(
-            #                 full_filename, new_full_filename)
-
+            old_path = os.path.join(root_path, 'projects', project, dir_type_name,
+                                    os.sep.join(old_parents))
+            new_path = os.path.join(root_path, 'projects', project, dir_type_name,
+                                    os.sep.join(new_parents))
+            error = io_manager.rename_file(old_path, old_filename+'.py',
+                                           new_path, new_filename+'.py')
         if not error and elem_type == 'test':
-            try:
-                old_data_full_path = os.path.join(root_path, 'projects', project, 'data',
-                                                  os.sep.join(old_parents), old_filename + '.csv')
-                new_data_full_path = os.path.join(new_dir_path, new_filename + '.csv')
-                if os.path.exists(old_data_full_path):
-                    shutil.move(old_data_full_path, new_data_full_path)
-            except:
-                pass
+            # try to rename data file in /data/ folder
+            # TODO, data files in /data/ will be deprecated
+            old_path = os.path.join(root_path, 'projects', project, 'data',
+                                    os.sep.join(old_parents))
+            new_path = os.path.join(root_path, 'projects', project, 'data',
+                                    os.sep.join(new_parents))
+            if os.path.isfile(os.path.join(old_path, old_filename+'.csv')):
+                error = io_manager.rename_file(old_path, old_filename+'.csv',
+                                               new_path, new_filename+'.csv')
+            # try to rename data file in /tests/ folder
+            old_path = os.path.join(root_path, 'projects', project, 'tests',
+                                    os.sep.join(old_parents))
+            new_path = os.path.join(root_path, 'projects', project, 'tests',
+                                    os.sep.join(new_parents))
+            if os.path.isfile(os.path.join(old_path, old_filename+'.csv')):
+                error = io_manager.rename_file(old_path, old_filename+'.csv',
+                                               new_path, new_filename+'.csv')
+
+        # TODO remove commented lines
+        #     old_full_path = os.path.join(root_path, 'projects', project, dir_type_name,
+        #                                  os.sep.join(old_parents), old_filename + '.py')
+
+        #     new_dir_path = os.path.join(root_path, 'projects', project, dir_type_name,
+        #                                 os.sep.join(new_parents))
+
+        #     new_full_path = os.path.join(new_dir_path, new_filename + '.py')
+
+        #     if os.path.exists(new_full_path):
+        #         error = 'File {} already exists'.format(new_full_filename)
+
+        # if not error:
+        #     # create new parents if they do not exist
+        #     if not os.path.exists(new_dir_path):
+        #         base_path = os.path.join(root_path, 'projects', project, dir_type_name)
+        #         for parent in new_parents:
+        #             base_path = os.path.join(base_path, parent)
+        #             if not os.path.exists(base_path):
+        #                 utils.create_new_directory(path=base_path, add_init=True)
+
+        #     # try:
+        #     os.rename(old_full_path, new_full_path)
+        #     # except:
+        #     #     error = 'There was an error renaming \'{}\' to \'{}\''.format(
+        #     #                 full_filename, new_full_filename)
+
+        # if not error and elem_type == 'test':
+        #     try:
+        #         # TODO remove, csv in /data/ deprecation
+        #         data_base_path = os.path.join(root_path, 'projects', project, 'data')
+        #         old_data_data_folder = os.path.join(data_base_path,
+        #                                             os.sep.join(old_parents),
+        #                                             old_filename + '.csv')
+        #         new_data_data_folder_path = os.path.join(data_base_path,
+        #                                                  os.sep.join(new_parents))
+        #         new_data_data_folder_file = os.path.join(data_base_path,
+        #                                                  os.sep.join(new_parents),
+        #                                                  new_filename + '.csv')
+        #         tests_base_path = os.path.join(root_path, 'projects', project, 'data')
+        #         old_data_tests_folder = os.path.join(tests_base_path
+        #                                              os.sep.join(old_parents),
+        #                                              old_filename + '.csv')
+        #         new_data_tests_folder = os.path.join(tests_base_path
+        #                                              os.sep.join(old_parents),
+        #                                              old_filename + '.csv')
+        #         if os.path.isfile(old_data_data_folder):
+        #             shutil.move(old_data_data_folder, new_data_data_folder)
+        #         if os.path.isfile(old_data_data_folder):
+        #             shutil.move(old_data_data_folder, new_data_data_folder)
+        #     except:
+        #         pass
 
     return json.dumps(error)
 
@@ -550,7 +596,8 @@ def new_tree_element():
                     errors = gui_utils.new_directory(root_path, project, parents,
                                                      element_name, dir_type='tests')
                 else:
-                    errors = test_case.new_test_case(root_path, project, parents, element_name)
+                    errors = test_case.new_test_case(root_path, project,
+                                                     parents, element_name)
                     # changelog.log_change(root_path, project, 'CREATE', 'test',
                     #                      full_path, g.user.username)
             elif elem_type == 'page':
@@ -559,7 +606,8 @@ def new_tree_element():
                                                      element_name, dir_type='pages')
                 else:
                     errors = page_object.new_page_object(root_path, project, parents,
-                                                         element_name, add_parents=add_parents)
+                                                         element_name,
+                                                         add_parents=add_parents)
             elif elem_type == 'suite':
                 if is_dir:
                     errors = gui_utils.new_directory(root_path, project, parents,
@@ -604,11 +652,12 @@ def save_test_case_code():
     if request.method == 'POST':
         projectname = request.json['project']
         test_case_name = request.json['testCaseName']
-        test_data = request.json['testData']
+        table_test_data = request.json['testData']
         content = request.json['content']
 
-        test_data.save_test_data(root_path, projectname, test_case_name, test_data)
-        test_case.save_test_case_code(root_path, projectname, test_case_name, content)
+        # test_data.save_test_data(root_path, projectname, test_case_name, test_data)
+        test_case.save_test_case_code(root_path, projectname, test_case_name,
+                                      content, table_test_data)
 
         return json.dumps('ok')
 
@@ -656,7 +705,8 @@ def run_test_case():
 
         timestamp = gui_utils.run_test_case(project, test_name, environment)
 
-        #changelog.log_change(root_path, project, 'RUN', 'test', test_name, g.user.username)
+        #changelog.log_change(root_path, project, 'RUN', 'test',
+        #                     test_name, g.user.username)
         return json.dumps(timestamp)
 
 
@@ -671,10 +721,10 @@ def save_test_case():
         test_data_content = request.json['testData']
         test_steps = request.json['testSteps']
 
-        test_data.save_test_data(root_path, project, test_name, test_data_content)
+        # test_data.save_test_data(root_path, project, test_name, test_data_content)
 
         test_case.save_test_case(root_path, project, test_name, description,
-                                 page_objects, test_steps)
+                                 page_objects, test_steps, test_data_content)
 
         # changelog.log_change(root_path, project, 'MODIFY', 'test', test_name,
         #                       g.user.username)
@@ -708,9 +758,12 @@ def check_test_case_run_result():
         for data_set in sets:
             report_path = os.path.join(path, data_set, 'report.json')
             if os.path.exists(report_path):
-                test_case_data = report_parser.get_test_case_data(root_path, project,
-                                                              test_case_name, execution=timestamp,
-                                                              test_set=data_set, is_single=True)
+                test_case_data = report_parser.get_test_case_data(root_path,
+                                                                  project,
+                                                                  test_case_name,
+                                                                  execution=timestamp,
+                                                                  test_set=data_set,
+                                                                  is_single=True)
                 result['reports'].append(test_case_data)
 
             log_path = os.path.join(path, data_set, 'execution_console.log')
@@ -783,6 +836,9 @@ def save_settings():
             'errors': []
         }
         settings_manager.save_settings(projectname, project_settings, global_settings)
+        # re-read settings
+        test_execution.settings = settings_manager.get_project_settings(root_path,
+                                                                        projectname)
         return json.dumps(result)
 
 
@@ -858,7 +914,8 @@ def get_execution_data():
 def get_project_health_data():
     if request.method == 'POST':
         project = request.form['project']
-        project_data = report_parser.get_last_executions(root_path, project=project, suite=None, limit=1)
+        project_data = report_parser.get_last_executions(root_path, project=project,
+                                                         suite=None, limit=1)
         
         health_data = {}
 

@@ -15,11 +15,6 @@
     <div>
         <div class="col-sm-8 header-col">
             <h3 id="testCaseName">
-                <small>
-                    <a href="/p/{{project}}/" class="link-without-underline">
-                        <span class="glyphicon glyphicon glyphicon-menu-left" aria-hidden="true"></span>
-                    </a>
-                </small>
                 {{test_case_name}}
             </h3>
         </div>
@@ -34,6 +29,8 @@
 
     <div id="codeEditorContainer" class="col-sm-12" style="border: 1px solid #e0e0e0; padding-left:0px; padding-right: 0px">
     </div>
+
+    {% if test_data or test_data_setting == 'csv' %}
 
     <div id="datosContainerContainer" class="col-sm-12 light-gray-block" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
 
@@ -133,6 +130,8 @@
         </div>
 
     </div>
+
+    {% endif %}
 
 </div>
 

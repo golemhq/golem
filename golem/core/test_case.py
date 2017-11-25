@@ -3,16 +3,14 @@ import re
 import sys
 import importlib
 import inspect
+import pprint
 from ast import literal_eval
 
-from golem.core import utils, page_object
+from golem.core import utils, page_object, test_execution
+from golem.core import test_data as test_data_module
 
 
 def _parse_step(step):
-    # action('a')                 -> ['a']
-    # action('a', 'b')            -> ['a', 'b']
-    # action('a, b, c')           -> ['a, b, c']
-    # action(('a', 'b', 'c'))     -> ['(\'a\', \'b\', \'c\')']
     method_name = step.split('(', 1)[0].strip()
     if not '.' in method_name:
         method_name = method_name.replace('_', ' ')
@@ -75,6 +73,7 @@ def _parse_step(step):
         #     else:
         #         # clean_param_list.append(param.replace('\'', '').replace('"', ''))
         #         clean_param_list.append(param)
+        print('PARAMS', param_list)
     step = {
         'method_name': method_name,
         'parameters': param_list
@@ -102,8 +101,7 @@ def get_test_case_content(root_path, project, test_case_name):
             'test': [],
             'teardown': []
         },
-        'content': '',
-        'data': []
+        'content': ''
     }
     
     # add the 'project' directory to python path
@@ -214,8 +212,21 @@ def format_description(description):
     return formatted_description
 
 
+def format_data(test_data):
+    result = '[\n'
+    for data_set in test_data:
+        result += '    {\n'
+        for key, value in data_set.items():
+            if not value:
+                value = "''"
+            result += '        \'{}\': {},\n'.format(key, value)
+        result += '    },\n'
+    result += ']\n\n'
+    return result
+
+
 def save_test_case(root_path, project, full_test_case_name, description,
-                   page_objects, test_steps):
+                   page_objects, test_steps, test_data):
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
     test_case_path = os.path.join(root_path, 'projects', project, 'tests',
                                   os.sep.join(parents), '{}.py'.format(tc_name))
@@ -231,18 +242,25 @@ def save_test_case(root_path, project, full_test_case_name, description,
         f.write('pages = {}\n'.format(format_page_object_string(page_objects)))
         f.write('\n')
 
+        # write test data if required or save test data to external file
+        if test_execution.settings['test_data'] == 'infile':
+            if test_data:
+                pretty = pprint.PrettyPrinter(indent=4, width=1)
+                #f.write('data = ' + pretty.pformat(test_data) + '\n\n')
+                f.write('data = {}'.format(format_data(test_data)))
+                test_data_module.remove_csv_if_exists(root_path, project, full_test_case_name)
+        else:
+            test_data_module.save_external_test_data_file(root_path, project,
+                                                          full_test_case_name,
+                                                          test_data)
+
         # write the setup function
         f.write('def setup(data):\n')
         if test_steps['setup']:
             for step in test_steps['setup']:
-                # params_formatted = []
-                # for param in step['parameters']:
-                #     # params_formatted.append(format_parameter(param, step['action'], root_path, project,
-                #     #                                          setup_stored_keys))
-                #     params_formatted.append(param_formatter.format_param2(param, step['action']))
-                f.write('    {0}({1})\n'
-                        .format(step['action'].replace(' ', '_'),
-                                ', '.join(step['parameters'])))
+                step_action = step['action'].replace(' ', '_')
+                param_str = ', '.join(step['parameters'])
+                f.write('    {0}({1})\n'.format(step_action, param_str))
         else:
             f.write('    pass\n')
         f.write('\n')
@@ -251,14 +269,9 @@ def save_test_case(root_path, project, full_test_case_name, description,
         f.write('def test(data):\n')
         if test_steps['test']:
             for step in test_steps['test']:
-                # formatted_params = []
-                # for param in step['parameters']:
-                #     formatted_params.append(format_parameters(param, step['action'],
-                #                                               root_path, project,
-                #                                               test_stored_keys))
-                f.write('    {0}({1})\n'
-                        .format(step['action'].replace(' ', '_'),
-                                ', '.join(step['parameters'])))
+                step_action = step['action'].replace(' ', '_')
+                param_str = ', '.join(step['parameters'])
+                f.write('    {0}({1})\n'.format(step_action, param_str))
         else:
             f.write('    pass\n')
         f.write('\n\n')
@@ -267,18 +280,27 @@ def save_test_case(root_path, project, full_test_case_name, description,
         f.write('def teardown(data):\n')
         if test_steps['teardown']:
             for step in test_steps['teardown']:
-                # parameters_formatted = format_parameters(step, root_path, project,
-                #                                          teardown_stored_keys)
-                f.write('    {0}({1})\n'
-                        .format(step['action'].replace(' ', '_'),
-                                ', '.join(step['parameters'])))
+                step_action = step['action'].replace(' ', '_')
+                param_str = ', '.join(step['parameters'])
+                f.write('    {0}({1})\n'.format(step_action, param_str))
         else:
             f.write('    pass\n')
 
 
-def save_test_case_code(root_path, project, full_test_case_name, content):
+def save_test_case_code(root_path, project, full_test_case_name, content, table_test_data):
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
     test_case_path = os.path.join(root_path, 'projects', project, 'tests',
                                   os.sep.join(parents), '{}.py'.format(tc_name))
     with open(test_case_path, 'w', encoding='utf-8') as test_file:
         test_file.write(content)
+
+    # save test data
+    if table_test_data:
+        #save csv data
+        test_data_module.save_external_test_data_file(root_path, project,
+                                                      full_test_case_name,
+                                                      table_test_data)
+    elif test_execution.settings['test_data'] == 'infile':
+        # remove csv files
+        test_data_module.remove_csv_if_exists(root_path, project, full_test_case_name)
+

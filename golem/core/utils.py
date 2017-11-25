@@ -113,11 +113,14 @@ def _generate_dict_from_file_structure(full_path, original_path=None):
     all_sub_elements = os.listdir(full_path)
     files = []
     directories = []
-    for elem in all_sub_elements:
+    for elem in all_sub_elements: 
         if os.path.isdir(os.path.join(full_path, elem)):
-            directories.append(elem)
+            if elem not in ['__pycache__']:
+                directories.append(elem)
         else:
-            if not elem in ['__init__.py', '.DS_Store']:
+            cond1 = elem not in ['__init__.py', '.DS_Store']
+            cond2 = not elem.endswith('.csv')
+            if cond1 and cond2:
                 files.append(os.path.splitext(elem)[0])
     for directory in directories:
         _ = _generate_dict_from_file_structure(os.path.join(full_path, directory),

@@ -224,8 +224,8 @@ var dataTable = new function(){
             }
         });
         // empty values are allowed but only for one row of data
-        var tempTestData = [testData[0]];
-        for(var i = 1; i <= testData.length - 1; i++){
+        var tempTestData = [];
+        for(var i = 0; i <= testData.length - 1; i++){
             var allEmpty = true;
             for(key in testData[i]){
                 if(testData[i][key].length > 0){
