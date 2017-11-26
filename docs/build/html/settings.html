@@ -58,13 +58,23 @@
 </ul>
 <p>Take a screenshot on error by default. Default is True.</p>
 <ul class="simple">
+<li><em>screenshot_on_step</em></li>
+</ul>
+<p>Take a screenshot on every step. Default is False.</p>
+<ul class="simple">
 <li><em>screenshot_on_end</em></li>
 </ul>
 <p>Take a screenshot after 'test' function ends. Default is False.</p>
 <ul class="simple">
-<li><em>screenshot_on_step</em></li>
+<li><em>test_data</em></li>
 </ul>
-<p>Take a screenshot on every step. Default is False.</p>
+<p>The location to store test data. Options are: 'infile' and 'csv'. Default is 'csv.'.</p>
+<p>With 'test_data' = 'infile'  data is stored inside the test file as a list of dictionaries.</p>
+<p>With 'test_data' = 'csv' data is stored in a csv file in the same folder of the test and with the same name, e.g.: /tests/some_test.py -&gt; /tests/some_test.csv</p>
+<ul class="simple">
+<li><em>wait_hook</em></li>
+</ul>
+<p>Custom wait method to use for every action, that can be specific to each application. It must be defined inside extend.py</p>
 <ul class="simple">
 <li><em>default_browser</em></li>
 </ul>
@@ -105,10 +115,6 @@ The minimum capabilities required are 'browserName', 'version' and 'platform', r
 <span class="p">}</span>
 </pre></div>
 </div>
-<ul class="simple">
-<li><em>wait_hook</em></li>
-</ul>
-<p>Custom wait method to use for every action, that can be specific to each application. It must be defined inside extend.py</p>
 <ul class="simple">
 <li><em>console_log_level</em></li>
 </ul>

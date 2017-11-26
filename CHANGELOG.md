@@ -3,9 +3,13 @@
 
 ## [Unreleased]
 
+### Changed
+- csv files are created in the same folder as the test. Csv files in /data/ folder will keep working with a deprecation warning
+
 ### Added
 - Rename button for suites, tests and pages
-- 'test_data' setting, 'csv' or 'infile'
+- 'test_data' setting, options are 'csv' and 'infile'
+- Tests can store data inside the test itself
 
 
 ## [0.3.1] - 2017-11-08

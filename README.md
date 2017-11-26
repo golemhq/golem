@@ -28,6 +28,8 @@ Golem is a complete test automation tool and framework for end-to-end testing. I
 * An interactive console
 
 
+**Please note**: Golem is still in beta. Read the changelog before upgrading.
+
 ***
 
 ## Contents

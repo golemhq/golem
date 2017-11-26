@@ -170,8 +170,8 @@ class Test_get_suites:
 
 class Test_get_projects:
 
-    def test_get_projects(self, project_fixture):
-        projects = utils.get_projects(project_fixture['testdir_fixture']['path'])
+    def test_get_projects(self, project_fixture, testdir_fixture):
+        projects = utils.get_projects(testdir_fixture['path'])
         assert project_fixture['name'] in projects
 
 

@@ -73,7 +73,6 @@ def _parse_step(step):
         #     else:
         #         # clean_param_list.append(param.replace('\'', '').replace('"', ''))
         #         clean_param_list.append(param)
-        print('PARAMS', param_list)
     step = {
         'method_name': method_name,
         'parameters': param_list

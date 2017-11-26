@@ -29,7 +29,11 @@ Take a screenshot after 'test' function ends. Default is False.
 
 - *test_data*
 
-Where to store store test data. Options are: 'infile', 'csv'. Default is 'csv.'. With option 'infile' test data is stored inside the test file itself as a list of dictionaries. With option 'csv' test data is stored in csv file in the same folder as the test itself and with the same name as the test, e.g.: tests/some_test.py -> tests/some_test.csv
+The location to store test data. Options are: 'infile' and 'csv'. Default is 'csv.'. 
+
+With 'test_data' = 'infile'  data is stored inside the test file as a list of dictionaries. 
+
+With 'test_data' = 'csv' data is stored in a csv file in the same folder of the test and with the same name, e.g.: /tests/some_test.py -> /tests/some_test.csv
 
 - *wait_hook*
 

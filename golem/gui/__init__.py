@@ -278,7 +278,7 @@ def project_settings(project):
                            global_settings=global_settings, settings=project_settings)
 
 
-# PROJECT SETTINGS VIEW
+# ENVIRONMENTS VIEW
 @app.route("/project/<project>/environments/")
 def environments_view(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):

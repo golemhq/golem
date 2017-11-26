@@ -96,6 +96,7 @@ def get_external_test_data(workspace, project, full_test_case_name):
 def get_internal_test_data(workspace, project, full_test_case_name):
     # check if test has data variable defined
     data_list = []
+    # sys.path.append(workspace)
     sys.path.append(os.path.join(workspace, 'projects', project))
     test_module = importlib.import_module('projects.{0}.tests.{1}'
                                           .format(project, full_test_case_name))
@@ -120,18 +121,12 @@ def get_internal_test_data(workspace, project, full_test_case_name):
                    '{}\n'
                    'Test data for test {} will be ignored'
                     .format(data_variable, full_test_case_name)))
-    print('DATA LIST', data_list)
     _ = []
     for datax in data_list:
         d = {}
         for k,v in datax.items():
             if type(v) == str and len(v):
-                print('AAAAA', v, v[0])
-                if v[0] == "'":
-                    print('ENTRE')
                     d[k] = "'{}'".format(v)
-                else:
-                    d[k] = '"{}"'.format(v)
             else:
                 d[k] = v
         _.append(d)

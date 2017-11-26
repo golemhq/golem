@@ -25,7 +25,7 @@ class Test__get_page_object_content:
             page_file.write('    pass')
 
 
-        sys.path.append(testdir_fixture['path'])
+        #sys.path.append(testdir_fixture['path'])
         content = page_object.get_page_object_content(project, page_name)
 
         expected = {
