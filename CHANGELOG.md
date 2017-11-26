@@ -3,6 +3,8 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2017-11-26
+
 ### Changed
 - csv files are created in the same folder as the test. Csv files in /data/ folder will keep working with a deprecation warning
 
