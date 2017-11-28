@@ -1,6 +1,6 @@
 Golem - Test Automation Framework 
 [![Build Status](https://travis-ci.org/lucianopuccio/golem.svg?branch=master)](https://travis-ci.org/lucianopuccio/golem)
-[![Documentation Status](http://readthedocs.org/projects/golem-framework/badge/?version=latest)](http://golem-framework.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/golem-framework/badge/?version=latest)](https://golem-framework.readthedocs.io/en/latest/?badge=latest)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 ==================================================
 
@@ -80,7 +80,7 @@ Screen Captures
 Pre-requisites
 --------------------------------------
 
-Basic knowledge of Selenium Webdriver is required. Check out [this docs](golem-framework.readthedocs.io/en/latest/installation.html) first.
+Basic knowledge of Selenium Webdriver is required. Check out [this docs](https://golem-framework.readthedocs.io/en/latest/installation.html) first.
 
 
 Installation
@@ -92,8 +92,7 @@ Golem works with Python 3.4+
 pip install golem-framework
 ```
 
-Read the full installation guide here: [http://golem-framework.readthedocs.io/en/latest/installation.html](golem-framework.readthedocs.io/en/latest/installation.html)
-
+Read the full installation guide here: [https://golem-framework.readthedocs.io/en/latest/installation.html](https://golem-framework.readthedocs.io/en/latest/installation.html)
 
 Quick Start
 --------------------------------------
@@ -110,7 +109,7 @@ The latests versions of the webdrivers can be found here:
 * Chrome: (https://sites.google.com/a/chromium.org/chromedriver/)
 * Firefox: (https://github.com/mozilla/geckodriver/releases)
 
-For more information check [this page](http://golem-framework.readthedocs.io/en/latest/web-drivers.html) of the documentation.
+For more information check [this page](https://golem-framework.readthedocs.io/en/latest/web-drivers.html) of the documentation.
 
 **Start the Web Module**
 
@@ -128,7 +127,7 @@ By default, the following user is available: username: *admin* / password: *admi
 Documentation
 --------------------------------------
 
-Read the full documentation here: [http://golem-framework.readthedocs.io/](http://golem-framework.readthedocs.io/)
+Read the full documentation here: [https://golem-framework.readthedocs.io/](https://golem-framework.readthedocs.io/)
 
 
 Example Projects
