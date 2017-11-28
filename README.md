@@ -80,7 +80,7 @@ Screen Captures
 Pre-requisites
 --------------------------------------
 
-Basic knowledge of Selenium Webdriver is required. Check out [this docs](golem-framework.readthedocs.io/en/latest/installation.html) first.
+Basic knowledge of Selenium Webdriver is required. Check out [this docs](https://golem-framework.readthedocs.io/en/latest/installation.html) first.
 
 
 Installation
@@ -92,8 +92,7 @@ Golem works with Python 3.4+
 pip install golem-framework
 ```
 
-Read the full installation guide here: [http://golem-framework.readthedocs.io/en/latest/installation.html](golem-framework.readthedocs.io/en/latest/installation.html)
-
+Read the full installation guide here: [https://golem-framework.readthedocs.io/en/latest/installation.html](https://golem-framework.readthedocs.io/en/latest/installation.html)
 
 Quick Start
 --------------------------------------
