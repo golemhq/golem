@@ -26,16 +26,17 @@ See the full [list of golem actions](golem-actions.html)
 
 Contains methods for interacting with a browser (a selenium webdriver instance)
 
-### golem.browser.**get_browser()**
 
-Returns the browser instance (a Selenium Webdriver) with two extra methods: *find()* and *find_all()*. It is not required to explicitly open the browser, any golem action that requires a browser will open one if it is not already open and store it in *golem.execution.browser*. If a browser is already open, this method will return that browser instance.
+### golem.browser.**open_browser(browser_id=None)**
+
+Opens a new browser window. The browser_id is optional but useful when having multiple browsers open at the same time.
 
 **Chosing a browser**
 
-The browser that is selected follows this order of precedence:
+The browser that is selected follows this order of priority:
 
-1. Command line run command, -b / --browsers flag
-2. 'browsers' list in a suite
+1. Command line *run* command, -b / --browsers flag
+2. 'browsers' list defined in a suite
 3. settings.json, "default_browser" option
 
 Example:
@@ -43,6 +44,7 @@ Example:
 ```
 python golem.py run project test -b chrome firefox
 ```
+
 
 **The extra browser methods:**
 
@@ -60,7 +62,7 @@ Returns a list of webelements that can be empty if no element matched the criter
 
 
 
-### Example Usage of find() and find_all()
+#### Example Usage of find() and find_all()
 
 Consider the following HTML elements:
 
@@ -110,6 +112,37 @@ element = browser.find(xpath="//input[@id='someId']")
 element = browser.find(tag_name='input')
 ```
 
+
+### golem.browser.**get_browser()**
+
+Returns the browser instance. If there's none, it will open a new browser. 
+
+The opened browser (a Selenium Webdriver object) has two extra methods: *find()* and *find_all()*. 
+
+It is not required to explicitly open the browser, any golem action that requires a browser will open one if it is not already open and store it in *golem.execution.browser*.
+
+
+### golem.browser.**activate_browser(browser_id)**
+
+When working with multiple browsers at the same time. Use this method to activate one of the browser instances before interacting with it.
+
+Example:
+
+```
+def some_func():
+    # open two browsers, the first is active by default
+    browser.open_browser('browser_one')
+    browser.open_browser('browser_two')
+    
+    # navigate to a url using the first browser
+    browser.get_browser().navigate('https:...')
+    
+    # activate the second browser 
+    browser.activate_browser('browser_two')
+    
+    # navigate to a url using the second browser
+    browser.get_browser().navigate('https:...')
+``` 
 
 
 ### golem.browser.**element()**

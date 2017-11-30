@@ -40,6 +40,12 @@ def _capture_or_add_step(message, screenshot_on_step):
         step(message)
 
 
+def activate_browser(browser_id):
+    step_message = 'Activate browser {}'.format(browser_id)
+    browser.activate_browser(browser_id)    
+    _capture_or_add_step(step_message, False)
+
+
 def assert_contains(element, value):
     step_message = 'Assert that {0} contains {1}'.format(element, value)
     execution.logger.info(step_message)
@@ -134,6 +140,10 @@ def get(url):
     navigate(url)
 
 
+def get_browser():
+    return browser.get_browser()
+
+
 def mouse_hover(element):
     _run_wait_hook()
     driver = get_browser()
@@ -151,6 +161,12 @@ def navigate(url):
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
     
+
+def open_browser(browser_id=None):
+    step_message = 'Open browser'
+    browser.open_browser(browser_id)
+    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+
     
 def press_key(element, key):
     step_message = 'Press key: {}'.format(key)

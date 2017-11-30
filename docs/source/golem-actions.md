@@ -7,6 +7,11 @@ Golem comes with predefined actions that cover almost all the needs to write tes
 ### Browser Actions
 
 
+#### activate_browser(browser_id)
+
+Activates a browser to use in subsequent actions. Only needed when having more than one browser open.
+
+
 ##### capture(message='')
 
 Take a screenshot of the browser, the message is optional
@@ -32,6 +37,11 @@ Closes the webdriver browser
 Navigate to a URL, same as *navigate(url)*
 
 
+##### get_browser()
+
+Returns the active browser driver object
+
+
 ##### mouse_hover(element)
 
 Perform a mouse hover on the element
@@ -40,6 +50,11 @@ Perform a mouse hover on the element
 ##### navigate(url)
 
 Navigate to a URL
+
+
+##### open_browser(browser_id=None)
+
+Open a new browser. Browser Id is optional, useful when having multiple open browsers.
 
 
 ##### press_key(element, key)

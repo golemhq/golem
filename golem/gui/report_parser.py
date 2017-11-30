@@ -167,6 +167,11 @@ def get_test_case_data(root_path, project, test, suite=None, execution=None,
     """ retrieves all the date of a single test case execution"""
     test_case_data = {
         'log': [],
+        # 'steps': {
+        #     'setup': [],
+        #     'test': [],
+        #     'teardown': []
+        # }
     }
     if is_single:
         test_case_dir = os.path.join(root_path, 'projects', project, 'reports',

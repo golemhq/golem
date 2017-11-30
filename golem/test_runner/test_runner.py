@@ -155,7 +155,8 @@ def run_test(workspace, project, test_name, test_data, browser,
     # let's try to close the driver manually
     if execution.browser:
         try:
-            execution.browser.quit()
+            for browser, driver in execution.browsers.items():
+                driver.quit()
         except:
             # if this fails, we have lost control over the webdriver window
             # and we are not going to be able to close it

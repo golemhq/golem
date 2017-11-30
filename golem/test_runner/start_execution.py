@@ -40,6 +40,8 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
                                               suite)
         report_suite_name = suite
         is_suite = True
+        if len(tests) == 0:
+            print('Warning: suite {} does not have tests'.format(suite))
     elif directory_suite:
         tests = utils.get_directory_suite_test_cases(workspace, project, directory_suite)
         report_suite_name = directory_suite
@@ -86,7 +88,6 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
                    'available options are:\n',
                    '\n'.join(default_browsers),
                    '\n'.join(remote_browsers)]
-            #sys.exit('Error: the browser {} is not defined'.format(driver))
             sys.exit(''.join(msg))
 
     drivers = drivers_temp
@@ -161,16 +162,16 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory_suite
         if hasattr(suite_module, 'before'):
             suite_module.before()
 
-    if test_execution.interactive and threads == 1:
-        if threads == 1:
-            # run tests serially
-            for test in execution_list:
-                run_test(test_execution.root_path, test_execution.project,
-                         test['test_name'], test['data_set'],
-                         test['driver'], test_execution.settings,
-                         test['report_directory'])
-        else:
-            print('Error: to run in debug mode, threads must equal one')
+    if test_execution.interactive and threads != 1:
+        print('Error: to run in debug mode, threads must equal one')
+
+    if threads == 1:
+        # run tests serially
+        for test in execution_list:
+            run_test(test_execution.root_path, test_execution.project,
+                     test['test_name'], test['data_set'],
+                     test['driver'], test_execution.settings,
+                     test['report_directory'])
     else:
         # run list of tests using multiprocessing
         multiprocess_executor(execution_list, is_suite, execution_directory, threads)
