@@ -166,7 +166,8 @@ def get_test_case_data(root_path, project, test, suite=None, execution=None,
                        test_set=None, is_single=False):
     """ retrieves all the date of a single test case execution"""
     test_case_data = {
-        'log': [],
+        'debug_log': [],
+        'info_log': [],
         # 'steps': {
         #     'setup': [],
         #     'test': [],
@@ -222,12 +223,16 @@ def get_test_case_data(root_path, project, test, suite=None, execution=None,
             if 'set_name' in report_data:
                 test_case_data['set_name'] = report_data['set_name']
 
-    log_path = os.path.join(test_case_dir, 'execution.log')
-    if os.path.exists(log_path):
-        with open(log_path, 'r') as log_file:
+    debug_log_path = os.path.join(test_case_dir, 'execution_debug.log')
+    info_log_path = os.path.join(test_case_dir, 'execution_info.log')
+    if os.path.isfile(debug_log_path):
+        with open(debug_log_path, 'r') as log_file:
             log = log_file.readlines()
-            test_case_data['log'] = log
-
+            test_case_data['debug_log'] = log
+    if os.path.isfile(info_log_path):
+        with open(info_log_path, 'r') as log_file:
+            log = log_file.readlines()
+            test_case_data['info_log'] = log
     return test_case_data
 
 

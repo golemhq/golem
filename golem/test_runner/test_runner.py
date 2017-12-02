@@ -50,13 +50,11 @@ def run_test(workspace, project, test_name, test_data, browser,
         result['set_name'] = test_data['set_name']
     elif test_data:
         result['set_name'] = test_data[next(iter(test_data))]
-
     logger = execution_logger.get_logger(report_directory,
                                          settings['console_log_level'],
-                                         settings['file_log_level'],
                                          settings['log_all_events'])
     execution.logger = logger
-
+    logger.debug('sarasa')
     # Print execution info to console
     logger.info('Test execution started: {}'.format(test_name))
     logger.info('Browser: {}'.format(browser['name']))

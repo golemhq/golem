@@ -166,7 +166,8 @@ def test_case_view(project, test_case_name):
                                project=project,
                                full_test_case_name=test_case_name)
     else:
-        test_case_contents = test_case.get_test_case_content(root_path, project, test_case_name)
+        test_case_contents = test_case.get_test_case_content(root_path, project,
+                                                             test_case_name)
         test_data = test_data_module.get_test_data(root_path, project, test_case_name)
         return render_template('test_builder/test_case.html', project=project,
                                test_case_contents=test_case_contents,
@@ -514,60 +515,6 @@ def rename_element():
             if os.path.isfile(os.path.join(old_path, old_filename+'.csv')):
                 error = io_manager.rename_file(old_path, old_filename+'.csv',
                                                new_path, new_filename+'.csv')
-
-        # TODO remove commented lines
-        #     old_full_path = os.path.join(root_path, 'projects', project, dir_type_name,
-        #                                  os.sep.join(old_parents), old_filename + '.py')
-
-        #     new_dir_path = os.path.join(root_path, 'projects', project, dir_type_name,
-        #                                 os.sep.join(new_parents))
-
-        #     new_full_path = os.path.join(new_dir_path, new_filename + '.py')
-
-        #     if os.path.exists(new_full_path):
-        #         error = 'File {} already exists'.format(new_full_filename)
-
-        # if not error:
-        #     # create new parents if they do not exist
-        #     if not os.path.exists(new_dir_path):
-        #         base_path = os.path.join(root_path, 'projects', project, dir_type_name)
-        #         for parent in new_parents:
-        #             base_path = os.path.join(base_path, parent)
-        #             if not os.path.exists(base_path):
-        #                 utils.create_new_directory(path=base_path, add_init=True)
-
-        #     # try:
-        #     os.rename(old_full_path, new_full_path)
-        #     # except:
-        #     #     error = 'There was an error renaming \'{}\' to \'{}\''.format(
-        #     #                 full_filename, new_full_filename)
-
-        # if not error and elem_type == 'test':
-        #     try:
-        #         # TODO remove, csv in /data/ deprecation
-        #         data_base_path = os.path.join(root_path, 'projects', project, 'data')
-        #         old_data_data_folder = os.path.join(data_base_path,
-        #                                             os.sep.join(old_parents),
-        #                                             old_filename + '.csv')
-        #         new_data_data_folder_path = os.path.join(data_base_path,
-        #                                                  os.sep.join(new_parents))
-        #         new_data_data_folder_file = os.path.join(data_base_path,
-        #                                                  os.sep.join(new_parents),
-        #                                                  new_filename + '.csv')
-        #         tests_base_path = os.path.join(root_path, 'projects', project, 'data')
-        #         old_data_tests_folder = os.path.join(tests_base_path
-        #                                              os.sep.join(old_parents),
-        #                                              old_filename + '.csv')
-        #         new_data_tests_folder = os.path.join(tests_base_path
-        #                                              os.sep.join(old_parents),
-        #                                              old_filename + '.csv')
-        #         if os.path.isfile(old_data_data_folder):
-        #             shutil.move(old_data_data_folder, new_data_data_folder)
-        #         if os.path.isfile(old_data_data_folder):
-        #             shutil.move(old_data_data_folder, new_data_data_folder)
-        #     except:
-        #         pass
-
     return json.dumps(error)
 
 
@@ -657,7 +604,6 @@ def new_tree_element():
 
 @app.route("/new_project/", methods=['POST'])
 def new_project():
-
     if request.method == 'POST':
         project_name = request.form['projectName']
 
@@ -679,7 +625,6 @@ def new_project():
 
 @app.route("/save_test_case_code/", methods=['POST'])
 def save_test_case_code():
-
     if request.method == 'POST':
         projectname = request.json['project']
         test_case_name = request.json['testCaseName']
@@ -697,7 +642,6 @@ def save_test_case_code():
 
 @app.route("/get_global_actions/", methods=['POST'])
 def get_global_actions():
-
     if request.method == 'POST':
         global_actions = gui_utils.get_global_actions()
         return json.dumps(global_actions)
@@ -745,7 +689,6 @@ def run_test_case():
 
 @app.route("/save_test_case/", methods=['POST'])
 def save_test_case():
-
     if request.method == 'POST':
         project = request.json['project']
         test_name = request.json['testCaseName']
@@ -799,7 +742,7 @@ def check_test_case_run_result():
                                                                   is_single=True)
                 result['reports'].append(test_case_data)
 
-            log_path = os.path.join(path, data_set, 'execution_console.log')
+            log_path = os.path.join(path, data_set, 'execution_info.log')
             if os.path.exists(log_path):
                 with open(log_path) as log_file:
                     log = log_file.readlines()

@@ -4,11 +4,15 @@
 ## [Unreleased]
 
 ### Added
-- Open multiple browsers for the same test.
+- Can open multiple browsers for the same test.
 - New actions: open_browser, activate_browser
+- Add INFO and DEBUG logs to test report
 
 ### Fixed
-- #59, added syntax validation for tests & pages
+- #59, added syntax validation for test builder and page builder
+
+### Deprecated
+- Removed 'file_log_level' setting, by default two log files are generated: execution_info.log, execution_debug.log
 
 ## [0.4.0] - 2017-11-26
 

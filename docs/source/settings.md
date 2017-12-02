@@ -84,10 +84,6 @@ Example: settings.json
 
 Default is 'INFO'
 
-- *file_log_level*
-
-Default is 'DEBUG'
-
 - *log_all_events*
 
 Default is false

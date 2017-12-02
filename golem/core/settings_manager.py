@@ -46,10 +46,6 @@ SETTINGS_FILE_CONTENT = (
 // Default option is INFO
 "console_log_level": "INFO",
 
-// Log level to file. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.
-// Default option is DEBUG
-"file_log_level": "DEBUG",
-
 // Log all events, instead of just Golem events. Default is false
 "log_all_events": "false"
 }
@@ -100,16 +96,13 @@ def assign_settings_default_values(settings):
         ('remote_url', None),
         ('remote_browsers', {}),
         ('console_log_level', 'INFO'),
-        ('file_log_level', 'DEBUG'),
         ('log_all_events', False)
     ]
-
     for default in defaults:
         if not default[0] in settings:
             settings[default[0]] = default[1]
         elif settings[default[0]] in ['', None]:
                 settings[default[0]] = default[1]
-
     return settings
 
 
@@ -134,16 +127,6 @@ def get_global_settings_as_string(workspace):
     return settings
 
 
-def get_project_settings_as_string(workspace, project):
-    project_settings_path = os.path.join(workspace, 'projects',
-                                         project, 'settings.json')
-    settings = ''
-    if os.path.exists(project_settings_path):
-        with open(project_settings_path) as settings_file:
-            settings = settings_file.read()
-    return settings
-
-
 def get_project_settings(workspace, project):
     '''get project level settings from selected project folder,
     this overrides any global settings'''
@@ -153,12 +136,21 @@ def get_project_settings(workspace, project):
     project_settings = {}
     if os.path.exists(project_settings_path):
         project_settings = read_json_with_comments(project_settings_path)
-        project_settings = assign_settings_default_values(project_settings)
     # merge and override global settings with project settings
     for setting in project_settings:
-        if project_settings[setting]:
-            global_settings[setting] = project_settings[setting]
+        global_settings[setting] = project_settings[setting]
+    global_settings = assign_settings_default_values(global_settings)
     return global_settings
+
+
+def get_project_settings_as_string(workspace, project):
+    project_settings_path = os.path.join(workspace, 'projects',
+                                         project, 'settings.json')
+    settings = ''
+    if os.path.exists(project_settings_path):
+        with open(project_settings_path) as settings_file:
+            settings = settings_file.read()
+    return settings
 
 
 def save_settings(project, project_settings, global_settings):

@@ -71,9 +71,16 @@
 	</div>
 
 	<div class="col-md-12 project-container font-17" id="log" style="padding-left: 30px; padding-right: 30px; padding-bottom: 15px;">
-		<h3 class="no-margin-top">Log</h3>
-		<div id="logLines" style="font-family: monospace; font-size: 14px;">
-			{% for line in test_case_data.log %}
+		<h3 class="no-margin-top">Log <small><a class="btn btn-default btn-xs" onclick="setLogLevel('debug')">DEBUG</a> <a class="btn btn-default btn-xs" onclick="setLogLevel('info')">INFO</a></small></h3>
+		<div id="debugLogLines" style="font-family: monospace; font-size: 14px;">
+			{% for line in test_case_data.debug_log %}
+				<div class="step">
+					<span>{{line}}</span>
+				</div>
+			{% endfor %}
+		</div>
+		<div id="infoLogLines" style="font-family: monospace; font-size: 14px; display: none">
+			{% for line in test_case_data.info_log %}
 				<div class="step">
 					<span>{{line}}</span>
 				</div>
@@ -90,5 +97,5 @@
 	var execution = '{{execution}}';
 	var testCase = '{{test_case}}';
 </script>
-<!-- <script src="{{ url_for('static', filename='js/report_test.js') }}"></script> -->
+<script src="{{ url_for('static', filename='js/report_test.js') }}"></script>
 {% endblock %}
