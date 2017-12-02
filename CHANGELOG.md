@@ -7,6 +7,9 @@
 - Open multiple browsers for the same test.
 - New actions: open_browser, activate_browser
 
+### Fixed
+- #59, added syntax validation for tests & pages
+
 ## [0.4.0] - 2017-11-26
 
 ### Changed

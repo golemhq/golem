@@ -1,7 +1,46 @@
 import os
 from collections import OrderedDict
 
+from tests.fixtures import testdir_fixture, random_project_fixture, project_fixture
+
 from golem.core import test_case
+
+
+SAMPLE_TEST_CONTENT = """
+description = 'some description'
+
+data = [{'a': 'b'}]
+
+pages = ['page1', 'page2']
+
+def setup(data):
+    page1.func1()
+
+def test(data):
+    page2.func2('a', 'b')
+    click(page2.elem1)
+
+def teardown(data):
+    pass
+
+"""
+
+
+NEW_TEST_CONTENT = """
+description = ''
+
+pages = []
+
+def setup(data):
+    pass
+
+def test(data):
+    pass
+
+def teardown(data):
+    pass
+
+"""
 
 
 class Test__parse_step:
@@ -165,29 +204,66 @@ class Test__parse_step:
             assert step['expected'] == parsed
 
 
-# class Test_format_parameter:
-#     possible_inputs = [
-#         {
-#             'param': 'test',
-#             'expected': 'test'
-#         },
-#         {
-#             'param': '123',
-#             'action': 'click',
-#             'expected': 123
-#         },
-#         {
-#             'param': 'test test',
-#             'action': 'click',
-#             'expected': 'test test'
-#         }
-#     ]
+class Test_get_test_case_content:
 
-#     def test_format_parameters(self):
-#         param_formatter = test_case.Param_formatter('', '', '')
-#         for step in self.possible_inputs:
-#             parsed = param_formatter.format_param(step['param'], step['action'])
-#             print(parsed)
-#             assert step['expected'] == parsed
+    def test_get_test_case_content(self, testdir_fixture, random_project_fixture):
+
+        test_name = 'some_test_case'
+        root_path = random_project_fixture['testdir_fixture']['path']
+        project = random_project_fixture['name']
+        path = os.path.join(root_path, 'projects', project,
+                            'tests', test_name + '.py')
+        with open(path, 'w') as ff:
+            ff.write(SAMPLE_TEST_CONTENT)
+        test_content = test_case.get_test_case_content(root_path, project, test_name)
+        assert test_content['description'] == 'some description'
+        assert test_content['pages'] == ['page1', 'page2']
+        assert test_content['steps']['setup'] == [{'method_name': 'page1.func1', 'parameters': []}]
+        assert test_content['steps']['test'] == [{'method_name': 'page2.func2', 'parameters': ["'a'", "'b'"]}, {'method_name': 'click', 'parameters': ['page2.elem1']}]
+        assert test_content['steps']['teardown'] == []
+
+
+class Test_get_test_case_code:
+
+    def test_get_test_case_code(self, testdir_fixture, random_project_fixture):
+        test_name = 'some_test_case2'
+        root_path = random_project_fixture['testdir_fixture']['path']
+        project = random_project_fixture['name']
+        path = os.path.join(root_path, 'projects', project, 'tests', test_name + '.py')
+        with open(path, 'w') as ff:
+            ff.write(SAMPLE_TEST_CONTENT)
+        test_code = test_case.get_test_case_code(path)
+        assert test_code == SAMPLE_TEST_CONTENT
+
+
+class Test_new_test_case:
+
+    def test_new_test_case(self, testdir_fixture, project_fixture):
+
+        root_path = testdir_fixture['path']
+        project = project_fixture['name']
+        test_name = 'new_test_case_001'
+        parents = ['aaaa', 'bbbb']
+        errors = test_case.new_test_case(root_path, project, parents, test_name)
+
+        path = os.path.join(root_path, 'projects', project, 'tests',
+                            os.sep.join(parents), test_name + '.py')
+        assert os.path.isfile(path)
+        assert errors == []
+        test_code = test_case.get_test_case_code(path)
+        assert test_code == NEW_TEST_CONTENT
+
+
+    def test_new_test_case_file_exists(self, testdir_fixture, project_fixture):
+
+        root_path = testdir_fixture['path']
+        project = project_fixture['name']
+        test_name = 'new_test_case_002'
+        parents = ['aaaa', 'bbbb']
+        test_case.new_test_case(root_path, project, parents, test_name)
+
+        errors = test_case.new_test_case(root_path, project, parents, test_name)
+
+        assert errors == ['A test with that name already exists']
 
 

@@ -160,30 +160,22 @@ def new_test_case(root_path, project, parents, tc_name):
         "    pass\n\n")
     errors = []
     # check if a file already exists
-    path = os.path.join(root_path, 'projects', project, 'tests',
+    fullpath = os.path.join(root_path, 'projects', project, 'tests',
                         os.sep.join(parents), '{}.py'.format(tc_name))
-    if os.path.isfile(path):
+    if os.path.isfile(fullpath):
         errors.append('A test with that name already exists')
     if not errors:
-        parents_joined = os.sep.join(parents)
-        base_path = os.path.join(root_path, 'projects', project, 'tests')
-        test_case_path = os.path.join(base_path, parents_joined)
-        # create the directory structure if it does not exist
-        if not os.path.exists(test_case_path):
-            for parent in parents:
-                base_path = os.path.join(base_path, parent)
-                utils.create_new_directory(path=base_path, add_init=True)
-        test_case_full_path = os.path.join(test_case_path, tc_name + '.py')
-        # TODO remove create data file on test creation
-        # data_path = os.path.join(root_path, 'projects', project, 'data', parents_joined)
-        # if not os.path.exists(data_path):
-        #     os.makedirs(data_path)
-        # data_full_path = os.path.join(data_path, tc_name + '.csv')
-        with open(test_case_full_path, 'w') as test_file:
+        base_path = os.path.join(root_path, 'projects', project,
+                                 'tests', os.sep.join(parents))
+        os.makedirs(base_path, exist_ok=True)
+        # # create the directory structure if it does not exist
+        # if not os.path.exists(test_case_path):
+        #     for parent in parents:
+        #         base_path = os.path.join(base_path, parent)
+        #         utils.create_new_directory(path=base_path, add_init=True)
+        # test_case_full_path = os.path.join(test_case_path, tc_name + '.py')
+        with open(fullpath, 'w') as test_file:
             test_file.write(test_case_content)
-        # TODO remove create data file on test creation
-        # with open(data_full_path, 'w') as data_file:
-        #     data_file.write('')
         print('Test {} created for project {}'.format(tc_name, project))
     return errors
 
