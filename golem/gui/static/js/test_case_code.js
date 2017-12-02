@@ -2,6 +2,7 @@
 var codeEditor;
 var unsavedChanges = false;
 
+
 $(document).ready(function() {
 
     if(codeError.length > 0){
@@ -16,7 +17,11 @@ $(document).ready(function() {
         lineNumbers: true,
         styleActiveLine: true,
         matchBrackets: true,
-        indentWithTabs: false
+        indentUnit: 4,
+        indentWithTabs: false,
+        extraKeys: {
+            Tab: convertTabToSpaces
+        }
     });
 
     // set unsaved changes watcher
@@ -24,6 +29,15 @@ $(document).ready(function() {
     
 });
 
+
+function convertTabToSpaces(cm) {
+  if (cm.somethingSelected()) {
+    cm.indentSelection("add");
+  } else {
+    cm.replaceSelection(cm.getOption("indentWithTabs")? "\t":
+      Array(cm.getOption("indentUnit") + 1).join(" "), "end", "+input");
+  }
+}
 
 function saveTestCase(){
     // if(!unsavedChanges && codeEditor.isClean()){

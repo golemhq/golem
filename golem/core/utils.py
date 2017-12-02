@@ -557,5 +557,4 @@ def validate_python_file_syntax(path):
     except:
         # error = '\n'.join(traceback.format_exc().splitlines()[-3:])
         error = traceback.format_exc(limit=-1)
-        print(sys.exc_info())
     return error

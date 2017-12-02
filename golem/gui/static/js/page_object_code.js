@@ -15,12 +15,26 @@ $(document).ready(function() {
         lineNumbers: true,
         styleActiveLine: true,
         matchBrackets: true,
-        indentWithTabs: false
+        indentUnit: 4,
+        indentWithTabs: false,
+        extraKeys: {
+            Tab: convertTabToSpaces
+        }
     });
 
     // set unsaved changes watcher
     watchForUnsavedChanges();
 });
+
+
+function convertTabToSpaces(cm) {
+  if (cm.somethingSelected()) {
+    cm.indentSelection("add");
+  } else {
+    cm.replaceSelection(cm.getOption("indentWithTabs")? "\t":
+      Array(cm.getOption("indentUnit") + 1).join(" "), "end", "+input");
+  }
+}
 
 
 function loadGuiView(){
