@@ -99,7 +99,7 @@ def index():
 # PROJECT VIEW - redirec to to /project/suites/
 @app.route("/project/<project>/")
 @login_required
-def project(project):
+def project_view(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
     elif not utils.project_exists(root_path, project):
@@ -117,7 +117,7 @@ def project_tests(project):
     elif not utils.project_exists(root_path, project):
         abort(404, 'This page does not exists.')
     else:
-        return render_template('project_tests.html', project=project)
+        return render_template('project/project_tests.html', project=project)
 
 
 # PROJECT SUITES VIEW
@@ -129,7 +129,7 @@ def project_suites(project):
     elif not utils.project_exists(root_path, project):
         abort(404, 'This page does not exists.')
     else:
-        return render_template('project_suites.html', project=project)
+        return render_template('project/project_suites.html', project=project)
 
 
 # PROJECT PAGES VIEW
@@ -141,7 +141,7 @@ def project_pages(project):
     elif not utils.project_exists(root_path, project):
         abort(404, 'This page does not exists.')
     else:
-        return render_template('project_pages.html', project=project)
+        return render_template('project/project_pages.html', project=project)
 
 
 # TEST CASE VIEW
@@ -159,11 +159,20 @@ def test_case_view(project, test_case_name):
     #     abort(404, 'This file is locked by someone else.')
     # else:
     tc_name, parents = utils.separate_file_from_parents(test_case_name)
-    test_case_contents = test_case.get_test_case_content(root_path, project, test_case_name)
-    test_data = test_data_module.get_test_data(root_path, project, test_case_name)
-    return render_template('test_case.html', project=project,
-                           test_case_contents=test_case_contents, test_case_name=tc_name,
-                           full_test_case_name=test_case_name, test_data=test_data)
+    path = test_case.generate_test_case_path(root_path, project, test_case_name)
+    error = utils.validate_python_file_syntax(path)
+    if error:
+        return render_template('test_builder/test_case_syntax_error.html',
+                               project=project,
+                               full_test_case_name=test_case_name)
+    else:
+        test_case_contents = test_case.get_test_case_content(root_path, project, test_case_name)
+        test_data = test_data_module.get_test_data(root_path, project, test_case_name)
+        return render_template('test_builder/test_case.html', project=project,
+                               test_case_contents=test_case_contents,
+                               test_case_name=tc_name,
+                               full_test_case_name=test_case_name,
+                               test_data=test_data)
 
 
 # TEST CASE CODE VIEW
@@ -175,60 +184,83 @@ def test_case_code_view(project, test_case_name):
         return render_template('not_permission.html')
 
     tc_name, parents = utils.separate_file_from_parents(test_case_name)
-    test_case_contents = test_case.get_test_case_content(root_path, project, test_case_name)
+    path = os.path.join(root_path, 'projects', project, 'tests',
+                          os.sep.join(parents), tc_name + '.py')
+    test_case_contents = test_case.get_test_case_code(path)
+    error = utils.validate_python_file_syntax(path)
     external_data = test_data_module.get_external_test_data(root_path, project,
                                                             test_case_name)
     test_data_setting = test_execution.settings['test_data']
-    return render_template('test_case_code.html', project=project, 
+    return render_template('test_builder/test_case_code.html', project=project, 
                            test_case_contents=test_case_contents, test_case_name=tc_name,
                            full_test_case_name=test_case_name, test_data=external_data,
-                           test_data_setting=test_data_setting)
+                           test_data_setting=test_data_setting, error=error)
 
 
 # PAGE OBJECT VIEW
 @app.route("/project/<project>/page/<full_page_name>/")
 @login_required
-def page_view(project, full_page_name):
+def page_view(project, full_page_name, no_sidebar=False):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
-    page_object_data = page_object.get_page_object_content(project, full_page_name)
-    return render_template('page_object.html', project=project,
-                           page_object_data=page_object_data, page_name=full_page_name)
+    path = page_object.generate_page_path(root_path, project, full_page_name)
+    error = utils.validate_python_file_syntax(path)
+    if error:
+        return render_template('page_builder/page_syntax_error.html',
+                               project=project,
+                               full_page_name=full_page_name)
+    else:
+        page_data = page_object.get_page_object_content(project, full_page_name)
+        return render_template('page_builder/page_object.html',
+                               project=project,
+                               page_object_data=page_data,
+                               page_name=full_page_name, 
+                               no_sidebar=no_sidebar)
 
 
 # PAGE OBJECT VIEW no sidebar
 @app.route("/project/<project>/page/<full_page_name>/no_sidebar/")
 @login_required
 def page_view_no_sidebar(project, full_page_name):
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
-        return render_template('not_permission.html')
-    page_object_data = page_object.get_page_object_content(project, full_page_name)
-    return render_template('page_object.html', project=project,
-                           page_object_data=page_object_data, page_name=full_page_name,
-                           no_sidebar=True)
+    # if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+    #     return render_template('not_permission.html')
+    # page_object_data = page_object.get_page_object_content(project, full_page_name)
+    # return render_template('page_builder/page_object.html', project=project,
+    #                        page_object_data=page_object_data, page_name=full_page_name,
+    #                        no_sidebar=True)
+    page_view(project, full_page_name, no_sidebar=True)
 
 
 # PAGE OBJECT CODE VIEW
 @app.route("/project/<project>/page/<full_page_name>/code/")
 @login_required
-def page_code_view(project, full_page_name):
+def page_code_view(project, full_page_name, no_sidebar=False):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
-    page_object_data = page_object.get_page_object_content(project, full_page_name)
-    return render_template('page_object_code.html', project=project,
-                           page_object_data=page_object_data, page_name=full_page_name)
+
+    path = page_object.generate_page_path(root_path, project, full_page_name)
+    error = utils.validate_python_file_syntax(path)
+    page_object_code = page_object.get_page_object_code(path)
+    return render_template('page_builder/page_object_code.html',
+                           project=project,
+                           page_object_code=page_object_code,
+                           page_name=full_page_name,
+                           error=error,
+                           no_sidebar=no_sidebar)
 
 
 # PAGE OBJECT CODE VIEW no sidebar
 @app.route("/project/<project>/page/<full_page_name>/no_sidebar/code/")
 @login_required
 def page_code_view_no_sidebar(project, full_page_name):
-    if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
-        return render_template('not_permission.html')
-    page_object_data = page_object.get_page_object_content(project, full_page_name)
-    return render_template('page_object_code.html', project=project,
-                           page_object_data=page_object_data, page_name=full_page_name,
-                           no_sidebar=True)
+    # if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
+    #     return render_template('not_permission.html')
+    # page_object_data = page_object.get_page_object_content(project, full_page_name)
+    # return render_template('page_builder/page_object_code.html', project=project,
+    #                        page_object_data=page_object_data, page_name=full_page_name,
+    #                        no_sidebar=True)
+    page_code_view(project, full_page_name, no_sidebar=True)
+
 
 # SUITE VIEW
 @app.route("/project/<project>/suite/<suite>/")
@@ -306,7 +338,7 @@ def report_dashboard():
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:
-        return render_template('report_dashboard.html', project='', suite='')
+        return render_template('report/report_dashboard.html', project='', suite='')
 
 
 # REPORT DASHBOARD PROJECT VIEW
@@ -316,7 +348,7 @@ def report_dashboard_project(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:
-        return render_template('report_dashboard.html', project=project, suite='')
+        return render_template('report/report_dashboard.html', project=project, suite='')
 
 
 # REPORT DASHBOARD SUITE VIEW
@@ -326,7 +358,7 @@ def report_dashboard_suite(project, suite):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'report'):
         return render_template('not_permission.html')
     else:
-        return render_template('report_dashboard.html', project=project, suite=suite)
+        return render_template('report/report_dashboard.html', project=project, suite=suite)
 
 
 # REPORT EXECUTION VIEW
@@ -337,7 +369,7 @@ def report_execution(project, suite, execution):
         return render_template('not_permission.html')
     else:
         formatted_date = report_parser.get_date_time_from_timestamp(execution)
-        return render_template('report_execution.html', project=project, suite=suite,
+        return render_template('report/report_execution.html', project=project, suite=suite,
                                execution=execution, formatted_date=formatted_date)
 
 
@@ -350,7 +382,7 @@ def report_test(project, suite, execution, test_case, test_set):
     test_case_data = report_parser.get_test_case_data(root_path, project, test_case,
                                                       suite=suite, execution=execution,
                                                       test_set=test_set, is_single=False)
-    return render_template('report_test.html', project=project, suite=suite,
+    return render_template('report/report_test.html', project=project, suite=suite,
                            execution=execution, test_case=test_case, test_set=test_set,
                            test_case_data=test_case_data)
 
@@ -657,8 +689,10 @@ def save_test_case_code():
         # test_data.save_test_data(root_path, projectname, test_case_name, test_data)
         test_case.save_test_case_code(root_path, projectname, test_case_name,
                                       content, table_test_data)
+        path = test_case.generate_test_case_path(root_path, projectname, test_case_name)
+        error = utils.validate_python_file_syntax(path)
 
-        return json.dumps('ok')
+        return json.dumps({'error': error})
 
 
 @app.route("/get_global_actions/", methods=['POST'])
@@ -685,14 +719,14 @@ def save_page_object():
 @app.route("/save_page_object_code/", methods=['POST'])
 def save_page_object_code():
     if request.method == 'POST':
-        projectname = request.json['project']
+        project = request.json['project']
         page_object_name = request.json['pageObjectName']
         content = request.json['content']
-        error = utils.code_syntax_is_valid(content)
-        page_object.save_page_object_code(root_path, projectname,
+        path = page_object.generate_page_path(root_path, project, page_object_name)
+        page_object.save_page_object_code(root_path, project,
                                           page_object_name, content)
-        return json.dumps(error)
-
+        error = utils.validate_python_file_syntax(path)
+        return json.dumps({'error': error})
 
 
 @app.route("/run_test_case/", methods=['POST'])

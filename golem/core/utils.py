@@ -442,15 +442,6 @@ def create_user(workspace, username, password, is_admin, projects, reports):
     return errors
 
 
-def code_syntax_is_valid(code):
-    error = ''
-    try:
-        compile(code, '<string>', 'exec')
-    except Exception as e:
-        error = 'syntax error'
-    return error
-
-
 def delete_element(workspace, project, element_type, full_path):
     if element_type == 'test':
         folder = 'tests'
@@ -550,3 +541,21 @@ def load_json_from_file(filepath):
             print(traceback.format_exc())
             raise Exception(msg).with_traceback(e.__traceback__)
     return json_data
+
+
+def validate_python_file_syntax(path):
+    # try:
+    #     compile(code, '<string>', 'exec')
+    # except Exception as e:
+    #     error = 'syntax error'
+    # return error
+    error = ''
+    specx = importlib.util.spec_from_file_location('modulename', path)
+    modulex = importlib.util.module_from_spec(specx)
+    try:
+        specx.loader.exec_module(modulex)
+    except:
+        # error = '\n'.join(traceback.format_exc().splitlines()[-3:])
+        error = traceback.format_exc(limit=-1)
+        print(sys.exc_info())
+    return error

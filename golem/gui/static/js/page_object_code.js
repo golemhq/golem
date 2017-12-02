@@ -1,16 +1,21 @@
 var codeEditor;
 
 
-$(document).ready(function() {      
+$(document).ready(function() {
 
-   codeEditor = CodeMirror($("#codeEditorContainer")[0], {
-      value: pageObjectCode,
-      mode:  "python",
-      //theme: "default",
-      lineNumbers: true,
-      styleActiveLine: true,
-      matchBrackets: true,
-      indentWithTabs: false
+    if(codeError.length > 0){
+        $(".error-container").show();
+        $(".error-container pre").html(codeError);
+    }      
+
+    codeEditor = CodeMirror($("#codeEditorContainer")[0], {
+        value: pageObjectCode,
+        mode:  "python",
+        //theme: "default",
+        lineNumbers: true,
+        styleActiveLine: true,
+        matchBrackets: true,
+        indentWithTabs: false
     });
 
     // set unsaved changes watcher
@@ -45,17 +50,18 @@ function savePageObject(){
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
         type: 'POST',
-        success: function(error) {
-            if(error === ''){
-                utils.toast('success', "Page "+pageObjectName+" saved", 3000)
-                codeEditor.markClean();
+        success: function(data) {
+            codeEditor.markClean();
+            utils.toast('success', "Page "+pageObjectName+" saved", 3000);
+            if(data.error.length > 0){
+                $(".error-container").show();
+                $(".error-container pre").html(data.error);
             }
             else{
-                utils.toast('error', error, 3000);
+                $(".error-container").hide();
+                $(".error-container pre").html('');
             }
         },
-        error: function() {
-        }
     });
 }
 

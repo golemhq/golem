@@ -1,0 +1,25 @@
+{% extends "layout.html" %} 
+
+{% block head_declarations %} 
+<link rel="stylesheet" href="{{ url_for('static', filename='css/page_object.css') }}">
+{% endblock %} 
+
+{% block content %}
+<div>
+    <div>
+        <div class="col-sm-8 header-col">
+            <h3 id="pageObjectName">
+                {{full_page_name}}
+            </h3>
+        </div>
+    </div>
+
+    <div class="col-sm-8 col-sm-offset-2 text-center">
+        <div>   
+            <h4>There are errors in the page</h4>
+            <p class="">There are errors and the page cannot be displayed, open the page code editor to solve them.</p>
+            <a class="btn btn-default" href="{{ url_for('page_code_view', project=project, full_page_name=full_page_name) }}">Open Page Code</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

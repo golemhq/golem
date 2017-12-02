@@ -72,6 +72,14 @@ def get_page_object_content(project, full_page_name):
     return page_object_data
 
 
+def get_page_object_code(path):
+    code = ''
+    with open(path) as ff:
+        code = ff.read()
+    return code
+
+
+
 def save_page_object(root_path, project, full_page_name, elements, functions, import_lines):
     page_name, parents = utils.separate_file_from_parents(full_page_name)
     page_object_path = os.path.join(root_path, 'projects', project, 'pages',
@@ -138,3 +146,10 @@ def new_page_object(root_path, project, parents, page_name, add_parents=False):
         with open(full_page_path, 'w') as po_file:
             po_file.write('')
     return errors
+
+
+def generate_page_path(root_path, project, full_page_name):
+    page_name, parents = utils.separate_file_from_parents(full_page_name)
+    page_path = os.path.join(root_path, 'projects', project, 'pages',
+                             os.sep.join(parents), '{}.py'.format(page_name))
+    return page_path

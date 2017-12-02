@@ -4,38 +4,40 @@ var unsavedChanges = false;
 
 $(document).ready(function() {
 
+    if(codeError.length > 0){
+        $(".error-container").show();
+        $(".error-container pre").html(codeError);
+    }
+
     codeEditor = CodeMirror($("#codeEditorContainer")[0], {
-      value: testCaseCode,
-      mode:  "python",
-      //theme: "default",
-      lineNumbers: true,
-      styleActiveLine: true,
-      matchBrackets: true
+        value: testCaseCode,
+        mode:  "python",
+        //theme: "default",
+        lineNumbers: true,
+        styleActiveLine: true,
+        matchBrackets: true,
+        indentWithTabs: false
     });
 
     // set unsaved changes watcher
     watchForUnsavedChanges();
-
+    
 });
 
 
 function saveTestCase(){
-    if(!unsavedChanges && codeEditor.isClean()){
-        return
-    }
-
+    // if(!unsavedChanges && codeEditor.isClean()){
+    //     return
+    // }
     var content = codeEditor.getValue();
-
     // get data from table
     var testData = dataTable.getData();
-
     var data = {
         'content': content,
         'testData': testData,
         'project': project,
         'testCaseName': fullTestCaseName
     }
-
     $.ajax({
         url: "/save_test_case_code/",
         data: JSON.stringify(data),
@@ -44,11 +46,17 @@ function saveTestCase(){
         type: 'POST',
         success: function(data) {
             unsavedChanges = false;
-            utils.toast('success', "Test "+testCaseName+" saved", 3000);
-            unsavedChanges = false;
             codeEditor.markClean();
-        },
-        error: function() {
+            utils.toast('success', "Test "+testCaseName+" saved", 3000);
+            if(data.error.length > 0){
+                $(".error-container").show();
+                $(".error-container pre").html(codeError);
+                utils.toast('info', "There are errors in the code", 3000)
+            }
+            else{
+                $(".error-container").hide();
+                $(".error-container pre").html('');
+            }
         }
     });
 }

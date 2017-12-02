@@ -1,34 +1,26 @@
 {% extends "layout.html" %} 
 
 {% block head_declarations %} 
-
 <link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/codemirror.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/page_object_code.css') }}">
-
 {% endblock %} 
 
 {% block content %}
-
-
-
 <div class="col-lg-10 col-lg-offset-1 col-md-12">
-
     <div class="col-sm-6 header-col">
         <h3 id="pageObjectName">
             {{page_name}}</h3>
         </div>
-        
         <div class="col-sm-6 text-right header-col" style="padding-top: 20px">
             <button id="loadGuiButton" class="btn btn-default btn-sm" onclick="loadGuiView()"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Preview</button>
             <button id="save" class="btn btn-default btn-sm" onclick="savePageObject();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
         </div>
-
         <div class="clearfix"></div>
-
-        <div id="codeEditorContainer">
+        <div class="error-container" style="display: none;">
+            <pre style="color: red"></pre>
         </div>
+        <div id="codeEditorContainer"></div>
     </div>
-
 </div>
 
 <script src="{{ url_for('static', filename='js/external/code_mirror/codemirror.js') }}"></script>
@@ -38,7 +30,7 @@
 <script>
     var project = "{{project}}";
     var pageObjectName = "{{page_name}}";
-    var pageObjectCode = {{page_object_data.source_code|tojson}};
+    var pageObjectCode = {{page_object_code|tojson}};
+    var codeError = {{error|tojson}};
 </script>
-
 {% endblock %}

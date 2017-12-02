@@ -99,8 +99,7 @@ def get_test_case_content(root_path, project, test_case_name):
             'setup': [],
             'test': [],
             'teardown': []
-        },
-        'content': ''
+        }
     }
     
     # add the 'project' directory to python path
@@ -137,15 +136,15 @@ def get_test_case_content(root_path, project, test_case_name):
     test_contents['steps']['setup'] = setup_steps
     test_contents['steps']['test'] = test_steps
     test_contents['steps']['teardown'] = teardown_steps
-    try:
-        test_contents['content'] = inspect.getsource(test_module)
-    except:
-        pass
-
-    # get test data
-    # test_data = test_data.get_test_data_dict_list(root_path, project, test_case_name)
 
     return test_contents
+
+
+def get_test_case_code(path):
+    code = ''
+    with open(path) as ff:
+        code = ff.read()
+    return code
 
 
 def new_test_case(root_path, project, parents, tc_name):
@@ -226,9 +225,7 @@ def format_data(test_data):
 
 def save_test_case(root_path, project, full_test_case_name, description,
                    page_objects, test_steps, test_data):
-    tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    test_case_path = os.path.join(root_path, 'projects', project, 'tests',
-                                  os.sep.join(parents), '{}.py'.format(tc_name))
+    test_case_path = generate_test_case_path(root_path, project, full_test_case_name)
     formatted_description = format_description(description)
     
     with open(test_case_path, 'w', encoding='utf-8') as f:
@@ -287,9 +284,7 @@ def save_test_case(root_path, project, full_test_case_name, description,
 
 
 def save_test_case_code(root_path, project, full_test_case_name, content, table_test_data):
-    tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    test_case_path = os.path.join(root_path, 'projects', project, 'tests',
-                                  os.sep.join(parents), '{}.py'.format(tc_name))
+    test_case_path = generate_test_case_path(root_path, project, full_test_case_name)
     with open(test_case_path, 'w', encoding='utf-8') as test_file:
         test_file.write(content)
 
@@ -303,3 +298,9 @@ def save_test_case_code(root_path, project, full_test_case_name, content, table_
         # remove csv files
         test_data_module.remove_csv_if_exists(root_path, project, full_test_case_name)
 
+
+def generate_test_case_path(root_path, project, full_test_case_name):
+    tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
+    test_case_path = os.path.join(root_path, 'projects', project, 'tests',
+                                  os.sep.join(parents), '{}.py'.format(tc_name))
+    return test_case_path

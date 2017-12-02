@@ -27,6 +27,10 @@
 
     <div class="clearfix"></div>
 
+    <div class="error-container" style="display: none;">
+        <pre style="color: red"></pre>
+    </div>
+
     <div id="codeEditorContainer" class="col-sm-12" style="border: 1px solid #e0e0e0; padding-left:0px; padding-right: 0px">
     </div>
 
@@ -173,7 +177,8 @@
     var project = "{{project}}";
     var testCaseName = "{{test_case_name}}";
     var fullTestCaseName = "{{full_test_case_name}}";
-    var testCaseCode = {{test_case_contents.content|tojson}};
+    var testCaseCode = {{test_case_contents|tojson}};
+    var codeError = {{error|tojson}};
 </script>
 
 {% endblock %}

@@ -1,0 +1,28 @@
+{% extends "layout.html" %} 
+
+{% block head_declarations %} 
+<link rel="stylesheet" href="{{ url_for('static', filename='css/test_case.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_common.css') }}">
+{% endblock %} 
+
+{% block content %}
+<div>
+    <div>
+        <div class="col-sm-8 header-col">
+            <h3 id="testNameContainer">
+                <div id="testName">
+                    {{full_test_case_name}}
+                </div>
+            </h3>
+        </div>
+    </div>
+
+    <div class="col-sm-8 col-sm-offset-2 text-center">
+        <div>
+            <h4>There are errors in the test</h4>
+            <p class="">There are errors and the test cannot be displayed, open the test code editor to solve them.</p>
+            <a class="btn btn-default" href="{{ url_for('test_case_code_view', project=project, test_case_name=full_test_case_name) }}">Open Test Code</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
