@@ -7,7 +7,7 @@ Golem comes with predefined actions that cover almost all the needs to write tes
 ### Browser Actions
 
 
-#### activate_browser(browser_id)
+##### activate_browser(browser_id)
 
 Activates a browser to use in subsequent actions. Only needed when having more than one browser open.
 

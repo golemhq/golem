@@ -3,6 +3,8 @@
 
 ## [Unreleased]
 
+## [0.4.1] - 2017-12-03
+
 ### Added
 - Can open multiple browsers for the same test.
 - New actions: open_browser, activate_browser
