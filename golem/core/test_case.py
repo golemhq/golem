@@ -12,8 +12,8 @@ from golem.core import test_data as test_data_module
 
 def _parse_step(step):
     method_name = step.split('(', 1)[0].strip()
-    if not '.' in method_name:
-        method_name = method_name.replace('_', ' ')
+    # if not '.' in method_name:
+    #     method_name = method_name.replace('_', ' ')
     # clean_param_list = []
     param_list = []
 

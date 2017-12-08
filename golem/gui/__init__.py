@@ -223,13 +223,7 @@ def page_view(project, full_page_name, no_sidebar=False):
 @app.route("/project/<project>/page/<full_page_name>/no_sidebar/")
 @login_required
 def page_view_no_sidebar(project, full_page_name):
-    # if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
-    #     return render_template('not_permission.html')
-    # page_object_data = page_object.get_page_object_content(project, full_page_name)
-    # return render_template('page_builder/page_object.html', project=project,
-    #                        page_object_data=page_object_data, page_name=full_page_name,
-    #                        no_sidebar=True)
-    page_view(project, full_page_name, no_sidebar=True)
+    return page_view(project, full_page_name, no_sidebar=True)
 
 
 # PAGE OBJECT CODE VIEW
@@ -254,13 +248,7 @@ def page_code_view(project, full_page_name, no_sidebar=False):
 @app.route("/project/<project>/page/<full_page_name>/no_sidebar/code/")
 @login_required
 def page_code_view_no_sidebar(project, full_page_name):
-    # if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
-    #     return render_template('not_permission.html')
-    # page_object_data = page_object.get_page_object_content(project, full_page_name)
-    # return render_template('page_builder/page_object_code.html', project=project,
-    #                        page_object_data=page_object_data, page_name=full_page_name,
-    #                        no_sidebar=True)
-    page_code_view(project, full_page_name, no_sidebar=True)
+    return page_code_view(project, full_page_name, no_sidebar=True)
 
 
 # SUITE VIEW
@@ -571,7 +559,7 @@ def new_tree_element():
         if not errors:
             if elem_type == 'test':
                 if is_dir:
-                    errors = gui_utils.new_directory(root_path, project, parents,
+                    errors = io_manager.new_directory(root_path, project, parents,
                                                      element_name, dir_type='tests')
                 else:
                     errors = test_case.new_test_case(root_path, project,
@@ -580,7 +568,7 @@ def new_tree_element():
                     #                      full_path, g.user.username)
             elif elem_type == 'page':
                 if is_dir:
-                    errors = gui_utils.new_directory(root_path, project, parents,
+                    errors = io_manager.new_directory(root_path, project, parents,
                                                      element_name, dir_type='pages')
                 else:
                     errors = page_object.new_page_object(root_path, project, parents,
@@ -588,7 +576,7 @@ def new_tree_element():
                                                          add_parents=add_parents)
             elif elem_type == 'suite':
                 if is_dir:
-                    errors = gui_utils.new_directory(root_path, project, parents,
+                    errors = io_manager.new_directory(root_path, project, parents,
                                                      element_name, dir_type='suites')
                 else:
                     errors = suite.new_suite(root_path, project, parents, element_name)
@@ -643,7 +631,10 @@ def save_test_case_code():
 @app.route("/get_global_actions/", methods=['POST'])
 def get_global_actions():
     if request.method == 'POST':
-        global_actions = gui_utils.get_global_actions()
+        global_actions = gui_utils.Golem_action_parser().get_actions()
+        # for a in ac:
+        #     print(a, '\n')
+        # global_actions = gui_utils.get_global_actions()
         return json.dumps(global_actions)
 
 

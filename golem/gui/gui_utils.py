@@ -1,34 +1,10 @@
 import datetime
 import os
 import subprocess
+import inspect
 
+import golem.actions
 from golem.core import utils
-
-
-def new_directory(root_path, project, parents, dir_name, dir_type):
-    """Creates a new directory for suites, tests or pages.
-    if the directory is inside other directories, these should already exist.
-    parents is a list of parent directories.
-    dir_type should be in: ['tests', 'suites', 'pages']"""
-    parents = os.sep.join(parents)
-    path = os.path.join(root_path, 'projects', project, dir_type, parents, dir_name)
-    errors = []
-    if os.path.exists(path):
-        errors.append('A directory with that name already exists')
-    else:
-        utils.create_new_directory(path=path, add_init=True)
-    return errors
-
-
-# def new_directory_page_object(root_path, project, parents, dir_name):
-#     parents = os.sep.join(parents)
-#     errors = []
-#     if directory_already_exists(root_path, project, 'pages', parents, dir_name):
-#         errors.append('A directory with that name already exists')
-#     else:
-#         path_list = [root_path, 'projects', project, 'pages', parents, dir_name]
-#         utils.create_new_directory(path_list=path_list, add_init=True)
-#     return errors
 
 
 def run_test_case(project, test_case_name, environment):
@@ -66,182 +42,278 @@ def string_to_time(time_string):
     return datetime.datetime.strptime(time_string, '%Y-%m-%d-%H-%M-%S-%f')
 
 
-def get_global_actions():
-    global_actions = [
+class Golem_action_parser:
+    """Generates a list of golem actions by reading the functions docstrings
+
+    This class is a singleton.
+
+    The list of action definitions is cached so only the first time
+    they are required will be retrieved by parsing the golem.actions module
+
+    This class expects the docstrings of the actions to have this format:
+
+    def some_action(param1, param2, param3):
+        '''This is the description of the action
+        
+        parameters:
+        param1  element
+        param2  value
+        param3 (int, float)  value
+        '''
+
+    This would generate the following list:
+
+    actions = [
         {
-            'name': 'assert contains',
-            'parameters': [{'name': 'element', 'type': 'value'},
-                           {'name': 'value', 'type': 'value'}]
-        },
-        {
-            'name': 'assert equals',
-            'parameters': [{'name': 'actual value', 'type': 'value'},
-                           {'name': 'expected value', 'type': 'value'}]
-        },
-        {
-            'name': 'assert false',
-            'parameters': [{'name': 'condition', 'type': 'value'}]
-        },
-        {
-            'name': 'assert true',
-            'parameters': [{'name': 'condition', 'type': 'value'}]
-        },
-        {
-            'name': 'capture',
-            'parameters': [{'name': 'message (optional)', 'type': 'value'}]
-        },
-        {
-            'name': 'clear',
-            'parameters': [{'name': 'element', 'type': 'element'}]
-        },
-        {
-            'name': 'click',
-            'parameters': [{'name': 'element', 'type': 'element'}]
-        },
-        {
-            'name': 'close',
-            'parameters': []
-        },
-        {
-            'name': 'debug',
-            'parameters': []
-        },
-        {
-            'name': 'get',
-            'parameters': [{'name': 'url', 'type': 'value'}]
-        },
-        {
-            'name': 'http_get',
-            'parameters': [{'name': 'url', 'type': 'value'},
-                           {'name': 'headers', 'type': 'multiline-value'},
-                           {'name': 'params', 'type': 'value'},
-                           {'name': 'verify SSL certificate', 'type': 'value'}]
-        },
-        {
-            'name': 'http_post',
-            'parameters': [{'name': 'url', 'type': 'value'},
-                           {'name': 'headers', 'type': 'value'},
-                           {'name': 'data', 'type': 'value'},
-                           {'name': 'verify SSL certificate', 'type': 'value'}]
-        },
-        {
-            'name': 'navigate',
-            'parameters': [{'name': 'url', 'type': 'value'}]
-        },
-        {
-            'name': 'press key',
-            'parameters': [{'name': 'element', 'type': 'element'},
-                           {'name': 'key', 'type': 'value'}]
-        },
-        {
-            'name': 'random',
-            'parameters': [{'name': 'args', 'type': 'value'}]
-        },
-        {
-            'name': 'refresh page',
-            'parameters': []
-        },
-        {
-            'name': 'select by index',
-            'parameters': [{'name': 'from element', 'type': 'element'},
-                           {'name': 'index', 'type': 'value'}]
-        },
-        {
-            'name': 'select by text',
-            'parameters': [{'name': 'from element', 'type': 'element'},
-                           {'name': 'text', 'type': 'value'}]
-        },
-        {
-            'name': 'select by value',
-            'parameters': [{'name': 'from element', 'type': 'element'},
-                           {'name': 'value', 'type': 'value'}]
-        },
-        {
-            'name': 'send keys',
-            'parameters': [{'name': 'element', 'type': 'element'},
-                           {'name': 'value', 'type': 'value'}]
-        },
-        {
-            'name': 'set window size',
-            'parameters': [{'name': 'width', 'type': 'value'},
-                           {'name': 'height', 'type': 'value'}]
-        },
-        {
-            'name': 'step',
-            'parameters': [{'name': 'message', 'type': 'value'}]
-        },
-        {
-            'name': 'store',
-            'parameters': [{'name': 'key', 'type': 'value'},
-                           {'name': 'value', 'type': 'value'}]
-        },
-        {
-            'name': 'verify exists',
-            'parameters': [{'name': 'element', 'type': 'element'}]
-        },
-        {
-            'name': 'verify is enabled',
-            'parameters': [{'name': 'element', 'type': 'element'}]
-        },
-        {
-            'name': 'verify is not enabled',
-            'parameters': [{'name': 'element', 'type': 'element'}]
-        },
-        {
-            'name': 'verify is not selected',
-            'parameters': [{'name': 'element', 'type': 'element'}]
-        },
-        {
-            'name': 'verify is not visible',
-            'parameters': [{'name': 'element', 'type': 'element'}]
-        },
-        {
-            'name': 'verify is selected',
-            'parameters': [{'name': 'element', 'type': 'element'}]
-        },
-        {
-            'name': 'verify is visible',
-            'parameters': [{'name': 'element', 'type': 'element'}]
-        },
-        {
-            'name': 'verify not exists',
-            'parameters': [{'name': 'element', 'type': 'element'}]
-        },
-        {
-            'name': 'verify selected option',
-            'parameters': [{'name': 'select', 'type': 'element'},
-                           {'name': 'text option', 'type': 'value'}]
-        },
-        {
-            'name': 'verify text',
-            'parameters': [{'name': 'text', 'type': 'value'}]
-        },
-        {
-            'name': 'verify text in element',
-            'parameters': [{'name': 'element', 'type': 'element'},
-                           {'name': 'text', 'type': 'value'}]
-        },
-        {
-            'name': 'wait',
-            'parameters': [{'name': 'seconds', 'type': 'value'}]
-        },
-        {
-            'name': 'wait for element visible',
-            'parameters': [{'name': 'element', 'type': 'element'},
-                           {'name': 'timeout (optional)', 'type': 'value'}]
-        },
-        {
-            'name': 'wait for element not visible',
-            'parameters': [{'name': 'element', 'type': 'element'},
-                           {'name': 'timeout (optional)', 'type': 'value'}]
-        },
-        {
-            'name': 'wait for element enabled',
-            'parameters': [{'name': 'element', 'type': 'element'},
-                           {'name': 'timeout (optional)', 'type': 'value'}]
+            'name': 'some_action',
+            'description': 'This is the description of the action'
+            'parameters': [{'name': 'param1', 'type': 'element'},
+                           {'name': 'param2', 'type': 'value'},
+                           {'name': 'param3 (int, float)', 'type': 'value'}]
         }
     ]
-    return global_actions
+
+    Note: the `type` distinction (element or value) is used by the GUI test builder
+    because it needs to know if it should use element autocomplete (page
+    object elements) or data autocomplete (columns of the datatable)
+    """
+    __instance = None
+    actions = None
+
+    def __new__(cls):
+        if Golem_action_parser.__instance is None:
+            Golem_action_parser.__instance = object.__new__(cls)
+        return Golem_action_parser.__instance
+
+    def _is_module_function(self, mod, func):
+        return inspect.isfunction(func) and inspect.getmodule(func) == mod
+
+    def _parse_docstring(self, docstring):
+        docstring_def = {
+            'description': '',
+            'parameters': []
+        }
+        split = docstring.split('Parameters:')
+        desc_lines = [x.strip() for x in split[0].splitlines() if len(x.strip())]
+        description = ' '.join(desc_lines)
+        docstring_def['description'] = description
+        if len(split) == 2:
+            param_lines = [x.strip() for x in split[1].splitlines() if len(x.strip())]
+            for param_line in param_lines:
+                param_parts = param_line.split(':')
+                param = {
+                    'name': param_parts[0].strip(),
+                    'type': param_parts[1].strip()
+                }
+                docstring_def['parameters'].append(param)
+
+        return docstring_def
+
+    def get_actions(self):
+        if not self.actions:
+            actions = []
+            module = golem.actions
+
+            def is_valid_function(function, module):
+                if self._is_module_function(module, function):
+                    if not function.__name__.startswith('_'):
+                        return True
+                return False
+
+            action_func_list = [function for function in module.__dict__.values()
+                                if is_valid_function(function, module)]
+
+            for action in action_func_list:
+                doc = action.__doc__
+                if doc is None:
+                    print('Warning: action {} does not have docstring defined'
+                          .format(action.__name__))
+                else:
+                    action_def = self._parse_docstring(doc)
+                    action_def['name'] = action.__name__
+                    actions.append(action_def)
+            self.actions = actions
+
+        return self.actions
+
+# TODO deprecated
+# def get_global_actions():
+
+#     global_actions = [
+#         {
+#             'name': 'assert contains',
+#             'parameters': [{'name': 'element', 'type': 'value'},
+#                            {'name': 'value', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'assert equals',
+#             'parameters': [{'name': 'actual value', 'type': 'value'},
+#                            {'name': 'expected value', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'assert false',
+#             'parameters': [{'name': 'condition', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'assert true',
+#             'parameters': [{'name': 'condition', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'capture',
+#             'parameters': [{'name': 'message (optional)', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'clear',
+#             'parameters': [{'name': 'element', 'type': 'element'}]
+#         },
+#         {
+#             'name': 'click',
+#             'parameters': [{'name': 'element', 'type': 'element'}]
+#         },
+#         {
+#             'name': 'close',
+#             'parameters': []
+#         },
+#         {
+#             'name': 'debug',
+#             'parameters': []
+#         },
+#         {
+#             'name': 'get',
+#             'parameters': [{'name': 'url', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'http_get',
+#             'parameters': [{'name': 'url', 'type': 'value'},
+#                            {'name': 'headers', 'type': 'multiline-value'},
+#                            {'name': 'params', 'type': 'value'},
+#                            {'name': 'verify SSL certificate', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'http_post',
+#             'parameters': [{'name': 'url', 'type': 'value'},
+#                            {'name': 'headers', 'type': 'value'},
+#                            {'name': 'data', 'type': 'value'},
+#                            {'name': 'verify SSL certificate', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'navigate',
+#             'parameters': [{'name': 'url', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'press key',
+#             'parameters': [{'name': 'element', 'type': 'element'},
+#                            {'name': 'key', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'random',
+#             'parameters': [{'name': 'args', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'refresh page',
+#             'parameters': []
+#         },
+#         {
+#             'name': 'select by index',
+#             'parameters': [{'name': 'from element', 'type': 'element'},
+#                            {'name': 'index', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'select by text',
+#             'parameters': [{'name': 'from element', 'type': 'element'},
+#                            {'name': 'text', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'select by value',
+#             'parameters': [{'name': 'from element', 'type': 'element'},
+#                            {'name': 'value', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'send keys',
+#             'parameters': [{'name': 'element', 'type': 'element'},
+#                            {'name': 'value', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'set window size',
+#             'parameters': [{'name': 'width', 'type': 'value'},
+#                            {'name': 'height', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'step',
+#             'parameters': [{'name': 'message', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'store',
+#             'parameters': [{'name': 'key', 'type': 'value'},
+#                            {'name': 'value', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'verify exists',
+#             'parameters': [{'name': 'element', 'type': 'element'}]
+#         },
+#         {
+#             'name': 'verify is enabled',
+#             'parameters': [{'name': 'element', 'type': 'element'}]
+#         },
+#         {
+#             'name': 'verify is not enabled',
+#             'parameters': [{'name': 'element', 'type': 'element'}]
+#         },
+#         {
+#             'name': 'verify is not selected',
+#             'parameters': [{'name': 'element', 'type': 'element'}]
+#         },
+#         {
+#             'name': 'verify is not visible',
+#             'parameters': [{'name': 'element', 'type': 'element'}]
+#         },
+#         {
+#             'name': 'verify is selected',
+#             'parameters': [{'name': 'element', 'type': 'element'}]
+#         },
+#         {
+#             'name': 'verify is visible',
+#             'parameters': [{'name': 'element', 'type': 'element'}]
+#         },
+#         {
+#             'name': 'verify not exists',
+#             'parameters': [{'name': 'element', 'type': 'element'}]
+#         },
+#         {
+#             'name': 'verify selected option',
+#             'parameters': [{'name': 'select', 'type': 'element'},
+#                            {'name': 'text option', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'verify text',
+#             'parameters': [{'name': 'text', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'verify text in element',
+#             'parameters': [{'name': 'element', 'type': 'element'},
+#                            {'name': 'text', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'wait',
+#             'parameters': [{'name': 'seconds', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'wait for element visible',
+#             'parameters': [{'name': 'element', 'type': 'element'},
+#                            {'name': 'timeout (optional)', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'wait for element not visible',
+#             'parameters': [{'name': 'element', 'type': 'element'},
+#                            {'name': 'timeout (optional)', 'type': 'value'}]
+#         },
+#         {
+#             'name': 'wait for element enabled',
+#             'parameters': [{'name': 'element', 'type': 'element'},
+#                            {'name': 'timeout (optional)', 'type': 'value'}]
+#         }
+#     ]
+#     return global_actions
 
 
 def get_supported_browsers_suggestions():
@@ -256,3 +328,4 @@ def get_supported_browsers_suggestions():
         'ie-remote'
     ]
     return supported_browsers
+

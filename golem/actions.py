@@ -15,7 +15,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 import requests
 
 from golem.core.exceptions import TextNotPresent, ElementNotFound
-from golem.browser import get_browser
 from golem import browser
 from golem import execution
 
@@ -41,12 +40,22 @@ def _capture_or_add_step(message, screenshot_on_step):
 
 
 def activate_browser(browser_id):
+    """Activates a browser by the browser_id
+    
+    Parameters:
+    browser_id : value
+    """
     step_message = 'Activate browser {}'.format(browser_id)
     browser.activate_browser(browser_id)    
     _capture_or_add_step(step_message, False)
 
 
 def assert_contains(element, value):
+    """Assert element contains value
+    Parameters:
+    element : element
+    value : value
+    """
     step_message = 'Assert that {0} contains {1}'.format(element, value)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
@@ -55,6 +64,11 @@ def assert_contains(element, value):
 
 
 def assert_equals(actual_value, expected_value):
+    """Assert actual value equals expected value
+    Parameters:
+    actual_value : value
+    expected_value : value
+    """
     step_message = 'Assert that {0} equals {1}'.format(actual_value, expected_value)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
@@ -63,6 +77,10 @@ def assert_equals(actual_value, expected_value):
 
 
 def assert_false(condition):
+    """Assert condition is false
+    Parameters:
+    condition : value
+    """
     step_message = 'Assert that {0} is false'.format(condition)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
@@ -71,6 +89,10 @@ def assert_false(condition):
 
 
 def assert_true(condition):
+    """Assert condition is true
+    Parameters:
+    condition : value
+    """
     step_message = 'Assert that {0} is true'.format(condition)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
@@ -79,9 +101,13 @@ def assert_true(condition):
 
 
 def capture(message=''):
+    """Take a screenshot
+    Parameters:
+    message (optional) : value
+    """
     _run_wait_hook()
     execution.logger.info('Take screenshot {}'.format(message))
-    driver = get_browser()
+    driver = browser.get_browser()
     # store image at this point, the target directory is already
     # created since the beginning of the test, stored in golem.core.report_directory
     img_id = str(uuid.uuid4())[:8]
@@ -96,8 +122,12 @@ def capture(message=''):
 
 
 def clear(element):
+    """Clear an input
+    Parameters:
+    element : element
+    """
     _run_wait_hook()
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     step_message = 'Clear {0} element'.format(webelement.name)
     execution.logger.info(step_message)
     webelement.clear()
@@ -105,8 +135,12 @@ def clear(element):
 
 
 def click(element):
+    """Click an element
+    Parameters:
+    element : element
+    """
     _run_wait_hook()
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     step_message = 'Click {0}'.format(webelement.name)
     execution.logger.info(step_message)
     webelement.click()
@@ -114,6 +148,7 @@ def click(element):
 
 
 def close():
+    """Close a browser. Closes the current active browser"""
     execution.logger.info('Close driver')
     driver = get_browser()
     driver.quit()
@@ -121,6 +156,7 @@ def close():
 
 
 def debug():
+    """Enter debug mode"""
     import readline  # optional, will allow Up/Down/History in the console
     import code
     def console_exit():
@@ -137,16 +173,25 @@ def debug():
 
 
 def get(url):
+    """Navigate to the given URL
+    Parameters:
+    url : value
+    """
     navigate(url)
 
 
 def get_browser():
+    """Get the current active browser"""
     return browser.get_browser()
 
 
 def mouse_hover(element):
+    """Hover an element with the mouse
+    Parameters:
+    element : element
+    """
     _run_wait_hook()
-    driver = get_browser()
+    driver = browser.get_browser()
     webelement = driver.find(element)
     step_message = 'Mouse hover element \'{0}\''.format(webelement.name)
     execution.logger.info(step_message)
@@ -155,20 +200,34 @@ def mouse_hover(element):
 
 
 def navigate(url):
+    """Navigate to a URL
+    Parameters:
+    url : value
+    """
     step_message = 'Navigate to: \'{0}\''.format(url)
-    driver = get_browser()
+    driver = browser.get_browser()
     driver.get(url)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
     
 
 def open_browser(browser_id=None):
+    """Open a new browser. The param browser_id is optional
+    and only used to manage more than one browser at the same time.
+    Parameters:
+    browser_id (optional) : value
+    """
     step_message = 'Open browser'
     browser.open_browser(browser_id)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
 
     
 def press_key(element, key):
+    """Press a given key in the element.
+    Parameters:
+    element : element
+    key : value
+    """
     step_message = 'Press key: {}'.format(key)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -188,6 +247,11 @@ def press_key(element, key):
 
 
 def random(value):
+    """Generate a random string value.
+    TODO
+    Parameters:
+    value : value
+    """
     random_string = ''
     for char in value:
         if char == 'c':
@@ -201,9 +265,10 @@ def random(value):
 
 
 def refresh_page():
+    """Refresh the page."""
     _run_wait_hook()
     step_message = 'Refresh page'
-    get_browser().refresh()
+    browser.get_browser().refresh()
     #get_browser().execute_script("location.reload()")
     #browser = get_browser()
     #browser.get(browser.current_url);
@@ -212,8 +277,13 @@ def refresh_page():
 
 
 def select_by_index(element, index):
+    """Select an option from a select dropdown by index.
+    Parameters:
+    element : element
+    index : value
+    """
     _run_wait_hook()
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     step_message = 'Select option of index {0} from element {1}'.format(index, webelement.name)
     select = selenium.webdriver.support.select.Select(webelement)
     select.select_by_index(index)
@@ -222,8 +292,13 @@ def select_by_index(element, index):
 
 
 def select_by_text(element, text):
+    """Select an option from a select dropdown by text.
+    Parameters:
+    element : element
+    text : value
+    """
     _run_wait_hook()
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     step_message = 'Select \'{0}\' from element {1}'.format(text, webelement.name)
     select = selenium.webdriver.support.select.Select(webelement)
     select.select_by_visible_text(text)
@@ -232,8 +307,13 @@ def select_by_text(element, text):
 
 
 def select_by_value(element, value):
+    """Select an option from a select dropdown by value.
+    Parameters:
+    element : element
+    value : value
+    """
     _run_wait_hook()
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     step_message = 'Select \'{0}\' value from element {1}'.format(value, webelement.name)
     select = selenium.webdriver.support.select.Select(webelement)
     select.select_by_value(value)
@@ -242,8 +322,13 @@ def select_by_value(element, value):
 
 
 def send_keys(element, text):
+    """Send keys to an input.
+    Parameters:
+    element : element
+    text : text
+    """
     _run_wait_hook()
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     step_message = 'Write \'{0}\' in element {1}'.format(text, webelement.name)
     # TODO chrome driver drops some characters when calling send_keys
     # if execution.browser_name in ['chrome', 'chrome-headless', 'chrome-remote']:
@@ -257,8 +342,13 @@ def send_keys(element, text):
 
 
 def set_window_size(width, height):
+    """Set the browser window size.
+    Parameters:
+    width : value
+    height : value
+    """
     _run_wait_hook()
-    browser = get_browser()
+    browser = browser.get_browser()
     step_message = 'Set browser window size to {0}x, {1}y.'.format(width, height)
     browser.set_window_size(width, height)
     execution.logger.info(step_message)
@@ -266,29 +356,46 @@ def set_window_size(width, height):
 
 
 def step(message):
+    """Log a step to the report.
+    Parameters:
+    message : value
+    """
     execution.steps.append(message)
 
 
 def store(key, value):
+    """Store a value in data.
+    Parameters:
+    key : value
+    value : value
+    """
     execution.logger.info('Store value {} in key {}'.format(value, key))
     setattr(execution.data, key, value)
 
 
 # TODO rename to verify_element_exists
 def verify_exists(element):
+    """Verify that en element exists.
+    Parameters:
+    element : element
+    """
     _run_wait_hook()
     step_message = 'Verify that the element exists'
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
     try:
-        webelement = get_browser().find(element, timeout=1)
+        webelement = browser.get_browser().find(element, timeout=1)
     except:
         raise ElementNotFound('Element {} does not exist'.format(element))
 
 
 def verify_is_enabled(element):
+    """Verify an element is enabled.
+    Parameters:
+    element : element
+    """
     _run_wait_hook()
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     step_message = 'Verify the element \'{0}\' is enabled'.format(webelement.name)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -297,8 +404,12 @@ def verify_is_enabled(element):
 
 
 def verify_is_not_enabled(element):
+    """Verify an element is not enabled
+    Parameters:
+    element : element
+    """
     _run_wait_hook()
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     step_message = 'Verify the element \'{0}\' is not enabled'.format(webelement.name)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -307,8 +418,12 @@ def verify_is_not_enabled(element):
 
 
 def verify_is_not_selected(element):
+    """Verify an element is not selected
+    Parameters:
+    element : element
+    """
     _run_wait_hook()
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     step_message = 'Verify the element \'{0}\' is not selected'.format(webelement.name)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -317,8 +432,12 @@ def verify_is_not_selected(element):
 
 
 def verify_is_not_visible(element):
+    """Verify an element is not visible
+    Parameters:
+    element : element
+    """
     _run_wait_hook()
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     step_message = 'Verify the element \'{0}\' is not visible'.format(webelement.name)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -327,8 +446,12 @@ def verify_is_not_visible(element):
 
 
 def verify_is_selected(element):
+    """Verify an element is selected
+    Parameters:
+    element : element
+    """
     _run_wait_hook()
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     step_message = 'Verify the element \'{0}\' is selected'.format(webelement.name)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -337,8 +460,12 @@ def verify_is_selected(element):
 
 
 def verify_is_visible(element):
+    """Verify an element is visible
+    Parameters:
+    element : element
+    """
     _run_wait_hook()
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     step_message = 'Verify the element \'{0}\' is visible'.format(webelement.name)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -347,6 +474,10 @@ def verify_is_visible(element):
 
 
 def verify_not_exists(element):
+    """Verify an element does not exist
+    Parameters:
+    element : element
+    """
     _run_wait_hook()
     step_message = 'Verify that the element'
     execution.logger.info(step_message)
@@ -361,8 +492,13 @@ def verify_not_exists(element):
 
 
 def verify_selected_option(element, text):
+    """Verify an element has a selected option, passed by option text.
+    Parameters:
+    element : element
+    text : value
+    """
     _run_wait_hook()
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     select = selenium.webdriver.support.select.Select(webelement)
     step_message = ('Verify selected option of element \'{0}\''
                     ' is \'{1}\''.format(webelement.name, text))
@@ -375,8 +511,12 @@ def verify_selected_option(element, text):
 
 
 def verify_text(text):
+    """Verify that the given text is present anywhere in the page.
+    Parameters:
+    text : value
+    """
     _run_wait_hook()
-    driver = get_browser()
+    driver = browser.get_browser()
     step_message = 'Verify \'{0}\' is present in page'.format(text)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -385,8 +525,13 @@ def verify_text(text):
 
 
 def verify_text_in_element(element, text):
+    """Verify the given text is present in element.
+    Parameters:
+    element : element
+    text : value
+    """
     _run_wait_hook()
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     step_message = 'Verify element \'{0}\' contains text \'{1}\''.format(webelement.name, text)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
@@ -396,6 +541,10 @@ def verify_text_in_element(element, text):
 
 
 def wait(seconds):
+    """Wait for a fixed amount of seconds.
+    Parameters:
+    seconds (int or float) : value
+    """
     execution.logger.info('Waiting for {} seconds'.format(seconds))
     try:
         to_float = float(seconds)
@@ -440,11 +589,12 @@ def wait(seconds):
 
 
 def wait_for_element_not_exist(element, timeout=20):
-    """wait for a webelement to stop existing in the DOM.
-    
-    Wait for a webelement to stop existing in the DOM or until
-    the timeout ends. If the webelement still exists after the time
-    ended it will not raise an exception.
+    """Wait for a webelement to stop existing in the DOM.
+    If the webelement still exists after the timeout
+    ended, it will not raise an exception.
+    Parameters:
+    element : element
+    timeout (optional, default: 20) : value
     """
     try:
         timeout = int(timeout)
@@ -453,7 +603,7 @@ def wait_for_element_not_exist(element, timeout=20):
     execution.logger.info('Waiting for element {} to not exist'.format(element))
     webelement = None
     try:
-        s = get_browser().find(element, timeout=3)
+        s = browser.get_browser().find(element, timeout=3)
     except:
         execution.logger.debug('Element already does not exist, continuing...')
         return
@@ -472,7 +622,12 @@ def wait_for_element_not_exist(element, timeout=20):
 
 
 def wait_for_element_not_visible(element, timeout=20):
-    """wait for a webelement to stop being visible (is_displayed() == True)."""
+    """Wait for an element to stop being visible.
+    After the timeout, this won't throw an exception.
+    Parameters:
+    element : element
+    timeout (optional, default: 20) : value
+    """
     try:
         timeout = int(timeout)
     except:
@@ -480,7 +635,7 @@ def wait_for_element_not_visible(element, timeout=20):
     execution.logger.info('Waiting for element {} to be not visible'.format(element))
     webelement = None
     try:
-        webelement = get_browser().find(element, timeout=3)
+        webelement = browser.get_browser().find(element, timeout=3)
     except:
         execution.logger.debug('Element is already not visible, continuing...')
         return
@@ -496,12 +651,18 @@ def wait_for_element_not_visible(element, timeout=20):
 
 
 def wait_for_element_enabled(element, timeout=20):
+    """Wait for element to be enabled.
+    After timeout this won't throw an exception.
+    Parameters:
+    element : element
+    timeout (optional, default: 20) : value
+    """
     execution.logger.info('Waiting for element {} to be enabled'.format(element))
     start_time = time.time()
     timed_out = False
     #webelement = None
     #try:
-    webelement = get_browser().find(element, timeout)
+    webelement = browser.get_browser().find(element, timeout)
     enabled = webelement.is_enabled()
     while not enabled and not timed_out:
         execution.logger.debug('Element is not enabled, waiting..')
@@ -513,6 +674,12 @@ def wait_for_element_enabled(element, timeout=20):
 
 
 def wait_for_element_visible(element, timeout=20):
+    """Wait for element to be visible.
+    After timeout this won't throw an exception.
+    Parameters:
+    element : element
+    timeout (optional, default: 20) : value
+    """
     try:
         timeout = int(timeout)
     except:
@@ -521,7 +688,7 @@ def wait_for_element_visible(element, timeout=20):
     execution.logger.info('Waiting for element {} to be visible'.format(element))
     start_time = time.time()
     timed_out = False
-    webelement = get_browser().find(element)
+    webelement = browser.get_browser().find(element)
     while not webelement.is_displayed() and not timed_out:
         execution.logger.debug('Element is not visible, waiting..')
         time.sleep(0.5)
@@ -530,6 +697,15 @@ def wait_for_element_visible(element, timeout=20):
 
 
 def http_get(url, headers={}, params={}, verify_ssl_cert=True):
+    """Perform an HTTP GET request to the given URL.
+    Headers and params are optional dictionaries.
+    
+    Parameters:
+    url : value
+    headers (optional, dict) : value
+    params (optional, dict) : value
+    verify_ssl_cert (optional, default is True) : value
+    """
     step_message = 'Make GET request to {}'.format(url)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
@@ -538,6 +714,15 @@ def http_get(url, headers={}, params={}, verify_ssl_cert=True):
 
 
 def http_post(url, headers={}, data={}, verify_ssl_cert=True):
+    """Perform an HTTP POST request to the given URL.
+    Headers and data are optional dictionaries.
+    
+    Parameters:
+    url : value
+    headers (optional, dict) : value
+    data (optional, dict) : value
+    verify_ssl_cert (optional, default is True) : value
+    """
     step_message = 'Make POST request to {}'.format(url)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, False)
@@ -546,6 +731,11 @@ def http_post(url, headers={}, data={}, verify_ssl_cert=True):
 
 
 def verify_response_status_code(response, status_code):
+    """Verify the response status code.
+    Parameters:
+    response : value
+    status_code : value
+    """
     if isinstance(status_code, str):
         if status_code.isdigit():
             status_code = int(status_code)
