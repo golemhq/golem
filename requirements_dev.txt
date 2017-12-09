@@ -2,4 +2,7 @@ flask
 Flask-Login
 selenium
 pytest
+sphinx
+recommonmark
 requests
+tox
