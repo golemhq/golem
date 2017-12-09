@@ -8,13 +8,13 @@
 
 
 <div class="content-wrapper">
-	<h2><a class="link-without-underline" href="/report/project/{{project}}/">{{project|replace("_", " ")}}</a> - <a class="link-without-underline" href="/report/project/{{project}}/suite/{{suite}}/">{{suite|replace("_", " ")}}</a> <small>({{formatted_date}})</small></h2>
+	<h2><a class="link-without-decoration" href="/report/project/{{project}}/">{{project|replace("_", " ")}}</a> - <a class="link-without-decoration" href="/report/project/{{project}}/suite/{{suite}}/">{{suite|replace("_", " ")}}</a> <small>({{formatted_date}})</small></h2>
 	<div class="col-md-12 project-container">
 		<h3 class="no-margin-top">General</h3>
 		<div class="widget widget-table">
 			<div class="widget-content">
 				<div class="table-responsive">
-					<table class="table general-table margin-bottom-5">
+					<table id="generalTable" class="table general-table margin-bottom-5">
 						<thead>
 							<tr>
 								<th>Module</th>
@@ -27,7 +27,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr class="total-row" id="totalRow">
+							<tr class="total-row general-table-row cursor-pointer" id="totalRow">
 								<td class="module">Total</td>
 								<td class="total-tests"></td>
 								<td class="tests-ok"></td>
@@ -51,15 +51,59 @@
 		<div class="widget widget-table">
 			<div class="widget-content">
 				<div class="table-responsive">
-					<table class="table test-list-table margin-bottom-5">
+					<table id="detailTable" class="table detail-table margin-bottom-5">
 						<thead>
 							<tr>
 								<th>#</th>
-								<th>Module</th>
-								<th class="test-name-header">Test Name</th>
-								<th>Environment</th>
-								<th>Browser</th>
-								<th>Result</th>
+								<th class="dropdown filter-table-dropdown" colname="module">
+									<a type="button" class="link-without-decoration" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									    Module <i class="fa fa-filter funnel-icon" aria-hidden="true" style="display:none"></i></span>
+									</a>
+								  	<ul class="dropdown-menu">
+								  		<form>
+										    <!-- <li>
+										    	<div class="checkbox">
+												    <label>
+												      <input type="checkbox"> Check me out
+												    </label>
+											  	</div>
+											</li> -->
+										</form>
+								  	</ul>
+								</th>
+								<th class="test-name-header" colname="test-name">Test Name</th>
+								<th class="dropdown filter-table-dropdown" colname="set-name" style="display:none">
+									<a type="button" class="link-without-decoration" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									    set Name <i class="fa fa-filter funnel-icon" aria-hidden="true" style="display:none"></i></span>
+									</a>
+								  	<ul class="dropdown-menu">
+								  		<form></form>
+								  	</ul>
+								</th>
+								<th class="dropdown filter-table-dropdown" colname="environment">
+									<a type="button" class="link-without-decoration" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									    Environment <i class="fa fa-filter funnel-icon" aria-hidden="true" style="display:none"></i></span>
+									</a>
+								  	<ul class="dropdown-menu">
+								  		<form></form>
+								  	</ul>
+								</th>
+								<th class="dropdown filter-table-dropdown" colname="browser">
+									<a type="button" class="link-without-decoration" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									    Browser <i class="fa fa-filter funnel-icon" aria-hidden="true" style="display:none"></i></span>
+									</a>
+								  	<ul class="dropdown-menu">
+								  		<form></form>
+								  	</ul>
+								</th>
+								<th class="dropdown filter-table-dropdown" colname="result">
+									<a type="button" class="link-without-decoration" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									    Result <i class="fa fa-filter funnel-icon" aria-hidden="true" style="display:none"></i></span>
+									</a>
+								  	<ul class="dropdown-menu">
+								  		<form></form>
+								  	</ul>
+								</th>
 								<th>Time</th>
 								<th></th>
 							</tr>

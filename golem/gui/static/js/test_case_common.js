@@ -142,11 +142,11 @@ var testRunner = new function(){
                 var thisStep = thisReport.steps[s];
 
                 if(thisStep.screenshot){
-                    var msg = "<span class='hand-icon' data-toggle='collapse' data-target='#"+thisStep.screenshot+"' \
+                    var msg = "<span class='cursor-pointer' data-toggle='collapse' data-target='#"+thisStep.screenshot+"' \
                         aria-expanded='false' aria-controls='"+thisStep.screenshot+"'>'"+thisStep.message+"' \
                         <span class='glyphicon glyphicon-picture' aria-hidden='true'></span></span> \
                     <div class='collapse text-center' id='"+ thisStep.screenshot + "'> \
-                        <img class='step-screenshot hand-icon' style='width: 100%;' src='/test/screenshot/"+ project +"/"+ thisReport.full_name +"/"+thisReport.execution+ "/"+thisReport.test_set+ "/"+ thisStep.screenshot +"/' onclick='reportUtils.expandImg(event);'> \
+                        <img class='step-screenshot cursor-pointer' style='width: 100%;' src='/test/screenshot/"+ project +"/"+ thisReport.full_name +"/"+thisReport.execution+ "/"+thisReport.test_set+ "/"+ thisStep.screenshot +"/' onclick='reportUtils.expandImg(event);'> \
                     </div>";
                 }
                 else{

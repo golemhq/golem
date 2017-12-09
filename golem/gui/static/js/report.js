@@ -137,11 +137,21 @@ var ExecutionsReport = new function(){
     };
 
     this.addSetNameColumnToTable = function(){
-        if(!$("table.test-list-table thead tr .set-name-header").length){
-            $("table.test-list-table thead tr .test-name-header").after("<th class='set-name-header'>Set Name</th>");
-        }
-        $("table.test-list-table tr").each(function(){
-            console.log($(this));
+        // let setNameHeaderTemplate = "\
+        //     <th class='set-name-header'>Set Name</th>";
+        //     <th class='dropdown filter-table-dropdown' colname='environment'>
+        //         <a type="button" class="link-without-decoration" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        //             Environment <i class="fa fa-filter funnel-icon" aria-hidden="true"></i></span>
+        //         </a>
+        //         <ul class="dropdown-menu">
+        //             <form></form>
+        //         </ul>
+        //     </th>
+        // if(!$("#detailTable thead tr .set-name-header").length){
+        //     $("#detailTable thead tr .test-name-header").after("");
+        // }
+        $("#detailTable th[colname='set-name'").show();
+        $("#detailTable tr").each(function(){
             if(!$(this).find(".set-name").length){
                 $(this).find(".tc-name").after($("<td class='set-name'></td>"));
             }
@@ -150,7 +160,7 @@ var ExecutionsReport = new function(){
 
     this.generateModuleRow = function(data){
         var row = "\
-            <tr>\
+            <tr class='general-table-row cursor-pointer'>\
                 <td class='module'>"+data.moduleName+"</td>\
                 <td class='total-tests'>"+data.totalTests+"</td>\
                 <td class='tests-ok'>"+data.testsPassed+"</td>\
@@ -163,6 +173,4 @@ var ExecutionsReport = new function(){
             </tr>";
         return $(row)
     }
-
 }
-

@@ -59,9 +59,9 @@
 			<div class="step">
 				<span>{{loop.index}}.</span>
 				{% if step.screenshot %}
-					<span class="hand-icon" data-toggle="collapse" data-target="#{{step.screenshot}}" aria-expanded="false" aria-controls="{{step.screenshot}}">{{step.message}} <span class="glyphicon glyphicon-picture" aria-hidden="true"></span></span>
+					<span class="cursor-pointer" data-toggle="collapse" data-target="#{{step.screenshot}}" aria-expanded="false" aria-controls="{{step.screenshot}}">{{step.message}} <span class="glyphicon glyphicon-picture" aria-hidden="true"></span></span>
 					<div class="collapse text-center" id="{{step.screenshot}}">
-						<img class="step-screenshot hand-icon" src="/report/screenshot/{{project}}/{{suite}}/{{execution}}/{{test_case}}/{{test_set}}/{{step.screenshot}}/" onclick="reportUtils.expandImg(event);">
+						<img class="step-screenshot cursor-pointer" src="/report/screenshot/{{project}}/{{suite}}/{{execution}}/{{test_case}}/{{test_set}}/{{step.screenshot}}/" onclick="reportUtils.expandImg(event);">
 					</div>
 				{% else %}
 					{{step.message}}

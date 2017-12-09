@@ -216,12 +216,17 @@ gray 1  #fafafa
 }
 
 
-.link-without-underline:hover, .link-without-underline:visited, .link-without-underline:focus {
+.link-without-underline:hover,
+.link-without-underline:visited,
+.link-without-underline:focus {
     text-decoration: none;
     outline: none;
 }
 
-.link-without-decoration, .link-without-decoration:hover, .link-without-decoration:visited, .link-without-decoration:focus {
+.link-without-decoration,
+.link-without-decoration:hover,
+.link-without-decoration:visited,
+.link-without-decoration:focus {
     text-decoration: none;
     outline: none;
     color: inherit;

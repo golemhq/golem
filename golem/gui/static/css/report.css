@@ -1,27 +1,10 @@
 
-
-/*.wrapper {
-	margin-bottom: 0px;
-}*/
-
-
-/*.page-title {
-	margin-top: 5px !important;
-	margin-bottom: 30px !important;
-}*/
-/*
-.project-name {
-	margin-top: 0px;
-}*/
-
 .project-container { 
 	background-color: #f5f5f5;
 	border: 1px solid #e4e4e4;
 	margin-bottom: 15px;
 	padding-top: 15px;
-    /*padding-bottom: 15px*/
 }
-
 
 .widget {
 	border-width: 1px;
@@ -32,7 +15,7 @@
 }
 
 .widget.widget-table {
-	overflow: hidden;
+	/*overflow: hidden;*/
 }
 
 .widget .widget-header {
@@ -49,7 +32,6 @@
     display: inline-block;
     vertical-align: middle;
     zoom: 1;
-    /*font-family: "latobold";*/
     font-size: 1.1em;
     margin: 0;
     line-height: 35px;
@@ -60,10 +42,6 @@
 	padding: 10px !important;
 }
 
-.chart-container {
-    /*height: 212px;*/
-}
-
 .chart-inner-container {
     height: 212px;
     position: relative;
@@ -71,45 +49,50 @@
     transform: translateY(-50%);
 }
 
-.hand-icon {
-	cursor: pointer;
-}
 
-/*.modal-dialog.screenshot-modal-dialog {
-	width: 90%;
-	padding-top: 0px;
-}
-
-#expandedScreenshot {
-	margin-left: auto;
-	margin-right: auto;
-	width: 100%;
-}
-
-.screenshot-modal .modal-header .close {
-	font-size: 28px;
-	margin-top: -12px;
-}
-
-.screenshot-modal .modal-header {
-	padding-right: 10px;
-}*/
-
-.link-without-underline, .link-without-underline:hover, .link-without-underline:visited, .link-without-underline:focus {
-    text-decoration: none;
-    outline: none;
-    color: inherit;
-}
-
-.general-table td, .test-list-table td {
+#generalTable td,
+#detailTable td {
     padding-top: 4px !important;
     padding-bottom: 4px !important;
 }
-
 
 .step-screenshot {
     margin-left: auto;
     margin-right: auto;
     width: 70%;
     border: 1px solid lightgray;
+}
+
+
+/* Table filter dropdown */
+
+.filter-table-dropdown .dropdown-menu {
+    margin-top: 0px;
+    border: 1px solid #ccc;
+    white-space: nowrap;
+}
+
+.filter-table-dropdown .dropdown-menu form li {
+    padding: 2px 10px;
+}
+
+.filter-table-dropdown div.checkbox {
+    margin: 0px;
+}
+
+.table-responsive {
+    overflow-x: visible; 
+}
+
+#content {
+    overflow-x: visible;
+}
+
+
+#detailTable .funnel-icon {
+    color: gray;
+}
+
+#detailTable th.filtered .funnel-icon {
+    color: black;
 }

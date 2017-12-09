@@ -7,6 +7,13 @@ var netTime = undefined;
 
 $(document).ready(function() {            
 	getReportData();
+
+	$("#generalTable").on('click', 'tr', function(){
+		let moduleName = $(this).find("td.module").html();
+		detailTable.filterDetailTableByModule(moduleName);
+	})
+
+	detailTable.instantiateDetailTableFilterListeners();
 });
 
 
@@ -40,6 +47,7 @@ function loadReport(execution_data){
 		var test = execution_data.test_cases[tc];
 		var row = $("#"+test.test_set);
 		if(row.length == 0){
+			// this test case is not added yet
 			addTestToDetailTable(test);
 		}
 		else if(row.attr('pending') == 'pending' && test.result != 'pending'){
@@ -49,8 +57,8 @@ function loadReport(execution_data){
 }
 
 function addTestToDetailTable(test){
-	// this test case is not added yet
-	var numbering = $(".table.test-list-table tbody tr").length + 1;
+	
+	var numbering = $("#detailTable tbody tr").length + 1;
 
 	if(test.result == 'pass')
 		var resultString = passIcon() + ' ' + test.result;
@@ -74,7 +82,7 @@ function addTestToDetailTable(test){
 	testRow.attr('onclick', "document.location.href='"+link+"'");
 	testRow.find('td.link a').attr('href', link)
 
-	$(".test-list-table tbody").append(testRow);
+	$("#detailTable tbody").append(testRow);
 
 	//add this test case to allTestCases
 	allTestCases[test.test_set] = test;
@@ -82,6 +90,12 @@ function addTestToDetailTable(test){
 	if(test.result != 'pending'){
 		loadTestRowResult(test);
 	}
+
+	// add options to header dropdowns
+	detailTable.updateColumnHeaderFilterOptions('module', test.module);
+	// detailTable.updateColumnHeaderFilterOptions('environment', test.environment);
+	detailTable.updateColumnHeaderFilterOptions('browser', test.browser);
+	detailTable.updateColumnHeaderFilterOptions('result', test.result);
 
 	updateModuleRowInGeneralTable(test);
 	refreshGeneralTable();
@@ -104,6 +118,7 @@ function loadTestRowResult(test){
 		ExecutionsReport.hasSetNameColumn = true;
 		ExecutionsReport.addSetNameColumnToTable();
 		row.find('.set-name').html(test.set_name);
+		detailTable.updateColumnHeaderFilterOptions('set-name', test.set_name);
 	}
 
 	//add this test case to allTestCases
@@ -114,6 +129,11 @@ function loadTestRowResult(test){
 
 	//The module in the general table should be updated
 	updateModuleRowInGeneralTable(test);
+
+	// add options to header dropdowns
+	detailTable.updateColumnHeaderFilterOptions('browser', test.browser);
+	detailTable.updateColumnHeaderFilterOptions('result', test.result);
+	detailTable.updateColumnHeaderFilterOptions('environment', test.environment);
 
 	row.removeAttr('pending');
 }
@@ -270,4 +290,93 @@ function formatTimeOutput(seconds){
 		final += sec + 's'
 	}
 	return final
+}
+
+
+var detailTable = new function(){
+
+	this.updateColumnHeaderFilterOptions = function(column, value){
+		if([undefined, ''].includes(value)){
+			return
+		}
+		let colHeader = $("#detailTable th[colname='"+column+"']");
+		let optionList = colHeader.find("ul>form");
+		let options = optionList.find("li>div.checkbox>label>span");
+		let optionExists = false;
+		options.each(function(){
+			if($(this).html() == value){
+				optionExists = true
+			}
+		});
+		if(!optionExists){
+			let newOption = "\
+				<li>\
+					<div class='checkbox'>\
+				    	<label>\
+				      		<input type='checkbox'> <span>"+value+"</span>\
+				    	</label>\
+			  		</div>\
+				</li>";
+			optionList.append(newOption);
+			// show funnel icon
+			colHeader.find('.funnel-icon').show();
+		}
+	}
+
+
+	this.instantiateDetailTableFilterListeners = function(){
+		$("#detailTable").on('change', "th input:checkbox", function(){
+			detailTable.applyFilters()
+		})
+	}
+
+
+	this.applyFilters = function(){
+		// display all columns
+		$("#detailTable tr").show();
+
+		let tableRows = $("#detailTable>tbody>tr");
+
+		// for each column header
+		$("#detailTable th").each(function($index){
+			let thisColumnHeader = $(this);
+			let checkedCheckboxes = thisColumnHeader.find("input[type='checkbox']:checked");
+			let columnIndex = $index;
+			if(checkedCheckboxes.length > 0){
+				// mark this column header as 'filtered'
+				thisColumnHeader.addClass('filtered');
+
+				let checkedValues = [];
+				checkedCheckboxes.each(function(){
+					checkedValues.push($(this).parent().find('span').html());
+				});
+				// for reach row
+				tableRows.each(function(){
+					let thisRow = $(this);
+					let thisCellValue = $(this).find('td').get(columnIndex).innerText;
+					if(!checkedValues.includes(thisCellValue.trim())){
+						thisRow.hide();
+					}
+				})
+			}
+			else {
+				// mark column header as not filtered
+				thisColumnHeader.removeClass('filtered');
+			}
+		});
+	}
+
+
+	this.filterDetailTableByModule = function(moduleName){
+		// remove all filters in module column,
+		// apply the filter provided
+		// keep any other filters
+		let moduleColumnHeader = $("#detailTable th:contains('Module')");
+		moduleColumnHeader.find('input:checkbox')
+						  .prop('checked', false).change();
+		if(moduleName != 'Total'){
+			moduleColumnHeader.find(`div.checkbox label:contains('${moduleName}') input`)
+						  	  .prop('checked', true).change();
+		}
+	}
 }
