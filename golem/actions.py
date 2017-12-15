@@ -32,11 +32,15 @@ def _run_wait_hook():
                                .format(time.time() - start_time))
 
 
+def _add_step(message):
+    execution.steps.append(message)
+
+
 def _capture_or_add_step(message, screenshot_on_step):
     if screenshot_on_step:
         capture(message)
     else:
-        step(message)
+        _add_step(message)
 
 
 def activate_browser(browser_id):
@@ -183,6 +187,12 @@ def get(url):
 def get_browser():
     """Get the current active browser"""
     return browser.get_browser()
+
+
+def get_current_url():
+    """Return the current browser URL    
+    """
+    return browser.get_browser().current_url
 
 
 def mouse_hover(element):
@@ -360,6 +370,7 @@ def step(message):
     Parameters:
     message : value
     """
+    execution.logger.info('Step: {}'.format(message))
     execution.steps.append(message)
 
 

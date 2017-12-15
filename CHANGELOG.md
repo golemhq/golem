@@ -3,6 +3,9 @@
 
 ## [Unreleased]
 
+### Added
+- get_current_url action
+
 ## [0.4.2] - 2017-12-15
 
 ### Added

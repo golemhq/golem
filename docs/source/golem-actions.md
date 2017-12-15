@@ -42,6 +42,11 @@ Navigate to a URL, same as *navigate(url)*
 Returns the active browser driver object
 
 
+##### get_current_url()
+
+Returns the current browser URL
+
+
 ##### mouse_hover(element)
 
 Perform a mouse hover on the element
