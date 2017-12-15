@@ -325,7 +325,7 @@ def send_keys(element, text):
     """Send keys to an input.
     Parameters:
     element : element
-    text : text
+    text : value
     """
     _run_wait_hook()
     webelement = browser.get_browser().find(element)

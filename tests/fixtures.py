@@ -51,6 +51,7 @@ def random_project_fixture(testdir_fixture):
     random_name = 'project_' + random_value
     os.chdir(testdir_fixture['path'])
     call(['python', 'golem.py', 'createproject', random_name])
+    sys.path.append(os.path.join(testdir_fixture['path'], random_name))
     yield {
             'testdir_fixture': testdir_fixture,
             'name': random_name}

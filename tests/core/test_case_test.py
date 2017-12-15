@@ -1,9 +1,9 @@
 import os
 from collections import OrderedDict
 
-from tests.fixtures import testdir_fixture, random_project_fixture, project_fixture
-
 from golem.core import test_case
+
+from tests.fixtures import testdir_fixture, random_project_fixture, project_fixture
 
 
 SAMPLE_TEST_CONTENT = """

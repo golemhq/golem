@@ -3,53 +3,51 @@ import os
 import sys
 import importlib
 
-from golem.core import utils, test_execution
+from golem.core import utils
 
 
 def save_external_test_data_file(root_path, project, full_test_case_name, test_data):
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
 
-    # if test_data == 'csv'
-    if test_execution.settings['test_data'] == 'csv':
-        data_file_path_data_folder = os.path.join(root_path, 'projects', project,
-                                                  'data', os.sep.join(parents),
-                                                  '{}.csv'.format(tc_name))
-        data_path_tests_folder = os.path.join(root_path, 'projects', project,
-                                           'tests', os.sep.join(parents))
-        data_file_path_tests_folder = os.path.join(data_path_tests_folder,
-                                                   '{}.csv'.format(tc_name))
-        # if csv file exists in /data/ use this file
-        # remove csv file fro /tests/ folder if it exists
-        if os.path.isfile(data_file_path_data_folder):
-            with open(data_file_path_data_folder, 'w') as data_file:
-                if test_data:
-                    writer = csv.DictWriter(data_file, fieldnames=test_data[0].keys(),
-                                            lineterminator='\n')
-                    writer.writeheader()
-                    for row in test_data:
-                        writer.writerow(row)
-                else:
-                    data_file.write('')
-            # remove csv from /tests/ folder if it exists
-            if os.path.isfile(data_file_path_tests_folder):
-                os.remove(data_file_path_tests_folder)
-            # TODO deprecate /data/ folder
-            print(('Warning: data files defined in the /data/ folder will soon '
-                   'be deprecated. Test data files should be placed in the same folder '
-                   'as the test file.'))
-        else:
-            # else, update or create a csv file in /tests/ folder
-            
-            os.makedirs(data_path_tests_folder, exist_ok=True)
-            with open(data_file_path_tests_folder, 'w') as data_file:
-                if test_data:
-                    writer = csv.DictWriter(data_file, fieldnames=test_data[0].keys(),
-                                            lineterminator='\n')
-                    writer.writeheader()
-                    for row in test_data:
-                        writer.writerow(row)
-                else:
-                    data_file.write('')
+    data_file_path_data_folder = os.path.join(root_path, 'projects', project,
+                                              'data', os.sep.join(parents),
+                                              '{}.csv'.format(tc_name))
+    data_path_tests_folder = os.path.join(root_path, 'projects', project,
+                                       'tests', os.sep.join(parents))
+    data_file_path_tests_folder = os.path.join(data_path_tests_folder,
+                                               '{}.csv'.format(tc_name))
+    # if csv file exists in /data/ use this file
+    # remove csv file from /tests/ folder if it exists
+    if os.path.isfile(data_file_path_data_folder):
+        with open(data_file_path_data_folder, 'w') as data_file:
+            if test_data:
+                writer = csv.DictWriter(data_file, fieldnames=test_data[0].keys(),
+                                        lineterminator='\n')
+                writer.writeheader()
+                for row in test_data:
+                    writer.writerow(row)
+            else:
+                data_file.write('')
+        # remove csv from /tests/ folder if it exists
+        if os.path.isfile(data_file_path_tests_folder):
+            os.remove(data_file_path_tests_folder)
+        # TODO deprecate /data/ folder
+        print(('Warning: data files defined in the /data/ folder will soon '
+               'be deprecated. Test data files should be placed in the same folder '
+               'as the test file.'))
+    else:
+        # else, update or create a csv file in /tests/ folder
+        
+        os.makedirs(data_path_tests_folder, exist_ok=True)
+        with open(data_file_path_tests_folder, 'w') as data_file:
+            if test_data:
+                writer = csv.DictWriter(data_file, fieldnames=test_data[0].keys(),
+                                        lineterminator='\n')
+                writer.writeheader()
+                for row in test_data:
+                    writer.writerow(row)
+            else:
+                data_file.write('')
 
 
 def get_external_test_data(workspace, project, full_test_case_name):

@@ -60,7 +60,6 @@ def run_test(workspace, project, test_name, test_data, browser,
                                          settings['console_log_level'],
                                          settings['log_all_events'])
     execution.logger = logger
-    logger.debug('sarasa')
     # Print execution info to console
     logger.info('Test execution started: {}'.format(test_name))
     logger.info('Browser: {}'.format(browser['name']))

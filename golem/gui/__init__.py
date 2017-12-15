@@ -22,11 +22,11 @@ from golem.core import (utils,
                         environment_manager,
                         test_case,
                         page_object,
-                        suite,
                         test_execution,
                         changelog,
                         lock)
 from golem.core import test_data as test_data_module
+from golem.core import suite as suite_module
 
 from . import gui_utils, user, report_parser
 
@@ -258,12 +258,12 @@ def suite_view(project, suite):
         return render_template('not_permission.html')
 
     all_test_cases = utils.get_test_cases(root_path, project)
-    selected_tests = utils.get_suite_test_cases(root_path, project, suite)
-    worker_amount = utils.get_suite_amount_of_workers(root_path, project, suite)
-    browsers = utils.get_suite_browsers(root_path, project, suite)
+    selected_tests = suite_module.get_suite_test_cases(root_path, project, suite)
+    worker_amount = suite_module.get_suite_amount_of_workers(root_path, project, suite)
+    browsers = suite_module.get_suite_browsers(root_path, project, suite)
     browsers = ', '.join(browsers)
     default_browser = test_execution.settings['default_browser']
-    environments = utils.get_suite_environments(root_path, project, suite)
+    environments = suite_module.get_suite_environments(root_path, project, suite)
     environments = ', '.join(environments)
     
     return render_template('suite.html',
@@ -303,7 +303,7 @@ def project_settings(project):
 def environments_view(project):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
-    environment_data = environment_manager.get_environments_as_string(project)
+    environment_data = environment_manager.get_environments_as_string(root_path, project)
     return render_template('environments.html', project=project,
                            environment_data=environment_data)
 
@@ -579,7 +579,7 @@ def new_tree_element():
                     errors = io_manager.new_directory(root_path, project, parents,
                                                      element_name, dir_type='suites')
                 else:
-                    errors = suite.new_suite(root_path, project, parents, element_name)
+                    errors = suite_module.new_suite(root_path, project, parents, element_name)
         element = {
             'name': element_name,
             'full_path': dot_path,
@@ -632,9 +632,6 @@ def save_test_case_code():
 def get_global_actions():
     if request.method == 'POST':
         global_actions = gui_utils.Golem_action_parser().get_actions()
-        # for a in ac:
-        #     print(a, '\n')
-        # global_actions = gui_utils.get_global_actions()
         return json.dumps(global_actions)
 
 
@@ -786,7 +783,7 @@ def save_suite():
         browsers = request.json['browsers']
         environments = request.json['environments']
 
-        suite.save_suite(root_path, project, suite_name, test_cases,
+        suite_module.save_suite(root_path, project, suite_name, test_cases,
                          workers, browsers, environments)
 
         return json.dumps('ok')
@@ -814,7 +811,7 @@ def save_environments():
     if request.method == 'POST':
         projectname = request.json['project']
         env_data = request.json['environmentData']
-        error = environment_manager.save_environments(projectname, env_data)
+        error = environment_manager.save_environments(root_path, projectname, env_data)
         return json.dumps(error)
 
 
@@ -850,7 +847,7 @@ def get_supported_browsers():
 @app.route("/get_environments/", methods=['POST'])
 def get_environments():
     project = request.form['project']
-    return json.dumps(environment_manager.get_envs(project))
+    return json.dumps(environment_manager.get_envs(root_path, project))
 
 
 @app.route("/report/get_last_executions/", methods=['POST'])

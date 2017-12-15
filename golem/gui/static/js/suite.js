@@ -139,7 +139,6 @@ var findBranchAndCheckDescendents = function(testPath, rootUl){
         // the branch is in this level
         rootUl.find('>li.branch').each(function(){
             if($(this).find('>a').html()+'/' == testPath[0]){
-                console.log('returning this', $(this).find('>ul'));
                 var branchUl = $(this).find('>ul');
                 $(this).find('>input').prop('checked', true);
                 checkBranchTestCases(branchUl, true);

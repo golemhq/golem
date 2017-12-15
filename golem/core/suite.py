@@ -1,4 +1,5 @@
 import os
+import importlib
 
 from golem.core import utils
 
@@ -46,3 +47,61 @@ def new_suite(root_path, project, parents, suite_name):
             suite_file.write(suite_content)
         print('Suite {} created for project {}'.format(suite_name, project))
     return errors
+
+
+def get_suite_amount_of_workers(workspace, project, suite):
+    amount = 1
+    suite_module = importlib.import_module('projects.{0}.suites.{1}'.format(project, suite),
+                                           package=None)
+    if hasattr(suite_module, 'workers'):
+        amount = suite_module.workers
+
+    return amount
+
+
+def get_suite_environments(workspace, project, suite):
+    environments = []
+    module_name = 'projects.{0}.suites.{1}'.format(project, suite)
+    suite_module = importlib.import_module(module_name, package=None)
+    if hasattr(suite_module, 'environments'):
+        environments = suite_module.environments
+
+    return environments
+
+
+def get_suite_test_cases(workspace, project, suite):
+    '''Return a list with all the test cases of a given suite'''
+    tests = []
+    module_name = 'projects.{0}.suites.{1}'.format(project, suite)
+    suite_module = importlib.import_module(module_name, package=None)
+    if '*' in suite_module.tests:
+        path = os.path.join(workspace, 'projects', project, 'tests')
+        tests = utils.get_files_in_directory_dot_path(path)
+    else:
+        for test in suite_module.tests:
+            if test[-1] == '*':
+                this_dir = os.path.join(test[:-2])
+                path = os.path.join(workspace, 'projects', project,
+                                    'tests', this_dir)
+                this_dir_tests = utils.get_files_in_directory_dot_path(path)
+                this_dir_tests = ['{}.{}'.format(this_dir, x) for x in this_dir_tests]
+                tests = tests + this_dir_tests
+            else:
+                tests.append(test)
+    return tests
+
+
+def get_suite_browsers(workspace, project, suite):
+    browsers = []
+    module_name = 'projects.{0}.suites.{1}'.format(project, suite)
+    suite_module = importlib.import_module(module_name, package=None)
+    if hasattr(suite_module, 'browsers'):
+        browsers = suite_module.browsers
+
+    return browsers
+
+
+def get_suite_module(workspace, project, suite):
+    module_name = 'projects.{0}.suites.{1}'.format(project, suite)
+    suite_module = importlib.import_module(module_name, package=None)
+    return suite_module
