@@ -30,7 +30,7 @@ def _define_drivers(drivers, remote_browsers, default_browsers):
         elif driver in default_browsers:
             _ = {
                 'name': driver,
-                'full_name': driver,
+                'full_name': None,
                 'remote': False,
                 'capabilities': None
             }

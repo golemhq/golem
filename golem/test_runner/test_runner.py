@@ -185,5 +185,6 @@ def run_test(workspace, project, test_name, test_data, browser,
     #sys.modules['golem.execution'] = None
     
     report.generate_report(report_directory, test_name, execution.data, result)
-    del execution
+    # del execution
+    sys.modules['golem.execution'] = None
     return

@@ -31,7 +31,7 @@ class Test__define_drivers:
         expected = [
             {
                 'name': 'chrome',
-                'full_name': 'chrome',
+                'full_name': None,
                 'remote': False,
                 'capabilities': None
             },

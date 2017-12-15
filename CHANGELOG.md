@@ -3,6 +3,11 @@
 
 ## [Unreleased]
 
+## [0.4.2] - 2017-12-15
+
+### Added
+- Filter execution report table by column values (#74)
+
 ## [0.4.1] - 2017-12-03
 
 ### Added
