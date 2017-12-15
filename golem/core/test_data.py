@@ -37,17 +37,18 @@ def save_external_test_data_file(root_path, project, full_test_case_name, test_d
                'as the test file.'))
     else:
         # else, update or create a csv file in /tests/ folder
-        
-        os.makedirs(data_path_tests_folder, exist_ok=True)
-        with open(data_file_path_tests_folder, 'w') as data_file:
-            if test_data:
-                writer = csv.DictWriter(data_file, fieldnames=test_data[0].keys(),
-                                        lineterminator='\n')
-                writer.writeheader()
-                for row in test_data:
-                    writer.writerow(row)
-            else:
-                data_file.write('')
+        if os.path.isfile(data_file_path_tests_folder) or test_data:
+            # update data file only if it already exists or there's data
+            os.makedirs(data_path_tests_folder, exist_ok=True)
+            with open(data_file_path_tests_folder, 'w') as data_file:
+                if test_data:
+                    writer = csv.DictWriter(data_file, fieldnames=test_data[0].keys(),
+                                            lineterminator='\n')
+                    writer.writeheader()
+                    for row in test_data:
+                        writer.writerow(row)
+                else:
+                    data_file.write('')
 
 
 def get_external_test_data(workspace, project, full_test_case_name):

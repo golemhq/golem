@@ -291,7 +291,8 @@ def create_new_directories(root_path, directories, add_init=False):
 
 def create_new_project(workspace, project):
     create_new_directory(path_list=[workspace, 'projects', project], add_init=True)
-    create_new_directory(path_list=[workspace, 'projects', project, 'data'], add_init=False)
+    # TODO, remove, don't create data folder for new projects
+    # create_new_directory(path_list=[workspace, 'projects', project, 'data'], add_init=False)
     create_new_directory(path_list=[workspace, 'projects', project, 'pages'], add_init=True)
     create_new_directory(path_list=[workspace, 'projects', project, 'reports'], add_init=False)
     create_new_directory(path_list=[workspace, 'projects', project, 'tests'], add_init=True)
