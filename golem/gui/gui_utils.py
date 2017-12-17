@@ -7,7 +7,7 @@ import golem.actions
 from golem.core import utils
 
 
-def run_test_case(project, test_case_name):
+def run_test_case(project, test_case_name, environment):
     timestamp = utils.get_timestamp()
     param_list = ['golem','run', project, test_case_name,
                   '--timestamp', timestamp]

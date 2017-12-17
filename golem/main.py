@@ -23,7 +23,7 @@ def execute_from_command_line(root_path):
 
     # set test_execution values
     test_execution.root_path = root_path
-    test_execution.settings = get_global_settings()
+    test_execution.settings = get_global_settings(root_path)
 
     import golem.core
     golem.core.temp = test_execution.settings
