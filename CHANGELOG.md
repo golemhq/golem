@@ -4,6 +4,8 @@
 ## [Unreleased]
 
 ### Added
+- 'golem' script to start the framework instead of 'python golem.py'
+- 'golem.py' changed to 'golem_start.py', however it's not needed, just use 'golem run' or 'golem gui' instead.
 - get_current_url action
 
 ## [0.4.2] - 2017-12-15

@@ -35,7 +35,8 @@ def testdir_fixture():
 def project_fixture(testdir_fixture):
     project_name = 'temp_project1'
     os.chdir(testdir_fixture['path'])
-    call(['python', 'golem.py', 'createproject', project_name])
+    # call(['python', 'golem.py', 'createproject', project_name])
+    call(['golem', 'createproject', project_name])
     sys.path.append(os.path.join(testdir_fixture['path'], project_name))
     yield {
             'testdir_fixture': testdir_fixture,
@@ -50,7 +51,8 @@ def random_project_fixture(testdir_fixture):
     random_value = ''.join(random.choice(string.ascii_lowercase) for _ in range(4))
     random_name = 'project_' + random_value
     os.chdir(testdir_fixture['path'])
-    call(['python', 'golem.py', 'createproject', random_name])
+    # call(['python', 'golem.py', 'createproject', random_name])
+    call(['golem', 'createproject', random_name])
     sys.path.append(os.path.join(testdir_fixture['path'], random_name))
     yield {
             'testdir_fixture': testdir_fixture,

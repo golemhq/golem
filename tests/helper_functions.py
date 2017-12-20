@@ -6,7 +6,7 @@ from subprocess import call
 
 def create_project(workspace, name):
     os.chdir(workspace)
-    call(['python', 'golem.py', 'createproject', name])
+    call(['golem', 'createproject', name])
 
 
 def create_random_project(workspace):
