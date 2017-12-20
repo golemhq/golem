@@ -42,7 +42,7 @@ The browser that is selected follows this order of priority:
 Example:
 
 ```
-python golem.py run project test -b chrome firefox
+golem run project test -b chrome firefox
 ```
 
 

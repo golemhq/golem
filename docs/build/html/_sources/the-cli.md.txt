@@ -22,7 +22,7 @@ Threads indicates the amount of test cases to execute in parallel, default is 1.
 Browsers indicates wich browser(s) to use, options are: chrome, firefox, chrome-remote, chrome-headless, chrome-remote-headless, firefox-remote, default is chrome, it accepts one or more browsers, like so:
 
 ```
->python golem.py run project_name test_name -b firefox chrome
+golem run project_name test_name -b firefox chrome
 ```
 
 Note: the test will be run once per each browser defined.
@@ -30,7 +30,7 @@ Note: the test will be run once per each browser defined.
 Environments can be a list of environments defined in the environments.json. If not provided it will try to use the first if possible.
 
 ```
->python golem.py run project_name test_name -e test stage
+golem run project_name test_name -e test stage
 ```
 
 See [Managing Environments](environments.html) for more detail.

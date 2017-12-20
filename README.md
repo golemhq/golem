@@ -12,7 +12,7 @@ Intro
 >Automate end to end tests in minutes, not hours.
 
 
-Golem is a complete test automation tool and framework for end-to-end testing. It creates powerful, robust and maintainable test suites, yet it is easy to pick up and learn even without a lot of programming knowledge. It is based on Selenium Webdriver and it can be extended using Python.
+Golem is a complete test automation tool and framework for end-to-end testing. It creates powerful, robust and maintainable test suites, it's easy to learn even without a lot of programming knowledge. It is based on Selenium Webdriver and it can be extended using Python.
 
 **It can:**
 * Use the Page Object pattern
@@ -116,7 +116,7 @@ For more information check [this page](https://golem-framework.readthedocs.io/en
 
 ```
 cd <test_directory>
-python golem.py gui
+golem gui
 ```
 
 

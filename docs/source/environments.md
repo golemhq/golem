@@ -50,6 +50,6 @@ tests = ['some_test', '...']
 To select which environment to use when running a test from the command line use the -e --environments flag:
 
 ```
-python golem.py run project test --environments test stage
+golem run project test --environments test stage
 ```
 

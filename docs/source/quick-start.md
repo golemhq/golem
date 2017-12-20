@@ -29,7 +29,7 @@ For more detailed information, check [this page](web-drivers.html)
 To start the Golem Web Module, run the following command:
 
 ```
-python golem.py gui
+golem gui
 ```
 
 The Web Module can be accessed at [http://localhost:5000/](http://localhost:5000/)
@@ -43,7 +43,7 @@ Next, create a new **project** inside the test directory
 
 ```
 cd <directory_name>
-python golem.py createproject <project_name>
+golem createproject <project_name>
 ```
 
 Or, create a new project using the Web Module:

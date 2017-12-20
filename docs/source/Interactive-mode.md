@@ -38,7 +38,7 @@ When the interactive console is terminated, the test will resume the execution f
 It is posible to start a quick interactive mode by not providing a project and test to the run command:
 
 ```
->python golem.py run -i
+golem run -i
 ```
 
 This will start an interactive console with a clean slate.

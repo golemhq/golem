@@ -55,12 +55,12 @@
 <p>Run a test case or test suite from a project.</p>
 <p>Threads indicates the amount of test cases to execute in parallel, default is 1.</p>
 <p>Browsers indicates wich browser(s) to use, options are: chrome, firefox, chrome-remote, chrome-headless, chrome-remote-headless, firefox-remote, default is chrome, it accepts one or more browsers, like so:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">golem</span><span class="o">.</span><span class="n">py</span> <span class="n">run</span> <span class="n">project_name</span> <span class="n">test_name</span> <span class="o">-</span><span class="n">b</span> <span class="n">firefox</span> <span class="n">chrome</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">golem</span> <span class="n">run</span> <span class="n">project_name</span> <span class="n">test_name</span> <span class="o">-</span><span class="n">b</span> <span class="n">firefox</span> <span class="n">chrome</span>
 </pre></div>
 </div>
 <p>Note: the test will be run once per each browser defined.</p>
 <p>Environments can be a list of environments defined in the environments.json. If not provided it will try to use the first if possible.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">golem</span><span class="o">.</span><span class="n">py</span> <span class="n">run</span> <span class="n">project_name</span> <span class="n">test_name</span> <span class="o">-</span><span class="n">e</span> <span class="n">test</span> <span class="n">stage</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">golem</span> <span class="n">run</span> <span class="n">project_name</span> <span class="n">test_name</span> <span class="o">-</span><span class="n">e</span> <span class="n">test</span> <span class="n">stage</span>
 </pre></div>
 </div>
 <p>See <a class="reference external" href="environments.html">Managing Environments</a> for more detail.</p>
@@ -149,7 +149,7 @@
       &copy;2017, Luciano Puccio.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

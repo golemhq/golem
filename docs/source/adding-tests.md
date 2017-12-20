@@ -7,7 +7,7 @@ Tests should be placed in the 'tests' folder of a project. You can use more fold
 
 **Add a new test using the console:**
 ```
-python golem.py createtest <project name> <test name>
+golem createtest <project name> <test name>
 ```
 
 **Add a test from the Web Module**:
@@ -85,7 +85,7 @@ And seeing it with the Web Module:
 To run the test just press the 'Run Test' button in the Web Module. The test can also be run using the command line with the following command:
 
 ```
-python golem.py run <project_name> validate_article_title
+golem run <project_name> validate_article_title
 ```
 
 
