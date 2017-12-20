@@ -322,8 +322,7 @@ def create_test_dir(workspace):
     create_new_directory(path_list=[workspace, 'projects'], add_init=True)
     create_new_directory(path_list=[workspace, 'drivers'], add_init=False)
 
-    golem_start_py_content = ("import os\n"
-                              "import sys\n\n"
+    golem_start_py_content = ("import os\n\n"
                               "from golem.main import execute_from_command_line"
                               "\n\n"
                               "if __name__ == '__main__':\n"
