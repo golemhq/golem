@@ -3,6 +3,8 @@
 
 ## [Unreleased]
 
+## [0.4.4] - 2017-12-19
+
 ### Added
 - 'golem' script to start the framework instead of 'python golem.py'
 - 'golem.py' changed to 'golem_start.py', however it's not needed, just use 'golem run' or 'golem gui' instead.
