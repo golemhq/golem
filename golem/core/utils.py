@@ -322,26 +322,14 @@ def create_test_dir(workspace):
     create_new_directory(path_list=[workspace, 'projects'], add_init=True)
     create_new_directory(path_list=[workspace, 'drivers'], add_init=False)
 
-    # copy drivers from golem/bin/drivers to test_dir/drivers
-    pkgdir = sys.modules['golem'].__path__[0]
-    #sourcepath = os.path.join(pkgdir, 'bin', 'drivers')
-    #destination_path = os.path.join(workspace, 'drivers')
-    #shutil.copytree(sourcepath, destination_path)
-
-    golem_py_content = ("import os\n"
-                        "import sys\n"
-                        "\n\n"
-                        "# deactivate .pyc extention file generation\n"
-                        "sys.dont_write_bytecode = True\n"
-                        "\n\n"
-                        "if __name__ == '__main__':\n"
-                        "    del sys.path[0]\n"
-                        "    sys.path.append('')\n\n"
-                        "    from golem.main import execute_from_command_line\n\n"
-                        "    execute_from_command_line(os.getcwd())\n")
-    golem_py_path = os.path.join(workspace, 'golem.py')
-    with open(golem_py_path, 'a') as golem_py_file:
-        golem_py_file.write(golem_py_content)
+    golem_start_py_content = ("import os\n\n"
+                              "from golem.main import execute_from_command_line"
+                              "\n\n"
+                              "if __name__ == '__main__':\n"
+                              "    execute_from_command_line(os.getcwd())\n")
+    golem_start_py_path = os.path.join(workspace, 'golem_start.py')
+    with open(golem_start_py_path, 'a') as golem_start_py_file:
+        golem_start_py_file.write(golem_start_py_content)
 
     settings_path = os.path.join(workspace, 'settings.json')
     with open(settings_path, 'a') as settings_file:

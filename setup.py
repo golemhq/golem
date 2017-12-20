@@ -52,7 +52,10 @@ setup(
                       ],
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': ['golem-admin = golem.bin.golem_admin:main']
+        'console_scripts': [
+            'golem-admin = golem.bin.golem_admin:main',
+            'golem = golem.bin.golem_init:main'
+        ]
     },
     cmdclass={'test': PyTest},
     include_package_data=True,

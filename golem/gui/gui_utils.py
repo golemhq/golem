@@ -9,9 +9,7 @@ from golem.core import utils
 
 def run_test_case(project, test_case_name, environment):
     timestamp = utils.get_timestamp()
-    param_list = ['python', 'golem.py','run',
-                  project,
-                  test_case_name,
+    param_list = ['golem','run', project, test_case_name,
                   '--timestamp', timestamp]
     if environment:
         param_list.append('--environments')
@@ -22,7 +20,8 @@ def run_test_case(project, test_case_name, environment):
 
 def run_suite(project, suite_name):
     timestamp = utils.get_timestamp()
-    subprocess.Popen(['python', 'golem.py', 'run', project, suite_name, '--timestamp', timestamp])
+    subprocess.Popen(['golem', 'run', project, suite_name,
+                      '--timestamp', timestamp])
     return timestamp
 
 

@@ -1,4 +1,5 @@
 """Main point of entrance to the application"""
+import sys
 
 import argparse
 from .core import test_execution
@@ -7,6 +8,10 @@ from . import commands
 
 
 def execute_from_command_line(root_path):
+    # deactivate .pyc extention file generation
+    sys.dont_write_bytecode = True
+    sys.path.insert(0, '')
+
     parser = argparse.ArgumentParser(
         description='run test case, test suite or start the Golem GUI tool',
         usage='golem.py run project test_case|test_suite|directory',
