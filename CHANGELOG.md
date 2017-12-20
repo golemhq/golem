@@ -3,7 +3,7 @@
 
 ## [Unreleased]
 
-## [0.4.4] - 2017-12-19
+## [0.4.5] - 2017-12-19
 
 ### Added
 - 'golem' script to start the framework instead of 'python golem.py'
