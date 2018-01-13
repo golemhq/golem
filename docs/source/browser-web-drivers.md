@@ -59,4 +59,4 @@ iedriver_path": "./drivers/iedriver.exe",
 
 <br>
 
-Next, go to [Interactive Mode](interactive-mode.html)
+Next, go to [Interactive Mode](Interactive-mode.html)
