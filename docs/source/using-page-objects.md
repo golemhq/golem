@@ -26,7 +26,7 @@ def test(data):
     click(('id', 'searchButton'))
     verify_text_in_element(('id', 'firstHeading'), data.article_title)
 
-def teardown():
+def teardown(data):
     close()
 
 ```
@@ -73,7 +73,7 @@ def test(data):
     click(header.search_button)
     verify_text_in_element(article.title, data.article_title)
 
-def teardown():
+def teardown(data):
     close()
 
 ```

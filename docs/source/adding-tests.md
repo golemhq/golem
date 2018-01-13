@@ -65,7 +65,7 @@ def test(data):
     click(('id', 'searchButton'))
     verify_text_in_element(('id', 'firstHeading'), 'Automation')
 
-def teardown():
+def teardown(data):
     close()
 
 ```
