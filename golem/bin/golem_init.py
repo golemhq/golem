@@ -18,6 +18,7 @@ def main():
     # file is present otherwise create it first and use it to
     # kickstart golem.
     # TODO
+    sys.dont_write_bytecode = True
     if os.name == 'nt':
         path = os.path.join(os.getcwd(), 'golem_start.py') 
         if not os.path.isfile(path):

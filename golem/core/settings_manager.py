@@ -60,7 +60,7 @@ REDUCED_SETTINGS_FILE_CONTENT = (
 
 def read_json_with_comments(json_path):
     """Receives a list of lines of a json file with '//' comments
-    Remove the commented lines and return a json loads of the result
+    Removes the commented lines and return a json loads of the result
     """
     file_lines = []
     with open(json_path) as json_file:
@@ -80,7 +80,7 @@ def read_json_with_comments(json_path):
 
 
 def assign_settings_default_values(settings):
-    """ Verify that each setting value is present at least with
+    """Verify that each setting value is present at least with
     the default value""" 
     defaults = [
         ('implicit_wait', None),
@@ -107,7 +107,7 @@ def assign_settings_default_values(settings):
 
 
 def get_global_settings(workspace):
-    '''get global settings from workspace folder'''
+    """Get global settings from workspace folder as a dictionary"""
     settings_path = os.path.join(workspace, 'settings.json')
     settings = {}
     if os.path.exists(settings_path):
@@ -119,6 +119,7 @@ def get_global_settings(workspace):
 
 
 def get_global_settings_as_string(workspace):
+    """Get global settings as a string"""
     settings_path = os.path.join(workspace, 'settings.json')
     settings = ''
     if os.path.exists(settings_path):
@@ -128,8 +129,10 @@ def get_global_settings_as_string(workspace):
 
 
 def get_project_settings(workspace, project):
-    '''get project level settings from selected project folder,
-    this overrides any global settings'''
+    """Get project level settings from project directory,
+    Merge global and project settings.
+    Project settings override global settings
+    """
     global_settings = get_global_settings(workspace)
     project_settings_path = os.path.join(workspace, 'projects',
                                          project, 'settings.json')
@@ -144,6 +147,7 @@ def get_project_settings(workspace, project):
 
 
 def get_project_settings_as_string(workspace, project):
+    """Get project settings as a string"""
     project_settings_path = os.path.join(workspace, 'projects',
                                          project, 'settings.json')
     settings = ''
@@ -153,11 +157,12 @@ def get_project_settings_as_string(workspace, project):
     return settings
 
 
-def save_settings(project, project_settings, global_settings):
+def save_settings(project, global_settings=None, project_settings=None):
+    """Save global and project settings."""
     settings_path = os.path.join('settings.json')
-    with open(settings_path, 'w') as global_settings_file:
-        global_settings_file.write(global_settings)
-
+    if global_settings is not None:
+        with open(settings_path, 'w') as global_settings_file:
+            global_settings_file.write(global_settings)
     if project is not None and project_settings is not None:
         project_path = os.path.join('projects', project, 'settings.json')
         with open(project_path, 'w') as project_settings_file:
@@ -166,5 +171,6 @@ def save_settings(project, project_settings, global_settings):
 
 
 def get_remote_browsers(settings):
+    """Return a list of the remote browsers defined in settings."""
     remote_browsers = list(settings['remote_browsers'].keys())
     return remote_browsers

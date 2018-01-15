@@ -1,5 +1,5 @@
+"""Helper general purpose functions"""
 import csv
-import imp
 import importlib
 import shutil
 import json
@@ -12,146 +12,24 @@ from datetime import datetime
 
 import golem
 from golem.core import settings_manager
-
-
-# def _generate_dict_from_file_structure(full_path):
-#     """Generates a dictionary with the preserved structure of a given
-#     directory (with its files and subdirectories).
-#     Files are stored in tuples, with the first element being the name
-#     of the file without its extention and the second element
-#     the dotted path to the file.
-
-#     For example, given the following directory:
-#     test/
-#          subdir1/
-#                  subdir2/
-#                          file5
-#                  file3
-#                  file4
-
-#          file1
-#          file2
-
-#     The result will be:
-#     test = {
-#         'subdir1': {
-#             'subdir2': {
-#                 'subdir2': {
-#                     ('file5', 'subdir1.subdir2.file5'): None,
-#                 },
-#                 ('file3', 'subdir1.file3'): None,
-#                 ('file4', 'subdir1.file4'): None,
-#         },
-#         ('file1', 'file1'): None,
-#         ('file2', 'file2'): None,
-#     }
-#     """
-#     root_dir = os.path.basename(os.path.normpath(full_path))
-
-#     dir_tree = OrderedDict()
-#     start = full_path.rfind(os.sep) + 1
-
-#     for path, dirs, files in os.walk(full_path):
-#         folders = path[start:].split(os.sep)
-#         # remove __init__.py from list of files
-#         if '__init__.py' in files:
-#             files.remove('__init__.py')
-#         # mac OS creates '.DS_store' files
-#         if '.DS_Store' in files:
-#             files.remove('.DS_Store')
-#         # remove files that are not .py extension and remove extensions
-#         filenames = [x[:-3] for x in files if x.split('.')[1] == 'py']
-#         filename_filepath_duple_list = []
-#         # remove root_dir form folders
-#         folders_without_root_dir = [x for x in folders if x != root_dir]
-#         for f in filenames:
-#             file_with_dotted_path = '.'.join(folders_without_root_dir + [f])
-#             filename_filepath_duple_list.append((f, file_with_dotted_path))
-#         subdir_dict = OrderedDict.fromkeys(filename_filepath_duple_list)
-#         parent = reduce(OrderedDict.get, folders[:-1], dir_tree)
-#         parent.update({folders[-1]: subdir_dict})
-
-#         # this code is added to give support to python 2.7
-#         # support for python 2.7 has been dropped
-#         # which does not have move_to_end method
-#         # if not hasattr(OrderedDict, 'move_to_end'):
-#         #     def move_to_end(self, key, last=True):
-#         #         link_prev, link_next, key = link = self._OrderedDict__map[key]
-#         #         link_prev[1] = link_next
-#         #         link_next[0] = link_prev
-#         #         root = self._OrderedDict__root
-#         #         if last:
-#         #             last = root[0]
-#         #             link[0] = last
-#         #             link[1] = root
-#         #             last[1] = root[0] = link
-#         #     OrderedDict.move_to_end = move_to_end
-#         # end of python 2.7 support code
-
-#         parent.move_to_end(folders[-1], last=False)
-#     dir_tree = dir_tree[root_dir]
-#     return dir_tree
-
-
-def _directory_element(elem_type, name, dot_path=None):
-    element = {
-        'type': elem_type,
-        'name': name,
-        'dot_path': dot_path,
-        'sub_elements': []
-    }
-    return element
-
-
-def _generate_dict_from_file_structure(full_path, original_path=None):
-    root_dir_name = os.path.basename(os.path.normpath(full_path))
-    if not original_path:
-        original_path = full_path
-    _ = os.path.relpath(full_path, original_path).replace(os.sep, '.')
-    element = _directory_element('directory', root_dir_name, _)
-
-    all_sub_elements = os.listdir(full_path)
-    files = []
-    directories = []
-    for elem in all_sub_elements: 
-        if os.path.isdir(os.path.join(full_path, elem)):
-            if elem not in ['__pycache__']:
-                directories.append(elem)
-        else:
-            cond1 = elem not in ['__init__.py', '.DS_Store']
-            cond2 = not elem.endswith('.csv')
-            if cond1 and cond2:
-                files.append(os.path.splitext(elem)[0])
-    for directory in directories:
-        _ = _generate_dict_from_file_structure(os.path.join(full_path, directory),
-                                               original_path)
-        element['sub_elements'].append(_)
-    for filename in files:
-        full_file_path = os.path.join(full_path, filename)
-
-        rel_file_path = os.path.relpath(full_file_path, original_path)
-        dot_file_path = rel_file_path.replace(os.sep, '.')
-        file_element = _directory_element('file', filename, dot_file_path)
-        element['sub_elements'].append(file_element)
-
-    return element
+from golem.core import file_manager
 
 
 def get_test_cases(workspace, project):
     path = os.path.join(workspace, 'projects', project, 'tests')
-    test_cases = _generate_dict_from_file_structure(path)
+    test_cases = file_manager.generate_file_structure_dict(path)
     return test_cases
 
 
 def get_pages(workspace, project):
     path = os.path.join(workspace, 'projects', project, 'pages')
-    pages = _generate_dict_from_file_structure(path)
+    pages = file_manager.generate_file_structure_dict(path)
     return pages
 
 
 def get_suites(workspace, project):
     path = os.path.join(workspace, 'projects', project, 'suites')
-    suites = _generate_dict_from_file_structure(path)
+    suites = file_manager.generate_file_structure_dict(path)
     return suites
 
 
@@ -159,6 +37,7 @@ def get_projects(workspace):
     projects = []
     path = os.path.join(workspace, 'projects')
     projects = next(os.walk(path))[1]
+    projects = [x for x in projects if x != '__pycache__']
     return projects
 
 
@@ -166,35 +45,11 @@ def project_exists(workspace, project):
     return project in get_projects(workspace)
 
 
-def get_files_in_directory_dot_path(base_path):
-    '''
-    generate a list of all the files inside a directory and
-    subdirectories with the relative path as a dotted string.
-    for example, given:
-    C:/base_dir/dir/sub_dir/file.py
-    get_files_in_directory_dotted_path('C:/base_dir/'):
-    >['dir.sub_dir.file']
-    '''
-    all_files = []
-    files_with_dotted_path = []
-    for path, subdirs, files in os.walk(base_path):
-        for name in files:
-            if name not in ['__init__.py', '.DS_Store']:
-                filepath = os.path.join(path, os.path.splitext(name)[0])
-                all_files.append(filepath)
-    for file in all_files:
-        rel_path_as_list = file.replace(base_path, '').split(os.sep)
-        rel_path_as_list = [x for x in rel_path_as_list if x != '']
-        files_with_dotted_path.append('.'.join(rel_path_as_list))
-    return files_with_dotted_path
-
-
 def get_directory_test_cases(workspace, project, suite):
     '''Return a list with all the test cases of a given directory'''
     tests = list()
-
     path = os.path.join(workspace, 'projects', project, 'tests', suite)
-    files = get_files_in_directory_dot_path(path)
+    files = file_manager.get_files_dot_path(path)
     tests = ['.'.join((suite, x)) for x in files]
 
     return tests
@@ -211,22 +66,6 @@ def get_timestamp():
 def get_date_from_timestamp(timestamp):
     date = datetime.strptime(timestamp, '%Y.%m.%d.%H.%M.%S.%f')
     return date
-
-
-def test_case_exists(workspace, project, full_test_case_name):
-    test, parents = separate_file_from_parents(full_test_case_name)
-    path = os.path.join(workspace, 'projects', project, 'tests',
-                        os.sep.join(parents), '{}.py'.format(test))
-    test_exists = os.path.isfile(path)
-    return test_exists
-
-
-def test_suite_exists(workspace, project, full_test_suite_name):
-    suite, parents = separate_file_from_parents(full_test_suite_name)
-    path = os.path.join(workspace, 'projects', project, 'suites',
-                        os.sep.join(parents), '{}.py'.format(suite))
-    suite_exists = os.path.isfile(path)
-    return suite_exists
 
 
 def display_tree_structure_command_line(structure, lvl=0):
@@ -254,49 +93,19 @@ def is_first_level_directory(workspace, project, directory):
     return os.path.isdir(path)
 
 
-def generate_page_object_module(project, parent_module, full_path, page_path_list):
-    if len(page_path_list) > 1:
-        if not hasattr(parent_module, page_path_list[0]):
-            new_module = imp.new_module(page_path_list[0])
-            setattr(parent_module, page_path_list[0], new_module)
-        else:
-            new_module = getattr(parent_module, page_path_list[0])
-        page_path_list.pop(0)
-        new_module = generate_page_object_module(project, new_module, full_path, page_path_list)
-        setattr(parent_module, page_path_list[0], new_module)
-    else:
-        imported_module = importlib.import_module('projects.{}.pages.{}'
-                                                  .format(project, full_path))
-        setattr(parent_module, page_path_list[0], imported_module)
-    return parent_module
-
-
-def create_new_directory(path_list=None, path=None, add_init=False):
-    if path_list:
-        path = os.sep.join(path_list)
-    if not os.path.exists(path):
-        os.makedirs(path)
-    if add_init:
-        # add __init__.py file to make the new directory a python package
-        init_path = os.path.join(path, '__init__.py')
-        open(init_path, 'a').close()
-
-
-def create_new_directories(root_path, directories, add_init=False):
-    path = root_path
-    for directory in directories:
-        path = os.path.join(path, directory)
-        create_new_directory(path=path, add_init=add_init)
-
-
 def create_new_project(workspace, project):
-    create_new_directory(path_list=[workspace, 'projects', project], add_init=True)
+    file_manager.create_directory(path_list=[workspace,'projects',project],
+                                      add_init=True)
     # TODO, remove, don't create data folder for new projects
-    # create_new_directory(path_list=[workspace, 'projects', project, 'data'], add_init=False)
-    create_new_directory(path_list=[workspace, 'projects', project, 'pages'], add_init=True)
-    create_new_directory(path_list=[workspace, 'projects', project, 'reports'], add_init=False)
-    create_new_directory(path_list=[workspace, 'projects', project, 'tests'], add_init=True)
-    create_new_directory(path_list=[workspace, 'projects', project, 'suites'], add_init=True)
+    # create_directory(path_list=[workspace, 'projects', project, 'data'], add_init=False)
+    _ = [workspace, 'projects', project, 'pages']
+    file_manager.create_directory(path_list=_, add_init=True)
+    _ = [workspace, 'projects', project, 'reports']
+    file_manager.create_directory(path_list=_, add_init=False)
+    _ = [workspace, 'projects', project, 'tests']
+    file_manager.create_directory(path_list=_, add_init=True)
+    _ = [workspace, 'projects', project, 'suites']
+    file_manager.create_directory(path_list=_, add_init=True)
     extend_path = os.path.join(workspace, 'projects', project, 'extend.py')
     open(extend_path, 'a').close()
 
@@ -310,17 +119,12 @@ def create_new_project(workspace, project):
     print('Project {} created'.format(project))
 
 
-def create_demo_project(workspace):
-    create_new_directory(path_list=[workspace, 'projects', 'demo'])
-    source = os.path.join(golem.__path__[0], 'templates/demo_project')
-    destination = os.path.join(workspace, 'projects', 'demo')
-    shutil.copytree(source, destination)
-
-
 def create_test_dir(workspace):
-    create_new_directory(path_list=[workspace], add_init=True)
-    create_new_directory(path_list=[workspace, 'projects'], add_init=True)
-    create_new_directory(path_list=[workspace, 'drivers'], add_init=False)
+    file_manager.create_directory(path_list=[workspace], add_init=True)
+    file_manager.create_directory(path_list=[workspace, 'projects'],
+                                  add_init=True)
+    file_manager.create_directory(path_list=[workspace, 'drivers'],
+                                  add_init=False)
 
     golem_start_py_content = ("import os\n\n"
                               "from golem.main import execute_from_command_line"

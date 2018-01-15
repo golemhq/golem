@@ -5,15 +5,14 @@ from golem.core import utils
 
 
 def get_envs(workspace, project):
-    envs = []
-    env_json_path = os.path.join(workspace, 'projects', project, 'environments.json')
-    if os.path.exists(env_json_path):
-        env_data = utils.load_json_from_file(env_json_path)
-        envs = list(env_data.keys())
+    """get the list of envs defined in the environments.json file"""
+    env_data = get_environment_data(workspace, project)
+    envs = list(env_data.keys())
     return envs
 
 
 def get_environment_data(workspace, project):
+    """get the full env data defined in the environments.json file"""
     env_data = {}
     env_json_path = os.path.join(workspace, 'projects', project, 'environments.json')
     if os.path.exists(env_json_path):
@@ -22,6 +21,7 @@ def get_environment_data(workspace, project):
 
 
 def get_environments_as_string(workspace, project):
+    """get the contents of environments.json file as string"""
     env_data = ''
     env_json_path = os.path.join(workspace, 'projects', project, 'environments.json')
     if os.path.isfile(env_json_path):
@@ -31,6 +31,8 @@ def get_environments_as_string(workspace, project):
 
 
 def save_environments(workspace, project, env_data):
+    """save environments.json file contents.
+    Returns a string with the error or empty otherwise"""
     error = ''
     if len(env_data):
         try:

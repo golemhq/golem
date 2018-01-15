@@ -7,11 +7,10 @@ from subprocess import call
 
 import pytest
 
+
 BASE_DIR = None
 
-# this is deprecated, sould be @pytest.fixture
-# but travis uses an old version of pytest for python 3.4
-# @pytest.yield_fixture(scope="session")
+
 @pytest.fixture(scope="session")
 def testdir_fixture():    
     global BASE_DIR
@@ -42,7 +41,7 @@ def project_fixture(testdir_fixture):
             'testdir_fixture': testdir_fixture,
             'name': project_name}
     os.chdir(os.path.join(testdir_fixture['path'], 'projects'))
-    shutil.rmtree(project_name)
+    shutil.rmtree(project_name, ignore_errors=True)
 
 
 @pytest.mark.usefixtures("testdir_fixture")
@@ -58,4 +57,4 @@ def random_project_fixture(testdir_fixture):
             'testdir_fixture': testdir_fixture,
             'name': random_name}
     os.chdir(os.path.join(testdir_fixture['path'], 'projects'))
-    shutil.rmtree(random_name)
+    shutil.rmtree(random_name, ignore_errors=True)

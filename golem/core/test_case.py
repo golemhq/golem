@@ -1,3 +1,6 @@
+"""Methods for dealing with test case modules
+Test Cases are modules located inside the /tests/ directory
+"""
 import os
 import re
 import sys
@@ -11,6 +14,7 @@ from golem.core import test_data as test_data_module
 
 
 def _parse_step(step):
+    """Parse a step string of a test function (setup, test or teardown)."""
     method_name = step.split('(', 1)[0].strip()
     # if not '.' in method_name:
     #     method_name = method_name.replace('_', ' ')
@@ -81,6 +85,9 @@ def _parse_step(step):
 
 
 def _get_parsed_steps(function_code):
+    """Get a list of parsed steps provided the code of a
+    test function (setup, test or teardown)
+    """
     steps = []
     code_lines = inspect.getsourcelines(function_code)[0]
     code_lines = [x.strip().replace('\n', '') for x in code_lines]
@@ -92,6 +99,15 @@ def _get_parsed_steps(function_code):
 
 
 def get_test_case_content(root_path, project, test_case_name):
+    """Parse and return the contents of a Test in
+    the following format:
+      'description' :  string
+      'pages' :        list of pages
+      'steps' :        step dictionary
+        'setup' :      parsed setup steps
+        'test' :       parsed test steps
+        'teardown' :   parsed teardown steps
+    """
     test_contents = {
         'description': '',
         'pages': [],
@@ -136,11 +152,13 @@ def get_test_case_content(root_path, project, test_case_name):
     test_contents['steps']['setup'] = setup_steps
     test_contents['steps']['test'] = test_steps
     test_contents['steps']['teardown'] = teardown_steps
-
     return test_contents
 
 
 def get_test_case_code(path):
+    """Get test case content as a string
+    provided the full path to the python file.
+    """
     code = ''
     with open(path) as ff:
         code = ff.read()
@@ -148,6 +166,7 @@ def get_test_case_code(path):
 
 
 def new_test_case(root_path, project, parents, tc_name):
+    """Create a new empty test case."""
     test_case_content = (
         "\n"
         "description = ''\n\n"
@@ -172,7 +191,7 @@ def new_test_case(root_path, project, parents, tc_name):
         # if not os.path.exists(test_case_path):
         #     for parent in parents:
         #         base_path = os.path.join(base_path, parent)
-        #         utils.create_new_directory(path=base_path, add_init=True)
+        #         utils.create_directory(path=base_path, add_init=True)
         # test_case_full_path = os.path.join(test_case_path, tc_name + '.py')
         with open(fullpath, 'w') as test_file:
             test_file.write(test_case_content)
@@ -180,7 +199,8 @@ def new_test_case(root_path, project, parents, tc_name):
     return errors
 
 
-def format_page_object_string(page_objects):
+def _format_page_object_string(page_objects):
+    """Format page object string to store in test case."""
     po_string = ''
     for page in page_objects:
         po_string = po_string + " '" + page + "',\n" + " " * 8
@@ -188,7 +208,8 @@ def format_page_object_string(page_objects):
     return po_string
 
 
-def format_description(description):
+def _format_description(description):
+    """Format description string to store in test case."""
     formatted_description = ''
     description = description.replace('"', '\\"').replace("'", "\\'")
     if '\n' in description:
@@ -202,7 +223,8 @@ def format_description(description):
     return formatted_description
 
 
-def format_data(test_data):
+def _format_data(test_data):
+    """Format data string to store in test case."""
     result = '[\n'
     for data_set in test_data:
         result += '    {\n'
@@ -215,33 +237,48 @@ def format_data(test_data):
     return result
 
 
+def generate_test_case_path(root_path, project, full_test_case_name):
+    """Generate full path to a python file of a test case.
+    
+    full_test_case_name must be a dot path starting from /tests/ dir.
+    Example:
+      generate_test_case_path('/', 'project1', 'module1.test1')
+      -> '/projects/project1/tests/module1/test1.py'
+    """
+    tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
+    test_case_path = os.path.join(root_path, 'projects', project, 'tests',
+                                  os.sep.join(parents), '{}.py'.format(tc_name))
+    return test_case_path
+
+
 def save_test_case(root_path, project, full_test_case_name, description,
                    page_objects, test_steps, test_data):
-    test_case_path = generate_test_case_path(root_path, project, full_test_case_name)
-    formatted_description = format_description(description)
-    
+    """Save test case contents to file.
+
+    full_test_case_name is a relative dot path to the test
+    """
+    test_case_path = generate_test_case_path(root_path, project,
+                                             full_test_case_name)
+    formatted_description = _format_description(description)
     with open(test_case_path, 'w', encoding='utf-8') as f:
-        
         # write description
         f.write('\n')
         f.write(formatted_description)
         f.write('\n')
         # write the list of pages
-        f.write('pages = {}\n'.format(format_page_object_string(page_objects)))
+        f.write('pages = {}\n'.format(_format_page_object_string(page_objects)))
         f.write('\n')
-
         # write test data if required or save test data to external file
         if test_execution.settings['test_data'] == 'infile':
             if test_data:
                 pretty = pprint.PrettyPrinter(indent=4, width=1)
                 #f.write('data = ' + pretty.pformat(test_data) + '\n\n')
-                f.write('data = {}'.format(format_data(test_data)))
+                f.write('data = {}'.format(_format_data(test_data)))
                 test_data_module.remove_csv_if_exists(root_path, project, full_test_case_name)
         else:
             test_data_module.save_external_test_data_file(root_path, project,
                                                           full_test_case_name,
                                                           test_data)
-
         # write the setup function
         f.write('def setup(data):\n')
         if test_steps['setup']:
@@ -252,7 +289,6 @@ def save_test_case(root_path, project, full_test_case_name, description,
         else:
             f.write('    pass\n')
         f.write('\n')
-        
         # write the test function
         f.write('def test(data):\n')
         if test_steps['test']:
@@ -263,7 +299,6 @@ def save_test_case(root_path, project, full_test_case_name, description,
         else:
             f.write('    pass\n')
         f.write('\n\n')
-        
         # write the teardown function
         f.write('def teardown(data):\n')
         if test_steps['teardown']:
@@ -275,11 +310,14 @@ def save_test_case(root_path, project, full_test_case_name, description,
             f.write('    pass\n')
 
 
-def save_test_case_code(root_path, project, full_test_case_name, content, table_test_data):
+def save_test_case_code(root_path, project, full_test_case_name,
+                        content, table_test_data):
+    """Save test case contents string to file.
+    full_test_case_name is a relative dot path to the test.
+    """
     test_case_path = generate_test_case_path(root_path, project, full_test_case_name)
     with open(test_case_path, 'w', encoding='utf-8') as test_file:
         test_file.write(content)
-
     # save test data
     if table_test_data:
         #save csv data
@@ -291,8 +329,12 @@ def save_test_case_code(root_path, project, full_test_case_name, content, table_
         test_data_module.remove_csv_if_exists(root_path, project, full_test_case_name)
 
 
-def generate_test_case_path(root_path, project, full_test_case_name):
-    tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    test_case_path = os.path.join(root_path, 'projects', project, 'tests',
-                                  os.sep.join(parents), '{}.py'.format(tc_name))
-    return test_case_path
+def test_case_exists(workspace, project, full_test_case_name):
+    """Test case exists.
+
+    full_test_case_name is a relative dot path to the test.
+    """
+    test, parents = utils.separate_file_from_parents(full_test_case_name)
+    path = os.path.join(workspace, 'projects', project, 'tests',
+                        os.sep.join(parents), '{}.py'.format(test))
+    return os.path.isfile(path)

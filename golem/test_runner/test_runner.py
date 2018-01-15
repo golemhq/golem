@@ -1,7 +1,4 @@
-"""
-This module contains the method for running one test (one execution)
-i.e.: one test with a single test set
-"""
+"""This module contains the method for running a single test."""
 import sys
 import os
 import importlib
@@ -9,11 +6,12 @@ import time
 import traceback
 
 from golem.core import report, utils
+from golem.test_runner.test_runner_utils import import_page_into_test_module
 
 
 def run_test(workspace, project, test_name, test_data, browser,
              settings, report_directory):
-    ''' runs a single test case by name'''
+    """Runs a single test"""
     result = {
         'result': 'pass',
         'error': '',
@@ -86,7 +84,7 @@ def run_test(workspace, project, test_name, test_data, browser,
 
     # add the 'project' directory to python path
     # so it's possible to make relative imports from the test
-    # example, some_test.py
+    # example: some_test.py
     # from pages import some_page
     sys.path.append(os.path.join(workspace, 'projects', project))
 
@@ -98,31 +96,27 @@ def run_test(workspace, project, test_name, test_data, browser,
         test_module = importlib.import_module(
             'projects.{0}.tests.{1}'.format(project, test_name))
 
-        # import the page objects into the test module
+        # import each page into the test_module
         if hasattr(test_module, 'pages'):
             for page in test_module.pages:
-                test_module = utils.generate_page_object_module(project, test_module,
-                                                                page, page.split('.'))
-
+                test_module = import_page_into_test_module(project, test_module,
+                                                           page)
         # import logger into the test module
         setattr(test_module, 'logger', execution.logger)
-
         # import actions into the test module
         for action in dir(actions):
             setattr(test_module, action, getattr(actions, action))
-
         # log description
         if hasattr(test_module, 'description'):
             execution.description = test_module.description
         else:
             logger.info('Test does not have description')
-
         # run setup method
         if hasattr(test_module, 'setup'):
             test_module.setup(execution.data)
         else:
             logger.info('Test does not have setup function')
-
+        # run test method
         if hasattr(test_module, 'test'):
             test_module.test(execution.data)
         else:

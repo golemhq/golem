@@ -1,4 +1,4 @@
-"""Function wrappers for the actions"""
+"""Golem actions"""
 import time
 import uuid
 import os

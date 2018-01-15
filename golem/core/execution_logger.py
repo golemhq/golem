@@ -8,6 +8,8 @@ INFO_LOG_FILENAME = 'execution_info.log'
 
 
 def _get_log_level(log_level_string):
+    """return the logging log leve.
+    Validates log_level_string is a valid value"""
     log_level = ''
     if log_level_string == 'DEBUG':
         log_level = logging.DEBUG
@@ -24,7 +26,18 @@ def _get_log_level(log_level_string):
     return log_level
 
 
-def get_logger(log_directory=None, console_log_level=None, log_all_events=False):
+def get_logger(log_directory=None, console_log_level='INFO',
+               log_all_events=False):
+    """instantiate the logger for the execution.
+    log_directory:     where the file logs will be stored
+    console_log_level: the log leve used for the console output
+    log_all_events:    log all the events or only golem's events
+
+    3 log levels are defined:
+      1. console output (by default INFO)
+      2. file output (DEBUG)
+      3. file output (INFO)
+    """
     logger = None
     if log_all_events:
         logger = logging.getLogger()
@@ -38,7 +51,7 @@ def get_logger(log_directory=None, console_log_level=None, log_all_events=False)
     stream_formatter = logging.Formatter(stream_format_string, "%H:%M:%S")
     stream_handler.setFormatter(stream_formatter)
     logger.addHandler(stream_handler)
-    # add file handler
+    # add file handlers
     if log_directory:
         # debug file log
         log_file = os.path.join(log_directory, DEBUG_LOG_FILENAME)

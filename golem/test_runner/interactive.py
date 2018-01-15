@@ -1,3 +1,4 @@
+"""Golem interactive mode."""
 import golem.core
 from golem.core import utils
 from golem import actions
@@ -8,7 +9,7 @@ from golem import browser
 
 
 def interactive(settings, cli_drivers):
-
+	"""Starts the Golem interactive shell."""
     drivers = utils.choose_driver_by_precedence(cli_drivers=cli_drivers,
                                                 suite_drivers=[],
                                                 settings_default_driver=settings['default_browser'])

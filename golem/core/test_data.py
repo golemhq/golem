@@ -1,3 +1,11 @@
+"""Methods for dealing with test data files
+
+Data files have csv extensions and are stored in the same
+directory as the test.
+
+DEPRECATED: Previously data files were stored in /data/ folder
+and this module still has support of this for backwards compatibility
+"""
 import csv
 import os
 import sys
@@ -6,7 +14,18 @@ import importlib
 from golem.core import utils
 
 
-def save_external_test_data_file(root_path, project, full_test_case_name, test_data):
+def save_external_test_data_file(root_path, project,
+                                 full_test_case_name, test_data):
+    """Save data to external file (csv).
+
+    full_test_case_name must be a relative dot path
+    test_data must be a dictionary of values
+
+    Temporarily this will save to /data/<test_name>.csv if this already
+    exists. Otherwise, the file will be store in the same folder
+    as the test
+    # TODO 
+    """
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
 
     data_file_path_data_folder = os.path.join(root_path, 'projects', project,
@@ -52,6 +71,7 @@ def save_external_test_data_file(root_path, project, full_test_case_name, test_d
 
 
 def get_external_test_data(workspace, project, full_test_case_name):
+    """Get data from file (csv)."""
     data_list = []
 
     test, parents = utils.separate_file_from_parents(full_test_case_name)
@@ -93,6 +113,7 @@ def get_external_test_data(workspace, project, full_test_case_name):
 
 
 def get_internal_test_data(workspace, project, full_test_case_name):
+    """Get test data defined inside the test itself."""
     # check if test has data variable defined
     data_list = []
     # sys.path.append(workspace)
@@ -134,11 +155,14 @@ def get_internal_test_data(workspace, project, full_test_case_name):
 
 
 def get_test_data(workspace, project, full_test_case_name):
-    """get test data. The order of priority is:
+    """Get test data.
+
+    The order of priority is:
     1. data defined in a csv file in /data/ folder,
     same directory structure as the test. Soon to be deprecated. # TODO
     2. data defined in a csv file in /tests/ folder, same folder as the test
     3. data defined in the test itself
+
     Try to convert each value to a Python var type. Fall back to string.
     Returns a list of dictionaries"""
     data_list = []
@@ -158,7 +182,7 @@ def get_test_data(workspace, project, full_test_case_name):
 
 
 def remove_csv_if_exists(root_path, project, full_test_case_name):
-    """remove csv data file from /data/ folder and from /tests/ folder"""
+    """Remove csv data file from /data/ folder and from /tests/ folder"""
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
     data_file_path_data_folder = os.path.join(root_path, 'projects', project,
                                               'data', os.sep.join(parents),

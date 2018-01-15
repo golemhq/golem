@@ -1,10 +1,14 @@
+"""Methods for dealing with suite modules
+Suites are modules located inside the /suites/ directory
+"""
 import os
 import importlib
 
-from golem.core import utils
+from golem.core import utils, file_manager
 
 
 def _format_list_items(list_items):
+    """Generate an indented string out of a list of items."""
     list_string = ''
     if list_items:
         for item in list_items:
@@ -15,7 +19,9 @@ def _format_list_items(list_items):
     return list_string
 
 
-def save_suite(root_path, project, suite, test_cases, workers, browsers, environments):
+def save_suite(root_path, project, suite, test_cases, workers,
+               browsers, environments):
+    """Save suite content to file."""
     suite_name, parents = utils.separate_file_from_parents(suite)
 
     suite_path = os.path.join(root_path, 'projects', project, 'suites',
@@ -32,6 +38,7 @@ def save_suite(root_path, project, suite, test_cases, workers, browsers, environ
 
 
 def new_suite(root_path, project, parents, suite_name):
+    """Create a new empty suite."""
     errors = []
     path = os.path.join(root_path, 'projects', project, 'suites',
                         os.sep.join(parents), '{}.py'.format(suite_name))
@@ -50,16 +57,18 @@ def new_suite(root_path, project, parents, suite_name):
 
 
 def get_suite_amount_of_workers(workspace, project, suite):
+    """Get the amount of workers defined in a suite.
+    Default is 1 if suite does not have workers defined"""
     amount = 1
     suite_module = importlib.import_module('projects.{0}.suites.{1}'.format(project, suite),
                                            package=None)
     if hasattr(suite_module, 'workers'):
         amount = suite_module.workers
-
     return amount
 
 
 def get_suite_environments(workspace, project, suite):
+    """Get the environments defined in a suite."""
     environments = []
     module_name = 'projects.{0}.suites.{1}'.format(project, suite)
     suite_module = importlib.import_module(module_name, package=None)
@@ -70,20 +79,20 @@ def get_suite_environments(workspace, project, suite):
 
 
 def get_suite_test_cases(workspace, project, suite):
-    '''Return a list with all the test cases of a given suite'''
+    """Return a list with all the test cases of a given suite"""
     tests = []
     module_name = 'projects.{0}.suites.{1}'.format(project, suite)
     suite_module = importlib.import_module(module_name, package=None)
     if '*' in suite_module.tests:
         path = os.path.join(workspace, 'projects', project, 'tests')
-        tests = utils.get_files_in_directory_dot_path(path)
+        tests = file_manager.get_files_dot_path(path)
     else:
         for test in suite_module.tests:
             if test[-1] == '*':
                 this_dir = os.path.join(test[:-2])
                 path = os.path.join(workspace, 'projects', project,
                                     'tests', this_dir)
-                this_dir_tests = utils.get_files_in_directory_dot_path(path)
+                this_dir_tests = file_manager.get_files_dot_path(path)
                 this_dir_tests = ['{}.{}'.format(this_dir, x) for x in this_dir_tests]
                 tests = tests + this_dir_tests
             else:
@@ -92,6 +101,7 @@ def get_suite_test_cases(workspace, project, suite):
 
 
 def get_suite_browsers(workspace, project, suite):
+    """Get the list of browsers defined in a suite"""
     browsers = []
     module_name = 'projects.{0}.suites.{1}'.format(project, suite)
     suite_module = importlib.import_module(module_name, package=None)
@@ -102,6 +112,17 @@ def get_suite_browsers(workspace, project, suite):
 
 
 def get_suite_module(workspace, project, suite):
+    """Get the module of a suite using importlib.import_module."""
     module_name = 'projects.{0}.suites.{1}'.format(project, suite)
     suite_module = importlib.import_module(module_name, package=None)
     return suite_module
+
+
+def suite_exists(workspace, project, full_suite_name):
+    """suite exists.
+    full_suite_name must be a relative dot path
+    """
+    suite, parents = utils.separate_file_from_parents(full_suite_name)
+    path = os.path.join(workspace, 'projects', project, 'suites',
+                        os.sep.join(parents), '{}.py'.format(suite))
+    return os.path.isfile(path)

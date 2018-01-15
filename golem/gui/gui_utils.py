@@ -1,3 +1,4 @@
+"""Helper functions to deal with Golem GUI module application."""
 import datetime
 import os
 import subprocess
@@ -8,6 +9,7 @@ from golem.core import utils
 
 
 def run_test_case(project, test_case_name, environment):
+    """Run a test case. This is used when running tests from the GUI"""
     timestamp = utils.get_timestamp()
     param_list = ['golem','run', project, test_case_name,
                   '--timestamp', timestamp]
@@ -19,40 +21,23 @@ def run_test_case(project, test_case_name, environment):
 
 
 def run_suite(project, suite_name):
+    """Run a suite. This is used when running suites from the GUI"""
     timestamp = utils.get_timestamp()
     subprocess.Popen(['golem', 'run', project, suite_name,
                       '--timestamp', timestamp])
     return timestamp
 
 
-def directory_already_exists(root_path, project, root_dir, parents, dir_name):
-    parents_joined = os.sep.join(parents)
-    directory_path = os.path.join(root_path, 'projects', project, root_dir,
-                                  parents_joined, dir_name)
-    return bool(os.path.exists(directory_path))
-
-
-def time_to_string():
-    time_format = '%Y-%m-%d-%H-%M-%S-%f'
-    return datetime.datetime.now().strftime(time_format)
-
-
-def string_to_time(time_string):
-    return datetime.datetime.strptime(time_string, '%Y-%m-%d-%H-%M-%S-%f')
-
-
 class Golem_action_parser:
     """Generates a list of golem actions by reading the functions docstrings
 
-    This class is a singleton.
-
-    The list of action definitions is cached so only the first time
-    they are required will be retrieved by parsing the golem.actions module
+    This class is a singleton. The list of action definitions
+    is cached so only the first time they are required will be
+    retrieved by parsing the golem.actions module
 
     This class expects the docstrings of the actions to have this format:
-
     def some_action(param1, param2, param3):
-        '''This is the description of the action
+        '''This is the description of the action function
         
         parameters:
         param1  element
@@ -61,7 +46,6 @@ class Golem_action_parser:
         '''
 
     This would generate the following list:
-
     actions = [
         {
             'name': 'some_action',
@@ -72,9 +56,10 @@ class Golem_action_parser:
         }
     ]
 
-    Note: the `type` distinction (element or value) is used by the GUI test builder
-    because it needs to know if it should use element autocomplete (page
-    object elements) or data autocomplete (columns of the datatable)
+    Note: the `type` distinction (element or value) is used by the GUI
+    test builder because it needs to know if it should use element
+    autocomplete (page object elements) or data autocomplete
+    (columns of the datatable)
     """
     __instance = None
     actions = None
@@ -135,187 +120,9 @@ class Golem_action_parser:
 
         return self.actions
 
-# TODO deprecated
-# def get_global_actions():
-
-#     global_actions = [
-#         {
-#             'name': 'assert contains',
-#             'parameters': [{'name': 'element', 'type': 'value'},
-#                            {'name': 'value', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'assert equals',
-#             'parameters': [{'name': 'actual value', 'type': 'value'},
-#                            {'name': 'expected value', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'assert false',
-#             'parameters': [{'name': 'condition', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'assert true',
-#             'parameters': [{'name': 'condition', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'capture',
-#             'parameters': [{'name': 'message (optional)', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'clear',
-#             'parameters': [{'name': 'element', 'type': 'element'}]
-#         },
-#         {
-#             'name': 'click',
-#             'parameters': [{'name': 'element', 'type': 'element'}]
-#         },
-#         {
-#             'name': 'close',
-#             'parameters': []
-#         },
-#         {
-#             'name': 'debug',
-#             'parameters': []
-#         },
-#         {
-#             'name': 'get',
-#             'parameters': [{'name': 'url', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'http_get',
-#             'parameters': [{'name': 'url', 'type': 'value'},
-#                            {'name': 'headers', 'type': 'multiline-value'},
-#                            {'name': 'params', 'type': 'value'},
-#                            {'name': 'verify SSL certificate', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'http_post',
-#             'parameters': [{'name': 'url', 'type': 'value'},
-#                            {'name': 'headers', 'type': 'value'},
-#                            {'name': 'data', 'type': 'value'},
-#                            {'name': 'verify SSL certificate', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'navigate',
-#             'parameters': [{'name': 'url', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'press key',
-#             'parameters': [{'name': 'element', 'type': 'element'},
-#                            {'name': 'key', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'random',
-#             'parameters': [{'name': 'args', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'refresh page',
-#             'parameters': []
-#         },
-#         {
-#             'name': 'select by index',
-#             'parameters': [{'name': 'from element', 'type': 'element'},
-#                            {'name': 'index', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'select by text',
-#             'parameters': [{'name': 'from element', 'type': 'element'},
-#                            {'name': 'text', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'select by value',
-#             'parameters': [{'name': 'from element', 'type': 'element'},
-#                            {'name': 'value', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'send keys',
-#             'parameters': [{'name': 'element', 'type': 'element'},
-#                            {'name': 'value', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'set window size',
-#             'parameters': [{'name': 'width', 'type': 'value'},
-#                            {'name': 'height', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'step',
-#             'parameters': [{'name': 'message', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'store',
-#             'parameters': [{'name': 'key', 'type': 'value'},
-#                            {'name': 'value', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'verify exists',
-#             'parameters': [{'name': 'element', 'type': 'element'}]
-#         },
-#         {
-#             'name': 'verify is enabled',
-#             'parameters': [{'name': 'element', 'type': 'element'}]
-#         },
-#         {
-#             'name': 'verify is not enabled',
-#             'parameters': [{'name': 'element', 'type': 'element'}]
-#         },
-#         {
-#             'name': 'verify is not selected',
-#             'parameters': [{'name': 'element', 'type': 'element'}]
-#         },
-#         {
-#             'name': 'verify is not visible',
-#             'parameters': [{'name': 'element', 'type': 'element'}]
-#         },
-#         {
-#             'name': 'verify is selected',
-#             'parameters': [{'name': 'element', 'type': 'element'}]
-#         },
-#         {
-#             'name': 'verify is visible',
-#             'parameters': [{'name': 'element', 'type': 'element'}]
-#         },
-#         {
-#             'name': 'verify not exists',
-#             'parameters': [{'name': 'element', 'type': 'element'}]
-#         },
-#         {
-#             'name': 'verify selected option',
-#             'parameters': [{'name': 'select', 'type': 'element'},
-#                            {'name': 'text option', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'verify text',
-#             'parameters': [{'name': 'text', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'verify text in element',
-#             'parameters': [{'name': 'element', 'type': 'element'},
-#                            {'name': 'text', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'wait',
-#             'parameters': [{'name': 'seconds', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'wait for element visible',
-#             'parameters': [{'name': 'element', 'type': 'element'},
-#                            {'name': 'timeout (optional)', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'wait for element not visible',
-#             'parameters': [{'name': 'element', 'type': 'element'},
-#                            {'name': 'timeout (optional)', 'type': 'value'}]
-#         },
-#         {
-#             'name': 'wait for element enabled',
-#             'parameters': [{'name': 'element', 'type': 'element'},
-#                            {'name': 'timeout (optional)', 'type': 'value'}]
-#         }
-#     ]
-#     return global_actions
-
 
 def get_supported_browsers_suggestions():
+    """Return a list of supported browsers by default."""
     supported_browsers = [
         'chrome',
         'chrome-remote',

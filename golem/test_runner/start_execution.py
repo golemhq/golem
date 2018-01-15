@@ -1,5 +1,4 @@
-"""
-"""
+"""Module that starts the execution of a suite or test."""
 import sys
 import traceback
 import time
@@ -11,11 +10,20 @@ from golem.core import (test_execution,
                         environment_manager,
                         settings_manager)
 from golem.core import suite as suite_module
-from golem.test_runner.multiprocess_executor import multiprocess_executor, run_test
+from golem.test_runner.multiprocess_executor import multiprocess_executor
+from golem.test_runner.test_runner import run_test
 from golem.gui import gui_utils, report_parser
 
 
 def _define_drivers(drivers, remote_browsers, default_browsers):
+    """Generate the definitions for the drivers.
+
+    A defined driver contains the following attributes:
+      'name':         real name
+      'full_name':    remote browser name defined by user in settings
+      'remote':       boolean
+      'capabilities': capabilities defined by remote_browsers setting
+    """
     drivers_def = []
     for driver in drivers:
         if driver in remote_browsers:
@@ -40,12 +48,21 @@ def _define_drivers(drivers, remote_browsers, default_browsers):
                    'available options are:\n',
                    '\n'.join(default_browsers),
                    '\n'.join(remote_browsers)]
-            # sys.exit(''.join(msg))
             raise Exception(''.join(msg))
     return drivers_def
 
 
 def _select_environments(cli_envs, suite_envs, project_envs):
+    """Define the environments to use for the test.
+
+    The test can have a list of environments set from 2 places:
+      - using the -e|--environments CLI argument
+      - suite `environments` variable
+
+    If both of these are empty try using the first env if there
+    are any envs defined. Otherwise just return ['']
+    meaning, no envs will be used.
+    """
     envs = []
     if cli_envs:
         # use the environments passed through command line if available
@@ -63,6 +80,20 @@ def _select_environments(cli_envs, suite_envs, project_envs):
 
 
 def _define_execution_list(workspace, project, execution):
+    """Generate the execution list
+    
+    execution is a dictionary containing:
+      'environments':   list of envs
+      'tests':          list of tests
+        'test_sets':    each test contains a list of test sets (data sets)
+      'drivers':        list of drivers
+    
+    This function generates the combinations of each of the above.
+    Each test should be executed once per each:
+      - data set
+      - environment
+      - driver
+    """
     execution_list = []
     envs_data = environment_manager.get_environment_data(workspace, project)
     for test in execution['tests']:
@@ -89,6 +120,7 @@ def _define_execution_list(workspace, project, execution):
 
 def _create_execution_directory(workspace, project, timestamp, test_name,
                                 suite_name, is_suite):
+    """Generate the execution directory."""
     execution_directory = ''
     if is_suite:
         execution_directory = report.create_suite_execution_directory(
@@ -106,7 +138,7 @@ def _execute_tests():
 
 
 def run_test_or_suite(workspace, project, test=None, suite=None, directory=None):
-
+    """Run a suite or test or directory containing tests."""
     execution = {
         'tests': [],
         'workers': 1,
@@ -159,7 +191,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
     # 1. drivers defined by CLI
     # 2. drivers defined inside a suite
     # 3. 'default_driver' setting
-    # 4. default is 'chrome'
+    # 4. default default is 'chrome'
     settings_default_driver = test_execution.settings['default_browser']
     selected_drivers = utils.choose_driver_by_precedence(
                                 cli_drivers=test_execution.cli_drivers,
@@ -168,7 +200,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
 
     # Define the attributes for each driver
     #
-    # A driver can be predefined ('chrome, 'chrome-headless', 'chrome-remote' etc)
+    # A driver can be predefined ('chrome, 'chrome-headless', 'firefox', etc)
     # or it can be defined by the user with the 'remote_browsers' setting.
     # Remote browsers have extra details such as capabilities
     # 
@@ -196,9 +228,10 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
     # 1. envs passed by CLI
     # 2. envs defined inside the suite
     # 3. The first env defined
-    # 4. no envs
+    # 4. no envs at all
     #
-    # Note, in the case of 4, the test might fail if it uses env variables
+    # Note, in the case of 4, the test might fail if it tries
+    # to use env variables
     cli_envs = test_execution.cli_environments
     project_envs = environment_manager.get_envs(workspace, project)
     execution['environments'] = _select_environments(cli_envs, suite_envs, project_envs)
@@ -216,15 +249,10 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
     # create the execution directory
     #
     # if this is a suite, the directory takes this structure
-    # reports/
-    #         [suite_name]/
-    #                    [timestamp]/
+    #   reports/<suite_name>/<timestamp>/
     # 
     # if this is a single test, the directory takes this structure:
-    # reports/
-    #         single_tests/
-    #                    [test_name]/
-    #                                [timestamp]/
+    #   reports/single_tests/<test_name>/<timestamp>/
     execution_directory = _create_execution_directory(workspace, project, 
                                                       test_execution.timestamp,
                                                       test_name=test,
@@ -232,11 +260,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
                                                       is_suite=is_suite)
     # for each test, create the test directory
     # for example, in a suite 'suite1' with a 'test1':
-    # reports/
-    #         suite1/
-    #                2017.01.01.../
-    #                              test1/
-    #                                    set_00001/
+    # reports/suite1/2017.07.02.19.22.20.001/test1/set_00001/
     for test in execution_list:
         report_directory = report.create_report_directory(execution_directory,
                                                           test['test_name'],
@@ -269,9 +293,8 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
                          test['driver'], test_execution.settings,
                          test['report_directory'])
         else:
-            # run list of tests using multiprocessing
-            multiprocess_executor(execution_list, is_suite, execution_directory,
-                                  execution['workers'])
+            # run tests using multiprocessing
+            multiprocess_executor(execution_list, execution['workers'])
 
     # run suite `after` function
     if execution['suite_after']:

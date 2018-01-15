@@ -44,7 +44,7 @@
             <div class="clearfix"></div>        
             <div id="datosContainer">
                 <div id="elements">
-                    {% for element in page_object_data.element_list %}
+                    {% for element in page_object_data.elements %}
                     <div class="element col-md-12 clearfix">
                         <div style="width: calc(100% - 34px)">
                             <div class="col-xs-3 no-pad-left padding-right-5">
@@ -75,7 +75,7 @@
                         </div>
                     </div>
                     {% endfor %}
-                    {% if not page_object_data.element_list %}
+                    {% if not page_object_data.elements %}
                     <div class="element col-md-12 clearfix">
                         <div style="width: calc(100% - 34px)">
                             <div class="col-xs-3 no-pad-left padding-right-5">
@@ -120,7 +120,7 @@
             <div id="functionContainer">
 
                 <div id="functions">
-                    {% for function in page_object_data.function_list %}
+                    {% for function in page_object_data.functions %}
 
                     <div class="function col-md-12">
                         <div class="input-group" data-toggle="collapse" data-target="#{{function.function_name}}" aria-expanded="false" aria-controls="{{function.function_name}}">

@@ -5,6 +5,9 @@ import uuid
 
 
 def create_suite_execution_directory(workspace, project, suite_name, timestamp):
+    """Create direcoty to store report for suite.
+    <workspace>/projects/<project>/reports/<suite_name>/<timestamp>/
+    """
     execution_directory = os.path.join(workspace, 'projects', project, 'reports',
                                        suite_name, timestamp)
     if not os.path.isdir(execution_directory):
@@ -16,6 +19,9 @@ def create_suite_execution_directory(workspace, project, suite_name, timestamp):
 
 
 def create_test_execution_directory(workspace, project, test_name, timestamp):
+    """Create direcoty to store report for suite.
+    <workspace>/projects/<project>/reports/single_tests/<test_name>/<timestamp>/
+    """
     execution_directory = os.path.join(workspace, 'projects', project, 'reports',
                                        'single_tests', test_name, timestamp)
     if not os.path.isdir(execution_directory):
@@ -27,14 +33,24 @@ def create_test_execution_directory(workspace, project, test_name, timestamp):
 
 
 def create_report_directory(execution_directory, test_case_name, is_suite):
+    """Create direcoty to store a single test report.
+    
+    execution_directory takes the following format for suites:
+      <workspace>/projects/<project>/reports/<suite_name>/<timestamp>/
+    and this format for single tests
+      <workspace>/projects/<project>/reports/<suite_name>/<timestamp>/
+    
+    The result for suites is:
+      <execution_directory>/<test_name>/<set_name>/
+    and for single tests is:
+      <execution_directory>/<set_name>/
+    """
     set_name = 'set_' + str(uuid.uuid4())[:6]
-
     # create suite execution folder in reports directory
     if is_suite:
         report_directory = os.path.join(execution_directory, test_case_name, set_name)
     else:
         report_directory = os.path.join(execution_directory, set_name)
-
     if not os.path.isdir(report_directory):
         try:
             os.makedirs(report_directory)
@@ -44,6 +60,7 @@ def create_report_directory(execution_directory, test_case_name, is_suite):
 
 
 def generate_report(report_directory, test_case_name, test_data, result):
+    """Generate the json report for a single test execution."""
     json_report_path = os.path.join(report_directory, 'report.json')
 
     short_error = ''

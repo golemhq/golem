@@ -29,7 +29,7 @@ class Test__get_page_object_content:
         content = page_object.get_page_object_content(project, page_name)
 
         expected = {
-            'function_list': [
+            'functions': [
                 {
                     'function_name': 'func1',
                     'full_function_name': 'page_test_get_content.func1',
@@ -37,7 +37,7 @@ class Test__get_page_object_content:
                     'arguments': ['c', 'b', 'a'],
                     'code': 'def func1(c, b, a):\n    pass\n'
                 }],
-            'element_list': [
+            'elements': [
                 {
                     'element_name': 'elem1',
                     'element_selector': 'id',
@@ -46,9 +46,11 @@ class Test__get_page_object_content:
                     'element_full_name': 'page_test_get_content.elem1'
                 }],
             'import_lines': [],
-            'code_line_list': ["elem1 = ('id', 'someId', 'Elem1')", 'def func1(c, b, a):', '    pass', ''],
-            'source_code': "elem1 = ('id', 'someId', 'Elem1')\ndef func1(c, b, a):\n    pass\n"
+            'code_lines': ["elem1 = ('id', 'someId', 'Elem1')",
+                           'def func1(c, b, a):',
+                           '    pass',
+                           ''],
+            'source_code': ("elem1 = ('id', 'someId', 'Elem1')\ndef func1(c, b, a):\n"
+                            "    pass\n")
         }
-
         assert content == expected
-

@@ -1,3 +1,4 @@
+"""The Golem GUI application using Flask."""
 import json
 import os
 
@@ -18,7 +19,7 @@ from flask_login import (LoginManager,
 
 from golem.core import (utils,
                         settings_manager,
-                        io_manager,
+                        file_manager,
                         environment_manager,
                         test_case,
                         page_object,
@@ -483,8 +484,8 @@ def rename_element():
                                     os.sep.join(old_parents))
             new_path = os.path.join(root_path, 'projects', project, dir_type_name,
                                     os.sep.join(new_parents))
-            error = io_manager.rename_file(old_path, old_filename+'.py',
-                                           new_path, new_filename+'.py')
+            error = file_manager.rename_file(old_path, old_filename+'.py',
+                                             new_path, new_filename+'.py')
         if not error and elem_type == 'test':
             # try to rename data file in /data/ folder
             # TODO, data files in /data/ will be deprecated
@@ -493,16 +494,16 @@ def rename_element():
             new_path = os.path.join(root_path, 'projects', project, 'data',
                                     os.sep.join(new_parents))
             if os.path.isfile(os.path.join(old_path, old_filename+'.csv')):
-                error = io_manager.rename_file(old_path, old_filename+'.csv',
-                                               new_path, new_filename+'.csv')
+                error = file_manager.rename_file(old_path, old_filename+'.csv',
+                                                 new_path, new_filename+'.csv')
             # try to rename data file in /tests/ folder
             old_path = os.path.join(root_path, 'projects', project, 'tests',
                                     os.sep.join(old_parents))
             new_path = os.path.join(root_path, 'projects', project, 'tests',
                                     os.sep.join(new_parents))
             if os.path.isfile(os.path.join(old_path, old_filename+'.csv')):
-                error = io_manager.rename_file(old_path, old_filename+'.csv',
-                                               new_path, new_filename+'.csv')
+                error = file_manager.rename_file(old_path, old_filename+'.csv',
+                                                 new_path, new_filename+'.csv')
     return json.dumps(error)
 
 
@@ -511,7 +512,7 @@ def get_page_objects():
     if request.method == 'POST':
         project = request.form['project']
         path = os.path.join(root_path, 'projects', project, 'pages')
-        page_objects = utils.get_files_in_directory_dot_path(path)
+        page_objects = file_manager.get_files_dot_path(path)
         return json.dumps(page_objects)
 
 
@@ -559,8 +560,9 @@ def new_tree_element():
         if not errors:
             if elem_type == 'test':
                 if is_dir:
-                    errors = io_manager.new_directory(root_path, project, parents,
-                                                     element_name, dir_type='tests')
+                    errors = file_manager.new_directory_of_type(root_path, project,
+                                                                parents, element_name,
+                                                                dir_type='tests')
                 else:
                     errors = test_case.new_test_case(root_path, project,
                                                      parents, element_name)
@@ -568,16 +570,18 @@ def new_tree_element():
                     #                      full_path, g.user.username)
             elif elem_type == 'page':
                 if is_dir:
-                    errors = io_manager.new_directory(root_path, project, parents,
-                                                     element_name, dir_type='pages')
+                    errors = file_manager.new_directory_of_type(root_path, project,
+                                                                parents, element_name,
+                                                                dir_type='pages')
                 else:
                     errors = page_object.new_page_object(root_path, project, parents,
                                                          element_name,
                                                          add_parents=add_parents)
             elif elem_type == 'suite':
                 if is_dir:
-                    errors = io_manager.new_directory(root_path, project, parents,
-                                                     element_name, dir_type='suites')
+                    errors = file_manager.new_directory_of_type(root_path, project,
+                                                                parents, element_name,
+                                                                dir_type='suites')
                 else:
                     errors = suite_module.new_suite(root_path, project, parents, element_name)
         element = {
@@ -799,7 +803,7 @@ def save_settings():
             'result': 'ok',
             'errors': []
         }
-        settings_manager.save_settings(projectname, project_settings, global_settings)
+        settings_manager.save_settings(projectname, global_settings, project_settings)
         # re-read settings
         test_execution.settings = settings_manager.get_project_settings(root_path,
                                                                         projectname)

@@ -82,15 +82,17 @@ class RunCommand(BaseCommand):
                 raise CommandException('\n'.join(msg))
             else:
                 test_execution.project = args.project
-                test_execution.settings = settings_manager.get_project_settings(root_path, args.project)
-                if utils.test_suite_exists(root_path, test_execution.project,
-                                           args.test_or_suite):
+                _ = settings_manager.get_project_settings(root_path,
+                                                          args.project)
+                test_execution.settings = _
+                if suite_module.suite_exists(root_path, test_execution.project,
+                                             args.test_or_suite):
                     test_execution.suite = args.test_or_suite
                     # execute test suite
                     start_execution.run_test_or_suite(root_path,
                                                       test_execution.project,
                                                       suite=test_execution.suite)
-                elif utils.test_case_exists(root_path, test_execution.project,
+                elif test_case.test_case_exists(root_path, test_execution.project,
                                             args.test_or_suite):
                     test_execution.test = args.test_or_suite
                     # execute test case

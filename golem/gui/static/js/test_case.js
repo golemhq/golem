@@ -515,13 +515,13 @@ function getPageObjectElements(){
                 else{
                     // TODO
                     // concat elements
-                    selectedPageObjectsElements = selectedPageObjectsElements.concat(data.content.element_list);
+                    selectedPageObjectsElements = selectedPageObjectsElements.concat(data.content.elements);
                     // remove duplicates
                     // selectedPageObjectsElements = selectedPageObjectsElements.filter(function (x, i, a) { 
                     //     return selectedPageObjectsElements.indexOf(x) == i; 
                     // });
                     // concat functions
-                    selectedPageObjectsFunctions = selectedPageObjectsFunctions.concat(data.content.function_list);
+                    selectedPageObjectsFunctions = selectedPageObjectsFunctions.concat(data.content.functions);
                     // remove duplicates
                     // selectedPageObjectsFunctions = selectedPageObjectsFunctions.filter(function (x, i, a) { 
                     //     return selectedPageObjectsFunctions.indexOf(x) == i; 

@@ -1,3 +1,4 @@
+"""Methods for dealing with GUI users."""
 import json
 import os
 

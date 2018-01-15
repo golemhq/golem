@@ -1,6 +1,5 @@
-""" The Execution class contains data specific of a single test execution
-that is shared among other modules.
-
+"""The Execution module contains data specific to a
+single test execution and it is shared among other modules.
 """
 import sys
 
@@ -21,5 +20,7 @@ class Execution:
         self.report_directory = None
         self.logger = None
 
-# The instance of Execution is added to sys.modules to simplify the public API.
+
+# An instance of Execution is added to sys.modules
+# to simplify the public API.
 sys.modules['golem.execution'] = Execution()
