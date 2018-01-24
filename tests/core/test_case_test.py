@@ -3,7 +3,9 @@ from collections import OrderedDict
 
 from golem.core import test_case
 
-from tests.fixtures import testdir_fixture, random_project_fixture, project_fixture
+from tests.fixtures import (testdir_fixture,
+                            random_project_fixture,
+                            project_fixture)
 
 
 SAMPLE_TEST_CONTENT = """
@@ -206,10 +208,10 @@ class Test__parse_step:
 
 class Test_get_test_case_content:
 
-    def test_get_test_case_content(self, testdir_fixture, random_project_fixture):
+    def test_get_test_case_content(self, random_project_fixture):
 
         test_name = 'some_test_case'
-        root_path = random_project_fixture['testdir_fixture']['path']
+        root_path = random_project_fixture['testdir']
         project = random_project_fixture['name']
         path = os.path.join(root_path, 'projects', project,
                             'tests', test_name + '.py')
@@ -225,9 +227,9 @@ class Test_get_test_case_content:
 
 class Test_get_test_case_code:
 
-    def test_get_test_case_code(self, testdir_fixture, random_project_fixture):
+    def test_get_test_case_code(self, random_project_fixture):
         test_name = 'some_test_case2'
-        root_path = random_project_fixture['testdir_fixture']['path']
+        root_path = random_project_fixture['testdir']
         project = random_project_fixture['name']
         path = os.path.join(root_path, 'projects', project, 'tests', test_name + '.py')
         with open(path, 'w') as ff:

@@ -25,8 +25,6 @@ class Test_get_test_cases:
                                 'test1')
         tests = utils.get_test_cases(testdir_fixture['path'],
                                      project_fixture['name'])
-
-
         expected_result = {
             'type': 'directory',
             'name': 'tests',

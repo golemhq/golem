@@ -272,15 +272,20 @@ def choose_driver_by_precedence(cli_drivers=None, suite_drivers=None,
     return chosen_drivers
 
 
-def load_json_from_file(filepath):
-    json_data = None
+# TODO
+def load_json_from_file(filepath, ignore_failure=False, default=None):
+    json_data = default
     with open(filepath) as json_file:
         try:
-            json_data = json.load(json_file)
+            contents = json_file.read()
+            if len(contents.strip()):
+                json_data = json.loads(contents)
         except Exception as e:
             msg = 'There was an error parsing file {}'.format(filepath)
+            print(msg)
             print(traceback.format_exc())
-            raise Exception(msg).with_traceback(e.__traceback__)
+            if not ignore_failure:
+                raise Exception(msg).with_traceback(e.__traceback__)
     return json_data
 
 

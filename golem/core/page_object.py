@@ -105,8 +105,9 @@ def get_page_object_code(path):
     """Get the page object code as string given the full path
     to the python file"""
     code = ''
-    with open(path) as ff:
-        code = ff.read()
+    if os.path.isfile(path):
+        with open(path) as ff:
+            code = ff.read()
     return code
 
 
@@ -116,7 +117,6 @@ def save_page_object(root_path, project, full_page_name, elements,
     full_page_name must be a dot path starting from /project/pages/
     directory, (i.e.: 'module.sub_module.page_name_01')
     """
-
     def format_element_string(name, selector, value, display_name):
         formatted = ("\n\n{0} = ('{1}', \'{2}\', '{3}')"
                      .format(element['name'], element['selector'],
@@ -134,8 +134,15 @@ def save_page_object(root_path, project, full_page_name, elements,
             # replace the spaces with underlines of the element name
             if ' ' in element['name']:
                 element['name'] = element['name'].replace(' ', '_')
+            # escape quote characters
             element['value'] = element['value'].replace('"', '\\"').replace("'", "\\'")
-            po_file.write(format_element_string(name, selector, value, display_name))
+            if not element['display_name']:
+                element['display_name'] = element['name']
+            formatted = format_element_string(element['name'],
+                                              element['selector'],
+                                              element['value'],
+                                              element['display_name'])
+            po_file.write(formatted)
         for func in functions:
             po_file.write('\n\n' + func)
 
@@ -170,7 +177,7 @@ def new_page_object(root_path, project, parents, page_name,
                                  'pages', os.sep.join(parents))
         if not os.path.exists(page_path):
             if add_parents:
-                base_path = os.path.join(root_path, 'projects', project, 'pages')
+                base_path = pages_base_dir(root_path, project)
                 for parent in parents:
                     base_path = os.path.join(base_path, parent)
                     if not os.path.exists(base_path):
@@ -194,3 +201,10 @@ def generate_page_path(root_path, project, full_page_name):
     page_path = os.path.join(root_path, 'projects', project, 'pages',
                              os.sep.join(parents), '{}.py'.format(page_name))
     return page_path
+
+
+def pages_base_dir(root_path, project):
+    """Generate base dir for pages.
+    i.e.: <root_path>/projets/<project>/pages/
+    """
+    return os.path.join(root_path, 'projects', project, 'pages')

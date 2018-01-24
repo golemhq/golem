@@ -163,6 +163,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
                                                                         suite)
         suite_drivers = suite_module.get_suite_browsers(workspace, project, suite)
         suite_envs = suite_module.get_suite_environments(workspace, project, suite)
+        # TODO, get_before and get_after should be suite module functions
         suite_imported_module = suite_module.get_suite_module(workspace, project, suite)
         execution['suite_before'] = getattr(suite_imported_module, 'before', None)
         execution['suite_after'] = getattr(suite_imported_module, 'after', None)

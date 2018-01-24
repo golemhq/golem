@@ -511,7 +511,7 @@ def rename_element():
 def get_page_objects():
     if request.method == 'POST':
         project = request.form['project']
-        path = os.path.join(root_path, 'projects', project, 'pages')
+        path = page_object.pages_base_dir(root_path, project)
         page_objects = file_manager.get_files_dot_path(path)
         return json.dumps(page_objects)
 

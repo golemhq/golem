@@ -139,11 +139,15 @@ def new_directory_of_type(root_path, project, parents, dir_name, dir_type):
     If the directory is inside other directories, these should already exist.
     parents is a list of parent directories.
     dir_type should be in ['tests', 'suites', 'pages']"""
-    parents = os.sep.join(parents)
-    path = os.path.join(root_path, 'projects', project, dir_type, parents, dir_name)
     errors = []
-    if os.path.exists(path):
-        errors.append('A directory with that name already exists')
+    if dir_type not in ['tests', 'suites', 'pages']:
+        errors.append('{} is not a valid dir_type'.format(dir_type))
     else:
-        create_directory(path=path, add_init=True)
+        parents = os.sep.join(parents)
+        path = os.path.join(root_path, 'projects', project,
+                            dir_type, parents, dir_name)
+        if os.path.exists(path):
+            errors.append('A directory with that name already exists')
+        else:
+            create_directory(path=path, add_init=True)
     return errors

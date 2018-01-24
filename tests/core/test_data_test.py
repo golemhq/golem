@@ -1,4 +1,8 @@
-from golem.core import utils, test_data, test_case, settings_manager, test_execution
+from golem.core import (utils,
+                        test_data,
+                        test_case,
+                        settings_manager,
+                        test_execution)
 
 from tests.fixtures import project_fixture, testdir_fixture
 
