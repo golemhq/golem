@@ -46,8 +46,8 @@ SETTINGS_FILE_CONTENT = (
 // Default option is INFO
 "console_log_level": "INFO",
 
-// Log all events, instead of just Golem events. Default is false
-"log_all_events": "false"
+// Log all events, instead of just Golem events. Default is true
+"log_all_events": true
 }
 """)
 
@@ -96,7 +96,7 @@ def assign_settings_default_values(settings):
         ('remote_url', None),
         ('remote_browsers', {}),
         ('console_log_level', 'INFO'),
-        ('log_all_events', False)
+        ('log_all_events', True)
     ]
     for default in defaults:
         if not default[0] in settings:

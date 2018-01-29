@@ -20,6 +20,9 @@ class Execution:
         self.report_directory = None
         self.logger = None
 
+    def reset(self):
+        self.__init__()
+
 
 # An instance of Execution is added to sys.modules
 # to simplify the public API.

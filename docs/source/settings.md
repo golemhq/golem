@@ -86,7 +86,7 @@ Default is 'INFO'
 
 - *log_all_events*
 
-Default is false
+Default is true
 
 <br>
 

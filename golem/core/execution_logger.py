@@ -27,17 +27,17 @@ def _get_log_level(log_level_string):
 
 
 def get_logger(log_directory=None, console_log_level='INFO',
-               log_all_events=False):
+               log_all_events=True):
     """instantiate the logger for the execution.
     log_directory:     where the file logs will be stored
     console_log_level: the log leve used for the console output
-    log_all_events:    log all the events or only golem's events
+    log_all_events:    log all the events or only golem events
 
     3 log levels are defined:
       1. console output (by default INFO)
       2. file output (DEBUG)
       3. file output (INFO)
-    """
+    """    
     logger = None
     if log_all_events:
         logger = logging.getLogger()
@@ -70,4 +70,10 @@ def get_logger(log_directory=None, console_log_level='INFO',
         file_handler.setFormatter(file_formatter)
         logger.addHandler(file_handler)
     return logger
+
+
+# def reset_logger(logger):
+#     logging.shutdown()
+#     import importlib
+#     importlib.reload(logging)
 

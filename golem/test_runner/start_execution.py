@@ -286,16 +286,22 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
         if test_execution.interactive and execution['workers'] != 1:
             print('WARNING: to run in debug mode, threads must equal one')
 
-        if execution['workers'] == 1:
-            # run tests serially
-            for test in execution_list:
-                run_test(workspace, project,
-                         test['test_name'], test['data_set'],
-                         test['driver'], test_execution.settings,
-                         test['report_directory'])
-        else:
-            # run tests using multiprocessing
-            multiprocess_executor(execution_list, execution['workers'])
+        # if execution['workers'] == 1:
+        #     # run tests serially
+        #     # Note: when running test serially I can't seem
+        #     # to be able to reset the logger without stopping 
+        #     # third party loggers like selenium's
+        #     # so, running everything through multiprocessing
+        #     for test in execution_list:
+        #         run_test(workspace, project,
+        #                  test['test_name'], test['data_set'],
+        #                  test['driver'], test_execution.settings,
+        #                  test['report_directory'])
+        # else:
+        #     # run tests using multiprocessing
+        #     multiprocess_executor(execution_list, execution['workers'])
+
+        multiprocess_executor(execution_list, execution['workers'])
 
     # run suite `after` function
     if execution['suite_after']:
