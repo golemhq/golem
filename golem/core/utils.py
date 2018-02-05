@@ -49,9 +49,8 @@ def get_directory_test_cases(workspace, project, suite):
     '''Return a list with all the test cases of a given directory'''
     tests = list()
     path = os.path.join(workspace, 'projects', project, 'tests', suite)
-    files = file_manager.get_files_dot_path(path)
+    files = file_manager.get_files_dot_path(path, extension='.py')
     tests = ['.'.join((suite, x)) for x in files]
-
     return tests
 
 
@@ -109,9 +108,7 @@ def create_new_project(workspace, project):
     extend_path = os.path.join(workspace, 'projects', project, 'extend.py')
     open(extend_path, 'a').close()
 
-    settings_path = os.path.join(workspace, 'projects', project, 'settings.json')
-    with open(settings_path, 'a') as settings_file:
-        settings_file.write(settings_manager.REDUCED_SETTINGS_FILE_CONTENT)
+    settings_manager.create_project_settings_file(workspace, project)
 
     environments_path = os.path.join(workspace, 'projects', project, 'environments.json')
     with open(environments_path, 'a') as environments_file:
@@ -135,9 +132,7 @@ def create_test_dir(workspace):
     with open(golem_start_py_path, 'a') as golem_start_py_file:
         golem_start_py_file.write(golem_start_py_content)
 
-    settings_path = os.path.join(workspace, 'settings.json')
-    with open(settings_path, 'a') as settings_file:
-        settings_file.write(settings_manager.SETTINGS_FILE_CONTENT)
+    settings_manager.create_global_settings_file(workspace)
 
     users_path = os.path.join(workspace, 'users.json')
     open(users_path, 'a').close()

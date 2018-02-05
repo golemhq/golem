@@ -7,25 +7,48 @@ from subprocess import call
 
 import pytest
 
+from . import helper_functions
+
 
 BASE_DIR = None
 
 
-@pytest.fixture(scope="session")
-def testdir_fixture():    
+def _get_base_dir():
     global BASE_DIR
     if not BASE_DIR:
         BASE_DIR = os.getcwd()
-    os.chdir(BASE_DIR)
+    return BASE_DIR
+
+
+@pytest.fixture(scope="session")
+def testdir_fixture():    
+    base_dir = _get_base_dir()
+    os.chdir(base_dir)
     test_dir_name = 'temp_directory_one'
-    full_path = os.path.join(BASE_DIR, test_dir_name)
+    full_path = os.path.join(base_dir, test_dir_name)
     call(['golem-admin', 'createdirectory', test_dir_name])
     sys.path.append(full_path)
     yield {
             'path': full_path,
-            'base_path': BASE_DIR,
+            'base_path': base_dir,
             'name': test_dir_name}
-    os.chdir(BASE_DIR)
+    os.chdir(base_dir)
+    shutil.rmtree(test_dir_name, ignore_errors=True)
+
+
+@pytest.fixture(scope="class")
+def random_testdir_fixture():    
+    base_dir = _get_base_dir()
+    os.chdir(base_dir)
+    test_dir_name = helper_functions.random_string(4, 'tesdir_')
+    full_path = os.path.join(base_dir, test_dir_name)
+    call(['golem-admin', 'createdirectory', test_dir_name])
+    sys.path.append(full_path)
+    yield {
+            'path': full_path,
+            'base_path': base_dir,
+            'name': test_dir_name}
+    os.chdir(base_dir)
     shutil.rmtree(test_dir_name, ignore_errors=True)
 
 
@@ -34,46 +57,43 @@ def testdir_fixture():
 def project_fixture(testdir_fixture):
     project_name = 'temp_project_one'
     os.chdir(testdir_fixture['path'])
-    # call(['python', 'golem.py', 'createproject', project_name])
     call(['golem', 'createproject', project_name])
-    sys.path.append(os.path.join(testdir_fixture['path'], project_name))
+    _ = os.path.join(testdir_fixture['path'], 'projects', project_name)
+    #sys.path.append(_)
     yield {
+            'name': project_name,
             'testdir_fixture': testdir_fixture,
-            'name': project_name}
+            'testdir': testdir_fixture['path']}
     os.chdir(os.path.join(testdir_fixture['path'], 'projects'))
     shutil.rmtree(project_name, ignore_errors=True)
 
 
-@pytest.mark.usefixtures("testdir_fixture")
+@pytest.mark.usefixtures("random_testdir_fixture")
 @pytest.fixture(scope="class")
-def random_project_fixture(testdir_fixture):
-    random_value = ''.join(random.choice(string.ascii_lowercase) for _ in range(4))
-    random_name = 'project_' + random_value
-    os.chdir(testdir_fixture['path'])
-    # call(['python', 'golem.py', 'createproject', random_name])
+def random_project_fixture(random_testdir_fixture):
+    random_name = helper_functions.random_string(4, 'project_')
+    os.chdir(random_testdir_fixture['path'])
     call(['golem', 'createproject', random_name])
-    sys.path.append(os.path.join(testdir_fixture['path'], random_name))
-    # TODO testdir_fixture is just 'testdir'
+    _ = os.path.join(random_testdir_fixture['path'], 'projects', random_name)
+    #sys.path.append(_)
     # add project_path
     yield {
             'name': random_name,
-            'testdir_fixture': testdir_fixture,
-            'testdir': testdir_fixture['path']
+            'testdir_fixture': random_testdir_fixture,
+            'testdir': random_testdir_fixture['path']
             }
-    os.chdir(os.path.join(testdir_fixture['path'], 'projects'))
+    os.chdir(os.path.join(random_testdir_fixture['path'], 'projects'))
     shutil.rmtree(random_name, ignore_errors=True)
 
 
 #@pytest.mark.usefixtures("testdir_fixture")
 @pytest.fixture(scope="session")
 def permanent_project_fixture(testdir_fixture):
-    random_value = ''.join(random.choice(string.ascii_lowercase) for _ in range(4))
-    random_name = 'project_' + random_value
+    random_name = helper_functions.random_string(4, 'project_')
     os.chdir(testdir_fixture['path'])
-    # call(['python', 'golem.py', 'createproject', random_name])
     call(['golem', 'createproject', random_name])
-    sys.path.append(os.path.join(testdir_fixture['path'], random_name))
-    # TODO testdir_fixture is just 'testdir'
+    _ = os.path.join(testdir_fixture['path'], 'projects', random_name)
+    #sys.path.append(_)
     # add project_path
     yield {
             'name': random_name,

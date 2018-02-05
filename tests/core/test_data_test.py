@@ -54,10 +54,8 @@ class Test_get_internal_test_data:
             }
 
         ]
-        test_case.new_test_case(testdir_fixture['path'],
-                                project_fixture['name'],
-                                [],
-                                test_name)
+        test_case.new_test_case(testdir_fixture['path'], project_fixture['name'],
+                                [], test_name)
         test_steps = {
             'setup': [],
             'test': [],

@@ -512,7 +512,7 @@ def get_page_objects():
     if request.method == 'POST':
         project = request.form['project']
         path = page_object.pages_base_dir(root_path, project)
-        page_objects = file_manager.get_files_dot_path(path)
+        page_objects = file_manager.get_files_dot_path(path, extension='.py')
         return json.dumps(page_objects)
 
 
@@ -803,7 +803,8 @@ def save_settings():
             'result': 'ok',
             'errors': []
         }
-        settings_manager.save_settings(projectname, global_settings, project_settings)
+        settings_manager.save_global_settings(root_path, global_settings)
+        settings_manager.save_project_settings(root_path, projectname, project_settings)
         # re-read settings
         test_execution.settings = settings_manager.get_project_settings(root_path,
                                                                         projectname)

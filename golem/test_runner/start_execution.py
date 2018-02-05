@@ -123,13 +123,13 @@ def _create_execution_directory(workspace, project, timestamp, test_name,
     """Generate the execution directory."""
     execution_directory = ''
     if is_suite:
-        execution_directory = report.create_suite_execution_directory(
+        execution_directory = report.create_execution_directory(
                                         workspace, project,
-                                        suite_name, timestamp)
+                                        timestamp, suite_name=suite_name)
     else:
-        execution_directory = report.create_test_execution_directory(
+        execution_directory = report.create_execution_directory(
                                         workspace, project,
-                                        test_name, timestamp)
+                                        timestamp, test_name=test_name)
     return execution_directory
 
 
@@ -246,7 +246,7 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
     #
     # The result is a list that contains all the requested combinations
     execution_list = _define_execution_list(workspace, project, execution)
-
+    
     # create the execution directory
     #
     # if this is a suite, the directory takes this structure

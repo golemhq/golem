@@ -148,7 +148,7 @@ def save_page_object(root_path, project, full_page_name, elements,
 
 
 def save_page_object_code(root_path, project, full_page_name, content):
-    """Save a Page Object given it's full code as a string
+    """Save a Page Object given it's full code as a string.
     full_page_name must be a dot path starting from /project/pages/
     directory.
     content must be the file content as string
@@ -165,7 +165,7 @@ def new_page_object(root_path, project, parents, page_name,
     """Create a new page object.
     Parents is a list of directories and subdirectories where the
     page should be stored.
-    If add_parents is true, the parent directories will be added
+    If add_parents is True, the parent directories will be added
     if they do not exist."""
     errors = []
     full_page_path = os.path.join(root_path, 'projects', project, 'pages',

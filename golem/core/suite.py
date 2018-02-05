@@ -85,14 +85,14 @@ def get_suite_test_cases(workspace, project, suite):
     suite_module = importlib.import_module(module_name, package=None)
     if '*' in suite_module.tests:
         path = os.path.join(workspace, 'projects', project, 'tests')
-        tests = file_manager.get_files_dot_path(path)
+        tests = file_manager.get_files_dot_path(path, extension='.py')
     else:
         for test in suite_module.tests:
             if test[-1] == '*':
                 this_dir = os.path.join(test[:-2])
                 path = os.path.join(workspace, 'projects', project,
                                     'tests', this_dir)
-                this_dir_tests = file_manager.get_files_dot_path(path)
+                this_dir_tests = file_manager.get_files_dot_path(path, extension='.py')
                 this_dir_tests = ['{}.{}'.format(this_dir, x) for x in this_dir_tests]
                 tests = tests + this_dir_tests
             else:

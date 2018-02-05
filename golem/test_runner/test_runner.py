@@ -9,6 +9,16 @@ from golem.core import report, utils
 from golem.test_runner.test_runner_utils import import_page_into_test_module
 
 
+class Data(dict):
+    """dot notation access to dictionary attributes"""
+    def __getattr__(*args):
+        val = dict.get(*args)
+        return Data(val) if type(val) is dict else val
+
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+
 def run_test(workspace, project, test_name, test_data, browser,
              settings, report_directory):
     """Runs a single test"""
@@ -29,15 +39,6 @@ def run_test(workspace, project, test_name, test_data, browser,
     from golem import execution
 
     # convert test_data to data obj
-    class Data(dict):
-        """dot notation access to dictionary attributes"""
-        def __getattr__(*args):
-            val = dict.get(*args)
-            return Data(val) if type(val) is dict else val
-
-        __setattr__ = dict.__setitem__
-        __delattr__ = dict.__delitem__
-
     execution.data = Data(test_data)
 
     # set set_name

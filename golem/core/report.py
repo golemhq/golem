@@ -1,29 +1,31 @@
-"""Generate the report structure, json and screenshots"""
+"""Generate report for test execution"""
 import json
 import os
 import uuid
 
 
-def create_suite_execution_directory(workspace, project, suite_name, timestamp):
-    """Create direcoty to store report for suite.
+def create_execution_directory(workspace, project, timestamp,
+                               test_name=None, suite_name=None):
+    """Create directory to store report for suite or single test.
+    
+    If suite, directory will be:
     <workspace>/projects/<project>/reports/<suite_name>/<timestamp>/
-    """
-    execution_directory = os.path.join(workspace, 'projects', project, 'reports',
-                                       suite_name, timestamp)
-    if not os.path.isdir(execution_directory):
-        try:
-            os.makedirs(execution_directory)
-        except:
-            pass
-    return execution_directory
-
-
-def create_test_execution_directory(workspace, project, test_name, timestamp):
-    """Create direcoty to store report for suite.
+    
+    If test, directory will be:
     <workspace>/projects/<project>/reports/single_tests/<test_name>/<timestamp>/
     """
-    execution_directory = os.path.join(workspace, 'projects', project, 'reports',
-                                       'single_tests', test_name, timestamp)
+    if test_name:
+        execution_directory = os.path.join(workspace, 'projects', project,
+                                           'reports', 'single_tests', test_name,
+                                           timestamp)
+    elif suite_name:
+        execution_directory = os.path.join(workspace, 'projects', project,
+                                           'reports', suite_name, timestamp)
+    else:
+        # TODO
+        import sys
+        sys.exit('Invalid params for create_test_execution_directory')
+
     if not os.path.isdir(execution_directory):
         try:
             os.makedirs(execution_directory)
@@ -67,6 +69,7 @@ def generate_report(report_directory, test_case_name, test_data, result):
     if result['error']:
         short_error = '\n'.join(result['error'].split('\n')[-2:])
 
+    # TODO
     serializable_data = {}
     for key, value in test_data.items():
         try:

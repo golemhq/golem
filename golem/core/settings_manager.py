@@ -57,10 +57,42 @@ REDUCED_SETTINGS_FILE_CONTENT = (
 }
 """)
 
+DEFAULTS = [
+    ('implicit_wait', None),
+    ('screenshot_on_error', True),
+    ('screenshot_on_step', False),
+    ('screenshot_on_end', False),
+    ('test_data', 'csv'),
+    ('wait_hook', None),
+    ('default_browser', 'chrome'),
+    ('chromedriver_path', None),
+    ('geckodriver_path', None),
+    ('iedriver_path', None),
+    ('remote_url', None),
+    ('remote_browsers', {}),
+    ('console_log_level', 'INFO'),
+    ('log_all_events', True)
+]
 
-def read_json_with_comments(json_path):
-    """Receives a list of lines of a json file with '//' comments
-    Removes the commented lines and return a json loads of the result
+
+def create_global_settings_file(testdir):
+    """Create a new global settings file"""
+    settings_path = os.path.join(testdir, 'settings.json')
+    with open(settings_path, 'a') as settings_file:
+        settings_file.write(SETTINGS_FILE_CONTENT)
+
+
+def create_project_settings_file(testdir, project):
+    """Create a new project settings file"""
+    settings_path = os.path.join(testdir, 'projects', project, 'settings.json')
+    with open(settings_path, 'a') as settings_file:
+        settings_file.write(REDUCED_SETTINGS_FILE_CONTENT)
+
+
+def _read_json_with_comments(json_path):
+    """Reads a file with '//' comments.
+    Reads the file, removes the commented lines and return
+    a json loads of the result.
     """
     file_lines = []
     with open(json_path) as json_file:
@@ -81,24 +113,9 @@ def read_json_with_comments(json_path):
 
 def assign_settings_default_values(settings):
     """Verify that each setting value is present at least with
-    the default value""" 
-    defaults = [
-        ('implicit_wait', None),
-        ('screenshot_on_error', True),
-        ('screenshot_on_step', False),
-        ('screenshot_on_end', False),
-        ('test_data', 'csv'),
-        ('wait_hook', None),
-        ('default_browser', 'chrome'),
-        ('chromedriver_path', None),
-        ('geckodriver_path', None),
-        ('iedriver_path', None),
-        ('remote_url', None),
-        ('remote_browsers', {}),
-        ('console_log_level', 'INFO'),
-        ('log_all_events', True)
-    ]
-    for default in defaults:
+    the default value
+    """ 
+    for default in DEFAULTS:
         if not default[0] in settings:
             settings[default[0]] = default[1]
         elif settings[default[0]] in ['', None]:
@@ -111,7 +128,7 @@ def get_global_settings(workspace):
     settings_path = os.path.join(workspace, 'settings.json')
     settings = {}
     if os.path.exists(settings_path):
-        settings = read_json_with_comments(settings_path)
+        settings = _read_json_with_comments(settings_path)
         settings = assign_settings_default_values(settings)
     else:
         print('Warning: settings file is not present')
@@ -138,7 +155,7 @@ def get_project_settings(workspace, project):
                                          project, 'settings.json')
     project_settings = {}
     if os.path.exists(project_settings_path):
-        project_settings = read_json_with_comments(project_settings_path)
+        project_settings = _read_json_with_comments(project_settings_path)
     # merge and override global settings with project settings
     for setting in project_settings:
         global_settings[setting] = project_settings[setting]
@@ -157,20 +174,26 @@ def get_project_settings_as_string(workspace, project):
     return settings
 
 
-def save_settings(project, global_settings=None, project_settings=None):
-    """Save global and project settings."""
-    settings_path = os.path.join('settings.json')
+def save_global_settings(workspace, global_settings):
+    """Save global settings.
+    input settings must be to be the string content of file."""
+    settings_path = os.path.join(workspace, 'settings.json')
     if global_settings is not None:
         with open(settings_path, 'w') as global_settings_file:
             global_settings_file.write(global_settings)
-    if project is not None and project_settings is not None:
-        project_path = os.path.join('projects', project, 'settings.json')
-        with open(project_path, 'w') as project_settings_file:
-            project_settings_file.write(project_settings)
-    return
+
+
+def save_project_settings(workspace, project, project_settings):
+    """Save project settings.
+    input settings must be to be the string content of file."""
+    project_path = os.path.join(workspace, 'projects', project, 'settings.json')
+    with open(project_path, 'w') as project_settings_file:
+        project_settings_file.write(project_settings)
 
 
 def get_remote_browsers(settings):
     """Return a list of the remote browsers defined in settings."""
-    remote_browsers = list(settings['remote_browsers'].keys())
+    remote_browsers = []
+    if 'remote_browsers' in settings:
+        remote_browsers = list(settings['remote_browsers'].keys())
     return remote_browsers

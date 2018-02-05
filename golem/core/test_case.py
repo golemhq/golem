@@ -119,8 +119,8 @@ def get_test_case_content(root_path, project, test_case_name):
     }
     
     # add the 'project' directory to python path
-    sys.path.append(os.path.join(root_path, 'projects', project))
-
+    # TODO
+    #sys.path.append(os.path.join(root_path, 'projects', project))
     test_module = importlib.import_module('projects.{0}.tests.{1}'
                                           .format(project, test_case_name))
     # get description

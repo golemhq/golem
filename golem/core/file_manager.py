@@ -77,7 +77,7 @@ def generate_file_structure_dict(full_path, original_path=None):
     return element
 
 
-def get_files_dot_path(base_path):
+def get_files_dot_path(base_path, extension=None):
     """generate a list of all the files inside a directory and
     subdirectories with the relative path as a dotted string.
     for example, given the files:
@@ -92,7 +92,10 @@ def get_files_dot_path(base_path):
         if not '__pycache__' in path:
             for name in files:
                 if name not in ['__init__.py', '.DS_Store']:
-                    filepath = os.path.join(path, os.path.splitext(name)[0])
+                    root, ext = os.path.splitext(name)
+                    if extension and ext != extension:
+                        continue
+                    filepath = os.path.join(path, root)
                     all_files.append(filepath)
     for file in all_files:
         rel_path_as_list = file.replace(base_path, '').split(os.sep)

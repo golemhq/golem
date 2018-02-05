@@ -1,10 +1,11 @@
-
 import os
 
 from golem.core import page_object, file_manager, utils
 
 from tests import helper_functions
-from tests.fixtures import testdir_fixture, random_project_fixture
+from tests.fixtures import (testdir_fixture,
+                            random_testdir_fixture,
+                            random_project_fixture)
 
 
 class Test___directory_element:
@@ -73,26 +74,37 @@ class Test_get_files_dot_path:
     def test_get_files_dot_path(self, testdir_fixture):
         project = helper_functions.create_random_project(testdir_fixture['path'])
         # create a new page object in pages folder
-        page_object.new_page_object(testdir_fixture['path'],
-                                    project,
-                                    [],
+        page_object.new_page_object(testdir_fixture['path'], project, [],
                                     'page1')
         # create a new page object in pages/dir/subdir/
-        page_object.new_page_object(testdir_fixture['path'],
-                                    project,
-                                    ['dir', 'subdir'],
-                                    'page2',
+        page_object.new_page_object(testdir_fixture['path'], project,
+                                    ['dir', 'subdir'], 'page2',
                                     add_parents=True)
-        base_path = os.path.join(testdir_fixture['path'],
-                                 'projects',
-                                 project,
-                                 'pages')
-        dotted_files = file_manager.get_files_dot_path(base_path)
+        base_path = os.path.join(testdir_fixture['path'], 'projects',
+                                 project, 'pages')
+        dot_files = file_manager.get_files_dot_path(base_path)
         expected_result = [
             'page1',
             'dir.subdir.page2'
         ]
-        assert dotted_files == expected_result
+        assert dot_files == expected_result
+
+
+    def test_get_files_dot_path_extension(self, testdir_fixture):
+        project = helper_functions.create_random_project(testdir_fixture['path'])
+        testdir = testdir_fixture['path']
+        # create a new page object in pages folder (.py extension)
+        page_object.new_page_object(testdir, project, [], 'page2')
+        # create a file with another extension
+        another_extension = os.path.join(testdir, 'projects', project,
+                                         'pages', 'another.json')
+        with open(another_extension, 'w') as another_file:
+            another_file.write('')
+        base_path = os.path.join(testdir_fixture['path'], 'projects',
+                                 project, 'pages')
+        dot_files = file_manager.get_files_dot_path(base_path, extension='.py')
+        expected_result = ['page2']
+        assert dot_files == expected_result
 
 
 class Test_create_directory:

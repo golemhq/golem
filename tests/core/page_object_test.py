@@ -129,3 +129,67 @@ class Test_save_page_object:
         with open(page_path) as page_file:
             contents = page_file.read()
             assert contents == expected_contents
+
+
+class Test_save_page_object_code:
+
+    def test_save_page_object_code(self, permanent_project_fixture):
+        project = permanent_project_fixture['name']
+        testdir = permanent_project_fixture['testdir']
+
+        page_name = 'page_name_x1'
+        parents = ['save', 'page', 'code']
+        page_object.new_page_object(testdir, project, parents,
+                                    page_name, add_parents=True)
+
+        page_code = ("elem1 = ('id', 'x')\n"
+                     "elem2 = ('id', 'y')\n"
+                     "def func1():\n"
+                     "   pass")
+
+        full_page_name = '{}.{}'.format('.'.join(parents), page_name)
+        page_object.save_page_object_code(testdir, project, full_page_name, page_code)
+
+        full_path = os.path.join(testdir, 'projects', project,
+                                 'pages', os.sep.join(parents),
+                                 page_name + '.py')
+        with open(full_path) as page_file:
+            content = page_file.read()
+            assert content == page_code
+
+
+class Test_new_page_object:
+
+    def test_new_page_object(self, permanent_project_fixture):
+        project = permanent_project_fixture['name']
+        testdir = permanent_project_fixture['testdir']
+        page_name = 'page_name_x2'
+        parents = ['new', 'page', 'object']
+        page_object.new_page_object(testdir, project, parents,
+                                    page_name, add_parents=True)
+        full_path = os.path.join(testdir, 'projects', project,
+                                 'pages', os.sep.join(parents),
+                                 page_name + '.py')
+        assert os.path.isfile(full_path)
+
+
+class Test_generate_page_path:
+
+    def test_generate_page_path(self):
+        testdir = 'x'
+        project = 'y'
+        full_page_name = 'a.b.c'
+        expected = os.path.join(testdir, 'projects', project, 'pages',
+                                'a', 'b', 'c.py')
+        actual = page_object.generate_page_path(testdir, project, full_page_name)
+        assert actual == expected
+
+
+class Test_pages_base_dir:
+
+    def test_pages_base_dir(self):
+        testdir = 'x'
+        project = 'y'
+        expected = os.path.join(testdir, 'projects', project, 'pages')
+        actual = page_object.pages_base_dir(testdir, project)
+        assert actual == expected

@@ -4,6 +4,7 @@ from collections import OrderedDict
 from golem.core import test_case
 
 from tests.fixtures import (testdir_fixture,
+                            random_testdir_fixture,
                             random_project_fixture,
                             project_fixture)
 
@@ -208,11 +209,14 @@ class Test__parse_step:
 
 class Test_get_test_case_content:
 
-    def test_get_test_case_content(self, random_project_fixture):
+    #def test_get_test_case_content(self, random_project_fixture):
+    def test_get_test_case_content(self, testdir_fixture, project_fixture):
+        root_path = project_fixture['testdir']
+        project = project_fixture['name']
 
+        # root_path = random_project_fixture['testdir']
+        # project = random_project_fixture['name']
         test_name = 'some_test_case'
-        root_path = random_project_fixture['testdir']
-        project = random_project_fixture['name']
         path = os.path.join(root_path, 'projects', project,
                             'tests', test_name + '.py')
         with open(path, 'w') as ff:
@@ -223,6 +227,7 @@ class Test_get_test_case_content:
         assert test_content['steps']['setup'] == [{'method_name': 'page1.func1', 'parameters': []}]
         assert test_content['steps']['test'] == [{'method_name': 'page2.func2', 'parameters': ["'a'", "'b'"]}, {'method_name': 'click', 'parameters': ['page2.elem1']}]
         assert test_content['steps']['teardown'] == []
+        #assert False
 
 
 class Test_get_test_case_code:
@@ -240,9 +245,8 @@ class Test_get_test_case_code:
 
 class Test_new_test_case:
 
-    def test_new_test_case(self, testdir_fixture, project_fixture):
-
-        root_path = testdir_fixture['path']
+    def test_new_test_case(self, project_fixture):
+        root_path = project_fixture['testdir']
         project = project_fixture['name']
         test_name = 'new_test_case_001'
         parents = ['aaaa', 'bbbb']
@@ -256,9 +260,8 @@ class Test_new_test_case:
         assert test_code == NEW_TEST_CONTENT
 
 
-    def test_new_test_case_file_exists(self, testdir_fixture, project_fixture):
-
-        root_path = testdir_fixture['path']
+    def test_new_test_case_file_exists(self, project_fixture):
+        root_path = project_fixture['testdir']
         project = project_fixture['name']
         test_name = 'new_test_case_002'
         parents = ['aaaa', 'bbbb']
