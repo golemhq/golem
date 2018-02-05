@@ -14,7 +14,7 @@ install:
 
 script: 
   # - python setup.py test
-  - pytest
+  - pytest tests
 
 branches:
   only:
