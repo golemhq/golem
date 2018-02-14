@@ -33,7 +33,7 @@ class Test__define_drivers:
                 'name': 'chrome',
                 'full_name': None,
                 'remote': False,
-                'capabilities': None
+                'capabilities': {}
             },
             {
                 'name': 'chrome',

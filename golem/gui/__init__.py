@@ -843,7 +843,7 @@ def unlock_file():
 def get_supported_browsers():
     project = request.form['project']
     settings = settings_manager.get_project_settings(root_path, project)
-    remote_browsers = settings_manager.get_remote_browsers(settings)
+    remote_browsers = settings_manager.get_remote_browser_list(settings)
     default_browsers = gui_utils.get_supported_browsers_suggestions()
     return json.dumps(remote_browsers + default_browsers)
 

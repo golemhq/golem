@@ -271,34 +271,36 @@ class Test_save_project_settings:
         assert actual == input_settings
 
 
-class Test_get_remote_browsers:
+class Test_get_remote_browser_list:
 
-    def test_get_remote_browsers(self):
+    def test_get_remote_browser_list(self):
         input_settings = {
             'remote_browsers': {
                 'browser01': {},
                 'browser02': {}
             }
         }
-        remote_browsers = settings_manager.get_remote_browsers(input_settings)
+        remote_browsers = settings_manager.get_remote_browser_list(input_settings)
         expected = ['browser01', 'browser02']
         assert remote_browsers == expected
 
 
-    def test_get_remote_browsers_empty(self):
+    def test_get_remote_browser_list_empty(self):
         input_settings = {
             'another_setting': '',
             'remote_browsers': {}
         }
-        remote_browsers = settings_manager.get_remote_browsers(input_settings)
+        remote_browsers = settings_manager.get_remote_browser_list(input_settings)
         expected = []
         assert remote_browsers == expected
 
 
-    def test_get_remote_browsers_not_present(self):
+    def test_get_remote_browser_list_not_present(self):
         input_settings = {
             'another_setting': ''
         }
-        remote_browsers = settings_manager.get_remote_browsers(input_settings)
+        remote_browsers = settings_manager.get_remote_browser_list(input_settings)
         expected = []
         assert remote_browsers == expected
+
+# TODO get_remote_browsers

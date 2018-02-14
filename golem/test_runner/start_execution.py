@@ -40,7 +40,7 @@ def _define_drivers(drivers, remote_browsers, default_browsers):
                 'name': driver,
                 'full_name': None,
                 'remote': False,
-                'capabilities': None
+                'capabilities': {}
             }
             drivers_def.append(_)
         else:

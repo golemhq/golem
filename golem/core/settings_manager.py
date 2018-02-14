@@ -192,8 +192,14 @@ def save_project_settings(workspace, project, project_settings):
 
 
 def get_remote_browsers(settings):
-    """Return a list of the remote browsers defined in settings."""
-    remote_browsers = []
+    """Return the defined remote browsers in settings."""
+    remote_browsers = {}
     if 'remote_browsers' in settings:
-        remote_browsers = list(settings['remote_browsers'].keys())
+        remote_browsers = settings['remote_browsers']
     return remote_browsers
+
+
+def get_remote_browser_list(settings):
+    """Return a list of the remote browsers defined in settings."""
+    remote_browser_list = list(get_remote_browsers(settings).keys())
+    return remote_browser_list
