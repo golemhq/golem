@@ -160,33 +160,25 @@ def save_page_object_code(root_path, project, full_page_name, content):
         po_file.write(content)
 
 
-def new_page_object(root_path, project, parents, page_name,
-                    add_parents=False):
+def new_page_object(root_path, project, parents, page_name):
     """Create a new page object.
     Parents is a list of directories and subdirectories where the
     page should be stored.
     If add_parents is True, the parent directories will be added
     if they do not exist."""
     errors = []
-    full_page_path = os.path.join(root_path, 'projects', project, 'pages',
-                             os.sep.join(parents), '{}.py'.format(page_name))
-    if os.path.isfile(full_page_path):
+    base_path = os.path.join(root_path, 'projects', project, 'pages')
+    full_path = os.path.join(base_path, os.sep.join(parents))
+    filepath = os.path.join(full_path, '{}.py'.format(page_name))
+    if os.path.isfile(filepath):
         errors.append('A page file with that name already exists')
     if not errors:
-        page_path = os.path.join(root_path, 'projects', project,
-                                 'pages', os.sep.join(parents))
-        if not os.path.exists(page_path):
-            if add_parents:
-                base_path = pages_base_dir(root_path, project)
-                for parent in parents:
-                    base_path = os.path.join(base_path, parent)
-                    if not os.path.exists(base_path):
-                        file_manager.create_directory(path=base_path,
-                                                      add_init=True)
-            else:
-                errors.append('Directory for new page does not exist')
-    if not errors:
-        with open(full_page_path, 'w') as po_file:
+        if not os.path.isdir(full_path):
+            for parent in parents:
+                base_path = os.path.join(base_path, parent)
+                file_manager.create_directory(path=base_path,
+                                              add_init=True)
+        with open(filepath, 'w') as po_file:
             po_file.write('')
     return errors
 

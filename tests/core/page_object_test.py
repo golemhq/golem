@@ -28,8 +28,7 @@ class Test_get_page_object_content:
         testdir = permanent_project_fixture['testdir']
         page_name = 'page_test_get_content_ab1412'
 
-        page_object.new_page_object(testdir, project, [],
-                                    page_name, add_parents=False)
+        page_object.new_page_object(testdir, project, [], page_name)
         page_path = os.path.join(testdir, 'projects',
                                  project, 'pages', page_name + '.py')
         with open(page_path, 'w') as page_file:
@@ -74,8 +73,7 @@ class Test_get_page_object_code:
         testdir = permanent_project_fixture['testdir']
         page_name = 'page_test_get_code_ab8456'
 
-        page_object.new_page_object(testdir, project, [],
-                                    page_name, add_parents=False)
+        page_object.new_page_object(testdir, project, [], page_name)
         page_path = os.path.join(testdir, 'projects',
                                  project, 'pages', page_name + '.py')
         file_content = 'test=("id", "xyz")\ntest2=("id", "abc")\n'
@@ -103,7 +101,7 @@ class Test_save_page_object:
                                  'pages', 'testa', 'testb',
                                  'page_test987.py')
         page_object.new_page_object(testdir, project, ['testa', 'testb'],
-                                    'page_test987', add_parents=True)
+                                    'page_test987')
         page_name = 'testa.testb.page_test987'
         elements = [
             {'name': 'a', 'selector': 'id', 'value': 'b', 'display_name': 'a'},
@@ -139,8 +137,7 @@ class Test_save_page_object_code:
 
         page_name = 'page_name_x1'
         parents = ['save', 'page', 'code']
-        page_object.new_page_object(testdir, project, parents,
-                                    page_name, add_parents=True)
+        page_object.new_page_object(testdir, project, parents, page_name)
 
         page_code = ("elem1 = ('id', 'x')\n"
                      "elem2 = ('id', 'y')\n"
@@ -165,8 +162,7 @@ class Test_new_page_object:
         testdir = permanent_project_fixture['testdir']
         page_name = 'page_name_x2'
         parents = ['new', 'page', 'object']
-        page_object.new_page_object(testdir, project, parents,
-                                    page_name, add_parents=True)
+        page_object.new_page_object(testdir, project, parents, page_name)
         full_path = os.path.join(testdir, 'projects', project,
                                  'pages', os.sep.join(parents),
                                  page_name + '.py')

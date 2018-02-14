@@ -19,10 +19,10 @@ def _format_list_items(list_items):
     return list_string
 
 
-def save_suite(root_path, project, suite, test_cases, workers,
+def save_suite(root_path, project, suite_name, test_cases, workers,
                browsers, environments):
     """Save suite content to file."""
-    suite_name, parents = utils.separate_file_from_parents(suite)
+    suite_name, parents = utils.separate_file_from_parents(suite_name)
 
     suite_path = os.path.join(root_path, 'projects', project, 'suites',
                               os.sep.join(parents), '{}.py'.format(suite_name))
@@ -39,18 +39,24 @@ def save_suite(root_path, project, suite, test_cases, workers,
 
 def new_suite(root_path, project, parents, suite_name):
     """Create a new empty suite."""
+    suite_content = ('\n'
+                     'browsers = []\n\n'
+                     'environments = []\n\n'
+                     'workers = 1\n\n'
+                     'tests = []\n')
     errors = []
-    path = os.path.join(root_path, 'projects', project, 'suites',
-                        os.sep.join(parents), '{}.py'.format(suite_name))
-    if os.path.isfile(path):
+    base_path = os.path.join(root_path, 'projects', project, 'suites')
+    full_path = os.path.join(base_path, os.sep.join(parents))
+    filepath = os.path.join(full_path, '{}.py'.format(suite_name))
+    if os.path.isfile(filepath):
         errors.append('A suite with that name already exists')
     if not errors:
-        suite_content = ('\n'
-                         'browsers = []\n\n'
-                         'environments = []\n\n'
-                         'workers = 1\n\n'
-                         'tests = []\n')
-        with open(path, 'w') as suite_file:
+        # create the directory structure if it does not exist
+        if not os.path.isdir(full_path):
+            for parent in parents:
+                base_path = os.path.join(base_path, parent)
+                file_manager.create_directory(path=base_path, add_init=True)
+        with open(filepath, 'w') as suite_file:
             suite_file.write(suite_content)
         print('Suite {} created for project {}'.format(suite_name, project))
     return errors

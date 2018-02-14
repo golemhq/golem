@@ -34,7 +34,9 @@ class Test_get_envs:
             env_json_file.write(ENV_DATA)
         envs = environment_manager.get_envs(testdir, project)
         expected_envs = ['test', 'development']
-        assert envs == expected_envs
+        assert len(envs) == 2
+        assert 'test' in envs
+        assert 'development' in envs
 
 
     def test_get_envs_empty_file(self, permanent_project_fixture):

@@ -110,8 +110,8 @@ def create_directory(path_list=None, path=None, add_init=False):
     """
     if path_list:
         path = os.sep.join(path_list)
-    if not os.path.exists(path):
-        os.makedirs(path)
+    if not os.path.isdir(path):
+        os.makedirs(path, exist_ok=True)
     if add_init:
         # add __init__.py file to make the new directory a python package
         init_path = os.path.join(path, '__init__.py')

@@ -575,8 +575,7 @@ def new_tree_element():
                                                                 dir_type='pages')
                 else:
                     errors = page_object.new_page_object(root_path, project, parents,
-                                                         element_name,
-                                                         add_parents=add_parents)
+                                                         element_name)
             elif elem_type == 'suite':
                 if is_dir:
                     errors = file_manager.new_directory_of_type(root_path, project,

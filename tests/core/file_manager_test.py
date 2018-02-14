@@ -36,8 +36,7 @@ class Test_generate_file_structure_dict:
         project = random_project_fixture['name']
         testdir = random_project_fixture['testdir']
         page_object.new_page_object(testdir, project, [], 'page_one')
-        page_object.new_page_object(testdir, project, ['module'], 'page_two',
-                                    add_parents=True)
+        page_object.new_page_object(testdir, project, ['module'], 'page_two')
         full_path = page_object.pages_base_dir(testdir, project)
         file_structure = file_manager.generate_file_structure_dict(full_path)
         expected_result = {
@@ -78,8 +77,7 @@ class Test_get_files_dot_path:
                                     'page1')
         # create a new page object in pages/dir/subdir/
         page_object.new_page_object(testdir_fixture['path'], project,
-                                    ['dir', 'subdir'], 'page2',
-                                    add_parents=True)
+                                    ['dir', 'subdir'], 'page2')
         base_path = os.path.join(testdir_fixture['path'], 'projects',
                                  project, 'pages')
         dot_files = file_manager.get_files_dot_path(base_path)

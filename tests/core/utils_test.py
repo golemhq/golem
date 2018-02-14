@@ -72,21 +72,14 @@ class Test_get_pages:
     def test_get_pages(self, testdir_fixture, project_fixture):
         page_object.new_page_object(testdir_fixture['path'],
                                   project_fixture['name'],
-                                  ['subdir1', 'subdir2'],
-                                  'test3',
-                                  add_parents=True)
+                                  ['subdir1', 'subdir2'], 'test3')
         page_object.new_page_object(testdir_fixture['path'],
                                   project_fixture['name'],
-                                  ['subdir1'],
-                                  'test2',
-                                  add_parents=True)
+                                  ['subdir1'], 'test2')
         page_object.new_page_object(testdir_fixture['path'],
-                                  project_fixture['name'],
-                                  [],
-                                  'test1',
-                                  add_parents=True)
+                                  project_fixture['name'], [], 'test1')
         pages = utils.get_pages(testdir_fixture['path'],
-                                       project_fixture['name'])
+                                project_fixture['name'])
 
         expected_result = {
             'type': 'directory',
@@ -133,14 +126,10 @@ class Test_get_pages:
 class Test_get_suites:
 
     def test_get_suites(self, testdir_fixture, project_fixture):
-        suite.new_suite(testdir_fixture['path'],
-                        project_fixture['name'],
-                        [],
-                        'suite1')
-        suite.new_suite(testdir_fixture['path'],
-                        project_fixture['name'],
-                        [],
-                        'suite2')
+        suite.new_suite(testdir_fixture['path'], project_fixture['name'],
+                        [], 'suite1')
+        suite.new_suite(testdir_fixture['path'], project_fixture['name'],
+                        [], 'suite2')
         
         suites = utils.get_suites(testdir_fixture['path'],
                                   project_fixture['name'])

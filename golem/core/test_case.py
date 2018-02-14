@@ -9,7 +9,10 @@ import inspect
 import pprint
 from ast import literal_eval
 
-from golem.core import utils, page_object, test_execution
+from golem.core import (utils,
+                        page_object,
+                        test_execution,
+                        file_manager)
 from golem.core import test_data as test_data_module
 
 
@@ -179,21 +182,19 @@ def new_test_case(root_path, project, parents, tc_name):
         "    pass\n\n")
     errors = []
     # check if a file already exists
-    fullpath = os.path.join(root_path, 'projects', project, 'tests',
-                        os.sep.join(parents), '{}.py'.format(tc_name))
-    if os.path.isfile(fullpath):
+    base_path = os.path.join(root_path, 'projects', project, 'tests')
+    full_path = os.path.join(base_path, os.sep.join(parents))
+    filepath = os.path.join(full_path, '{}.py'.format(tc_name))
+    if os.path.isfile(filepath):
         errors.append('A test with that name already exists')
     if not errors:
-        base_path = os.path.join(root_path, 'projects', project,
-                                 'tests', os.sep.join(parents))
-        os.makedirs(base_path, exist_ok=True)
-        # # create the directory structure if it does not exist
-        # if not os.path.exists(test_case_path):
-        #     for parent in parents:
-        #         base_path = os.path.join(base_path, parent)
-        #         utils.create_directory(path=base_path, add_init=True)
-        # test_case_full_path = os.path.join(test_case_path, tc_name + '.py')
-        with open(fullpath, 'w') as test_file:
+        # create the directory structure if it does not exist
+        if not os.path.isdir(full_path):
+            for parent in parents:
+                base_path = os.path.join(base_path, parent)
+                file_manager.create_directory(path=base_path, add_init=True)
+        
+        with open(filepath, 'w') as test_file:
             test_file.write(test_case_content)
         print('Test {} created for project {}'.format(tc_name, project))
     return errors

@@ -6,7 +6,8 @@ from golem.core import test_case
 from tests.fixtures import (testdir_fixture,
                             random_testdir_fixture,
                             random_project_fixture,
-                            project_fixture)
+                            project_fixture,
+                            permanent_project_fixture)
 
 
 SAMPLE_TEST_CONTENT = """
@@ -227,7 +228,6 @@ class Test_get_test_case_content:
         assert test_content['steps']['setup'] == [{'method_name': 'page1.func1', 'parameters': []}]
         assert test_content['steps']['test'] == [{'method_name': 'page2.func2', 'parameters': ["'a'", "'b'"]}, {'method_name': 'click', 'parameters': ['page2.elem1']}]
         assert test_content['steps']['teardown'] == []
-        #assert False
 
 
 class Test_get_test_case_code:
@@ -272,3 +272,34 @@ class Test_new_test_case:
         assert errors == ['A test with that name already exists']
 
 
+    def test_new_test_case_with_parents(self, permanent_project_fixture):            
+        testdir = permanent_project_fixture['testdir']
+        project = permanent_project_fixture['name']
+        test_name = 'test_new_test_0001'
+        parents = ['asd01', 'asd02']
+        errors = test_case.new_test_case(testdir, project, parents, test_name)
+        path = os.path.join(testdir, 'projects', project, 'tests',
+                            os.sep.join(parents), test_name + '.py')
+        assert errors == []
+        assert os.path.isfile(path)
+        # verify that each parent dir has __init__.py file
+        init_path = os.path.join(testdir, 'projects', project, 'tests',
+                                 'asd01', '__init__.py')
+        assert os.path.isfile(init_path)
+        init_path = os.path.join(testdir, 'projects', project, 'tests',
+                                 'asd01', 'asd02', '__init__.py')
+        assert os.path.isfile(init_path)
+
+
+    def test_new_test_case_with_parents_already_exist(self, permanent_project_fixture):
+        testdir = permanent_project_fixture['testdir']
+        project = permanent_project_fixture['name']
+        test_name1 = 'test_new_0004'
+        test_name2 = 'test_new_0005'
+        parents = ['asf01']
+        test_case.new_test_case(testdir, project, parents, test_name1)
+        errors = test_case.new_test_case(testdir, project, parents, test_name2)
+        path = os.path.join(testdir, 'projects', project, 'tests',
+                            os.sep.join(parents), test_name2 + '.py')
+        assert errors == []
+        assert os.path.isfile(path)
