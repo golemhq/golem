@@ -3,6 +3,9 @@
 
 ## [Unreleased]
 
+### Added
+- action set_browser_capability
+
 ### Fixed
 - #78
 

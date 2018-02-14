@@ -351,6 +351,18 @@ def send_keys(element, text):
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
 
 
+def set_browser_capability(capability_key, capability_value):
+    """Set a browser capability.
+    Parameters:
+    capability_key : value
+    capability_value : value
+    """
+    step_message = ('Set browser cabability "{}" to "{}"'
+                    .format(capability_key, capability_value))
+    execution.browser_definition['capabilities'][capability_key] = capability_value
+    execution.logger.debug(step_message)
+
+
 def set_window_size(width, height):
     """Set the browser window size.
     Parameters:
