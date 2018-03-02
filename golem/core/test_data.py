@@ -11,6 +11,7 @@ import os
 import sys
 import importlib
 
+from ast import literal_eval
 from golem.core import utils
 
 
