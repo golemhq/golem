@@ -1,6 +1,7 @@
 """Functions to parse Golem report files."""
 import json
 import os
+import base64
 
 
 def get_date_time_from_timestamp(timestamp):
@@ -280,3 +281,22 @@ def generate_execution_report(execution_directory, elapsed_time):
     report_path = os.path.join(execution_directory, 'execution_report.json')
     with open(report_path, 'w', encoding='utf-8') as json_file:
         json.dump(data, json_file, indent=4)
+
+
+def return_html_test_steps(test_case_data, file_name):
+    report_html = """
+    """
+    for test in test_case_data['steps']:
+        if test['screenshot'] is not None:
+            image_filename = "%s/%s.png" % (file_name, test['screenshot'])
+
+            if (os.path.isfile(image_filename)):
+                b64 = base64.encodestring(open(image_filename, "rb").read())
+
+                image_img = '<img alt="%s" title="%s" src="data:image/png;base64,%s" width="700"/>' % (
+                'test', 'test', b64.decode("utf8"))
+                report_html += f"""<li>{image_img}</li>"""
+        else:
+            report_html += f"""<li>{test['message']}</li>"""
+
+    return report_html
