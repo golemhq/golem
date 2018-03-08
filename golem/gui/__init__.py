@@ -535,7 +535,7 @@ def getHTMLReport():
         test_module = test['module']
         test_browser = test['browser']
         test_result = test['result']
-        test_set_name = test['data']['name']
+        test_set_name = test['set_name']
         test_start_date_time = test['start_date_time']
         test_sub_modules = test['sub_modules']
         test_test_elapsed_time = test['test_elapsed_time']
