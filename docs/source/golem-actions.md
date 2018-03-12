@@ -12,6 +12,25 @@ Golem comes with predefined actions that cover almost all the needs to write tes
 Activates a browser to use in subsequent actions. Only needed when having more than one browser open.
 
 
+##### add_cookie(cookie_dict)
+
+Add a cookie to the current session.
+    
+Required keys are: "name" and "value". Optional keys are: "path", "domain", "secure", "expiry"
+
+Note:
+* If a cookie with the same name exists, it will be overriden.
+* This function cannot set the domain of a cookie, the domain URL
+must be visited by the browser first.
+* The domain is set automatically to the current domain the browser is in.
+* If the browser did not visit any url (initial blank page) this
+function will fail with "Message: unable to set cookie"
+
+**Example usage:**
+
+add_cookie({'name': 'foo', 'value': 'bar'})
+
+
 ##### capture(message='')
 
 Take a screenshot of the browser, the message is optional
@@ -32,6 +51,16 @@ Perform a mouse click
 Closes the webdriver browser
 
 
+##### delete_cookie(name)
+Delete a cookie from the current session.
+
+
+##### delete_cookies()
+Delete all cookies from the current session.
+
+Note: this only deletes cookies from the current domain.
+
+
 ##### get(url)
 
 Navigate to a URL, same as *navigate(url)*
@@ -40,6 +69,14 @@ Navigate to a URL, same as *navigate(url)*
 ##### get_browser()
 
 Returns the active browser driver object
+
+
+##### get_cookie(name)
+Get a cookie by its name. Returns the cookie if found, None if not.
+
+
+##### get_cookies()
+Returns a list of dictionaries, corresponding to cookies visible in the current session.
 
 
 ##### get_current_url()
@@ -110,6 +147,16 @@ select_by_value('#countrySelect', 'CA')
 
 Send key strokes to the element
 
+##### set_browser_capability(capability_key, capability_value)
+Set a browser capability. Must be called before the browser is started.
+
+
+##### verify_cookie_value(name, value)
+Verify the value of a cookie.
+
+
+##### verify_cookie_exists(name)
+Verify a cookie exists in the current session. The cookie is found by its name.
 
 ##### verify_exists(element)
 
