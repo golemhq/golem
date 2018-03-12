@@ -282,7 +282,7 @@ class Test_get_remote_browser_list:
         }
         remote_browsers = settings_manager.get_remote_browser_list(input_settings)
         expected = ['browser01', 'browser02']
-        assert remote_browsers == expected
+        assert sorted(remote_browsers) == sorted(expected)
 
 
     def test_get_remote_browser_list_empty(self):
