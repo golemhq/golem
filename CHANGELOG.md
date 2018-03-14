@@ -4,7 +4,7 @@
 ## [Unreleased]
 
 ### Added
-- action set_browser_capability
+- actions: set_browser_capability, add_cookie, delete_cookie, delete_all_cookies, get_cookie, get_cookies, verify_cookie_value, verify_cookie_exists
 
 ### Fixed
 - #78

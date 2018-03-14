@@ -167,7 +167,7 @@ class Test_generate_report:
             'set_name': 'set_001',
         }
         report.generate_report(report_dir, test_name, test_data, result)
-        expected = {
+        expected_a = {
             'test_case': test_name,
             'result': 'pass',
             'steps': ['step1', 'step2'],
@@ -184,7 +184,25 @@ class Test_generate_report:
                 'var2': "'value2'"
             }
         }
+        expected_b = {
+            'test_case': test_name,
+            'result': 'pass',
+            'steps': ['step1', 'step2'],
+            'description': 'description of the test',
+            'error': '',
+            'short_error': '',
+            'test_elapsed_time': 22.22,
+            'test_timestamp': '2018.02.04.02.16.42.729',
+            'browser': 'chrome',
+            'environment': 'env01',
+            'set_name': 'set_001',
+            'test_data': {
+                'env': "{'url': '1.1.1.1', 'name': 'env01'}",
+                'var2': "'value2'"
+            }
+        }
         path = os.path.join(report_dir, 'report.json')
         with open(path) as report_file:
             actual = json.load(report_file)
-            assert actual == expected
+            # TODO
+            assert actual == expected_a or actual == expected_b

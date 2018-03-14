@@ -54,6 +54,28 @@ def activate_browser(browser_id):
     _capture_or_add_step(step_message, False)
 
 
+def add_cookie(cookie_dict):
+    """Add a cookie to the current session.
+    
+    Required keys are: "name" and "value"
+    Optional keys are: "path", "domain", "secure", "expiry"
+    
+    Note:
+    * If a cookie with the same name exists, it will be overriden.
+    * This function cannot set the domain of a cookie, the domain URL
+    must be visited by the browser first.
+    * The domain is set automatically to the current domain the browser is in.
+    * If the browser did not visit any url (initial blank page) this
+    function will fail with "Message: unable to set cookie"
+
+    Parameters:
+    cookie_dict : value
+    """
+    execution.logger.debug('Add cookie: {}'.format(cookie_dict))
+    driver = browser.get_browser()
+    driver.add_cookie(cookie_dict)
+
+
 def assert_contains(element, value):
     """Assert element contains value
     Parameters:
@@ -176,6 +198,30 @@ def debug():
         pass
 
 
+def delete_cookie(name):
+    """Delete a cookie from the current session
+
+    Parameters:
+    name: value
+    """
+    execution.logger.debug('Delete cookie "{}"'.format(name))
+    driver = browser.get_browser()
+    cookie = driver.get_cookie(name)
+    if not cookie:
+        raise Exception('Cookie "{}" was not found'.format(name))
+    else:
+        driver.delete_cookie(name)
+
+
+def delete_all_cookies():
+    """Delete all cookies from the current session.
+
+    Note: this only deletes cookies from the current domain.
+    """
+    execution.logger.debug('Delete all cookies')
+    driver = browser.get_browser().delete_all_cookies()
+
+
 def get(url):
     """Navigate to the given URL
     Parameters:
@@ -187,6 +233,26 @@ def get(url):
 def get_browser():
     """Get the current active browser"""
     return browser.get_browser()
+
+
+def get_cookie(name):
+    """Get a cookie by its name.
+    Returns the cookie if found, None if not.
+    Parameters:
+    name : value
+    """
+    execution.logger.debug('Get cookie "{}"'.format(name))
+    driver = browser.get_browser()
+    return driver.get_cookie(name)
+
+
+def get_cookies():
+    """Returns a list of dictionaries, corresponding to cookies
+    visible in the current session.
+    """
+    execution.logger.debug('Get all current cookies')
+    driver = browser.get_browser()
+    return driver.get_cookies()
 
 
 def get_current_url():
@@ -394,6 +460,43 @@ def store(key, value):
     """
     execution.logger.info('Store value {} in key {}'.format(value, key))
     setattr(execution.data, key, value)
+
+
+def verify_cookie_value(name, value):
+    """Verify the value of a cookie.
+
+    Parameters:
+    name: value
+    value: value
+    """
+    step_message = ('Verify that cookie "{}" contains value "{}"'
+                    .format(name, value))
+    execution.logger.info(step_message)
+    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    cookie = browser.get_browser().get_cookie(name)
+    if not cookie:
+        raise Exception('Cookie "{}" was not found'.format(name))
+    elif not 'value' in cookie:
+        raise Exception('Cookie "{}" did not have "value" key'.format(name))
+    elif cookie['value'] != value:
+        msg = ('Expected cookie "{}" value to be "{}" but was "{}"'
+               .format(name, value, cookie['value']))
+        raise Exception(msg)
+         
+
+def verify_cookie_exists(name):
+    """Verify a cookie exists in the current session.
+    The cookie is found by its name.
+
+    Parameters:
+    name: value
+    """
+    step_message = 'Verify that cookie "{}" exists'.format(name)
+    execution.logger.info(step_message)
+    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    cookie = browser.get_browser().get_cookie(name)
+    if not cookie:
+        raise Exception('Cookie "{}" was not found'.format(name))
 
 
 # TODO rename to verify_element_exists
