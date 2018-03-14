@@ -8,3 +8,4 @@
 build/
 dist/
 geckodriver.log
+docs/build/
