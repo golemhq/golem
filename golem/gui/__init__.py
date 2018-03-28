@@ -434,7 +434,7 @@ def getHTMLReport():
     jquery_js = open(os.path.join(os.path.dirname(__file__), "static/js/external/jquery.min.js"), 'r').read()
     bootstrap_js = open(os.path.join(os.path.dirname(__file__), "static/js/external/bootstrap.min.js"), 'r').read()
 
-    report_html = f"""
+    report_html = """
     <!DOCTYPE html>
     <html>
     <head>
@@ -498,8 +498,8 @@ def getHTMLReport():
                                             <div aria-valuenow="20" style="width: 0%;" class="progress-bar ok-bar passed-green-background" data-transitiongoal="20"></div>
                                         </div>
                                     </td>
-                                    <td class="total-time">{time.strftime('%Mm %Ss', time.gmtime(total_time))}</td>
-                                    <td class="net-time">{time.strftime('%Mm %Ss', time.gmtime(net_elapsed_time))}</td>
+                                    <td class="total-time">{total_time}</td>
+                                    <td class="net-time">{net_time}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -524,7 +524,21 @@ def getHTMLReport():
                                     <th>&nbsp;</th>
                                 </tr>
                             </thead>
-                            <tbody>"""
+                            <tbody>""".format(
+        bootstrap_css=bootstrap_css,
+        bootstrap_theme_css=bootstrap_theme_css,
+        main_css=main_css,
+        report_css=report_css,
+        jquery_js=jquery_js,
+        bootstrap_js=bootstrap_js,
+        main_js=main_js,
+        project_title=project_title,
+        total_cases=total_cases,
+        total_cases_ok=total_cases_ok,
+        total_cases_fail=total_cases_fail,
+        total_time=time.strftime('%Mm %Ss', time.gmtime(total_time)),
+        net_time=time.strftime('%Mm %Ss', time.gmtime(net_elapsed_time))
+    )
 
     count = 0
     for test in execution_data['test_cases']:
@@ -549,31 +563,31 @@ def getHTMLReport():
         test_case_steps = report_parser.return_html_test_steps(test_case_data, file_name)
 
         if test_result == 'pass':
-            pass_or_fail = f"""<span class="passed-green" style="font-size: 20px"><strong>&#9745;</strong></span>"""
+            pass_or_fail = """<span class="passed-green" style="font-size: 20px"><strong>&#9745;</strong></span>"""
         else:
-            pass_or_fail = f"""<span class="failed-red" style="font-size: 20px"><strong>&#9746;</strong></span></span>"""
+            pass_or_fail = """<span class="failed-red" style="font-size: 20px"><strong>&#9746;</strong></span></span>"""
 
-        report_html += f"""
+        report_html += """
             <tr>
                 <td>
-                    {count+1}
+                    {count_plus_one}
                 </td>
                 <td>{test_module}</td>
-                <td>{test_name}</td>
+                <td>{test_full_name}</td>
                 <td>{test_set_name}</td>
                 <td>{test_environment}</td>
                 <td>{test_browser}</td>
                 <td>{pass_or_fail} {test_result}</td>
                 <td>{test_test_elapsed_time}</td>
                 <td class="link">
-                    <a href="#{test_name}_{count}" data-toggle="collapse" data-target="#{test_name}_{count}" aria-expanded="false" aria-controls="{test_name}_{count}">
+                    <a href="#{test_full_name}_{count}" data-toggle="collapse" data-target="#{test_full_name}_{count}" aria-expanded="false" aria-controls="{test_full_name}_{count}">
                         <span style="font-size: 20px"><strong>&#8853;</strong></span>
                     </a>
                 </td>
             </tr>
             <tr style="height:0px !important;">
                 <td style="height:0px !important; padding-top:0px !important; padding-bottom: 0px !important;"colspan="9">
-                    <div class="collapse" id="{test_name}_{count}">
+                    <div class="collapse" id="{test_full_name}_{count}">
                         <div class="row">
                             <ol>
                                 {test_case_steps}
@@ -581,11 +595,21 @@ def getHTMLReport():
                         </div>
                     </div>
                 </td>
-            </tr>
-        """
+            </tr>""".format(
+                count_plus_one=count+1,
+                test_module=test_module,
+                test_full_name=test_full_name,
+                test_set_name=test_set_name,
+                test_environment=test_environment,
+                test_browser=test_browser,
+                pass_or_fail=pass_or_fail,
+                test_result=test_result,
+                test_test_elapsed_time=test_test_elapsed_time,
+                count=count,
+                test_case_steps=test_case_steps)
         count += 1
 
-    report_html += f"""
+    report_html += """
                     </tbody>
                 </table>
             </div>
@@ -598,7 +622,7 @@ def getHTMLReport():
     </script>
     </body>
     </html>
-    """
+    """.format(failPercentage=failPercentage, okPercentage=okPercentage)
 
     return Response(report_html,
                     mimetype="text/html",
