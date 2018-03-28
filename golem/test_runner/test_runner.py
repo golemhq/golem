@@ -111,12 +111,12 @@ def run_test(workspace, project, test_name, test_data, browser,
         if hasattr(test_module, 'description'):
             execution.description = test_module.description
         else:
-            logger.info('Test does not have description')
+            logger.debug('Test does not have description')
         # run setup method
         if hasattr(test_module, 'setup'):
             test_module.setup(execution.data)
         else:
-            logger.info('Test does not have setup function')
+            logger.debug('Test does not have setup function')
         # run test method
         if hasattr(test_module, 'test'):
             test_module.test(execution.data)
@@ -142,7 +142,7 @@ def run_test(workspace, project, test_name, test_data, browser,
         if hasattr(test_module, 'teardown'):
             test_module.teardown(execution.data)
         else:
-            logger.info('Test does not have a teardown function')
+            logger.debug('Test does not have a teardown function')
     except:
         result['result'] = 'fail'
         result['error'] += '\n\nteardown failed'

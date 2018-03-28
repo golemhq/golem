@@ -11,6 +11,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import NoAlertPresentException
 
 import requests
 
@@ -41,6 +42,16 @@ def _capture_or_add_step(message, screenshot_on_step):
         capture(message)
     else:
         _add_step(message)
+
+
+def accept_alert():
+    """Accept an alert"""
+    # TODO implement through browser
+    step_message = 'Accept alert'
+    execution.logger.info(step_message)
+    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    driver = browser.get_browser()
+    driver.switch_to.alert.accept()
 
 
 def activate_browser(browser_id):
@@ -220,6 +231,16 @@ def delete_all_cookies():
     """
     execution.logger.debug('Delete all cookies')
     driver = browser.get_browser().delete_all_cookies()
+
+
+def dismiss_alert():
+    """Dismiss an alert"""
+    # TODO implement through browser
+    step_message = 'Dismiss alert'
+    execution.logger.info(step_message)
+    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    driver = browser.get_browser()
+    driver.switch_to.alert.dismiss()
 
 
 def get(url):
@@ -460,6 +481,33 @@ def store(key, value):
     """
     execution.logger.info('Store value {} in key {}'.format(value, key))
     setattr(execution.data, key, value)
+
+
+def verify_alert_is_present():
+    """Verify an alert is present"""
+    # TODO implement through browser
+    step_message = 'Verify an alert is present'
+    execution.logger.info(step_message)
+    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    driver = browser.get_browser()
+    try:
+        alert = driver.switch_to.alert
+    except NoAlertPresentException:
+        assert False, 'an alert was not present'
+
+
+def verify_alert_is_not_present():
+    """Verify an alert is not present"""
+    # TODO implement through browser
+    step_message = 'Verify an alert is not present'
+    execution.logger.info(step_message)
+    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    driver = browser.get_browser()
+    try:
+        alert = driver.switch_to.alert
+        assert False, 'an alert was present'
+    except NoAlertPresentException:
+        pass
 
 
 def verify_cookie_value(name, value):

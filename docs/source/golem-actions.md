@@ -7,6 +7,11 @@ Golem comes with predefined actions that cover almost all the needs to write tes
 ### Browser Actions
 
 
+##### accept_alert()
+
+Accepts an alert present
+
+
 ##### activate_browser(browser_id)
 
 Activates a browser to use in subsequent actions. Only needed when having more than one browser open.
@@ -59,6 +64,10 @@ Delete a cookie from the current session.
 Delete all cookies from the current session.
 
 Note: this only deletes cookies from the current domain.
+
+
+##### dismiss_alert()
+Dismiss an alert
 
 
 ##### get(url)
@@ -149,6 +158,16 @@ Send key strokes to the element
 
 ##### set_browser_capability(capability_key, capability_value)
 Set a browser capability. Must be called before the browser is started.
+
+
+##### verify_alert_is_present()
+
+Verify an alert is present
+
+
+##### verify_alert_is_not_present()
+
+Verify an alert is not present
 
 
 ##### verify_cookie_value(name, value)

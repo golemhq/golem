@@ -4,6 +4,14 @@
 ## [Unreleased]
 
 ### Added
+- actions: verify_alert_is_present, verify_alert_is_not_present, accept_alert, dismiss_alert
+
+### Fixed
+- #93
+
+## [0.4.6] - 2018-03-12
+
+### Added
 - actions: set_browser_capability, add_cookie, delete_cookie, delete_all_cookies, get_cookie, get_cookies, verify_cookie_value, verify_cookie_exists
 
 ### Fixed
