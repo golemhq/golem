@@ -13,7 +13,7 @@ The Windows installer works fine, you can get it from here: [python.org/download
 
 - Mac:
 
-To install on Mac OS follow this instructions: [Installing Python 3 on Mac OS X](http://python-guide-pt-br.readthedocs.io/en/latest/starting/install3/osx/)
+To install on Mac OS follow this instructions: [Installing Python 3 on Mac OS X](http://python-guide.readthedocs.io/en/latest/starting/install3/osx/)
 
 - Linux:
 
