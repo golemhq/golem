@@ -3,17 +3,16 @@ import sys
 
 from golem.core import page_object
 
-from tests.fixtures import (testdir_fixture,
-                            random_project_fixture,
-                            permanent_project_fixture)
+from tests.fixtures import (testdir_session,
+                            project_session)
 from tests import helper_functions
 
 
 class Test_page_exists:
 
-    def test_page_exists(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_page_exists(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         page_object.new_page_object(testdir, project, [], 'page_x001_exist')
         exists = page_object.page_exists(testdir, project, 'page_x001_exist')
         not_exists = page_object.page_exists(testdir, project, 'page_x001_not_exist')
@@ -23,9 +22,9 @@ class Test_page_exists:
 
 class Test_get_page_object_content:
 
-    def test_get_page_object_content(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_get_page_object_content(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         page_name = 'page_test_get_content_ab1412'
 
         page_object.new_page_object(testdir, project, [], page_name)
@@ -36,6 +35,8 @@ class Test_get_page_object_content:
             page_file.write('def func1(c, b, a):\n')
             page_file.write('    pass')
 
+        from golem.core import test_execution
+        test_execution.root_path = testdir
         content = page_object.get_page_object_content(project, page_name)
 
         expected = {
@@ -63,14 +64,15 @@ class Test_get_page_object_content:
             'source_code': ("elem1 = ('id', 'someId', 'Elem1')\ndef func1(c, b, a):\n"
                             "    pass\n")
         }
+
         assert content == expected
 
 
 class Test_get_page_object_code:
 
-    def test_get_page_object_code(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_get_page_object_code(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         page_name = 'page_test_get_code_ab8456'
 
         page_object.new_page_object(testdir, project, [], page_name)
@@ -83,9 +85,9 @@ class Test_get_page_object_code:
         assert code == file_content
 
 
-    def test_get_page_object_code_file_not_exist(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_get_page_object_code_file_not_exist(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         page_path = os.path.join(testdir, 'projects',
                                  project, 'pages', 'does', 'not', 'exist54654.py')
         code = page_object.get_page_object_code(page_path)
@@ -94,9 +96,9 @@ class Test_get_page_object_code:
 
 class Test_save_page_object:
 
-    def test_save_page_object(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_save_page_object(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         page_path = os.path.join(testdir, 'projects', project,
                                  'pages', 'testa', 'testb',
                                  'page_test987.py')
@@ -131,9 +133,9 @@ class Test_save_page_object:
 
 class Test_save_page_object_code:
 
-    def test_save_page_object_code(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_save_page_object_code(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
 
         page_name = 'page_name_x1'
         parents = ['save', 'page', 'code']
@@ -157,9 +159,9 @@ class Test_save_page_object_code:
 
 class Test_new_page_object:
 
-    def test_new_page_object(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_new_page_object(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         page_name = 'page_name_x2'
         parents = ['new', 'page', 'object']
         page_object.new_page_object(testdir, project, parents, page_name)

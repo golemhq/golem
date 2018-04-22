@@ -4,27 +4,28 @@ from subprocess import call
 
 from golem.core import utils, page_object, test_case, suite
 
-from tests.fixtures import project_fixture, testdir_fixture
+from tests.fixtures import project_class, testdir_session
 from tests import helper_functions
 
 
 class Test_get_test_cases:
 
-    def test_get_test_cases(self, testdir_fixture, project_fixture):
-        test_case.new_test_case(testdir_fixture['path'],
-                                project_fixture['name'],
+    def test_get_test_cases(self, project_class):
+        testdir = project_class['testdir']
+        test_case.new_test_case(testdir,
+                                project_class['name'],
                                 ['subdir1', 'subdir2'],
                                 'test3')
-        test_case.new_test_case(testdir_fixture['path'],
-                                project_fixture['name'],
+        test_case.new_test_case(testdir,
+                                project_class['name'],
                                 ['subdir1'],
                                 'test2')
-        test_case.new_test_case(testdir_fixture['path'],
-                                project_fixture['name'],
+        test_case.new_test_case(testdir,
+                                project_class['name'],
                                 [],
                                 'test1')
-        tests = utils.get_test_cases(testdir_fixture['path'],
-                                     project_fixture['name'])
+        tests = utils.get_test_cases(testdir,
+                                     project_class['name'])
         expected_result = {
             'type': 'directory',
             'name': 'tests',
@@ -69,17 +70,19 @@ class Test_get_test_cases:
 
 class Test_get_pages:
 
-    def test_get_pages(self, testdir_fixture, project_fixture):
-        page_object.new_page_object(testdir_fixture['path'],
-                                  project_fixture['name'],
+    def test_get_pages(self, project_class):
+        testdir = project_class['testdir']
+        page_object.new_page_object(testdir,
+                                  project_class['name'],
                                   ['subdir1', 'subdir2'], 'test3')
-        page_object.new_page_object(testdir_fixture['path'],
-                                  project_fixture['name'],
+        page_object.new_page_object(testdir,
+                                  project_class['name'],
                                   ['subdir1'], 'test2')
-        page_object.new_page_object(testdir_fixture['path'],
-                                  project_fixture['name'], [], 'test1')
-        pages = utils.get_pages(testdir_fixture['path'],
-                                project_fixture['name'])
+        page_object.new_page_object(testdir,
+                                    project_class['name'],
+                                    [], 'test1')
+        pages = utils.get_pages(testdir,
+                                project_class['name'])
 
         expected_result = {
             'type': 'directory',
@@ -125,14 +128,15 @@ class Test_get_pages:
 
 class Test_get_suites:
 
-    def test_get_suites(self, testdir_fixture, project_fixture):
-        suite.new_suite(testdir_fixture['path'], project_fixture['name'],
+    def test_get_suites(self, project_class):
+        testdir = project_class['testdir']
+        suite.new_suite(testdir, project_class['name'],
                         [], 'suite1')
-        suite.new_suite(testdir_fixture['path'], project_fixture['name'],
+        suite.new_suite(testdir, project_class['name'],
                         [], 'suite2')
         
-        suites = utils.get_suites(testdir_fixture['path'],
-                                  project_fixture['name'])
+        suites = utils.get_suites(testdir,
+                                  project_class['name'])
         expected_result = {
             'type': 'directory',
             'name': 'suites',
@@ -157,15 +161,15 @@ class Test_get_suites:
 
 class Test_get_projects:
 
-    def test_get_projects(self, project_fixture, testdir_fixture):
-        projects = utils.get_projects(testdir_fixture['path'])
-        assert project_fixture['name'] in projects
+    def test_get_projects(self, project_class):
+        projects = utils.get_projects(project_class['testdir'])
+        assert project_class['name'] in projects
 
 
 class Test_project_exists:
     
-    def test_project_exists(self, project_fixture, testdir_fixture):
-        exists = utils.project_exists(testdir_fixture['path'],
-                                      project_fixture['name'])
+    def test_project_exists(self, project_class):
+        exists = utils.project_exists(project_class['testdir'],
+                                      project_class['name'])
         assert exists
 

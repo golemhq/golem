@@ -2,16 +2,16 @@ import os
 
 from golem.core import settings_manager
 
-from tests.fixtures import (testdir_fixture,
-                            random_testdir_fixture,
-                            random_project_fixture,
-                            permanent_project_fixture)
+from tests.fixtures import (testdir_session,
+                            testdir_class,
+                            project_class,
+                            project_session)
 
 
 class Test_create_global_settings_file:
 
-    def test_create_global_settings_file(self, random_testdir_fixture):
-        testdir = random_testdir_fixture['path']
+    def test_create_global_settings_file(self, testdir_class):
+        testdir = testdir_class['path']
         settings_path = os.path.join(testdir, 'settings.json')
         os.remove(settings_path)
         settings_manager.create_global_settings_file(testdir)
@@ -22,9 +22,9 @@ class Test_create_global_settings_file:
 
 class Test_create_project_settings_file:
 
-    def test_create_project_settings_file(self, random_project_fixture):
-        testdir = random_project_fixture['testdir']
-        project = random_project_fixture['name']
+    def test_create_project_settings_file(self, project_class):
+        testdir = project_class['testdir']
+        project = project_class['name']
         settings_path = os.path.join(testdir, 'projects', project, 'settings.json')
         os.remove(settings_path)
         settings_manager.create_project_settings_file(testdir, project)
@@ -35,8 +35,8 @@ class Test_create_project_settings_file:
 
 class Test__read_json_with_comments:
 
-    def test__read_json_with_comments(self, random_testdir_fixture):
-        testdir = random_testdir_fixture['path']
+    def test__read_json_with_comments(self, testdir_class):
+        testdir = testdir_class['path']
         file_content = ('{\n'
                         '// a commented line\n'
                         '"implicit_wait": 10,\n'
@@ -175,8 +175,8 @@ class Test_assign_settings_default_values:
 
 class Test_get_global_settings:
 
-    def test_get_global_settings_default(self, testdir_fixture):
-        testdir = testdir_fixture['path']
+    def test_get_global_settings_default(self, testdir_session):
+        testdir = testdir_session['path']
         global_settings = settings_manager.get_global_settings(testdir)
         expected = {
             'chromedriver_path': './drivers/chromedriver',
@@ -199,8 +199,8 @@ class Test_get_global_settings:
 
 class Test_get_global_settings_as_string:
 
-    def test_get_global_settings_as_string(self, testdir_fixture):
-        testdir = testdir_fixture['path']
+    def test_get_global_settings_as_string(self, testdir_session):
+        testdir = testdir_session['path']
         global_settings = settings_manager.get_global_settings_as_string(testdir)
         expected = settings_manager.SETTINGS_FILE_CONTENT
         assert global_settings == expected
@@ -208,9 +208,9 @@ class Test_get_global_settings_as_string:
 
 class Test_get_project_settings:
 
-    def test_get_project_settings_default(self, random_project_fixture):
-        testdir = random_project_fixture['testdir']
-        project = random_project_fixture['name']
+    def test_get_project_settings_default(self, project_class):
+        testdir = project_class['testdir']
+        project = project_class['name']
         project_settings = settings_manager.get_project_settings(testdir, project)
         expected = {
             'chromedriver_path': './drivers/chromedriver',
@@ -235,9 +235,9 @@ class Test_get_project_settings:
 
 class Test_get_project_settings_as_string:
 
-    def test_get_project_settings_as_string(self, permanent_project_fixture):
-        testdir = permanent_project_fixture['testdir']
-        project = permanent_project_fixture['name']
+    def test_get_project_settings_as_string(self, project_session):
+        testdir = project_session['testdir']
+        project = project_session['name']
         project_settings = settings_manager.get_project_settings_as_string(
                                             testdir, project)
         expected = settings_manager.REDUCED_SETTINGS_FILE_CONTENT
@@ -246,8 +246,8 @@ class Test_get_project_settings_as_string:
 
 class Test_save_global_settings:
 
-    def test_save_global_settings(self, random_testdir_fixture):
-        testdir = random_testdir_fixture['path']
+    def test_save_global_settings(self, testdir_class):
+        testdir = testdir_class['path']
         input_settings = ('// test\n'
                           '{\n'
                           '"test": "test"\n'
@@ -259,9 +259,9 @@ class Test_save_global_settings:
 
 class Test_save_project_settings:
 
-    def test_save_project_settings(self, random_project_fixture):
-        testdir = random_project_fixture['testdir']
-        project = random_project_fixture['name']
+    def test_save_project_settings(self, project_class):
+        testdir = project_class['testdir']
+        project = project_class['name']
         input_settings = ('// test\n'
                           '{\n'
                           '"test": "test"\n'

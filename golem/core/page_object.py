@@ -3,10 +3,11 @@ Page object are modules located inside /pages/ directory
 """
 import importlib
 import os
+import sys
 import types
 import inspect
 
-from golem.core import utils, file_manager
+from golem.core import utils, file_manager, test_execution
 
 
 def page_exists(root_path, project, full_page_name):
@@ -52,23 +53,38 @@ def get_page_object_content(project, full_page_name):
         'code_lines': [],
         'source_code': ''
     }
-    _ = 'projects.{0}.pages.{1}'.format(project, full_page_name)
-    modulex = importlib.import_module(_)
+    po_module = None
+    try:
+        import_str = 'projects.{0}.pages.{1}'.format(project, full_page_name)
+        po_module = importlib.import_module(import_str)
+    except:
+        pass
+    if not po_module:
+        path = generate_page_path(test_execution.root_path, project, full_page_name)
+        spec_file = importlib.util.spec_from_file_location("file_module", path)
+        po_module = importlib.util.module_from_spec(spec_file)
+        spec_file.loader.exec_module(po_module)
     # get all the names of the module,
     # ignoring the ones starting with '_'
-    variable_list = [i for i in dir(modulex) if not i.startswith("_")]
+    variable_list = [i for i in dir(po_module) if not i.startswith("_")]
     
     # get all the import lines in a list
     try:
-        po_data['source_code'] = inspect.getsource(modulex)
+        po_data['source_code'] = inspect.getsource(po_module)
     except:
-        print('Parsing of {} failed'.format(full_page_name))
+        pass
+    if not po_data['source_code']:
+        try:
+            sys.modules['file_module'] = po_module
+            po_data['source_code'] = inspect.getsource(po_module)
+        except:
+            print('Parsing of {} failed'.format(full_page_name))    
     po_data['code_lines'] = po_data['source_code'].split('\n')
     for line in po_data['code_lines']:
         if 'import' in line:
             po_data['import_lines'].append(line)
     for var_name in variable_list:
-        variable = getattr(modulex, var_name)
+        variable = getattr(po_module, var_name)
         if isinstance(variable, types.FunctionType):
             # this is a function
             new_function = {

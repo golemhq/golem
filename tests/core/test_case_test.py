@@ -3,11 +3,10 @@ from collections import OrderedDict
 
 from golem.core import test_case
 
-from tests.fixtures import (testdir_fixture,
-                            random_testdir_fixture,
-                            random_project_fixture,
-                            project_fixture,
-                            permanent_project_fixture)
+from tests.fixtures import (testdir_session,
+                            testdir_class,
+                            project_class,
+                            project_session)
 
 
 SAMPLE_TEST_CONTENT = """
@@ -210,13 +209,10 @@ class Test__parse_step:
 
 class Test_get_test_case_content:
 
-    #def test_get_test_case_content(self, random_project_fixture):
-    def test_get_test_case_content(self, testdir_fixture, project_fixture):
-        root_path = project_fixture['testdir']
-        project = project_fixture['name']
+    def test_get_test_case_content(self, project_class):
+        root_path = project_class['testdir']
+        project = project_class['name']
 
-        # root_path = random_project_fixture['testdir']
-        # project = random_project_fixture['name']
         test_name = 'some_test_case'
         path = os.path.join(root_path, 'projects', project,
                             'tests', test_name + '.py')
@@ -232,10 +228,10 @@ class Test_get_test_case_content:
 
 class Test_get_test_case_code:
 
-    def test_get_test_case_code(self, random_project_fixture):
+    def test_get_test_case_code(self, project_class):
         test_name = 'some_test_case2'
-        root_path = random_project_fixture['testdir']
-        project = random_project_fixture['name']
+        root_path = project_class['testdir']
+        project = project_class['name']
         path = os.path.join(root_path, 'projects', project, 'tests', test_name + '.py')
         with open(path, 'w') as ff:
             ff.write(SAMPLE_TEST_CONTENT)
@@ -245,9 +241,9 @@ class Test_get_test_case_code:
 
 class Test_new_test_case:
 
-    def test_new_test_case(self, project_fixture):
-        root_path = project_fixture['testdir']
-        project = project_fixture['name']
+    def test_new_test_case(self, project_class):
+        root_path = project_class['testdir']
+        project = project_class['name']
         test_name = 'new_test_case_001'
         parents = ['aaaa', 'bbbb']
         errors = test_case.new_test_case(root_path, project, parents, test_name)
@@ -260,9 +256,9 @@ class Test_new_test_case:
         assert test_code == NEW_TEST_CONTENT
 
 
-    def test_new_test_case_file_exists(self, project_fixture):
-        root_path = project_fixture['testdir']
-        project = project_fixture['name']
+    def test_new_test_case_file_exists(self, project_class):
+        root_path = project_class['testdir']
+        project = project_class['name']
         test_name = 'new_test_case_002'
         parents = ['aaaa', 'bbbb']
         test_case.new_test_case(root_path, project, parents, test_name)
@@ -272,9 +268,9 @@ class Test_new_test_case:
         assert errors == ['A test with that name already exists']
 
 
-    def test_new_test_case_with_parents(self, permanent_project_fixture):            
-        testdir = permanent_project_fixture['testdir']
-        project = permanent_project_fixture['name']
+    def test_new_test_case_with_parents(self, project_session):            
+        testdir = project_session['testdir']
+        project = project_session['name']
         test_name = 'test_new_test_0001'
         parents = ['asd01', 'asd02']
         errors = test_case.new_test_case(testdir, project, parents, test_name)
@@ -291,9 +287,9 @@ class Test_new_test_case:
         assert os.path.isfile(init_path)
 
 
-    def test_new_test_case_with_parents_already_exist(self, permanent_project_fixture):
-        testdir = permanent_project_fixture['testdir']
-        project = permanent_project_fixture['name']
+    def test_new_test_case_with_parents_already_exist(self, project_session):
+        testdir = project_session['testdir']
+        project = project_session['name']
         test_name1 = 'test_new_0004'
         test_name2 = 'test_new_0005'
         parents = ['asf01']
