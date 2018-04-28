@@ -285,17 +285,36 @@ def load_json_from_file(filepath, ignore_failure=False, default=None):
 
 
 def validate_python_file_syntax(path):
-    # try:
-    #     compile(code, '<string>', 'exec')
-    # except Exception as e:
-    #     error = 'syntax error'
-    # return error
     error = ''
-    specx = importlib.util.spec_from_file_location('modulename', path)
-    modulex = importlib.util.module_from_spec(specx)
+    source = open(path, 'r').read()
     try:
-        specx.loader.exec_module(modulex)
+        compile(source, path, 'exec', optimize=0)
     except:
-        # error = '\n'.join(traceback.format_exc().splitlines()[-3:])
         error = traceback.format_exc(limit=-1)
     return error
+
+
+def import_module(path):
+    """Import a Python module from a given path
+    Note: module_from_spec is new in python 3.5
+    TODO unit test
+    """
+    mod = None
+    module_dir, module_file = os.path.split(path)
+    module_name, module_ext = os.path.splitext(module_file)
+    try:
+        spec = importlib.util.spec_from_file_location(module_name, path)
+        _mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(_mod)
+        mod = _mod
+    except:
+        pass
+    if not mod:
+        try:
+            spec = importlib.util.spec_from_file_location(module_name, path)
+            _mod = spec.loader.load_module()
+            spec.loader.exec_module(_mod)
+            mod = _mod
+        except:
+            pass
+    return mod

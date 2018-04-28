@@ -98,6 +98,9 @@ def run_command(project='', test_or_suite='', browsers=[], threads=1,
                 # TODO print suites in structure
                 for suite in test_suites['sub_elements']:
                     print('  ' + suite['name'])
+        else:
+            msg = ('the project {0} does not exist'.format(project))
+            raise CommandException(msg)
 
     elif test_execution.interactive:
         from golem.test_runner import interactive

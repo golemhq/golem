@@ -1,7 +1,6 @@
 """Methods for dealing with page object modules
 Page object are modules located inside /pages/ directory
 """
-import importlib
 import os
 import sys
 import types
@@ -53,17 +52,10 @@ def get_page_object_content(project, full_page_name):
         'code_lines': [],
         'source_code': ''
     }
-    po_module = None
-    try:
-        import_str = 'projects.{0}.pages.{1}'.format(project, full_page_name)
-        po_module = importlib.import_module(import_str)
-    except:
-        pass
-    if not po_module:
-        path = generate_page_path(test_execution.root_path, project, full_page_name)
-        spec_file = importlib.util.spec_from_file_location("file_module", path)
-        po_module = importlib.util.module_from_spec(spec_file)
-        spec_file.loader.exec_module(po_module)
+
+    path = generate_page_path(test_execution.root_path, project, full_page_name)
+    po_module = utils.import_module(path)
+
     # get all the names of the module,
     # ignoring the ones starting with '_'
     variable_list = [i for i in dir(po_module) if not i.startswith("_")]

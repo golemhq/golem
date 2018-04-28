@@ -4,10 +4,8 @@ Test Cases are modules located inside the /tests/ directory
 import os
 import re
 import sys
-import importlib
 import inspect
 import pprint
-import types
 from ast import literal_eval
 
 from golem.core import (utils,
@@ -339,17 +337,5 @@ def test_case_exists(workspace, project, full_test_case_name):
 
 
 def import_test_case_module(workspace, project, full_test_case_name):
-    sys.path.append(os.path.join(workspace, 'projects', project))
-    test_module = None
-    try:
-        test_module = importlib.import_module('projects.{0}.tests.{1}'
-                                              .format(project, full_test_case_name))
-    except:
-        pass
-    if not test_module:
-        path = generate_test_case_path(workspace, project,
-                                                 full_test_case_name)
-        loader = importlib.machinery.SourceFileLoader('', path)
-        test_module = types.ModuleType(loader.name)
-        loader.exec_module(test_module)
-    return test_module
+    path = generate_test_case_path(workspace, project, full_test_case_name)
+    return utils.import_module(path)

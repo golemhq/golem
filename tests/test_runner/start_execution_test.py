@@ -6,8 +6,11 @@ import pytest
 from golem.test_runner import start_execution
 from golem.core import test_case, test_data, environment_manager, utils
 
-from tests.fixtures import testdir_session
-from tests.helper_functions import create_random_project
+from tests.fixtures import (testdir_session,
+                            testdir_function,
+                            project_session,
+                            project_function,
+                            project_function_clean)
 
 
 class Test__define_drivers:
@@ -153,12 +156,13 @@ class Test__select_environments:
 class Test__define_execution_list:
     """Tests for golem.test_runner.start_execution._define_execution_list()"""
 
-    def test_define_execution_list(self, testdir_session):
+    def test_define_execution_list(self, project_function_clean):
         """Verify that the execution list is generated properly when there's only
         one test without datasets, one driver and zero environments
         """
-        root_path = testdir_session['path']
-        project = create_random_project(root_path)
+        root_path = project_function_clean['testdir']
+        project = project_function_clean['name']
+        os.chdir(root_path)
         test_name = 'new_test_case_001'
         parents = []
         test_case.new_test_case(root_path, project, parents, test_name)
@@ -185,12 +189,13 @@ class Test__define_execution_list:
         assert execution_list == expected_list
 
 
-    def test_define_execution_list_multiple_data_sets(self, testdir_session):
+    def test_define_execution_list_multiple_data_sets(self, project_function_clean):
         """Verify that the execution list is generated properly when a test
         has multiple data sets
         """
-        root_path = testdir_session['path']
-        project = create_random_project(root_path)
+        root_path = project_function_clean['testdir']
+        project = project_function_clean['name']
+        os.chdir(root_path)
         test_name = 'new_test_case_002'
         parents = []
         test_case.new_test_case(root_path, project, parents, test_name)
@@ -237,14 +242,15 @@ class Test__define_execution_list:
         assert execution_list == expected_list
 
 
-    def test_define_execution_list_multiple_tests(self, testdir_session):
+    def test_define_execution_list_multiple_tests(self, project_function_clean):
         """Verify that the execution list is generated properly when there
         are multiple tests in the list
         """
-        root_path = testdir_session['path']
-        project = create_random_project(root_path)
+        root_path = project_function_clean['testdir']
+        project = project_function_clean['name']
+        os.chdir(root_path)
         # create test one
-        test_name_one = 'new_test_case_one'
+        test_name_one = 'test_one_001'
         parents = []
         test_case.new_test_case(root_path, project, parents, test_name_one)
         tdata = [
@@ -261,7 +267,7 @@ class Test__define_execution_list:
         test_data.save_external_test_data_file(root_path, project, test_name_one, tdata)
 
         # create test two
-        test_name_two = 'new_test_case_two'
+        test_name_two = 'test_two_001'
         parents = []
         test_case.new_test_case(root_path, project, parents, test_name_two)
 
@@ -279,19 +285,19 @@ class Test__define_execution_list:
         
         expected_list = [
             {
-                'test_name': 'new_test_case_one',
+                'test_name': 'test_one_001',
                 'data_set': {'col1': 'a', 'col2': 'b'},
                 'driver': 'chrome',
                 'report_directory': None
             },
             {
-                'test_name': 'new_test_case_one',
+                'test_name': 'test_one_001',
                 'data_set': {'col1': 'c', 'col2': 'd'},
                 'driver': 'chrome',
                 'report_directory': None
             },
             {
-                'test_name': 'new_test_case_two',
+                'test_name': 'test_two_001',
                 'data_set': {},
                 'driver': 'chrome',
                 'report_directory': None
@@ -300,14 +306,15 @@ class Test__define_execution_list:
         assert execution_list == expected_list
 
 
-    def test_define_execution_list_multiple_envs(self, testdir_session):
+    def test_define_execution_list_multiple_envs(self, project_function_clean):
         """Verify that the execution list is generated properly when the execution
         has multiple envs
         """
-        root_path = testdir_session['path']
-        project = create_random_project(root_path)
+        root_path = project_function_clean['testdir']
+        project = project_function_clean['name']
+        os.chdir(root_path)
         # create test one
-        test_name_one = 'new_test_case_one'
+        test_name_one = 'test_one_003'
         parents = []
         test_case.new_test_case(root_path, project, parents, test_name_one)
 
@@ -337,13 +344,13 @@ class Test__define_execution_list:
         
         expected_list = [
             {
-                'test_name': 'new_test_case_one',
+                'test_name': 'test_one_003',
                 'data_set': {'env': {'url': 'xxx', 'name': 'stage'}},
                 'driver': 'chrome',
                 'report_directory': None
             },
             {
-                'test_name': 'new_test_case_one',
+                'test_name': 'test_one_003',
                 'data_set': {'env': {'url': 'yyy', 'name': 'preview'}},
                 'driver': 'chrome',
                 'report_directory': None
@@ -352,18 +359,19 @@ class Test__define_execution_list:
         assert execution_list == expected_list
 
 
-    def test_define_execution_list_multiple_drivers(self, testdir_session):
+    def test_define_execution_list_multiple_drivers(self, project_function_clean):
         """Verify that the execution list is generated properly when there
         are multiple drivers in the list
         """
-        root_path = testdir_session['path']
-        project = create_random_project(root_path)
+        root_path = project_function_clean['testdir']
+        project = project_function_clean['name']
+        os.chdir(root_path)
         # create test one
-        test_name_one = 'new_test_case_one'
+        test_name_one = 'test_one_004'
         parents = []
         test_case.new_test_case(root_path, project, parents, test_name_one)
         # create test two
-        test_name_two = 'new_test_case_two'
+        test_name_two = 'test_two_004'
         parents = []
         test_case.new_test_case(root_path, project, parents, test_name_two)
 
@@ -381,25 +389,25 @@ class Test__define_execution_list:
         
         expected_list = [
             {
-                'test_name': 'new_test_case_one',
+                'test_name': 'test_one_004',
                 'data_set': {},
                 'driver': 'chrome',
                 'report_directory': None
             },
             {
-                'test_name': 'new_test_case_one',
+                'test_name': 'test_one_004',
                 'data_set': {},
                 'driver': 'firefox',
                 'report_directory': None
             },
             {
-                'test_name': 'new_test_case_two',
+                'test_name': 'test_two_004',
                 'data_set': {},
                 'driver': 'chrome',
                 'report_directory': None
             },
             {
-                'test_name': 'new_test_case_two',
+                'test_name': 'test_two_004',
                 'data_set': {},
                 'driver': 'firefox',
                 'report_directory': None
@@ -408,14 +416,16 @@ class Test__define_execution_list:
         assert execution_list == expected_list
 
 
-    def test_define_execution_list_multiple_tests_datasets_drivers_envs(self, testdir_session):
+    def test_define_execution_list_multiple_tests_datasets_drivers_envs(
+                self, project_function_clean):
         """Verify that the execution list is generated properly when there
         are multiple tests, data sets, drivers and environments
         """
-        root_path = testdir_session['path']
-        project = create_random_project(root_path)
+        root_path = project_function_clean['testdir']
+        project = project_function_clean['name']
+        os.chdir(root_path)
         # create test one
-        test_name_one = 'new_test_case_one'
+        test_name_one = 'test_one_005'
         parents = []
         test_case.new_test_case(root_path, project, parents, test_name_one)
         # test data for test one
@@ -430,7 +440,7 @@ class Test__define_execution_list:
         ]
         test_data.save_external_test_data_file(root_path, project, test_name_one, tdata)
         # create test two
-        test_name_two = 'new_test_case_two'
+        test_name_two = 'test_two_005'
         parents = []
         test_case.new_test_case(root_path, project, parents, test_name_two)
 
@@ -454,35 +464,34 @@ class Test__define_execution_list:
             'suite_before': None,
             'suite_after': None
         }
-        import sys
         execution_list = start_execution._define_execution_list(root_path, project,
                                                                 execution)
         expected_list = [
-        {'test_name': 'new_test_case_one', 'data_set': {'col1': 'a', 'env': {'url': 'xxx', 'name': 'stage'}}, 'driver': 'chrome', 'report_directory': None},
-        {'test_name': 'new_test_case_one', 'data_set': {'col1': 'a', 'env': {'url': 'xxx', 'name': 'stage'}}, 'driver': 'firefox', 'report_directory': None},
-        {'test_name': 'new_test_case_one', 'data_set': {'col1': 'a', 'env': {'url': 'yyy', 'name': 'preview'}}, 'driver': 'chrome', 'report_directory': None},
-        {'test_name': 'new_test_case_one', 'data_set': {'col1': 'a', 'env': {'url': 'yyy', 'name': 'preview'}}, 'driver': 'firefox', 'report_directory': None},
-        {'test_name': 'new_test_case_one', 'data_set': {'col1': 'b', 'env': {'url': 'xxx', 'name': 'stage'}}, 'driver': 'chrome', 'report_directory': None},
-        {'test_name': 'new_test_case_one', 'data_set': {'col1': 'b', 'env': {'url': 'xxx', 'name': 'stage'}}, 'driver': 'firefox', 'report_directory': None},
-        {'test_name': 'new_test_case_one', 'data_set': {'col1': 'b', 'env': {'url': 'yyy', 'name': 'preview'}}, 'driver': 'chrome', 'report_directory': None},
-        {'test_name': 'new_test_case_one', 'data_set': {'col1': 'b', 'env': {'url': 'yyy', 'name': 'preview'}}, 'driver': 'firefox', 'report_directory': None},
-        {'test_name': 'new_test_case_two', 'data_set': {'env': {'url': 'xxx', 'name': 'stage'}}, 'driver': 'chrome', 'report_directory': None},
-        {'test_name': 'new_test_case_two', 'data_set': {'env': {'url': 'xxx', 'name': 'stage'}}, 'driver': 'firefox', 'report_directory': None},
-        {'test_name': 'new_test_case_two', 'data_set': {'env': {'url': 'yyy', 'name': 'preview'}}, 'driver': 'chrome', 'report_directory': None},
-        {'test_name': 'new_test_case_two', 'data_set': {'env': {'url': 'yyy', 'name': 'preview'}}, 'driver': 'firefox', 'report_directory': None}]
-
+        {'test_name': 'test_one_005', 'data_set': {'col1': 'a', 'env': {'url': 'xxx', 'name': 'stage'}}, 'driver': 'chrome', 'report_directory': None},
+        {'test_name': 'test_one_005', 'data_set': {'col1': 'a', 'env': {'url': 'xxx', 'name': 'stage'}}, 'driver': 'firefox', 'report_directory': None},
+        {'test_name': 'test_one_005', 'data_set': {'col1': 'a', 'env': {'url': 'yyy', 'name': 'preview'}}, 'driver': 'chrome', 'report_directory': None},
+        {'test_name': 'test_one_005', 'data_set': {'col1': 'a', 'env': {'url': 'yyy', 'name': 'preview'}}, 'driver': 'firefox', 'report_directory': None},
+        {'test_name': 'test_one_005', 'data_set': {'col1': 'b', 'env': {'url': 'xxx', 'name': 'stage'}}, 'driver': 'chrome', 'report_directory': None},
+        {'test_name': 'test_one_005', 'data_set': {'col1': 'b', 'env': {'url': 'xxx', 'name': 'stage'}}, 'driver': 'firefox', 'report_directory': None},
+        {'test_name': 'test_one_005', 'data_set': {'col1': 'b', 'env': {'url': 'yyy', 'name': 'preview'}}, 'driver': 'chrome', 'report_directory': None},
+        {'test_name': 'test_one_005', 'data_set': {'col1': 'b', 'env': {'url': 'yyy', 'name': 'preview'}}, 'driver': 'firefox', 'report_directory': None},
+        {'test_name': 'test_two_005', 'data_set': {'env': {'url': 'xxx', 'name': 'stage'}}, 'driver': 'chrome', 'report_directory': None},
+        {'test_name': 'test_two_005', 'data_set': {'env': {'url': 'xxx', 'name': 'stage'}}, 'driver': 'firefox', 'report_directory': None},
+        {'test_name': 'test_two_005', 'data_set': {'env': {'url': 'yyy', 'name': 'preview'}}, 'driver': 'chrome', 'report_directory': None},
+        {'test_name': 'test_two_005', 'data_set': {'env': {'url': 'yyy', 'name': 'preview'}}, 'driver': 'firefox', 'report_directory': None}]
+        
         assert execution_list == expected_list
 
 
 class Test__create_execution_directory:
     """Tests for golem.test_runner.start_execution._create_execution_directory()"""
 
-    def test__create_execution_directory_is_suite(self, testdir_session):
+    def test__create_execution_directory_is_suite(self, project_session):
         """Verify that create_execution_directory works as expected when 
         a suite is passed on
         """
-        root_path = testdir_session['path']
-        project = create_random_project(root_path)
+        root_path = project_session['testdir']
+        project = project_session['name']
         timestamp = utils.get_timestamp()
         test_name = 'any_test_name_does_not_matter'
         suite_name = 'any_suite_name'
@@ -498,12 +507,12 @@ class Test__create_execution_directory:
         assert path_exists
 
 
-    def test__create_execution_directory_is_suite(self, testdir_session):
+    def test__create_execution_directory_is_suite(self, project_session):
         """Verify that create_execution_directory works as expected when 
         a not suite is passed on
         """
-        root_path = testdir_session['path']
-        project = create_random_project(root_path)
+        root_path = project_session['testdir']
+        project = project_session['name']
         timestamp = utils.get_timestamp()
         test_name = 'any_test_name_does_not_matter_2'
         suite_name = 'single_tests'

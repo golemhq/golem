@@ -1,10 +1,14 @@
 import os
+import types
+import inspect
 from collections import OrderedDict
 from subprocess import call
 
+import pytest
+
 from golem.core import utils, page_object, test_case, suite
 
-from tests.fixtures import project_class, testdir_session
+from tests.fixtures import project_class, testdir_session, dir_function
 from tests import helper_functions
 
 
@@ -166,10 +170,82 @@ class Test_get_projects:
         assert project_class['name'] in projects
 
 
-class Test_project_exists:
+class Test_validate_python_file_syntax:
     
-    def test_project_exists(self, project_class):
-        exists = utils.project_exists(project_class['testdir'],
-                                      project_class['name'])
-        assert exists
+    def test_syntax_correct(self, dir_function):
+        filename = 'test_python_syntax.py'
+        filepath = os.path.join(dir_function['path'], filename)
+        filecontent = ('import os\n'
+                       'var = 2 + 2\n'
+                       'print(var)\n'
+                       'def func():\n'
+                       '    pass\n')
+        with open(filepath, 'w') as f:
+            f.write(filecontent)
+        error = utils.validate_python_file_syntax(filepath)
+        assert error == ''
 
+
+    syntax_tests = [
+        (
+            ('var = 2 +\n'),
+            ('    var = 2 +\n'
+             '            ^\n'
+             'SyntaxError: invalid syntax\n')
+        ),
+        (
+            ('import\n'
+             'var = 2 + 2'),
+            ('    import\n'
+             '         ^\n'
+             'SyntaxError: invalid syntax\n')
+        ),
+        (
+            ('def func()\n'
+             '    var = 2 + 2\n'),
+            ('    def func()\n'
+             '             ^\n'
+             'SyntaxError: invalid syntax\n')
+        ),
+    ]
+
+    @pytest.mark.parametrize('filecontent,expected', syntax_tests)
+    def test_incorrect_syntax(self, filecontent, expected, dir_function):
+        filename = 'test_python_syntax.py'
+        filepath = os.path.join(dir_function['path'], filename)
+        with open(filepath, 'w') as f:
+            f.write(filecontent)
+        error = utils.validate_python_file_syntax(filepath)
+        print(error)
+        assert expected in error
+
+
+class Test_import_module:
+
+    def test_import_module(self, dir_function):
+        filename = 'python_module.py'
+        filepath = os.path.join(dir_function['path'], filename)
+        filecontent = ('foo = 2\n'
+                       'def bar(a, b):\n'
+                       '    baz = ""\n')
+        with open(filepath, 'w') as f:
+            f.write(filecontent)
+        module = utils.import_module(filepath)
+        assert type(module) == types.ModuleType
+        
+        foo = getattr(module, 'foo')
+        assert type(foo) == int
+
+        bar = getattr(module, 'bar')
+        assert type(bar) == types.FunctionType
+
+        args = list(inspect.signature(bar).parameters)
+        code = inspect.getsource(bar)
+        assert args == ['a', 'b']
+        assert code == 'def bar(a, b):\n    baz = ""\n'
+
+
+    def test_module_does_not_exist(self, dir_function):
+        filepath = os.path.join(dir_function['path'], 'non_existent.py')
+        module = utils.import_module(filepath)
+        assert module == None

@@ -29,6 +29,20 @@ def _create_testdir(base_dir):
     return testdir_name, full_path
 
 
+@pytest.fixture(scope="function")
+def dir_function():
+    base_dir = get_base_dir()
+    dirname = helper_functions.random_string(4, 'tempdir_')
+    path = os.path.join(base_dir, dirname)
+    os.mkdir(path)
+    yield {
+        'name': dirname,
+        'path': path
+    }
+    os.chdir(base_dir)
+    shutil.rmtree(dirname, ignore_errors=True)
+
+
 @pytest.fixture(scope="session")
 def testdir_session():
     base_dir = get_base_dir()
@@ -46,6 +60,18 @@ def testdir_session():
 
 @pytest.fixture(scope="class")   
 def testdir_class():
+    base_dir = get_base_dir()
+    testdir_name, full_path = _create_testdir(base_dir)
+    yield {
+            'path': full_path,
+            'base_path': base_dir,
+            'name': testdir_name}
+    os.chdir(base_dir)
+    shutil.rmtree(testdir_name, ignore_errors=True)
+
+
+@pytest.fixture(scope="function")   
+def testdir_function():
     base_dir = get_base_dir()
     testdir_name, full_path = _create_testdir(base_dir)
     yield {
@@ -87,3 +113,30 @@ def project_class(testdir_session):
     os.chdir(os.path.join(testdir_session['path'], 'projects'))
     shutil.rmtree(project_name, ignore_errors=True)
 
+
+@pytest.mark.usefixtures("testdir_session")
+@pytest.fixture(scope="function")
+def project_function(testdir_session):
+    project_name = helper_functions.random_string(4, 'project_')
+    os.chdir(testdir_session['path'])
+    call(['golem', 'createproject', project_name])
+    yield {
+            'name': project_name,
+            'testdir_fixture': testdir_session,
+            'testdir': testdir_session['path']}
+    os.chdir(os.path.join(testdir_session['path'], 'projects'))
+    shutil.rmtree(project_name, ignore_errors=True)
+
+
+@pytest.mark.usefixtures("testdir_function")
+@pytest.fixture(scope="function")
+def project_function_clean(testdir_function):
+    project_name = helper_functions.random_string(4, 'project_')
+    os.chdir(testdir_function['path'])
+    call(['golem', 'createproject', project_name])
+    yield {
+            'name': project_name,
+            'testdir_fixture': testdir_function,
+            'testdir': testdir_function['path']}
+    os.chdir(os.path.join(testdir_function['path'], 'projects'))
+    shutil.rmtree(project_name, ignore_errors=True)

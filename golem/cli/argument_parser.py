@@ -3,7 +3,7 @@ import argparse
 
 def get_parser():
     parser = argparse.ArgumentParser(prog='golem', add_help=False)
-    parser.add_argument('-h', '--help', nargs='?', default=True)
+    parser.add_argument('-h', '--help', nargs='?', const=True, default=False)
     subparsers = parser.add_subparsers(dest='command')
 
     # run
@@ -71,7 +71,7 @@ def get_parser():
 
 def get_admin_parser():
     parser = argparse.ArgumentParser(prog='golem-admin', add_help=False)
-    parser.add_argument('-h', '--help', nargs='?', default=True)
+    parser.add_argument('-h', '--help', nargs='?', const=True, default=False)
     subparsers = parser.add_subparsers(dest='command')
     
     # createdirectory
