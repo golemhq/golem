@@ -25,7 +25,8 @@ def run_command(cmd):
     output = ''
     p = subprocess.Popen(cmd,
                          stdout=subprocess.PIPE,
-                         stderr=subprocess.STDOUT)
+                         stderr=subprocess.STDOUT,
+                         shell=True)
     for line in iter(p.stdout.readline, b''):
         line_parsed = line.decode('ascii').replace('\r', '')
         output += line_parsed
