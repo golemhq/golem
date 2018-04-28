@@ -9,9 +9,10 @@
 
 <div class="content-wrapper">
     <h2 style="display:inline-block;"><a class="link-without-decoration" href="/report/project/{{project}}/">{{project|replace("_", " ")}}</a> - <a class="link-without-decoration" href="/report/project/{{project}}/suite/{{suite}}/">{{suite|replace("_", " ")}}</a> <small>({{formatted_date}})</small></h2>
-	    <a style="display:inline-block; float:right; margin-right:100px; margin-top:20px; margin-bottom:10px;" class="btn btn-default btn-sm" href="/getHTMLReport?project={{project}}&suite={{suite}}&execution={{execution}}">
-		    <span class="glyphicon glyphicon-export" aria-hidden="true"></span> Download HTML Report for {{project|replace("_", " ")}} - {{suite|replace("_", " ")}}
-	    </a>	<div class="col-md-12 project-container">
+	    <a style="display:inline-block; float:right; margin-top:20px; margin-bottom:10px;" class="btn btn-default btn-sm" href="/getHTMLReport?project={{project}}&suite={{suite}}&execution={{execution}}">
+		    <span class="glyphicon glyphicon-export" aria-hidden="true"></span> Download HTML Report
+		</a>
+	<div class="col-md-12 project-container">
 		<h3 class="no-margin-top">General</h3>
 		<div class="widget widget-table">
 			<div class="widget-content">

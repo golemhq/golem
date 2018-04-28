@@ -5,6 +5,7 @@
 
 ### Added
 - actions: verify_alert_is_present, verify_alert_is_not_present, accept_alert, dismiss_alert
+- Download report as HTML (@danielmaddern)
 
 ### Fixed
 - #93

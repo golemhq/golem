@@ -286,17 +286,15 @@ def generate_execution_report(execution_directory, elapsed_time):
 def return_html_test_steps(test_case_data, file_name):
     report_html = """
     """
-    for test in test_case_data['steps']:
-        if test['screenshot'] is not None:
-            image_filename = "%s/%s.png" % (file_name, test['screenshot'])
-
+    for step in test_case_data['steps']:
+        if step['screenshot'] is not None:
+            image_filename = os.path.join(file_name, step['screenshot'] + '.png')
             if (os.path.isfile(image_filename)):
                 b64 = base64.encodestring(open(image_filename, "rb").read())
 
                 image_img = '<img alt="%s" title="%s" src="data:image/png;base64,%s" width="700"/>' % (
                 'test', 'test', b64.decode("utf8"))
-                report_html += f"""<li>{image_img}</li>"""
+                report_html += """<li>{}<br>{}</li>""".format(step['message'], image_img)
         else:
-            report_html += f"""<li>{test['message']}</li>"""
-
+            report_html += """<li>{}</li>""".format(step['message'])
     return report_html

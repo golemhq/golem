@@ -417,9 +417,8 @@ def getHTMLReport():
     for test in execution_data['test_cases']:
         total_time += test['test_elapsed_time']
 
-    # start_date_time = execution_data['start_date_time']
-
     project_title = '' + project + ' - ' + suite + ''
+    formatted_date = report_parser.get_date_time_from_timestamp(execution)
 
     okPercentage = total_cases_ok * 100 / total_cases
     failPercentage = total_cases_fail * 100 / total_cases + okPercentage
@@ -451,7 +450,7 @@ def getHTMLReport():
     <body>
         <div id="content" class="container-fluid">
             <div class="content-wrapper">
-                <h2 style="display:inline-block;">{project_title}</h2>
+                <h2 style="display:inline-block;">{project_title} <small>({formatted_date})</small></h2>
             </div>
             <div class="col-md-12 project-container">
             <h3 class="no-margin-top">General</h3>
@@ -537,7 +536,8 @@ def getHTMLReport():
         total_cases_ok=total_cases_ok,
         total_cases_fail=total_cases_fail,
         total_time=time.strftime('%Mm %Ss', time.gmtime(total_time)),
-        net_time=time.strftime('%Mm %Ss', time.gmtime(net_elapsed_time))
+        net_time=time.strftime('%Mm %Ss', time.gmtime(net_elapsed_time)),
+        formatted_date=formatted_date
     )
 
     count = 0
@@ -553,11 +553,11 @@ def getHTMLReport():
         test_start_date_time = test['start_date_time']
         test_sub_modules = test['sub_modules']
         test_test_elapsed_time = test['test_elapsed_time']
-        test_case_data = report_parser.get_test_case_data(root_path, project, test_name,
+        test_case_data = report_parser.get_test_case_data(root_path, project, test_full_name,
                                                           suite=suite, execution=execution,
                                                           test_set=test_folder, is_single=False)
 
-        file_name = os.path.join(root_path, 'projects', project, 'reports', suite, execution, test_name,
+        file_name = os.path.join(root_path, 'projects', project, 'reports', suite, execution, test_full_name,
                                  test['test_set'])
 
         test_case_steps = report_parser.return_html_test_steps(test_case_data, file_name)
@@ -580,14 +580,14 @@ def getHTMLReport():
                 <td>{pass_or_fail} {test_result}</td>
                 <td>{test_test_elapsed_time}</td>
                 <td class="link">
-                    <a href="#{test_full_name}_{count}" data-toggle="collapse" data-target="#{test_full_name}_{count}" aria-expanded="false" aria-controls="{test_full_name}_{count}">
+                    <a href="javascript:;" data-toggle="collapse" data-target="#{test_full_name_css}_{count}" aria-expanded="false" aria-controls="{test_full_name_css}_{count}">
                         <span style="font-size: 20px"><strong>&#8853;</strong></span>
                     </a>
                 </td>
             </tr>
             <tr style="height:0px !important;">
                 <td style="height:0px !important; padding-top:0px !important; padding-bottom: 0px !important;"colspan="9">
-                    <div class="collapse" id="{test_full_name}_{count}">
+                    <div class="collapse" id="{test_full_name_css}_{count}">
                         <div class="row">
                             <ol>
                                 {test_case_steps}
@@ -605,6 +605,7 @@ def getHTMLReport():
                 pass_or_fail=pass_or_fail,
                 test_result=test_result,
                 test_test_elapsed_time=test_test_elapsed_time,
+                test_full_name_css=test_full_name.replace('.', '-'),
                 count=count,
                 test_case_steps=test_case_steps)
         count += 1
