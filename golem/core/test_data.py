@@ -8,11 +8,9 @@ and this module still has support of this for backwards compatibility
 """
 import csv
 import os
-import sys
-import importlib
 
 from ast import literal_eval
-from golem.core import utils
+from golem.core import utils, test_execution
 
 
 def save_external_test_data_file(root_path, project,
@@ -117,10 +115,12 @@ def get_internal_test_data(workspace, project, full_test_case_name):
     """Get test data defined inside the test itself."""
     # check if test has data variable defined
     data_list = []
-    # sys.path.append(workspace)
-    sys.path.append(os.path.join(workspace, 'projects', project))
-    test_module = importlib.import_module('projects.{0}.tests.{1}'
-                                          .format(project, full_test_case_name))
+
+    tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
+    path = os.path.join(workspace, 'projects', project, 'tests',
+                        os.sep.join(parents), '{}.py'.format(tc_name))
+    test_module = utils.import_module(path)
+    
     if hasattr(test_module, 'data'):
         data_variable = getattr(test_module, 'data')
         if type(data_variable) == dict:
@@ -175,7 +175,6 @@ def get_test_data(workspace, project, full_test_case_name):
         internal_data = get_internal_test_data(workspace, project, full_test_case_name)
         if internal_data:
             data_list = internal_data
-
     if not data_list:
         data_list.append({})
 

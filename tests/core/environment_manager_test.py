@@ -3,7 +3,7 @@ import os
 from tests import helper_functions
 from golem.core import environment_manager
 
-from tests.fixtures import testdir_fixture, permanent_project_fixture
+from tests.fixtures import testdir_session, project_session
 
 
 ENV_DATA = ('{\n'
@@ -24,9 +24,9 @@ ENV_DATA_INVALID_JSON = ('{\n'
 
 class Test_get_envs:
 
-    def test_get_envs(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_get_envs(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
 
@@ -39,9 +39,9 @@ class Test_get_envs:
         assert 'development' in envs
 
 
-    def test_get_envs_empty_file(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_get_envs_empty_file(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         with open(env_json_path, 'w') as env_json_file:
@@ -51,9 +51,9 @@ class Test_get_envs:
         assert envs == expected_envs
 
 
-    def test_get_envs_invalid_json(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_get_envs_invalid_json(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         with open(env_json_path, 'w') as env_json_file:
@@ -63,9 +63,9 @@ class Test_get_envs:
         assert envs == expected_envs
 
 
-    def test_get_envs_file_not_exist(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_get_envs_file_not_exist(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         if os.path.isfile(env_json_path):
@@ -77,9 +77,9 @@ class Test_get_envs:
 
 class Test_get_environment_data:
 
-    def test_get_environment_data(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_get_environment_data(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         with open(env_json_path, 'w') as env_json_file:
@@ -96,9 +96,9 @@ class Test_get_environment_data:
         assert result == expected
 
 
-    def test_get_environment_data_empty_file(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_get_environment_data_empty_file(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         with open(env_json_path, 'w') as env_json_file:
@@ -108,9 +108,9 @@ class Test_get_environment_data:
         assert result == expected
 
 
-    def test_get_environment_data_invalid_json(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_get_environment_data_invalid_json(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         with open(env_json_path, 'w') as env_json_file:
@@ -120,9 +120,9 @@ class Test_get_environment_data:
         assert result == expected
 
 
-    def test_get_environment_data_file_not_exist(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_get_environment_data_file_not_exist(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         if os.path.isfile(env_json_path):
@@ -134,9 +134,9 @@ class Test_get_environment_data:
 
 class Test_get_environments_as_string:
 
-    def test_get_environments_as_string(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_get_environments_as_string(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         with open(env_json_path, 'w') as env_json_file:
@@ -145,9 +145,9 @@ class Test_get_environments_as_string:
         assert result == ENV_DATA
 
 
-    def test_get_environments_as_string_empty_file(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_get_environments_as_string_empty_file(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         with open(env_json_path, 'w') as env_json_file:
@@ -156,9 +156,9 @@ class Test_get_environments_as_string:
         assert result == ''
 
 
-    def test_get_environments_as_string_file_not_exist(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_get_environments_as_string_file_not_exist(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         if os.path.isfile(env_json_path):
@@ -169,9 +169,9 @@ class Test_get_environments_as_string:
 
 class Test_save_environments:
 
-    def test_save_environments(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_save_environments(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         error = environment_manager.save_environments(testdir, project, ENV_DATA)
@@ -181,9 +181,9 @@ class Test_save_environments:
             assert file_content == ENV_DATA
 
 
-    def test_save_environments_empty_env_data(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_save_environments_empty_env_data(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         empty_env_data = ''
@@ -195,9 +195,9 @@ class Test_save_environments:
             assert file_content == empty_env_data
 
 
-    def test_save_environments_invalid_json(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_save_environments_invalid_json(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         original_json = '{"test": ""}'

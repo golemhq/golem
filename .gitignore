@@ -5,6 +5,7 @@
 .coverage
 .eggs/
 .tox
+*.pytest_cache/
 build/
 dist/
 geckodriver.log

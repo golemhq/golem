@@ -3,9 +3,9 @@ import os
 from golem.core import page_object, file_manager, utils
 
 from tests import helper_functions
-from tests.fixtures import (testdir_fixture,
-                            random_testdir_fixture,
-                            random_project_fixture)
+from tests.fixtures import (testdir_session,
+                            testdir_class,
+                            project_class)
 
 
 class Test___directory_element:
@@ -32,9 +32,9 @@ class Test___directory_element:
 
 class Test_generate_file_structure_dict:
 
-    def test_generate_file_structure_dict(self, random_project_fixture):
-        project = random_project_fixture['name']
-        testdir = random_project_fixture['testdir']
+    def test_generate_file_structure_dict(self, project_class):
+        project = project_class['name']
+        testdir = project_class['testdir']
         page_object.new_page_object(testdir, project, [], 'page_one')
         page_object.new_page_object(testdir, project, ['module'], 'page_two')
         full_path = page_object.pages_base_dir(testdir, project)
@@ -70,15 +70,15 @@ class Test_generate_file_structure_dict:
 
 class Test_get_files_dot_path:
 
-    def test_get_files_dot_path(self, testdir_fixture):
-        project = helper_functions.create_random_project(testdir_fixture['path'])
+    def test_get_files_dot_path(self, testdir_session):
+        project = helper_functions.create_random_project(testdir_session['path'])
         # create a new page object in pages folder
-        page_object.new_page_object(testdir_fixture['path'], project, [],
+        page_object.new_page_object(testdir_session['path'], project, [],
                                     'page1')
         # create a new page object in pages/dir/subdir/
-        page_object.new_page_object(testdir_fixture['path'], project,
+        page_object.new_page_object(testdir_session['path'], project,
                                     ['dir', 'subdir'], 'page2')
-        base_path = os.path.join(testdir_fixture['path'], 'projects',
+        base_path = os.path.join(testdir_session['path'], 'projects',
                                  project, 'pages')
         dot_files = file_manager.get_files_dot_path(base_path)
         expected_result = [
@@ -88,9 +88,9 @@ class Test_get_files_dot_path:
         assert dot_files == expected_result
 
 
-    def test_get_files_dot_path_extension(self, testdir_fixture):
-        project = helper_functions.create_random_project(testdir_fixture['path'])
-        testdir = testdir_fixture['path']
+    def test_get_files_dot_path_extension(self, testdir_session):
+        project = helper_functions.create_random_project(testdir_session['path'])
+        testdir = testdir_session['path']
         # create a new page object in pages folder (.py extension)
         page_object.new_page_object(testdir, project, [], 'page2')
         # create a file with another extension
@@ -98,7 +98,7 @@ class Test_get_files_dot_path:
                                          'pages', 'another.json')
         with open(another_extension, 'w') as another_file:
             another_file.write('')
-        base_path = os.path.join(testdir_fixture['path'], 'projects',
+        base_path = os.path.join(testdir_session['path'], 'projects',
                                  project, 'pages')
         dot_files = file_manager.get_files_dot_path(base_path, extension='.py')
         expected_result = ['page2']
@@ -107,9 +107,9 @@ class Test_get_files_dot_path:
 
 class Test_create_directory:
 
-    def test_create_directory_path_list(self, random_project_fixture):
-        project = random_project_fixture['name']
-        testdir = random_project_fixture['testdir']
+    def test_create_directory_path_list(self, project_class):
+        project = project_class['name']
+        testdir = project_class['testdir']
         base_dir = page_object.pages_base_dir(testdir, project)
         file_manager.create_directory(path_list=[base_dir, 'a', 'b', 'c'],
                                       add_init=False)
@@ -119,9 +119,9 @@ class Test_create_directory:
         assert not os.path.exists(init_file_path)
 
 
-    def test_create_directory_path(self, random_project_fixture):
-        project = random_project_fixture['name']
-        testdir = random_project_fixture['testdir']
+    def test_create_directory_path(self, project_class):
+        project = project_class['name']
+        testdir = project_class['testdir']
         base_dir = page_object.pages_base_dir(testdir, project)
         expected_dir = os.path.join(base_dir, 'd', 'e', 'f')
         file_manager.create_directory(path=expected_dir,
@@ -133,9 +133,9 @@ class Test_create_directory:
 
 class Test_rename_file:
 
-    def test_rename_file(self, random_project_fixture):
-        project = random_project_fixture['name']
-        testdir = random_project_fixture['testdir']
+    def test_rename_file(self, project_class):
+        project = project_class['name']
+        testdir = project_class['testdir']
         page_object.new_page_object(testdir, project, [], 'page_one')
         base_dir = page_object.pages_base_dir(testdir, project)
         new_path = os.path.join(base_dir, 'submodule')
@@ -146,9 +146,9 @@ class Test_rename_file:
         assert error == ''
 
 
-    def test_rename_file_destination_exist(self, random_project_fixture):
-        project = random_project_fixture['name']
-        testdir = random_project_fixture['testdir']
+    def test_rename_file_destination_exist(self, project_class):
+        project = project_class['name']
+        testdir = project_class['testdir']
         page_object.new_page_object(testdir, project, [], 'page_two')
         page_object.new_page_object(testdir, project, [], 'destination')
         base_dir = page_object.pages_base_dir(testdir, project)
@@ -161,9 +161,9 @@ class Test_rename_file:
 
 class Test_new_directory_of_type:
 
-    def test_new_directory_of_type_tests(self, random_project_fixture):
-        project = random_project_fixture['name']
-        testdir = random_project_fixture['testdir']
+    def test_new_directory_of_type_tests(self, project_class):
+        project = project_class['name']
+        testdir = project_class['testdir']
         errors = file_manager.new_directory_of_type(testdir, project, [],
                                                     'new_test_dir', 'tests')
         expected_dir = os.path.join(testdir, 'projects', project, 'tests',
@@ -174,9 +174,9 @@ class Test_new_directory_of_type:
         assert errors == []
 
 
-    def test_new_directory_of_type_pages(self, random_project_fixture):
-        project = random_project_fixture['name']
-        testdir = random_project_fixture['testdir']
+    def test_new_directory_of_type_pages(self, project_class):
+        project = project_class['name']
+        testdir = project_class['testdir']
         errors = file_manager.new_directory_of_type(testdir, project, [],
                                                     'new_pages_dir', 'pages')
         expected_dir = os.path.join(testdir, 'projects', project, 'pages',
@@ -187,9 +187,9 @@ class Test_new_directory_of_type:
         assert errors == []
 
 
-    def test_new_directory_of_type_suites(self, random_project_fixture):
-        project = random_project_fixture['name']
-        testdir = random_project_fixture['testdir']
+    def test_new_directory_of_type_suites(self, project_class):
+        project = project_class['name']
+        testdir = project_class['testdir']
         errors = file_manager.new_directory_of_type(testdir, project, [],
                                                     'new_suites_dir', 'suites')
         expected_dir = os.path.join(testdir, 'projects', project, 'suites',
@@ -200,17 +200,17 @@ class Test_new_directory_of_type:
         assert errors == []
 
 
-    def test_new_directory_of_type_invalid_type(self, random_project_fixture):
-        project = random_project_fixture['name']
-        testdir = random_project_fixture['testdir']
+    def test_new_directory_of_type_invalid_type(self, project_class):
+        project = project_class['name']
+        testdir = project_class['testdir']
         errors = file_manager.new_directory_of_type(testdir, project, [],
                                                     'new_suites_dir', 'invalid_type')
         assert errors == ['invalid_type is not a valid dir_type']
 
 
-    def test_new_directory_of_type_already_exist(self, random_project_fixture):
-        project = random_project_fixture['name']
-        testdir = random_project_fixture['testdir']
+    def test_new_directory_of_type_already_exist(self, project_class):
+        project = project_class['name']
+        testdir = project_class['testdir']
         file_manager.new_directory_of_type(testdir, project, [],
                                                     'new_suites_dir_two', 'suites')
         errors = file_manager.new_directory_of_type(testdir, project, [],

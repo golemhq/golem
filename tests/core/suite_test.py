@@ -2,8 +2,8 @@ import os
 
 from golem.core import suite
 
-from tests.fixtures import (testdir_fixture,
-                            permanent_project_fixture)
+from tests.fixtures import (testdir_session,
+                            project_session)
 
 
 class Test___format_list_items:
@@ -30,9 +30,9 @@ class Test___format_list_items:
 
 class Test_save_suite:
 
-    def test_save_suite(self, permanent_project_fixture):
-        testdir = permanent_project_fixture['testdir']
-        project = permanent_project_fixture['name']
+    def test_save_suite(self, project_session):
+        testdir = project_session['testdir']
+        project = project_session['name']
         suite_name = 'test_save_suite_0001'
         suite.new_suite(testdir, project, [], suite_name)
         test_cases = [
@@ -79,9 +79,9 @@ class Test_save_suite:
 
 class Test_new_suite:
 
-    def test_new_suite(self, permanent_project_fixture):
-        testdir = permanent_project_fixture['testdir']
-        project = permanent_project_fixture['name']
+    def test_new_suite(self, project_session):
+        testdir = project_session['testdir']
+        project = project_session['name']
         suite_name = 'test_save_suite_0002'
         errors = suite.new_suite(testdir, project, [], suite_name)
         path = os.path.join(testdir, 'projects', project, 'suites',
@@ -99,9 +99,9 @@ class Test_new_suite:
             assert content == expected
 
 
-    def test_new_suite_with_parents(self, permanent_project_fixture):
-        testdir = permanent_project_fixture['testdir']
-        project = permanent_project_fixture['name']
+    def test_new_suite_with_parents(self, project_session):
+        testdir = project_session['testdir']
+        project = project_session['name']
         suite_name = 'test_save_suite_0003'
         parents = ['asd01', 'asd02']
         errors = suite.new_suite(testdir, project, parents, suite_name)
@@ -118,18 +118,18 @@ class Test_new_suite:
         assert os.path.isfile(init_path)
 
 
-    def test_new_suite_already_exists(self, permanent_project_fixture):
-        testdir = permanent_project_fixture['testdir']
-        project = permanent_project_fixture['name']
+    def test_new_suite_already_exists(self, project_session):
+        testdir = project_session['testdir']
+        project = project_session['name']
         suite_name = 'test_save_suite_0003'
         suite.new_suite(testdir, project, [], suite_name)
         errors = suite.new_suite(testdir, project, [], suite_name)
         assert errors == ['A suite with that name already exists']
 
 
-    def test_new_suite_with_parents_already_exist(self, permanent_project_fixture):
-        testdir = permanent_project_fixture['testdir']
-        project = permanent_project_fixture['name']
+    def test_new_suite_with_parents_already_exist(self, project_session):
+        testdir = project_session['testdir']
+        project = project_session['name']
         suite_name1 = 'test_save_suite_0004'
         suite_name2 = 'test_save_suite_0005'
         parents = ['asf01']

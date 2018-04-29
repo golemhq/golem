@@ -4,14 +4,14 @@ import json
 from golem.core import report, utils
 from golem.test_runner import test_runner
 
-from tests.fixtures import testdir_fixture, permanent_project_fixture
+from tests.fixtures import testdir_session, project_session
 
 
 class Test_create_execution_directory:
 
-    def test_create_execution_directory_test(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_create_execution_directory_test(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         timestamp = utils.get_timestamp()
         test_name = 'test_execution_directory'
         directory = report.create_execution_directory(testdir, project, timestamp,
@@ -22,9 +22,9 @@ class Test_create_execution_directory:
         assert directory == path
 
 
-    def test_create_execution_directory_test_parents(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_create_execution_directory_test_parents(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         timestamp = utils.get_timestamp()
         test_name = 'a.b.test_execution_directory'
         directory = report.create_execution_directory(testdir, project, timestamp,
@@ -35,9 +35,9 @@ class Test_create_execution_directory:
         assert directory == path
 
 
-    def test_create_execution_directory_suite(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_create_execution_directory_suite(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         timestamp = utils.get_timestamp()
         suite_name = 'suite_execution_directory'
         directory = report.create_execution_directory(testdir, project, timestamp,
@@ -48,9 +48,9 @@ class Test_create_execution_directory:
         assert directory == path
 
 
-    def test_create_execution_directory_suite_parents(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_create_execution_directory_suite_parents(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         timestamp = utils.get_timestamp()
         suite_name = 'a.b.suite_execution_directory'
         directory = report.create_execution_directory(testdir, project, timestamp,
@@ -63,9 +63,9 @@ class Test_create_execution_directory:
 
 class Test_create_report_directory:
 
-    def test_create_report_directory_test(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_create_report_directory_test(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         timestamp = utils.get_timestamp()
         test_name = 'testing_report_001'
         exec_dir = report.create_execution_directory(testdir, project, timestamp,
@@ -75,9 +75,9 @@ class Test_create_report_directory:
         assert os.path.isdir(directory)
 
 
-    def test_create_report_directory_suite(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_create_report_directory_suite(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         timestamp = utils.get_timestamp()
         test_name = 'testing_report_002'
         exec_dir = report.create_execution_directory(testdir, project, timestamp,
@@ -89,9 +89,9 @@ class Test_create_report_directory:
 
 class Test_generate_report:
 
-    def test_generate_report(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_generate_report(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         timestamp = utils.get_timestamp()
         test_name = 'testing_report_002'
         exec_dir = report.create_execution_directory(testdir, project, timestamp,
@@ -137,9 +137,9 @@ class Test_generate_report:
             assert actual == expected
 
 
-    def test_generate_report_with_env(self, permanent_project_fixture):
-        project = permanent_project_fixture['name']
-        testdir = permanent_project_fixture['testdir']
+    def test_generate_report_with_env(self, project_session):
+        project = project_session['name']
+        testdir = project_session['testdir']
         timestamp = utils.get_timestamp()
         test_name = 'testing_report_003'
         exec_dir = report.create_execution_directory(testdir, project, timestamp,

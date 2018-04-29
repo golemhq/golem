@@ -4,7 +4,6 @@ Test Cases are modules located inside the /tests/ directory
 import os
 import re
 import sys
-import importlib
 import inspect
 import pprint
 from ast import literal_eval
@@ -121,11 +120,7 @@ def get_test_case_content(root_path, project, test_case_name):
         }
     }
     
-    # add the 'project' directory to python path
-    # TODO
-    #sys.path.append(os.path.join(root_path, 'projects', project))
-    test_module = importlib.import_module('projects.{0}.tests.{1}'
-                                          .format(project, test_case_name))
+    test_module = import_test_case_module(root_path, project, test_case_name)
     # get description
     description = getattr(test_module, 'description', '')
     
@@ -339,3 +334,8 @@ def test_case_exists(workspace, project, full_test_case_name):
     path = os.path.join(workspace, 'projects', project, 'tests',
                         os.sep.join(parents), '{}.py'.format(test))
     return os.path.isfile(path)
+
+
+def import_test_case_module(workspace, project, full_test_case_name):
+    path = generate_test_case_path(workspace, project, full_test_case_name)
+    return utils.import_module(path)
