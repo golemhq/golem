@@ -97,14 +97,14 @@ def create_new_project(workspace, project):
                                       add_init=True)
     # TODO, remove, don't create data folder for new projects
     # create_directory(path_list=[workspace, 'projects', project, 'data'], add_init=False)
-    _ = [workspace, 'projects', project, 'pages']
-    file_manager.create_directory(path_list=_, add_init=True)
-    _ = [workspace, 'projects', project, 'reports']
-    file_manager.create_directory(path_list=_, add_init=False)
-    _ = [workspace, 'projects', project, 'tests']
-    file_manager.create_directory(path_list=_, add_init=True)
-    _ = [workspace, 'projects', project, 'suites']
-    file_manager.create_directory(path_list=_, add_init=True)
+    path_list = [workspace, 'projects', project, 'pages']
+    file_manager.create_directory(path_list=path_list, add_init=True)
+    path_list = [workspace, 'projects', project, 'reports']
+    file_manager.create_directory(path_list=path_list, add_init=False)
+    path_list = [workspace, 'projects', project, 'tests']
+    file_manager.create_directory(path_list=path_list, add_init=True)
+    path_list = [workspace, 'projects', project, 'suites']
+    file_manager.create_directory(path_list=path_list, add_init=True)
     extend_path = os.path.join(workspace, 'projects', project, 'extend.py')
     open(extend_path, 'a').close()
 
@@ -171,7 +171,10 @@ def create_user(workspace, username, password, is_admin, projects, reports):
     return errors
 
 
-def delete_element(workspace, project, element_type, full_path):
+def delete_element(workspace, project, element_type, dot_path):
+    """Delete a test, page or suite given it's full path
+    separated by dots.
+    """
     if element_type == 'test':
         folder = 'tests'
     elif element_type == 'page':
@@ -183,18 +186,25 @@ def delete_element(workspace, project, element_type, full_path):
 
     errors = []
     path = os.path.join(workspace, 'projects', project, folder,
-                        full_path.replace('.', os.sep) + '.py')
+                        dot_path.replace('.', os.sep) + '.py')
     if not os.path.exists(path):
-        errors.append('File {} does not exist'.format(full_path))
+        errors.append('File {} does not exist'.format(dot_path))
     else:
         try:
             os.remove(path)
         except:
-            errors.append('There was an error removing file {}'.format(full_path))
+            errors.append('There was an error removing file {}'.format(dot_path))
 
     if element_type == 'test':
+        # TODO deprecate data folder
         data_path = os.path.join(workspace, 'projects', project, 'data',
-                                 full_path.replace('.', os.sep) + '.csv')
+                                 dot_path.replace('.', os.sep) + '.csv')
+        try:
+            os.remove(data_path)
+        except:
+            pass
+        data_path = os.path.join(workspace, 'projects', project, 'tests',
+                                 dot_path.replace('.', os.sep) + '.csv')
         try:
             os.remove(data_path)
         except:
@@ -218,7 +228,6 @@ def duplicate_element(workspace, project, element_type, original_file_dot_path,
         if original_file_dot_path == new_file_dot_path:
             errors.append('New file cannot be the same as the original')
         else:
-
             root_path = os.path.join(workspace, 'projects', project)
             original_file_rel_path = original_file_dot_path.replace('.', os.sep) + '.py'
             original_file_full_path = os.path.join(root_path, folder, original_file_rel_path)
@@ -229,16 +238,28 @@ def duplicate_element(workspace, project, element_type, original_file_dot_path,
 
     if not errors:
         try:
+            file_manager.create_directory(path=os.path.dirname(new_file_full_path), add_init=True)
             shutil.copyfile(original_file_full_path, new_file_full_path)
         except:
             errors.append('There was an error creating the new file')
 
     if not errors and element_type == 'test':
+        # TODO deprecate data folder
         try:
             original_data_rel_path = original_file_dot_path.replace('.', os.sep) + '.csv'
             original_data_full_path = os.path.join(root_path, 'data', original_data_rel_path)
             new_data_rel_path = new_file_dot_path.replace('.', os.sep) + '.csv'
             new_data_full_path = os.path.join(root_path, 'data', new_data_rel_path)
+            os.makedirs(os.path.dirname(new_data_full_path), exist_ok=True)
+            shutil.copyfile(original_data_full_path, new_data_full_path)
+        except:
+            pass
+        try:
+            original_data_rel_path = original_file_dot_path.replace('.', os.sep) + '.csv'
+            original_data_full_path = os.path.join(root_path, 'tests', original_data_rel_path)
+            new_data_rel_path = new_file_dot_path.replace('.', os.sep) + '.csv'
+            new_data_full_path = os.path.join(root_path, 'tests', new_data_rel_path)
+            file_manager.create_directory(path=os.path.dirname(new_data_full_path), add_init=True)
             shutil.copyfile(original_data_full_path, new_data_full_path)
         except:
             pass
@@ -263,7 +284,7 @@ def choose_driver_by_precedence(cli_drivers=None, suite_drivers=None,
     elif settings_default_driver:
         chosen_drivers = [settings_default_driver]
     else:
-        chosen_drivers = ['chrome']  # hardcoded default
+        chosen_drivers = ['chrome']  # default default
     return chosen_drivers
 
 

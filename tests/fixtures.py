@@ -37,7 +37,8 @@ def dir_function():
     os.mkdir(path)
     yield {
         'name': dirname,
-        'path': path
+        'path': path,
+        'base_path': base_dir
     }
     os.chdir(base_dir)
     shutil.rmtree(dirname, ignore_errors=True)

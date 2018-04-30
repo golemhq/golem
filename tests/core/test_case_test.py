@@ -255,18 +255,14 @@ class Test_new_test_case:
         test_code = test_case.get_test_case_code(path)
         assert test_code == NEW_TEST_CONTENT
 
-
     def test_new_test_case_file_exists(self, project_class):
         root_path = project_class['testdir']
         project = project_class['name']
         test_name = 'new_test_case_002'
         parents = ['aaaa', 'bbbb']
         test_case.new_test_case(root_path, project, parents, test_name)
-
         errors = test_case.new_test_case(root_path, project, parents, test_name)
-
-        assert errors == ['A test with that name already exists']
-
+        assert errors == ['a test with that name already exists']
 
     def test_new_test_case_with_parents(self, project_session):            
         testdir = project_session['testdir']
@@ -285,7 +281,6 @@ class Test_new_test_case:
         init_path = os.path.join(testdir, 'projects', project, 'tests',
                                  'asd01', 'asd02', '__init__.py')
         assert os.path.isfile(init_path)
-
 
     def test_new_test_case_with_parents_already_exist(self, project_session):
         testdir = project_session['testdir']

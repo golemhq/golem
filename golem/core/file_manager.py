@@ -83,8 +83,8 @@ def get_files_dot_path(base_path, extension=None):
     for example, given the files:
       C:/base_dir/dir/file1.py
       C:/base_dir/dir/sub_dir/file2.py
-    get_files_in_directory_dotted_path('C:/base_dir/'):
-    >['dir.file1', 'dir.sub_dir.file2']
+      > get_files_in_directory_dotted_path('C:/base_dir/')
+      > ['dir.file1', 'dir.sub_dir.file2']
     """
     all_files = []
     files_with_dotted_path = []

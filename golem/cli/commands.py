@@ -1,11 +1,11 @@
 import os
+import sys
 
 from golem.core import (utils,
                         test_execution,
                         suite as suite_module,
                         test_case,
                         settings_manager)
-from golem.core.exceptions import CommandException
 from golem.gui import gui_start
 from golem.test_runner import start_execution
 
@@ -85,9 +85,9 @@ def run_command(project='', test_or_suite='', browsers=[], threads=1,
                 else:
                     # TODO run directory
                     # test_or_suite does not match any existing suite or test
-                    msg = ('the value {0} does not match an existing '
+                    msg = ('golem run: error: the value {0} does not match an existing '
                            'test or suite'.format(test_or_suite))
-                    raise CommandException(msg) 
+                    sys.exit(msg)
             else:
                 print(messages.RUN_USAGE_MSG)
                 test_cases = utils.get_test_cases(root_path, project)
@@ -99,8 +99,8 @@ def run_command(project='', test_or_suite='', browsers=[], threads=1,
                 for suite in test_suites['sub_elements']:
                     print('  ' + suite['name'])
         else:
-            msg = ('the project {0} does not exist'.format(project))
-            raise CommandException(msg)
+            msg = ('golem run: error: the project {0} does not exist'.format(project))
+            sys.exit(msg)
 
     elif test_execution.interactive:
         from golem.test_runner import interactive
@@ -120,9 +120,9 @@ def createproject_command(project):
     root_path = test_execution.root_path
 
     if project in utils.get_projects(root_path):
-        msg = ('a project with the name \'{}\' already exists'
+        msg = ('golem createproject: error: a project with name \'{}\' already exists'
                .format(project))
-        raise CommandException(msg)
+        sys.exit(msg)
     else:
         utils.create_new_project(root_path, project)
 
@@ -131,24 +131,26 @@ def createtest_command(project, test):
     root_path = test_execution.root_path
 
     if project not in utils.get_projects(root_path):
-        raise CommandException(
-            'Error: a project with that name does not exist'
-        )
+        msg = ('golem createtest: error: a project with name {} '
+               'does not exist'.format(project))
+        sys.exit(msg)
     dot_path = test.split('.')
     test_name = dot_path.pop()
     errors = test_case.new_test_case(root_path, project,
                                      dot_path, test_name)
     if errors:
-        raise CommandException('\n'.join(errors))
+        sys.exit('golem createtest: error: {}'.format(' '.join(errors)))
 
 
 def createsuite_command(project, suite_name):
     if project not in utils.get_projects(test_execution.root_path):
-        raise CommandException('Error: a project with that name does not exist')
+        msg = ('golem createsuite: error: a project with name {} '
+               'does not exist'.format(project))
+        sys.exit(msg)
     errors = suite_module.new_suite(test_execution.root_path,
                              project, [], suite_name)
     if errors:
-        raise CommandException('\n'.join(errors))
+        sys.exit('golem createsuite: error: {}'.format(' '.join(errors)))
 
 
 def createuser_command(username, password, is_admin=False,
@@ -156,7 +158,7 @@ def createuser_command(username, password, is_admin=False,
     errors = utils.create_user(test_execution.root_path, username,
                                password, is_admin, projects, reports)
     if errors:
-        raise CommandException('\n'.join(errors))
+        sys.exit('golem createuser: error: {}'.format(' '.join(errors)))
     else:
         print('User {} was created successfully'.format(username))
 
@@ -164,8 +166,9 @@ def createuser_command(username, password, is_admin=False,
 def createdirectory_command(dir_name):
     # Generate a new 'golem' directory
     if os.path.exists(dir_name):
-        msg = 'The directory {} already exists'.format(dir_name)
-        raise CommandException(msg)
+        msg = ('golem-admin createdirectory: error: the directory {} '
+               'already exists'.format(dir_name))
+        sys.exit(msg)
     else:
         destination = os.path.join(os.getcwd(), dir_name)
         utils.create_test_dir(destination)

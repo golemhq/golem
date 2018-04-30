@@ -106,7 +106,6 @@ class Test_golem:
         assert 'Executing:' in result
         assert 'Warning: no tests were found' in result
 
-
     def test_golem_createproject_no_args(self, testdir_session):
         path = testdir_session['path']
         os.chdir(path)
@@ -115,16 +114,14 @@ class Test_golem:
                     'golem createproject: error: the following arguments are required: project')
         assert result == expected
 
-
     def test_golem_createproject_project_exists(self, project_session):
         path = project_session['testdir']
         project = project_session['name']
         os.chdir(path)
         result = run_command('golem createproject {}'.format(project))
-        expected = ('golem.core.exceptions.CommandException: '
-                    'a project with the name \'{}\' already exists'
+        expected = ('golem createproject: error: a project with name \'{}\' already exists'
                     .format(project))
-        assert expected in result
+        assert result == expected
 
     def test_golem_createsuite_no_args(self, project_session):
         path = project_session['testdir']
@@ -142,9 +139,9 @@ class Test_golem:
         project = 'project_does_not_exist'
         suite = 'suite_test_00002'
         result = run_command('golem createsuite {} {}'.format(project, suite))
-        expected = ('golem.core.exceptions.CommandException: '
-                    'Error: a project with that name does not exist')
-        assert expected in result
+        expected = ('golem createsuite: error: a project with name {} '
+                    'does not exist'.format(project))
+        assert result == expected
 
     def test_golem_createsuite_already_exists(self, project_session):
         path = project_session['testdir']
@@ -154,9 +151,9 @@ class Test_golem:
         command = 'golem createsuite {} {}'.format(project, suite)
         run_command(command)
         result = run_command(command)
-        expected = ('golem.core.exceptions.CommandException: A suite '
+        expected = ('golem createsuite: error: a suite '
                     'with that name already exists')
-        assert expected in result
+        assert result == expected
 
     def test_golem_createtest_no_args(self, project_session):
         path = project_session['testdir']
@@ -174,9 +171,9 @@ class Test_golem:
         project = 'project_not_exist'
         test = 'test_0004'
         result = run_command('golem createtest {} {}'.format(project, test))
-        expected = ('golem.core.exceptions.CommandException: Error: a '
-                    'project with that name does not exist')
-        assert expected in result
+        expected = ('golem createtest: error: a project with name {} '
+                    'does not exist'.format(project))
+        assert result == expected
 
     def test_golem_createtest_already_exists(self, project_session):
         path = project_session['testdir']
@@ -185,9 +182,8 @@ class Test_golem:
         test = 'test_0005'
         run_command('golem createtest {} {}'.format(project, test))
         result = run_command('golem createtest {} {}'.format(project, test))
-        expected = ('golem.core.exceptions.CommandException: A test '
-                    'with that name already exists')
-        assert expected in result
+        expected = ('golem createtest: error: a test with that name already exists')
+        assert result == expected
 
     def test_golem_run_no_args(self, project_session):
         path = project_session['testdir']
@@ -215,3 +211,24 @@ class Test_golem:
         assert 'INFO Test execution started: {}'.format(test) in result
         assert 'INFO Browser: firefox' in result
         assert 'INFO Test passed' in result
+
+    def test_golem_run_not_match_test_or_suite(self, project_session):
+        path = project_session['testdir']
+        project = project_session['name']
+        os.chdir(path)
+        test = 'test001_does_not_exist'
+        command = ('golem run {} {}'.format(project, test))
+        result = run_command(command)
+        expected = ('golem run: error: the value {0} does not match an existing '
+                    'test or suite'.format(test))
+        assert result == expected
+
+    def test_golem_run_project_does_not_exist(self, testdir_session):
+        path = testdir_session['path']
+        project = 'project_does_not_exist_4564546'
+        os.chdir(path)
+        test = 'test002_does_not_exist'
+        command = ('golem run {} {}'.format(project, test))
+        result = run_command(command)
+        expected = ('golem run: error: the project {0} does not exist'.format(project))
+        assert result == expected

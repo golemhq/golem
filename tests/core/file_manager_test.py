@@ -72,10 +72,7 @@ class Test_get_files_dot_path:
 
     def test_get_files_dot_path(self, testdir_session):
         project = helper_functions.create_random_project(testdir_session['path'])
-        # create a new page object in pages folder
-        page_object.new_page_object(testdir_session['path'], project, [],
-                                    'page1')
-        # create a new page object in pages/dir/subdir/
+        page_object.new_page_object(testdir_session['path'], project, [], 'page1')
         page_object.new_page_object(testdir_session['path'], project,
                                     ['dir', 'subdir'], 'page2')
         base_path = os.path.join(testdir_session['path'], 'projects',
@@ -87,13 +84,10 @@ class Test_get_files_dot_path:
         ]
         assert dot_files == expected_result
 
-
     def test_get_files_dot_path_extension(self, testdir_session):
         project = helper_functions.create_random_project(testdir_session['path'])
         testdir = testdir_session['path']
-        # create a new page object in pages folder (.py extension)
         page_object.new_page_object(testdir, project, [], 'page2')
-        # create a file with another extension
         another_extension = os.path.join(testdir, 'projects', project,
                                          'pages', 'another.json')
         with open(another_extension, 'w') as another_file:
@@ -117,7 +111,6 @@ class Test_create_directory:
         assert os.path.isdir(expected_dir)
         init_file_path = os.path.join(expected_dir, '__init__.py')
         assert not os.path.exists(init_file_path)
-
 
     def test_create_directory_path(self, project_class):
         project = project_class['name']
@@ -144,7 +137,6 @@ class Test_rename_file:
         new_full_path = os.path.join(new_path, 'page_one_edit.py')
         assert os.path.isfile(new_full_path)
         assert error == ''
-
 
     def test_rename_file_destination_exist(self, project_class):
         project = project_class['name']
@@ -173,7 +165,6 @@ class Test_new_directory_of_type:
         assert os.path.isfile(expected_init_path)
         assert errors == []
 
-
     def test_new_directory_of_type_pages(self, project_class):
         project = project_class['name']
         testdir = project_class['testdir']
@@ -185,7 +176,6 @@ class Test_new_directory_of_type:
         assert os.path.isdir(expected_dir)
         assert os.path.isfile(expected_init_path)
         assert errors == []
-
 
     def test_new_directory_of_type_suites(self, project_class):
         project = project_class['name']
@@ -199,14 +189,12 @@ class Test_new_directory_of_type:
         assert os.path.isfile(expected_init_path)
         assert errors == []
 
-
     def test_new_directory_of_type_invalid_type(self, project_class):
         project = project_class['name']
         testdir = project_class['testdir']
         errors = file_manager.new_directory_of_type(testdir, project, [],
                                                     'new_suites_dir', 'invalid_type')
         assert errors == ['invalid_type is not a valid dir_type']
-
 
     def test_new_directory_of_type_already_exist(self, project_class):
         project = project_class['name']
