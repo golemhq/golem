@@ -411,7 +411,6 @@ class Test_validate_python_file_syntax:
         with open(filepath, 'w') as f:
             f.write(filecontent)
         error = utils.validate_python_file_syntax(filepath)
-        print(error)
         assert expected in error
 
 
@@ -444,3 +443,83 @@ class Test_import_module:
         filepath = os.path.join(dir_function['path'], 'non_existent.py')
         module = utils.import_module(filepath)
         assert module == None
+
+
+class Test_extract_version_from_webdriver_filename:
+
+    filenames = [
+        ('chromedriver_2.3', '2.3'),
+        ('chromedriver_2.3.4', '2.3.4'),
+        ('chromedriver_2.3.exe', '2.3'),
+        ('chromedriver-no-version', '0.0'),
+        ('invalid_2a.3', '0.0'),
+        ('invalid_test', '0.0'),
+        ('chromedriver_test_2.3', '2.3'),
+    ]
+
+    @pytest.mark.parametrize('filename, expected', filenames)
+    def test_extract_version_from_filename(self, filename, expected):
+        result = utils.extract_version_from_webdriver_filename(filename)
+        assert result == expected
+
+
+class Test_match_latest_executable_path:
+
+    def test_match_latest_executable_path(self, dir_function, test_utils):
+        """the latest version filepath matching glob pattern
+        is returned
+        """
+        basedir = dir_function['path']
+        os.chdir(basedir)
+        test_utils.create_empty_file(basedir, 'chromedriver_2.2')
+        test_utils.create_empty_file(basedir, 'chromedriver_2.4')
+        test_utils.create_empty_file(basedir, 'chromedriver_2.3')
+        test_utils.create_empty_file(basedir, 'geckodriver_5.6.7')
+        result = utils.match_latest_executable_path('chromedriver*')
+        assert result == os.path.join(basedir, 'chromedriver_2.4')
+
+    def test_match_latest_executable_path_exe(self, dir_function, test_utils):
+        """test that match_latest workds for filenames ending in .exe"""
+        basedir = dir_function['path']
+        os.chdir(basedir)
+        filepath = test_utils.create_empty_file(basedir, 'chromedriver_2.4.exe')
+        filepath = test_utils.create_empty_file(basedir, 'chromedriver_2.3.exe')
+        filepath = test_utils.create_empty_file(basedir, 'geckodriver_5.6.7.exe')
+        result = utils.match_latest_executable_path('chromedriver*')
+        assert result == os.path.join(basedir, 'chromedriver_2.4.exe')
+
+    def test_match_latest_executable_path_subdir(self, dir_function, test_utils):
+        """test that match_latest workds passing a rel path
+        to a subdir
+        """
+        basedir = dir_function['path']
+        os.chdir(basedir)
+        path = os.path.join(basedir, 'drivers')
+        test_utils.create_empty_file(path, 'chromedriver_2.2')
+        test_utils.create_empty_file(path, 'chromedriver_2.4')
+        test_utils.create_empty_file(path, 'chromedriver_2.3')
+        test_utils.create_empty_file(path, 'geckodriver_5.6.7')
+        result = utils.match_latest_executable_path('./drivers/chromedriver*')
+        assert result == os.path.join(path, 'chromedriver_2.4')
+
+    def test_no_asterisc(self, dir_function, test_utils):
+        """test that match_latest still works using
+        no wildcards
+        """
+        basedir = dir_function['path']
+        os.chdir(basedir)
+        path = os.path.join(basedir, 'drivers')
+        test_utils.create_empty_file(path, 'chromedriver_2.2')
+        test_utils.create_empty_file(path, 'chromedriver_2.4')
+        result = utils.match_latest_executable_path('./drivers/chromedriver_2.2')
+        assert result == os.path.join(path, 'chromedriver_2.2')
+
+    def test_asterisc_subdir(self, dir_function, test_utils):
+        """test that '*' wildcard can be used for dirs"""
+        basedir = dir_function['path']
+        os.chdir(basedir)
+        path = os.path.join(basedir, 'drivers')
+        test_utils.create_empty_file(path, 'chromedriver_2.2')
+        test_utils.create_empty_file(path, 'chromedriver_2.4')
+        result = utils.match_latest_executable_path('./*/chromedriver*')
+        assert result == os.path.join(path, 'chromedriver_2.4')

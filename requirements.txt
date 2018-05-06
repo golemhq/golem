@@ -3,3 +3,4 @@ Flask-Login
 selenium
 pytest
 requests
+py-webdriver-manager

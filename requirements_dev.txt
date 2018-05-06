@@ -3,6 +3,7 @@ Flask-Login
 selenium
 pytest
 requests
+py-webdriver-manager
 sphinx
 recommonmark
 tox

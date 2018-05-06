@@ -28,15 +28,15 @@ SETTINGS_FILE_CONTENT = (
 
 // Path to the chrome driver executable. By default it points to the
 // 'drivers' folder inside the test directory.
-"chromedriver_path": "./drivers/chromedriver",
+"chromedriver_path": "./drivers/chromedriver*",
 
 // Path to the gecko driver executable. This is used by Firefox.
 // By default it points to the 'drivers' folder inside the test directory.
-"geckodriver_path": "./drivers/geckodriver",
+"geckodriver_path": "./drivers/geckodriver*",
 
 // Path to the ie driver executable. This is used by Internet Explorer.
 // By default it points to the 'drivers' folder inside the test directory.
-"iedriver_path": "./drivers/iedriver.exe",
+"iedriver_path": "./drivers/iedriver*",
 
 // URLRemote URL : the URL to use when connecting to a remote webdriver
 // for example, using selenium grid

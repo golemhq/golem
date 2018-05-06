@@ -49,6 +49,7 @@ setup(
                       'Flask-login>=0.4.0',
                       'selenium>=3.6.0',
                       'requests>=2.18.4',
+                      'py-webdriver-manager'
                       ],
     tests_require=['pytest'],
     entry_points={

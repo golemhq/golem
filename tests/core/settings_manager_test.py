@@ -179,11 +179,11 @@ class Test_get_global_settings:
         testdir = testdir_session['path']
         global_settings = settings_manager.get_global_settings(testdir)
         expected = {
-            'chromedriver_path': './drivers/chromedriver',
             'console_log_level': 'INFO',
             'default_browser': 'chrome',
-            'geckodriver_path': './drivers/geckodriver',
-            'iedriver_path': './drivers/iedriver.exe',
+            'chromedriver_path': './drivers/chromedriver*',
+            'geckodriver_path': './drivers/geckodriver*',
+            'iedriver_path': './drivers/iedriver*',
             'implicit_wait': 20,
             'log_all_events': True,
             'remote_browsers': {},
@@ -212,12 +212,12 @@ class Test_get_project_settings:
         testdir = project_class['testdir']
         project = project_class['name']
         project_settings = settings_manager.get_project_settings(testdir, project)
-        expected = {
-            'chromedriver_path': './drivers/chromedriver',
+        expected = {            
             'console_log_level': 'INFO',
             'default_browser': 'chrome',
-            'geckodriver_path': './drivers/geckodriver',
-            'iedriver_path': './drivers/iedriver.exe',
+            'chromedriver_path': './drivers/chromedriver*',
+            'geckodriver_path': './drivers/geckodriver*',
+            'iedriver_path': './drivers/iedriver*',
             'implicit_wait': 20,
             'log_all_events': True,
             'remote_browsers': {},

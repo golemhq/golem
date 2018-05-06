@@ -7,6 +7,7 @@ import os
 import sys
 import uuid
 import traceback
+import glob
 from ast import literal_eval
 from datetime import datetime
 
@@ -339,3 +340,42 @@ def import_module(path):
         except:
             pass
     return mod
+
+
+def extract_version_from_webdriver_filename(filename):
+    """Extract version from webdriver filename.
+    
+    Expects a file in the format: `filename_1.2` or `filename_1.2.exe`
+    The extracted version must conform with pep-386
+    If a valid version is not found it returns '0.0'
+    """
+    version = '0.0'
+    if '_' in filename:
+        components = filename.replace('.exe', '').split('_')
+        if len(components) > 1:
+            parsed_version = components[-1] 
+            from distutils.version import StrictVersion
+            try:
+                StrictVersion(parsed_version)
+                version = parsed_version
+            except:
+                pass
+    return version
+
+
+def match_latest_executable_path(glob_path):
+    """Returns the absolute path to the webdriver executable
+    with the highest version given a path with glob pattern.
+    """
+    found_files = []
+    absolute_glob_path = os.path.abspath(glob_path)
+    # Note: recursive=True arg is not supported
+    # in Python 3.4, so '**' wildcard is not supported
+    matched_files = glob.glob(absolute_glob_path)
+    for matched_file in matched_files:
+        found_files.append((matched_file, extract_version_from_webdriver_filename(matched_file)))
+    if found_files:
+        highest_version = sorted(found_files, key=lambda tup: tup[1], reverse=True)
+        return highest_version[0][0]
+    else:
+        return None

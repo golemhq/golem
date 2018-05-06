@@ -16,12 +16,19 @@ This will create a folder that will contain all subsequent projects.
 
 ##### Download the Webdriver Executables
 
-Golem needs the latest webdrivers in order to work, by default, it will pick up the executables placed in the *<test_directory>/drivers directory*, this setting can be overriden from the settings.
-The latests versions of the webdrivers can be found here:
-* Chrome: [https://sites.google.com/a/chromium.org/chromedriver/](https://sites.google.com/a/chromium.org/chromedriver/)
-* Firefox: [https://github.com/mozilla/geckodriver/releases](https://github.com/mozilla/geckodriver/releases)
+```
+cd <test_directory>
+webdriver-manager update
+``` 
 
-For more detailed information, check [this page](web-drivers.html)
+Webdriver executables can be downloaded manually. Place them in a known location (e.g.: in <test_directory>/drivers) and make sure the settings.json has the correct path to the executable (i.e.: "chromedriver_path": "./drivers/chromedriver\*"). Note: use '\*' wildcard to match latest version automatically.
+
+The latests versions of the webdrivers can be found here:
+* Chrome: (https://sites.google.com/a/chromium.org/chromedriver/)
+* Firefox: (https://github.com/mozilla/geckodriver/releases)
+* IE: (http://selenium-release.storage.googleapis.com/index.html)
+
+For more detail, check [this page](web-drivers.html)
 
 
 ##### Start the Web Module

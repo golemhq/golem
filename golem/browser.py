@@ -10,6 +10,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException
 
 from golem.core.exceptions import IncorrectSelectorType, ElementNotFound
+from golem.core import utils
 from golem import execution
 
 
@@ -235,8 +236,10 @@ def open_browser(browser_id=None):
     """Open a browser.
 
     When opening more than one browser instance per test
-    provie a browser_id to switch between browsers later on
+    provide a browser_id to switch between browsers later on
     """
+    msg_could_not_start_driver = ('Could not start {} driver using the path \'{}\', '
+                                  'check the settings file.')
     driver = None
     browser_definition = execution.browser_definition
     settings = execution.settings
@@ -245,56 +248,57 @@ def open_browser(browser_id=None):
                                   desired_capabilities=browser_definition['capabilities'])
     elif browser_definition['name'] == 'firefox':
         if settings['geckodriver_path']:
+            executable_path = utils.match_latest_executable_path(settings['geckodriver_path'])
             try:
-                driver = webdriver.Firefox(executable_path=settings['geckodriver_path'])
+                driver = webdriver.Firefox(executable_path=executable_path)
             except:
-                msg = ('Could not start firefox driver using the path \'{}\', '
-                       'check the settings file.'.format(settings['geckodriver_path']))
-                execution.logger.error(msg)
+                execution.logger.error(msg_could_not_start_driver
+                                       .format('firefox', settings['geckodriver_path']))
                 execution.logger.info(traceback.format_exc())
-                raise Exception(msg) from None
+                raise Exception(msg)
         else:
             raise Exception('geckodriver_path setting is not defined')
     elif browser_definition['name'] == 'chrome':
         if settings['chromedriver_path']:
             try:
+                executable_path = utils.match_latest_executable_path(settings['chromedriver_path'])
                 chrome_options = Options()
                 chrome_options.add_argument('--start-maximized')
-                driver = webdriver.Chrome(executable_path=settings['chromedriver_path'], chrome_options=chrome_options)
+                driver = webdriver.Chrome(executable_path=executable_path,
+                                          chrome_options=chrome_options)
             except:
-                msg = ('Could not start chrome driver using the path \'{}\', '
-                       'check the settings file.'.format(settings['chromedriver_path']))
-                execution.logger.error(msg)
+                execution.logger.error(msg_could_not_start_driver
+                                       .format('chrome', settings['chromedriver_path']))
                 execution.logger.info(traceback.format_exc())
-                raise Exception(msg) from None
+                raise Exception(msg)
         else:
             raise Exception('chromedriver_path setting is not defined')
     elif browser_definition['name'] == 'chrome-headless':
         if settings['chromedriver_path']:
             try:
+                executable_path = utils.match_latest_executable_path(settings['chromedriver_path'])
                 options = webdriver.ChromeOptions()
                 options.add_argument('headless')
                 options.add_argument('--window-size=1600,1600')
-                driver = webdriver.Chrome(executable_path=settings['chromedriver_path'],
+                driver = webdriver.Chrome(executable_path=executable_path,
                                           chrome_options=options)
             except:
-                msg = ('Could not start chrome driver using the path \'{}\', '
-                       'check the settings file.'.format(settings['chromedriver_path']))
-                execution.logger.error(msg)
+                execution.logger.error(msg_could_not_start_driver
+                                       .format('chrome', settings['chromedriver_path']))
                 execution.logger.info(traceback.format_exc())
-                raise Exception(msg) from None
+                raise Exception(msg)
         else:
             raise Exception('chromedriver_path setting is not defined')
     elif browser_definition['name'] == 'ie':
         if settings['iedriver_path']:
             try:
-                driver = webdriver.Ie(executable_path=settings['iedriver_path'])
+                executable_path = utils.match_latest_executable_path(settings['iedriver_path'])
+                driver = webdriver.Ie(executable_path=executable_path)
             except:
-                msg = ('Could not start IE driver using the path \'{}\', '
-                       'check the settings file.'.format(settings['iedriver_path']))
-                execution.logger.error(msg)
+                execution.logger.error(msg_could_not_start_driver
+                                       .format('internet explorer', settings['geckodriver_path']))
                 execution.logger.info(traceback.format_exc())
-                raise Exception(msg) from None
+                raise Exception(msg)
         else:
             raise Exception('iedriver_path setting is not defined')
     elif browser_definition['name'] == 'ie-remote':
@@ -303,13 +307,9 @@ def open_browser(browser_id=None):
     elif browser_definition['name'] == 'chrome-remote-headless':
         options = webdriver.ChromeOptions()
         options.add_argument('headless')
-        #os.environ["webdriver.chrome.driver"] = settings['chromedriver_path']
         desired_capabilities = options.to_capabilities()
-        #driver = webdriver.Remote(command_executor=settings['remote_url'],
-                                  # desired_capabilities=desired_capabilities)
         driver = webdriver.Chrome(command_executor=settings['remote_url'],
-                                  desired_capabilities=desired_capabilities,
-                                  executable_path=settings['chromedriver_path'])
+                                  desired_capabilities=desired_capabilities)
     elif browser_definition['name'] == 'chrome-remote':
         driver = webdriver.Remote(command_executor=settings['remote_url'],
                                   desired_capabilities=DesiredCapabilities.CHROME)

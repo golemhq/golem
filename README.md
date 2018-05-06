@@ -104,18 +104,25 @@ Quick Start
 golem-admin createdirectory <test_directory>
 ```
 
-**Download the latest webdriver executables** 
-Note: Golem needs the latest webdrivers in order to work, by default, it will pick up the executables placed in the <test_directory>/drivers directory, this setting can be overriden from the settings.
+**Download the latest webdriver executables**
+
+```
+cd <test_directory>
+webdriver-manager update
+``` 
+
+Webdriver executables can be downloaded manually. Place them in a known location (e.g. in <test_directory>/drivers) and make sure the settings.json has the correct path to the executables (e.g. "chromedriver_path": "./drivers/chromedriver\*"). Note: use '\*' wildcard to match latest version automatically.
+
 The latests versions of the webdrivers can be found here:
 * Chrome: (https://sites.google.com/a/chromium.org/chromedriver/)
 * Firefox: (https://github.com/mozilla/geckodriver/releases)
+* IE: (http://selenium-release.storage.googleapis.com/index.html)
 
 For more information check [this page](https://golem-framework.readthedocs.io/en/latest/web-drivers.html) of the documentation.
 
 **Start the Web Module**
 
 ```
-cd <test_directory>
 golem gui
 ```
 
@@ -123,6 +130,19 @@ golem gui
 The Web Module can be accessed at http://localhost:5000/
 
 By default, the following user is available: username: *admin* / password: *admin*
+
+
+**Run a Test From Console**
+
+```
+golem run <project> <test>
+```
+
+Flags:
+
+* -b | --browsers: a list of browsers, by default use defined in settings.json or Chrome
+* -t | --threads: run in parallel, default 1 (not parallel)
+* -e | --environments: a list of environments, default is none
 
 
 Documentation
@@ -136,11 +156,11 @@ Example Projects
 
 Here is a repo with example working projects usign Golem: [https://github.com/lucianopuccio/golem-demo](https://github.com/lucianopuccio/golem-demo)
 
+
 Roadmap
 --------------------------------------
 
 - Integrate with Appium for mobile testing
-- Better integration with Sauce Labs
 - Improve API test Golem actions
 - Video recording
 
