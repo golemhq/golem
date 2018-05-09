@@ -6,12 +6,6 @@ import pytest
 from golem.test_runner import start_execution
 from golem.core import test_case, test_data, environment_manager, utils
 
-from tests.fixtures import (testdir_session,
-                            testdir_function,
-                            project_session,
-                            project_function,
-                            project_function_clean)
-
 
 class Test__define_drivers:
     """Tests for golem.test_runner.start_execution._define_drivers()"""

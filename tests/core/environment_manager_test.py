@@ -1,9 +1,6 @@
 import os
 
-from tests import helper_functions
 from golem.core import environment_manager
-
-from tests.fixtures import testdir_session, project_session
 
 
 ENV_DATA = ('{\n'

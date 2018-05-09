@@ -4,8 +4,6 @@ from golem.core import (utils,
                         settings_manager,
                         test_execution)
 
-from tests.fixtures import project_class, testdir_session
-
 
 class Test_get_test_data:
 

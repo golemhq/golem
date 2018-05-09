@@ -2,19 +2,11 @@ import os
 import types
 import inspect
 from collections import OrderedDict
-from subprocess import call
 
 import pytest
 
 from golem.core import utils, page_object, test_case, suite
 
-from tests.fixtures import (dir_function,
-                            testdir_session,
-                            testdir_function,
-                            project_class,
-                            project_function,
-                            project_function_clean)
-from tests import helper_functions
 
 
 class Test_get_test_cases:

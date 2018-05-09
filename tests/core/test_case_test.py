@@ -3,11 +3,6 @@ from collections import OrderedDict
 
 from golem.core import test_case
 
-from tests.fixtures import (testdir_session,
-                            testdir_class,
-                            project_class,
-                            project_session)
-
 
 SAMPLE_TEST_CONTENT = """
 description = 'some description'

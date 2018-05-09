@@ -2,11 +2,6 @@ import os
 
 from golem.core import settings_manager
 
-from tests.fixtures import (testdir_session,
-                            testdir_class,
-                            project_class,
-                            project_session)
-
 
 class Test_create_global_settings_file:
 

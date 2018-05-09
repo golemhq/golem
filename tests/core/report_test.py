@@ -4,8 +4,6 @@ import json
 from golem.core import report, utils
 from golem.test_runner import test_runner
 
-from tests.fixtures import testdir_session, project_session
-
 
 class Test_create_execution_directory:
 

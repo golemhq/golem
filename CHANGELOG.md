@@ -3,7 +3,7 @@
 
 ## [Unreleased]
 
-## [0.4.1] - 2018-05-07
+## [0.4.7] - 2018-05-07
 
 ### Added
 - actions: verify_alert_is_present, verify_alert_is_not_present, accept_alert, dismiss_alert

@@ -2,9 +2,6 @@ import os
 
 from golem.core import suite
 
-from tests.fixtures import (testdir_session,
-                            project_session)
-
 
 class Test___format_list_items:
 

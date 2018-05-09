@@ -3,16 +3,12 @@ import sys
 
 from golem.core import page_object
 
-from tests.fixtures import (testdir_session,
-                            project_session)
-from tests import helper_functions
-
 
 class Test_page_exists:
 
     def test_page_exists(self, project_session):
-        project = project_session['name']
         testdir = project_session['testdir']
+        project = project_session['name']
         page_object.new_page_object(testdir, project, [], 'page_x001_exist')
         exists = page_object.page_exists(testdir, project, 'page_x001_exist')
         not_exists = page_object.page_exists(testdir, project, 'page_x001_not_exist')
@@ -23,8 +19,8 @@ class Test_page_exists:
 class Test_get_page_object_content:
 
     def test_get_page_object_content(self, project_session):
-        project = project_session['name']
         testdir = project_session['testdir']
+        project = project_session['name']
         page_name = 'page_test_get_content_ab1412'
 
         page_object.new_page_object(testdir, project, [], page_name)
@@ -71,8 +67,8 @@ class Test_get_page_object_content:
 class Test_get_page_object_code:
 
     def test_get_page_object_code(self, project_session):
-        project = project_session['name']
         testdir = project_session['testdir']
+        project = project_session['name']
         page_name = 'page_test_get_code_ab8456'
 
         page_object.new_page_object(testdir, project, [], page_name)
@@ -86,8 +82,8 @@ class Test_get_page_object_code:
 
 
     def test_get_page_object_code_file_not_exist(self, project_session):
-        project = project_session['name']
         testdir = project_session['testdir']
+        project = project_session['name']
         page_path = os.path.join(testdir, 'projects',
                                  project, 'pages', 'does', 'not', 'exist54654.py')
         code = page_object.get_page_object_code(page_path)
@@ -97,8 +93,8 @@ class Test_get_page_object_code:
 class Test_save_page_object:
 
     def test_save_page_object(self, project_session):
-        project = project_session['name']
         testdir = project_session['testdir']
+        project = project_session['name']
         page_path = os.path.join(testdir, 'projects', project,
                                  'pages', 'testa', 'testb',
                                  'page_test987.py')
@@ -134,8 +130,8 @@ class Test_save_page_object:
 class Test_save_page_object_code:
 
     def test_save_page_object_code(self, project_session):
-        project = project_session['name']
         testdir = project_session['testdir']
+        project = project_session['name']
 
         page_name = 'page_name_x1'
         parents = ['save', 'page', 'code']
@@ -160,8 +156,8 @@ class Test_save_page_object_code:
 class Test_new_page_object:
 
     def test_new_page_object(self, project_session):
-        project = project_session['name']
         testdir = project_session['testdir']
+        project = project_session['name']
         page_name = 'page_name_x2'
         parents = ['new', 'page', 'object']
         page_object.new_page_object(testdir, project, parents, page_name)

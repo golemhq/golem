@@ -1,7 +1,5 @@
 import os
 
-from tests.fixtures import testdir_session
-
 
 class Test_startdirectory:
 
