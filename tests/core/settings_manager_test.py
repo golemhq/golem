@@ -266,6 +266,39 @@ class Test_save_project_settings:
         assert actual == input_settings
 
 
+class Test_get_remote_browsers:
+
+    def test_get_remote_browsers(self):
+        settings = {
+            "remote_browsers": {
+                "chrome_60_mac": {
+                    "browserName": "chrome",
+                    "version": "60.0",
+                    "platform": "macOS 10.12"
+                },
+                "chrome_61_mac": {
+                    "browserName": "chrome",
+                    "version": "60.0",
+                    "platform": "macOS 10.12"
+                }
+            }
+        }
+        expected = {
+            "chrome_60_mac": {
+                "browserName": "chrome",
+                "version": "60.0",
+                "platform": "macOS 10.12"
+            },
+            "chrome_61_mac": {
+                "browserName": "chrome",
+                "version": "60.0",
+                "platform": "macOS 10.12"
+            }
+        }
+        rb = settings_manager.get_remote_browsers(settings)
+        assert rb == expected
+
+
 class Test_get_remote_browser_list:
 
     def test_get_remote_browser_list(self):
@@ -297,5 +330,3 @@ class Test_get_remote_browser_list:
         remote_browsers = settings_manager.get_remote_browser_list(input_settings)
         expected = []
         assert remote_browsers == expected
-
-# TODO get_remote_browsers

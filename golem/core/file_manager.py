@@ -23,25 +23,20 @@ def generate_file_structure_dict(full_path, original_path=None):
     test/
          subdir1/
                  subdir2/
-                         file5
-                 file3
-                 file4
-
+                         file3
+                 file2
          file1
-         file2
 
     The result will be:
     test = {
         'subdir1': {
             'subdir2': {
                 'subdir2': {
-                    ('file5', 'subdir1.subdir2.file5'): None,
+                    ('file3', 'subdir1.subdir2.file3'): None,
                 },
-                ('file3', 'subdir1.file3'): None,
-                ('file4', 'subdir1.file4'): None,
+                ('file2', 'subdir1.file2'): None,
         },
         ('file1', 'file1'): None,
-        ('file2', 'file2'): None,
     }
     """
     root_dir_name = os.path.basename(os.path.normpath(full_path))
@@ -63,9 +58,9 @@ def generate_file_structure_dict(full_path, original_path=None):
             if cond1 and cond2:
                 files.append(os.path.splitext(elem)[0])
     for directory in directories:
-        _ = generate_file_structure_dict(os.path.join(full_path, directory),
-                                               original_path)
-        element['sub_elements'].append(_)
+        sub_element = generate_file_structure_dict(os.path.join(full_path, directory),
+                                                   original_path)
+        element['sub_elements'].append(sub_element)
     for filename in files:
         full_file_path = os.path.join(full_path, filename)
 
@@ -119,9 +114,6 @@ def create_directory(path_list=None, path=None, add_init=False):
 
 
 def rename_file(old_path, old_file, new_path, new_file):
-    """rename a file
-    If there are no errors, returns an empty string.
-    If there are errors return a string with the error description"""
     error = ''
     os.makedirs(new_path, exist_ok=True)
     old_fullpath = os.path.join(old_path, old_file)
@@ -132,8 +124,8 @@ def rename_file(old_path, old_file, new_path, new_file):
         try:
             os.rename(old_fullpath, new_fullpath)
         except:
-            error = 'There was an error renaming \'{}\' to \'{}\''.format(
-                        old_fullpath, new_fullpath)
+            error = ('There was an error renaming \'{}\' to \'{}\''
+                     .format(old_fullpath, new_fullpath))
     return error
 
 

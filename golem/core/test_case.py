@@ -95,7 +95,7 @@ def _get_parsed_steps(function_code):
     code_lines = [x.strip().replace('\n', '') for x in code_lines]
     code_lines.pop(0)
     for line in code_lines:
-        if line != 'pass':
+        if line != 'pass' and len(line):
             steps.append(_parse_step(line))
     return steps
 
@@ -129,21 +129,21 @@ def get_test_case_content(root_path, project, test_case_name):
       
     # get setup steps
     setup_steps = []
-    setup_function_code = getattr(test_module, 'setup', None)
-    if setup_function_code:
-        setup_steps = _get_parsed_steps(setup_function_code)
+    setup_function = getattr(test_module, 'setup', None)
+    if setup_function:
+        setup_steps = _get_parsed_steps(setup_function)
     
     # get test steps
     test_steps = []
-    test_function_code = getattr(test_module, 'test', None)
-    if test_function_code:
-        test_steps = _get_parsed_steps(test_function_code)
+    test_function = getattr(test_module, 'test', None)
+    if test_function:
+        test_steps = _get_parsed_steps(test_function)
     
     # get teardown steps
     teardown_steps = []
-    teardown_function_code = getattr(test_module, 'teardown', None)
-    if teardown_function_code:
-        teardown_steps = _get_parsed_steps(teardown_function_code)
+    teardown_function = getattr(test_module, 'teardown', None)
+    if teardown_function:
+        teardown_steps = _get_parsed_steps(teardown_function)
 
     test_contents['description'] = description
     test_contents['pages'] = pages
@@ -294,7 +294,7 @@ def save_test_case(root_path, project, full_test_case_name, description,
                 f.write('    {0}({1})\n'.format(step_action, param_str))
         else:
             f.write('    pass\n')
-        f.write('\n\n')
+        f.write('\n')
         # write the teardown function
         f.write('def teardown(data):\n')
         if test_steps['teardown']:
@@ -311,11 +311,14 @@ def save_test_case_code(root_path, project, full_test_case_name,
     """Save test case contents string to file.
     full_test_case_name is a relative dot path to the test.
     """
+    print('TABLE TEST DATA')
+    print(table_test_data)
+    print()
     test_case_path = generate_test_case_path(root_path, project, full_test_case_name)
-    with open(test_case_path, 'w', encoding='utf-8') as test_file:
+    with open(test_case_path, 'w') as test_file:
         test_file.write(content)
     # save test data
-    if table_test_data:
+    if test_execution.settings['test_data'] == 'csv':
         #save csv data
         test_data_module.save_external_test_data_file(root_path, project,
                                                       full_test_case_name,

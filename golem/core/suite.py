@@ -66,8 +66,7 @@ def get_suite_amount_of_workers(workspace, project, suite):
     """Get the amount of workers defined in a suite.
     Default is 1 if suite does not have workers defined"""
     amount = 1
-    suite_module = importlib.import_module('projects.{0}.suites.{1}'.format(project, suite),
-                                           package=None)
+    suite_module = get_suite_module(workspace, project, suite)
     if hasattr(suite_module, 'workers'):
         amount = suite_module.workers
     return amount
@@ -76,8 +75,7 @@ def get_suite_amount_of_workers(workspace, project, suite):
 def get_suite_environments(workspace, project, suite):
     """Get the environments defined in a suite."""
     environments = []
-    module_name = 'projects.{0}.suites.{1}'.format(project, suite)
-    suite_module = importlib.import_module(module_name, package=None)
+    suite_module = get_suite_module(workspace, project, suite)
     if hasattr(suite_module, 'environments'):
         environments = suite_module.environments
 
@@ -86,9 +84,9 @@ def get_suite_environments(workspace, project, suite):
 
 def get_suite_test_cases(workspace, project, suite):
     """Return a list with all the test cases of a given suite"""
+    # TODO should use glob
     tests = []
-    module_name = 'projects.{0}.suites.{1}'.format(project, suite)
-    suite_module = importlib.import_module(module_name, package=None)
+    suite_module = get_suite_module(workspace, project, suite)
     if '*' in suite_module.tests:
         path = os.path.join(workspace, 'projects', project, 'tests')
         tests = file_manager.get_files_dot_path(path, extension='.py')
@@ -109,18 +107,19 @@ def get_suite_test_cases(workspace, project, suite):
 def get_suite_browsers(workspace, project, suite):
     """Get the list of browsers defined in a suite"""
     browsers = []
-    module_name = 'projects.{0}.suites.{1}'.format(project, suite)
-    suite_module = importlib.import_module(module_name, package=None)
+    suite_module = get_suite_module(workspace, project, suite)
     if hasattr(suite_module, 'browsers'):
         browsers = suite_module.browsers
 
     return browsers
 
 
-def get_suite_module(workspace, project, suite):
-    """Get the module of a suite using importlib.import_module."""
-    module_name = 'projects.{0}.suites.{1}'.format(project, suite)
-    suite_module = importlib.import_module(module_name, package=None)
+def get_suite_module(workspace, project, suite_name):
+    """Get the module of a suite"""
+    suite_name, parents = utils.separate_file_from_parents(suite_name)
+    path = os.path.join(workspace, 'projects', project, 'suites',
+                        os.sep.join(parents), suite_name + '.py')
+    suite_module = utils.import_module(path)
     return suite_module
 
 

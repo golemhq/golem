@@ -18,3 +18,5 @@ cli_drivers = []
 
 interactive = False
 
+test_data = None
+

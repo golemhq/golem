@@ -178,6 +178,33 @@ class Test_get_projects:
         assert projects == []
 
 
+class Test_create_test_dir:
+
+    def test_new_directory_contents(self, dir_function):
+        path = dir_function['path']
+        name = 'testdirectory_001'
+        utils.create_test_dir(name)
+        testdir = os.path.join(path, name)
+        listdir = os.listdir(testdir)
+        files = [name for name in listdir 
+                 if os.path.isfile(os.path.join(testdir, name))]
+        dirs = [name for name in listdir 
+                 if os.path.isdir(os.path.join(testdir, name))]
+        if '.DS_Store' in files:
+            files.remove('.DS_Store')
+        assert len(files) == 4
+        # verify files
+        assert '__init__.py' in files
+        assert 'golem_start.py' in files
+        assert 'settings.json' in files
+        assert 'users.json' in files
+        # verify directories
+        assert len(dirs) == 2
+        # verify the test dir contains the correct directories
+        assert 'projects' in dirs
+        assert 'drivers' in dirs
+
+
 class Test_delete_element:
 
     def test_delete_tests(self, project_function):
@@ -462,7 +489,6 @@ class Test_match_latest_executable_path:
         is returned
         """
         basedir = dir_function['path']
-        os.chdir(basedir)
         test_utils.create_empty_file(basedir, 'chromedriver_2.2')
         test_utils.create_empty_file(basedir, 'chromedriver_2.4')
         test_utils.create_empty_file(basedir, 'chromedriver_2.3')
@@ -473,7 +499,6 @@ class Test_match_latest_executable_path:
     def test_match_latest_executable_path_exe(self, dir_function, test_utils):
         """test that match_latest workds for filenames ending in .exe"""
         basedir = dir_function['path']
-        os.chdir(basedir)
         filepath = test_utils.create_empty_file(basedir, 'chromedriver_2.4.exe')
         filepath = test_utils.create_empty_file(basedir, 'chromedriver_2.3.exe')
         filepath = test_utils.create_empty_file(basedir, 'geckodriver_5.6.7.exe')
@@ -485,7 +510,6 @@ class Test_match_latest_executable_path:
         to a subdir
         """
         basedir = dir_function['path']
-        os.chdir(basedir)
         path = os.path.join(basedir, 'drivers')
         test_utils.create_empty_file(path, 'chromedriver_2.2')
         test_utils.create_empty_file(path, 'chromedriver_2.4')
@@ -499,7 +523,6 @@ class Test_match_latest_executable_path:
         no wildcards
         """
         basedir = dir_function['path']
-        os.chdir(basedir)
         path = os.path.join(basedir, 'drivers')
         test_utils.create_empty_file(path, 'chromedriver_2.2')
         test_utils.create_empty_file(path, 'chromedriver_2.4')
@@ -509,7 +532,6 @@ class Test_match_latest_executable_path:
     def test_asterisc_subdir(self, dir_function, test_utils):
         """test that '*' wildcard can be used for dirs"""
         basedir = dir_function['path']
-        os.chdir(basedir)
         path = os.path.join(basedir, 'drivers')
         test_utils.create_empty_file(path, 'chromedriver_2.2')
         test_utils.create_empty_file(path, 'chromedriver_2.4')

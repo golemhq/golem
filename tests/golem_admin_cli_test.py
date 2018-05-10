@@ -31,9 +31,8 @@ class Test_golem_admin:
     def test_createdirectory_already_exists(self, dir_function, test_utils):
         path = dir_function['path']
         name = 'testdir_001'
-        os.chdir(path)
-        os.mkdir(name)
         cmd = 'golem-admin createdirectory {}'.format(name)
+        test_utils.run_command(cmd)
         result = test_utils.run_command(cmd)
         expected = ('golem-admin createdirectory: error: the directory {} '
                     'already exists'.format(name))
@@ -42,7 +41,6 @@ class Test_golem_admin:
     def test_createdirectory(self, dir_function, test_utils):
         path = dir_function['path']
         name = 'testdir_test_002'
-        os.chdir(path)
         cmd = 'golem-admin createdirectory {}'.format(name)
         result = test_utils.run_command(cmd)
         full_path = os.path.join(path, name)

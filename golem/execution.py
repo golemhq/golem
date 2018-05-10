@@ -1,5 +1,5 @@
 """The Execution module contains data specific to a
-single test execution and it is shared among other modules.
+single test execution
 """
 import sys
 

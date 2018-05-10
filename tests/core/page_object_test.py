@@ -166,6 +166,25 @@ class Test_new_page_object:
                                  page_name + '.py')
         assert os.path.isfile(full_path)
 
+    def test_new_page_object_page_exists(self, project_session):
+        testdir = project_session['testdir']
+        project = project_session['name']
+        page_name = 'page_name_x3'
+        parents = ['new', 'page', 'object']
+        page_object.new_page_object(testdir, project, parents, page_name)
+        error = page_object.new_page_object(testdir, project, parents, page_name)
+        assert error == ['A page file with that name already exists']
+
+    def test_new_page_object_into_subdirectory(self, project_session):
+        testdir = project_session['testdir']
+        project = project_session['name']
+        page_name = 'page_name_x3'
+        parents = ['subdir']
+        page_object.new_page_object(testdir, project, parents, page_name)
+        init_path = os.path.join(testdir, 'projects', project, 'pages',
+                                 'subdir', '__init__.py')
+        assert os.path.isfile(init_path)
+
 
 class Test_generate_page_path:
 

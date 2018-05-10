@@ -29,6 +29,7 @@ def dir_function():
     dirname = Test_utils().random_string(4, 'tempdir_')
     path = os.path.join(base_dir, dirname)
     os.mkdir(path)
+    os.chdir(path)
     yield {
         'name': dirname,
         'path': path,

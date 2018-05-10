@@ -164,7 +164,7 @@ def createuser_command(username, password, is_admin=False,
 
 
 def createdirectory_command(dir_name):
-    # Generate a new 'golem' directory
+    """Generate a new 'golem' directory"""
     if os.path.exists(dir_name):
         msg = ('golem-admin createdirectory: error: the directory {} '
                'already exists'.format(dir_name))

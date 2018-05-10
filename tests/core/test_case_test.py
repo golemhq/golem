@@ -1,7 +1,9 @@
 import os
 from collections import OrderedDict
 
-from golem.core import test_case
+import pytest
+
+from golem.core import test_case, test_execution
 
 
 SAMPLE_TEST_CONTENT = """
@@ -42,182 +44,228 @@ def teardown(data):
 
 
 class Test__parse_step:
-
+    
     possible_steps = [
         # action without parameters
-        {
-            'src': 'action()',
-            'expected': {'method_name': 'action', 'parameters': []}
-        },
+        (
+            'action()',
+            {'method_name': 'action', 'parameters': []}
+        ),
         # string parameter
-        {
-            'src': 'action(\'value\')',
-            'expected': {'method_name': 'action', 'parameters': ["'value'"]}
-        },
+        (
+            'action(\'value\')',
+            {'method_name': 'action', 'parameters': ["'value'"]}
+        ),
         # double string parameter
-        {
-            'src': 'action(\"double_quotes\")',
-            'expected': {'method_name': 'action', 'parameters': ['"double_quotes"']}
-        },
+        (
+            'action(\"double_quotes\")',
+            {'method_name': 'action', 'parameters': ['"double_quotes"']}
+        ),
         # string with spaces
-        {
-            'src': 'action(\'spaces spaces spaces\')',
-            'expected': {'method_name': 'action', 'parameters': ["'spaces spaces spaces'"]}
-        },
+        (
+            'action(\'spaces spaces spaces\')',
+            {'method_name': 'action', 'parameters': ["'spaces spaces spaces'"]}
+        ),
         # double quotes string with single quotes
-        {
-            'src': 'action(\"test \'test2\' test\")',
-            'expected': {'method_name': 'action', 'parameters': ["\"test \'test2\' test\""]}
-        },
+        (
+            'action(\"test \'test2\' test\")',
+            {'method_name': 'action', 'parameters': ["\"test \'test2\' test\""]}
+        ),
         # single quotes string with double quotes
-        {
-            'src': 'action(\'test \"test2\" test\')',
-            'expected': {'method_name': 'action', 'parameters': ["\'test \"test2\" test\'"]}
-        },
+        (
+            'action(\'test \"test2\" test\')',
+            {'method_name': 'action', 'parameters': ["\'test \"test2\" test\'"]}
+        ),
         # multiple string parameters
-        {
-        'src': 'action(\'one\', \'two\', \'three\')',
-            'expected': {'method_name': 'action', 'parameters': ["'one'", "'two'", "'three'"]}
-        },
+        (
+            'action(\'one\', \'two\', \'three\')',
+            {'method_name': 'action', 'parameters': ["'one'", "'two'", "'three'"]}
+        ),
         # tuple parameter
-        {
-            'src': 'action((\'this\', \'is a\', \'tuple\'))',
-            'expected': {'method_name': 'action', 'parameters': ['(\'this\', \'is a\', \'tuple\')']}
-        },
+        (
+            'action((\'this\', \'is a\', \'tuple\'))',
+            {'method_name': 'action', 'parameters': ['(\'this\', \'is a\', \'tuple\')']}
+        ),
         # tuple parameter with double quotes string
-        {
-            'src': 'action((\"this\", \"is a\", \"tuple\"))',
-            'expected': {'method_name': 'action', 'parameters': ['(\"this\", \"is a\", \"tuple\")']}
-        },
+        (
+            'action((\"this\", \"is a\", \"tuple\"))',
+            {'method_name': 'action', 'parameters': ['(\"this\", \"is a\", \"tuple\")']}
+        ),
         # tuple parameter with ints
-        {
-            'src': 'action((1, 2, 3))',
-            'expected': {'method_name': 'action', 'parameters': ['(1, 2, 3)']}
-        },
+        (
+            'action((1, 2, 3))',
+            {'method_name': 'action', 'parameters': ['(1, 2, 3)']}
+        ),
         # tuple and a string parameter
-        {
-            'src': 'action((\'a\', \'b\', \'c\'), \'another\')',
-            'expected': {'method_name': 'action', 'parameters': ['(\'a\', \'b\', \'c\')', "'another'"]}
-        },
+        (
+            'action((\'a\', \'b\', \'c\'), \'another\')',
+            {'method_name': 'action', 'parameters': ['(\'a\', \'b\', \'c\')', "'another'"]}
+        ),
         # two tuple parameters
-        {
-            'src': 'action((\'two\', \'tuples\'), (\'a\', \'b\'))',
-            'expected': {'method_name': 'action', 'parameters': ['(\'two\', \'tuples\')', '(\'a\', \'b\')']}
-        },
+        (
+            'action((\'two\', \'tuples\'), (\'a\', \'b\'))',
+            {'method_name': 'action', 'parameters': ['(\'two\', \'tuples\')', '(\'a\', \'b\')']}
+        ),
         # dict parameter
-        {
-            'src': 'action({\'test\': \'test\'})',
-            'expected': {'method_name': 'action', 'parameters': ['{\'test\': \'test\'}']}
-        },
+        (
+            'action({\'test\': \'test\'})',
+            {'method_name': 'action', 'parameters': ['{\'test\': \'test\'}']}
+        ),
         # dict parameter with double quotes
-        {
-            'src': 'action({\"test\": \"test\"})',
-            'expected': {'method_name': 'action', 'parameters': ['{\"test\": \"test\"}']}
-        },
+        (
+            'action({\"test\": \"test\"})',
+            {'method_name': 'action', 'parameters': ['{\"test\": \"test\"}']}
+        ),
         # dict parameter with int values
-        {
-            'src': 'action({\"test\": 2})',
-            'expected': {'method_name': 'action', 'parameters': ['{\"test\": 2}']}
-        },
+        (
+            'action({\"test\": 2})',
+            {'method_name': 'action', 'parameters': ['{\"test\": 2}']}
+        ),
         # dict parameter with boolean values
-        {
-            'src': 'action({\"test\": True})',
-            'expected': {'method_name': 'action', 'parameters': ['{\"test\": True}']}
-        },
+        (
+            'action({\"test\": True})',
+            {'method_name': 'action', 'parameters': ['{\"test\": True}']}
+        ),
         # dict parameter with None values
-        {
-            'src': 'action({\"test\": None})',
-            'expected': {'method_name': 'action', 'parameters': ['{\"test\": None}']}
-        },
+        (
+            'action({\"test\": None})',
+            {'method_name': 'action', 'parameters': ['{\"test\": None}']}
+        ),
         # dict parameter with multiple keys
-        {
-            'src': 'action({\'test\': \'test\', \'test2\': \'test2\'})',
-            'expected': {'method_name': 'action', 'parameters': ['{\'test\': \'test\', \'test2\': \'test2\'}']}
-        },
+        (
+            'action({\'test\': \'test\', \'test2\': \'test2\'})',
+            {'method_name': 'action', 'parameters': ['{\'test\': \'test\', \'test2\': \'test2\'}']}
+        ),
         # dict parameter with multiple double quote keys
-        {
-            'src': 'action({\"test\": \"test\", \"test2\": \"test2\"})',
-            'expected': {'method_name': 'action', 'parameters': ['{\"test\": \"test\", \"test2\": \"test2\"}']}
-        },
+        (
+            'action({\"test\": \"test\", \"test2\": \"test2\"})',
+            {'method_name': 'action', 'parameters': ['{\"test\": \"test\", \"test2\": \"test2\"}']}
+        ),
         # list parameter
-        {
-            'src': 'action([\'a\', \'b\'])',
-            'expected': {'method_name': 'action', 'parameters': ['[\'a\', \'b\']']}
-        },
+        (
+            'action([\'a\', \'b\'])',
+            {'method_name': 'action', 'parameters': ['[\'a\', \'b\']']}
+        ),
         # list parameter with double quote strings
-        {
-            'src': 'action([\"a\", \"b\"])',
-            'expected': {'method_name': 'action', 'parameters': ['[\"a\", \"b\"]']}
-        },
+        (
+            'action([\"a\", \"b\"])',
+            {'method_name': 'action', 'parameters': ['[\"a\", \"b\"]']}
+        ),
         # list parameter with ints
-        {
-            'src': 'action([1, 2])',
-            'expected': {'method_name': 'action', 'parameters': ['[1, 2]']}
-        },
+        (
+            'action([1, 2])',
+            {'method_name': 'action', 'parameters': ['[1, 2]']}
+        ),
         # int parameter
-        {
-            'src': 'action(123)',
-            'expected': {'method_name': 'action', 'parameters': ['123']}
-        },
+        (
+            'action(123)',
+            {'method_name': 'action', 'parameters': ['123']}
+        ),
         # float parameter
-        {
-            'src': 'action(123.4)',
-            'expected': {'method_name': 'action', 'parameters': ['123.4']}
-        },
+        (
+            'action(123.4)',
+            {'method_name': 'action', 'parameters': ['123.4']}
+        ),
         # boolean parameter
-        {
-            'src': 'action(True)',
-            'expected': {'method_name': 'action', 'parameters': ['True']}
-        },
+        (
+            'action(True)',
+            {'method_name': 'action', 'parameters': ['True']}
+        ),
         # None parameter
-        {
-            'src': 'action(None)',
-            'expected': {'method_name': 'action', 'parameters': ['None']}
-        },
+        (
+            'action(None)',
+            {'method_name': 'action', 'parameters': ['None']}
+        ),
         # object attribute
-        {
-            'src': 'action(page.element)',
-            'expected': {'method_name': 'action', 'parameters': ['page.element']}
-        },
+        (
+            'action(page.element)',
+            {'method_name': 'action', 'parameters': ['page.element']}
+        ),
         # object attribute and a string
-        {
-            'src': 'action(page.element, \'test\')',
-            'expected': {'method_name': 'action', 'parameters': ['page.element', '\'test\'']}
-        },
+        (
+            'action(page.element, \'test\')',
+            {'method_name': 'action', 'parameters': ['page.element', '\'test\'']}
+        ),
         # string with commas
-        {
-            'src': 'action(\'string, with, commas\')',
-            'expected': {'method_name': 'action', 'parameters': ["'string, with, commas'"]}
-        },
+        (
+            'action(\'string, with, commas\')',
+            {'method_name': 'action', 'parameters': ["'string, with, commas'"]}
+        ),
         # page object method without parameters
-        {
-            'src': 'some_page.some_action()',
-            'expected': {'method_name': 'some_page.some_action', 'parameters': []}
-        }
+        (
+            'some_page.some_action()',
+            {'method_name': 'some_page.some_action', 'parameters': []}
+        )
     ]
 
-    def test_parse_step(self):
-        for step in self.possible_steps:
-            parsed = test_case._parse_step(step['src'])
-            assert step['expected'] == parsed
+    @pytest.mark.parametrize('step, expected', possible_steps)
+    def test_parse_step(self, step, expected):
+        parsed = test_case._parse_step(step)
+        assert parsed == expected
+
+
+class Test__get_parsed_steps:
+
+    def test__get_parsed_steps(self):
+        def func1():
+            min(2, 3)
+            max(2, 3)
+        result = test_case._get_parsed_steps(func1)
+        expected = [
+            {'method_name': 'min', 'parameters': ['2', '3']},
+            {'method_name': 'max', 'parameters': ['2', '3']}
+        ]
+        assert result == expected
+
+    def test__get_parsed_steps_empty_lines(self):
+        def func1():
+            min(2, 3)
+
+            max(2, 3)
+
+        result = test_case._get_parsed_steps(func1)
+        expected = [
+            {'method_name': 'min', 'parameters': ['2', '3']},
+            {'method_name': 'max', 'parameters': ['2', '3']}
+        ]
+        assert result == expected
+
+    def test__get_parsed_steps_pass(self):
+        def func1():
+            pass
+    
+        result = test_case._get_parsed_steps(func1)
+        assert result == []
 
 
 class Test_get_test_case_content:
 
     def test_get_test_case_content(self, project_class):
-        root_path = project_class['testdir']
+        testdir = project_class['testdir']
         project = project_class['name']
 
         test_name = 'some_test_case'
-        path = os.path.join(root_path, 'projects', project,
+        path = os.path.join(testdir, 'projects', project,
                             'tests', test_name + '.py')
         with open(path, 'w') as ff:
             ff.write(SAMPLE_TEST_CONTENT)
-        test_content = test_case.get_test_case_content(root_path, project, test_name)
+        test_content = test_case.get_test_case_content(testdir, project, test_name)
         assert test_content['description'] == 'some description'
         assert test_content['pages'] == ['page1', 'page2']
         assert test_content['steps']['setup'] == [{'method_name': 'page1.func1', 'parameters': []}]
         assert test_content['steps']['test'] == [{'method_name': 'page2.func2', 'parameters': ["'a'", "'b'"]}, {'method_name': 'click', 'parameters': ['page2.elem1']}]
+        assert test_content['steps']['teardown'] == []
+
+    def test_get_test_case_content_empty_test(self, project_function):
+        testdir = project_function['testdir']
+        project = project_function['name']
+        test_name = 'some_test_case'
+        test_case.new_test_case(testdir, project, [], test_name)
+        test_content = test_case.get_test_case_content(testdir, project, test_name)
+        assert test_content['description'] == ''
+        assert test_content['pages'] == []
+        assert test_content['steps']['setup'] == []
+        assert test_content['steps']['test'] == []
         assert test_content['steps']['teardown'] == []
 
 
@@ -289,3 +337,123 @@ class Test_new_test_case:
                             os.sep.join(parents), test_name2 + '.py')
         assert errors == []
         assert os.path.isfile(path)
+
+
+class Test_save_test_case:
+
+    def test_save_test_case_data_infile(self, project_function):
+        testdir = project_function['testdir']
+        project = project_function['name']
+        test_case.new_test_case(testdir, project, ['a', 'b'], 'test_one')
+        description = 'description'
+        page_objects = ['page1', 'page2']
+        test_steps = {
+            'setup': [
+                {'action': 'click', 'parameters': ['elem1']}
+            ],
+            'test': [
+                {'action': 'send_keys', 'parameters': ['elem2', 'keys']}
+            ],
+            'teardown': []
+        }
+        test_data = [{
+            'key': '\'value\''
+        }]
+        test_execution.settings['test_data'] = 'infile'
+        test_case.save_test_case(testdir, project, 'a.b.test_one',
+                                 description, page_objects, test_steps,
+                                 test_data)
+        path = os.path.join(testdir, 'projects', project, 'tests',
+                            'a', 'b', 'test_one.py')
+        expected = (
+            '\n'
+            'description = \'description\'\n'
+            '\n'
+            'pages = [\'page1\',\n'
+            '         \'page2\']\n'
+            '\n'
+            'data = [\n'
+            '    {\n'
+            '        \'key\': \'value\',\n'
+            '    },\n'
+            ']\n'
+            '\n'
+            'def setup(data):\n'
+            '    click(elem1)\n'
+            '\n'
+            'def test(data):\n'
+            '    send_keys(elem2, keys)\n'
+            '\n'
+            'def teardown(data):\n'
+            '    pass\n')
+        with open(path) as f:
+            assert f.read() == expected
+
+    def test_save_test_case_data_csv(self, project_function):
+        testdir = project_function['testdir']
+        project = project_function['name']
+        test_case.new_test_case(testdir, project, ['a', 'b'], 'test_one')
+        description = 'description'
+        page_objects = []
+        test_steps = {
+            'setup': [],
+            'test': [
+                {'action': 'send_keys', 'parameters': ['elem2', 'keys']}
+            ],
+            'teardown': []
+        }
+        test_data = [{
+            'key': '\'value\''
+        }]
+        test_execution.settings['test_data'] = 'csv'
+        test_case.save_test_case(testdir, project, 'a.b.test_one',
+                                 description, page_objects, test_steps,
+                                 test_data)
+        path = os.path.join(testdir, 'projects', project, 'tests',
+                            'a', 'b', 'test_one.py')
+        expected = (
+            '\n'
+            'description = \'description\'\n'
+            '\n'
+            'pages = []\n'
+            '\n'
+            'def setup(data):\n'
+            '    pass\n'
+            '\n'
+            'def test(data):\n'
+            '    send_keys(elem2, keys)\n'
+            '\n'
+            'def teardown(data):\n'
+            '    pass\n')
+        with open(path) as f:
+            assert f.read() == expected
+
+        data_path = os.path.join(testdir, 'projects', project, 'tests',
+                                 'a', 'b', 'test_one.csv')
+        expected = ('key\n'
+                    '\'value\'\n')
+        with open(data_path) as f:
+            assert f.read() == expected
+
+
+class Test_save_test_case_code:
+
+    def test_save_test_case_code_csv_data(self, project_function):
+        testdir = project_function['testdir']
+        project = project_function['name']
+        test_name = 'test_one'
+        test_data = [
+            {'key': "'value'"}
+        ]
+        test_execution.settings['test_data'] = 'csv'
+        test_case.new_test_case(testdir, project, [], test_name)
+        test_case.save_test_case_code(testdir, project, test_name,
+                                      SAMPLE_TEST_CONTENT, test_data)
+        path = os.path.join(testdir, 'projects', project, 'tests', test_name + '.py')
+        with open(path) as f:
+            assert f.read() == SAMPLE_TEST_CONTENT
+        path = os.path.join(testdir, 'projects', project, 'tests', test_name + '.csv')
+        expected = ('key\n'
+            '\'value\'\n')
+        with open(path) as f:
+            assert f.read() == expected

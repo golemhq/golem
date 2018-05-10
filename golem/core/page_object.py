@@ -1,6 +1,3 @@
-"""Methods for dealing with page object modules
-Page object are modules located inside /pages/ directory
-"""
 import os
 import sys
 import types
