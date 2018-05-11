@@ -1,7 +1,6 @@
 """The multiprocess_executor method runs all the test cases
 provided in parallel using multiprocessing.
 """
-import time
 from multiprocessing import Pool
 from multiprocessing.pool import ApplyResult
 
@@ -37,6 +36,6 @@ def multiprocess_executor(execution_list, threads=1):
         apply_async = pool.apply_async(run_test, args=args)
         results.append(apply_async)
     map(ApplyResult.wait, results)
-    lst_results = [r.get() for r in results]
+    # lst_results = [r.get() for r in results]
     pool.close()
     pool.join()

@@ -311,9 +311,6 @@ def save_test_case_code(root_path, project, full_test_case_name,
     """Save test case contents string to file.
     full_test_case_name is a relative dot path to the test.
     """
-    print('TABLE TEST DATA')
-    print(table_test_data)
-    print()
     test_case_path = generate_test_case_path(root_path, project, full_test_case_name)
     with open(test_case_path, 'w') as test_file:
         test_file.write(content)

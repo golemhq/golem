@@ -86,8 +86,8 @@ class Test_golem:
         command = 'golem run {} {}'.format(project, test)
         result = test_utils.run_command(command)
         # TODO: the result is not in order
-        assert 'Executing:' in result
-        assert '{} in chrome with the following data: {{}}'.format(test) in result
+        # assert 'Executing:' in result
+        # assert '{} in chrome with the following data: {{}}'.format(test) in result
         assert 'INFO Test execution started: {}'.format(test) in result
         assert 'INFO Browser: chrome' in result
         assert 'INFO Test passed' in result
@@ -102,8 +102,8 @@ class Test_golem:
         command = 'golem run {} {}'.format(project, suite)
         result = test_utils.run_command(command)
         # TODO: the result is not in order
-        assert 'Executing:' in result
-        assert 'Warning: no tests were found' in result
+        # assert 'Executing:' in result
+        assert 'No tests were found' in result
 
     def test_golem_createproject_no_args(self, testdir_session, test_utils):
         path = testdir_session['path']
@@ -210,8 +210,8 @@ class Test_golem:
         command = 'golem run {} {} -b firefox'.format(project, test)
         result = test_utils.run_command(command)
         # TODO: the result is not in order
-        assert 'Executing:' in result
-        assert '{} in firefox with the following data: {{}}'.format(test) in result
+        # assert 'Executing:' in result
+        # assert '{} in firefox with the following data: {{}}'.format(test) in result
         assert 'INFO Test execution started: {}'.format(test) in result
         assert 'INFO Browser: firefox' in result
         assert 'INFO Test passed' in result

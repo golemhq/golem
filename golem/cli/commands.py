@@ -7,8 +7,8 @@ from golem.core import (utils,
                         test_case,
                         settings_manager)
 from golem.gui import gui_start
-from golem.test_runner import start_execution
-
+from golem.test_runner import (start_execution,
+                               interactive as interactive_module)
 from .argument_parser import get_parser
 from . import messages
 
@@ -67,6 +67,10 @@ def run_command(project='', test_or_suite='', browsers=[], threads=1,
             test_execution.project = project
             settings = settings_manager.get_project_settings(root_path, project)
             test_execution.settings = settings
+            # settings are accessible from a test
+            # test_execution is not accessible from a test
+            # the test needs to know if interactive is true
+            test_execution.settings['interactive'] = interactive
             if test_or_suite:
                 if suite_module.suite_exists(root_path, test_execution.project,
                                          test_or_suite):
@@ -103,8 +107,8 @@ def run_command(project='', test_or_suite='', browsers=[], threads=1,
             sys.exit(msg)
 
     elif test_execution.interactive:
-        from golem.test_runner import interactive
-        interactive.interactive(test_execution.settings, test_execution.cli_drivers)
+        interactive_module.interactive(test_execution.settings,
+                                       test_execution.cli_drivers)
     else:
         print(messages.RUN_USAGE_MSG)
         print('Projects:')

@@ -7,7 +7,7 @@ from golem.test_runner import start_execution
 from golem.core import test_case, test_data, environment_manager, utils
 
 
-class Test__define_drivers:
+class Test_define_drivers:
     """Tests for golem.test_runner.start_execution._define_drivers()"""
 
     remote_drivers = {
@@ -20,7 +20,7 @@ class Test__define_drivers:
 
     default_drivers = ['chrome', 'chrome-headless']
 
-    def test__define_drivers(self):
+    def test_define_drivers(self):
         """Verify that _define_drivers returns the correct values"""
 
         drivers = ['chrome', 'chrome_60_mac']
@@ -44,24 +44,24 @@ class Test__define_drivers:
             }
         ]
 
-        drivers_defined = start_execution._define_drivers(drivers, self.remote_drivers,
+        drivers_defined = start_execution.define_drivers(drivers, self.remote_drivers,
                                                           self.default_drivers)
         assert drivers_defined == expected
 
 
-    def test__define_drivers_drivers_empty(self):
+    def test_define_drivers_drivers_empty(self):
         """Verify that _define_drivers returns correct value 
         when selected drivers is empty
         """
         drivers = []
         expected = []
 
-        drivers_defined = start_execution._define_drivers(drivers, self.remote_drivers,
+        drivers_defined = start_execution.define_drivers(drivers, self.remote_drivers,
                                                           self.default_drivers)
         assert drivers_defined == expected
 
 
-    def test__define_drivers_driver_is_not_defined(self):
+    def test_define_drivers_driver_is_not_defined(self):
         """Verify that _define_drivers raises the correct exception
         when a driver name that is not defined is passed
         """
@@ -74,13 +74,13 @@ class Test__define_drivers:
         expected_msg = ''.join(expected_msg)
 
         with pytest.raises(Exception) as excinfo:      
-            drivers_defined = start_execution._define_drivers(drivers,
+            drivers_defined = start_execution.define_drivers(drivers,
                                                               self.remote_drivers,
                                                               self.default_drivers)
         assert str(excinfo.value) == expected_msg
 
 
-    def test__define_drivers_driver_order_of_preference(self):
+    def test_define_drivers_driver_order_of_preference(self):
         """Verify that _define_drivers selects the drivers in the correct
         order of precedence, first remote drivers then predefined drivers"""
         remote_drivers = {
@@ -95,7 +95,7 @@ class Test__define_drivers:
 
         drivers = ['chromex']
    
-        drivers_defined = start_execution._define_drivers(drivers,
+        drivers_defined = start_execution.define_drivers(drivers,
                                                           remote_drivers,
                                                           default_drivers)
         assert len(drivers_defined) == 1

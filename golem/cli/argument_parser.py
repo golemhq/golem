@@ -8,14 +8,6 @@ def get_parser():
 
     # run
     parser_run = subparsers.add_parser('run', add_help=False)
-    browser_choices = ['firefox',
-                       'chrome',
-                       'chrome-remote',
-                       'chrome-headless',
-                       'chrome-remote-headless',
-                       'firefox-remote',
-                       'ie',
-                       'ie-remote']
     parser_run.add_argument('project', nargs='?', default='')
     parser_run.add_argument('test_or_suite', nargs='?', default='')
     parser_run.add_argument('-b', '--browsers', action='store',

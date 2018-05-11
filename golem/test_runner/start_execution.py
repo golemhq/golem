@@ -15,7 +15,7 @@ from golem.test_runner.test_runner import run_test
 from golem.gui import gui_utils, report_parser
 
 
-def _define_drivers(drivers, remote_browsers, default_browsers):
+def define_drivers(drivers, remote_browsers, default_browsers):
     """Generate the definitions for the drivers.
 
     A defined driver contains the following attributes:
@@ -178,10 +178,10 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
 
     # warn if no tests were found
     if len(execution['tests']) == 0:
-        print('Warning: no tests were found')
+        print('No tests were found')
 
     # get amount of workers (parallel executions), default is 1
-    if test_execution.thread_amount:
+    if test_execution.thread_amount > 1:
         # the thread count passed through cli has higher priority
         execution['workers'] = test_execution.thread_amount
     elif suite_amount_workers:
@@ -212,8 +212,8 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
     # 'capabilities': full capabilities defined in the remote_browsers setting
     remote_browsers = settings_manager.get_remote_browsers(test_execution.settings)
     default_browsers = gui_utils.get_supported_browsers_suggestions()
-    execution['drivers'] = _define_drivers(selected_drivers, remote_browsers,
-                                           default_browsers)
+    execution['drivers'] = define_drivers(selected_drivers, remote_browsers,
+                                          default_browsers)
 
     # Generate timestamp if needed
     # A timestamp is passed when the test is executed from the GUI.
@@ -268,7 +268,6 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
                                                           is_suite)
         test['report_directory'] = report_directory
 
-    
     # EXECUTION
 
     start_time = time.time()
@@ -286,22 +285,16 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
         if test_execution.interactive and execution['workers'] != 1:
             print('WARNING: to run in debug mode, threads must equal one')
 
-        # if execution['workers'] == 1:
-        #     # run tests serially
-        #     # Note: when running test serially I can't seem
-        #     # to be able to reset the logger without stopping 
-        #     # third party loggers like selenium's
-        #     # so, running everything through multiprocessing
-        #     for test in execution_list:
-        #         run_test(workspace, project,
-        #                  test['test_name'], test['data_set'],
-        #                  test['driver'], test_execution.settings,
-        #                  test['report_directory'])
-        # else:
-        #     # run tests using multiprocessing
-        #     multiprocess_executor(execution_list, execution['workers'])
-
-        multiprocess_executor(execution_list, execution['workers'])
+        if execution['workers'] == 1:
+            # run tests serially
+            for test in execution_list:
+                run_test(workspace, project,
+                         test['test_name'], test['data_set'],
+                         test['driver'], test_execution.settings,
+                         test['report_directory'])
+        else:
+            # run tests using multiprocessing
+            multiprocess_executor(execution_list, execution['workers'])
 
     # run suite `after` function
     if execution['suite_after']:

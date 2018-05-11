@@ -34,7 +34,7 @@ def run_test(workspace, project, test_name, test_data, browser,
         'set_name': '',
     }
 
-    from golem.core import execution_logger
+    from golem.test_runner import execution_logger
     from golem import actions
     from golem import execution
 
@@ -107,7 +107,7 @@ def run_test(workspace, project, test_name, test_data, browser,
         # import actions into the test module
         for action in dir(actions):
             setattr(test_module, action, getattr(actions, action))
-        # log description
+        # store test description
         if hasattr(test_module, 'description'):
             execution.description = test_module.description
         else:
@@ -168,19 +168,15 @@ def run_test(workspace, project, test_name, test_data, browser,
 
     if not result['error']:
         logger.info('Test passed')
-
     result['description'] = execution.description
     result['steps'] = execution.steps
     result['test_elapsed_time'] = test_elapsed_time
     result['test_timestamp'] = test_timestamp
     result['browser'] = execution.browser_definition['name']
     result['browser_full_name'] = execution.browser_definition['full_name']
-
-    # remove golem.execution from sys.modules to guarantee thread safety
-    #sys.modules['golem.execution'] = None
     
     report.generate_report(report_directory, test_name, execution.data, result)
     
-    # execution.reset()
-    # execution_logger.reset_logger(logger)
+    execution.reset()
+    execution_logger.reset_logger(logger)
     return

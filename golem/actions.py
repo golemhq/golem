@@ -2,6 +2,7 @@
 import time
 import uuid
 import os
+import sys
 import importlib
 import string
 import random as rand
@@ -194,14 +195,45 @@ def close():
 
 def debug():
     """Enter debug mode"""
-    import readline  # optional, will allow Up/Down/History in the console
+    if not execution.settings['interactive']:
+        execution.logger.info('the -i flag is required to access interactive mode')
+        return
+
+    try:
+        # optional, enables Up/Down/History in the console
+        # not available in windows
+        import readline  
+    except:
+        pass
     import code
     def console_exit():
         raise SystemExit
+    def console_help():
+        msg = ('# start a browser and find an element:\n'
+               'navigate(\'http://..\')\n'
+               'browser = get_browser()\n'
+               'browser.title\n'
+               'element = browser.find(id=\'some-id\')\n'
+               'element.text\n'
+               '\n'
+               '# use Golem actions\n'
+               'actions.send_keys(element, \'some text\')\n'
+               '\n'
+               '# import a page from a project\n'
+               'from projects.project_name.pages import page_name\n'
+               '\n'
+               '# get test data (when run from a test)\n'
+               'execution.data')
+        print(msg)
     vars_copy = globals().copy()
     vars_copy.update(locals())
     vars_copy['exit'] = console_exit
-    banner = 'Entering interactive debug mode\nType exit() to stop'
+    vars_copy['help'] = console_help
+    actions_module = sys.modules[__name__]
+    vars_copy['actions'] = actions_module
+    banner = ('Entering interactive mode\n'
+              'type exit() to stop\n'
+              'type help() for more info')
     shell = code.InteractiveConsole(vars_copy)
     try:
         shell.interact(banner=banner)
