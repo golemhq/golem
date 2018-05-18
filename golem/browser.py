@@ -252,8 +252,8 @@ def open_browser(browser_id=None):
             try:
                 driver = webdriver.Firefox(executable_path=executable_path)
             except:
-                execution.logger.error(msg_could_not_start_driver
-                                       .format('firefox', settings['geckodriver_path']))
+                msg = msg_could_not_start_driver.format('firefox', settings['geckodriver_path'])
+                execution.logger.error(msg)
                 execution.logger.info(traceback.format_exc())
                 raise Exception(msg)
         else:
@@ -267,8 +267,9 @@ def open_browser(browser_id=None):
                 driver = webdriver.Chrome(executable_path=executable_path,
                                           chrome_options=chrome_options)
             except:
-                execution.logger.error(msg_could_not_start_driver
-                                       .format('chrome', settings['chromedriver_path']))
+                msg = msg_could_not_start_driver.format('chrome',
+                                                        settings['chromedriver_path'])
+                execution.logger.error(msg)
                 execution.logger.info(traceback.format_exc())
                 raise Exception(msg)
         else:
@@ -283,8 +284,9 @@ def open_browser(browser_id=None):
                 driver = webdriver.Chrome(executable_path=executable_path,
                                           chrome_options=options)
             except:
-                execution.logger.error(msg_could_not_start_driver
-                                       .format('chrome', settings['chromedriver_path']))
+                msg = msg_could_not_start_driver.format('chrome',
+                                                        settings['chromedriver_path'])
+                execution.logger.error(msg)
                 execution.logger.info(traceback.format_exc())
                 raise Exception(msg)
         else:
@@ -295,8 +297,9 @@ def open_browser(browser_id=None):
                 executable_path = utils.match_latest_executable_path(settings['iedriver_path'])
                 driver = webdriver.Ie(executable_path=executable_path)
             except:
-                execution.logger.error(msg_could_not_start_driver
-                                       .format('internet explorer', settings['geckodriver_path']))
+                msg = msg_could_not_start_driver.format('internet explorer',
+                                                        settings['iedriver_path'])
+                execution.logger.error(msg)
                 execution.logger.info(traceback.format_exc())
                 raise Exception(msg)
         else:

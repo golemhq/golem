@@ -66,7 +66,7 @@
                             <a href="#" class="branch-name">{{ elem.name }}</a>
                             <ul>{{ loop(elem.sub_elements) }}</ul>
                         {%- else %}
-                            <label><input type="checkbox" name="checkbox" class="select-testcase-checkbox test-checkbox"><span class="node-name">{{ elem.name }}</span></label>
+                            <label full-name="{{elem.dot_path}}"><input type="checkbox" name="checkbox" class="select-testcase-checkbox test-checkbox"><span class="node-name">{{ elem.name }}</span></label>
                         {%- endif %}
                     </li>
                 {%- endfor %}
