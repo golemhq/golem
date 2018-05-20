@@ -128,10 +128,16 @@ def get_supported_browsers_suggestions():
         'chrome-remote',
         'chrome-headless',
         'chrome-remote-headless',
+        'edge',
+        'edge-remote',
         'firefox',
         'firefox-remote',
         'ie',
-        'ie-remote'
+        'ie-remote',
+        'opera',
+        'opera-remote',
+        # 'safari',
+        # 'safari-remote'
     ]
     return supported_browsers
 

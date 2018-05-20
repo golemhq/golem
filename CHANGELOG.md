@@ -3,10 +3,15 @@
 
 ## [Unreleased]
 
+### Added
+- Support for Edge and Opera
+- Extend WebDriver and WebElement
+
 ## [0.4.8] - 2018-05-12
 
 ### Fixed
-- #78, #98
+
+- Issues: #78 #98
 
 ## [0.4.7] - 2018-05-07
 

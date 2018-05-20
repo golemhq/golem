@@ -1,7 +1,7 @@
 Settings
 ==================================================
 
-Use the settings.json file to configure Golem behavior. There is a global settings.json file and a settings.json file inside each project folder.
+Use the settings.json file to configure Golem behavior. There is a global settings.json file and a settings.json file inside each project.
 
 <div class="admonition note">
     <p class="first admonition-title">Remember</p>
@@ -41,19 +41,45 @@ Custom wait method to use for every action, that can be specific to each applica
 
 - *default_browser*
 
-Define the driver to use unless overriden by the -d/--driver flag. Default is 'chrome'. Valid options are: firefox, chrome, chrome-remote, firefox-remote, chrome-headless, chrome-remote-headless.
+Define the driver to use unless overriden by the -b/--browsers flag. Default is 'chrome'. Valid options are:
+
+1. chrome
+2. chrome-remote
+3. chrome-headless
+4. chrome-remote-headless
+5. firefox
+6. firefox-remote
+7. ie
+8. ie-remote
+9. safari
+10. safari-remote
+11. opera
+12. opera-remote
+13. Any browser defined in remote_browsers
 
 - *chromedriver_path*
 
-Path to the chrome driver executable. By default it points to the *drivers* folder inside the test directory.
+Path to the Chrome driver executable.
+
+- *edgedriver_path*
+
+Path to the Edge driver executable.
 
 - *geckodriver_path*
 
-Path to the gecko driver executable. By default it points to the *drivers* folder inside the test directory.
+Path to the Gecko driver executable.
+
+- *operadriver_path*
+
+Path to the Opera driver executable.
+
+- *safaridriver_path*
+
+Path to the Safari driver executable.
 
 - *remote_url*
 
-the URL to use when connecting to a remote webdriver, for example, when using selenium grid. Default is 'http://localhost:4444/wd/hub'
+The URL to use when connecting to a remote webdriver, for example, when using selenium grid. Default is 'http://localhost:4444/wd/hub'
 
 - *remote_browsers*
 
@@ -86,7 +112,7 @@ Default is 'INFO'
 
 - *log_all_events*
 
-Default is true
+Log all events or just Golem events. Default is true.
 
 <br>
 

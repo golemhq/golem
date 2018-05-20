@@ -26,17 +26,20 @@ SETTINGS_FILE_CONTENT = (
 // Define the driver to use, unless overriden by the -d/--driver flag
 "default_browser": "chrome",
 
-// Path to the chrome driver executable. By default it points to the
-// 'drivers' folder inside the test directory.
+// Path to the chrome driver executable.
 "chromedriver_path": "./drivers/chromedriver*",
 
-// Path to the gecko driver executable. This is used by Firefox.
-// By default it points to the 'drivers' folder inside the test directory.
+// Path to the Edge driver executable.
+"edgedriver_path": "./drivers/edgedriver*",
+
+// Path to the gecko driver executable.
 "geckodriver_path": "./drivers/geckodriver*",
 
-// Path to the ie driver executable. This is used by Internet Explorer.
-// By default it points to the 'drivers' folder inside the test directory.
+// Path to the ie driver executable.
 "iedriver_path": "./drivers/iedriver*",
+
+// Path to the Opera driver executable.
+"operadriver_path": "./drivers/operadriver*",
 
 // URLRemote URL : the URL to use when connecting to a remote webdriver
 // for example, using selenium grid
@@ -66,8 +69,11 @@ DEFAULTS = [
     ('wait_hook', None),
     ('default_browser', 'chrome'),
     ('chromedriver_path', None),
+    ('edgedriver_path', None),
     ('geckodriver_path', None),
     ('iedriver_path', None),
+    ('operadriver_path', None),
+    # ('safaridriver_path', None),
     ('remote_url', None),
     ('remote_browsers', {}),
     ('console_log_level', 'INFO'),

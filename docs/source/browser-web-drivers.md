@@ -1,60 +1,89 @@
 Browser Web Drivers
 ==================================================
 
+The supported browsers are:
+- Chrome
+- Edge
+- Firefox
+- Internet Explorer
+- Opera
+- Remote (Selenium Grid)
 
-### Chrome
+To download the webdriver executables run the following command (currently only Chrome and Firefox):
 
-To run tests using Chrome locally, the Chromedriver executable is needed.
-
-ChromeDriver is a standalone server which implements WebDriver's wire protocol for Chromium. ChromeDriver is available for Chrome on Android and Chrome on Desktop (Mac, Linux, Windows and ChromeOS).  
-
-Download Chromedriver from [here](https://sites.google.com/a/chromium.org/chromedriver/)
-
-To set it up for Golem to use, place it anywhere in your machine (you can use the 'drivers' folder that is generated automatically inside the test directory) and point to it with the 'chromedriver_path' settings variable:
-
-**settings.json**
 ```
-"chromedriver_path": "./drivers/chromedriver",
+webdriver-manager update
 ```
 
-#### Chrome headless
+**A note on driver versions**
 
-Chrome can run in headless mode, without a GUI. This is useful when running tests in servers without display.
+When using a search pattern like: ```"chromedriver_path": "./drivers/chromedriver*"``` Golem will automatically choose the highest version available.
 
-To do this, just set the browser of a test or suite to 'chrome-headless' or 'chrome-remote-headless.
+Example, consider the following files:
+```
+/drivers
+    chromedriver_2.36
+    chromedriver_2.37
+    chromedriver_2.38
+```
+
+When using ```"chromedriver_path": "./drivers/chromedriver*"``` the chromedriver_2.38 will be selected.
+
+<br>
+
+To download the executables manually, follow instructions below.
+
+
+#### Chrome  
+
+Download the Chromedriver from [http://chromedriver.chromium.org/downloads](http://chromedriver.chromium.org/downloads)
+
+Set the *chromedriver_path* setting to point to the location of the chromedriver, e.g. ```"chromedriver_path": "./drivers/chromedriver*"```
+
+##### Chrome headless
+
+Chrome can run in headless mode, without a GUI. Set the browser of a test or suite to 'chrome-headless' or 'chrome-remote-headless.
 
 Requirements: chrome 58+, chromedriver 2.32+
 
 ```
-python golem.py run project_name test_name -b chrome-headless
+golem run <project> <test> -b chrome-headless
 ```
 
 
-### Firefox
+#### Firefox
 
-Firefox needs the geckodriver to work.
+Download the Geckodriver from [https://github.com/mozilla/geckodriver/releases](https://github.com/mozilla/geckodriver/releases)
 
-Download the Geckodriver from [here](https://github.com/mozilla/geckodriver/releases)
+Set the *geckodriver_path* setting to point to the location of the geckodriver, e.g. ```"geckodriver_path": "./drivers/geckodriver*"```
 
-Point to the geckodriver executable using the settings 'geckodriver_path' variable:
 
-**settings.json**
+#### Internet Explorer
+
+Download the IEDriverServer from [http://selenium-release.storage.googleapis.com/index.html](http://selenium-release.storage.googleapis.com/index.html).
+
+Set the *iedriver_path* setting to point to the location of the iedriver, e.g. ```"iedriver_path": "./drivers/iedriver*"```
+
+
+#### Edge
+
+Download the Edge driver from [https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/).
+
+Set the *edgedriver_path* setting to point to the location of the edgedriver, e.g. ```"edgedriver_path": "./drivers/edgedriver*"```
+
+
+#### Opera
+
+Download the Opera driver from [https://github.com/operasoftware/operachromiumdriver/releases](https://github.com/operasoftware/operachromiumdriver/releases).
+
+Set the *operadriver_path* setting to point to the location of the Opera driver, e.g. ```"operadriver_path": "./drivers/operadriver*"```
+
+##### Error: cannot find Opera binary
+
+The Opera driver fails to find the Opera binary installed in the machine. To fix this set the *opera_binary_path* setting to point to the Opera binary. Example:
+
 ```
-geckodriver_path": "./drivers/geckodriver",
-```
-
-
-### Internet Explorer
-
-Internet Explorer needs the IEDriverServer executable to work.
-
-Download the IEDriverServer from [here](http://selenium-release.storage.googleapis.com/index.html).
-
-Point to the IEDriverServer executable using the settings 'iedriver_path' variable:
-
-**settings.json**
-```
-iedriver_path": "./drivers/iedriver.exe",
+"opera_binary_path": "C:\\Program Files\\Opera\\launcher.exe", 
 ```
 
 <br>

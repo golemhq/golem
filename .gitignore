@@ -5,6 +5,7 @@
 .coverage
 .eggs/
 .tox
+.idea
 *.pytest_cache/
 build/
 dist/
