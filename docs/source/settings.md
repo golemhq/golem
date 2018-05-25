@@ -11,9 +11,13 @@ Use the settings.json file to configure Golem behavior. There is a global settin
 #### Settings
 
 
-- *implicit_wait*
+- *search_timeout*
 
-Default time to wait looking for an element until it is found. Default is 20 seconds.
+Default time to wait looking for an element until it is present. Default is 20 seconds.
+
+- *wait_displayed*
+
+Wait for elements to be present and displayed. Default is False
 
 - *screenshot_on_error*
 

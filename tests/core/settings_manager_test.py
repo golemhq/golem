@@ -34,7 +34,7 @@ class Test__read_json_with_comments:
         testdir = testdir_class['path']
         file_content = ('{\n'
                         '// a commented line\n'
-                        '"implicit_wait": 10,\n'
+                        '"search_timeout": 10,\n'
                         '\n'
                         '// another commented line\n'
                         '"screenshot_on_error": true\n'
@@ -44,7 +44,7 @@ class Test__read_json_with_comments:
             json_file.write(file_content)
         result = settings_manager._read_json_with_comments(path)
         expected = {
-            'implicit_wait': 10,
+            'search_timeout': 10,
             'screenshot_on_error': True
         }
         assert result == expected
@@ -54,7 +54,8 @@ class Test_assign_settings_default_values:
 
     def test_default_values_definition(self):
         expected_defaults = [
-            ('implicit_wait', None),
+            ('search_timeout', 0),
+            ('wait_displayed', False),
             ('screenshot_on_error', True),
             ('screenshot_on_step', False),
             ('screenshot_on_end', False),
@@ -79,7 +80,8 @@ class Test_assign_settings_default_values:
     def test_assign_settings_default_values_all_missing(self):
         normalized = settings_manager.assign_settings_default_values({})
         expected = {
-            'implicit_wait': None,
+            'search_timeout': 0,
+            'wait_displayed': False,
             'screenshot_on_error': True,
             'screenshot_on_step': False,
             'screenshot_on_end': False,
@@ -101,7 +103,8 @@ class Test_assign_settings_default_values:
 
     def test_assign_settings_default_values_all_none(self):
         input_settings = {
-            'implicit_wait': None,
+            'search_timeout': None,
+            'wait_displayed': False,
             'screenshot_on_error': None,
             'screenshot_on_step': None,
             'screenshot_on_end': None,
@@ -121,7 +124,8 @@ class Test_assign_settings_default_values:
         }
         normalized = settings_manager.assign_settings_default_values(input_settings)
         expected = {
-            'implicit_wait': None,
+            'search_timeout': 0,
+            'wait_displayed': False,
             'screenshot_on_error': True,
             'screenshot_on_step': False,
             'screenshot_on_end': False,
@@ -143,7 +147,8 @@ class Test_assign_settings_default_values:
 
     def test_assign_settings_default_values_all_empty_str(self):
         input_settings = {
-            'implicit_wait': '',
+            'search_timeout': '',
+            'wait_displayed': '',
             'screenshot_on_error': '',
             'screenshot_on_step': '',
             'screenshot_on_end': '',
@@ -163,6 +168,8 @@ class Test_assign_settings_default_values:
         }
         normalized = settings_manager.assign_settings_default_values(input_settings)
         expected = {
+            'search_timeout': 0,
+            'wait_displayed': False,
             'console_log_level': 'INFO',
             'default_browser': 'chrome',
             'chromedriver_path': None,
@@ -170,7 +177,6 @@ class Test_assign_settings_default_values:
             'geckodriver_path': None,
             'iedriver_path': None,
             'operadriver_path': None,
-            'implicit_wait': None,
             'log_all_events': True,
             'remote_browsers': {},
             'remote_url': None,
@@ -197,7 +203,8 @@ class Test_get_global_settings:
             'iedriver_path': './drivers/iedriver*',
             'operadriver_path': './drivers/operadriver*',
             # 'safari_path': './drivers/safari*',
-            'implicit_wait': 20,
+            'search_timeout': 20,
+            'wait_displayed': False,
             'log_all_events': True,
             'remote_browsers': {},
             'remote_url': 'http://localhost:4444/wd/hub',
@@ -234,7 +241,8 @@ class Test_get_project_settings:
             'iedriver_path': './drivers/iedriver*',
             'operadriver_path': './drivers/operadriver*',
             # 'safari_path': './drivers/safari*',
-            'implicit_wait': 20,
+            'search_timeout': 20,
+            'wait_displayed': False,
             'log_all_events': True,
             'remote_browsers': {},
             'remote_url': 'http://localhost:4444/wd/hub',

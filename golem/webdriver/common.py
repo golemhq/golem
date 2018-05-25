@@ -3,71 +3,71 @@ import time
 from selenium.webdriver.remote.webelement import WebElement
 
 from golem import execution
-from golem.core.exceptions import IncorrectSelectorType, ElementNotFound
-from .extended_webelement import extend_webelement, ExtendedWebElement
+from golem.webdriver.extended_webelement import (extend_webelement,
+                                                 ExtendedWebElement)
+from golem.core.exceptions import (IncorrectSelectorType,
+                                   ElementNotFound,
+                                   ElementNotDisplayed)
 
 
-def _find_webelement(root, selector_type, selector_value,
-                     element_name, remaining_time):
+def _find_webelement(root, selector_type, selector_value, element_name,
+                     timeout=0, wait_displayed=False):
     """Finds a web element."""
     webelement = None
+    remaining_time = lambda: timeout - (time.time() - start_time)
     start_time = time.time()
-    try:
-        if selector_type == 'id':
-            webelement = root.find_element_by_id(selector_value)
-        elif selector_type == 'css':
-            webelement = root.find_element_by_css_selector(selector_value)
-        elif selector_type == 'text':
-            webelement = root.find_element_by_css_selector("text[{}]".format(selector_value))
-        elif selector_type == 'link_text':
-            webelement = root.find_element_by_link_text(selector_value)
-        elif selector_type == 'partial_link_text':
-            webelement = root.find_element_by_partial_link_text(selector_value)
-        elif selector_type == 'name':
-            webelement = root.find_element_by_name(selector_value)
-        elif selector_type == 'xpath':
-            webelement = root.find_element_by_xpath(selector_value)
-        elif selector_type == 'tag_name':
-            webelement = root.find_element_by_tag_name(selector_value)
-        else:
-            msg = 'Selector {0} is not a valid option'.format(selector_type)
-            raise IncorrectSelectorType(msg)
-        execution.logger.debug('Element found')
-    except:
-        time.sleep(0.5)
-        end_time = time.time()
-        remaining_time -= end_time - start_time
-        if remaining_time > 0:
-            execution.logger.debug('Element not found yet, remaining time: {}'.format(remaining_time))
-            webelement = _find_webelement(root, selector_type, selector_value,
-                                          element_name, remaining_time)
-        else:
-            raise ElementNotFound('Element {0} not found using selector {1}:\'{2}\''
-                                  .format(element_name, selector_type, selector_value))
-    
-    # Use remaining time to wait until element is visible (is_displayed)
-    # TODO add this as a setting
-    remaining_time = remaining_time - (time.time() - start_time)
-    while not webelement.is_displayed() and remaining_time > 0:
-        # Element is not visible yet
-        execution.logger.debug('Element still not visible, waiting')
-        time.sleep(0.5)
-        remaining_time = remaining_time - (time.time() - start_time)
+    while webelement is None:
+        try:
+            if selector_type == 'id':
+                webelement = root.find_element_by_id(selector_value)
+            elif selector_type == 'css':
+                webelement = root.find_element_by_css_selector(selector_value)
+            elif selector_type == 'link_text':
+                webelement = root.find_element_by_link_text(selector_value)
+            elif selector_type == 'partial_link_text':
+                webelement = root.find_element_by_partial_link_text(selector_value)
+            elif selector_type == 'name':
+                webelement = root.find_element_by_name(selector_value)
+            elif selector_type == 'xpath':
+                webelement = root.find_element_by_xpath(selector_value)
+            elif selector_type == 'tag_name':
+                webelement = root.find_element_by_tag_name(selector_value)
+            else:
+                msg = 'Selector {} is not a valid option'.format(selector_type)
+                raise IncorrectSelectorType(msg)
+            execution.logger.debug('Element found')
+        except:
+            if remaining_time() <= 0:
+                break
+            else:
+                time.sleep(0.5)
+                execution.logger.debug('Element not found yet, remaining time: {:.2f}'
+                                       .format(remaining_time()))
+    if webelement is None:
+        raise ElementNotFound('Element {0} not found using selector {1}:\'{2}\''
+                              .format(element_name, selector_type, selector_value))
+    else:
+        if wait_displayed:
+            while not webelement.is_displayed() and remaining_time() > 0:
+                execution.logger.debug('Element still not visible, waiting')
+                time.sleep(0.5)
 
-    if not webelement.is_displayed():
-        execution.logger.debug('Element not visible, continuing..')
-
-    return webelement
+            if not webelement.is_displayed():
+                msg = ('Timeout waiting for element {0} to be visible, '
+                       'using selector {1}:\'{2}\''
+                       .format(element_name, selector_type, selector_value))
+                raise ElementNotDisplayed(msg)
+        return webelement
 
 
-def _find(self, element=None, id=None, name=None, text=None,
+def _find(self, element=None, id=None, name=None,
           link_text=None, partial_link_text=None, css=None,
-          xpath=None, tag_name=None, timeout=None):
+          xpath=None, tag_name=None, timeout=None, wait_displayed=None):
     """Find a webelement.
 
     `element` can be:
       a web element
-      a tuple with the format (<selector_type>, <selector_value>, [<display_nane>])
+      a tuple with format (<selector_type>, <selector_value>, [<display_nane>])
       a css selector string
     """
     webelement = None
@@ -77,7 +77,10 @@ def _find(self, element=None, id=None, name=None, text=None,
     element_name = None
 
     if timeout is None:
-        timeout = execution.settings['implicit_wait']
+        timeout = execution.settings['search_timeout']
+
+    if wait_displayed is None:
+        wait_displayed = execution.settings['wait_displayed']
 
     if isinstance(element, WebElement) or isinstance(element, ExtendedWebElement):
         webelement = element
@@ -95,9 +98,6 @@ def _find(self, element=None, id=None, name=None, text=None,
     elif name:
         selector_type = 'name'
         selector_value = element_name = name
-    elif text:
-        selector_type = 'text'
-        selector_value = element_name = text
     elif link_text:
         selector_type = 'link_text'
         selector_value = element_name = link_text
@@ -118,7 +118,7 @@ def _find(self, element=None, id=None, name=None, text=None,
     
     if not webelement:
         webelement = _find_webelement(self, selector_type, selector_value,
-                                      element_name, timeout)
+                                      element_name, timeout, wait_displayed)
         webelement.selector_type = selector_type
         webelement.selector_value = selector_value
         webelement.name = element_name
@@ -126,13 +126,12 @@ def _find(self, element=None, id=None, name=None, text=None,
     return extend_webelement(webelement)
 
 
-def _find_all(self, element=None, id=None, name=None, text=None, link_text=None,
+def _find_all(self, element=None, id=None, name=None, link_text=None,
               partial_link_text=None, css=None, xpath=None, tag_name=None):
     """Find all webelements
 
     `element` can be:
-      a web element
-      a tuple with the format (<selector_type>, <selector_value>, [<display_nane>])
+      a tuple with format (<selector_type>, <selector_value>, [<display_nane>])
       a css selector string
     """
     webelements = []
@@ -145,8 +144,6 @@ def _find_all(self, element=None, id=None, name=None, text=None, link_text=None,
             id = selector_value
         elif selector_type == 'css':
             css = selector_value
-        elif selector_type == 'text':
-            text = selector_value
         elif selector_type == 'link_text':
             link_text = selector_value
         elif selector_type == 'partial_link_text':
@@ -172,11 +169,6 @@ def _find_all(self, element=None, id=None, name=None, text=None, link_text=None,
         selector_value = css
         element_name = tuple_element_name or css
         webelements = self.find_elements_by_css_selector(css)
-    elif text:
-        selector_type = 'text'
-        selector_value = text
-        element_name = tuple_element_name or text
-        webelements = self.find_elements_by_css_selector("text[{}]".format(text))
     elif link_text:
         selector_type = 'link_text'
         selector_value = link_text

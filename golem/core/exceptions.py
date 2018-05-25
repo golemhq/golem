@@ -11,3 +11,7 @@ class ElementNotFound(Exception):
 
 class TextNotPresent(Exception):
     pass
+
+
+class ElementNotDisplayed(Exception):
+    pass

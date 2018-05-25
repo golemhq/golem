@@ -1,4 +1,4 @@
-from . import common
+from golem.webdriver import common
 
 
 class GolemExtendedDriver:

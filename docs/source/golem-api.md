@@ -48,13 +48,13 @@ golem run project test -b chrome firefox
 
 **The extra browser methods:**
 
-#### browser.**find**([element, id, name, text, link_text,partial_link_text, css, xpath, tag_name, timeout])
+#### browser.**find**([element, id, name, link_text, partial_link_text, css, xpath, tag_name, timeout, wait_displayed])
 
-Finds a webelement with the provided selector criteria. Every paramenter is optional but one selector must be provided. Timeout is also optional, by default, it uses the "implicit_wait" option defined in the settings.json
+Finds a webelement with the provided selector criteria. Every paramenter is optional but one selector must be provided. Timeout is also optional, by default, it uses the "search_timeout" option defined in the settings.json
 
 Returns a selenium webelement with two extra methods: *find()* and *find_all()*
 
-#### browser.**find_all**([element, id, name, text, link_text,partial_link_text, css, xpath, tag_name])
+#### browser.**find_all**([element, id, name, link_text, partial_link_text, css, xpath, tag_name])
 
 Finds all webelements that matches the provided selector criteria. Every paramenter is optional but one selector must be provided. 
 
@@ -92,9 +92,6 @@ element = browser.find(id='someId')
 
 # by name
 element = browser.find(name='someName')
-
-# by text
-element = browser.find(text='some text')
 
 # by link text
 element = browser.find(link_text='some link text')

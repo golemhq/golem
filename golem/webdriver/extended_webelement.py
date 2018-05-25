@@ -1,6 +1,6 @@
 from selenium.webdriver.remote.webelement import WebElement
 
-from . import common
+from golem.webdriver import common
 
 
 def extend_webelement(web_element):

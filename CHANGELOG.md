@@ -6,6 +6,14 @@
 ### Added
 - Support for Edge and Opera
 - Extend WebDriver and WebElement
+- wait_displayed flag to find method, wait_displayed setting
+
+### Changed
+- Renamed 'implicit_wait' setting to 'search_timeout'
+
+### Removed
+- selector by 'text'
+
 
 ## [0.4.8] - 2018-05-12
 

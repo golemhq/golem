@@ -5,8 +5,11 @@ import traceback
 
 SETTINGS_FILE_CONTENT = (
 """{
-// Default time to wait looking for an element until it is found
-"implicit_wait": 20,
+// Default timeout in seconds to wait until an element is present
+"search_timeout": 20,
+
+// Wait for elements to be present and be displayed
+"wait_displayed": false,
 
 // Take a screenshot on error
 "screenshot_on_error": true,
@@ -61,7 +64,8 @@ REDUCED_SETTINGS_FILE_CONTENT = (
 """)
 
 DEFAULTS = [
-    ('implicit_wait', None),
+    ('search_timeout', 0),
+    ('wait_displayed', False),
     ('screenshot_on_error', True),
     ('screenshot_on_step', False),
     ('screenshot_on_end', False),
@@ -129,12 +133,25 @@ def assign_settings_default_values(settings):
     return settings
 
 
+def _deprecated_implicit_wait_warning(settings):
+    if 'implicit_wait' in settings:
+        print("INFO: 'implicit_wait' setting is deprecated, use 'search_timeout' instead")
+        if not 'search_timeout' in settings:
+            # if implicit_wait is defined and search_timeout is not,
+            # Use the value of the former for the latter
+            settings['search_timeout'] = settings['implicit_wait']
+    return settings
+
+
 def get_global_settings(workspace):
     """Get global settings from workspace folder as a dictionary"""
     settings_path = os.path.join(workspace, 'settings.json')
     settings = {}
     if os.path.exists(settings_path):
         settings = _read_json_with_comments(settings_path)
+        # TODO implicit_wait setting is deprecated
+        # remove once implicit_wait is fully deprecated
+        settings = _deprecated_implicit_wait_warning(settings)
         settings = assign_settings_default_values(settings)
     else:
         print('Warning: settings file is not present')
@@ -162,6 +179,9 @@ def get_project_settings(workspace, project):
     project_settings = {}
     if os.path.exists(project_settings_path):
         project_settings = _read_json_with_comments(project_settings_path)
+        # TODO implicit_wait setting is deprecated
+        # remove once implicit_wait is fully deprecated
+        project_settings = _deprecated_implicit_wait_warning(project_settings)
     # merge and override global settings with project settings
     for setting in project_settings:
         global_settings[setting] = project_settings[setting]
