@@ -17,7 +17,8 @@ class Test_save_external_test_data_file:
         with open(data_path) as f:
             result = f.read()
             expected = ('key1,key2\nvalue1,value2\nvalue3,value4\n')
-            assert result == expected
+            expected_var = ('key2,key1\nvalue2,value1\nvalue4,value3\n')
+            assert result == expected or result == expected_var
 
     def test_save_external_data_empty_data(self, project_function_clean,
                                            test_utils):
@@ -243,7 +244,7 @@ class Test_get_internal_test_data:
     def test_get_internal_test_data_no_data_var(self, project_function_clean):
         testdir = project_function_clean['testdir']
         project = project_function_clean['name']
-        test_name = 'test_get_internal_test_data'
+        test_name = 'test_get_internal_test_data_no_data_var'
         test_content = ("there_is = 'no data here'\n")
         test_path = os.path.join(testdir, 'projects', project, 'tests', test_name+'.py')
         with open(test_path, 'w+') as f:
