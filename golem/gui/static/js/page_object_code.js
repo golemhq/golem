@@ -3,7 +3,7 @@ var codeEditor;
 
 $(document).ready(function() {
 
-    if(codeError.length > 0){
+    if(codeError !== null){
         $(".error-container").show();
         $(".error-container pre").html(codeError);
     }      
@@ -67,9 +67,10 @@ function savePageObject(){
         success: function(data) {
             codeEditor.markClean();
             utils.toast('success', "Page "+pageObjectName+" saved", 3000);
-            if(data.error.length > 0){
+            if(data.error != null){
                 $(".error-container").show();
                 $(".error-container pre").html(data.error);
+                utils.toast('info', "There are errors in the code", 3000)
             }
             else{
                 $(".error-container").hide();

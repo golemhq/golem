@@ -51,7 +51,7 @@ def get_page_object_content(project, full_page_name):
     }
 
     path = generate_page_path(test_execution.root_path, project, full_page_name)
-    po_module = utils.import_module(path)
+    po_module, _ = utils.import_module(path)
 
     # get all the names of the module,
     # ignoring the ones starting with '_'
@@ -102,7 +102,6 @@ def get_page_object_content(project, full_page_name):
         #     pass
         else:
             pass
-            # print('ERROR', variable)
     return po_data
 
 

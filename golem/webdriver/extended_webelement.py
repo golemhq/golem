@@ -1,6 +1,6 @@
 from selenium.webdriver.remote.webelement import WebElement
 
-from golem.webdriver import common
+from golem.webdriver.common import _find, _find_all
 
 
 def extend_webelement(web_element):
@@ -16,9 +16,9 @@ class ExtendedWebElement(WebElement):
     def find(self, *args, **kwargs):
         if len(args) == 1:
             kwargs['element'] = args[0]
-        return common._find(self, **kwargs)
+        return _find(self, **kwargs)
 
     def find_all(self, *args, **kwargs):
         if len(args) == 1:
             kwargs['element'] = args[0]
-        return common._find_all(self, **kwargs)
+        return _find_all(self, **kwargs)

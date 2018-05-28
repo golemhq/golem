@@ -6,7 +6,7 @@ from selenium.webdriver import Opera as SeleniumOperaDriver
 from selenium.webdriver import Remote as SeleniumRemoteDriver
 # from selenium.webdriver import Safari as SeleniumSafariDriver
 
-from .extended_driver import GolemExtendedDriver
+from golem.webdriver.extended_driver import GolemExtendedDriver
 
 
 class GolemChromeDriver(SeleniumChromeDriver, GolemExtendedDriver):

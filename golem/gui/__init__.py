@@ -163,7 +163,7 @@ def test_case_view(project, test_case_name):
     # else:
     tc_name, parents = utils.separate_file_from_parents(test_case_name)
     path = test_case.generate_test_case_path(root_path, project, test_case_name)
-    error = utils.validate_python_file_syntax(path)
+    _, error = utils.import_module(path)
     if error:
         return render_template('test_builder/test_case_syntax_error.html',
                                project=project,
@@ -171,7 +171,8 @@ def test_case_view(project, test_case_name):
     else:
         test_case_contents = test_case.get_test_case_content(root_path, project,
                                                              test_case_name)
-        test_data = test_data_module.get_test_data(root_path, project, test_case_name)
+        test_data = test_data_module.get_test_data(root_path, project, test_case_name,
+                                                   repr_strings=True)
         return render_template('test_builder/test_case.html', project=project,
                                test_case_contents=test_case_contents,
                                test_case_name=tc_name,
@@ -191,7 +192,7 @@ def test_case_code_view(project, test_case_name):
     path = os.path.join(root_path, 'projects', project, 'tests',
                           os.sep.join(parents), tc_name + '.py')
     test_case_contents = test_case.get_test_case_code(path)
-    error = utils.validate_python_file_syntax(path)
+    _, error = utils.import_module(path)
     external_data = test_data_module.get_external_test_data(root_path, project,
                                                             test_case_name)
     test_data_setting = test_execution.settings['test_data']
@@ -208,7 +209,7 @@ def page_view(project, full_page_name, no_sidebar=False):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
     path = page_object.generate_page_path(root_path, project, full_page_name)
-    error = utils.validate_python_file_syntax(path)
+    _, error = utils.import_module(path)
     if error:
         return render_template('page_builder/page_syntax_error.html',
                                project=project,
@@ -237,7 +238,7 @@ def page_code_view(project, full_page_name, no_sidebar=False):
         return render_template('not_permission.html')
 
     path = page_object.generate_page_path(root_path, project, full_page_name)
-    error = utils.validate_python_file_syntax(path)
+    _, error = utils.import_module(path)
     page_object_code = page_object.get_page_object_code(path)
     return render_template('page_builder/page_object_code.html',
                            project=project,
@@ -864,7 +865,7 @@ def save_test_case_code():
         test_case.save_test_case_code(root_path, projectname, test_case_name,
                                       content, table_test_data)
         path = test_case.generate_test_case_path(root_path, projectname, test_case_name)
-        error = utils.validate_python_file_syntax(path)
+        _, error = utils.import_module(path)
 
         return json.dumps({'error': error})
 
@@ -898,7 +899,7 @@ def save_page_object_code():
         path = page_object.generate_page_path(root_path, project, page_object_name)
         page_object.save_page_object_code(root_path, project,
                                           page_object_name, content)
-        error = utils.validate_python_file_syntax(path)
+        _, error = utils.import_module(path)
         return json.dumps({'error': error})
 
 

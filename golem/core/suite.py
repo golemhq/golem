@@ -119,7 +119,7 @@ def get_suite_module(workspace, project, suite_name):
     suite_name, parents = utils.separate_file_from_parents(suite_name)
     path = os.path.join(workspace, 'projects', project, 'suites',
                         os.sep.join(parents), suite_name + '.py')
-    suite_module = utils.import_module(path)
+    suite_module, _ = utils.import_module(path)
     return suite_module
 
 

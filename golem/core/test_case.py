@@ -3,13 +3,9 @@ Test Cases are modules located inside the /tests/ directory
 """
 import os
 import re
-import sys
 import inspect
-import pprint
-from ast import literal_eval
 
 from golem.core import (utils,
-                        page_object,
                         test_execution,
                         file_manager)
 from golem.core import test_data as test_data_module
@@ -119,7 +115,6 @@ def get_test_case_content(root_path, project, test_case_name):
             'teardown': []
         }
     }
-    
     test_module = import_test_case_module(root_path, project, test_case_name)
     # get description
     description = getattr(test_module, 'description', '')
@@ -267,8 +262,6 @@ def save_test_case(root_path, project, full_test_case_name, description,
         # write test data if required or save test data to external file
         if test_execution.settings['test_data'] == 'infile':
             if test_data:
-                pretty = pprint.PrettyPrinter(indent=4, width=1)
-                #f.write('data = ' + pretty.pformat(test_data) + '\n\n')
                 f.write('data = {}'.format(_format_data(test_data)))
                 test_data_module.remove_csv_if_exists(root_path, project, full_test_case_name)
         else:
@@ -338,4 +331,5 @@ def test_case_exists(workspace, project, full_test_case_name):
 
 def import_test_case_module(workspace, project, full_test_case_name):
     path = generate_test_case_path(workspace, project, full_test_case_name)
-    return utils.import_module(path)
+    module, _ = utils.import_module(path)
+    return module

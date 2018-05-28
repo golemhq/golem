@@ -196,3 +196,9 @@ class Test_utils:
         if len(output) > 1 and output[-1] == '\n':
             output = output[:-1]
         return output
+
+    @staticmethod
+    def set_project_setting(testdir, setting, setting_value):
+        setting_path = os.path.join(testdir, 'settings.json')
+        with open(setting_path, 'w') as f:
+            f.write('{{"{0}": "{1}"\}}'.format(setting, setting_value))

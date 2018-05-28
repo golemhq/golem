@@ -6,10 +6,11 @@
 ### Added
 - Support for Edge and Opera
 - Extend WebDriver and WebElement
-- wait_displayed flag to find method, wait_displayed setting
+- wait_displayed arg to find method, wait_displayed setting
 
 ### Changed
 - Renamed 'implicit_wait' setting to 'search_timeout'
+- CSV data files will only store strings and won't cast values to other types
 
 ### Removed
 - selector by 'text'

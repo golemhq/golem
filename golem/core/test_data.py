@@ -9,19 +9,18 @@ and this module still has support of this for backwards compatibility
 import csv
 import os
 
-from ast import literal_eval
-from golem.core import utils, test_execution
+from golem.core import utils
 
 
-def save_external_test_data_file(root_path, project,
-                                 full_test_case_name, test_data):
+def save_external_test_data_file(root_path, project, full_test_case_name,
+                                 test_data):
     """Save data to external file (csv).
 
     full_test_case_name must be a relative dot path
-    test_data must be a dictionary of values
+    test_data must be a list of dictionaries
 
     Temporarily this will save to /data/<test_name>.csv if this already
-    exists. Otherwise, the file will be store in the same folder
+    exists. Otherwise, the file will be stored in the same folder
     as the test
     # TODO 
     """
@@ -31,7 +30,7 @@ def save_external_test_data_file(root_path, project,
                                               'data', os.sep.join(parents),
                                               '{}.csv'.format(tc_name))
     data_path_tests_folder = os.path.join(root_path, 'projects', project,
-                                       'tests', os.sep.join(parents))
+                                          'tests', os.sep.join(parents))
     data_file_path_tests_folder = os.path.join(data_path_tests_folder,
                                                '{}.csv'.format(tc_name))
     # if csv file exists in /data/ use this file
@@ -72,7 +71,6 @@ def save_external_test_data_file(root_path, project,
 def get_external_test_data(workspace, project, full_test_case_name):
     """Get data from file (csv)."""
     data_list = []
-
     test, parents = utils.separate_file_from_parents(full_test_case_name)
     data_file_path_data_folder = os.path.join(workspace, 'projects', project,
                                               'data', os.sep.join(parents),
@@ -82,16 +80,10 @@ def get_external_test_data(workspace, project, full_test_case_name):
                                               '{}.csv'.format(test))
     # check if csv file exists in /data/ folder
     if os.path.isfile(data_file_path_data_folder):
-        with open(data_file_path_data_folder, 'r', encoding='utf8') as csv_file:
+        with open(data_file_path_data_folder, 'r') as csv_file:
             dict_reader = csv.DictReader(csv_file)
             for data_set in dict_reader:
-                d = {}
-                for item in data_set.items():
-                    try:
-                        d[item[0]] = literal_eval(item[1])
-                    except:
-                        d[item[0]] = item[1]
-                data_list.append(d)
+                data_list.append(dict(data_set))
         # TODO deprecate /data/ folder
         print(('Warning: data files defined in the /data/ folder will soon '
                'be deprecated. Test data files should be placed in the same folder '
@@ -101,27 +93,23 @@ def get_external_test_data(workspace, project, full_test_case_name):
         with open(data_file_path_test_folder, 'r', encoding='utf8') as csv_file:
             dict_reader = csv.DictReader(csv_file)
             for data_set in dict_reader:
-                d = {}
-                for item in data_set.items():
-                    try:
-                        d[item[0]] = literal_eval(item[1])
-                    except:
-                        d[item[0]] = item[1]
-                data_list.append(d)
+                data_list.append(dict(data_set))
     return data_list
 
 
-def get_internal_test_data(workspace, project, full_test_case_name):
+def get_internal_test_data(workspace, project, full_test_case_name,
+                           repr_strings=False):
     """Get test data defined inside the test itself."""
     # check if test has data variable defined
     data_list = []
-
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
     path = os.path.join(workspace, 'projects', project, 'tests',
                         os.sep.join(parents), '{}.py'.format(tc_name))
-    test_module = utils.import_module(path)
-    
+    test_module, _ = utils.import_module(path)
+
     if hasattr(test_module, 'data'):
+        msg_not_list_not_dict = ('Warning: infile test data must be a dictionary '
+                                 'or a list of dictionaries\nCurrent value is:\n{}\n')
         data_variable = getattr(test_module, 'data')
         if type(data_variable) == dict:
             data_list.append(data_variable)
@@ -129,33 +117,25 @@ def get_internal_test_data(workspace, project, full_test_case_name):
             if all(isinstance(item, dict) for item in data_variable):
                 data_list = data_variable
             else:
-                print(('Warning: infile test data must be a dictionary or '
-                       'a list of dictionaries\n'
-                       'Current value is:\n'
-                       '{}\n'
-                       'Test data for test {} will be ignored'
-                       .format(data_variable, full_test_case_name)))
-        else: 
-            print(('Warning: infile test data must be a dictionary or '
-                   'a list of dictionaries\n'
-                   'Current value is:\n'
-                   '{}\n'
-                   'Test data for test {} will be ignored'
-                    .format(data_variable, full_test_case_name)))
-    _ = []
-    for datax in data_list:
-        d = {}
-        for k,v in datax.items():
-            if type(v) == str and len(v):
-                    d[k] = "'{}'".format(v)
-            else:
-                d[k] = v
-        _.append(d)
-    data_list = _
+                print(msg_not_list_not_dict.format(data_variable))
+        else:
+            print(msg_not_list_not_dict.format(data_variable))
+    if repr_strings:
+        # replace string values for their repr values
+        data_list_clean = []
+        for data_dict in data_list:
+            d = {}
+            for k, v in data_dict.items():
+                if type(v) == str:
+                    d[k] = repr(v)
+                else:
+                    d[k] = v
+            data_list_clean.append(d)
+        data_list = data_list_clean
     return data_list
 
 
-def get_test_data(workspace, project, full_test_case_name):
+def get_test_data(workspace, project, full_test_case_name, repr_strings=False):
     """Get test data.
 
     The order of priority is:
@@ -164,20 +144,18 @@ def get_test_data(workspace, project, full_test_case_name):
     2. data defined in a csv file in /tests/ folder, same folder as the test
     3. data defined in the test itself
 
-    Try to convert each value to a Python var type. Fall back to string.
     Returns a list of dictionaries"""
     data_list = []
-
     external_data = get_external_test_data(workspace, project, full_test_case_name)
     if external_data:
         data_list = external_data
     else:
-        internal_data = get_internal_test_data(workspace, project, full_test_case_name)
+        internal_data = get_internal_test_data(workspace, project, full_test_case_name,
+                                               repr_strings=repr_strings)
         if internal_data:
             data_list = internal_data
     if not data_list:
         data_list.append({})
-
     return data_list
 
 

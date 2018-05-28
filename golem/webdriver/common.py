@@ -3,11 +3,10 @@ import time
 from selenium.webdriver.remote.webelement import WebElement
 
 from golem import execution
-from golem.webdriver.extended_webelement import (extend_webelement,
-                                                 ExtendedWebElement)
 from golem.core.exceptions import (IncorrectSelectorType,
                                    ElementNotFound,
                                    ElementNotDisplayed)
+# from golem.webdriver.extended_webelement import extend_webelement, ExtendedWebElement
 
 
 def _find_webelement(root, selector_type, selector_value, element_name,
@@ -70,6 +69,8 @@ def _find(self, element=None, id=None, name=None,
       a tuple with format (<selector_type>, <selector_value>, [<display_nane>])
       a css selector string
     """
+    # TODO: avoid circular import
+    from golem.webdriver.extended_webelement import extend_webelement, ExtendedWebElement
     webelement = None
 
     selector_type = None
@@ -134,6 +135,8 @@ def _find_all(self, element=None, id=None, name=None, link_text=None,
       a tuple with format (<selector_type>, <selector_value>, [<display_nane>])
       a css selector string
     """
+    # TODO: avoid circular import
+    from golem.webdriver.extended_webelement import extend_webelement
     webelements = []
     tuple_element_name = None
     if isinstance(element, tuple):

@@ -384,21 +384,35 @@ class Test_choose_driver_by_precedence:
         assert selected == ['chrome']
 
 
-class Test_validate_python_file_syntax:
-    
-    def test_syntax_correct(self, dir_function):
-        filename = 'test_python_syntax.py'
+class Test_import_module:
+
+    def test_import_module_success(self, dir_function):
+        filename = 'python_module.py'
         filepath = os.path.join(dir_function['path'], filename)
-        filecontent = ('import os\n'
-                       'var = 2 + 2\n'
-                       'print(var)\n'
-                       'def func():\n'
-                       '    pass\n')
+        filecontent = ('foo = 2\n'
+                       'def bar(a, b):\n'
+                       '    baz = ""\n')
         with open(filepath, 'w') as f:
             f.write(filecontent)
-        error = utils.validate_python_file_syntax(filepath)
-        assert error == ''
+        module, error = utils.import_module(filepath)
+        assert type(module) == types.ModuleType
+        assert error is None
+        
+        foo = getattr(module, 'foo')
+        assert type(foo) == int
 
+        bar = getattr(module, 'bar')
+        assert type(bar) == types.FunctionType
+
+        args = list(inspect.signature(bar).parameters)
+        code = inspect.getsource(bar)
+        assert args == ['a', 'b']
+        assert code == 'def bar(a, b):\n    baz = ""\n'
+
+    def test_module_does_not_exist(self, dir_function):
+        filepath = os.path.join(dir_function['path'], 'non_existent.py')
+        module, error = utils.import_module(filepath)
+        assert module == None
 
     syntax_tests = [
         (
@@ -421,47 +435,20 @@ class Test_validate_python_file_syntax:
              '             ^\n'
              'SyntaxError: invalid syntax\n')
         ),
+        (
+            'data = [{"key": unknown}]',
+            "NameError: name 'unknown' is not defined"
+        ),
     ]
 
-    @pytest.mark.parametrize('filecontent,expected', syntax_tests)
+    @pytest.mark.parametrize('filecontent, expected', syntax_tests)
     def test_incorrect_syntax(self, filecontent, expected, dir_function):
         filename = 'test_python_syntax.py'
         filepath = os.path.join(dir_function['path'], filename)
         with open(filepath, 'w') as f:
             f.write(filecontent)
-        error = utils.validate_python_file_syntax(filepath)
+        _, error = utils.import_module(filepath)
         assert expected in error
-
-
-class Test_import_module:
-
-    def test_import_module(self, dir_function):
-        filename = 'python_module.py'
-        filepath = os.path.join(dir_function['path'], filename)
-        filecontent = ('foo = 2\n'
-                       'def bar(a, b):\n'
-                       '    baz = ""\n')
-        with open(filepath, 'w') as f:
-            f.write(filecontent)
-        module = utils.import_module(filepath)
-        assert type(module) == types.ModuleType
-        
-        foo = getattr(module, 'foo')
-        assert type(foo) == int
-
-        bar = getattr(module, 'bar')
-        assert type(bar) == types.FunctionType
-
-        args = list(inspect.signature(bar).parameters)
-        code = inspect.getsource(bar)
-        assert args == ['a', 'b']
-        assert code == 'def bar(a, b):\n    baz = ""\n'
-
-
-    def test_module_does_not_exist(self, dir_function):
-        filepath = os.path.join(dir_function['path'], 'non_existent.py')
-        module = utils.import_module(filepath)
-        assert module == None
 
 
 class Test_extract_version_from_webdriver_filename:

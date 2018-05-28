@@ -306,40 +306,32 @@ def load_json_from_file(filepath, ignore_failure=False, default=None):
     return json_data
 
 
-def validate_python_file_syntax(path):
-    error = ''
-    source = open(path, 'r').read()
-    try:
-        compile(source, path, 'exec', optimize=0)
-    except:
-        error = traceback.format_exc(limit=-1)
-    return error
-
-
 def import_module(path):
-    """Import a Python module from a given path
-    Note: module_from_spec is new in python 3.5
-    TODO unit test
-    """
+    """Import a Python module from a given path"""
     mod = None
+    error = None
     module_dir, module_file = os.path.split(path)
     module_name, module_ext = os.path.splitext(module_file)
     try:
         spec = importlib.util.spec_from_file_location(module_name, path)
-        _mod = importlib.util.module_from_spec(spec)
+        # Note: module_from_spec is new in python 3.5
+        if hasattr(importlib.util, 'module_from_spec'):
+            _mod = importlib.util.module_from_spec(spec)
+        else:
+            _mod = spec.loader.load_module()
         spec.loader.exec_module(_mod)
         mod = _mod
     except:
-        pass
-    if not mod:
-        try:
-            spec = importlib.util.spec_from_file_location(module_name, path)
-            _mod = spec.loader.load_module()
-            spec.loader.exec_module(_mod)
-            mod = _mod
-        except:
-            pass
-    return mod
+        error = traceback.format_exc(limit=0)
+    # if not mod:
+    #     try:
+    #         spec = importlib.util.spec_from_file_location(module_name, path)
+    #         _mod = spec.loader.load_module()
+    #         spec.loader.exec_module(_mod)
+    #         mod = _mod
+    #     except:
+    #         pass
+    return mod, error
 
 
 def extract_version_from_webdriver_filename(filename):

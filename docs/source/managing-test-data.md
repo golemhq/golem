@@ -1,11 +1,12 @@
 Managing Test Data
 ==================================================
 
-Keeping the test data (input and output values) properly managed is vital for the success of the automated tests.
+The data for each test can be stored inside the test file or in a separate CSV file. To select which location should Golem use, set the *test_data* setting to 'csv' or 'infile'.
 
-To do that, Golem tests can store the data in a separate file.
+**Note**: All CSV values are considered strings. If you need different value types use 'infile' setting.
 
-##### Using the Data Table
+
+#### Using the Data Table
 
 Let's rewrite the previous example but extracting all the data values outside of the code:
 
@@ -55,7 +56,7 @@ With the Web Module, the result is the following:
 
 **Multiple data sets**
 
-If you need to execute the same test, but with different values each time (the steps are the same but the input and output values change) in Golem you can add more data sets (more rows to the data table). Golem will automatically execute the same test once per each row in the data table.
+If you need to execute the same test, but with different values each time (the steps are the same but the input and output values change) more data sets can be added (more rows to the data table). The same test will be run once per each row in the data table.
 
 
 For example, consider the previous data file, but with added rows:
@@ -98,5 +99,50 @@ Using that data file, Golem will run the same test 4 times, using each time a di
     <p class="first admonition-title">Check this out</p>
     <p>In the third and fourth rows we used a different URL, so we can even point the same test to different environments by just changing the data sets.</p>
 </div>
+
+####Infile data
+
+When using *"test_data": "infile"* different Python variable types can be used. **Strings must be defined in quotes**.
+
+![data table infile](_static/img/data-table-infile.png "Test With Data Table")
+
+The test code looks like this:
+
+**test_with_infile_data.py**
+```
+description = 'Hey! this test has infile data!'
+
+data = [
+    {
+        'numbers': 12,
+        'boolean': False,
+        'none': None,
+        'list': [1,2,3],
+        'dict': {'key': 'string'},
+        'tuple': (1, '2', 3.0),
+        'str_single': 'test',
+        'str_double': "test",
+    },
+    {
+        'numbers': 12,
+        'boolean': True,
+        'none': None,
+        'list': ['a', 'b', 'c'],
+        'dict': {"key": 12},
+        'tuple': ('a', 'a"b"c', "a'b'c"),
+        'str_single': 'a "b" c',
+        'str_double': "a 'b' c",
+    },
+]
+
+def test(data):
+    navigate('some_url')
+    send_keys(('id', 'searchInput'), data.str_single)
+    
+```
+
+Data is stored as a list of dictionaries. Each dictionary is a different test set. The test will be run once per heach test set.
+
+
 
 Next, go to [Using Page Objects](using-page-objects.html)

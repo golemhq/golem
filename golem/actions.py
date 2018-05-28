@@ -501,7 +501,7 @@ def step(message):
     Parameters:
     message : value
     """
-    execution.logger.info('Step: {}'.format(message))
+    execution.logger.info(message)
     execution.steps.append(message)
 
 
