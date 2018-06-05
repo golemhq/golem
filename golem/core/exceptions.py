@@ -9,6 +9,14 @@ class ElementNotFound(Exception):
     pass
 
 
+class TestError(Exception):
+    pass
+
+
+class TestFailure(Exception):
+    pass
+
+
 class TextNotPresent(Exception):
     pass
 

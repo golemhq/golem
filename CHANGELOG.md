@@ -4,6 +4,42 @@
 ## [Unreleased]
 
 ### Added
+
+- New actions: go_back, set_search_timeout, get_search_timeout, double_click, focus_element, set_trace, error,
+execute_javascript, fail, javascript_click, verify_selected_option_by_text, verify_selected_option_by_value,
+get_alert_text, send_text_to_alert, submit_prompt_alert, verify_alert_text, verify_alert_text_is_not, wait_for_alert_present
+verify_element_has_attribute, verify_element_has_not_attribute, verify_element_has_focus, verify_element_has_not_focus
+
+
+- Type hints for WebDriver and WebElement 
+
+### Changed
+
+- Renamed actions:
+  - capture -> take_screenshot
+  - clear -> clear_element
+  - close -> close_browser
+  - debug -> interactive_mode
+  - mouse_hover -> mouse_over
+  - select_by_index -> select_option_by_index
+  - select_by_text -> select_option_by_text
+  - select_by_value -> select_option_by_value
+  - verify_alert_is_present -> verify_alert_present
+  - verify_alert_is_not_present -> verify_alert_not_present
+  - verify_cookie_exists -> verify_cookie_present
+  - verify_is_enabled -> verify_element_enabled
+  - verify_is_not_enabled -> verify_element_not_enabled
+  - verify_is_selected -> verify_element_checked
+  - verify_is_not_selected -> verify_element_not_checked
+ 
+ 
+
+### Removed
+- Deprecated actions: assert_contains, assert_equals, assert_false, assert_true, verify_selected_option
+
+## [0.5.0] - 2018-05-27
+
+### Added
 - Support for Edge and Opera
 - Extend WebDriver and WebElement
 - wait_displayed arg to find method, wait_displayed setting

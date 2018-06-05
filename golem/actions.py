@@ -1,22 +1,25 @@
 """Golem actions"""
+import code
+import importlib
+import os
+import pdb
+import random as rand
+import string
+import sys
 import time
 import uuid
-import os
-import sys
-import importlib
-import string
-import random as rand
 
 import selenium
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoAlertPresentException
 
 import requests
 
-from golem.core.exceptions import TextNotPresent, ElementNotFound
+from golem.core.exceptions import (TextNotPresent,
+                                   ElementNotFound,
+                                   TestError,
+                                   TestFailure)
 from golem import browser
 from golem import execution
 
@@ -38,21 +41,41 @@ def _add_step(message):
     execution.steps.append(message)
 
 
-def _capture_or_add_step(message, screenshot_on_step):
-    if screenshot_on_step:
-        capture(message)
+def _capture_screenshot(img_id):
+    """take a screenshot and store it in report_directory.
+    Report_directory must already exist
+    """
+    driver = browser.get_browser()
+    if execution.report_directory:
+        img_path = os.path.join(execution.report_directory, '{}.png'.format(img_id))
+        driver.get_screenshot_as_file(img_path)
     else:
-        _add_step(message)
+        execution.logger.debug('cannot take screensot, report directory does not exist')
 
 
-def accept_alert():
-    """Accept an alert"""
-    # TODO implement through browser
+def _append_screenshot():
+    if execution.settings['screenshot_on_step']:
+        img_id = str(uuid.uuid4())[:8]
+        _capture_screenshot(img_id)
+        last_step = execution.steps[-1]
+        execution.steps[-1] = '{}__{}'.format(last_step, img_id)
+
+
+def accept_alert(ignore_not_present=False):
+    """Accept an alert
+    Use ignore_not_present to ignore error when alert is not present
+
+    Parameters:
+    ignore_not_present (optional, False): value"""
     step_message = 'Accept alert'
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    driver = browser.get_browser()
-    driver.switch_to.alert.accept()
+    _add_step(step_message)
+    try:
+        get_browser().switch_to.alert.accept()
+    except NoAlertPresentException:
+        if not ignore_not_present:
+            raise
+    _append_screenshot()
 
 
 def activate_browser(browser_id):
@@ -61,9 +84,10 @@ def activate_browser(browser_id):
     Parameters:
     browser_id : value
     """
-    step_message = 'Activate browser {}'.format(browser_id)
-    browser.activate_browser(browser_id)    
-    _capture_or_add_step(step_message, False)
+    step_msg = 'Activate browser {}'.format(browser_id)
+    _add_step(step_msg)
+    browser.activate_browser(browser_id)
+    _append_screenshot()
 
 
 def add_cookie(cookie_dict):
@@ -84,25 +108,37 @@ def add_cookie(cookie_dict):
     cookie_dict : value
     """
     execution.logger.debug('Add cookie: {}'.format(cookie_dict))
-    driver = browser.get_browser()
-    driver.add_cookie(cookie_dict)
+    get_browser().add_cookie(cookie_dict)
+
+
+def add_error(message):
+    """Add an error to the test.
+    The test will continue
+    Parameters:
+    message : value
+    """
+    execution.logger.error(message)
+    # execution.errors.append(message
 
 
 def assert_contains(element, value):
-    """Assert element contains value
+    """DEPRECATED
+    Assert element contains value
     Parameters:
     element : element
     value : value
     """
     step_message = 'Assert that {0} contains {1}'.format(element, value)
     execution.logger.info(step_message)
+    execution.logger.warning('Action assert_contains is deprecated')
     _capture_or_add_step(step_message, False)
     if not value in element:
         raise Exception('Expected {} to contain {}'.format(element, value))
 
 
 def assert_equals(actual_value, expected_value):
-    """Assert actual value equals expected value
+    """DEPRECATED
+    Assert actual value equals expected value
     Parameters:
     actual_value : value
     expected_value : value
@@ -115,7 +151,8 @@ def assert_equals(actual_value, expected_value):
 
 
 def assert_false(condition):
-    """Assert condition is false
+    """DEPRECATED
+    Assert condition is false
     Parameters:
     condition : value
     """
@@ -127,7 +164,8 @@ def assert_false(condition):
 
 
 def assert_true(condition):
-    """Assert condition is true
+    """DEPRECATED
+    Assert condition is true
     Parameters:
     condition : value
     """
@@ -139,37 +177,37 @@ def assert_true(condition):
 
 
 def capture(message=''):
-    """Take a screenshot
+    """DEPRECATED, use take_screenshot instead
+    Take a screenshot
     Parameters:
     message (optional) : value
     """
-    _run_wait_hook()
-    execution.logger.info('Take screenshot {}'.format(message))
-    driver = browser.get_browser()
-    # store image at this point, the target directory is already
-    # created since the beginning of the test, stored in golem.core.report_directory
-    img_id = str(uuid.uuid4())[:8]
-    img_path = os.path.join(execution.report_directory, '{}.png'.format(img_id))
-    driver.get_screenshot_as_file(img_path)
-
-    if len(message) == 0:
-        message = 'Screenshot'
-
-    full_message = '{0}__{1}'.format(message, img_id)
-    step(full_message)
+    execution.logger.warning('capture is DEPRECATED, Use take_screenshot instead')
+    take_screenshot(message)
 
 
 def clear(element):
+    """DEPRECATED, use clear_element instead
+    Clear an input
+    Parameters:
+    element : element
+    """
+    execution.logger.warning('clear is DEPRECATED, use clear_element instead')
+    clear_element(element)
+
+
+def clear_element(element):
     """Clear an input
     Parameters:
     element : element
     """
     _run_wait_hook()
     webelement = browser.get_browser().find(element)
-    step_message = 'Clear {0} element'.format(webelement.name)
-    execution.logger.info(step_message)
+    step_msg= 'Clear {0} element'.format(webelement.name)
+    execution.logger.info(step_msg)
+    _add_step(step_msg)
     webelement.clear()
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    _append_screenshot()
 
 
 def click(element):
@@ -179,66 +217,32 @@ def click(element):
     """
     _run_wait_hook()
     webelement = browser.get_browser().find(element)
-    step_message = 'Click {0}'.format(webelement.name)
-    execution.logger.info(step_message)
+    step_msg = 'Click {0}'.format(webelement.name)
+    execution.logger.info(step_msg)
+    _add_step(step_msg)
     webelement.click()
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    _append_screenshot()
 
 
 def close():
-    """Close a browser. Closes the current active browser"""
+    """DEPRECATED, use close_browser instead
+    Close a browser. Closes the current active browser"""
+    execution.logger.warning('close is DEPRECATED, use close_browser instead')
+    close_browser()
+
+
+def close_browser():
+    """Close browser and all it's windows"""
     execution.logger.info('Close driver')
-    driver = get_browser()
-    driver.quit()
+    get_browser().quit()
     execution.browser = None
 
 
 def debug():
-    """Enter debug mode"""
-    if not execution.settings['interactive']:
-        execution.logger.info('the -i flag is required to access interactive mode')
-        return
-
-    try:
-        # optional, enables Up/Down/History in the console
-        # not available in windows
-        import readline  
-    except:
-        pass
-    import code
-    def console_exit():
-        raise SystemExit
-    def console_help():
-        msg = ('# start a browser and find an element:\n'
-               'navigate(\'http://..\')\n'
-               'browser = get_browser()\n'
-               'browser.title\n'
-               'element = browser.find(id=\'some-id\')\n'
-               'element.text\n'
-               '\n'
-               '# use Golem actions\n'
-               'actions.send_keys(element, \'some text\')\n'
-               '\n'
-               '# import a page from a project\n'
-               'from projects.project_name.pages import page_name\n'
-               '\n'
-               '# get test data (when run from a test)\n'
-               'execution.data')
-        print(msg)
-    vars_copy = globals().copy()
-    vars_copy.update(locals())
-    vars_copy['exit'] = console_exit
-    vars_copy['help'] = console_help
-    actions_module = sys.modules[__name__]
-    vars_copy['actions'] = actions_module
-    banner = ('Entering interactive mode\n'
-              'type exit() to stop\n'
-              'type help() for more info')
-    shell = code.InteractiveConsole(vars_copy)
-    try:
-        shell.interact(banner=banner)
-    except SystemExit:
-        pass
+    """DEPRECATED, use interactive_mode instead
+    Enter debug mode"""
+    execution.logger.warning('debug is DEPRECATED, use interactive_mode instead')
+    interactive_mode()
 
 
 def delete_cookie(name):
@@ -262,17 +266,96 @@ def delete_all_cookies():
     Note: this only deletes cookies from the current domain.
     """
     execution.logger.debug('Delete all cookies')
-    driver = browser.get_browser().delete_all_cookies()
+    get_browser().delete_all_cookies()
 
 
-def dismiss_alert():
-    """Dismiss an alert"""
-    # TODO implement through browser
+def dismiss_alert(ignore_not_present=False):
+    """Dismiss an alert.
+    Use ignore_not_present=True to ignore error when alert is not present
+
+    Parameters:
+    ignore_not_present (optional, False) : value"""
     step_message = 'Dismiss alert'
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    driver = browser.get_browser()
-    driver.switch_to.alert.dismiss()
+    _add_step(step_message)
+    try:
+        get_browser().switch_to.alert.dismiss()
+    except NoAlertPresentException:
+        if not ignore_not_present:
+            raise
+    _append_screenshot()
+
+
+def double_click(element):
+    """Double click an element
+    Parameters:
+    element : element
+    """
+    element = browser.get_browser().find(element)
+    step_message = 'Double click element {}'.format(element.name)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    element.double_click()
+    _append_screenshot()
+
+
+# def drag_and_drop(element, target):
+#     """Drag and drop an element into target
+#     Parameters:
+#     element : element
+#     target : element
+#     """
+#     b = get_browser()
+#     element = b.find(element)
+#     target = b.find(target)
+#     step_message = 'Drag and drop {} into {}'.format(element.name, target.name)
+#     execution.logger.info(step_message)
+#     _add_step(step_message)
+#     b.drag_and_drop(element, target)
+#     _append_screenshot()
+
+
+def execute_javascript(script, *args):
+    """Execute javascript code
+
+    Parameters:
+    script : value
+    *args : value
+    """
+    return get_browser().execute_script(script, *args)
+
+
+def error(message=''):
+    """Mark the test as error and stop.
+
+    Parameters:
+    message (optional): value
+    """
+    add_error(message)
+    raise TestError(message)
+
+
+def fail(message=''):
+    """Mark the test as failure and stop
+
+    Parameters:
+    message (optional) : value"""
+    # TODO
+    raise TestFailure(message)
+
+
+def focus_element(element):
+    """Give focus to element
+    Parameters:
+    element : element
+    """
+    _run_wait_hook()
+    element = get_browser().find(element)
+    step_message = 'Focus element {}'.format(element.name)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    element.focus()
+    _append_screenshot()
 
 
 def get(url):
@@ -281,6 +364,12 @@ def get(url):
     url : value
     """
     navigate(url)
+
+
+def get_alert_text():
+    """Get alert text"""
+    execution.logger.debug('get alert text')
+    return get_browser().switch_to.alert.text
 
 
 def get_browser():
@@ -295,84 +384,167 @@ def get_cookie(name):
     name : value
     """
     execution.logger.debug('Get cookie "{}"'.format(name))
-    driver = browser.get_browser()
-    return driver.get_cookie(name)
+    return get_browser().get_cookie(name)
 
 
 def get_cookies():
     """Returns a list of dictionaries, corresponding to cookies
     visible in the current session.
     """
-    execution.logger.debug('Get all current cookies')
-    driver = browser.get_browser()
-    return driver.get_cookies()
+    execution.logger.debug('Get all cookies')
+    return get_browser().get_cookies()
 
 
 def get_current_url():
-    """Return the current browser URL    
+    """Return the current browser URL"""
+    return get_browser().current_url
+
+
+def get_search_timeout():
+    """Get search timeout"""
+    return execution.settings['search_timeout']
+
+
+def go_back():
+    """Goes one step backward in the browser history"""
+    _run_wait_hook()
+    step_msg = 'Go back'
+    execution.logger.debug(step_msg)
+    _add_step(step_msg)
+    browser.get_browser().back()
+    _append_screenshot()
+
+
+def interactive_mode():
+    """Enter interactive mode"""
+    if not execution.settings['interactive']:
+        execution.logger.info('the -i flag is required to access interactive mode')
+        return
+    try:
+        # optional, enables Up/Down/History in the console
+        # not available in windows
+        import readline
+    except:
+        pass
+
+    def console_exit():
+        raise SystemExit
+
+    def console_help():
+        msg = ('# start a browser and find an element:\n'
+               'navigate(\'http://..\')\n'
+               'browser = get_browser()\n'
+               'browser.title\n'
+               'element = browser.find(id=\'some-id\')\n'
+               'element.text\n'
+               '\n'
+               '# use Golem actions\n'
+               'actions.send_keys(element, \'some text\')\n'
+               '\n'
+               '# import a page from a project\n'
+               'from projects.project_name.pages import page_name\n'
+               '\n'
+               '# get test data (when run from a test)\n'
+               'execution.data')
+        print(msg)
+
+    vars_copy = globals().copy()
+    vars_copy.update(locals())
+    vars_copy['exit'] = console_exit
+    vars_copy['help'] = console_help
+    actions_module = sys.modules[__name__]
+    vars_copy['actions'] = actions_module
+    banner = ('Entering interactive mode\n'
+              'type exit() to stop\n'
+              'type help() for more info')
+    shell = code.InteractiveConsole(vars_copy)
+    try:
+        shell.interact(banner=banner)
+    except SystemExit:
+        pass
+
+
+def javascript_click(element):
+    """Click an element using Javascript
+    
+    Parameters:
+    element : element
     """
-    return browser.get_browser().current_url
+    _run_wait_hook()
+    element = browser.get_browser().find(element)
+    step_msg = 'Javascript click element {0}'.format(element.name)
+    execution.logger.info(step_msg)
+    _add_step(step_msg)
+    element.javascript_click()
+    _append_screenshot()
 
 
 def mouse_hover(element):
-    """Hover an element with the mouse
+    """DEPRECATED, used mouse_over instead
+    Hover an element with the mouse
+
+    Parameters:
+    element : element
+    """
+    execution.logger.warning('mouse_over is DEPRECATED, use mouse_over instead')
+
+
+def mouse_over(element):
+    """Perform a mouse over on element
+
     Parameters:
     element : element
     """
     _run_wait_hook()
     driver = browser.get_browser()
-    webelement = driver.find(element)
-    step_message = 'Mouse hover element \'{0}\''.format(webelement.name)
+    element = driver.find(element)
+    step_message = 'Mouse over element \'{0}\''.format(element.name)
     execution.logger.info(step_message)
-    ActionChains(driver).move_to_element(webelement).perform()
-    #_capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    _add_step(step_message)
+    element.mouse_over()
+    _append_screenshot()
 
 
 def navigate(url):
     """Navigate to a URL
+
     Parameters:
     url : value
     """
-    step_message = 'Navigate to: \'{0}\''.format(url)
-    driver = browser.get_browser()
-    driver.get(url)
-    execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    step_msg = 'Navigate to: \'{0}\''.format(url)
+    execution.logger.info(step_msg)
+    _add_step(step_msg)
+    browser.get_browser().get(url)
+    _append_screenshot()
     
 
 def open_browser(browser_id=None):
-    """Open a new browser. The param browser_id is optional
-    and only used to manage more than one browser at the same time.
+    """Open a new browser.
+    browser_id is optional and only used to manage more than one
+    browser at the same time.
+
     Parameters:
     browser_id (optional) : value
     """
     step_message = 'Open browser'
+    execution.logger.info(step_message)
+    _add_step(step_message)
     browser.open_browser(browser_id)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
 
     
 def press_key(element, key):
     """Press a given key in the element.
+
     Parameters:
     element : element
     key : value
     """
-    step_message = 'Press key: {}'.format(key)
+    element = get_browser().find(element)
+    step_message = 'Press key: {} in element {}'.format(key, element.name)
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    webelement = get_browser().find(element)
-    if key == 'RETURN' or key == 'ENTER':
-        webelement.send_keys(Keys.RETURN)
-    elif key == 'UP':
-        webelement.send_keys(Keys.UP)
-    elif key == 'DOWN':
-        webelement.send_keys(Keys.DOWN)
-    elif key == 'LEFT':
-        webelement.send_keys(Keys.LEFT)
-    elif key == 'RIGHT':
-        webelement.send_keys(Keys.RIGHT)
-    else:
-        raise Exception('Key value {} is invalid'.format(key))
+    _add_step(step_message)
+    element.press_key(key)
+    _append_screenshot()
 
 
 def random(value):
@@ -397,107 +569,177 @@ def refresh_page():
     """Refresh the page."""
     _run_wait_hook()
     step_message = 'Refresh page'
-    browser.get_browser().refresh()
-    #get_browser().execute_script("location.reload()")
-    #browser = get_browser()
-    #browser.get(browser.current_url);
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    _add_step(step_message)
+    get_browser().refresh()
+    _append_screenshot()
 
 
 def select_by_index(element, index):
+    """DEPRECATED, use select_option_by_index
+    Select an option from a select dropdown by index.
+
+    Parameters:
+    element : element
+    index : value
+    """
+    execution.logger.warning('select_by_index is DEPRECATED, use select_option_by_index instead')
+    select_option_by_index(element, index)
+
+
+def select_by_text(element, text):
+    """DEPRECATED, use select_option_by_text
+    Select an option from a select dropdown by text.
+
+    Parameters:
+    element : element
+    text : value
+    """
+    execution.logger.warning('select_by_text is DEPRECATED, use select_option_by_text instead')
+    select_option_by_text(element, text)
+
+
+def select_by_value(element, value):
+    """DEPRECATED, use select_option_by_value
+
+    Parameters:
+    element : element
+    value : value
+    """
+    execution.logger.warning('select_by_value is DEPRECATED, use select_option_by_value instead')
+    select_option_by_value(element, value)
+
+
+def select_option_by_index(element, index):
     """Select an option from a select dropdown by index.
+
     Parameters:
     element : element
     index : value
     """
     _run_wait_hook()
-    webelement = browser.get_browser().find(element)
-    step_message = 'Select option of index {0} from element {1}'.format(index, webelement.name)
-    select = selenium.webdriver.support.select.Select(webelement)
-    select.select_by_index(index)
+    element = get_browser().find(element)
+    step_message = 'Select option of index {0} from element {1}'.format(index, element.name)
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    _add_step(step_message)
+    element.select.select_by_index(index)
+    _append_screenshot()
 
 
-def select_by_text(element, text):
+def select_option_by_text(element, text):
     """Select an option from a select dropdown by text.
+
     Parameters:
     element : element
     text : value
     """
     _run_wait_hook()
-    webelement = browser.get_browser().find(element)
-    step_message = 'Select \'{0}\' from element {1}'.format(text, webelement.name)
-    select = selenium.webdriver.support.select.Select(webelement)
-    select.select_by_visible_text(text)
+    element = get_browser().find(element)
+    step_message = 'Select \'{0}\' from element {1}'.format(text, element.name)
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    _add_step(step_message)
+    element.select.select_by_visible_text(text)
+    _append_screenshot()
 
 
-def select_by_value(element, value):
+def select_option_by_value(element, value):
     """Select an option from a select dropdown by value.
+
     Parameters:
     element : element
     value : value
     """
     _run_wait_hook()
-    webelement = browser.get_browser().find(element)
-    step_message = 'Select \'{0}\' value from element {1}'.format(value, webelement.name)
-    select = selenium.webdriver.support.select.Select(webelement)
-    select.select_by_value(value)
+    element = browser.get_browser().find(element)
+    step_message = 'Select \'{0}\' value from element {1}'.format(value, element.name)
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    _add_step(step_message)
+    element.select.select_by_value(value)
+    _append_screenshot()
 
 
 def send_keys(element, text):
-    """Send keys to an input.
+    """Send keys to element.
+
     Parameters:
     element : element
     text : value
     """
     _run_wait_hook()
-    webelement = browser.get_browser().find(element)
-    step_message = 'Write \'{0}\' in element {1}'.format(text, webelement.name)
-    # TODO chrome driver drops some characters when calling send_keys
-    # if execution.browser_name in ['chrome', 'chrome-headless', 'chrome-remote']:
-    #     for c in text:
-    #         webelement.send_keys(c)
-    #         time.sleep(0.1)
-    # else:
-    webelement.send_keys(text)
+    element = get_browser().find(element)
+    step_message = 'Write \'{0}\' in element {1}'.format(text, element.name)
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    _add_step(step_message)
+    element.send_keys(text)
+    _append_screenshot()
+
+
+def send_text_to_alert(text):
+    """Send text to an alert
+
+    Parameters:
+    text : value
+    """
+    _run_wait_hook()
+    step_message = 'Send \'{}\' to alert'.format(text)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    get_browser().switch_to.alert.send_keys(text)
+    _append_screenshot()
 
 
 def set_browser_capability(capability_key, capability_value):
     """Set a browser capability.
+    Call this action before starting the browser for the
+    capability to take effect.
+
     Parameters:
     capability_key : value
     capability_value : value
     """
     step_message = ('Set browser cabability "{}" to "{}"'
                     .format(capability_key, capability_value))
-    execution.browser_definition['capabilities'][capability_key] = capability_value
     execution.logger.debug(step_message)
+    execution.browser_definition['capabilities'][capability_key] = capability_value
+
+
+def set_search_timeout(timeout):
+    """Set the search timeout value
+    Parameters:
+    timeout : value
+    """
+    execution.logger.debug('Set search_timeout to: {}'.format(timeout))
+    if not isinstance(timeout, int) and not isinstance(timeout, float):
+        raise ValueError('timeout must be int or float')
+    else:
+        execution.settings['search_timeout'] = timeout
+
+
+def set_trace():
+    """Set trace for Python pdb
+    """
+    if not execution.settings['interactive']:
+        execution.logger.info('the -i flag is required to set_trace')
+        return
+    pdb.set_trace()
 
 
 def set_window_size(width, height):
     """Set the browser window size.
+
     Parameters:
     width : value
     height : value
     """
     _run_wait_hook()
-    driver = browser.get_browser()
     step_message = 'Set browser window size to {0}x, {1}y.'.format(width, height)
-    driver.set_window_size(width, height)
-    execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    execution.logger.debug(step_message)
+    get_browser().set_window_size(width, height)
 
 
 def step(message):
     """Log a step to the report.
+
     Parameters:
     message : value
     """
@@ -506,7 +748,8 @@ def step(message):
 
 
 def store(key, value):
-    """Store a value in data.
+    """Store a value in data
+
     Parameters:
     key : value
     value : value
@@ -515,31 +758,96 @@ def store(key, value):
     setattr(execution.data, key, value)
 
 
-def verify_alert_is_present():
-    """Verify an alert is present"""
-    # TODO implement through browser
-    step_message = 'Verify an alert is present'
+def submit_prompt_alert(text):
+    """Send text to alert and accept it
+
+    Parameters:
+    text : value
+    """
+    _run_wait_hook()
+    step_message = 'Submit alert with text \'{}\''.format(text)
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    driver = browser.get_browser()
-    try:
-        alert = driver.switch_to.alert
-    except NoAlertPresentException:
-        assert False, 'an alert was not present'
+    _add_step(step_message)
+    get_browser().switch_to.alert.send_keys(text)
+    get_browser().switch_to.alert.accept()
+    _append_screenshot()
+
+
+def take_screenshot(message=''):
+    """Take a screenshot
+    Parameters:
+    message (optional) : value
+    """
+    _run_wait_hook()
+    step_msg = 'Take screenshot'
+    if message:
+        step_msg += ': {}'.format(message)
+    execution.logger.info(step_msg)
+    img_id = str(uuid.uuid4())[:8]
+    step_msg = '{}__{}'.format(step_msg, img_id)
+    _add_step(step_msg)
+    _capture_screenshot(img_id)
+
+
+def verify_alert_is_present():
+    """DEPRECATED, use verify_alert_present"""
+    execution.logger.warning('verify_alert_is_present is DEPRECATED, use verify_alert_present instead')
+    verify_alert_present()
 
 
 def verify_alert_is_not_present():
+    """DEPRECATED, use verify_alert_not_present.
+    Verify an alert is not present"""
+    execution.logger.warning('verify_alert_is_not_present is DEPRECATED, use verify_alert_not_present instead')
+    verify_alert_not_present()
+
+
+def verify_alert_present():
+    """Verify an alert is present"""
+    step_message = 'Verify an alert is present'
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    assert get_browser().alert_is_present(), 'an alert was not present'
+    _append_screenshot()
+
+
+def verify_alert_not_present():
     """Verify an alert is not present"""
-    # TODO implement through browser
     step_message = 'Verify an alert is not present'
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    driver = browser.get_browser()
-    try:
-        alert = driver.switch_to.alert
-        assert False, 'an alert was present'
-    except NoAlertPresentException:
-        pass
+    _add_step(step_message)
+    assert not get_browser().alert_is_present(), 'an alert was present'
+    _append_screenshot()
+
+
+def verify_alert_text(text):
+    """Verify alert text
+
+    Parameters:
+    text : value
+    """
+    step_message = 'Verify alert text is \'{}\''.format(text)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    alert_text = get_browser().switch_to.alert.text
+    error_msg = 'Expected alert text to be \'{}\' but was \'{}\''.format(text, alert_text)
+    assert alert_text == text, error_msg
+    _append_screenshot()
+
+
+def verify_alert_text_is_not(text):
+    """Verify alert text is not text
+
+    Parameters:
+    text : value
+    """
+    step_message = 'Verify alert text is not \'{}\''.format(text)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    alert_text = get_browser().switch_to.alert.text
+    error_msg = 'Expected alert text not to be \'{}\''.format(text)
+    assert alert_text != text, error_msg
+    _append_screenshot()
 
 
 def verify_cookie_value(name, value):
@@ -549,10 +857,10 @@ def verify_cookie_value(name, value):
     name: value
     value: value
     """
-    step_message = ('Verify that cookie "{}" contains value "{}"'
-                    .format(name, value))
+    _run_wait_hook()
+    step_message = 'Verify that cookie "{}" value is "{}"'.format(name, value)
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    _add_step()
     cookie = browser.get_browser().get_cookie(name)
     if not cookie:
         raise Exception('Cookie "{}" was not found'.format(name))
@@ -565,6 +873,17 @@ def verify_cookie_value(name, value):
          
 
 def verify_cookie_exists(name):
+    """DEPRECATED, use verify_cookie_present
+    Verify a cookie exists in the current session.
+    The cookie is found by its name.
+
+    Parameters:
+    name: value
+    """
+    execution.logger.warning('verify_cookie_exists is DEPRECATED, use verify_cookie_present')
+
+
+def verify_cookie_present(name):
     """Verify a cookie exists in the current session.
     The cookie is found by its name.
 
@@ -573,10 +892,137 @@ def verify_cookie_exists(name):
     """
     step_message = 'Verify that cookie "{}" exists'.format(name)
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    _add_step(step_message)
     cookie = browser.get_browser().get_cookie(name)
     if not cookie:
         raise Exception('Cookie "{}" was not found'.format(name))
+
+
+def verify_element_checked(element):
+    """Verify element is checked.
+    This applies to checkboxes and radio buttons.
+
+    Parameters:
+    element : element
+    """
+    _run_wait_hook()
+    element = get_browser().find(element)
+    step_message = 'Verify the element {} is checked'.format(element.name)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    assert element.is_selected(), 'element {} is not checked'.format(element.name)
+    _append_screenshot()
+
+
+def verify_element_enabled(element):
+    """Verify element is enabled.
+
+    Parameters:
+    element : element
+    """
+    _run_wait_hook()
+    element = get_browser().find(element)
+    step_message = 'Verify the element {} is enabled'.format(element.name)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    if not element.is_enabled():
+        raise Exception('Element is not enabled')
+    _append_screenshot()
+
+
+def verify_element_has_attribute(element, attribute):
+    """Verify element has attribute
+
+    Parameters:
+    element : element
+    attribute : value
+    """
+    _run_wait_hook()
+    element = get_browser().find(element)
+    step_message = 'Verify element {} has attribute {}'.format(element.name, attribute)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    error_msg = 'element {} does not have attribute {}'.format(element.name, attribute)
+    assert element.has_attribute(attribute), error_msg
+    _append_screenshot()
+
+
+def verify_element_has_focus(element):
+    """Verify element has focus
+
+    Parameters:
+    element : element
+    """
+    _run_wait_hook()
+    element = get_browser().find(element)
+    step_message = 'Verify element {} has focus'.format(element.name)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    error_msg = 'element {} does not have focus'.format(element.name)
+    assert element.has_focus(), error_msg
+
+
+def verify_element_has_not_attribute(element, attribute):
+    """Verify element has not attribute
+
+    Parameters:
+    element : element
+    attribute : value
+    """
+    _run_wait_hook()
+    element = get_browser().find(element)
+    step_message = 'Verify element {} has not attribute {}'.format(element.name, attribute)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    error_msg = 'element {} has attribute {}'.format(element.name, attribute)
+    assert not element.has_attribute(attribute), error_msg
+
+
+def verify_element_has_not_focus(element):
+    """Verify element does not have focus
+
+    Parameters:
+    element : element
+    """
+    _run_wait_hook()
+    element = get_browser().find(element)
+    step_message = 'Verify element {} does not have focus'.format(element.name)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    error_msg = 'element {} has focus'.format(element.name)
+    assert not element.has_focus(), error_msg
+
+
+def verify_element_not_checked(element):
+    """Verify element is not checked.
+    This applies to checkboxes and radio buttons.
+
+    Parameters:
+    element : element
+    """
+    _run_wait_hook()
+    element = browser.get_browser().find(element)
+    step_message = 'Verify the element {} is not checked'.format(element.name)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    assert not element.is_selected(), 'element {} is checked'.format(element.name)
+    _append_screenshot()
+
+
+def verify_element_not_enabled(element):
+    """Verify element is not enabled.
+
+    Parameters:
+    element : element
+    """
+    _run_wait_hook()
+    element = get_browser().find(element)
+    step_message = 'Verify the element {} is not enabled'.format(element.name)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    if element.is_enabled():
+        raise Exception('Element is enabled')
+    _append_screenshot()
 
 
 # TODO rename to verify_element_exists
@@ -596,45 +1042,35 @@ def verify_exists(element):
 
 
 def verify_is_enabled(element):
-    """Verify an element is enabled.
+    """DEPRECATED, use verify_element_enabled
+    Verify an element is enabled.
+
     Parameters:
     element : element
     """
-    _run_wait_hook()
-    webelement = browser.get_browser().find(element)
-    step_message = 'Verify the element \'{0}\' is enabled'.format(webelement.name)
-    execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    if not webelement.is_enabled():
-        raise Exception('Element is enabled')
+    execution.logger.warning('verify_is_enabled is DEPRECATED, use verify_element_enabled')
+    verify_element_enabled(element)
 
 
 def verify_is_not_enabled(element):
-    """Verify an element is not enabled
+    """DEPRECATED, use verify_element_not_enabled
+    Verify an element is not enabled
+
     Parameters:
     element : element
     """
-    _run_wait_hook()
-    webelement = browser.get_browser().find(element)
-    step_message = 'Verify the element \'{0}\' is not enabled'.format(webelement.name)
-    execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    if webelement.is_enabled():
-        raise Exception('Element is enabled')
+    execution.logger.warning('verify_is_not_enabled is DEPRECATED, use verify_element_not_enabled')
+    verify_element_not_enabled(element)
 
 
 def verify_is_not_selected(element):
-    """Verify an element is not selected
+    """DEPRECATED, use verify_element_not_checked
+
     Parameters:
     element : element
     """
-    _run_wait_hook()
-    webelement = browser.get_browser().find(element)
-    step_message = 'Verify the element \'{0}\' is not selected'.format(webelement.name)
-    execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    if webelement.is_selected():
-        raise Exception('Element is selected')
+    execution.logger.warning('verify_is_not_selected is DEPRECATED, use verify_element_not_checked')
+    verify_element_not_checked(element)
 
 
 def verify_is_not_visible(element):
@@ -652,17 +1088,14 @@ def verify_is_not_visible(element):
 
 
 def verify_is_selected(element):
-    """Verify an element is selected
+    """DEPRECATED, use verify_element_checked
+
+    Verify an element is selected
     Parameters:
     element : element
     """
-    _run_wait_hook()
-    webelement = browser.get_browser().find(element)
-    step_message = 'Verify the element \'{0}\' is selected'.format(webelement.name)
-    execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    if not webelement.is_selected():
-        raise Exception('Element is not selected')
+    execution.logger.warning('verify_is_selected is DEPRECATED, use verify_element_checked')
+    verify_element_checked(element)
 
 
 def verify_is_visible(element):
@@ -698,22 +1131,57 @@ def verify_not_exists(element):
 
 
 def verify_selected_option(element, text):
-    """Verify an element has a selected option, passed by option text.
+    """DEPRECATED, use verify_selected_option_by_text or verify_selected_option_by_value
+
+    Verify an element has a selected option, passed by option text.
+    Parameters:
+    element : element
+    text : value
+    """
+    execution.logger.warning(('verify_selected_option is DEPRECATED, use '
+                              'verify_selected_option_by_text or '
+                              'verify_selected_option_by_value'))
+    verify_selected_option_by_text(element, text)
+
+
+def verify_selected_option_by_text(element, text):
+    """Verify an element has a selected option by the option text
+
     Parameters:
     element : element
     text : value
     """
     _run_wait_hook()
-    webelement = browser.get_browser().find(element)
-    select = selenium.webdriver.support.select.Select(webelement)
-    step_message = ('Verify selected option of element \'{0}\''
-                    ' is \'{1}\''.format(webelement.name, text))
+    element = get_browser().find(element)
+    step_message = ('Verify selected option text of element {} is {}'
+                    .format(element.name, text))
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    if not select.first_selected_option.text == text:
-        raise TextNotPresent('Option selected in element \'{0}\' '
-                             'is not {1}'
-                             .format(webelement.name, text))
+    _add_step(step_message)
+    selected_option_text = element.select.first_selected_option.text
+    error_msg = ('Expected selected option in element {} to be {} but was {}'
+                 .format(element.name, text, selected_option_text))
+    assert selected_option_text == text, error_msg
+    _append_screenshot()
+
+
+def verify_selected_option_by_value(element, value):
+    """Verify an element has a selected option by the option value
+
+    Parameters:
+    element : element
+    value : value
+    """
+    _run_wait_hook()
+    element = get_browser().find(element)
+    step_message = ('Verify selected option value of element {} is {}'
+                    .format(element.name, value))
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    selected_option_value = element.select.first_selected_option.value
+    error_msg = ('Expected selected option in element {} to be {} but was {}'
+                 .format(element.name, value, selected_option_value))
+    assert selected_option_value == value, error_msg
+    _append_screenshot()
 
 
 def verify_text(text):
@@ -740,10 +1208,11 @@ def verify_text_in_element(element, text):
     webelement = browser.get_browser().find(element)
     step_message = 'Verify element \'{0}\' contains text \'{1}\''.format(webelement.name, text)
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+    _add_step(step_message)
     if text not in webelement.text:
         raise TextNotPresent("Text \'{0}\' was not found in element {1}. Text \'{2}\' was found."
                              .format(text, webelement.name, webelement.text))
+    _append_screenshot()
 
 
 def wait(seconds):
@@ -757,6 +1226,20 @@ def wait(seconds):
     except:
         raise Exception('seconds value should be a number')
     time.sleep(to_float)
+
+
+def wait_for_alert_present(timeout=30):
+    """Wait for an alert to be present
+
+    Parameters:
+    timeout (30): value
+    """
+    step_message = 'Wait for alert to be present'
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    get_browser().wait_for_alert_present(timeout)
+    _append_screenshot()
+
 
 # TODO
 # def wait_for_element_exists(element, timeout=20):

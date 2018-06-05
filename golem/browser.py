@@ -15,6 +15,7 @@ from golem.webdriver import (GolemChromeDriver,
                              GolemIeDriver,
                              GolemOperaDriver,
                              GolemRemoteDriver)
+from golem.webdriver.extended_driver import GolemExtendedDriver
 
 
 def element(*args, **kwargs):
@@ -167,7 +168,7 @@ def open_browser(browser_id=None):
         execution.browser = driver
 
 
-def get_browser():
+def get_browser() -> GolemRemoteDriver:
     """Returns the active browser. Starts a new one if there is none."""
     if not execution.browser:
         open_browser()

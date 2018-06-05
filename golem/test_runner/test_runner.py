@@ -124,13 +124,13 @@ def run_test(workspace, project, test_name, test_data, browser,
             raise Exception('Test does not have test function')
 
         if settings['screenshot_on_end'] and execution.browser:
-            actions.capture('test end')
+            actions.take_screenshot('test end')
     except:
         result['result'] = 'fail'
         result['error'] = traceback.format_exc()
         try:
             if settings['screenshot_on_error'] and execution.browser:
-                actions.capture('error')
+                actions.take_screenshot('error')
         except:
             # if the test failed and driver is not available
             # capture screenshot is not possible, continue

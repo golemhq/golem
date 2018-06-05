@@ -7,9 +7,9 @@ Golem comes with predefined actions that cover almost all the needs to write tes
 ### Browser Actions
 
 
-##### accept_alert()
+##### accept_alert(ignore_not_present=False)
 
-Accepts an alert present
+Accepts an alert, confirm or prompt box. Use ignore_not_present to ignore error when alert is not present.
 
 
 ##### activate_browser(browser_id)
@@ -38,12 +38,19 @@ add_cookie({'name': 'foo', 'value': 'bar'})
 
 ##### capture(message='')
 
+DEPRECATED, use take screenshot instead.
 Take a screenshot of the browser, the message is optional
 
 
 ##### clear(element)
 
+DEPRECATED, use clear_element insteand
+
+
+##### clear_element(element)
+
 Clear element
+
 
 
 ##### click(element)
@@ -53,7 +60,12 @@ Perform a mouse click
 
 ##### close()
 
-Closes the webdriver browser
+DEPRECATED, use close_browser instead.
+
+
+##### close_browser()
+
+Closes the webdriver browser and all it's windows/tabs
 
 
 ##### delete_cookie(name)
@@ -67,12 +79,32 @@ Note: this only deletes cookies from the current domain.
 
 
 ##### dismiss_alert()
-Dismiss an alert
+
+Dismiss an alert, confirm or prompt box. Use ignore_not_present to ignore error when alert is not present.
+
+
+##### double_click(element)
+
+Double click an element
+
+
+##### execute_javascript(script, *args)
+
+Execute javascript code
+
+
+##### focus_element(element)
+
+Give focus to element
 
 
 ##### get(url)
 
 Navigate to a URL, same as *navigate(url)*
+
+##### get_alert_text()
+
+Get text of alert, confirm or prompt box
 
 
 ##### get_browser()
@@ -93,9 +125,24 @@ Returns a list of dictionaries, corresponding to cookies visible in the current 
 Returns the current browser URL
 
 
+##### go_back()
+
+Goes one step backward in the browser history
+
+
+##### javascript_click(element)
+
+Click an element using Javascript
+
+
 ##### mouse_hover(element)
 
-Perform a mouse hover on the element
+DEPRECATED, use mouse_over instead
+
+
+##### mouse_over(element)
+
+Perform a mouse over on the element
 
 
 ##### navigate(url)
@@ -110,26 +157,43 @@ Open a new browser. Browser Id is optional, useful when having multiple open bro
 
 ##### press_key(element, key)
 
-Press the given keyboard key on the element. Options are:
+Press a given key in the element.
+Key must be a string with a value defined in selenium.webdriver.common.keys.Keys
 
-* ENTER/RETURN
-* UP
-* DOWN
-* LEFT
-* RIGHT
+Examples:
+```
+press_key('ENTER')
+press_key('TAB')
+press_key('LEFT')
+```
 
 
 ##### select_by_index(element, text)
 
-Select an option from a \<select\> element by the index of the option
+DEPRECATED, use select_option_by_index instead
 
 
 ##### select_by_text(element, text)
 
-Select an option from a \<select\> element by the option text
+DEPRECATED, use select_option_by_text instead
 
 
 ##### select_by_value(element, value)
+
+DEPRECATED, use select_option_by_value instead
+
+
+##### select_option_by_index(element, text)
+
+Select an option from a \<select\> element by index (starts from 0)
+
+
+##### select_option_by_text(element, text)
+
+Select an option from a \<select\> element by the option text
+
+
+##### select_option_by_value(element, value)
 
 Select an option from a \<select\> element by the option value. 
 
@@ -146,28 +210,64 @@ For example, given:
 To select the first option use:
 
 ```
-select_by_index('#countrySelect', 0)
-select_by_text('#countrySelect', 'Canada')
-select_by_value('#countrySelect', 'CA')
+select_option_by_index('#countrySelect', 0)
+select_option_by_text('#countrySelect', 'Canada')
+select_option_by_value('#countrySelect', 'CA')
 ```
 
 
 ##### send_keys(element, text)
 
-Send key strokes to the element
+Send text to element
+
+
+##### send_text_to_alert(text)
+
+Send text to an alert
+
+
+##### submit_prompt_alert(text)
+
+Send text to a prompt alert and accept it
+
 
 ##### set_browser_capability(capability_key, capability_value)
-Set a browser capability. Must be called before the browser is started.
+
+Set a browser capability. This must be called before the browser is started.
+
+
+##### take_screenshot(message='')
+
+Take a screenshot of entire page, the message is optional
 
 
 ##### verify_alert_is_present()
 
-Verify an alert is present
+DEPRECATED, use verify_alert_present
 
 
 ##### verify_alert_is_not_present()
 
-Verify an alert is not present
+DEPRECATED, use verify_alert_not_present
+
+
+##### verify_alert_present()
+
+Verify an alert is present. This applies to alerts, confirms and prompts.
+
+
+##### verify_alert_not_present()
+
+Verify an alert is not present. This applies to alerts, confirms and prompts.
+
+
+##### verify_alert_text(text)
+
+Verify alert text
+
+##### verify_alert_text_is_not(text)
+
+Verify alert text is not text
 
 
 ##### verify_cookie_value(name, value)
@@ -175,26 +275,73 @@ Verify the value of a cookie.
 
 
 ##### verify_cookie_exists(name)
-Verify a cookie exists in the current session. The cookie is found by its name.
+
+DEPRECATED, use verify_cookie_present instead.
+
+
+##### verify_cookie_present(name)
+
+Verify a cookie exists in the current session by the cookie name
+
+
+##### verify_element_checked(element)
+
+Verify element is checked. This applies to checkboxes and radio buttons.
+
+
+##### verify_element_enabled(element)
+
+Verify that element is enabled
+
+
+##### verify_element_has_attribute(element, attribute)
+
+Verify element has attribute
+
+
+##### verify_element_has_focus(element)
+
+Verify element has focus
+
+
+##### verify_element_has_not_attribute(element, attribute)
+
+Verify element does not have attribute
+
+
+##### verify_element_has_not_focus(element)
+
+Verify element does not have focus
+
 
 ##### verify_exists(element)
 
 Verify an element exists in the page
 
 
+##### verify_element_not_checked(element)
+
+Verify element is not checked. This applies to checkboxes and radio buttons.
+
+
+##### verify_element_not_enabled(element)
+
+Verify that element is not enabled
+
+
 ##### verify_is_enabled(element)
 
-Verify that an element is enabled
+DEPRECATED, use verify_element_enabled
 
 
 ##### verify_is_not_enabled(element)
 
-Verify that an element is not enabled
+DEPRECATED, use verify_element_not_enabled
 
 
 ##### verify_is_not_selected(element)
 
-Verify that an element is not selected, i.e: a checkbox
+DEPRECATED, use verify_element_not_checked
 
 
 ##### verify_is_not_visible(element)
@@ -204,7 +351,7 @@ Verify that an element is not visible
 
 ##### verify_is_selected(element)
 
-Verify that an element is selected, i.e.: a checkbox
+DEPRECATED, use verify_element_checked
 
 
 ##### verify_is_visible(element)
@@ -219,7 +366,17 @@ Verify that an element does not exist in the page
 
 ##### verify_selected_option(element, text)
 
-Verify that the option selected in a \<select\> is the one given (by the option text)
+DEPRECATED, use verify_selected_option_by_text or verify_selected_option_by_value
+
+
+##### verify_selected_option_by_text(element, text)
+
+Verify the option selected in a \<select\> by the option text
+
+
+##### verify_selected_option(element, text)
+
+Verify the option selected in a \<select\> by the option value
 
 
 ##### verify_text(text)
@@ -230,6 +387,11 @@ Verify that the given text is present anywhere on the page (in the entire DOM)
 ##### verify_text_in_element(element, text)
 
 Verify that an element contains the given text.
+
+
+##### wait_for_alert_present(timeout=30)
+
+Wait for an alert to be present
 
 
 ##### wait_for_element_not_exist(element, timeout=20)
@@ -257,27 +419,49 @@ Wait until the element is visible
 
 ##### assert_contains(element, value)
 
-Assert that the element contains the value
+DEPRECATED. Assert that the element contains the value
 
 
 ##### assert_equals(actual, expected)
 
-Assert that the actual value equals the expected value
+DEPRECATED. Assert that the actual value equals the expected value
 
 
 ##### assert_false(condition)
 
-Assert that the condition is false
+DEPRECATED. Assert that the condition is false
 
 
 ##### assert_true(condition)
 
-Assert that the condition is true
+DEPRECATED. Assert that the condition is true
 
 
 ##### debug()
 
-Starts an interactive console at this point of the test. The test should be run with the '-i' flag, otherwise it will be ignored. See [Interactive Mode](Interactive-mode.html) for more details.
+DEPRECATED, use interactive_mode instead.
+
+Starts an interactive console at this point of the test. The test should be run with the '-i' flag, otherwise this action will be ignored. See [Interactive Mode](Interactive-mode.html) for more details.
+
+
+##### error(message='')
+
+Mark the test as error and stop
+
+
+#### fail(message='')
+
+Mark the test as failure and stop
+
+
+##### get_search_timeout()
+
+Get search timeout.
+
+
+##### interactive_mode()
+
+Starts an interactive console at this point of the test. The test should be run with the '-i' flag, otherwise this action will be ignored. See [Interactive Mode](Interactive-mode.html) for more details.
 
 
 ##### random(args)
@@ -295,14 +479,31 @@ For example: random('cccddd') => 'aeg147'
 Refreshes the page
 
 
+##### set_search_timeout(timeout)
+
+Set the search timeout value. Timeout must be either int or float.
+
+
+##### set_trace()
+
+Perform a pdb.set_trace().
+Read more about the Python debugger [here](https://docs.python.org/3/library/pdb.html).
+The test should be run with the '-i' flag, otherwise this action will be ignored 
+
+
+##### set_window_size(width, height)
+
+Set the width and height of the window (in pixels)
+
+
 ##### step(message)
 
-Logs a new step to be displayed in the report later
+Logs a new step to be displayed in the report
 
 
 ##### store(key, value)
 
-Store a value in the given key for later use. Th_e value is going to be available through the data dictionary.
+Store a value in the given key for later use. The value is going to be available through the data dictionary.
 
 
 ##### wait(seconds)

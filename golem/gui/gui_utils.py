@@ -90,7 +90,6 @@ class Golem_action_parser:
                     'type': param_parts[1].strip()
                 }
                 docstring_def['parameters'].append(param)
-
         return docstring_def
 
     def get_actions(self):
@@ -106,18 +105,18 @@ class Golem_action_parser:
 
             action_func_list = [function for function in module.__dict__.values()
                                 if is_valid_function(function, module)]
-
             for action in action_func_list:
                 doc = action.__doc__
                 if doc is None:
                     print('Warning: action {} does not have docstring defined'
                           .format(action.__name__))
+                elif 'DEPRECATED' in doc:
+                    pass
                 else:
                     action_def = self._parse_docstring(doc)
                     action_def['name'] = action.__name__
                     actions.append(action_def)
             self.actions = actions
-
         return self.actions
 
 
