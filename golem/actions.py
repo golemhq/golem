@@ -906,11 +906,27 @@ def verify_element_checked(element):
     element : element
     """
     _run_wait_hook()
-    element = get_browser().find(element)
+    element = get_browser().find(element, timeout=0)
     step_message = 'Verify the element {} is checked'.format(element.name)
     execution.logger.info(step_message)
     _add_step(step_message)
     assert element.is_selected(), 'element {} is not checked'.format(element.name)
+    _append_screenshot()
+
+
+def verify_element_displayed(element):
+    """Verify element is displayed
+
+    Parameters:
+    element : element
+    """
+    _run_wait_hook()
+    element = get_browser().find(element, timeout=0, wait_displayed=False)
+    step_message = 'Verify element {} is displayed'.format(element.name)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    if not element.is_displayed():
+        raise Exception('element {} is not displayed'.format(element.name))
     _append_screenshot()
 
 
@@ -921,7 +937,7 @@ def verify_element_enabled(element):
     element : element
     """
     _run_wait_hook()
-    element = get_browser().find(element)
+    element = get_browser().find(element, timeout=0)
     step_message = 'Verify the element {} is enabled'.format(element.name)
     execution.logger.info(step_message)
     _add_step(step_message)
@@ -938,7 +954,7 @@ def verify_element_has_attribute(element, attribute):
     attribute : value
     """
     _run_wait_hook()
-    element = get_browser().find(element)
+    element = get_browser().find(element, timeout=0)
     step_message = 'Verify element {} has attribute {}'.format(element.name, attribute)
     execution.logger.info(step_message)
     _add_step(step_message)
@@ -954,7 +970,7 @@ def verify_element_has_focus(element):
     element : element
     """
     _run_wait_hook()
-    element = get_browser().find(element)
+    element = get_browser().find(element, timeout=0)
     step_message = 'Verify element {} has focus'.format(element.name)
     execution.logger.info(step_message)
     _add_step(step_message)
@@ -970,7 +986,7 @@ def verify_element_has_not_attribute(element, attribute):
     attribute : value
     """
     _run_wait_hook()
-    element = get_browser().find(element)
+    element = get_browser().find(element, timeout=0)
     step_message = 'Verify element {} has not attribute {}'.format(element.name, attribute)
     execution.logger.info(step_message)
     _add_step(step_message)
@@ -985,7 +1001,7 @@ def verify_element_has_not_focus(element):
     element : element
     """
     _run_wait_hook()
-    element = get_browser().find(element)
+    element = get_browser().find(element, timeout=0)
     step_message = 'Verify element {} does not have focus'.format(element.name)
     execution.logger.info(step_message)
     _add_step(step_message)
@@ -1001,11 +1017,27 @@ def verify_element_not_checked(element):
     element : element
     """
     _run_wait_hook()
-    element = browser.get_browser().find(element)
+    element = browser.get_browser().find(element, timeout=0)
     step_message = 'Verify the element {} is not checked'.format(element.name)
     execution.logger.info(step_message)
     _add_step(step_message)
     assert not element.is_selected(), 'element {} is checked'.format(element.name)
+    _append_screenshot()
+
+
+def verify_element_not_displayed(element):
+    """Verify element is not displayed
+
+    Parameters:
+    element : element
+    """
+    _run_wait_hook()
+    element = get_browser().find(element, timeout=0, wait_displayed=False)
+    step_message = 'Verify element {} is not displayed'.format(element.name)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    if element.is_displayed():
+        raise Exception('element {} is displayed'.format(element.name))
     _append_screenshot()
 
 
@@ -1016,7 +1048,7 @@ def verify_element_not_enabled(element):
     element : element
     """
     _run_wait_hook()
-    element = get_browser().find(element)
+    element = get_browser().find(element, timeout=0)
     step_message = 'Verify the element {} is not enabled'.format(element.name)
     execution.logger.info(step_message)
     _add_step(step_message)
@@ -1025,7 +1057,110 @@ def verify_element_not_enabled(element):
     _append_screenshot()
 
 
-# TODO rename to verify_element_exists
+def verify_element_not_present(element):
+    """Verify element is not present in the DOM
+
+    Parameters:
+    element : element
+    """
+    _run_wait_hook()
+    step_message = 'Verify element is not present'
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    try:
+        element = get_browser().find(element, timeout=0)
+        raise Exception('element {} is present'.format(element.name))
+    except:
+        pass
+
+
+def verify_element_present(element):
+    """Verify element is present in the DOM
+
+    Parameters:
+    element : element
+    """
+    _run_wait_hook()
+    step_message = 'Verify element is present'
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    try:
+        get_browser().find(element, timeout=0)
+    except ElementNotFound:
+        raise ElementNotFound('element is not present')
+
+
+def verify_element_text(element, text):
+    """Verify the text of the element
+
+    Parameters:
+    element : element
+    text : value
+    """
+    _run_wait_hook()
+    element = browser.get_browser().find(element, timeout=0)
+    step_message = 'Verify element {0} text is \'{1}\''.format(element.name, text)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    if element.text != text:
+        raise Exception(("expected element {} text to be '{}' but was '{}'"
+                         .format(element.name, text, element.text)))
+    _append_screenshot()
+
+
+def verify_element_text_contains(element, text):
+    """Verify element contains text
+
+    Parameters:
+    element : element
+    text : value
+    """
+    _run_wait_hook()
+    element = browser.get_browser().find(element, timeout=0)
+    step_message = 'Verify element {0} contains text \'{1}\''.format(element.name, text)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    if text not in element.text:
+        raise Exception(("expected element {} to contain text '{}'"
+                         .format(element.name, text)))
+    _append_screenshot()
+
+
+def verify_element_text_is_not(element, text):
+    """Verify the text of the element is not text
+
+    Parameters:
+    element : element
+    text : value
+    """
+    _run_wait_hook()
+    element = browser.get_browser().find(element, timeout=0)
+    step_message = 'Verify element {0} text is not \'{1}\''.format(element.name, text)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    if element.text == text:
+        raise Exception(("expected element {} text to not be '{}'"
+                         .format(element.name, text)))
+    _append_screenshot()
+
+
+def verify_element_text_not_contains(element, text):
+    """Verify the text of the element does not contain text
+
+    Parameters:
+    element : element
+    text : value
+    """
+    _run_wait_hook()
+    element = browser.get_browser().find(element, timeout=0)
+    step_message = 'Verify element {0} does not contain text \'{1}\''.format(element.name, text)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    if text in element.text:
+        raise Exception("element {} contains text '{}'".format(element.name, text))
+    _append_screenshot()
+
+
 def verify_exists(element):
     """Verify that en element exists.
     Parameters:
@@ -1074,17 +1209,13 @@ def verify_is_not_selected(element):
 
 
 def verify_is_not_visible(element):
-    """Verify an element is not visible
+    """DEPRECATED, use verify_element_not_displayed
+
     Parameters:
     element : element
     """
-    _run_wait_hook()
-    webelement = browser.get_browser().find(element)
-    step_message = 'Verify the element \'{0}\' is not visible'.format(webelement.name)
-    execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    if webelement.is_displayed():
-        raise Exception('Element is visible')
+    execution.logger.warning('verify_is_not_visible is DEPRECATED, use verify_element_not_displayed')
+    verify_element_not_displayed(element)
 
 
 def verify_is_selected(element):
@@ -1099,35 +1230,53 @@ def verify_is_selected(element):
 
 
 def verify_is_visible(element):
-    """Verify an element is visible
+    """DEPRECATED, use verify_element_displayed
+
     Parameters:
     element : element
     """
-    _run_wait_hook()
-    webelement = browser.get_browser().find(element)
-    step_message = 'Verify the element \'{0}\' is visible'.format(webelement.name)
-    execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    if not webelement.is_displayed():
-        raise Exception('Element is not visible')
+    execution.logger.warning('verify_is_visible is DEPRECATED, use verify_element_displayed')
+    verify_element_displayed(element)
 
 
 def verify_not_exists(element):
-    """Verify an element does not exist
+    """DEPRECATED, use verify_element_not_present
+
     Parameters:
     element : element
     """
+    execution.logger.warning('verify_not_exists is DEPRECATED, use verify_element_not_present')
+    verify_element_not_present(element)
+
+
+def verify_page_contains_text(text):
+    """Verify the given text is present anywhere in the page code
+
+    Parameters:
+    text : value
+    """
     _run_wait_hook()
-    step_message = 'Verify that the element'
+    step_message = 'Verify \'{0}\' is present in page'.format(text)
     execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    try:
-        webelement = get_browser().find(element)
-        if webelement:
-            raise Exception('Element {} exists and should not'
-                            .format(webelement.name))
-    except ElementNotFound:
-        pass
+    _add_step(step_message)
+    if text not in get_browser().page_source:
+        raise TextNotPresent("Text '{}' not found in page".format(text))
+    _append_screenshot()
+
+
+def verify_page_not_contains_text(text):
+    """Verify the given text is not present anywhere in the page code
+
+    Parameters:
+    text : value
+    """
+    _run_wait_hook()
+    step_message = 'Verify \'{0}\' is not present in page'.format(text)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    if text in get_browser().page_source:
+        raise Exception("text '{}' was found in page".format(text))
+    _append_screenshot()
 
 
 def verify_selected_option(element, text):
@@ -1185,33 +1334,145 @@ def verify_selected_option_by_value(element, value):
 
 
 def verify_text(text):
-    """Verify that the given text is present anywhere in the page.
+    """DEPRECATED, use verify_page_contains_text
+
     Parameters:
     text : value
     """
-    _run_wait_hook()
-    driver = browser.get_browser()
-    step_message = 'Verify \'{0}\' is present in page'.format(text)
-    execution.logger.info(step_message)
-    _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
-    if text not in driver.page_source:
-        raise TextNotPresent("Text '{}' was not found in the page".format(text))
+    execution.logger.warning('verify_text is DEPRECATED, use verify_page_contains_text')
+    verify_page_contains_text(text)
 
 
 def verify_text_in_element(element, text):
-    """Verify the given text is present in element.
+    """DEPRECATED, use verify_element_text
+
     Parameters:
     element : element
     text : value
     """
+    execution.logger.warning('verify_text_in_element is DEPRECATED, use verify_element_text or verify_element_text_contains')
+    verify_element_text_contains(element, text)
+
+
+def verify_title(title):
+    """Verify the page title
+
+    Parameters:
+    title : value
+    """
     _run_wait_hook()
-    webelement = browser.get_browser().find(element)
-    step_message = 'Verify element \'{0}\' contains text \'{1}\''.format(webelement.name, text)
+    step_message = "Verify page title is '{}'".format(title)
     execution.logger.info(step_message)
     _add_step(step_message)
-    if text not in webelement.text:
-        raise TextNotPresent("Text \'{0}\' was not found in element {1}. Text \'{2}\' was found."
-                             .format(text, webelement.name, webelement.text))
+    error_msg = ("expected title to be '{}' but was '{}'"
+                 .format(title, get_browser().title))
+    assert get_browser().title == title, error_msg
+    _append_screenshot()
+
+
+def verify_title_contains(text):
+    """Verify the page title contains text
+
+    Parameters:
+    title : value
+    """
+    _run_wait_hook()
+    step_message = "Verify page title contains '{}'".format(text)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    error_msg = "expected title to contain '{}'".format(text)
+    assert text in get_browser().title, error_msg
+    _append_screenshot()
+
+
+def verify_title_is_not(title):
+    """Verify the page title is not title
+
+    Parameters:
+    title : value
+    """
+    _run_wait_hook()
+    step_message = "Verify page title is not '{}'".format(title)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    error_msg = "expected title to not be '{}'".format(title)
+    assert get_browser().title != title, error_msg
+    _append_screenshot()
+
+
+def verify_title_not_contains(text):
+    """Verify the page title does not contain text
+
+    Parameters:
+    text : value
+    """
+    _run_wait_hook()
+    step_message = "Verify page title does not contain '{}'".format(text)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    error_msg = "title contains '{}'".format(text)
+    assert text not in get_browser().title, error_msg
+    _append_screenshot()
+
+
+def verify_url(url):
+    """Verify the current URL
+
+    Parameters:
+    url : value
+    """
+    _run_wait_hook()
+    step_message = "Verify URL is '{}'".format(url)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    error_msg = ("expected URL to be '{}' but was '{}'"
+                 .format(url, get_browser().current_url))
+    assert get_browser().current_url == url, error_msg
+    _append_screenshot()
+
+
+def verify_url_contains(partial_url):
+    """Verify the current URL contains partial_url
+
+    Parameters:
+    partial_url : value
+    """
+    _run_wait_hook()
+    step_message = "Verify URL contains '{}'".format(partial_url)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    error_msg = "expected URL to contain '{}'".format(partial_url)
+    assert partial_url in get_browser().current_url, error_msg
+    _append_screenshot()
+
+
+def verify_url_is_not(url):
+    """Verify the current URL is not url
+
+    Parameters:
+    url : value
+    """
+    _run_wait_hook()
+    step_message = "Verify URL is not '{}'".format(url)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    error_msg = "expected URL to not be '{}'".format(url)
+    assert get_browser().current_url != url, error_msg
+    _append_screenshot()
+
+
+def verify_url_not_contains(partial_url):
+    """Verify the current URL does not contain partial_url
+
+    Parameters:
+    partial_url : value
+    """
+    _run_wait_hook()
+    step_message = "Verify page title does not contain '{}'".format(partial_url)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    error_msg = "URL contains '{}'".format(partial_url)
+    assert partial_url not in get_browser().current_urlverify_url_not_contains, error_msg
     _append_screenshot()
 
 
@@ -1232,7 +1493,7 @@ def wait_for_alert_present(timeout=30):
     """Wait for an alert to be present
 
     Parameters:
-    timeout (30): value
+    timeout (30) : value
     """
     step_message = 'Wait for alert to be present'
     execution.logger.info(step_message)
@@ -1241,40 +1502,39 @@ def wait_for_alert_present(timeout=30):
     _append_screenshot()
 
 
-# TODO
-# def wait_for_element_exists(element, timeout=20):
-# #     try:
-# #         timeout = int(timeout)
-# #     except:
-# #         raise Exception('Timeout should be digits only')
-# #     execution.logger.info('Waiting for element {} to not exist'.format(element))
-# #     webelement = None
-# #     start_time = time.time()
-# #     while not webelement and (time.time() - start_time) < timeout:
-# #         try:
-# #             webelement = get_browser().find(element, timeout=3)
-# #         except:
-# #             print('wait_for_element_exists')
+def wait_for_element_enabled(element, timeout=20):
+    """Wait for element to be enabled.
 
-#     start_time = time.time()
-#     still_exists = True
-#     remaining_time = time.time() - start_time
-#     while still_exists and remaining_time < timeout:
-#         time.sleep(0.5)
-#         remaining_time = time.time() - start_time
-#         try:
-#             webelement = get_browser().find(element, timeout=0)
-#         except:
-#             still_exists = False
-#     # else:
-#     #     execution.logger.debug('Element {} was not found, continuing...'.format(element)) 
+    Parameters:
+    element : element
+    timeout (20) : value
+    """
+    _run_wait_hook()
+    element = get_browser().find(element, timeout=0)
+    step_message = 'Waiting for element {} to be enabled'.format(element.name)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    get_browser().wait_for_element_enabled(element, timeout)
+    _append_screenshot()
 
 
-# def wait_for_element_clickable(element, timeout=20):
-#     browser = get_browser()
-#     element = WebDriverWait(browser, timeout).until(
-#         EC.element_to_be_clickable())
+def wait_for_element_not_present(element, timeout=30):
+    """Wait for element to stop being present in the DOM.
 
+    Parameters:
+    element : element
+    timeout (20) : value
+    """
+    _run_wait_hook()
+    step_message = 'Wait for element {} to be not present'.format(element)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    try:
+        element = get_browser().find(element, timeout=0, wait_displayed=False)
+        get_browser().wait_for_element_not_present(element, timeout)
+    except ElementNotFound:
+        execution.logger.debug('element {} is not present'.format(element))
+    _append_screenshot()
 
 
 def wait_for_element_not_exist(element, timeout=20):
@@ -1285,29 +1545,8 @@ def wait_for_element_not_exist(element, timeout=20):
     element : element
     timeout (optional, default: 20) : value
     """
-    try:
-        timeout = int(timeout)
-    except:
-        raise Exception('Timeout should be digits only')
-    execution.logger.info('Waiting for element {} to not exist'.format(element))
-    webelement = None
-    try:
-        s = browser.get_browser().find(element, timeout=3)
-    except:
-        execution.logger.debug('Element already does not exist, continuing...')
-        return
-    start_time = time.time()
-    still_exists = True
-    remaining_time = time.time() - start_time
-    while still_exists and remaining_time <= timeout:
-        execution.logger.debug('Element still exists in the DOM, waiting...')
-        time.sleep(0.5)
-        remaining_time = time.time() - start_time
-        try:
-            webelement = get_browser().find(element, timeout=0)
-        except:
-            still_exists = False
-            execution.logger.debug('Element stopped existing')
+    execution.logger.warning('wait_for_element_not_exists is DEPRECATED, use wait_for_element_not_present')
+    wait_for_element_not_present()
 
 
 def wait_for_element_not_visible(element, timeout=20):
@@ -1339,27 +1578,19 @@ def wait_for_element_not_visible(element, timeout=20):
                 execution.logger.info('Timeout, element is still visible.')
 
 
-def wait_for_element_enabled(element, timeout=20):
-    """Wait for element to be enabled.
-    After timeout this won't throw an exception.
+def wait_for_element_present(element, timeout=30):
+    """Wait for element present in the DOM
+
     Parameters:
     element : element
-    timeout (optional, default: 20) : value
+    timeout (30) : value
     """
-    execution.logger.info('Waiting for element {} to be enabled'.format(element))
-    start_time = time.time()
-    timed_out = False
-    #webelement = None
-    #try:
-    webelement = browser.get_browser().find(element, timeout)
-    enabled = webelement.is_enabled()
-    while not enabled and not timed_out:
-        execution.logger.debug('Element is not enabled, waiting..')
-        time.sleep(0.5)
-        enabled = webelement.is_displayed()
-        if time.time() - start_time > timeout:
-            timed_out = True
-
+    _run_wait_hook()
+    step_message = 'Wait for element {} to be present'.format(element)
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    get_browser().wait_for_element_present(element, timeout)
+    _append_screenshot()
 
 
 def wait_for_element_visible(element, timeout=20):

@@ -289,6 +289,11 @@ Verify a cookie exists in the current session by the cookie name
 Verify element is checked. This applies to checkboxes and radio buttons.
 
 
+##### verify_element_displayed(element)
+
+Verify element is displayed
+
+
 ##### verify_element_enabled(element)
 
 Verify that element is enabled
@@ -316,7 +321,7 @@ Verify element does not have focus
 
 ##### verify_exists(element)
 
-Verify an element exists in the page
+DEPRECATED, use verify_element_present
 
 
 ##### verify_element_not_checked(element)
@@ -327,6 +332,41 @@ Verify element is not checked. This applies to checkboxes and radio buttons.
 ##### verify_element_not_enabled(element)
 
 Verify that element is not enabled
+
+
+##### verify_element_not_displayed(element)
+
+Verify element is not displayed
+
+
+##### verify_element_not_present(element)
+
+Verify element is not present in the DOM
+
+
+##### verify_element_present(element)
+
+Verify element is present in the DOM
+
+
+##### verify_element_text(element, text)
+
+Verify the text of the element
+
+
+##### verify_element_text_contains(element, text)
+
+Verify element contains text
+
+
+##### verify_element_text_is_not(element, text)
+
+Verify the text of the element is not text
+
+
+##### verify_element_text_not_contains(element, text)
+
+Verify element does not contain text
 
 
 ##### verify_is_enabled(element)
@@ -346,7 +386,7 @@ DEPRECATED, use verify_element_not_checked
 
 ##### verify_is_not_visible(element)
 
-Verify that an element is not visible
+DEPRECATED, use verify_element_not_displayed
 
 
 ##### verify_is_selected(element)
@@ -356,12 +396,22 @@ DEPRECATED, use verify_element_checked
 
 ##### verify_is_visible(element)
 
-Verify that an element is visible
+DEPRECATED, use verify_element_displayed
 
 
 ##### verify_not_exists(element)
 
-Verify that an element does not exist in the page
+DEPRECATED, use verify_element_not_present
+
+
+##### verify_page_contains_text(text)
+
+Verify the given text is present anywhere in the page (in the entire DOM)
+
+
+##### verify_page_not_contains_text(text)
+
+Verify the given text is present anywhere in the page (in the entire DOM)
 
 
 ##### verify_selected_option(element, text)
@@ -381,12 +431,52 @@ Verify the option selected in a \<select\> by the option value
 
 ##### verify_text(text)
 
-Verify that the given text is present anywhere on the page (in the entire DOM)
+DEPRECATED, use verify_page_contains_text
 
 
 ##### verify_text_in_element(element, text)
 
-Verify that an element contains the given text.
+DEPRECATED, use verify_element_text or verify_element_text_contains
+
+
+##### verify_title(title)
+
+Verify the page title
+
+
+##### verify_title_contains(text)
+
+Verify the page title contains text
+
+
+##### verify_title_is_not(title)
+
+Verify the page title is not title
+
+
+##### verify_title_not_contains(text)
+
+Verify the page title does not contain text
+
+
+##### verify_url(url)
+
+Verify the current URL
+
+
+##### verify_url_contains(partial_url)
+
+Verify the current URL contains partial_url
+
+
+##### verify_url_is_not(url)
+
+Verify the current URL is not url
+
+
+##### verify_url_not_contains(partial_url)
+
+Verify the current URL does not contain partial_url
 
 
 ##### wait_for_alert_present(timeout=30)
@@ -394,9 +484,19 @@ Verify that an element contains the given text.
 Wait for an alert to be present
 
 
+##### wait_for_element_enabled(element, timeout=30)
+
+Wait for element to be enabled
+
+
 ##### wait_for_element_not_exist(element, timeout=20)
 
 Wait until the element does not exists in the DOM anymore
+
+
+##### wait_for_element_not_present(element, timeout=30)
+
+Wait for element to stop being present in the DOM
 
 
 ##### wait_for_element_not_visible(element, timeout=20)
@@ -404,9 +504,9 @@ Wait until the element does not exists in the DOM anymore
 Wait until the element is not visible anymore
 
 
-##### wait_for_element_enabled(element, timeout=20)
+##### wait_for_element_present(element, timeout=30)
 
-Wait until the element is enabled
+Wait for element to be present in the DOM
 
 
 ##### wait_for_element_visible(element, timeout=20)

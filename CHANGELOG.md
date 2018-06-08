@@ -8,7 +8,10 @@
 - New actions: go_back, set_search_timeout, get_search_timeout, double_click, focus_element, set_trace, error,
 execute_javascript, fail, javascript_click, verify_selected_option_by_text, verify_selected_option_by_value,
 get_alert_text, send_text_to_alert, submit_prompt_alert, verify_alert_text, verify_alert_text_is_not, wait_for_alert_present
-verify_element_has_attribute, verify_element_has_not_attribute, verify_element_has_focus, verify_element_has_not_focus
+verify_element_has_attribute, verify_element_has_not_attribute, verify_element_has_focus, verify_element_has_not_focus,
+verify_page_not_contains_text, verify_element_text, verify_element_text_is_not, verify_element_text_not_contains, verify_title
+verify_title_contains, verify_title_is_not, verify_title_not_contains, verify_url, verify_url_contains, verify_url_is_not
+verify_url_not_contains, wait_for_element_present
 
 
 - Type hints for WebDriver and WebElement 
@@ -31,6 +34,13 @@ verify_element_has_attribute, verify_element_has_not_attribute, verify_element_h
   - verify_is_not_enabled -> verify_element_not_enabled
   - verify_is_selected -> verify_element_checked
   - verify_is_not_selected -> verify_element_not_checked
+  - verify_is_visible -> verify_element_displayed
+  - verify_is_not_visible -> verify_element_not_displayed
+  - verify_exists -> verify_element_present
+  - verify_not_exists -> verify_element_not_present
+  - verify_text -> verify_page_contains_text
+  - verify_text_in_element -> verify_element_text_contains
+  - wait_for_element_not_exist -> wait_for_element_not_present
  
  
 
