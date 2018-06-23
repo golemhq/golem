@@ -222,6 +222,11 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
     if not test_execution.timestamp:
         test_execution.timestamp = utils.get_timestamp()
 
+    # Creates a connection with the test DB.
+    # This test db will be used to store the test results and later it can also be used for storing test run time artifacts.
+    if not test_execution.db:
+        test_execution.db = utils.get_db_connection(test_execution.settings)
+
     # Select which envs to use
     # The user can define environments in the environments.json file.
     # The suite/test can be executed in one or more of these environments.
@@ -291,7 +296,9 @@ def run_test_or_suite(workspace, project, test=None, suite=None, directory=None)
                 run_test(workspace, project,
                          test['test_name'], test['data_set'],
                          test['driver'], test_execution.settings,
-                         test['report_directory'])
+                         test['report_directory'],
+                         test_execution.timestamp,
+                         hash(test_execution.timestamp + utils.get_timestamp() + str(test['data_set'])))
         else:
             # run tests using multiprocessing
             multiprocess_executor(execution_list, execution['workers'])

@@ -2,6 +2,8 @@
 import json
 import os
 import uuid
+import getpass
+import socket
 
 
 def create_execution_directory(workspace, project, timestamp,
@@ -61,7 +63,7 @@ def create_report_directory(execution_directory, test_case_name, is_suite):
     return report_directory
 
 
-def generate_report(report_directory, test_case_name, test_data, result):
+def generate_report(report_directory, test_case_name, test_data, result, timestamp, id):
     """Generate the json report for a single test execution."""
     json_report_path = os.path.join(report_directory, 'report.json')
 
@@ -111,8 +113,13 @@ def generate_report(report_directory, test_case_name, test_data, result):
         'browser': output_browser,
         'test_data': serializable_data,
         'environment': env_name,
-        'set_name': result['set_name']
+        'set_name': result['set_name'],
+        'suite_timestamp': timestamp,
+        'test_id': id,
+        'user': getpass.getuser(),
+        'hostname': socket.gethostname()
     }
 
     with open(json_report_path, 'w', encoding='utf-8') as json_file:
         json.dump(report, json_file, indent=4)
+    return report

@@ -20,7 +20,7 @@ class Data(dict):
 
 
 def run_test(workspace, project, test_name, test_data, browser,
-             settings, report_directory):
+             settings, report_directory, timestamp, hash_id):
     """Runs a single test"""
     result = {
         'result': 'pass',
@@ -82,6 +82,7 @@ def run_test(workspace, project, test_name, test_data, browser,
     execution.browser_definition = browser
     execution.settings = settings
     execution.report_directory = report_directory
+    execution.db = utils.get_db_connection(settings)
 
     # add the 'project' directory to python path
     # so it's possible to make relative imports from the test
@@ -175,8 +176,10 @@ def run_test(workspace, project, test_name, test_data, browser,
     result['browser'] = execution.browser_definition['name']
     result['browser_full_name'] = execution.browser_definition['full_name']
     
-    report.generate_report(report_directory, test_name, execution.data, result)
-    
+    test_report = report.generate_report(report_directory, test_name, execution.data, result, timestamp, hash_id)
+    if settings['results_to_db']:
+        execution.db.test_results.insert_one(test_report)
+
     execution.reset()
     execution_logger.reset_logger(logger)
     return

@@ -371,3 +371,13 @@ def match_latest_executable_path(glob_path):
         return highest_version[0][0]
     else:
         return None
+
+def get_db_connection(settings):
+    if settings["db_type"] == "MONGO":
+        from golem.db import Mongo
+        return Mongo(**settings).db
+    elif settings["db_type"] == "TINYDB":
+        from golem.db import Tinydb
+        return Tinydb(**settings).db
+    else:
+        return None

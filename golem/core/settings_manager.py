@@ -53,7 +53,22 @@ SETTINGS_FILE_CONTENT = (
 "console_log_level": "INFO",
 
 // Log all events, instead of just Golem events. Default is true
-"log_all_events": true
+"log_all_events": true,
+
+// Stores test results when enabled. Options are: true, false
+// Default option is false
+"results_to_db": false,
+
+// Test DB related configurations
+// Test DB type. Option are MONGO, TINYDB
+// Default is TINYDB
+"db_type": "TINYDB",
+
+// Test DB host. Default is EMPTY
+"db_string": "",
+
+// Test DB name, Default is testdb
+"db_name": "testdb"
 }
 """)
 
@@ -81,7 +96,11 @@ DEFAULTS = [
     ('remote_url', None),
     ('remote_browsers', {}),
     ('console_log_level', 'INFO'),
-    ('log_all_events', True)
+    ('log_all_events', True),
+    ('results_to_db', False),
+    ('db_string', ''),
+    ('db_type', 'TINYDB'),
+    ('db_name', 'testdb')
 ]
 
 

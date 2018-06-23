@@ -4,7 +4,7 @@ provided in parallel using multiprocessing.
 from multiprocessing import Pool
 from multiprocessing.pool import ApplyResult
 
-from golem.core import test_execution
+from golem.core import test_execution, utils
 from golem.test_runner.test_runner import run_test
 
 
@@ -32,7 +32,9 @@ def multiprocess_executor(execution_list, threads=1):
                 test['data_set'],
                 test['driver'],
                 test_execution.settings,
-                test['report_directory'])
+                test['report_directory'],
+                test_execution.timestamp,
+                hash(test_execution.timestamp + utils.get_timestamp() + str(test['data_set'])))
         apply_async = pool.apply_async(run_test, args=args)
         results.append(apply_async)
     map(ApplyResult.wait, results)

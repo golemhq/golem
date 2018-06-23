@@ -4,6 +4,8 @@ selenium
 pytest
 requests
 py-webdriver-manager
+pymongo
+tinymongo
 sphinx
 recommonmark
 tox

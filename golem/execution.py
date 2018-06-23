@@ -19,6 +19,7 @@ class Execution:
         self.workspace = None
         self.report_directory = None
         self.logger = None
+        self.db = None
 
     def reset(self):
         self.__init__()

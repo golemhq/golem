@@ -19,3 +19,4 @@ interactive = False
 
 test_data = None
 
+db = None
