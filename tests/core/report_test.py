@@ -1,5 +1,7 @@
 import os
 import json
+import getpass
+import socket
 
 from golem.core import report, utils
 from golem.test_runner import test_runner
@@ -111,7 +113,7 @@ class Test_generate_report:
             'browser_full_name': '',
             'set_name': 'set_001',
         }
-        report.generate_report(report_dir, test_name, test_data, result)
+        report.generate_report(report_dir, test_name, test_data, result, timestamp, hash(timestamp + str(test_data)))
         expected = {
             'test_case': test_name,
             'result': 'pass',
@@ -124,6 +126,10 @@ class Test_generate_report:
             'browser': 'chrome',
             'environment': '',
             'set_name': 'set_001',
+            'suite_timestamp': timestamp,
+            'test_id': hash(timestamp + str(test_data)),
+            'user': getpass.getuser(),
+            'hostname': socket.gethostname(),
             'test_data': {
                 'var1': "'value1'",
                 'var2': "'value2'"
@@ -164,7 +170,7 @@ class Test_generate_report:
             'browser_full_name': '',
             'set_name': 'set_001',
         }
-        report.generate_report(report_dir, test_name, test_data, result)
+        report.generate_report(report_dir, test_name, test_data, result, timestamp, hash(timestamp + str(test_data)))
         expected_a = {
             'test_case': test_name,
             'result': 'pass',
@@ -177,6 +183,10 @@ class Test_generate_report:
             'browser': 'chrome',
             'environment': 'env01',
             'set_name': 'set_001',
+            'suite_timestamp': timestamp,
+            'test_id': hash(timestamp + str(test_data)),
+            'user': getpass.getuser(),
+            'hostname': socket.gethostname(),
             'test_data': {
                 'env': "{'name': 'env01', 'url': '1.1.1.1'}",
                 'var2': "'value2'"
