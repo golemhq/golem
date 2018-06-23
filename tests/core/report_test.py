@@ -204,6 +204,10 @@ class Test_generate_report:
             'browser': 'chrome',
             'environment': 'env01',
             'set_name': 'set_001',
+            'suite_timestamp': timestamp,
+            'test_id': hash(timestamp + str(test_data)),
+            'user': getpass.getuser(),
+            'hostname': socket.gethostname(),
             'test_data': {
                 'env': "{'url': '1.1.1.1', 'name': 'env01'}",
                 'var2': "'value2'"
