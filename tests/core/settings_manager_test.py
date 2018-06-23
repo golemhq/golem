@@ -71,7 +71,11 @@ class Test_assign_settings_default_values:
             ('remote_url', None),
             ('remote_browsers', {}),
             ('console_log_level', 'INFO'),
-            ('log_all_events', True)
+            ('log_all_events', True),
+            ('results_to_db', False),
+            ('db_string', ''),
+            ('db_type', 'TINYDB'),
+            ('db_name', 'testdb')
         ]
         actual_defaults = settings_manager.DEFAULTS
         assert actual_defaults == expected_defaults
@@ -96,7 +100,11 @@ class Test_assign_settings_default_values:
             'remote_url': None,
             'remote_browsers': {},
             'console_log_level': 'INFO',
-            'log_all_events': True
+            'log_all_events': True,
+            'results_to_db': False,
+            'db_string': '',
+            'db_type': 'TINYDB',
+            'db_name': 'testdb'
         }
         assert normalized == expected
 
@@ -120,7 +128,11 @@ class Test_assign_settings_default_values:
             'remote_url': None,
             'remote_browsers': None,
             'console_log_level': None,
-            'log_all_events': None
+            'log_all_events': None,
+            'results_to_db': None,
+            'db_string': None,
+            'db_type': None,
+            'db_name': None
         }
         normalized = settings_manager.assign_settings_default_values(input_settings)
         expected = {
@@ -140,7 +152,11 @@ class Test_assign_settings_default_values:
             'remote_url': None,
             'remote_browsers': {},
             'console_log_level': 'INFO',
-            'log_all_events': True
+            'log_all_events': True,
+            'results_to_db': False,
+            'db_string': '',
+            'db_type': 'TINYDB',
+            'db_name': 'testdb'
         }
         assert normalized == expected
 
@@ -164,7 +180,11 @@ class Test_assign_settings_default_values:
             'remote_url': '',
             'remote_browsers': '',
             'console_log_level': '',
-            'log_all_events': ''
+            'log_all_events': '',
+            'results_to_db': '',
+            'db_string': '',
+            'db_type': '',
+            'db_name': ''
         }
         normalized = settings_manager.assign_settings_default_values(input_settings)
         expected = {
@@ -184,7 +204,11 @@ class Test_assign_settings_default_values:
             'screenshot_on_error': True,
             'screenshot_on_step': False,
             'test_data': 'csv',
-            'wait_hook': None
+            'wait_hook': None,
+            'results_to_db': False,
+            'db_string': '',
+            'db_type': 'TINYDB',
+            'db_name': 'testdb'
         }
         assert normalized == expected
 
@@ -212,7 +236,11 @@ class Test_get_global_settings:
             'screenshot_on_error': True,
             'screenshot_on_step': False,
             'test_data': 'csv',
-            'wait_hook': None
+            'wait_hook': None,
+            'results_to_db': False,
+            'db_string': '',
+            'db_type': 'TINYDB',
+            'db_name': 'testdb'
         }
         assert global_settings == expected
 
@@ -250,7 +278,11 @@ class Test_get_project_settings:
             'screenshot_on_error': True,
             'screenshot_on_step': False,
             'test_data': 'csv',
-            'wait_hook': None
+            'wait_hook': None,
+            'results_to_db': False,
+            'db_string': '',
+            'db_type': 'TINYDB',
+            'db_name': 'testdb'
         }
         assert project_settings == expected
 
