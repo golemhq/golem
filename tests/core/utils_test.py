@@ -1,12 +1,10 @@
 import os
 import types
 import inspect
-from collections import OrderedDict
 
 import pytest
 
 from golem.core import utils, page_object, test_case, suite
-
 
 
 class Test_get_test_cases:
@@ -482,6 +480,17 @@ class Test_match_latest_executable_path:
         test_utils.create_empty_file(basedir, 'geckodriver_5.6.7')
         result = utils.match_latest_executable_path('chromedriver*')
         assert result == os.path.join(basedir, 'chromedriver_2.4')
+
+    def test_match_latest_executable_path__compare_versions_not_strings(self, dir_function, test_utils):
+        """2.12 should be higher than 2.9
+        (but it's when not comparing just strings)
+        e.g. '2.9' > '2.12'
+        """
+        basedir = dir_function['path']
+        test_utils.create_empty_file(basedir, 'chromedriver_2.9')
+        test_utils.create_empty_file(basedir, 'chromedriver_2.12')
+        result = utils.match_latest_executable_path('chromedriver*')
+        assert result == os.path.join(basedir, 'chromedriver_2.12')
 
     def test_match_latest_executable_path_exe(self, dir_function, test_utils):
         """test that match_latest workds for filenames ending in .exe"""
