@@ -14,13 +14,15 @@ import requests
 from golem import browser
 from golem import execution
 from golem.core.exceptions import (TextNotPresent,
-                                   ElementNotFound,
                                    TestError,
                                    TestFailure)
 
+
+def _add_error(short_error, long_error, log_level='ERROR'):
+    execution.errors.append()
+
 def _add_step(message):
     execution.steps.append(message)
-
 
 def _append_screenshot():
     if execution.settings['screenshot_on_step']:
@@ -1203,12 +1205,22 @@ def verify_alert_is_present():
     verify_alert_present()
 
 
-def verify_alert_not_present():
+def assert_alert_not_present():
     """Verify an alert is not present"""
     step_message = 'Verify an alert is not present'
     execution.logger.info(step_message)
     _add_step(step_message)
     assert not get_browser().alert_is_present(), 'an alert was present'
+    _append_screenshot()
+
+
+def verify_alert_not_present():
+    """Verify an alert is not present"""
+    step_message = 'Verify an alert is not present'
+    execution.logger.info(step_message)
+    _add_step(step_message)
+    if not get_browser().alert_is_present():
+        _append_error('an alert was present')
     _append_screenshot()
 
 

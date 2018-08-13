@@ -66,8 +66,8 @@ def generate_report(report_directory, test_case_name, test_data, result):
     json_report_path = os.path.join(report_directory, 'report.json')
 
     short_error = ''
-    if result['error']:
-        short_error = '\n'.join(result['error'].split('\n')[-2:])
+    # if result['error']:
+    #     short_error = '\n'.join(result['error'].split('\n')[-2:])
 
     # TODO
     serializable_data = {}
@@ -104,7 +104,7 @@ def generate_report(report_directory, test_case_name, test_data, result):
         'result': result['result'],
         'steps': steps,
         'description': result['description'],
-        'error': result['error'],
+        'errors': result['errors'],
         'short_error': short_error,
         'test_elapsed_time': result['test_elapsed_time'],
         'test_timestamp': result['test_timestamp'],

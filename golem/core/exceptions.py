@@ -14,7 +14,7 @@ class TestError(Exception):
 
 
 class TestFailure(Exception):
-    pass
+    __test__ = False  # ignore this class from Pytest
 
 
 class TextNotPresent(Exception):
