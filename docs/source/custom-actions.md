@@ -183,4 +183,4 @@ def verify_wolf_name(owner, wolf_name):
 4. Then we ask if the first cell value is equal to the name of the owner, if this is the case, this is the row we are looking for. We then ask if the third cell value is equal to the wolf name. This is the actual validation.
 
 
-Next, go to [The CLI](the-cli.html)
+Next, go to [The CLI](the-cli.md)
