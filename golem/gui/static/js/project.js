@@ -192,7 +192,6 @@ var Project = new function(){
                         parentUl.children().last().before(branch);
                     }
                     else{
-
                         var elementUrl = "/project/"+data.project_name+"/"+data.element.type+"/"+data.element.full_path+"/";
                         var uiElement = Project.generateNewElement({
                             name: data.element.name,
@@ -200,21 +199,6 @@ var Project = new function(){
                             dotPath: data.element.full_path, 
                             type: data.element.type});
                         parentUl.children().last().before(uiElement);
-
-                        if(data.element.test_base != ""){
-                            var base_path = data.element.full_path.replace(data.element.name, data.element.test_base)
-                            var isBaseExists = $("li[fullpath='"+base_path+"']")
-                            if(isBaseExists.length == "0"){
-                                elementUrl = "/project/"+data.project_name+"/"+data.element.type+"/"+base_path+"/";
-                                var uiElement = Project.generateNewElement({
-                                    name: data.element.test_base,
-                                    url: elementUrl,
-                                    dotPath: base_path, 
-                                    type: data.element.type});
-                                parentUl.children().last().before(uiElement);
-                            }
-                        }
-                        
                     }
                     // reset the form, hide the form and display the add new link
                     input.val("");

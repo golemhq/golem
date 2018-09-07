@@ -17,9 +17,8 @@ from golem.core import file_manager
 
 
 def get_test_cases(workspace, project):
-    test_base = settings_manager.get_project_settings(workspace, project)['base_name']
     path = os.path.join(workspace, 'projects', project, 'tests')
-    test_cases = file_manager.generate_file_structure_dict(full_path=path, exclude_name=test_base+".py")
+    test_cases = file_manager.generate_file_structure_dict(path)
     return test_cases
 
 
