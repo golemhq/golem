@@ -6,7 +6,8 @@ import traceback
 SETTINGS_FILE_CONTENT = (
 """{
 
-// Base testcase name, this will be automated created if not null
+// Base testcase name, do not change it in a working project unless
+// you know what you're doing
 "base_name": "_base",
 
 // Default timeout in seconds to wait until an element is present
