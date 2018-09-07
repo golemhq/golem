@@ -199,8 +199,7 @@ def new_base_test_case(root_path, project, parents, test_base):
 
     """Create a Test Base page."""
     test_case_content = (
-        "\n"
-        "pages = []\n\n"
+        "\n\n"
         "def setup(data):\n"
         "    pass\n\n"
         "def teardown(data):\n"
