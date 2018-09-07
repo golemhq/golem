@@ -95,8 +95,11 @@ def _define_execution_list(workspace, project, execution):
       - driver
     """
     execution_list = []
+    test_base = settings_manager.get_project_settings(workspace, project)['base_name']
     envs_data = environment_manager.get_environment_data(workspace, project)
     for test in execution['tests']:
+        if test.split(".")[-1] == test_base:
+            continue
         data_sets = test_data.get_test_data(workspace, project, test)
         for data_set in data_sets:
             for env in execution['environments']:

@@ -7,9 +7,9 @@ import inspect
 
 from golem.core import (utils,
                         test_execution,
-                        file_manager)
+                        file_manager,
+                        settings_manager)
 from golem.core import test_data as test_data_module
-
 
 def _parse_step(step):
     """Parse a step string of a test function (setup, test or teardown)."""
@@ -159,23 +159,28 @@ def get_test_case_code(path):
 
 
 def new_test_case(root_path, project, parents, tc_name):
+    test_base = settings_manager.get_project_settings(root_path, project)['base_name']
     """Create a new empty test case."""
     test_case_content = (
         "\n"
         "description = ''\n\n"
         "pages = []\n\n"
         "def setup(data):\n"
-        "    pass\n\n"
+        "    {}.setup(data)\n\n"
         "def test(data):\n"
         "    pass\n\n"
         "def teardown(data):\n"
-        "    pass\n\n")
+        "    {}.setup(data)\n\n".format(test_base, test_base))
+
     errors = []
     # check if a file already exists
     base_path = os.path.join(root_path, 'projects', project, 'tests')
     full_path = os.path.join(base_path, os.sep.join(parents))
     filepath = os.path.join(full_path, '{}.py'.format(tc_name))
-    if os.path.isfile(filepath):
+
+    if tc_name == test_base:
+        errors.append('base testcase will be generated automatically')
+    elif os.path.isfile(filepath):
         errors.append('a test with that name already exists')
     if not errors:
         # create the directory structure if it does not exist
@@ -187,8 +192,33 @@ def new_test_case(root_path, project, parents, tc_name):
         with open(filepath, 'w') as test_file:
             test_file.write(test_case_content)
         print('Test {} created for project {}'.format(tc_name, project))
+        new_base_test_case(root_path, project, parents, test_base)
     return errors
 
+def new_base_test_case(root_path, project, parents, test_base):
+
+    """Create a Test Base page."""
+    test_case_content = (
+        "\n"
+        "pages = []\n\n"
+        "def setup(data):\n"
+        "    pass\n\n"
+        "def teardown(data):\n"
+        "    pass\n\n")
+    # check if a file already exists
+    base_path = os.path.join(root_path, 'projects', project, 'tests')
+    full_path = os.path.join(base_path, os.sep.join(parents))
+    filepath = os.path.join(full_path, '{}.py'.format(test_base))
+    if not os.path.isfile(filepath):
+        # create the directory structure if it does not exist
+        if not os.path.isdir(full_path):
+            for parent in parents:
+                base_path = os.path.join(base_path, parent)
+                file_manager.create_directory(path=base_path, add_init=True)
+        
+        with open(filepath, 'w') as test_file:
+            test_file.write(test_case_content)
+        print('{} page created for project {}'.format(test_base, project))
 
 def _format_page_object_string(page_objects):
     """Format page object string to store in test case."""

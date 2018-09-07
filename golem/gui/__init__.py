@@ -260,7 +260,6 @@ def page_code_view_no_sidebar(project, full_page_name):
 def suite_view(project, suite):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
-
     all_test_cases = utils.get_test_cases(root_path, project)
     selected_tests = suite_module.get_suite_test_cases(root_path, project, suite)
     worker_amount = suite_module.get_suite_amount_of_workers(root_path, project, suite)
@@ -269,7 +268,6 @@ def suite_view(project, suite):
     default_browser = test_execution.settings['default_browser']
     environments = suite_module.get_suite_environments(root_path, project, suite)
     environments = ', '.join(environments)
-    
     return render_template('suite.html',
                            project=project,
                            all_test_cases=all_test_cases['sub_elements'],
@@ -287,6 +285,7 @@ def global_settings():
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
     global_settings = settings_manager.get_global_settings_as_string(root_path)
+    print(global_settings)
     return render_template('settings.html', project=None,
                            global_settings=global_settings, settings=None)
 
@@ -789,6 +788,8 @@ def new_tree_element():
         full_path = full_path.split('.')
         element_name = full_path.pop()
         parents = full_path
+
+        test_base = ""
         # verify that the string only contains letters, numbers
         # dashes or underscores
         for c in element_name:
@@ -804,7 +805,8 @@ def new_tree_element():
                                                                 dir_type='tests')
                 else:
                     errors = test_case.new_test_case(root_path, project,
-                                                     parents, element_name)
+                                                     parents, element_name)  
+                    test_base = settings_manager.get_project_settings(root_path, project)['base_name']
                     # changelog.log_change(root_path, project, 'CREATE', 'test',
                     #                      full_path, g.user.username)
             elif elem_type == 'page':
@@ -826,8 +828,10 @@ def new_tree_element():
             'name': element_name,
             'full_path': dot_path,
             'type': elem_type,
-            'is_directory': is_dir
+            'is_directory': is_dir,
+            'test_base': test_base
         }
+        print("path is: " + json.dumps(element))
         return json.dumps({'errors': errors, 'project_name': project,
                            'element': element})
 
