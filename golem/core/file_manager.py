@@ -12,7 +12,7 @@ def _directory_element(elem_type, name, dot_path=None):
     return element
 
 
-def generate_file_structure_dict(full_path, original_path=None):
+def generate_file_structure_dict(full_path, original_path=None, exclude_name=""):
     """Generates a dictionary with the preserved structure of a given
     directory.
     Files are stored in tuples, with the first element being the name
@@ -53,13 +53,13 @@ def generate_file_structure_dict(full_path, original_path=None):
             if elem not in ['__pycache__']:
                 directories.append(elem)
         else:
-            cond1 = elem not in ['__init__.py', '.DS_Store']
+            cond1 = elem not in ['__init__.py', '.DS_Store', exclude_name]
             cond2 = not elem.endswith('.csv')
             if cond1 and cond2:
                 files.append(os.path.splitext(elem)[0])
     for directory in directories:
         sub_element = generate_file_structure_dict(os.path.join(full_path, directory),
-                                                   original_path)
+                                                   original_path, exclude_name)
         element['sub_elements'].append(sub_element)
     for filename in files:
         full_file_path = os.path.join(full_path, filename)

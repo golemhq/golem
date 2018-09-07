@@ -22,5 +22,6 @@ def import_page_into_test_module(project, parent_module, page_path, page_path_li
     else:
         imported_module = importlib.import_module('projects.{}.pages.{}'
                                                   .format(project, page_path))
+        print("setattr: " + page_path_list[0])
         setattr(parent_module, page_path_list[0], imported_module)
     return parent_module

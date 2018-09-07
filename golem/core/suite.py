@@ -4,7 +4,7 @@ Suites are modules located inside the /suites/ directory
 import os
 import importlib
 
-from golem.core import utils, file_manager
+from golem.core import utils, file_manager, settings_manager
 
 
 def _format_list_items(list_items):
@@ -101,6 +101,10 @@ def get_suite_test_cases(workspace, project, suite):
                 tests = tests + this_dir_tests
             else:
                 tests.append(test)
+    base_name = settings_manager.get_project_settings(workspace, project)['base_name']
+    for test in tests:
+        if test.split(".")[-1] == base_name:
+            tests.remove(test)
     return tests
 
 
