@@ -211,7 +211,7 @@ var Project = new function(){
                                     url: elementUrl,
                                     dotPath: base_path, 
                                     type: data.element.type});
-                                parentUl.children().last().before(uiElement);
+                                parentUl.children().first().before(uiElement);
                             }
                         }
                         

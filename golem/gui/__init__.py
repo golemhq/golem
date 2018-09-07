@@ -260,7 +260,8 @@ def page_code_view_no_sidebar(project, full_page_name):
 def suite_view(project, suite):
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
-    all_test_cases = utils.get_test_cases(root_path, project)
+
+    all_test_cases = utils.get_test_cases(root_path, project, is_suite_view=True)
     selected_tests = suite_module.get_suite_test_cases(root_path, project, suite)
     worker_amount = suite_module.get_suite_amount_of_workers(root_path, project, suite)
     browsers = suite_module.get_suite_browsers(root_path, project, suite)
@@ -268,6 +269,7 @@ def suite_view(project, suite):
     default_browser = test_execution.settings['default_browser']
     environments = suite_module.get_suite_environments(root_path, project, suite)
     environments = ', '.join(environments)
+
     return render_template('suite.html',
                            project=project,
                            all_test_cases=all_test_cases['sub_elements'],
@@ -285,7 +287,6 @@ def global_settings():
     if not user.has_permissions_to_project(g.user.id, project, root_path, 'gui'):
         return render_template('not_permission.html')
     global_settings = settings_manager.get_global_settings_as_string(root_path)
-    print(global_settings)
     return render_template('settings.html', project=None,
                            global_settings=global_settings, settings=None)
 

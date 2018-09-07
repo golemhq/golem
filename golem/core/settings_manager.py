@@ -7,7 +7,7 @@ SETTINGS_FILE_CONTENT = (
 """{
 
 // Base testcase name, this will be automated created if not null
-"base_name": "base",
+"base_name": "_base",
 
 // Default timeout in seconds to wait until an element is present
 "search_timeout": 20,

@@ -60,8 +60,8 @@ def run_test(workspace, project, test_name, test_data, browser,
                                          settings['log_all_events'])
     execution.logger = logger
     # Print execution info to console
-    logger.info('Test execution started a: {}'.format(test_name))
-    logger.info('Browser a: {}'.format(browser['name']))
+    logger.info('Test execution started: {}'.format(test_name))
+    logger.info('Browser: {}'.format(browser['name']))
     if 'env' in test_data:
         if 'name' in test_data['env']:
             logger.info('Environment: {}'.format(test_data['env']['name']))
@@ -105,11 +105,9 @@ def run_test(workspace, project, test_name, test_data, browser,
 
         # import each page into the test_module
         if hasattr(test_module, 'pages'):
-            logger.info('Importing pages')
             for page in test_module.pages:
                 test_module = import_page_into_test_module(project, test_module,
                                                            page)
-                logger.info('Testmodule is: {}'.format(test_module))
 
         # import logger into the test module
         setattr(test_module, 'logger', execution.logger)
