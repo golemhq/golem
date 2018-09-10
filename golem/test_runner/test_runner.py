@@ -108,6 +108,12 @@ def run_test(workspace, project, test_name, test_data, browser,
             for page in test_module.pages:
                 test_module = import_page_into_test_module(project, test_module,
                                                            page)
+        if hasattr(base_module, 'pages'):
+            for page in base_module.pages:
+                test_module = import_page_into_test_module(project, test_module,
+                                                           page)
+                base_module = import_page_into_test_module(project, base_module,
+                                                           page)
 
         # import logger into the test module
         setattr(test_module, 'logger', execution.logger)

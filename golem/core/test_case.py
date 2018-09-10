@@ -200,6 +200,8 @@ def new_base_test_case(root_path, project, parents, test_base):
     """Create a Test Base page."""
     test_case_content = (
         "\n\n"
+        "description = 'Gereral setup and teardown for all testcases'\n\n"
+        "pages = []\n\n"
         "def setup(data):\n"
         "    pass\n\n"
         "def teardown(data):\n"
@@ -277,6 +279,7 @@ def save_test_case(root_path, project, full_test_case_name, description,
 
     full_test_case_name is a relative dot path to the test
     """
+    print("save_test_case "+full_test_case_name)
     test_case_path = generate_test_case_path(root_path, project,
                                              full_test_case_name)
     formatted_description = _format_description(description)
