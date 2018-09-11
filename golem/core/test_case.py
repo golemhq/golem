@@ -170,7 +170,7 @@ def new_test_case(root_path, project, parents, tc_name):
         "def test(data):\n"
         "    pass\n\n"
         "def teardown(data):\n"
-        "    {}.setup(data)\n\n".format(test_base, test_base))
+        "    {}.teardown(data)\n\n".format(test_base, test_base))
 
     errors = []
     # check if a file already exists
