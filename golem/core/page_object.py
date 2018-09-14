@@ -19,6 +19,10 @@ def page_exists(root_path, project, full_page_name):
                         page_rel_path + '.py')
     return os.path.isfile(path)
 
+def _list_imported_functions(mod):
+    return [func.__name__ for func in iter(mod.__dict__.values()) 
+            if (inspect.isfunction(func) and inspect.getmodule(func) != None)]
+
 
 def get_page_object_content(project, full_page_name):
     """Parses a page object and returns it's contents
@@ -54,8 +58,8 @@ def get_page_object_content(project, full_page_name):
     po_module, _ = utils.import_module(path)
 
     # get all the names of the module,
-    # ignoring the ones starting with '_'
-    variable_list = [i for i in dir(po_module) if not i.startswith("_")]
+    # ignoring the ones starting with '_' and imported functions
+    variable_list = [i for i in dir(po_module) if (i not in _list_imported_functions(po_module)) and not i.startswith("_")]
     
     # get all the import lines in a list
     try:
