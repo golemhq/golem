@@ -59,7 +59,8 @@ def get_page_object_content(project, full_page_name):
 
     # get all the names of the module,
     # ignoring the ones starting with '_' and imported functions
-    variable_list = [i for i in dir(po_module) if (i not in _list_imported_functions(po_module)) and not i.startswith("_")]
+    variable_list = [i for i in dir(po_module) 
+                     if (i not in _list_imported_functions(po_module)) and not i.startswith("_")]
     
     # get all the import lines in a list
     try:
