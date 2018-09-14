@@ -150,7 +150,7 @@ var ExecutionsReport = new function(){
         // if(!$("#detailTable thead tr .set-name-header").length){
         //     $("#detailTable thead tr .test-name-header").after("");
         // }
-        $("#detailTable th[colname='set-name']").show();
+        $("#detailTable th[colname='set-name'").show();
         $("#detailTable tr").each(function(){
             if(!$(this).find(".set-name").length){
                 $(this).find(".tc-name").after($("<td class='set-name'></td>"));
