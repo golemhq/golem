@@ -42,12 +42,12 @@ function generateHealthChart(projectName){
 
 
 function loadHealthData(healthData){
+    // use the dataContainer to store result
+    // totals and colors used to generate 
+    // the doughnut chart afterwards
+    let dataContainer = {};
 
-    var totalOk = 0;
-    var totalFail = 0;
-    var totalPending = 0;
-
-    var table = "\
+    let table = "\
         <table id='healthTable' class='table no-margin-bottom last-execution-table'>\
             <thead>\
                 <tr>\
@@ -62,55 +62,55 @@ function loadHealthData(healthData){
     $("#healthTableContainer").append(table);
 
     $.each(healthData, function(suite){
-        var okPercentage = healthData[suite].total_ok * 100 / healthData[suite].total;
-        var failPercentage = healthData[suite].total_fail * 100 / healthData[suite].total + okPercentage;
-        totalOk += healthData[suite].total_ok;
-        totalFail += healthData[suite].total_fail;
-        totalPending += healthData[suite].total_pending;
-        var newRow = "\
-            <tr class='cursor-pointer' onclick=''>\
-                <td class=''>"+suite+"</td>\
-                <td class=''>"+utils.getDateTimeFromTimestamp(healthData[suite].execution)+"</td>\
-                <td class=''>\
-                    "+reportUtils.generateProgressBars()+"\
-                </td>\
-            </tr>";
-        newRow = $(newRow);
-
-        newRow.attr('onclick', "document.location.href='/report/project/"+project+"/suite/"+suite+"/"+healthData[suite].execution+"/'");
-
+        let suiteData = healthData[suite];
+        let dateTime = Main.Utils.getDateTimeFromTimestamp(suiteData.execution);
+        let newRow = $(`
+            <tr class="cursor-pointer" onclick="">
+                <td class="">${suite}</td>
+                <td class="">${dateTime}</td>
+                <td class="result"><div class="progress"></div></td>
+            </tr>`);
+        newRow.attr('onclick', `document.location.href='/report/project/${project}/suite/${suite}/${suiteData.execution}/'`);
         $("#healthTable tbody").append(newRow);
-
-        var okBar = newRow.find('.ok-bar');
-        var failBar = newRow.find('.fail-bar');
-        utils.animateProgressBar(okBar, okPercentage)
-        utils.animateProgressBar(failBar, failPercentage)
+        let results = Object.keys(suiteData.totals_by_result).sort()
+        let container = newRow.find('td.result>div.progress');
+        Main.ReportUtils.createProgressBars(container, results)
+        results.forEach(function(result){
+            let thisResultTotal = suiteData.totals_by_result[result];
+            let percentage = thisResultTotal * 100 / suiteData.total;
+            if(result in dataContainer){
+                dataContainer[result]['total'] += thisResultTotal
+            }
+            else{
+                dataContainer[result] = {
+                    'total': thisResultTotal,
+                    'color': Main.ReportUtils.getResultColor(result)
+                }
+            }
+            Main.ReportUtils.animateProgressBar(container, result, percentage);
+        });    
     });
-
-    var ctx = document.getElementById('healthChartCanvas').getContext('2d');
-    var chart = new Chart(ctx, {
+    let ctx = document.getElementById('healthChartCanvas').getContext('2d');
+    let data = [];
+    let colors = []
+    Object.keys(dataContainer).forEach(function(result){
+        data.push(dataContainer[result]['total']);
+        colors.push(dataContainer[result]['color'])
+    });
+    let chart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Passed', 'Failed', 'Pending'],
+            labels: Object.keys(dataContainer),
             datasets: [
                 {
-                    data: [totalOk, totalFail, totalPending],
-                    backgroundColor: [
-                        "#95BD65",
-                        "#fd5a3e",
-                        "#b3b3b3"
-                    ],
-                    hoverBackgroundColor: [
-                        "#95BD65",
-                        "#fd5a3e",
-                        "#b3b3b3"
-                    ]
+                    data: data,  // array of result total values
+                    backgroundColor: colors,  // array of result colors
+                    hoverBackgroundColor: colors  // array of result colors
                 }
             ]
         },
         options: {
             animation: {
-                //animateScale: true,
                 animateRotate: true
             },
             responsive: true,

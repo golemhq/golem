@@ -22,7 +22,9 @@ switch_to_window_by_url, switch_to_window_by_partial_url, verify_amount_of_windo
 verify_window_present_by_title, verify_window_present_by_partial_title, maximize_window, get_page_source, switch_to_next_window
 switch_to_previous_window, close_window_by_index, close_window_by_title, close_window_by_url, close_window_by_partial_title,
 close_window_by_partial_url, get_element_attribute, get_element_value, get_element_text, wait_for_window_present_by_title,
-wait_for_window_present_by_partial_title, 
+wait_for_window_present_by_partial_title, get_window_size
+
+- Added verify_* actions for soft assertions and assert_* for hard assertions
 
 ### Changed
 
@@ -51,6 +53,8 @@ wait_for_window_present_by_partial_title,
   - wait_for_element_not_exist -> wait_for_element_not_present
   - wait_for_element_visible -> wait_for_element_displayed
   - wait_for_element_not_visible -> wait_for_element_not_displayed
+
+- Changed test results: success, failure, error, code error. NOTE: previous reports won´t in the UI report viewer
 
 ### Removed
 - Deprecated actions: assert_contains, assert_equals, assert_false, assert_true, verify_selected_option

@@ -3,9 +3,7 @@
 var testRunner = new function(){
     
     this.runTestCase = function(){
-
         $("button#runTest").blur();
-
         if(unsavedChanges)
             saveTestCase({runAfter: true});
         else
@@ -26,7 +24,7 @@ var testRunner = new function(){
                     var callback = function(environment){
                         testRunner._doRunTestCase(environment);
                     }
-                    utils.displaySelectPromptModal('Select Environment', '', environments, 'Run', callback)
+                    Main.Utils.displaySelectPromptModal('Select Environment', '', environments, 'Run', callback)
                 }
                 else{
                     // should not ask the user which env
@@ -38,7 +36,7 @@ var testRunner = new function(){
 
     this._doRunTestCase = function(environment){
         environment = environment || '';
-        utils.toast('info', 'Running test ' + testCaseName, 3000);
+        Main.Utils.toast('info', 'Running test ' + testCaseName, 3000);
         $.ajax({
             url: "/run_test_case/",
             data: {
@@ -65,23 +63,22 @@ var testRunner = new function(){
     }
 
     this._checkAndRecheckStatus = function(checkDelay, project, fullTestCaseName, timestamp){
-
         $.ajax({
             url: "/check_test_case_run_result/",
             data: {
                  "project": project,
                  "testCaseName": fullTestCaseName,
                  "timestamp": timestamp
-             },
-             dataType: 'json',
-             type: 'POST',
-             success: function(result) {
+            },
+            dataType: 'json',
+            type: 'POST',
+            success: function(result) {
                 checkDelay += 100;
                 if(!result.complete){
                     setTimeout(function(){
                         testRunner._checkAndRecheckStatus(checkDelay, project, fullTestCaseName, timestamp);
                     }, checkDelay, project, fullTestCaseName, timestamp);
-                    
+
                     if(result.logs.length){
                         testRunner.mergeAndDisplayLogs(result.logs);
                     }
@@ -97,8 +94,8 @@ var testRunner = new function(){
                         testRunner.displayTestResults(result.reports);
                     }
                 }
-             }
-         });
+            }
+        });
     }
 
     this.mergeAndDisplayLogs = function(logs){
@@ -124,45 +121,54 @@ var testRunner = new function(){
 
     this.displayTestResults = function(reports){
         for(r in reports){
-            var thisReport = reports[r];
-            var report = $("<div class='report-result'></div>");
-            if(thisReport.result === 'pass'){
-                var resultIcon = passIcon()
-            }
-            else{
-                var resultIcon = failIcon()
-            }
-            report.append('<span><strong>Result:</strong> '+thisReport.result+' ' + resultIcon + '</span><br>');
-            report.append('<span><strong>Error:</strong> ' + thisReport.short_error + '</span><br>');
-            report.append('<span><strong>Elapsed Time:</strong> ' + thisReport.test_elapsed_time + '</span><br>');
-            report.append('<span><strong>Browser:<strong> ' + thisReport.browser + '</span><br>');
-            report.append('<span><strong>Steps:</strong></span>');
-            report.append("<ol style='margin-left: 20px'></ol>");
-            for(s in thisReport.steps){
-                var thisStep = thisReport.steps[s];
-
-                if(thisStep.screenshot){
-                    var msg = "<span class='cursor-pointer' data-toggle='collapse' data-target='#"+thisStep.screenshot+"' \
-                        aria-expanded='false' aria-controls='"+thisStep.screenshot+"'>'"+thisStep.message+"' \
-                        <span class='glyphicon glyphicon-picture' aria-hidden='true'></span></span> \
-                    <div class='collapse text-center' id='"+ thisStep.screenshot + "'> \
-                        <img class='step-screenshot cursor-pointer' style='width: 100%;' src='/test/screenshot/"+ project +"/"+ thisReport.full_name +"/"+thisReport.execution+ "/"+thisReport.test_set+ "/"+ thisStep.screenshot +"/' onclick='reportUtils.expandImg(event);'> \
-                    </div>";
+            let thisReport = reports[r];
+            let report = $("<div class='report-result'></div>");
+            let resultIcon = Main.Utils.getResultIcon(thisReport.result);       
+            report.append('<div><strong>Result:</strong> '+thisReport.result+ ' ' + resultIcon + '</div>');
+            report.append('<div><strong>Errors:</strong></div>');
+            if(thisReport.errors.length){
+                let errorsList = $("<ol id='resultErrorList' style='margin-left: 20px'></ol>");
+                for(s in thisReport.errors){
+                    let thisError = thisReport.errors[s];
+                    let msg = thisError.message;
+                    errorsList.append('<li>'+msg+'</li>');
                 }
-                else{
-                    var msg = thisStep.message;
-                }
-
-                report.find("ol").append('<li>' + msg + '</li>');
+                report.append(errorsList);
             }
-            report.append('</ol>');
-            $("#testResults").append(report);
+            report.append('<div><strong>Elapsed Time:</strong> ' + thisReport.test_elapsed_time + '</div>');
+            report.append('<div><strong>Browser:<strong> ' + thisReport.browser + '</div>');
+            report.append('<div><strong>Steps:</strong></div>');
+            if(thisReport.steps.length){
+                let stepsList = $("<ol id='resultStepsList' style='margin-left: 20px'></ol>")
+                for(s in thisReport.steps){
+                    var thisStep = thisReport.steps[s];
+                    let step = $('<li>' + thisStep.message + '</li>')
+                    if(thisStep.error){
+                        step.append(' - ' + thisStep.error.message)
+                    }
+                    if(thisStep.screenshot){
+                        let guid = Main.Utils.guid();
+                        let screenshotUrl = `/test/screenshot/${project}/${thisReport.full_name}/${thisReport.execution}/${thisReport.test_set}/${thisStep.screenshot}/`;
+                        var screenshotIcon = `
+                        <span class="cursor-pointer glyphicon glyphicon-picture" aria-hidden="true"
+                            data-toggle="collapse" data-target="#${guid}"
+                            aria-expanded="false" aria-controls="${guid}"></span>
+                        <div class="collapse text-center" id="${guid}">
+                            <img class="step-screenshot cursor-pointer" style="width: 100%"
+                                src="${screenshotUrl}" onclick="Main.ReportUtils.expandImg(event);">
+                        </div>`;
+                        step.append(' ' + screenshotIcon)
+                    }
+                    stepsList.append(step);
+                }
+                report.append(stepsList)
+             }
+            $("#testResults").html(report.html());
         }
         $('.modal-body').scrollTop($('.modal-body')[0].scrollHeight);
     }
 
 }
-
 
 
 var dataTable = new function(){
@@ -190,7 +196,7 @@ var dataTable = new function(){
         $("#dataTable thead tr").append(
             "<th> \
                 <div class='input-group'> \
-                    <input class='form-control' type='text'> \
+                    <input class='form-control' type='text' onchange='dataTableHeaderInputChange()'> \
                 </div> \
             </th>"
         );
@@ -239,7 +245,6 @@ var dataTable = new function(){
         testData = tempTestData;
         return testData
     }
-
 }
 
 
@@ -295,7 +300,7 @@ var header = new function(){
                     window.history.pushState("object or string", "", new_url);
                 }
                 else{
-                    utils.toast('error', error, 2000);
+                    Main.Utils.toast('error', error, 2000);
                     $("#testNameInput").hide();
                     $("#testName").show();
                 }

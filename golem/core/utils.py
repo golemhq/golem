@@ -6,6 +6,7 @@ import os
 import uuid
 import traceback
 import glob
+import re
 from datetime import datetime
 from distutils.version import StrictVersion
 
@@ -367,3 +368,9 @@ def match_latest_executable_path(glob_path):
         return highest_version[0][0]
     else:
         return None
+
+
+def get_valid_filename(s):
+    """Receives a string and returns a valid filename"""
+    s = str(s).strip().replace(' ', '_')
+    return re.sub(r'(?u)[^-\w.]', '', s)

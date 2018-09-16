@@ -9,14 +9,6 @@ class ElementNotFound(Exception):
     pass
 
 
-class TestError(Exception):
-    pass
-
-
-class TestFailure(Exception):
-    __test__ = False  # ignore this class from Pytest
-
-
 class TextNotPresent(Exception):
     pass
 

@@ -1,299 +1,325 @@
 
-var allTestCases = {};
-var baseDelay = 2000;
-
-var suiteFinished = false;
-var netTime = undefined;
-
-$(document).ready(function() {            
-	getReportData();
+$(document).ready(function(){            
+	ExecutionReport.getReportData();
 
 	$("#generalTable").on('click', 'tr', function(){
-		let moduleName = $(this).find("td.module").html();
-		detailTable.filterDetailTableByModule(moduleName);
+		let moduleName = $(this).find("td[data='module']").html();
+		DetailTable.filterDetailTableByModule(moduleName);
 	})
 
-	detailTable.instantiateDetailTableFilterListeners();
+	DetailTable.instantiateDetailTableFilterListeners();
 });
 
 
-function getReportData(){
-	$.post(
-		"/report/get_execution_data/",
-		{ 
-			project: project,
-			suite: suite,
-			execution: execution,
-		},
-		function(executionData) {	
-  			if(executionData.has_finished){
-  				suiteFinished = true;
-  				netTime = executionData.net_elapsed_time;
-  			}
-  			loadReport(executionData);
-  		}
-	);
-	if(baseDelay <= 10000){
-		baseDelay += 50;
-	}
-	if(!suiteFinished){
-		setTimeout(function(){getReportData()}, baseDelay);
-	}
-}
+const ExecutionReport = new function(){
 
+	this.suiteFinished = false;
+	this.queryDelay = 2000;
+	this.netTime = undefined;
+	this.tests = {};
 
-function loadReport(execution_data){
-	for(tc in execution_data.test_cases){
-		var test = execution_data.test_cases[tc];
-		var row = $("#"+test.test_set);
-		if(row.length == 0){
-			// this test case is not added yet
-			addTestToDetailTable(test);
+	this.getReportData = function(){
+		$.post(
+			"/report/get_execution_data/",
+			{ 
+				project: project,
+				suite: suite,
+				execution: execution,
+			},
+			function(executionData) {	
+	  			if(executionData.has_finished){
+	  				ExecutionReport.suiteFinished = true;
+	  				ExecutionReport.netTime = executionData.net_elapsed_time;
+	  			}
+	  			ExecutionReport.loadReport(executionData);	  		
+				if(!ExecutionReport.suiteFinished){
+					if(ExecutionReport.queryDelay <= 10000){
+						ExecutionReport.queryDelay += 50;
+					}
+					setTimeout(function(){ExecutionReport.getReportData()},
+							   ExecutionReport.queryDelay);
+				}
+	  		}
+		)
+	}
+
+	this.loadReport = function(execution_data){
+		for(tc in execution_data.tests){
+			let test = execution_data.tests[tc];
+			let row = $(`#${test.test_set}`);
+			if(row.length == 0){
+				// this test is not added yet
+				DetailTable.addTestToDetailTable(test);
+			}
+			else if(row.attr('pending') == 'pending' && test.result != 'pending'){
+				DetailTable.loadTestRowResult(test);
+			}
 		}
-		else if(row.attr('pending') == 'pending' && test.result != 'pending'){
-			loadTestRowResult(test);
+	}
+
+	this.getTestsInModule = function(module){
+		let tests = [];
+		for(t in ExecutionReport.tests){
+			if(ExecutionReport.tests[t].module == module){
+				tests.push(ExecutionReport.tests[t]);
+			}
 		}
+		return tests
+	}
+
+	this.getTestsInModuleWithResult = function(module, result){
+		var totalOk = 0;
+		for(t in ExecutionReport.tests){
+			let matchModule = ExecutionReport.tests[t].module == module;
+			let matchResult = ExecutionReport.tests[t].result == result;
+			if(matchModule && matchResult){
+				totalOk++;
+			}
+		}
+		return totalOk
+	}
+
+	this.getTotalModuleTime = function(module){
+		var totalTime = 0;
+		for(t in ExecutionReport.tests){
+			if(ExecutionReport.tests[t].module == module){
+				totalTime += ExecutionReport.tests[t].test_elapsed_time;
+			}
+		}
+		return Math.round(totalTime * 100) / 100
+	}
+
+	this.getTotalTestAmount = function(){
+	    return Object.keys(ExecutionReport.tests).length;
+	}
+
+	this.getTotalTestsWithResult = function(result){
+		let total = 0;
+	    for (key in ExecutionReport.tests) {
+	        if (ExecutionReport.tests[key].result == result) total++;
+	    }
+	    return total;
+	}
+
+	this.getTotalTime = function(){
+		var totalTime = 0;
+		for(t in ExecutionReport.tests){
+			totalTime += ExecutionReport.tests[t].test_elapsed_time;
+		}
+		return Math.round(totalTime * 100) / 100
+	}
+
+	this.formatTimeOutput = function(seconds){
+		let final = '';
+		let min, sec, ms;
+		if(seconds >= 60){
+			min = Math.floor(seconds/60);
+			min = Math.round(min * 10) / 10;
+			remainder = seconds % 60
+			if(remainder != 0){
+				sec = remainder;
+				sec = Math.round(sec * 10) / 10;
+			}
+		}
+		else{
+			sec = Math.round(seconds * 10) / 10;
+		}
+		if(min != undefined){
+			final += min + 'm '
+		}
+		if(sec != undefined){
+			final += sec + 's'
+		}
+		return final
 	}
 }
 
-function addTestToDetailTable(test){
-	
-	var numbering = $("#detailTable tbody tr").length + 1;
 
-	if(test.result == 'pass')
-		var resultString = passIcon() + ' ' + test.result;
-	else if(test.result == 'fail')
-		var resultString = failIcon() + ' ' + test.result;
-	else if(test.result == 'pending')
-		var resultString = 'pending';
+const GeneralTable = new function(){
 
-	var testRow = ExecutionsReport.generateTestRow({
-		testSet: test.test_set,
-		numbering: numbering,
-		module: test.module,
-		name: test.name,
-		environment: test.env,
-		//browser: test.browser,
-		result: resultString,
-		//elapsedTime: test.test_elapsed_time
-	});
+	this.resultColumns = [
+		'success',
+		'failure'
+	]
 
-	var link = "/report/project/"+project+"/"+suite+"/"+execution+"/"+test.full_name+"/"+test.test_set+"/";
-	testRow.attr('onclick', "document.location.href='"+link+"'");
-	testRow.find('td.link a').attr('href', link)
-
-	$("#detailTable tbody").append(testRow);
-
-	//add this test case to allTestCases
-	allTestCases[test.test_set] = test;
-
-	if(test.result != 'pending'){
-		loadTestRowResult(test);
+	this.updateGeneralTable = function(module){
+		GeneralTable.updateModuleRow(module);
+		GeneralTable.refreshTotalRow();
 	}
 
-	// add options to header dropdowns
-	detailTable.updateColumnHeaderFilterOptions('module', test.module);
-	// detailTable.updateColumnHeaderFilterOptions('environment', test.environment);
-	detailTable.updateColumnHeaderFilterOptions('browser', test.browser);
-	detailTable.updateColumnHeaderFilterOptions('result', test.result);
+	this.updateModuleRow = function(module){
+		// does the row for the module already exists?
+		let moduleRow = GeneralTable.getModuleRow(module);
+		if(moduleRow === null){
+			moduleRow = GeneralTable.addModuleRow(module);
+		}
+		let testsInModule = ExecutionReport.getTestsInModule(module);
+		let moduleTotalsByResult = {};
+		testsInModule.forEach(function(test){
+			if(!Object(moduleTotalsByResult).hasOwnProperty(test.result)){
+				moduleTotalsByResult[test.result] = 0;
+			}
+			moduleTotalsByResult[test.result] += 1;
+        });
+        Object.keys(moduleTotalsByResult).forEach(function(result){
+        	if(result == 'pending'){
+        		return
+        	}
+        	// does the Detail Table has column for this test result?
+			if(!GeneralTable.hasColumnForResult(result)){
+				GeneralTable.addColumnForResult(result)
+			}
+        	moduleRow.find(`td[data='result'][result='${result}']`).html(moduleTotalsByResult[result]);
+            let container = moduleRow.find("td[data='percentage']>div.progress");
+        	if(!Main.ReportUtils.hasProgressBarForResult(container, result)){
+        		Main.ReportUtils.createProgressBars(container, [result])
+        	}
+            let percentage = moduleTotalsByResult[result] * 100 / testsInModule.length;
+        	Main.ReportUtils.animateProgressBar(container, result, percentage)
 
-	updateModuleRowInGeneralTable(test);
-	refreshGeneralTable();
-}
-
-
-function loadTestRowResult(test){
-	var row = $("#"+test.test_set);
-
-	if(test.result == 'pass')
-		var resultString = passIcon() + ' ' + test.result;
-	else if(test.result == 'fail')
-		var resultString = failIcon() + ' ' + test.result;
-
-	row.find('.test-result').html(resultString);
-	row.find('.test-browser').html(test.browser);
-	row.find('.test-environment').html(test.environment);
-	row.find('.test-time').html(formatTimeOutput(test.test_elapsed_time));
-	if(test.set_name){
-		ExecutionsReport.hasSetNameColumn = true;
-		ExecutionsReport.addSetNameColumnToTable();
-		row.find('.set-name').html(test.set_name);
-		detailTable.updateColumnHeaderFilterOptions('set-name', test.set_name);
+        })
+		let timeInModule = ExecutionReport.getTotalModuleTime(module);
+		moduleRow.find("td[data='total-tests']").html(testsInModule.length);
+		moduleRow.find("td[data='total-time']").html(ExecutionReport.formatTimeOutput(timeInModule));
+		// if(ExecutionReport.netTime != undefined){
+		// 	totalRow.find("td[data='net-time']").html(ExecutionReport.formatTimeOutput(ExecutionReport.netTime));
+		// }
 	}
 
-	//add this test case to allTestCases
-	allTestCases[test.test_set] = test;
+	this.refreshTotalRow = function(){
+		// fill in total row
+		let totalTestAmount = ExecutionReport.getTotalTestAmount();
+		let totalTime = ExecutionReport.getTotalTime();
+		let totalRow = $("#totalRow");
+		totalRow.find("td[data='total-tests']").html(totalTestAmount);
+		totalRow.find("td[data='total-time']").html(ExecutionReport.formatTimeOutput(totalTime));
+		if(ExecutionReport.netTime != undefined){
+			totalRow.find("td[data='net-time']").html(ExecutionReport.formatTimeOutput(ExecutionReport.netTime));
+		}
+		let totalsByResult = {};
+		Object.keys(ExecutionReport.tests).forEach(function(testSet){
+			let test = ExecutionReport.tests[testSet];
+			if(!Object(totalsByResult).hasOwnProperty(test.result)){
+				totalsByResult[test.result] = 0;
+			}
+			totalsByResult[test.result] += 1;
+        });
+		Object.keys(totalsByResult).forEach(function(result){
+			if(result == 'pending'){
+        		return
+        	}
+        	totalRow.find(`td[data='result'][result='${result}']`).html(totalsByResult[result]);
+            let container = totalRow.find("td[data='percentage']>div.progress");
+        	if(!Main.ReportUtils.hasProgressBarForResult(container, result)){
+        		Main.ReportUtils.createProgressBars(container, [result])
+        	}
+            let percentage = totalsByResult[result] * 100 / totalTestAmount;
+        	Main.ReportUtils.animateProgressBar(container, result, percentage)
+        })
+	}
 
-	//refresh the general table
-	refreshGeneralTable();
-
-	//The module in the general table should be updated
-	updateModuleRowInGeneralTable(test);
-
-	// add options to header dropdowns
-	detailTable.updateColumnHeaderFilterOptions('browser', test.browser);
-	detailTable.updateColumnHeaderFilterOptions('result', test.result);
-	detailTable.updateColumnHeaderFilterOptions('environment', test.environment);
-
-	row.removeAttr('pending');
-}
-
-
-function updateModuleRowInGeneralTable(testCase){
-	// does the row for the module already exists?
-	var moduleRow = getModuleRow(testCase.module);
-	if(moduleRow === null){
-		// add a new row
-		var moduleRow = ExecutionsReport.generateModuleRow({
-			moduleName: testCase.module,
-		});
+	this.addModuleRow = function(module){
+		let moduleRow = GeneralTable.generateModuleRow({moduleName: module});
 		moduleRow.insertBefore("#totalRow");
+		return moduleRow
 	}
-	var testsInModule = getTestsInModule(testCase.module); //testCasesByModule[module].length;
-	var testsOkInModule = getTestsInModuleWithResult(testCase.module, 'pass');
-	var testsFailedInModule = getTestsInModuleWithResult(testCase.module, 'fail');
-	var timeInModule = getTotalModuleTime(testCase.module);
 
-	moduleRow.find(".total-tests").html(testsInModule);
-	moduleRow.find(".tests-ok").html(testsOkInModule);
-	moduleRow.find(".tests-failed").html(testsFailedInModule);
-	//moduleRow.find(".total-time").html(timeInModule + ' s');
-	//moduleRow.find(".total-time").html('');
-
-	var okPercentage = testsOkInModule * 100 / testsInModule;
-	var failPercentage = testsFailedInModule * 100 / testsInModule + okPercentage;
-	
-	var okBar = moduleRow.find('.ok-bar');
-	var failBar = moduleRow.find('.fail-bar');
-
-	utils.animateProgressBar(okBar, okPercentage);
-	utils.animateProgressBar(failBar, failPercentage);
-}
-
-
-function refreshGeneralTable(){
-	// fill in total row
-	var totalTestCases = getTotalTestCases();
-	var totalTestsOk = getTotalTestsWithResult('pass');
-	var totalTestsFailed = getTotalTestsWithResult('fail');
-	//var totalTestsFailed = totalTestCases - totalTestsOk;
-	var totalTime = getTotalTime();
-
-	var totalRow = $("#totalRow");
-	totalRow.find(".total-tests").html(totalTestCases);
-	totalRow.find(".tests-ok").html(totalTestsOk);
-	totalRow.find(".tests-failed").html(totalTestsFailed);
-	totalRow.find(".total-time").html(formatTimeOutput(totalTime));
-	if(netTime != undefined){
-		totalRow.find(".net-time").html(formatTimeOutput(netTime));
+	this.getModuleRow = function(module){
+		let moduleRow = null;
+		$("table.general-table tbody tr").each(function(i, row){
+			if($(row).find("td[data='module']").html() == module){
+				moduleRow = $(row)
+			}
+		});
+		return moduleRow
 	}
-	
-	var okPercentage = totalTestsOk * 100 / totalTestCases;
-	var failPercentage = totalTestsFailed * 100 / totalTestCases + okPercentage;
 
-	var okBar = totalRow.find('.ok-bar');
-	var failBar = totalRow.find('.fail-bar');
-
-	utils.animateProgressBar(okBar, okPercentage);
-	utils.animateProgressBar(failBar, failPercentage);
-}
-
-function getTestsInModule(module){
-	var tests = 0;
-	for(t in allTestCases){
-		if(allTestCases[t].module == module){
-			tests++
-		}
+	this.hasColumnForResult = function(result){
+		let columnHeader = $(`#generalTable th[result='${result}']`);
+		return columnHeader.length != 0
 	}
-	return tests
-}
 
-
-function getTestsInModuleWithResult(module, result){
-	var totalOk = 0;
-	for(t in allTestCases){
-		if(allTestCases[t].module == module && allTestCases[t].result == result){
-			totalOk++;
-		}
+	// Add a new column to GeneralTable for result
+	this.addColumnForResult = function(result){
+		GeneralTable.resultColumns.push(result);
+		let headerTh = $(`<th result="${result}">${Main.Utils.capitalizeWords(result)}</th>`)
+		// insert th for new result column
+		$("#generalTable th[data='percentage']").before(headerTh);
+		// insert td for each tr for new result column
+		$("#generalTable tr").each(function(i, tr){
+			let td = $(`<td data='result' result="${result}">0</td>`);
+			$(tr).find("td[data='percentage']").before(td);
+		})
 	}
-	return totalOk
-}
 
-
-function getTotalModuleTime(module){
-	var totalTime = 0;
-	for(t in allTestCases){
-		if(allTestCases[t].module == module){
-			totalTime += allTestCases[t].test_elapsed_time;
-		}
-	}
-	return Math.round(totalTime * 100) / 100
-}
-
-
-function getTotalTestCases(){
-	var size = 0, key;
-    for (key in allTestCases) {
-        if (allTestCases.hasOwnProperty(key)) size++;
+	this.generateModuleRow = function(data){
+		let resultColumns = '';
+		GeneralTable.resultColumns.forEach(function(result){
+			resultColumns += (`<td data="result" result="${result}">0</td>`)
+		});
+        var row = `
+            <tr class="general-table-row cursor-pointer">
+                <td data="module">${data.moduleName}</td>
+                <td data="total-tests">${data.totalTests}</td>
+        		${resultColumns}        
+                <td data="percentage"><div class='progress'></div></td>\
+                <td data="total-time"></td>\
+                <td data="net-time"></td>\
+            </tr>`;
+        return $(row)
     }
-    return size;
-}
-
-function getTotalTestsWithResult(result){
-	var totalOk = 0;
-    for (key in allTestCases) {
-        if (allTestCases[key].result == result) totalOk++;
-    }
-    return totalOk;
-}
-
-function getTotalTime(){
-	var totalTime = 0;
-	for(t in allTestCases){
-		totalTime += allTestCases[t].test_elapsed_time;
-	}
-	return Math.round(totalTime * 100) / 100
 }
 
 
-function getModuleRow(module){
-	var row = null;
-	$("table.general-table tbody tr").each(function(){
-		if($(this).find('td.module').html() == module){
-			row = $(this)
+const DetailTable = new function(){
+
+	this.hasSetNameColumn = false;
+
+	this.addTestToDetailTable = function(test){
+		let numbering = $("#detailTable tbody tr").length + 1;
+		let urlToTest = `/report/project/${project}/${suite}/${execution}/${test.full_name}/${test.test_set}/`;
+		let testRow = DetailTable.generateTestRow({
+			testSet: test.test_set,
+			numbering: numbering,
+			module: test.module,
+			name: test.name,
+			result: 'pending',
+			urlToTest: urlToTest
+		});
+		$("#detailTable tbody").append(testRow);
+		ExecutionReport.tests[test.test_set] = test;
+		if(test.result != 'pending'){
+			DetailTable.loadTestRowResult(test);
 		}
-	});
-	return row
-}
+		// add options to header dropdowns
+		DetailTable.updateColumnHeaderFilterOptions('module', test.module);
+		DetailTable.updateColumnHeaderFilterOptions('browser', test.browser);
+		DetailTable.updateColumnHeaderFilterOptions('result', test.result);
+		// update general table
+		GeneralTable.updateGeneralTable(test.module);
+	}
 
-function formatTimeOutput(seconds){
-	var final = '';
-	var min;
-	var sec;
-	var ms;
-	if(seconds >= 60){
-		min = Math.floor(seconds/60);
-		min = Math.round(min * 10) / 10;
-		remainder = seconds % 60
-		if(remainder != 0){
-			sec = remainder;
-			sec = Math.round(sec * 10) / 10;
+	this.loadTestRowResult = function(test){
+		let row = $(`#${test.test_set}`);
+		let resultString = Main.Utils.getResultIcon(test.result) + ' ' + test.result;		
+		row.find('.test-result').html(resultString);
+		row.find('.test-browser').html(test.browser);
+		row.find('.test-environment').html(test.environment);
+		row.find('.test-time').html(ExecutionReport.formatTimeOutput(test.test_elapsed_time));
+		if(test.set_name){
+			DetailTable.hasSetNameColumn = true;
+			DetailTable.displaySetNameColumn();
+			row.find('.set-name').html(test.set_name);
+			DetailTable.updateColumnHeaderFilterOptions('set-name', test.set_name);
 		}
+		ExecutionReport.tests[test.test_set] = test;
+		GeneralTable.updateGeneralTable(test.module);
+		// add options to header dropdowns
+		DetailTable.updateColumnHeaderFilterOptions('browser', test.browser);
+		DetailTable.updateColumnHeaderFilterOptions('result', test.result);
+		DetailTable.updateColumnHeaderFilterOptions('environment', test.environment);
+		row.removeAttr('pending');
 	}
-	else{
-		sec = Math.round(seconds * 10) / 10;
-	}
-	if(min != undefined){
-		final += min + 'm '
-	}
-	if(sec != undefined){
-		final += sec + 's'
-	}
-	return final
-}
-
-
-var detailTable = new function(){
 
 	this.updateColumnHeaderFilterOptions = function(column, value){
 		if([undefined, ''].includes(value)){
@@ -323,20 +349,16 @@ var detailTable = new function(){
 		}
 	}
 
-
 	this.instantiateDetailTableFilterListeners = function(){
 		$("#detailTable").on('change', "th input:checkbox", function(){
-			detailTable.applyFilters()
+			DetailTable.applyFilters()
 		})
 	}
-
 
 	this.applyFilters = function(){
 		// display all columns
 		$("#detailTable tr").show();
-
 		let tableRows = $("#detailTable>tbody>tr");
-
 		// for each column header
 		$("#detailTable th").each(function($index){
 			let thisColumnHeader = $(this);
@@ -345,7 +367,6 @@ var detailTable = new function(){
 			if(checkedCheckboxes.length > 0){
 				// mark this column header as 'filtered'
 				thisColumnHeader.addClass('filtered');
-
 				let checkedValues = [];
 				checkedCheckboxes.each(function(){
 					checkedValues.push($(this).parent().find('span').html());
@@ -366,7 +387,6 @@ var detailTable = new function(){
 		});
 	}
 
-
 	this.filterDetailTableByModule = function(moduleName){
 		// remove all filters in module column,
 		// apply the filter provided
@@ -379,4 +399,33 @@ var detailTable = new function(){
 						  	  .prop('checked', true).change();
 		}
 	}
+
+	// Expects the following data: testSet, numbering, module, name, result, urlToTest
+	this.generateTestRow = function(data){
+		let setNameStyle = DetailTable.hasSetNameColumn ? '' : 'display: none';
+        var row = `
+    <tr id="${data.testSet}" pending="pending" class="cursor-pointer" onclick="document.location.href='${data.urlToTest}'">
+        <td class="tc-number">${data.numbering}</td>
+        <td class="tc-module">${data.module}</td>
+        <td class="tc-name">${data.name}</td>
+        <td class="set-name" style="${setNameStyle}"></td>
+        <td class="test-environment"></td>
+        <td class="test-browser"></td>
+        <td class="test-result">${data.result}</td>
+        <td class="test-time"></td>
+        <td class="link">
+        	<a href="${data.urlToTest}" target="blank">
+            	<span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>
+        	</a>
+        </td>
+    </tr>`;
+        return $(row)
+    }
+
+    this.displaySetNameColumn = function(){
+        $("#detailTable th[colname='set-name'").show();
+        $("#detailTable tr").each(function(i, row){
+            $(row).find(".set-name").show();
+        })
+    }
 }

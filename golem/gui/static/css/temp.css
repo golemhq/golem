@@ -66,6 +66,7 @@ p {
     transition: all 0.3s;
     height: 100vh;
     position: fixed;
+    z-index: 10;
 }
 
 #content {

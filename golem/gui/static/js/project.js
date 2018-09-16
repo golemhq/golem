@@ -123,22 +123,7 @@ var Project = new function(){
         }
 
         var elementName = input.val().trim();
-
-        // replace inner spaces with underscores
-        //elementName = elementName.replace(/ /g, '_');
-        
-        var fullPath = Project.getElementFullPath(input, elementName);
-        // var isDir = false;
-        // if(elementName.indexOf('/') > -1){
-        //     isDir = true;
-        //     if(elementType == 'test') elementType = 'test_dir';
-        //     else if(elementType == 'page') elementType = 'page_dir';
-        // }
-        // if(elementName[elementName.length-1] == '/'){
-        //     isDir = true;
-        //     if(elementType == 'test') elementType = 'test_dir';
-        //     else if(elementType == 'page') elementType = 'page_dir';
-        // }
+        var fullPath = Project.getElementFullPath(input, elementName)
 
         if(elementName.length == 0){
             input.val('');
@@ -149,29 +134,9 @@ var Project = new function(){
 
         // validate length
         if(elementName.length > 100){
-            utils.displayErrorModal(['Maximum length is 100 characters']);
+            Main.Utils.displayErrorModal(['Maximum length is 100 characters']);
             return
         }
-
-        // validate there is no more than 1 slash
-        // if(elementName.split('/').length -1 > 1){
-        //     displayErrorModal(['Only one slash character is allowed']);
-        //     return   
-        // }
-
-        // validate there is no more than 1 slash
-        // if(elementType == 'suite' &&  elementName.indexOf('/') > -1){ //elementName.split('/').length -1 == 1){
-        //     displayErrorModal(['Suite names cannot contain slashes']);
-        //     return   
-        // }
-
-        // validate if there is a slash it is trailing
-        // if(isDir){
-        //     if(elementName.indexOf('/') != elementName.length-1){
-        //         displayErrorModal(['Directories should end with a trailing slash character']);
-        //         return
-        //     }
-        // }
         
         $.ajax({
             url: "/new_tree_element/",
@@ -206,7 +171,7 @@ var Project = new function(){
                     input.parent().parent().find(".display-new-element-link").show();
                 }
                 else{
-                    utils.displayErrorModal(data.errors);
+                    Main.Utils.displayErrorModal(data.errors);
                 }
             },
             error: function() {}
@@ -238,7 +203,7 @@ var Project = new function(){
         var callback = function(){
             Project.deleteElement(element, elemFullPath, elemType);
         }
-        utils.displayConfirmModal('Delete', message, callback);
+        Main.Utils.displayConfirmModal('Delete', message, callback);
 
     }
 
@@ -256,15 +221,14 @@ var Project = new function(){
             success: function(errors) {
                 if(errors.length == 0){
                     element.remove();
-                    utils.toast('success', "File "+fullPath+" was removed", 2000)
+                    Main.Utils.toast('success', "File "+fullPath+" was removed", 2000)
                 }
                 else{
-                    utils.toast('error', 'There was an error removing file', 2000)
+                    Main.Utils.toast('error', 'There was an error removing file', 2000)
                 }
             },
         });
     }
-
 
     this.duplicateElementPrompt = function(elementDuplicateButton){
         var element =  $(elementDuplicateButton).parent().parent();
@@ -277,7 +241,7 @@ var Project = new function(){
         var callback = function(newFileFullPath){
             Project.duplicateFile(elemFullPath, elemType, element, newFileFullPath);
         }
-        utils.displayPromptModal(title, message, inputValue, placeholderValue, callback)
+        Main.Utils.displayPromptModal(title, message, inputValue, placeholderValue, callback)
     }
 
 
@@ -311,14 +275,14 @@ var Project = new function(){
                         type: elemType});
                     var ul = originalElement.closest('ul');
                     ul.children().last().before(uiElement);
-                    utils.toast('success', 'File was copied', 2000)
+                    Main.Utils.toast('success', 'File was copied', 2000)
                 }
                 else{
-                    utils.toast('error', 'There was an error duplicating the file', 2000);
+                    Main.Utils.toast('error', 'There was an error duplicating the file', 2000);
                 }
             },
             error: function(){
-                utils.toast('error', 'There was an error duplicating the file', 2000)
+                Main.Utils.toast('error', 'There was an error duplicating the file', 2000)
             }
         });
     }
@@ -335,7 +299,7 @@ var Project = new function(){
         var callback = function(newFileFullPath){
             Project.renameFile(elemFullPath, elemType, element, newFileFullPath);
         }
-        utils.displayPromptModal(title, message, inputValue, placeholderValue, callback)
+        Main.Utils.displayPromptModal(title, message, inputValue, placeholderValue, callback)
     }
 
 
@@ -390,16 +354,15 @@ var Project = new function(){
                             getPages(project);   
                         }
                     }
-                    utils.toast('success', 'File was renamed', 2000);
+                    Main.Utils.toast('success', 'File was renamed', 2000);
                 }
                 else{
-                    utils.toast('error', error, 2000);
+                    Main.Utils.toast('error', error, 2000);
                 }
             },
             error: function(){
-                utils.toast('error', 'There was an error duplicating the file', 2000)
+                Main.Utils.toast('error', 'There was an error duplicating the file', 2000)
             }
         });
     }
-
 }

@@ -385,7 +385,7 @@ def report_test(project, suite, execution, test_case, test_set):
 def screenshot_file(project, suite, execution, test_case, test_set, scr):
     screenshot_path = os.path.join(root_path, 'projects', project, 'reports',
                                    suite, execution, test_case, test_set)
-    return send_from_directory(screenshot_path, '{}.png'.format(scr))
+    return send_from_directory(screenshot_path, scr)
 
 
 # TEST SCREENSHOT UNUSED
@@ -394,7 +394,7 @@ def screenshot_file(project, suite, execution, test_case, test_set, scr):
 def screenshot_file2(project, test, execution, test_set, scr):
     screenshot_path = os.path.join(root_path, 'projects', project, 'reports',
                                    'single_tests', test, execution, test_set)
-    return send_from_directory(screenshot_path, '{}.png'.format(scr))
+    return send_from_directory(screenshot_path, scr)
 
 
 # GENERATE HTML REPORT FILE
@@ -1123,9 +1123,7 @@ def get_project_health_data():
         project = request.form['project']
         project_data = report_parser.get_last_executions(root_path, project=project,
                                                          suite=None, limit=1)
-        
         health_data = {}
-
         for suite, executions in project_data[project].items():
             execution_data = report_parser.get_execution_data(workspace=root_path,
                                                               project=project,
@@ -1133,10 +1131,11 @@ def get_project_health_data():
                                                               execution=executions[0])
             health_data[suite] = {
                 'execution': executions[0],
-                'total': execution_data['total_cases'],
-                'total_ok': execution_data['total_cases_ok'],
-                'total_fail': execution_data['total_cases_fail'],
-                'total_pending': execution_data['total_pending']
+                'total': execution_data['total_tests'],
+                # 'total_ok': execution_data['total_cases_ok'],
+                # 'total_fail': execution_data['total_cases_fail'],
+                # 'total_pending': execution_data['total_pending']
+                'totals_by_result': execution_data['totals_by_result']
             }
         return jsonify(health_data)
 

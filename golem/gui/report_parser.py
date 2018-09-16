@@ -20,12 +20,12 @@ def get_date_time_from_timestamp(timestamp):
 def get_last_executions(root_path, project=None, suite=None, limit=5):
     """Get the last n executions.
     
-    Get the executons of one suite or all the suites,
+    Get the executions of one suite or all the suites,
     one project or all the projects.
     
     Returns a list of executions (timestamps strings)
     ordered in descendant order by execution time and
-    limited by `limit` (5 default)
+    limited by `limit`
     """
     last_execution_data = {}
     path = os.path.join(root_path, 'projects')
@@ -63,16 +63,16 @@ def _parse_execution_data(execution_directory=None, workspace=None,
                          project=None, suite=None, execution=None):
     """ """
     execution_data = {
-        'test_cases': [],
-        'total_cases_ok': 0,
-        'total_cases_fail': 0,
-        'total_cases': 0,
-        'total_pending': 0,
+        'tests': [],
+        'total_tests': 0,
+        'totals_by_result': {}
     }
     if not execution_directory:
         execution_directory = os.path.join(workspace, 'projects', project,
                                            'reports', suite, execution)
-    test_cases = os.walk(execution_directory).__next__()[1]
+    test_cases = []
+    if os.path.isdir(execution_directory):
+        test_cases = next(os.walk(execution_directory))[1]
     for test_case in test_cases:
         # each test case may have n >= 1 test sets
         # each test set is considered a different test
@@ -94,17 +94,17 @@ def _parse_execution_data(execution_directory=None, workspace=None,
                 'environment': '',
                 'set_name': ''
             }
-            execution_data['total_cases'] += 1
+            execution_data['total_tests'] += 1
             new_test_case['test_set'] = test_set
             module = ''
             sub_modules = []
-            test_case_splitted = test_case.split('.')
-            if len(test_case_splitted) > 1:
-                module = test_case_splitted[0]
-                if len(test_case_splitted) > 2:
-                    sub_modules = test_case_splitted[1:-1]
+            test_case_split = test_case.split('.')
+            if len(test_case_split) > 1:
+                module = test_case_split[0]
+                if len(test_case_split) > 2:
+                    sub_modules = test_case_split[1:-1]
             new_test_case['module'] = module
-            test_case_name = test_case_splitted[-1]
+            test_case_name = test_case_split[-1]
             new_test_case['sub_modules'] = sub_modules
             new_test_case['name'] = test_case_name
             new_test_case['full_name'] = test_case
@@ -118,17 +118,15 @@ def _parse_execution_data(execution_directory=None, workspace=None,
             if not os.path.exists(report_json_path):
                 # test has not finished, add empty test case to the list
                 new_test_case['result'] = 'pending'
-                execution_data['test_cases'].append(new_test_case)
-                execution_data['total_pending'] += 1
+                execution_data['tests'].append(new_test_case)
+                execution_data['totals_by_result']['pending'] = execution_data['totals_by_result'].get('pending', 0) + 1
             else:
                 # test has finished
                 with open(os.path.join(test_set_path, 'report.json'), 'r') as json_file:
                     report_data = json.load(json_file)
                 new_test_case['result'] = report_data['result']
-                if report_data['result'] == 'pass':
-                    execution_data['total_cases_ok'] += 1
-                elif report_data['result'] == 'fail':
-                    execution_data['total_cases_fail'] += 1
+                status = report_data['result']
+                execution_data['totals_by_result'][status] = execution_data['totals_by_result'].get(status, 0) + 1
                 new_test_case['test_elapsed_time'] = report_data['test_elapsed_time']
                 start_date_time = get_date_time_from_timestamp(report_data['test_timestamp'])
                 new_test_case['start_date_time'] = start_date_time
@@ -139,7 +137,7 @@ def _parse_execution_data(execution_directory=None, workspace=None,
                 # remove the if when retro-compatibility is not required
                 if 'set_name' in report_data:
                     new_test_case['set_name'] = report_data['set_name']
-                execution_data['test_cases'].append(new_test_case)
+                execution_data['tests'].append(new_test_case)
     return execution_data
 
 
@@ -176,6 +174,7 @@ def get_execution_data(execution_directory=None, workspace=None,
 def get_test_case_data(root_path, project, test, suite=None, execution=None,
                        test_set=None, is_single=False):
     """Retrieves all the data of a single test case execution."""
+    # TODO execution and test_set are not optional
     test_case_data = {
         'module': '',
         'sub_modules': '',
@@ -185,8 +184,7 @@ def get_test_case_data(root_path, project, test, suite=None, execution=None,
         'result': '',
         'test_elapsed_time': '',
         'start_date_time': '',
-        'error': '',
-        'short_error': '',
+        'errors': [],
         'browser': '',
         'environment': '',
         'steps': [],
@@ -203,16 +201,15 @@ def get_test_case_data(root_path, project, test, suite=None, execution=None,
     if os.path.exists(report_json_path):
         with open(report_json_path, 'r') as json_file:
             report_data = json.load(json_file)
-
             module = ''
             sub_modules = []
-            test_case_splitted = test.split('.')
-            if len(test_case_splitted) > 1:
-                module = test_case_splitted[0]
-                if len(test_case_splitted) > 2:
-                    sub_modules = test_case_splitted[1:-1]
+            test_case_split = test.split('.')
+            if len(test_case_split) > 1:
+                module = test_case_split[0]
+                if len(test_case_split) > 2:
+                    sub_modules = test_case_split[1:-1]
             test_case_data['module'] = module
-            test_case_name = test_case_splitted[-1]
+            test_case_name = test_case_split[-1]
             test_case_data['sub_modules'] = sub_modules
             test_case_data['name'] = test_case_name
             test_case_data['full_name'] = test
@@ -221,21 +218,10 @@ def get_test_case_data(root_path, project, test, suite=None, execution=None,
             test_case_data['test_elapsed_time'] = report_data['test_elapsed_time']
             start_date_time = get_date_time_from_timestamp(report_data['test_timestamp'])
             test_case_data['start_date_time'] = start_date_time
-            test_case_data['error'] = report_data['error']
-            test_case_data['short_error'] = report_data['short_error']
+            test_case_data['errors'] = report_data['errors']
             test_case_data['browser'] = report_data['browser']
             test_case_data['environment'] = report_data['environment']
-            steps = []
-            for step in report_data['steps']:
-                if '__' in step:
-                    this_step = {'message': step.split('__')[0],
-                                 'screenshot': step.split('__')[1]}
-                else:
-                    this_step = {'message': step,
-                                 'screenshot': None}
-                steps.append(this_step)
-            test_case_data['steps'] = steps
-
+            test_case_data['steps'] = report_data['steps']
             test_case_data['test_set'] = test_set
             test_case_data['execution'] = execution
             test_case_data['data'] = report_data['test_data']

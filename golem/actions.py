@@ -8,46 +8,100 @@ import string
 import sys
 import time
 import uuid
+import types
+import logging
+from contextlib import contextmanager
 
 import requests
 
-from golem import browser
-from golem import execution
-from golem.core.exceptions import (TextNotPresent,
-                                   TestError,
-                                   TestFailure)
+from golem import browser, execution
+from golem.core import utils
+from golem.test_runner import execution_logger
 
 
-def _add_error(short_error, long_error, log_level='ERROR'):
-    execution.errors.append()
-
-def _add_step(message):
-    execution.steps.append(message)
-
-def _append_screenshot():
-    if execution.settings['screenshot_on_step']:
-        img_id = str(uuid.uuid4())[:8]
-        _capture_screenshot(img_id)
-        last_step = execution.steps[-1]
-        execution.steps[-1] = '{}__{}'.format(last_step, img_id)
-
-
-def _capture_screenshot(img_id):
-    """take a screenshot and store it in report_directory.
-    Report_directory must already exist
-    """
-    driver = browser.get_browser()
-    if execution.report_directory:
-        img_path = os.path.join(execution.report_directory, '{}.png'.format(img_id))
-        driver.get_screenshot_as_file(img_path)
+def _add_error(message, description='', log_level='ERROR'):
+    """Add a new error to execution.errors and log the error"""
+    error = {
+        'message': message,
+        'description': description
+    }
+    execution.errors.append(error)
+    if log_level in execution_logger.VALID_LOG_LEVELS:
+        log_level_int = getattr(logging, log_level)
+        output = message
+        if description:
+            output = '{}\n{}'.format(message, description)
+        execution.logger.log(log_level_int, output)
     else:
-        execution.logger.debug('cannot take screensot, report directory does not exist')
+        raise Exception('log level {} is invalid'.format(log_level))
+
+
+def _add_step(message, log_level='INFO', log_step=True):
+    """Add a new step to execution.steps and log the step"""
+    step = {
+        'message': message,
+        'screenshot': None,
+        'error': None
+    }
+    execution.steps.append(step)
+    if log_step:
+        if log_level in execution_logger.VALID_LOG_LEVELS:
+            log_level_int = getattr(logging, log_level)
+            execution.logger.log(log_level_int, message)
+        else:
+            raise Exception('log level {} is invalid'.format(log_level))
+
+
+def _append_error(message, description=''):
+    """Append error to last step.
+    The last step must not have an error already added."""
+    if len(execution.steps) > 0:
+        last_step = execution.steps[-1]
+        if not last_step['error']:
+            last_step['error'] = {
+                'message': message,
+                'description': description
+            }
+        else:
+            raise Exception('last step already contains an error')
+    else:
+        raise Exception('there is no last step to append error')
+
+
+@contextmanager
+def _assert_step(step_message, error='', take_screenshots=True):
+    """Assert step context manager"""
+    _add_step(step_message)
+    _run_wait_hook()
+    step = types.SimpleNamespace(condition=None, error='')
+    yield step
+    error_message = error if error else step.error
+    assert step.condition, error_message
+    if take_screenshots:
+        _screenshot_on_step()
+
+
+def _capture_screenshot(image_filename):
+    """take a screenshot and store it in report_directory.
+    Report_directory must already exist.
+    """
+    if execution.report_directory:
+        img_path = os.path.join(execution.report_directory, image_filename)
+        get_browser().get_screenshot_as_file(img_path)
+    else:
+        execution.logger.debug('cannot take screenshot, report directory does not exist')
+
+
+def _generate_screenshot_name(message):
+    """Generate a valid filename from a message string"""
+    sanitized_filename = utils.get_valid_filename(message)
+    random_id = str(uuid.uuid4())[:5]
+    return '{}_{}.png'.format(sanitized_filename, random_id)
 
 
 def _run_wait_hook():
     wait_hook = execution.settings['wait_hook']
     if wait_hook:
-        time.sleep(0.3)
         start_time = time.time()
         extend_module = importlib.import_module('projects.{0}.extend'
                                                 .format(execution.project))
@@ -57,31 +111,93 @@ def _run_wait_hook():
                                .format(time.time() - start_time))
 
 
+def _screenshot_on_condition(condition):
+    """Take a screenshot if condition is True
+    Append the screenshot to the last step.
+    The last step must not have a screenshot already.
+    Use the last step message as the screenshot filename.
+    """
+    if len(execution.steps) > 0:
+        last_step = execution.steps[-1]
+        last_screenshot = last_step['screenshot']
+        if condition and not last_screenshot:
+            last_step_message = last_step['message']
+            screenshot_name = _generate_screenshot_name(last_step_message)
+            _capture_screenshot(screenshot_name)
+            last_step['screenshot'] = screenshot_name
+    else:
+        raise Exception('There is no step to attach the screenshot')
+
+
+def _screenshot_on_error():
+    """Take a screenshot if settings['screenshot_on_error']
+    Append the screenshot to the last step.
+    The last step must not have a screenshot already.
+    Use the last step message as the screenshot filename.
+    """
+    _screenshot_on_condition(execution.settings['screenshot_on_error'])
+
+
+def _screenshot_on_step():
+    """Take a screenshot if settings['screenshot_on_step']
+    Append the screenshot to the last step.
+    The last step must not have a screenshot already.
+    Use the last step message as the screenshot filename.
+    """
+    _screenshot_on_condition(execution.settings['screenshot_on_step'])
+
+
+@contextmanager
+def _step(message, run_wait_hook=True, take_screenshots=True):
+    """Step context manager (not verify step, not assert step)"""
+    _add_step(message)
+    if run_wait_hook:
+        _run_wait_hook()
+    yield
+    if take_screenshots:
+        _screenshot_on_step()
+
+
+@contextmanager
+def _verify_step(step_message, error='', error_description='', take_screenshots=True):
+    """Verify step context manager"""
+    _add_step(step_message)
+    _run_wait_hook()
+    step = types.SimpleNamespace(condition=None, error='', error_description='')
+    yield step
+    if not step.condition:
+        error_message = error if error else step.error
+        error_description = error_description if error_description else step.error_description
+        _add_error(error_message, error_description)
+        _append_error(error_message, error_description)
+        if take_screenshots:
+            _screenshot_on_error()
+    if take_screenshots:
+        _screenshot_on_step()
+
+
 def accept_alert(ignore_not_present=False):
-    """Accept an alert
-    When ignore_not_present is True the error when alert
-    is not present is ignored.
+    """Accept an alert, confirm or prompt box.
+    Use ignore_not_present to ignore error when alert is not present.
 
     Parameters:
-    ignore_not_present (False): value"""
-    step_message = 'Accept alert'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().accept_alert(ignore_not_present)
-    _append_screenshot()
+    ignore_not_present (optional, False) : value"""
+    with _step('Accept alert'):
+        get_browser().accept_alert(ignore_not_present)
 
 
 def activate_browser(browser_id):
     """Activates a browser by the browser_id
-    
+
+    When opening more than one browser (not windows or tabs)
+    for a single test, the new browser can be assigned to an ID.
+    Default browser ID is 'main'.
+
     Parameters:
     browser_id : value
     """
-    step_message = 'Activate browser {}'.format(browser_id)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    browser.activate_browser(browser_id)
-    _append_screenshot()
+    with _step('Activate browser {}'.format(browser_id), run_wait_hook=False):
+        browser.activate_browser(browser_id)
 
 
 def add_cookie(cookie_dict):
@@ -101,17 +217,68 @@ def add_cookie(cookie_dict):
     Parameters:
     cookie_dict : value
     """
-    execution.logger.debug('Add cookie: {}'.format(cookie_dict))
+    execution.logger.info('Add cookie: {}'.format(cookie_dict))
     get_browser().add_cookie(cookie_dict)
 
 
-def add_error(message):
-    """Add an error to the test.
-    The test will continue
+def assert_alert_not_present():
+    """Assert an alert is not present"""
+    _add_step('Assert an alert is not present')
+    _run_wait_hook()
+    assert not get_browser().alert_is_present(), 'an alert was present'
+    _screenshot_on_step()
+
+
+def assert_alert_present():
+    """Assert an alert is present"""
+    _add_step('Assert an alert is present')
+    _run_wait_hook()
+    assert get_browser().alert_is_present(), 'an alert was not present'
+    _screenshot_on_step()
+
+
+def assert_alert_text(text):
+    """Assert alert text
+    This will fail if there is no alert present.
+
     Parameters:
-    message : value
+    text : value
     """
-    execution.logger.error(message)
+    _add_step("Assert alert text is '{}'".format(text))
+    _run_wait_hook()
+    alert_text = get_browser().switch_to.alert.text
+    error_msg = "expected alert text to be '{}' but was '{}'".format(text, alert_text)
+    assert alert_text == text, error_msg
+    _screenshot_on_step()
+
+
+def assert_alert_text_is_not(text):
+    """Assert alert text is not `text`
+    This will fail if there is no alert present.
+
+    Parameters:
+    text : value
+    """
+    _add_step("Assert alert text is not '{}'".format(text))
+    _run_wait_hook()
+    alert_text = get_browser().switch_to.alert.text
+    error_msg = "expected alert text not to be '{}'".format(text)
+    assert alert_text != text, error_msg
+    _screenshot_on_step()
+
+
+def assert_amount_of_windows(amount):
+    """Assert the amount of open windows/tabs
+
+    Parameters:
+    amount : value
+    """
+    _add_step('Assert amount of open windows is {}'.format(amount))
+    _run_wait_hook()
+    actual_amount = len(get_window_handles())
+    error_msg = 'expected {} windows but got {}'.format(amount, actual_amount)
+    assert actual_amount == amount, error_msg
+    _screenshot_on_step()
 
 
 def assert_contains(element, value):
@@ -122,11 +289,305 @@ def assert_contains(element, value):
     value : value
     """
     step_message = 'Assert that {0} contains {1}'.format(element, value)
-    execution.logger.info(step_message)
     execution.logger.warning('Action assert_contains is deprecated')
     _add_step(step_message)
-    if not value in element:
-        raise Exception('Expected {} to contain {}'.format(element, value))
+    _run_wait_hook()
+    assert value not in element, 'Expected {} to contain {}'.format(element, value)
+
+
+def assert_cookie_present(name):
+    """Assert a cookie exists in the current session.
+    The cookie is found by its name.
+
+    Parameters:
+    name: value
+    """
+    _add_step("Assert that cookie '{}' exists".format(name))
+    _run_wait_hook()
+    cookie = browser.get_browser().get_cookie(name)
+    assert cookie, "cookie '{}' was not found".format(name)
+
+
+def assert_cookie_value(name, value):
+    """Assert the value of a cookie.
+    This will fail if the cookie does not exist.
+
+    Parameters:
+    name: value
+    value: value
+    """
+    _add_step("Assert that cookie '{}' value is '{}'".format(name, value))
+    _run_wait_hook()
+    cookie = browser.get_browser().get_cookie(name)
+    if not cookie:
+        raise Exception('Cookie "{}" was not found'.format(name))
+    elif not 'value' in cookie:
+        raise Exception('Cookie "{}" did not have "value" key'.format(name))
+    else:
+        msg = ("expected cookie '{}' value to be '{}' but was '{}'"
+               .format(name, value, cookie['value']))
+        assert cookie['value'] == value, msg
+
+
+def assert_element_attribute(element, attribute, value):
+    """Assert value of element attribute
+
+    Parameters:
+    element : element
+    attribute : value
+    value : value
+    """
+    element = get_browser().find(element, timeout=0)
+    step_message = ("Assert the element {} attribute {} value is '{}'"
+                    .format(element.name, attribute, value))
+    _add_step(step_message)
+    _run_wait_hook()
+    attr_value = element.get_attribute(attribute)
+    msg = ("expected element {} attribute {} value to be '{}' was '{}'"
+           .format(element.name, attribute, value, attr_value))
+    assert  attr_value == value, msg
+    _screenshot_on_step()
+
+
+def assert_element_attribute_is_not(element, attribute, value):
+    """Assert the value of element attribute is not `value`
+
+    Parameters:
+    element : element
+    attribute : value
+    value : value
+    """
+    element = get_browser().find(element, timeout=0)
+    step_message = 'Verify the element {} attribute {} value is not {}'.format(element.name, attribute, value)
+    _add_step(step_message)
+    _run_wait_hook()
+    attr_value = element.get_attribute(attribute)
+    msg = ('expected element {} attribute {} value to not be {}'
+           .format(element.name, attribute, value))
+    assert attr_value != value, msg
+    _screenshot_on_step()
+
+
+def assert_element_checked(element):
+    """Assert element is checked.
+    This applies to checkboxes and radio buttons.
+
+    Parameters:
+    element : element
+    """
+    element = get_browser().find(element, timeout=0)
+    _add_step('Assert the element {} is checked'.format(element.name))
+    _run_wait_hook()
+    assert element.is_selected(), 'element {} is not checked'.format(element.name)
+    _screenshot_on_step()
+
+
+def assert_element_displayed(element):
+    """Assert element is displayed (visible to the user)
+
+    Parameters:
+    element : element
+    """
+    element = get_browser().find(element, timeout=0, wait_displayed=False)
+    element = get_browser().find(element, timeout=0, wait_displayed=False)
+    _add_step('Assert element {} is displayed'.format(element.name))
+    _run_wait_hook()
+    assert element.is_displayed(), 'element {} is not displayed'.format(element.name)
+    _screenshot_on_step()
+
+
+def assert_element_enabled(element):
+    """Assert element is enabled.
+
+    Parameters:
+    element : element
+    """
+    element = get_browser().find(element, timeout=0)
+    _add_step('Assert element {} is enabled'.format(element.name))
+    _run_wait_hook()
+    assert element.is_enabled(), 'element {} is not enabled'.format(element.name)
+    _screenshot_on_step()
+
+
+def assert_element_has_attribute(element, attribute):
+    """Assert element has attribute
+
+    Parameters:
+    element : element
+    attribute : value
+    """
+    element = get_browser().find(element, timeout=0)
+    _add_step('Assert element {} has attribute {}'.format(element.name, attribute))
+    _run_wait_hook()
+    error_msg = 'element {} does not have attribute {}'.format(element.name, attribute)
+    assert element.has_attribute(attribute), error_msg
+    _screenshot_on_step()
+
+
+def assert_element_has_focus(element):
+    """Assert element has focus
+
+    Parameters:
+    element : element
+    """
+    element = get_browser().find(element, timeout=0)
+    _add_step('Assert element {} has focus'.format(element.name))
+    _run_wait_hook()
+    error_msg = 'element {} does not have focus'.format(element.name)
+    assert element.has_focus(), error_msg
+
+
+def assert_element_has_not_attribute(element, attribute):
+    """Assert element has not attribute
+
+    Parameters:
+    element : element
+    attribute : value
+    """
+    element = get_browser().find(element, timeout=0)
+    _add_step('Assert element {} has not attribute {}'.format(element.name, attribute))
+    _run_wait_hook()
+    error_msg = 'element {} has attribute {}'.format(element.name, attribute)
+    assert not element.has_attribute(attribute), error_msg
+
+
+def assert_element_has_not_focus(element):
+    """Assert element does not have focus
+
+    Parameters:
+    element : element
+    """
+    element = get_browser().find(element, timeout=0)
+    _add_step('Assert element {} does not have focus'.format(element.name))
+    _run_wait_hook()
+    error_msg = 'element {} has focus'.format(element.name)
+    assert not element.has_focus(), error_msg
+
+
+def assert_element_not_checked(element):
+    """Assert element is not checked.
+    This applies to checkboxes and radio buttons.
+
+    Parameters:
+    element : element
+    """
+    element = browser.get_browser().find(element, timeout=0)
+    _add_step('Assert the element {} is not checked'.format(element.name))
+    _run_wait_hook()
+    assert not element.is_selected(), 'element {} is checked'.format(element.name)
+    _screenshot_on_step()
+
+
+def assert_element_not_displayed(element):
+    """Assert element is not displayed (visible to the user)
+
+    Parameters:
+    element : element
+    """
+    element = get_browser().find(element, timeout=0, wait_displayed=False)
+    _add_step('Assert element {} is not displayed'.format(element.name))
+    _run_wait_hook()
+    assert element.is_displayed(), 'element {} is displayed'.format(element.name)
+    _screenshot_on_step()
+
+
+def assert_element_not_enabled(element):
+    """Assert element is not enabled.
+
+    Parameters:
+    element : element
+    """
+    element = get_browser().find(element, timeout=0)
+    _add_step('Assert element {} is not enabled'.format(element.name))
+    _run_wait_hook()
+    assert element.is_enabled(), 'element {} is enabled'.format(element.name)
+    _screenshot_on_step()
+
+
+def assert_element_not_present(element):
+    """Assert element is not present in the DOM
+
+    Parameters:
+    element : element
+    """
+    _add_step('Assert element is not present')
+    _run_wait_hook()
+    msg = 'element {} is present'.format(element)
+    assert not get_browser().element_is_present(element), msg
+
+
+def assert_element_present(element):
+    """Assert element is present in the DOM
+
+    Parameters:
+    element : element
+    """
+    _add_step('Assert element is present')
+    _run_wait_hook()
+    msg = 'element {} is not present'.format(element)
+    assert get_browser().element_is_present(element), msg
+
+
+def assert_element_text(element, text):
+    """Assert the text of the element
+
+    Parameters:
+    element : element
+    text : value
+    """
+    element = get_browser().find(element, timeout=0)
+    _add_step("Assert element {} text is '{}'".format(element.name, text))
+    _run_wait_hook()
+    msg = ("expected element {} text to be '{}' but was '{}'"
+           .format(element.name, text, element.text))
+    assert element.text == text, msg
+    _screenshot_on_step()
+
+
+def assert_element_text_contains(element, text):
+    """Assert element contains text
+
+    Parameters:
+    element : element
+    text : value
+    """
+    element = get_browser().find(element, timeout=0)
+    _add_step("Assert element {} contains text '{}'".format(element.name, text))
+    _run_wait_hook()
+    msg = ("expected element {} text '{}' to contain '{}'"
+           .format(element.name, element.text, text))
+    assert text in element.text, msg
+    _screenshot_on_step()
+
+
+def assert_element_text_is_not(element, text):
+    """Assert the text of the element is not `text`
+
+    Parameters:
+    element : element
+    text : value
+    """
+    element = browser.get_browser().find(element, timeout=0)
+    _add_step("Assert element {} text is not '{}'".format(element.name, text))
+    _run_wait_hook()
+    msg = "expected element {} text to not be '{}'".format(element.name, text)
+    assert element.text != text, msg
+    _screenshot_on_step()
+
+
+def assert_element_text_not_contains(element, text):
+    """Assert the text of the element does not contain `text`
+
+    Parameters:
+    element : element
+    text : value
+    """
+    element = get_browser().find(element, timeout=0)
+    _add_step("Assert element {} does not contain text '{}'".format(element.name, text))
+    _run_wait_hook()
+    msg = "element {} text '{}' contains text '{}'".format(element.name, element.text, text)
+    assert text not in element.text, msg
+    _screenshot_on_step()
 
 
 def assert_equals(actual_value, expected_value):
@@ -137,10 +598,9 @@ def assert_equals(actual_value, expected_value):
     expected_value : value
     """
     step_message = 'Assert that {0} equals {1}'.format(actual_value, expected_value)
-    execution.logger.info(step_message)
+    execution.logger.warning('Action assert_equals is deprecated')
     _add_step(step_message)
-    if not actual_value == expected_value:
-        raise Exception('Expected {} to equal {}'.format(actual_value, expected_value))
+    assert actual_value == expected_value, 'expected {} to equal {}'.format(actual_value, expected_value)
 
 
 def assert_false(condition):
@@ -149,11 +609,141 @@ def assert_false(condition):
     Parameters:
     condition : value
     """
-    step_message = 'Assert that {0} is false'.format(condition)
-    execution.logger.info(step_message)
+    step_message = 'Assert that {} is false'.format(condition)
+    execution.logger.warning('Action assert_false is deprecated')
     _add_step(step_message)
-    if condition:
-        raise Exception('Expected {} to be false'.format(condition))
+    assert not condition, 'expected {} to be false'.format(condition)
+
+
+def assert_page_contains_text(text):
+    """Assert the given text is present anywhere in the page source
+
+    Parameters:
+    text : value
+    """
+    _add_step("Verify '{}' is present in page".format(text))
+    _run_wait_hook()
+    assert text in get_browser().page_source, "text '{}' not found in page".format(text)
+    _screenshot_on_step()
+
+
+def assert_page_not_contains_text(text):
+    """Assert the given text is not present anywhere in the page source
+
+    Parameters:
+    text : value
+    """
+    _add_step("Assert '{}' is not present in page".format(text))
+    _run_wait_hook()
+    assert text not in get_browser().page_source, "text '{}' was found in page".format(text)
+    _screenshot_on_step()
+
+
+def assert_response_status_code(response, status_code):
+    """Assert the response status code.
+
+    Parameters:
+    response : value
+    status_code : value
+    """
+    if isinstance(status_code, str):
+        if status_code.isdigit():
+            status_code = int(status_code)
+    _add_step('Assert response status code is {}'.format(status_code))
+    msg = ('expected response status code to be {} but was {}'
+           .format(status_code, response.status_code))
+    assert response.status_code == status_code, msg
+
+
+def assert_selected_option_by_text(element, text):
+    """Assert an element has a selected option by the option text
+
+    Parameters:
+    element : element
+    text : value
+    """
+    element = get_browser().find(element)
+    step_message = ("Assert selected option text of element {} is '{}'"
+                    .format(element.name, text))
+    _add_step(step_message)
+    _run_wait_hook()
+    selected_option_text = element.select.first_selected_option.text
+    error_msg = ("expected selected option in element {} to be '{}' but was '{}'"
+                 .format(element.name, text, selected_option_text))
+    assert selected_option_text == text, error_msg
+    _screenshot_on_step()
+
+
+def assert_selected_option_by_value(element, value):
+    """Assert an element has a selected option by the option value
+
+    Parameters:
+    element : element
+    value : value
+    """
+    element = get_browser().find(element)
+    step_message = ('Assert selected option value of element {} is {}'
+                    .format(element.name, value))
+    _add_step(step_message)
+    _run_wait_hook()
+    selected_option_value = element.select.first_selected_option.value
+    error_msg = ('expected selected option in element {} to be {} but was {}'
+                 .format(element.name, value, selected_option_value))
+    assert selected_option_value == value, error_msg
+    _screenshot_on_step()
+
+
+def assert_title(title):
+    """Assert the page title
+
+    Parameters:
+    title : value
+    """
+    _add_step("Assert page title is '{}'".format(title))
+    _run_wait_hook()
+    error_msg = ("expected title to be '{}' but was '{}'"
+                 .format(title, get_browser().title))
+    assert get_browser().title == title, error_msg
+    _screenshot_on_step()
+
+
+def assert_title_contains(partial_title):
+    """Assert the page title contains partial_title
+
+    Parameters:
+    partial_title : value
+    """
+    _add_step("Assert page title contains '{}'".format(partial_title))
+    _run_wait_hook()
+    error_msg = "expected title to contain '{}'".format(partial_title)
+    assert partial_title in get_browser().title, error_msg
+    _screenshot_on_step()
+
+
+def assert_title_is_not(title):
+    """Assert the page title is not the given value
+
+    Parameters:
+    title : value
+    """
+    _add_step("Assert page title is not '{}'".format(title))
+    _run_wait_hook()
+    error_msg = "expected title to not be '{}'".format(title)
+    assert get_browser().title != title, error_msg
+    _screenshot_on_step()
+
+
+def assert_title_not_contains(text):
+    """Assert the page title does not contain text
+
+    Parameters:
+    text : value
+    """
+    _add_step("Assert page title does not contain '{}'".format(text))
+    _run_wait_hook()
+    error_msg = "title contains '{}'".format(text)
+    assert text not in get_browser().title, error_msg
+    _screenshot_on_step()
 
 
 def assert_true(condition):
@@ -163,10 +753,117 @@ def assert_true(condition):
     condition : value
     """
     step_message = 'Assert that {0} is true'.format(condition)
-    execution.logger.info(step_message)
+    execution.logger.warning('Action assert_true is deprecated')
     _add_step(step_message)
-    if not condition:
-        raise Exception('Expected {} to be true'.format(condition))
+    assert condition, 'expected {} to be true'.format(condition)
+
+
+def assert_url(url):
+    """Assert the current URL
+
+    Parameters:
+    url : value
+    """
+    _add_step("Assert URL is '{}'".format(url))
+    _run_wait_hook()
+    error_msg = ("expected URL to be '{}' but was '{}'"
+                 .format(url, get_browser().current_url))
+    assert get_browser().current_url == url, error_msg
+    _screenshot_on_step()
+
+
+def assert_url_contains(partial_url):
+    """Assert the current URL contains partial_url
+
+    Parameters:
+    partial_url : value
+    """
+    _add_step("Assert URL contains '{}'".format(partial_url))
+    _run_wait_hook()
+    error_msg = "expected URL to contain '{}'".format(partial_url)
+    assert partial_url in get_browser().current_url, error_msg
+    _screenshot_on_step()
+
+
+def assert_url_is_not(url):
+    """Assert the current URL is not `url`
+
+    Parameters:
+    url : value
+    """
+    _add_step("Assert URL is not '{}'".format(url))
+    _run_wait_hook()
+    error_msg = "expected URL to not be '{}'".format(url)
+    assert get_browser().current_url != url, error_msg
+    _screenshot_on_step()
+
+
+def assert_url_not_contains(partial_url):
+    """Assert the current URL does not contain partial_url
+
+    Parameters:
+    partial_url : value
+    """
+    _add_step("Assert page title does not contain '{}'".format(partial_url))
+    _run_wait_hook()
+    error_msg = ("expected URL '{}' to not contain '{}'"
+                 .format(partial_url))
+    assert partial_url not in get_browser().current_url, error_msg
+    _screenshot_on_step()
+
+
+def assert_window_present_by_partial_title(partial_title):
+    """Assert there is a window/tab present by partial title
+
+    Parameters:
+    partial_title : value
+    """
+    _add_step("Assert window present by partial title '{}'".format(partial_title))
+    _run_wait_hook()
+    error_msg = "There is no window present with partial title '{}'".format(partial_title)
+    window_titles = get_browser().get_window_titles()
+    assert any(partial_title in t for t in window_titles), error_msg
+    _screenshot_on_step()
+
+
+def assert_window_present_by_partial_url(partial_url):
+    """Assert there is a window/tab present by partial URL
+
+    Parameters:
+    partial_url : value
+    """
+    _add_step("Assert window present by partial URL '{}'".format(partial_url))
+    _run_wait_hook()
+    urls = get_browser().get_window_urls()
+    error_msg = "There is no window present with partial URL '{}'".format(partial_url)
+    assert any(partial_url in url for url in urls), error_msg
+    _screenshot_on_step()
+
+
+def assert_window_present_by_title(title):
+    """Assert there is a window/tab present by title
+
+    Parameters:
+    title : value
+    """
+    _add_step("Assert window present by title '{}'".format(title))
+    _run_wait_hook()
+    error_msg = "There is no window present with title '{}'".format(title)
+    assert title in get_browser().get_window_titles(), error_msg
+    _screenshot_on_step()
+
+
+def assert_window_present_by_url(url):
+    """Assert there is a window/tab present by URL
+
+    Parameters:
+    url : value
+    """
+    _add_step("Assert window present by URL '{}'".format(url))
+    _run_wait_hook()
+    error_msg = "There is no window present with URL '{}'".format(url)
+    assert url in get_browser().get_window_urls(), error_msg
+    _screenshot_on_step()
 
 
 def capture(message=''):
@@ -187,11 +884,8 @@ def check_element(element):
     element : element
     """
     element = get_browser().find(element)
-    step_msg = 'Check element {}'.format(element.name)
-    execution.logger.info(step_msg)
-    _add_step(step_msg)
-    get_browser().check_element(element)
-    _append_screenshot()
+    with _step('Check element {}'.format(element.name)):
+        get_browser().check_element(element)
 
 
 def clear(element):
@@ -210,13 +904,9 @@ def clear_element(element):
     Parameters:
     element : element
     """
-    _run_wait_hook()
     element = get_browser().find(element)
-    step_message = 'Clear element {}'.format(element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    element.clear()
-    _append_screenshot()
+    with _step('Clear element {}'.format(element.name)):
+        element.clear()
 
 
 def click(element):
@@ -225,13 +915,9 @@ def click(element):
     Parameters:
     element : element
     """
-    _run_wait_hook()
-    webelement = browser.get_browser().find(element)
-    step_message = 'Click {}'.format(webelement.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    webelement.click()
-    _append_screenshot()
+    element = browser.get_browser().find(element)
+    with _step('Click {}'.format(element.name)):
+        element.click()
 
 
 def close():
@@ -254,11 +940,11 @@ def close_window():
     If there are other windows open, this will try to switch to
     the first window afterwards.
     """
-    execution.logger.info('Close current window')
-    browser = get_browser()
-    browser.close()
-    if browser.window_handles:
-        browser.switch_to_first_window()
+    with _step('Close current window'):
+        browser_ = get_browser()
+        browser_.close()
+        if browser_.window_handles:
+            browser_.switch_to_first_window()
 
 
 def close_window_by_index(index):
@@ -268,12 +954,8 @@ def close_window_by_index(index):
     Parameters:
     index : value
     """
-    _run_wait_hook()
-    step_message = 'Close window by index {}'.format(index)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().close_window_by_index(index)
-    _append_screenshot()
+    with _step('Close window by index {}'.format(index)):
+        get_browser().close_window_by_index(index)
 
 
 def close_window_by_partial_title(partial_title):
@@ -282,12 +964,8 @@ def close_window_by_partial_title(partial_title):
     Parameters:
     partial_title : value
     """
-    _run_wait_hook()
-    step_message = 'Close window by partial title \'{}\''.format(partial_title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().close_window_by_partial_title(partial_title)
-    _append_screenshot()
+    with _step("Close window by partial title '{}'".format(partial_title)):
+        get_browser().close_window_by_partial_title(partial_title)
 
 
 def close_window_by_partial_url(partial_url):
@@ -296,12 +974,8 @@ def close_window_by_partial_url(partial_url):
     Parameters:
     partial_title : value
     """
-    _run_wait_hook()
-    step_message = 'Close window by partial URL \'{}\''.format(partial_url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().close_window_by_partial_url(partial_url)
-    _append_screenshot()
+    with _step("Close window by partial URL '{}'".format(partial_url)):
+        get_browser().close_window_by_partial_url(partial_url)
 
 
 def close_window_by_title(title):
@@ -310,12 +984,8 @@ def close_window_by_title(title):
     Parameters:
     title : value
     """
-    _run_wait_hook()
-    step_message = 'Close window by title \'{}\''.format(title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().close_window_by_title(title)
-    _append_screenshot()
+    with _step("Close window by title '{}'".format(title)):
+        get_browser().close_window_by_title(title)
 
 
 def close_window_by_url(url):
@@ -324,12 +994,8 @@ def close_window_by_url(url):
     Parameters:
     url : value
     """
-    _run_wait_hook()
-    step_message = 'Close window by URL \'{}\''.format(url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().close_window_by_url(url)
-    _append_screenshot()
+    with _step("Close window by URL '{}'".format(url)):
+        get_browser().close_window_by_url(url)
 
 
 def debug():
@@ -343,8 +1009,8 @@ def delete_all_cookies():
     """Delete all cookies from the current session.
     Note: this only deletes cookies from the current domain.
     """
-    execution.logger.debug('Delete all cookies')
-    get_browser().delete_all_cookies()
+    with _step('Delete all cookies'):
+        get_browser().delete_all_cookies()
 
 
 def delete_cookie(name):
@@ -353,27 +1019,22 @@ def delete_cookie(name):
     Parameters:
     name: value
     """
-    execution.logger.debug('Delete cookie "{}"'.format(name))
-    browser = get_browser()
-    cookie = browser.get_cookie(name)
-    if not cookie:
-        raise Exception('Cookie "{}" was not found'.format(name))
-    else:
-        browser.delete_cookie(name)
+    with _step("Delete cookie '{}'".format(name)):
+        cookie = get_browser().get_cookie(name)
+        if not cookie:
+            raise Exception('Cookie "{}" was not found'.format(name))
+        else:
+            get_browser().delete_cookie(name)
 
 
 def dismiss_alert(ignore_not_present=False):
     """Dismiss an alert.
-    When ignore_not_present is True the error when alert
-    is not present is ignored.
+     Use ignore_not_present to ignore error when alert is not present.
 
     Parameters:
     ignore_not_present (False) : value"""
-    step_message = 'Dismiss alert'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().dismiss_alert(ignore_not_present)
-    _append_screenshot()
+    with _step('Dismiss alert'):
+        get_browser().dismiss_alert(ignore_not_present)
 
 
 def double_click(element):
@@ -383,13 +1044,11 @@ def double_click(element):
     element : element
     """
     element = get_browser().find(element)
-    step_message = 'Double click element {}'.format(element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    element.double_click()
-    _append_screenshot()
+    with _step('Double click element {}'.format(element.name)):
+        element.double_click()
 
 
+# TODO
 # def drag_and_drop(element, target):
 #     """Drag and drop an element into target
 #     Parameters:
@@ -403,27 +1062,31 @@ def double_click(element):
 #     execution.logger.info(step_message)
 #     _add_step(step_message)
 #     b.drag_and_drop(element, target)
-#     _append_screenshot()
+#     _screenshot_on_step()
 
 
-def error(message=''):
-    """Mark the test as error and stop.
+def error(message, description=''):
+    """Add an error to the test.
+    The test will continue.
 
     Parameters:
-    message (optional): value
+    message : value
+    description (optional) : value
     """
-    add_error(message)
-    raise TestError(message)
+    _add_step('ERROR', log_step=False)
+    _add_error(message, description)
+    _append_error(message, description)
 
 
 def execute_javascript(script, *args):
-    """Execute javascript code
+    """Execute javascript code.
+    The result is returned.
 
     Parameters:
     script : value
     *args : value
     """
-    execution.logger.debug('Execute javascript code \'{}\' with args \'{}\''.format(script, args))
+    _add_step("Execute javascript code '{}' with args '{}'".format(script, args))
     return get_browser().execute_script(script, *args)
 
 
@@ -431,9 +1094,9 @@ def fail(message=''):
     """Mark the test as failure and stop
 
     Parameters:
-    message (optional) : value"""
-    # TODO
-    raise TestFailure(message)
+    message (optional, '') : value
+    """
+    raise AssertionError(message)
 
 
 def focus_element(element):
@@ -442,13 +1105,9 @@ def focus_element(element):
     Parameters:
     element : element
     """
-    _run_wait_hook()
     element = get_browser().find(element)
-    step_message = 'Focus element {}'.format(element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    element.focus()
-    _append_screenshot()
+    with _step('Focus element {}'.format(element.name)):
+        element.focus()
 
 
 def get(url):
@@ -509,7 +1168,9 @@ def get_element_attribute(element, attribute):
     element : element
     attribute : value
     """
-    return get_browser().find(element).get_attribute(attribute)
+    element = get_browser().find(element)
+    execution.logger.debug("Get '{}' element '{}' attribute".format(element, attribute))
+    return element.get_attribute(attribute)
 
 
 def get_element_text(element):
@@ -518,7 +1179,9 @@ def get_element_text(element):
     Parameters
     element : element
     """
-    return get_browser().find(element).text
+    element = get_browser().find(element)
+    execution.logger.debug("Get '{}' element text".format(element))
+    return element.text
 
 
 def get_element_value(element):
@@ -527,36 +1190,55 @@ def get_element_value(element):
     Parameters
     element : element
     """
-    return get_browser().find(element).get_attribute('value')
+    element = get_browser().find(element)
+    execution.logger.debug("Get '{}' element value".format(element))
+    return element.get_attribute('value')
 
 
 def get_page_source():
     """Get the page source"""
+    execution.logger.debug('Get page source')
     return get_browser().page_source
 
 
 def get_search_timeout():
     """Get search timeout"""
+    execution.logger.debug('Get search timeout')
     return execution.settings['search_timeout']
 
 
 def get_window_handle():
-    """Get window handle"""
+    """Get current window handle"""
+    execution.logger.debug('Get current window handle')
     return get_browser().current_window_handle
 
 
 def get_window_handles():
     """Return a list with the handles of all the open windows/tabs"""
+    execution.logger.debug('Get all window handles')
     return get_browser().window_handles
 
 
 def get_window_index():
-    """"Get the index of the current window/tab"""
+    """"Get the index of the current window/tab from the
+    list of window handles"""
+    execution.logger.debug('Get current window index')
     return get_browser().get_window_index()
+
+
+def get_window_size():
+    """Return the window size with the following format:
+    size = {
+        'width': x,
+        'height': y
+    }
+    """
+    return get_browser().get_window_size()
 
 
 def get_window_title():
     """Get window title"""
+    execution.logger.debug('Get window title')
     return get_browser().title
 
 
@@ -568,27 +1250,21 @@ def get_window_titles():
 
 def go_back():
     """Goes one step backward in the browser history"""
-    _run_wait_hook()
-    step_message = 'Go back'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    browser.get_browser().back()
-    _append_screenshot()
+    with _step('Go back'):
+        get_browser().back()
 
 
 def go_forward():
     """Goes one step forward in the browser history"""
-    _run_wait_hook()
-    step_msg = 'Go forward'
-    execution.logger.info(step_msg)
-    _add_step(step_msg)
-    browser.get_browser().forward()
-    _append_screenshot()
+    with _step('Go forward'):
+        get_browser().forward()
 
 
 def http_get(url, headers={}, params={}, verify_ssl_cert=True):
     """Perform an HTTP GET request to the given URL.
     Headers and params are optional dictionaries.
+    Store response in data.last_response
+    Returns the response
 
     Parameters:
     url : value
@@ -596,9 +1272,7 @@ def http_get(url, headers={}, params={}, verify_ssl_cert=True):
     params (optional, dict) : value
     verify_ssl_cert (optional, True) : value
     """
-    step_message = 'Make a GET request to {}'.format(url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
+    _add_step('Make a GET request to {}'.format(url))
     response = requests.get(url, headers=headers, params=params,
                             verify=verify_ssl_cert)
     store('last_response', response)
@@ -608,6 +1282,8 @@ def http_get(url, headers={}, params={}, verify_ssl_cert=True):
 def http_post(url, headers={}, data={}, verify_ssl_cert=True):
     """Perform an HTTP POST request to the given URL.
     Headers and data are optional dictionaries.
+    Stores the response in data.last_response
+    Returns the response
 
     Parameters:
     url : value
@@ -615,9 +1291,7 @@ def http_post(url, headers={}, data={}, verify_ssl_cert=True):
     data (optional, dict) : value
     verify_ssl_cert (optional, default is True) : value
     """
-    step_message = 'Make POST request to {}'.format(url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
+    _add_step('Make POST request to {}'.format(url))
     response = requests.post(url, headers=headers, data=data,
                              verify=verify_ssl_cert)
     store('last_response', response)
@@ -681,20 +1355,15 @@ def javascript_click(element):
     Parameters:
     element : element
     """
-    _run_wait_hook()
     element = get_browser().find(element)
-    step_msg = 'Javascript click element {}'.format(element.name)
-    execution.logger.info(step_msg)
-    _add_step(step_msg)
-    element.javascript_click()
-    _append_screenshot()
+    with _step('Javascript click element {}'.format(element.name)):
+        element.javascript_click()
 
 
 def maximize_window():
     """Maximize browser window"""
     execution.logger.debug('maximize browser window')
     get_browser().maximize_window()
-    _append_screenshot()
 
 
 def mouse_hover(element):
@@ -713,14 +1382,9 @@ def mouse_over(element):
     Parameters:
     element : element
     """
-    _run_wait_hook()
-    driver = browser.get_browser()
-    element = driver.find(element)
-    step_message = 'Mouse over element \'{}\''.format(element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    element.mouse_over()
-    _append_screenshot()
+    element = get_browser().find(element)
+    with _step("Mouse over element '{}'".format(element.name)):
+        element.mouse_over()
 
 
 def navigate(url):
@@ -729,25 +1393,21 @@ def navigate(url):
     Parameters:
     url : value
     """
-    step_message = 'Navigate to: \'{0}\''.format(url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    browser.get_browser().get(url)
-    _append_screenshot()
-    
+    with _step("Navigate to: '{}'".format(url), run_wait_hook=False):
+        get_browser().get(url)
+
 
 def open_browser(browser_id=None):
     """Open a new browser.
     browser_id is optional and only used to manage more than one
-    browser at the same time.
+    browser for the same test.
+    Default browser ID is 'main'.
 
     Parameters:
     browser_id (optional) : value
     """
-    step_message = 'Open browser'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    browser.open_browser(browser_id)
+    with _step('Open browser', take_screenshots=False, run_wait_hook=False):
+        browser.open_browser(browser_id)
 
     
 def press_key(element, key):
@@ -758,11 +1418,8 @@ def press_key(element, key):
     key : value
     """
     element = get_browser().find(element)
-    step_message = 'Press key: {} in element {}'.format(key, element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    element.press_key(key)
-    _append_screenshot()
+    with _step("Press key: '{}' in element {}".format(key, element.name)):
+        element.press_key(key)
 
 
 def random(value):
@@ -785,12 +1442,8 @@ def random(value):
 
 def refresh_page():
     """Refresh the page"""
-    _run_wait_hook()
-    step_message = 'Refresh page'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().refresh()
-    _append_screenshot()
+    with _step('Refresh page'):
+        get_browser().refresh()
 
 
 def select_by_index(element, index):
@@ -835,13 +1488,9 @@ def select_option_by_index(element, index):
     element : element
     index : value
     """
-    _run_wait_hook()
     element = get_browser().find(element)
-    step_message = 'Select option of index {0} from element {1}'.format(index, element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    element.select.select_by_index(index)
-    _append_screenshot()
+    with _step('Select option of index {} from element {}'.format(index, element.name)):
+        element.select.select_by_index(index)
 
 
 def select_option_by_text(element, text):
@@ -851,13 +1500,9 @@ def select_option_by_text(element, text):
     element : element
     text : value
     """
-    _run_wait_hook()
     element = get_browser().find(element)
-    step_message = 'Select \'{0}\' from element {1}'.format(text, element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    element.select.select_by_visible_text(text)
-    _append_screenshot()
+    with _step("Select option '{}' from element {}".format(text, element.name)):
+        element.select.select_by_visible_text(text)
 
 
 def select_option_by_value(element, value):
@@ -867,13 +1512,9 @@ def select_option_by_value(element, value):
     element : element
     value : value
     """
-    _run_wait_hook()
     element = get_browser().find(element)
-    step_message = 'Select \'{0}\' value from element {1}'.format(value, element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    element.select.select_by_value(value)
-    _append_screenshot()
+    with _step("Select option of value '{}' from element {}".format(value, element.name)):
+        element.select.select_by_value(value)
 
 
 def send_keys(element, text):
@@ -883,13 +1524,9 @@ def send_keys(element, text):
     element : element
     text : value
     """
-    _run_wait_hook()
     element = get_browser().find(element)
-    step_message = 'Write \'{0}\' in element {1}'.format(text, element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    element.send_keys(text)
-    _append_screenshot()
+    with _step("Write '{}' in element {}".format(text, element.name)):
+        element.send_keys(text)
 
 
 def send_text_to_alert(text):
@@ -898,12 +1535,8 @@ def send_text_to_alert(text):
     Parameters:
     text : value
     """
-    _run_wait_hook()
-    step_message = 'Send \'{}\' to alert'.format(text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().switch_to.alert.send_keys(text)
-    _append_screenshot()
+    with _step("Send '{}' to alert".format(text)):
+        get_browser().switch_to.alert.send_keys(text)
 
 
 def set_browser_capability(capability_key, capability_value):
@@ -951,20 +1584,18 @@ def set_window_size(width, height):
     width : value
     height : value
     """
-    _run_wait_hook()
     step_message = 'Set browser window size to {0}x, {1}y.'.format(width, height)
     execution.logger.debug(step_message)
     get_browser().set_window_size(width, height)
 
 
 def step(message):
-    """Log a step to the report.
+    """Add a step to the report.
 
     Parameters:
     message : value
     """
-    execution.logger.info(message)
-    execution.steps.append(message)
+    _add_step(message)
 
 
 def store(key, value):
@@ -974,58 +1605,43 @@ def store(key, value):
     key : value
     value : value
     """
-    execution.logger.info('Store value {} in key {}'.format(value, key))
+    execution.logger.info("Store value '{}' in key '{}'".format(value, key))
     setattr(execution.data, key, value)
 
 
-def submit_form(element):
+def submit_form(form_element):
     """Submit form.
     Element can be the form itself or any child element.
 
     Parameters:
-    element: element
+    form_element : element
     """
-    element = get_browser().find(element)
-    step_msg = 'Submit form'
-    execution.logger.info(step_msg)
-    _add_step(step_msg)
-    get_browser().find(element).submit()
-    _append_screenshot()
+    with _step('Submit form'):
+        get_browser().find(form_element).submit()
 
 
 def submit_prompt_alert(text):
-    """Send text to a prompt alert and accept it
+    """Send text to a prompt alert and accept it.
+    If there is no prompt alert present this will fail.
 
     Parameters:
     text : value
     """
-    _run_wait_hook()
-    step_message = 'Submit alert with text \'{}\''.format(text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().switch_to.alert.send_keys(text)
-    get_browser().switch_to.alert.accept()
-    _append_screenshot()
+    with _step("Submit alert with text '{}'".format(text)):
+        get_browser().switch_to.alert.send_keys(text)
+        get_browser().switch_to.alert.accept()
 
 
 def switch_to_default_content():
     """Switch to default content (default frame)"""
-    _run_wait_hook()
-    step_message = 'Switch to default content'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().switch_to.default_content()
-    _append_screenshot()
+    with _step('Switch to default content', take_screenshots=False):
+        get_browser().switch_to.default_content()
 
 
 def switch_to_first_window():
     """Switch to first window/tab"""
-    _run_wait_hook()
-    step_message = 'Switch to first window'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().switch_to_first_window()
-    _append_screenshot()
+    with _step('Switch to first window'):
+        get_browser().switch_to_first_window()
 
 
 def switch_to_frame(frame):
@@ -1035,22 +1651,14 @@ def switch_to_frame(frame):
     Parameters:
     frame : value
     """
-    _run_wait_hook()
-    step_message = 'Switch to frame {}'.format(frame)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().switch_to.frame(frame)
-    _append_screenshot()
+    with _step('Switch to frame {}'.format(frame), take_screenshots=False):
+        get_browser().switch_to.frame(frame)
 
 
 def switch_to_last_window():
     """Switch to last window/tab"""
-    _run_wait_hook()
-    step_message = 'Switch to last window'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().switch_to_last_window()
-    _append_screenshot()
+    with _step('Switch to last window'):
+        get_browser().switch_to_last_window()
 
 
 def switch_to_next_window():
@@ -1058,22 +1666,14 @@ def switch_to_next_window():
     If current window is the last in the list of window handles this
     will circle back from the start.
     """
-    _run_wait_hook()
-    step_message = 'Switch to next window'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().switch_to_next_window()
-    _append_screenshot()
+    with _step('Switch to next window'):
+        get_browser().switch_to_next_window()
 
 
 def switch_to_parent_frame():
     """Switch to the parent of the current frame"""
-    _run_wait_hook()
-    step_message = 'Switch to parent frame'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().switch_to.parent_frame()
-    _append_screenshot()
+    with _step('Switch to parent frame', take_screenshots=False):
+        get_browser().switch_to.parent_frame()
 
 
 def switch_to_previous_window():
@@ -1081,12 +1681,8 @@ def switch_to_previous_window():
     If current window is the first in the list of window handles this
     will circle back from the top.
     """
-    _run_wait_hook()
-    step_message = 'Switch to previous window'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().switch_to_previous_window()
-    _append_screenshot()
+    with _step('Switch to previous window'):
+        get_browser().switch_to_previous_window()
 
 
 def switch_to_window_by_index(index):
@@ -1096,12 +1692,8 @@ def switch_to_window_by_index(index):
     Parameters:
     index : value
     """
-    _run_wait_hook()
-    step_message = 'Switch to window of index {}'.format(index)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().switch_to_window_by_index(index)
-    _append_screenshot()
+    with _step('Switch to window of index {}'.format(index)):
+        get_browser().switch_to_window_by_index(index)
 
 
 def switch_to_window_by_partial_title(partial_title):
@@ -1110,12 +1702,8 @@ def switch_to_window_by_partial_title(partial_title):
     Parameters:
     partial_title : value
     """
-    _run_wait_hook()
-    step_message = 'Switch to window with partial title \'{}\''.format(partial_title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().switch_to_window_by_partial_title(partial_title)
-    _append_screenshot()
+    with _step("Switch to window with partial title '{}'".format(partial_title)):
+        get_browser().switch_to_window_by_partial_title(partial_title)
 
 
 def switch_to_window_by_partial_url(partial_url):
@@ -1124,12 +1712,8 @@ def switch_to_window_by_partial_url(partial_url):
     Parameters:
     partial_url : value
     """
-    _run_wait_hook()
-    step_message = 'Switch to window with partial URL \'{}\''.format(partial_url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().switch_to_window_by_partial_url(partial_url)
-    _append_screenshot()
+    with _step("Switch to window with partial URL '{}'".format(partial_url)):
+        get_browser().switch_to_window_by_partial_url(partial_url)
 
 
 def switch_to_window_by_title(title):
@@ -1138,12 +1722,8 @@ def switch_to_window_by_title(title):
     Parameters:
     title : value
     """
-    _run_wait_hook()
-    step_message = 'Switch to window with title \'{}\''.format(title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().switch_to_window_by_title(title)
-    _append_screenshot()
+    with _step("Switch to window with title '{}'".format(title)):
+        get_browser().switch_to_window_by_title(title)
 
 
 def switch_to_window_by_url(url):
@@ -1152,44 +1732,34 @@ def switch_to_window_by_url(url):
     Parameters:
     url : value
     """
-    _run_wait_hook()
-    step_message = 'Switch to window with URL \'{}\''.format(url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().switch_to_window_by_url(url)
-    _append_screenshot()
+    with _step("Switch to window with URL '{}'".format(url)):
+        get_browser().switch_to_window_by_url(url)
 
 
-def take_screenshot(message=''):
+def take_screenshot(message='Screenshot'):
     """Take a screenshot
+    `message` will be used for the filename
 
     Parameters:
-    message (optional) : value
+    message (optional, 'Screenshot') : value
     """
-    _run_wait_hook()
-    step_msg = 'Take screenshot'
-    if message:
-        step_msg += ': {}'.format(message)
-    execution.logger.info(step_msg)
-    img_id = str(uuid.uuid4())[:8]
-    step_msg = '{}__{}'.format(step_msg, img_id)
-    _add_step(step_msg)
-    _capture_screenshot(img_id)
+    _add_step(message)
+    screenshot_name = _generate_screenshot_name(message)
+    _capture_screenshot(screenshot_name)
+    last_step = execution.steps[-1]
+    last_step['screenshot'] = screenshot_name
 
 
 def uncheck_element(checkbox):
-    """Uncheck an checkbox element
+    """Uncheck a checkbox element
     If checkbox is already unchecked this is is ignored.
 
     Parameters:
     checkbox : element
     """
     element = get_browser().find(checkbox)
-    step_msg = 'Uncheck checkbox {}'.format(element.name)
-    execution.logger.info(step_msg)
-    _add_step(step_msg)
-    get_browser().uncheck_element(element)
-    _append_screenshot()
+    with _step('Uncheck checkbox {}'.format(element.name)):
+        get_browser().uncheck_element(element)
 
 
 def verify_alert_is_not_present():
@@ -1205,62 +1775,42 @@ def verify_alert_is_present():
     verify_alert_present()
 
 
-def assert_alert_not_present():
-    """Verify an alert is not present"""
-    step_message = 'Verify an alert is not present'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    assert not get_browser().alert_is_present(), 'an alert was present'
-    _append_screenshot()
-
-
 def verify_alert_not_present():
     """Verify an alert is not present"""
-    step_message = 'Verify an alert is not present'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    if not get_browser().alert_is_present():
-        _append_error('an alert was present')
-    _append_screenshot()
+    with _verify_step('Verify an alert is not present', 'an alert was present') as s:
+        s.condition = not get_browser().alert_is_present()
 
 
 def verify_alert_present():
     """Verify an alert is present"""
-    step_message = 'Verify an alert is present'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    assert get_browser().alert_is_present(), 'an alert was not present'
-    _append_screenshot()
+    with _verify_step('Verify an alert is present', 'an alert was not present') as s:
+        s.condition = get_browser().alert_is_present()
 
 
 def verify_alert_text(text):
-    """Verify alert text
+    """Verify alert text.
+    This will fail if there is no alert present.
 
     Parameters:
     text : value
     """
-    step_message = 'Verify alert text is \'{}\''.format(text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    alert_text = get_browser().switch_to.alert.text
-    error_msg = 'Expected alert text to be \'{}\' but was \'{}\''.format(text, alert_text)
-    assert alert_text == text, error_msg
-    _append_screenshot()
+    with _verify_step("Verify alert text is '{}'".format(text)) as s:
+        alert_text = get_browser().switch_to.alert.text
+        s.error = "Expected alert text to be '{}' but was '{}'".format(text, alert_text)
+        s.condition = alert_text == text
 
 
 def verify_alert_text_is_not(text):
-    """Verify alert text is not text
+    """Verify alert text is not `text`
+    This will fail if there is no alert present.
 
     Parameters:
     text : value
     """
-    step_message = 'Verify alert text is not \'{}\''.format(text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    alert_text = get_browser().switch_to.alert.text
-    error_msg = 'Expected alert text not to be \'{}\''.format(text)
-    assert alert_text != text, error_msg
-    _append_screenshot()
+    with _verify_step("Verify alert text is not '{}'".format(text)) as s:
+        alert_text = get_browser().switch_to.alert.text
+        s.error = "Expected alert text not to be '{}'".format(text)
+        s.condition = alert_text != text
 
 
 def verify_amount_of_windows(amount):
@@ -1269,13 +1819,10 @@ def verify_amount_of_windows(amount):
     Parameters:
     amount : value
     """
-    step_message = 'Verify amount of open windows is {}'.format(amount)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    actual_amount = len(get_window_handles())
-    error_msg = 'Expected {} windows but got {}'.format(amount, actual_amount)
-    assert actual_amount == amount, error_msg
-    _append_screenshot()
+    with _verify_step('Verify amount of open windows is {}'.format(amount)) as s:
+        actual_amount = len(get_window_handles())
+        s.error = 'Expected {} windows but got {}'.format(amount, actual_amount)
+        s.condition = actual_amount == amount
 
 
 def verify_cookie_exists(name):
@@ -1297,34 +1844,29 @@ def verify_cookie_present(name):
     Parameters:
     name: value
     """
-    step_message = 'Verify that cookie "{}" exists'.format(name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    cookie = browser.get_browser().get_cookie(name)
-    if not cookie:
-        raise Exception('Cookie "{}" was not found'.format(name))
+    with _verify_step("Verify that cookie '{}' exists".format(name), take_screenshots=False) as s:
+        s.error = "Cookie '{}' was not found".format(name)
+        s.condition = browser.get_browser().get_cookie(name)
 
 
 def verify_cookie_value(name, value):
     """Verify the value of a cookie.
+    This will fail if the cookie does not exist.
 
     Parameters:
     name: value
     value: value
     """
-    _run_wait_hook()
-    step_message = 'Verify that cookie "{}" value is "{}"'.format(name, value)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    cookie = browser.get_browser().get_cookie(name)
-    if not cookie:
-        raise Exception('Cookie "{}" was not found'.format(name))
-    elif not 'value' in cookie:
-        raise Exception('Cookie "{}" did not have "value" key'.format(name))
-    elif cookie['value'] != value:
-        msg = ('Expected cookie "{}" value to be "{}" but was "{}"'
-               .format(name, value, cookie['value']))
-        raise Exception(msg)
+    message = "Verify that cookie '{}' value is '{}'".format(name, value)
+    with _verify_step(message, take_screenshots=False) as s:
+        cookie = browser.get_browser().get_cookie(name)
+        s.error = ("Expected cookie '{}' value to be '{}' but was '{}'"
+                   .format(name, value, cookie['value']))
+        if not cookie:
+            raise Exception("Cookie '{}' was not found".format(name))
+        elif not 'value' in cookie:
+            raise Exception("Cookie '{}' did not have 'value' key".format(name))
+        s.condition = cookie['value'] == value
 
 
 def verify_element_attribute(element, attribute, value):
@@ -1335,13 +1877,14 @@ def verify_element_attribute(element, attribute, value):
     attribute : value
     value : value
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0)
-    step_message = 'Verify the element {} attribute {} value is {}'.format(element.name, attribute, value)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    assert element.get_attribute(attribute) == value
-    _append_screenshot()
+    message = ("Verify the element {} attribute {} value is '{}'"
+               .format(element.name, attribute, value))
+    with _verify_step(message) as s:
+        actual_value = element.get_attribute(attribute)
+        s.error = ("expected element {} attribute {} to be '{}' but was '{}'"
+                   .format(element.name, attribute, value, actual_value))
+        s.condition = actual_value == value
 
 
 def verify_element_attribute_is_not(element, attribute, value):
@@ -1352,13 +1895,14 @@ def verify_element_attribute_is_not(element, attribute, value):
     attribute : value
     value : value
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0)
-    step_message = 'Verify the element {} attribute {} value is not {}'.format(element.name, attribute, value)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    assert element.get_attribute(attribute) != value
-    _append_screenshot()
+    message = ("Verify the element {} attribute {} value is not '{}'"
+               .format(element.name, attribute, value))
+    with _verify_step(message) as s:
+        actual_value = element.get_attribute(attribute)
+        s.error = ("expected element {} {} attribute to not be '{}'"
+                   .format(element.name, attribute, value))
+        s.condition = actual_value != value
 
 
 def verify_element_checked(element):
@@ -1368,29 +1912,22 @@ def verify_element_checked(element):
     Parameters:
     element : element
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0)
-    step_message = 'Verify the element {} is checked'.format(element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    assert element.is_selected(), 'element {} is not checked'.format(element.name)
-    _append_screenshot()
+    with _verify_step('Verify the element {} is checked'.format(element.name)) as s:
+        s.error = 'element {} is not checked'.format(element.name)
+        s.condition = element.is_selected()
 
 
 def verify_element_displayed(element):
-    """Verify element is displayed
+    """Verify element is displayed (visible to the user)
 
     Parameters:
     element : element
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0, wait_displayed=False)
-    step_message = 'Verify element {} is displayed'.format(element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    if not element.is_displayed():
-        raise Exception('element {} is not displayed'.format(element.name))
-    _append_screenshot()
+    with _verify_step('Verify element {} is displayed'.format(element.name)) as s:
+        s.error = 'element {} is not displayed'.format(element.name)
+        s.condition = not element.is_displayed()
 
 
 def verify_element_enabled(element):
@@ -1399,14 +1936,10 @@ def verify_element_enabled(element):
     Parameters:
     element : element
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0)
-    step_message = 'Verify the element {} is enabled'.format(element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    if not element.is_enabled():
-        raise Exception('Element is not enabled')
-    _append_screenshot()
+    with _verify_step('Verify element {} is enabled'.format(element.name)) as s:
+        s.error = 'element {} is not enabled'.format(element.name)
+        s.condition = element.is_enabled()
 
 
 def verify_element_has_attribute(element, attribute):
@@ -1416,14 +1949,10 @@ def verify_element_has_attribute(element, attribute):
     element : element
     attribute : value
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0)
-    step_message = 'Verify element {} has attribute {}'.format(element.name, attribute)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = 'element {} does not have attribute {}'.format(element.name, attribute)
-    assert element.has_attribute(attribute), error_msg
-    _append_screenshot()
+    with _verify_step('Verify element {} has attribute {}'.format(element.name, attribute)) as s:
+        s.error = 'element {} does not have attribute {}'.format(element.name, attribute)
+        s.condition = element.has_attribute(attribute)
 
 
 def verify_element_has_focus(element):
@@ -1432,13 +1961,10 @@ def verify_element_has_focus(element):
     Parameters:
     element : element
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0)
-    step_message = 'Verify element {} has focus'.format(element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = 'element {} does not have focus'.format(element.name)
-    assert element.has_focus(), error_msg
+    with _verify_step('Verify element {} has focus'.format(element.name)) as s:
+        s.error = 'element {} does not have focus'.format(element.name)
+        s.condition = element.has_focus()
 
 
 def verify_element_has_not_attribute(element, attribute):
@@ -1448,13 +1974,11 @@ def verify_element_has_not_attribute(element, attribute):
     element : element
     attribute : value
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0)
-    step_message = 'Verify element {} has not attribute {}'.format(element.name, attribute)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = 'element {} has attribute {}'.format(element.name, attribute)
-    assert not element.has_attribute(attribute), error_msg
+    with _verify_step('Verify element {} has not attribute {}'
+                              .format(element.name, attribute)) as s:
+        s.error = 'element {} has attribute {}'.format(element.name, attribute)
+        s.condition = not element.has_attribute(attribute)
 
 
 def verify_element_has_not_focus(element):
@@ -1463,13 +1987,11 @@ def verify_element_has_not_focus(element):
     Parameters:
     element : element
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0)
-    step_message = 'Verify element {} does not have focus'.format(element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = 'element {} has focus'.format(element.name)
-    assert not element.has_focus(), error_msg
+    with _verify_step('Verify element {} does not have focus'
+                              .format(element.name)) as s:
+        s.error = 'element {} has focus'.format(element.name)
+        s.condition = not element.has_focus()
 
 
 def verify_element_not_checked(element):
@@ -1479,29 +2001,22 @@ def verify_element_not_checked(element):
     Parameters:
     element : element
     """
-    _run_wait_hook()
     element = browser.get_browser().find(element, timeout=0)
-    step_message = 'Verify the element {} is not checked'.format(element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    assert not element.is_selected(), 'element {} is checked'.format(element.name)
-    _append_screenshot()
+    with _verify_step('Verify the element {} is not checked'.format(element.name)) as s:
+        s.error = 'element {} is checked'.format(element.name)
+        s.condition = not element.is_selected()
 
 
 def verify_element_not_displayed(element):
-    """Verify element is not displayed
+    """Verify element is not displayed (visible to the user)
 
     Parameters:
     element : element
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0, wait_displayed=False)
-    step_message = 'Verify element {} is not displayed'.format(element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    if element.is_displayed():
-        raise Exception('element {} is displayed'.format(element.name))
-    _append_screenshot()
+    with _verify_step('Verify element {} is not displayed'.format(element.name)) as s:
+        s.error = 'element {} is displayed'.format(element.name)
+        s.condition = not element.is_displayed()
 
 
 def verify_element_not_enabled(element):
@@ -1510,14 +2025,10 @@ def verify_element_not_enabled(element):
     Parameters:
     element : element
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0)
-    step_message = 'Verify the element {} is not enabled'.format(element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    if element.is_enabled():
-        raise Exception('Element is enabled')
-    _append_screenshot()
+    with _verify_step('Verify element {} is not enabled'.format(element.name)) as s:
+        s.error = 'Element {} is enabled'.format(element.name)
+        s.condition = not element.is_enabled()
 
 
 def verify_element_not_present(element):
@@ -1526,12 +2037,9 @@ def verify_element_not_present(element):
     Parameters:
     element : element
     """
-    _run_wait_hook()
-    step_message = 'Verify element is not present'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    msg = 'element {} is present'.format(element)
-    assert not get_browser().element_is_present(element), msg
+    with _verify_step('Verify element {} is not present'.format(element)) as s:
+        s.error = 'element {} is present'.format(element)
+        s.condition = not get_browser().element_is_present(element)
 
 
 def verify_element_present(element):
@@ -1540,12 +2048,9 @@ def verify_element_present(element):
     Parameters:
     element : element
     """
-    _run_wait_hook()
-    step_message = 'Verify element is present'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    msg = 'element {} is not present'.format(element)
-    assert get_browser().element_is_present(element), msg
+    with _verify_step('Verify element {} is present'.format(element)) as s:
+        s.error = 'element {} is not present'.format(element)
+        s.condition = get_browser().element_is_present(element)
 
 
 def verify_element_text(element, text):
@@ -1555,15 +2060,11 @@ def verify_element_text(element, text):
     element : element
     text : value
     """
-    _run_wait_hook()
     element = browser.get_browser().find(element, timeout=0)
-    step_message = 'Verify element {0} text is \'{1}\''.format(element.name, text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    if element.text != text:
-        raise Exception(("expected element {} text to be '{}' but was '{}'"
-                         .format(element.name, text, element.text)))
-    _append_screenshot()
+    with _verify_step("Verify element {} text is '{}'".format(element.name, text)) as s:
+        s.error = ("expected element {} text to be '{}' but was '{}'"
+                         .format(element.name, text, element.text))
+        s.condition = element.text == text
 
 
 def verify_element_text_contains(element, text):
@@ -1573,33 +2074,25 @@ def verify_element_text_contains(element, text):
     element : element
     text : value
     """
-    _run_wait_hook()
     element = browser.get_browser().find(element, timeout=0)
-    step_message = 'Verify element {0} contains text \'{1}\''.format(element.name, text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    if text not in element.text:
-        raise Exception(("expected element {} to contain text '{}'"
-                         .format(element.name, text)))
-    _append_screenshot()
+    with _verify_step("Verify element {} contains text '{}'".format(element.name, text)) as s:
+        s.error = ("expected element {} text '{}' to contain '{}'"
+                   .format(element.name, element.text, text))
+        s.condition = text in element.text
 
 
 def verify_element_text_is_not(element, text):
-    """Verify the text of the element is not text
+    """Verify the text of the element is not `text`
 
     Parameters:
     element : element
     text : value
     """
-    _run_wait_hook()
     element = browser.get_browser().find(element, timeout=0)
-    step_message = 'Verify element {0} text is not \'{1}\''.format(element.name, text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    if element.text == text:
-        raise Exception(("expected element {} text to not be '{}'"
-                         .format(element.name, text)))
-    _append_screenshot()
+    with _verify_step("Verify element {} text is not '{}'"
+                              .format(element.name, text)) as s:
+        s.error = ("expected element {} text to not be '{}'".format(element.name, text))
+        s.condition = element.text != text
 
 
 def verify_element_text_not_contains(element, text):
@@ -1609,14 +2102,12 @@ def verify_element_text_not_contains(element, text):
     element : element
     text : value
     """
-    _run_wait_hook()
     element = browser.get_browser().find(element, timeout=0)
-    step_message = 'Verify element {0} does not contain text \'{1}\''.format(element.name, text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    if text in element.text:
-        raise Exception("element {} contains text '{}'".format(element.name, text))
-    _append_screenshot()
+    with _verify_step("Verify element {} does not contains text '{}'"
+                              .format(element.name, text)) as s:
+        s.error = ("expected element {} text '{}' to not contain '{}'"
+                   .format(element.name, element.text, text))
+        s.condition = text not in element.text
 
 
 def verify_exists(element):
@@ -1703,33 +2194,25 @@ def verify_not_exists(element):
 
 
 def verify_page_contains_text(text):
-    """Verify the given text is present anywhere in the page code
+    """Verify the given text is present anywhere in the page source
 
     Parameters:
     text : value
     """
-    _run_wait_hook()
-    step_message = 'Verify \'{0}\' is present in page'.format(text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    if text not in get_browser().page_source:
-        raise TextNotPresent("Text '{}' not found in page".format(text))
-    _append_screenshot()
+    with _verify_step("Verify '{}' is present in page".format(text)) as s:
+        s.error = "text '{}' not found in page".format(text)
+        s.condition = text in get_browser().page_source
 
 
 def verify_page_not_contains_text(text):
-    """Verify the given text is not present anywhere in the page code
+    """Verify the given text is not present anywhere in the page source
 
     Parameters:
     text : value
     """
-    _run_wait_hook()
-    step_message = 'Verify \'{0}\' is not present in page'.format(text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    if text in get_browser().page_source:
-        raise Exception("text '{}' was found in page".format(text))
-    _append_screenshot()
+    with _verify_step("Verify '{}' is not present in page".format(text)) as s:
+        s.error = "text '{}' was found in page".format(text)
+        s.condition = text not in get_browser().page_source
 
 
 def verify_response_status_code(response, status_code):
@@ -1739,15 +2222,13 @@ def verify_response_status_code(response, status_code):
     response : value
     status_code : value
     """
-    if isinstance(status_code, str):
-        if status_code.isdigit():
-            status_code = int(status_code)
-    step_message = 'Verify response status code is {}'.format(status_code)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    if not response.status_code == status_code:
-        raise Exception("Expected response status code to be {0} but was {1}"
-                        .format(status_code, response.status_code))
+    with _verify_step('Verify response status code is {}'.format(status_code)) as s:
+        if isinstance(status_code, str):
+            if status_code.isdigit():
+                status_code = int(status_code)
+        s.error = ('expected response status code to be {} but was {}'
+                         .format(status_code, response.status_code))
+        s.condition = response.status_code == status_code
 
 
 def verify_selected_option(element, text):
@@ -1771,17 +2252,13 @@ def verify_selected_option_by_text(element, text):
     element : element
     text : value
     """
-    _run_wait_hook()
     element = get_browser().find(element)
-    step_message = ('Verify selected option text of element {} is {}'
-                    .format(element.name, text))
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    selected_option_text = element.select.first_selected_option.text
-    error_msg = ('Expected selected option in element {} to be {} but was {}'
-                 .format(element.name, text, selected_option_text))
-    assert selected_option_text == text, error_msg
-    _append_screenshot()
+    with _verify_step('Verify selected option text of element {} is {}'
+                              .format(element.name, text)) as s:
+        selected_option_text = element.select.first_selected_option.text
+        s.error = ('Expected selected option in element {} to be {} but was {}'
+                   .format(element.name, text, selected_option_text))
+        s.condition = selected_option_text == text
 
 
 def verify_selected_option_by_value(element, value):
@@ -1791,17 +2268,13 @@ def verify_selected_option_by_value(element, value):
     element : element
     value : value
     """
-    _run_wait_hook()
     element = get_browser().find(element)
-    step_message = ('Verify selected option value of element {} is {}'
-                    .format(element.name, value))
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    selected_option_value = element.select.first_selected_option.value
-    error_msg = ('Expected selected option in element {} to be {} but was {}'
-                 .format(element.name, value, selected_option_value))
-    assert selected_option_value == value, error_msg
-    _append_screenshot()
+    with _verify_step('Verify selected option value of element {} is {}'
+                              .format(element.name, value)) as s:
+        selected_option_value = element.select.first_selected_option.value
+        s.error = ('Expected selected option in element {} to be {} but was {}'
+                   .format(element.name, value, selected_option_value))
+        s.condition = selected_option_value == value
 
 
 def verify_text(text):
@@ -1831,14 +2304,11 @@ def verify_title(title):
     Parameters:
     title : value
     """
-    _run_wait_hook()
-    step_message = "Verify page title is '{}'".format(title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = ("expected title to be '{}' but was '{}'"
-                 .format(title, get_browser().title))
-    assert get_browser().title == title, error_msg
-    _append_screenshot()
+    with _verify_step("Verify page title is '{}'".format(title)) as s:
+        actual_title = get_browser().title
+        s.error = ("expected title to be '{}' but was '{}'"
+                   .format(title, actual_title))
+        s.condition = actual_title == title
 
 
 def verify_title_contains(partial_title):
@@ -1847,13 +2317,9 @@ def verify_title_contains(partial_title):
     Parameters:
     partial_title : value
     """
-    _run_wait_hook()
-    step_message = "Verify page title contains '{}'".format(partial_title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = "expected title to contain '{}'".format(partial_title)
-    assert partial_title in get_browser().title, error_msg
-    _append_screenshot()
+    with _verify_step("Verify page title contains '{}'".format(partial_title)) as s:
+        s.error = "expected title to contain '{}'".format(partial_title)
+        s.condition = partial_title in get_browser().title
 
 
 def verify_title_is_not(title):
@@ -1862,13 +2328,9 @@ def verify_title_is_not(title):
     Parameters:
     title : value
     """
-    _run_wait_hook()
-    step_message = "Verify page title is not '{}'".format(title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = "expected title to not be '{}'".format(title)
-    assert get_browser().title != title, error_msg
-    _append_screenshot()
+    with _verify_step("Verify page title is not '{}'".format(title)) as s:
+        s.error = "expected title to not be '{}'".format(title)
+        s.condition = get_browser().title != title
 
 
 def verify_title_not_contains(text):
@@ -1877,13 +2339,9 @@ def verify_title_not_contains(text):
     Parameters:
     text : value
     """
-    _run_wait_hook()
-    step_message = "Verify page title does not contain '{}'".format(text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = "title contains '{}'".format(text)
-    assert text not in get_browser().title, error_msg
-    _append_screenshot()
+    with _verify_step("Verify page title does not contain '{}'".format(text)) as s:
+        s.error = "title contains '{}'".format(text)
+        s.condition = text not in get_browser().title
 
 
 def verify_url(url):
@@ -1892,14 +2350,11 @@ def verify_url(url):
     Parameters:
     url : value
     """
-    _run_wait_hook()
-    step_message = "Verify URL is '{}'".format(url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = ("expected URL to be '{}' but was '{}'"
-                 .format(url, get_browser().current_url))
-    assert get_browser().current_url == url, error_msg
-    _append_screenshot()
+    current_url = get_browser().current_url
+    msg = "Verify URL is '{}'".format(url)
+    err = "expected URL to be '{}' but was '{}'".format(url, current_url)
+    with _verify_step(msg, err) as s:
+        s.condition = current_url == url
 
 
 def verify_url_contains(partial_url):
@@ -1908,28 +2363,23 @@ def verify_url_contains(partial_url):
     Parameters:
     partial_url : value
     """
-    _run_wait_hook()
-    step_message = "Verify URL contains '{}'".format(partial_url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = "expected URL to contain '{}'".format(partial_url)
-    assert partial_url in get_browser().current_url, error_msg
-    _append_screenshot()
+    current_url = get_browser().current_url
+    msg = "Verify URL contains '{}'".format(partial_url)
+    err = "expected URL '{}' to contain '{}'".format(current_url, partial_url)
+    with _verify_step(msg, err) as s:
+        s.condition = partial_url in current_url
 
 
 def verify_url_is_not(url):
-    """Verify the current URL is not url
+    """Verify the current URL is not `url`
 
     Parameters:
     url : value
     """
-    _run_wait_hook()
-    step_message = "Verify URL is not '{}'".format(url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = "expected URL to not be '{}'".format(url)
-    assert get_browser().current_url != url, error_msg
-    _append_screenshot()
+    msg = "Verify URL is not '{}'".format(url)
+    err = "expected URL to not be '{}'".format(url)
+    with _verify_step(msg, err) as s:
+        s.condition = get_browser().current_url == url
 
 
 def verify_url_not_contains(partial_url):
@@ -1938,13 +2388,11 @@ def verify_url_not_contains(partial_url):
     Parameters:
     partial_url : value
     """
-    _run_wait_hook()
-    step_message = "Verify page title does not contain '{}'".format(partial_url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = "URL contains '{}'".format(partial_url)
-    assert partial_url not in get_browser().current_url, error_msg
-    _append_screenshot()
+    current_url = get_browser().current_url
+    msg = "Verify URL does not contain '{}'".format(partial_url)
+    err = "expected URL '{}' to not contain '{}'".format(current_url, partial_url)
+    with _verify_step(msg, err) as s:
+        s.condition = partial_url in current_url
 
 
 def verify_window_present_by_partial_title(partial_title):
@@ -1953,14 +2401,12 @@ def verify_window_present_by_partial_title(partial_title):
     Parameters:
     partial_title : value
     """
-    _run_wait_hook()
-    step_message = "Verify window present by partial title '{}'".format(partial_title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = "There is no window present with partial title '{}'".format(partial_title)
-    window_titles = get_browser().get_window_titles()
-    assert any(partial_title in t for t in window_titles), error_msg
-    _append_screenshot()
+    with _verify_step("Verify window present by partial title '{}'"
+                              .format(partial_title)) as s:
+        s.error = "There is no window present with partial title '{}'".format(partial_title)
+        titles = get_browser().get_window_titles()
+        s.error_description = '{}\nWindow titles: {}'.format(s.error, ','.join(titles))
+        s.condition = any(partial_title in t for t in titles)
 
 
 def verify_window_present_by_partial_url(partial_url):
@@ -1969,14 +2415,12 @@ def verify_window_present_by_partial_url(partial_url):
     Parameters:
     partial_url : value
     """
-    _run_wait_hook()
-    step_message = "Verify window present by partial URL '{}'".format(partial_url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    urls = get_browser().get_window_urls()
-    error_msg = "There is no window present with partial URL '{}'".format(partial_url)
-    assert any(partial_url in url for url in urls), error_msg
-    _append_screenshot()
+    with _verify_step("Verify window present by partial URL '{}'"
+                              .format(partial_url)) as s:
+        s.error = "There is no window present with partial URL '{}'".format(partial_url)
+        urls = get_browser().get_window_urls()
+        s.error_description = '{}\nWindow URLs:\n{}'.format(s.error, '\n'.join(urls))
+        s.condition = any(partial_url in url for url in urls)
 
 
 def verify_window_present_by_title(title):
@@ -1985,13 +2429,11 @@ def verify_window_present_by_title(title):
     Parameters:
     title : value
     """
-    _run_wait_hook()
-    step_message = "Verify window present by title '{}'".format(title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = "There is no window present with title '{}'".format(title)
-    assert title in get_browser().get_window_titles(), error_msg
-    _append_screenshot()
+    with _verify_step("Verify window present by title '{}'".format(title)) as s:
+        s.error = "There is no window present with title '{}'".format(title)
+        titles = get_browser().get_window_titles()
+        s.error_description = '{}\nWindow titles: {}'.format(s.error, ','.join(titles))
+        s.condition = title in titles
 
 
 def verify_window_present_by_url(url):
@@ -2000,17 +2442,16 @@ def verify_window_present_by_url(url):
     Parameters:
     url : value
     """
-    _run_wait_hook()
-    step_message = "Verify window present by URL '{}'".format(url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    error_msg = "There is no window present with URL '{}'".format(url)
-    assert url in get_browser().get_window_urls(), error_msg
-    _append_screenshot()
+    with _verify_step("Verify window present by URL '{}'".format(url)) as s:
+        s.error = "There is no window present with URL '{}'".format(url)
+        urls = get_browser().get_window_urls()
+        s.error_description = '{}\nWindow URLs:\n{}'.format(s.error, '\n'.join(urls))
+        s.condition = url in urls
 
 
 def wait(seconds):
     """Wait for a fixed amount of seconds.
+
     Parameters:
     seconds (int or float) : value
     """
@@ -2026,13 +2467,10 @@ def wait_for_alert_present(timeout=30):
     """Wait for an alert to be present
 
     Parameters:
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    step_message = 'Wait for alert to be present'
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_alert_present(timeout)
-    _append_screenshot()
+    with _step('Wait for alert to be present'):
+        get_browser().wait_for_alert_present(timeout)
 
 
 def wait_for_element_displayed(element, timeout=30):
@@ -2040,13 +2478,10 @@ def wait_for_element_displayed(element, timeout=30):
 
     Parameters:
     element : element
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = 'Wait for element {} to be displayed'.format(element)
-    execution.logger.info(step_message)
-    get_browser().wait_for_element_displayed(element, timeout)
-    _append_screenshot()
+    with _step('Wait for element {} to be displayed'.format(element)):
+        get_browser().wait_for_element_displayed(element, timeout)
 
 
 def wait_for_element_enabled(element, timeout=30):
@@ -2054,15 +2489,11 @@ def wait_for_element_enabled(element, timeout=30):
 
     Parameters:
     element : element
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0)
-    step_message = 'Wait for element {} to be enabled'.format(element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_element_enabled(element, timeout)
-    _append_screenshot()
+    with _step('Wait for element {} to be enabled'.format(element.name)):
+        get_browser().wait_for_element_enabled(element, timeout)
 
 
 def wait_for_element_has_attribute(element, attribute, timeout=30):
@@ -2071,15 +2502,11 @@ def wait_for_element_has_attribute(element, attribute, timeout=30):
     Parameters:
     element : element
     attribute : attribute
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0)
-    step_message = 'Wait for element {} to have {} attribute'.format(element.name, attribute)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_element_has_attribute(element, attribute, timeout)
-    _append_screenshot()
+    with _step('Wait for element {} to have {} attribute'.format(element.name, attribute)):
+        get_browser().wait_for_element_has_attribute(element, attribute, timeout)
 
 
 def wait_for_element_has_not_attribute(element, attribute, timeout=30):
@@ -2088,15 +2515,11 @@ def wait_for_element_has_not_attribute(element, attribute, timeout=30):
     Parameters:
     element : element
     attribute : attribute
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0)
-    step_message = 'Wait for element {} to not have {} attribute'.format(element.name, attribute)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_element_has_not_attribute(element, attribute, timeout)
-    _append_screenshot()
+    with _step('Wait for element {} to not have {} attribute'.format(element.name, attribute)):
+        get_browser().wait_for_element_has_not_attribute(element, attribute, timeout)
 
 
 def wait_for_element_not_displayed(element, timeout=30):
@@ -2104,12 +2527,10 @@ def wait_for_element_not_displayed(element, timeout=30):
 
     Parameters:
     element : element
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = 'Wait for element {} to be not displayed'.format(element)
-    execution.logger.info(step_message)
-    get_browser().wait_for_element_not_displayed(element, timeout)
+    with _step('Wait for element {} to be not displayed'.format(element)):
+        get_browser().wait_for_element_not_displayed(element, timeout)
 
 
 def wait_for_element_not_enabled(element, timeout=30):
@@ -2117,15 +2538,11 @@ def wait_for_element_not_enabled(element, timeout=30):
 
     Parameters:
     element : element
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
     element = get_browser().find(element, timeout=0)
-    step_message = 'Wait for element {} to be not enabled'.format(element.name)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_element_not_enabled(element, timeout)
-    _append_screenshot()
+    with _step('Wait for element {} to be not enabled'.format(element.name)):
+        get_browser().wait_for_element_not_enabled(element, timeout)
 
 
 def wait_for_element_not_exist(element, timeout=20):
@@ -2146,14 +2563,10 @@ def wait_for_element_not_present(element, timeout=30):
 
     Parameters:
     element : element
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = 'Wait for element {} to be not present'.format(element)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_element_not_present(element, timeout)
-    _append_screenshot()
+    with _step('Wait for element {} to be not present'.format(element)):
+        get_browser().wait_for_element_not_present(element, timeout)
 
 
 def wait_for_element_not_visible(element, timeout=20):
@@ -2173,14 +2586,10 @@ def wait_for_element_present(element, timeout=30):
 
     Parameters:
     element : element
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = 'Wait for element {} to be present'.format(element)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_element_present(element, timeout)
-    _append_screenshot()
+    with _step('Wait for element {} to be present'.format(element)):
+        get_browser().wait_for_element_present(element, timeout)
 
 
 def wait_for_element_text(element, text, timeout=30):
@@ -2189,14 +2598,10 @@ def wait_for_element_text(element, text, timeout=30):
     Parameters:
     element : element
     text : value
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = 'Wait for element {} text to be \'{}\''.format(element, text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_element_text(element, text, timeout)
-    _append_screenshot()
+    with _step("Wait for element {} text to be '{}'".format(element, text)):
+        get_browser().wait_for_element_text(element, text, timeout)
 
 
 def wait_for_element_text_contains(element, text, timeout=30):
@@ -2205,14 +2610,10 @@ def wait_for_element_text_contains(element, text, timeout=30):
     Parameters:
     element : element
     text : value
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = 'Wait for element {} to contain text \'{}\''.format(element, text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_element_text_contains(element, text, timeout)
-    _append_screenshot()
+    with _step("Wait for element {} to contain text '{}'".format(element, text)):
+        get_browser().wait_for_element_text_contains(element, text, timeout)
 
 
 def wait_for_element_text_is_not(element, text, timeout=30):
@@ -2221,14 +2622,10 @@ def wait_for_element_text_is_not(element, text, timeout=30):
     Parameters:
     element : element
     text : value
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = 'Wait for element {} text to not be \'{}\''.format(element, text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_element_text_is_not(element, text, timeout)
-    _append_screenshot()
+    with _step("Wait for element {} text to not be '{}'".format(element, text)):
+        get_browser().wait_for_element_text_is_not(element, text, timeout)
 
 
 def wait_for_element_text_not_contains(element, text, timeout=30):
@@ -2237,14 +2634,10 @@ def wait_for_element_text_not_contains(element, text, timeout=30):
     Parameters:
     element : element
     text : value
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = 'Wait for element {} to not contain text \'{}\''.format(element, text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_element_text_not_contains(element, text, timeout)
-    _append_screenshot()
+    with _step("Wait for element {} to not contain text '{}'".format(element, text)):
+        get_browser().wait_for_element_text_not_contains(element, text, timeout)
 
 
 def wait_for_element_visible(element, timeout=20):
@@ -2264,14 +2657,10 @@ def wait_for_page_contains_text(text, timeout=30):
 
     Parameters:
     text : value
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = "Wait for page contains text '{}'".format(text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_page_contains_text(text, timeout)
-    _append_screenshot()
+    with _step("Wait for page contains text '{}'".format(text)):
+        get_browser().wait_for_page_contains_text(text, timeout)
 
 
 def wait_for_page_not_contains_text(text, timeout=30):
@@ -2279,14 +2668,10 @@ def wait_for_page_not_contains_text(text, timeout=30):
 
     Parameters:
     text : value
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = "Wait for page to not contain text '{}'".format(text)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_page_not_contains_text(text, timeout)
-    _append_screenshot()
+    with _step("Wait for page to not contain text '{}'".format(text)):
+        get_browser().wait_for_page_not_contains_text(text, timeout)
 
 
 def wait_for_title(title, timeout=30):
@@ -2294,14 +2679,10 @@ def wait_for_title(title, timeout=30):
 
     Parameters:
     title : value
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = "Wait for title to be '{}'".format(title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_title(title, timeout)
-    _append_screenshot()
+    with _step("Wait for title to be '{}'".format(title)):
+        get_browser().wait_for_title(title, timeout)
 
 
 def wait_for_title_contains(partial_title, timeout=30):
@@ -2309,14 +2690,10 @@ def wait_for_title_contains(partial_title, timeout=30):
 
     Parameters:
     partial_title : value
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = "Wait for title to contain '{}'".format(partial_title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_title_contains(partial_title, timeout)
-    _append_screenshot()
+    with _step("Wait for title to contain '{}'".format(partial_title)):
+        get_browser().wait_for_title_contains(partial_title, timeout)
 
 
 def wait_for_title_is_not(title, timeout=30):
@@ -2324,14 +2701,10 @@ def wait_for_title_is_not(title, timeout=30):
 
     Parameters:
     title : value
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = "Wait for title to not be '{}'".format(title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_title_is_not(title, timeout)
-    _append_screenshot()
+    with _step("Wait for title to not be '{}'".format(title)):
+        get_browser().wait_for_title_is_not(title, timeout)
 
 
 def wait_for_title_not_contains(partial_title, timeout=30):
@@ -2339,14 +2712,10 @@ def wait_for_title_not_contains(partial_title, timeout=30):
 
     Parameters:
     partial_title : value
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = "Wait for title to not contain '{}'".format(partial_title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_title_not_contains(partial_title, timeout)
-    _append_screenshot()
+    with _step("Wait for title to not contain '{}'".format(partial_title)):
+        get_browser().wait_for_title_not_contains(partial_title, timeout)
 
 
 def wait_for_window_present_by_partial_title(partial_title, timeout=30):
@@ -2354,14 +2723,11 @@ def wait_for_window_present_by_partial_title(partial_title, timeout=30):
 
     Parameters:
     partial_title : value
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = "Wait for window present by partial title '{}'".format(partial_title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_window_present_by_partial_title(partial_title, timeout)
-    _append_screenshot()
+    with _step("Wait for window present by partial title '{}'".format(partial_title),
+               take_screenshots=False):
+        get_browser().wait_for_window_present_by_partial_title(partial_title, timeout)
 
 
 def wait_for_window_present_by_partial_url(partial_url, timeout=30):
@@ -2369,14 +2735,11 @@ def wait_for_window_present_by_partial_url(partial_url, timeout=30):
 
     Parameters:
     partial_url : value
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = "Wait for window present by partial url '{}'".format(partial_url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_window_present_by_partial_url(partial_url, timeout)
-    _append_screenshot()
+    with _step("Wait for window present by partial url '{}'".format(partial_url),
+               take_screenshots=False):
+        get_browser().wait_for_window_present_by_partial_url(partial_url, timeout)
 
 
 def wait_for_window_present_by_title(title, timeout=30):
@@ -2384,14 +2747,11 @@ def wait_for_window_present_by_title(title, timeout=30):
 
     Parameters:
     title : value
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = "Wait for window present by title '{}'".format(title)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_window_present_by_title(title, timeout)
-    _append_screenshot()
+    with _step("Wait for window present by title '{}'".format(title),
+               take_screenshots=False):
+        get_browser().wait_for_window_present_by_title(title, timeout)
 
 
 def wait_for_window_present_by_url(url, timeout=30):
@@ -2399,11 +2759,8 @@ def wait_for_window_present_by_url(url, timeout=30):
 
     Parameters:
     url : value
-    timeout (30) : value
+    timeout (optional, 30) : value
     """
-    _run_wait_hook()
-    step_message = "Wait for window present by url '{}'".format(url)
-    execution.logger.info(step_message)
-    _add_step(step_message)
-    get_browser().wait_for_window_present_by_url(url, timeout)
-    _append_screenshot()
+    with _step("Wait for window present by url '{}'".format(url),
+               take_screenshots=False):
+        get_browser().wait_for_window_present_by_url(url, timeout)

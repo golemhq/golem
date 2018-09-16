@@ -174,11 +174,11 @@ class GolemExtendedDriver:
         self.get(url)
 
     def switch_to_first_window(self):
-        """Switch to last window/tab"""
+        """Switch to first window/tab"""
         self.switch_to_window_by_index(0)
 
     def switch_to_last_window(self):
-        """Switch to window/tab by index"""
+        """Switch to last window/tab"""
         self.switch_to.window(self.window_handles[-1])
 
     def switch_to_next_window(self):

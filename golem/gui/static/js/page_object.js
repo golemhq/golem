@@ -115,11 +115,11 @@ function savePageObject(){
             // validate the name is a valid python variable name
             var validChars = /^[0-9a-zA-Z\_]+$/;
             if(!name.match(validChars)){
-                utils.displayErrorModal(['Element names should contain only letters, numbers and underscores']);
+                Main.Utils.displayErrorModal(['Element names should contain only letters, numbers and underscores']);
                 errors = true;
             }
             else if(!isNaN(name.charAt(0))){
-                utils.displayErrorModal(['Element names should not begin with a digit']);
+                Main.Utils.displayErrorModal(['Element names should not begin with a digit']);
                 errors = true
             }
             else{
@@ -155,7 +155,7 @@ function savePageObject(){
         contentType: 'application/json; charset=utf-8',
         type: 'POST',
         success: function(data) {
-            utils.toast('success', "Page "+pageObjectName+" saved", 3000);
+            Main.Utils.toast('success', "Page "+pageObjectName+" saved", 3000);
 
             unsavedChanges = false;
         },
@@ -192,7 +192,6 @@ function loadCodeView(){
     var pathname = window.location.pathname;
     window.location.replace(pathname + 'code/');
 }
-
 
 
 function deleteElement(elem){
