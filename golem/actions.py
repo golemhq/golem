@@ -868,7 +868,7 @@ def wait_for_element_enabled(element, timeout=20):
     timed_out = False
     #webelement = None
     #try:
-    webelement = browser.get_browser().find(element, timeout)
+    webelement = browser.get_browser().find(element, timeout=timeout)
     enabled = webelement.is_enabled()
     while not enabled and not timed_out:
         execution.logger.debug('Element is not enabled, waiting..')
