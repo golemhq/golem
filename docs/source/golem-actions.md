@@ -152,9 +152,13 @@ select_by_value('#countrySelect', 'CA')
 ```
 
 
-##### send_keys(element, text)
+##### send_keys(element, text, secure=False)
 
 Send key strokes to the element
+
+##### send_secure_keys(element, text)
+
+Send key strokes to the element and log string masked by asterisks
 
 ##### set_browser_capability(capability_key, capability_value)
 Set a browser capability. Must be called before the browser is started.

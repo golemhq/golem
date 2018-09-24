@@ -450,15 +450,20 @@ def select_by_value(element, value):
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
 
 
-def send_keys(element, text):
+def send_keys(element, text, secure=False):
     """Send keys to an input.
     Parameters:
     element : element
     text : value
+    secure (optional) : boolean
     """
     _run_wait_hook()
     webelement = browser.get_browser().find(element)
-    step_message = 'Write \'{0}\' in element {1}'.format(text, webelement.name)
+    if secure:
+        message = len(text)*'*'
+    else:
+        message = text
+    step_message = 'Write \'{0}\' in element {1}'.format(message, webelement.name)
     # TODO chrome driver drops some characters when calling send_keys
     # if execution.browser_name in ['chrome', 'chrome-headless', 'chrome-remote']:
     #     for c in text:
@@ -468,6 +473,15 @@ def send_keys(element, text):
     webelement.send_keys(text)
     execution.logger.info(step_message)
     _capture_or_add_step(step_message, execution.settings['screenshot_on_step'])
+
+
+def send_secure_keys(element, text):
+    """Send keys to an input but hide it in test log.
+    Parameters:
+    element : element
+    text : value
+    """
+    send_keys(element, text, True)
 
 
 def set_browser_capability(capability_key, capability_value):
