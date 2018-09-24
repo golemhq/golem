@@ -1,4 +1,4 @@
-from typing import List
+# from typing import List # not supported in 3.4
 
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
@@ -7,7 +7,7 @@ from selenium.common.exceptions import NoAlertPresentException, TimeoutException
 from golem.webdriver import common
 from golem.webdriver.extended_webelement import ExtendedRemoteWebElement
 from golem.webdriver import golem_expected_conditions as gec
-from golem.core.exceptions import ElementNotFound
+from golem.core.exceptions import ElementNotFound, ElementNotDisplayed
 
 
 class GolemExtendedDriver:
@@ -141,7 +141,11 @@ class GolemExtendedDriver:
             kwargs['element'] = args[0]
         return common._find(self, **kwargs)
 
-    def find_all(self, *args, **kwargs) -> List[ExtendedRemoteWebElement]:
+    # should use type annotation:
+    # from typing import List
+    ##  -> List[ExtendedRemoteWebElement]
+    # typing not supported in 3.4
+    def find_all(self, *args, **kwargs):
         if len(args) == 1:
             kwargs['element'] = args[0]
         return common._find_all(self, **kwargs)
@@ -256,10 +260,11 @@ class GolemExtendedDriver:
 
     def wait_for_element_displayed(self, element, timeout):
         """Wait for element to be present and displayed"""
-        element = self.find(element, timeout=timeout, wait_displayed=True)
-        if element and not element.is_displayed():
-            message = ('Timeout waiting for element {} to be displayed'
-                       .format(self.name))
+        try:
+            element = self.find(element, timeout=timeout, wait_displayed=True)
+        except ElementNotDisplayed:
+            message = ('timeout waiting for element {} to be displayed'
+                       .format(element))
             raise TimeoutException(message)
 
     def wait_for_element_enabled(self, element, timeout):
@@ -302,7 +307,12 @@ class GolemExtendedDriver:
 
     def wait_for_element_present(self, element, timeout):
         """Wait for element present in the DOM"""
-        self.find(element, timeout=timeout, wait_displayed=False)
+        try:
+            self.find(element, timeout=timeout, wait_displayed=False)
+        except ElementNotFound:
+            message = ('timeout waiting for element {} to be present'
+                       .format(element))
+            raise TimeoutException(message)
 
     def wait_for_element_text(self, element, text, timeout):
         """Wait for element text to match given text"""

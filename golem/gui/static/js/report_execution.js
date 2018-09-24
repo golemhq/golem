@@ -161,22 +161,22 @@ const GeneralTable = new function(){
 			}
 			moduleTotalsByResult[test.result] += 1;
         });
+        let container = moduleRow.find("td[data='percentage']>div.progress");
         Object.keys(moduleTotalsByResult).forEach(function(result){
-        	if(result == 'pending'){
-        		return
+        	if(result != 'pending'){
+                // does the Detail Table has column for this test result?
+                // pending does not have its own column
+                if(!GeneralTable.hasColumnForResult(result)){
+                    GeneralTable.addColumnForResult(result)
+                }
+                // update column value for this result
+                moduleRow.find(`td[data='result'][result='${result}']`).html(moduleTotalsByResult[result]);
         	}
-        	// does the Detail Table has column for this test result?
-			if(!GeneralTable.hasColumnForResult(result)){
-				GeneralTable.addColumnForResult(result)
-			}
-        	moduleRow.find(`td[data='result'][result='${result}']`).html(moduleTotalsByResult[result]);
-            let container = moduleRow.find("td[data='percentage']>div.progress");
         	if(!Main.ReportUtils.hasProgressBarForResult(container, result)){
         		Main.ReportUtils.createProgressBars(container, [result])
         	}
             let percentage = moduleTotalsByResult[result] * 100 / testsInModule.length;
         	Main.ReportUtils.animateProgressBar(container, result, percentage)
-
         })
 		let timeInModule = ExecutionReport.getTotalModuleTime(module);
 		moduleRow.find("td[data='total-tests']").html(testsInModule.length);
@@ -184,6 +184,12 @@ const GeneralTable = new function(){
 		// if(ExecutionReport.netTime != undefined){
 		// 	totalRow.find("td[data='net-time']").html(ExecutionReport.formatTimeOutput(ExecutionReport.netTime));
 		// }
+
+		// check if pending progress bar is stale
+		let moduleHasPending = 'pending' in moduleTotalsByResult;
+		if(!moduleHasPending){
+            Main.ReportUtils.animateProgressBar(container, 'pending', 0)
+		}
 	}
 
 	this.refreshTotalRow = function(){
@@ -204,18 +210,22 @@ const GeneralTable = new function(){
 			}
 			totalsByResult[test.result] += 1;
         });
+        let container = totalRow.find("td[data='percentage']>div.progress");
 		Object.keys(totalsByResult).forEach(function(result){
-			if(result == 'pending'){
-        		return
+			if(result != 'pending'){
+                totalRow.find(`td[data='result'][result='${result}']`).html(totalsByResult[result]);
         	}
-        	totalRow.find(`td[data='result'][result='${result}']`).html(totalsByResult[result]);
-            let container = totalRow.find("td[data='percentage']>div.progress");
         	if(!Main.ReportUtils.hasProgressBarForResult(container, result)){
         		Main.ReportUtils.createProgressBars(container, [result])
         	}
             let percentage = totalsByResult[result] * 100 / totalTestAmount;
         	Main.ReportUtils.animateProgressBar(container, result, percentage)
         })
+        // check if pending progress bar is stale
+		let totalsHasPending = 'pending' in totalsByResult;
+		if(!totalsHasPending ){
+            Main.ReportUtils.animateProgressBar(container, 'pending', 0)
+		}
 	}
 
 	this.addModuleRow = function(module){

@@ -102,7 +102,7 @@ class TestRunner:
                                                  self.test_name)
         test_module, error = utils.import_module(path)
         if error:
-            actions._add_error(error)
+            actions._add_error(message=error.splitlines()[-1], description=error)
             self.result['result'] = ResultsEnum.CODE_ERROR
         else:
             self.test_module = test_module
@@ -124,8 +124,9 @@ class TestRunner:
                                                                         self.test_module,
                                                                         page.split('.'))
             except Exception as e:
-                actions._add_error(message=traceback.format_exc().splitlines()[-1],
-                                   description=traceback.format_exc())
+                message = '{}: {}'.format(e.__class__.__name__, e)
+                trcbk = traceback.format_exc()
+                actions._add_error(message=message, description=trcbk)
                 self.result['result'] = ResultsEnum.CODE_ERROR
         if self.result['result'] == ResultsEnum.CODE_ERROR:
             self.finalize()
@@ -138,11 +139,11 @@ class TestRunner:
                 self.test_module.setup(execution.data)
             else:
                 execution.logger.debug('test does not have setup function')
-        except AssertionError:
-            self._add_error(message='Failure')
+        except AssertionError as e:
+            self._add_error(message='Failure', exception=e)
             self.result['result'] = ResultsEnum.FAILURE
-        except:
-            self._add_error(message='Error')
+        except Exception as e:
+            self._add_error(message='Error', exception=e)
             self.result['result'] = ResultsEnum.CODE_ERROR
         if self.result['result'] in [ResultsEnum.CODE_ERROR, ResultsEnum.FAILURE]:
             self.run_teardown()
@@ -160,13 +161,13 @@ class TestRunner:
                 error_msg = 'test {} does not have a test function'.format(self.test_name)
                 actions._add_error(error_msg)
                 self.result['result'] = ResultsEnum.CODE_ERROR
-        except AssertionError:
-            self._add_error(message='Failure')
+        except AssertionError as e:
+            self._add_error(message='Failure', exception=e)
             self.result['result'] = ResultsEnum.FAILURE
-        except:
+        except Exception as e:
             if not self.result['result'] == ResultsEnum.FAILURE:
                 self.result['result'] = ResultsEnum.CODE_ERROR
-            self._add_error('Error')
+            self._add_error(message='Error', exception=e)
         self.run_teardown()
 
     def run_teardown(self):
@@ -175,13 +176,14 @@ class TestRunner:
                 self.test_module.teardown(execution.data)
             else:
                 execution.logger.debug('test does not have a teardown function')
-        except AssertionError:
-            self._add_error(message='Failure')
-            self.result['result'] = ResultsEnum.FAILURE
-        except:
+        except AssertionError as e:
+            if not self.result['result'] == ResultsEnum.CODE_ERROR:
+                self.result['result'] = ResultsEnum.FAILURE
+            self._add_error(message='Failure', exception=e)
+        except Exception as e:
             if not self.result['result'] == ResultsEnum.FAILURE:
                 self.result['result'] = ResultsEnum.CODE_ERROR
-            self._add_error(message='Error')
+            self._add_error(message='Error', exception=e)
         # if there is no teardown or teardown failed or it did not close the driver,
         # let's try to close the driver manually
         if execution.browser:
@@ -205,7 +207,7 @@ class TestRunner:
                 self.result['result'] = ResultsEnum.ERROR
             else:
                 self.result['result'] = ResultsEnum.SUCCESS
-        execution.logger.info('Test end: {}'.format(self.result['result'].upper()))
+        execution.logger.info('Test Result: {}'.format(self.result['result'].upper()))
 
         self.result['description'] = execution.description
         self.result['steps'] = execution.steps
@@ -235,16 +237,20 @@ class TestRunner:
                     data_string += '    {}: {}\n'.format(key, value)
             execution.logger.info('Using data:{}'.format(data_string))
 
-    def _add_error(self, message):
-        """Add an error to the test.
+    def _add_error(self, message, exception):
+        """Add an error to the test from an exception.
           * Add a new step with `message`, don't log it
-          * Add an error using traceback.format_exc (first line and full traceback)
+          * Add an error using:
+              - message -> 'exception.__class__.__name__: exception'
+                e.g.: 'AssertionError: expected title to be 'foo'
+              - description -> traceback.format_exc()
           * Append the error to the last step
           * Log the error
-          * Take a screenshot if screenshot_on_error == True
+          * Take a screenshot if screenshot_on_error == True and
+            there is an open browser
         """
         actions._add_step(message, log_step=False)
-        error_message = traceback.format_exc().splitlines()[-1]
+        error_message = '{}: {}'.format(exception.__class__.__name__, exception)
         trcbk = traceback.format_exc()
         actions._add_error(message=error_message, description=trcbk)
         actions._append_error(message=error_message, description=trcbk)

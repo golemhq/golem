@@ -64,7 +64,9 @@ def get_logger(log_directory=None, console_log_level='INFO',
 
 def reset_logger(logger):    
     logger.removeHandler(stream_handler)
+    file_handler_debug.close()
     logger.removeHandler(file_handler_debug)
+    file_handler_info.close()
     logger.removeHandler(file_handler_info)
 
 

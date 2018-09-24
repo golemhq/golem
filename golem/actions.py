@@ -338,14 +338,14 @@ def assert_element_attribute(element, attribute, value):
     value : value
     """
     element = get_browser().find(element, timeout=0)
-    step_message = ("Assert the element {} attribute {} value is '{}'"
+    step_message = ("Assert element {} attribute {} value is '{}'"
                     .format(element.name, attribute, value))
     _add_step(step_message)
     _run_wait_hook()
     attr_value = element.get_attribute(attribute)
     msg = ("expected element {} attribute {} value to be '{}' was '{}'"
            .format(element.name, attribute, value, attr_value))
-    assert  attr_value == value, msg
+    assert attr_value == value, msg
     _screenshot_on_step()
 
 
@@ -358,7 +358,7 @@ def assert_element_attribute_is_not(element, attribute, value):
     value : value
     """
     element = get_browser().find(element, timeout=0)
-    step_message = 'Verify the element {} attribute {} value is not {}'.format(element.name, attribute, value)
+    step_message = 'Assert element {} attribute {} value is not {}'.format(element.name, attribute, value)
     _add_step(step_message)
     _run_wait_hook()
     attr_value = element.get_attribute(attribute)
@@ -376,7 +376,7 @@ def assert_element_checked(element):
     element : element
     """
     element = get_browser().find(element, timeout=0)
-    _add_step('Assert the element {} is checked'.format(element.name))
+    _add_step('Assert element {} is checked'.format(element.name))
     _run_wait_hook()
     assert element.is_selected(), 'element {} is not checked'.format(element.name)
     _screenshot_on_step()
@@ -472,7 +472,7 @@ def assert_element_not_checked(element):
     element : element
     """
     element = browser.get_browser().find(element, timeout=0)
-    _add_step('Assert the element {} is not checked'.format(element.name))
+    _add_step('Assert element {} is not checked'.format(element.name))
     _run_wait_hook()
     assert not element.is_selected(), 'element {} is checked'.format(element.name)
     _screenshot_on_step()
@@ -487,7 +487,7 @@ def assert_element_not_displayed(element):
     element = get_browser().find(element, timeout=0, wait_displayed=False)
     _add_step('Assert element {} is not displayed'.format(element.name))
     _run_wait_hook()
-    assert element.is_displayed(), 'element {} is displayed'.format(element.name)
+    assert not element.is_displayed(), 'element {} is displayed'.format(element.name)
     _screenshot_on_step()
 
 
@@ -500,7 +500,7 @@ def assert_element_not_enabled(element):
     element = get_browser().find(element, timeout=0)
     _add_step('Assert element {} is not enabled'.format(element.name))
     _run_wait_hook()
-    assert element.is_enabled(), 'element {} is enabled'.format(element.name)
+    assert not element.is_enabled(), 'element {} is enabled'.format(element.name)
     _screenshot_on_step()
 
 
@@ -806,9 +806,10 @@ def assert_url_not_contains(partial_url):
     """
     _add_step("Assert page title does not contain '{}'".format(partial_url))
     _run_wait_hook()
+    actual_url = get_browser().current_url
     error_msg = ("expected URL '{}' to not contain '{}'"
-                 .format(partial_url))
-    assert partial_url not in get_browser().current_url, error_msg
+                 .format(actual_url, partial_url))
+    assert partial_url not in actual_url, error_msg
     _screenshot_on_step()
 
 
@@ -1291,7 +1292,7 @@ def http_post(url, headers={}, data={}, verify_ssl_cert=True):
     data (optional, dict) : value
     verify_ssl_cert (optional, default is True) : value
     """
-    _add_step('Make POST request to {}'.format(url))
+    _add_step('Make a POST request to {}'.format(url))
     response = requests.post(url, headers=headers, data=data,
                              verify=verify_ssl_cert)
     store('last_response', response)
@@ -1878,7 +1879,7 @@ def verify_element_attribute(element, attribute, value):
     value : value
     """
     element = get_browser().find(element, timeout=0)
-    message = ("Verify the element {} attribute {} value is '{}'"
+    message = ("Verify element {} attribute {} value is '{}'"
                .format(element.name, attribute, value))
     with _verify_step(message) as s:
         actual_value = element.get_attribute(attribute)
@@ -1896,11 +1897,11 @@ def verify_element_attribute_is_not(element, attribute, value):
     value : value
     """
     element = get_browser().find(element, timeout=0)
-    message = ("Verify the element {} attribute {} value is not '{}'"
+    message = ("Verify element {} attribute {} value is not '{}'"
                .format(element.name, attribute, value))
     with _verify_step(message) as s:
         actual_value = element.get_attribute(attribute)
-        s.error = ("expected element {} {} attribute to not be '{}'"
+        s.error = ("expected element {} attribute {} to not be '{}'"
                    .format(element.name, attribute, value))
         s.condition = actual_value != value
 
@@ -1913,7 +1914,7 @@ def verify_element_checked(element):
     element : element
     """
     element = get_browser().find(element, timeout=0)
-    with _verify_step('Verify the element {} is checked'.format(element.name)) as s:
+    with _verify_step('Verify element {} is checked'.format(element.name)) as s:
         s.error = 'element {} is not checked'.format(element.name)
         s.condition = element.is_selected()
 
@@ -1927,7 +1928,7 @@ def verify_element_displayed(element):
     element = get_browser().find(element, timeout=0, wait_displayed=False)
     with _verify_step('Verify element {} is displayed'.format(element.name)) as s:
         s.error = 'element {} is not displayed'.format(element.name)
-        s.condition = not element.is_displayed()
+        s.condition = element.is_displayed()
 
 
 def verify_element_enabled(element):
@@ -2002,7 +2003,7 @@ def verify_element_not_checked(element):
     element : element
     """
     element = browser.get_browser().find(element, timeout=0)
-    with _verify_step('Verify the element {} is not checked'.format(element.name)) as s:
+    with _verify_step('Verify element {} is not checked'.format(element.name)) as s:
         s.error = 'element {} is checked'.format(element.name)
         s.condition = not element.is_selected()
 
@@ -2379,7 +2380,7 @@ def verify_url_is_not(url):
     msg = "Verify URL is not '{}'".format(url)
     err = "expected URL to not be '{}'".format(url)
     with _verify_step(msg, err) as s:
-        s.condition = get_browser().current_url == url
+        s.condition = get_browser().current_url != url
 
 
 def verify_url_not_contains(partial_url):
@@ -2392,7 +2393,7 @@ def verify_url_not_contains(partial_url):
     msg = "Verify URL does not contain '{}'".format(partial_url)
     err = "expected URL '{}' to not contain '{}'".format(current_url, partial_url)
     with _verify_step(msg, err) as s:
-        s.condition = partial_url in current_url
+        s.condition = partial_url not in current_url
 
 
 def verify_window_present_by_partial_title(partial_title):

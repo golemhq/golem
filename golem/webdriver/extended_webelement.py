@@ -1,3 +1,5 @@
+# from typing import List # not supported in 3.4
+
 from selenium.webdriver.remote.webelement import WebElement as RemoteWebElement
 from selenium.webdriver.firefox.webelement import FirefoxWebElement
 from selenium.webdriver.firefox.webdriver import WebDriver as FirefoxDriver
@@ -9,10 +11,14 @@ from selenium.webdriver.support import expected_conditions as ec
 
 from golem.webdriver.common import _find, _find_all
 from golem.webdriver import golem_expected_conditions as gec
-from typing import List
+
 
 
 class ExtendedWebElement:
+
+    selector_type = None
+    selector_value = None
+    name = None
 
     def check(self):
         """Check element if element is checkbox or radiobutton.
@@ -37,7 +43,8 @@ class ExtendedWebElement:
             kwargs['element'] = args[0]
         return _find(self, **kwargs)
 
-    def find_all(self, *args, **kwargs) -> List['ExtendedRemoteWebElement']:
+    #  -> List['ExtendedRemoteWebElement']
+    def find_all(self, *args, **kwargs):
         if len(args) == 1:
             kwargs['element'] = args[0]
         return _find_all(self, **kwargs)
@@ -179,7 +186,7 @@ class ExtendedWebElement:
     def wait_text_not_contains(self, text, timeout=30):
         """Wait for element text to not contain text"""
         wait = WebDriverWait(self.parent, timeout)
-        message = ('Timeout waiting for element {} text to not contain \'{}\''\
+        message = ('Timeout waiting for element {} text to not contain \'{}\''
                    .format(self.name, text))
         wait.until_not(gec.element_text_to_contain(self, text),
                        message=message)
@@ -187,7 +194,13 @@ class ExtendedWebElement:
 
 
 class Select(SeleniumSelect):
-    pass
+
+    @property
+    def first_selected_option(self):
+        """Return the first selected option as a
+        Golem ExtendedWebElement"""
+        option = super(Select, self).first_selected_option
+        return extend_webelement(option)
 
 
 class ExtendedRemoteWebElement(RemoteWebElement, ExtendedWebElement):
