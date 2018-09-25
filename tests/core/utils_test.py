@@ -169,7 +169,7 @@ class Test_get_projects:
         utils.create_new_project(testdir, 'project1')
         utils.create_new_project(testdir, 'project2')
         projects = utils.get_projects(testdir)
-        assert projects == ['project1', 'project2']
+        assert projects.sort() == ['project1', 'project2'].sort()
 
     def test_get_projects_no_project(self, testdir_function):
         projects = utils.get_projects(testdir_function['path'])
