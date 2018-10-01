@@ -1,101 +1,92 @@
 Golem Actions
 ==================================================
 
-Golem comes with predefined actions that cover almost all the needs to write tests. They are self-documenting. The entire list of available actions is the following:
+Golem comes with a list of predefined actions that cover most of the scenarios for tests.
+They are self-documenting, meaning, they store the steps, logs and screenshots in the execution report.
+
+**A note on assertions and verifications:**
+
+Actions that start with 'assert_' are hard assertions.
+They will stop the test when they fail (jump to teardown) and the test will end with result: failure.
+
+Actions that start with 'verify_' are soft assertions.
+When a verify_ action fails it stores an error but the test continues with the next statement.
+The test will end with result: error.
 
 
-### Alerts
+## Alerts
 
-
-##### accept_alert(ignore_not_present=False)
+### accept_alert(ignore_not_present=False)
 
 Accept an alert, confirm or prompt box. Use ignore_not_present to ignore error when alert is not present.
 
-
-##### assert_alert_not_present()
+### assert_alert_not_present()
 
 Assert an alert is not present. This applies to alerts, confirms and prompts.
 
-
-##### assert_alert_present()
+### assert_alert_present()
 
 Assert an alert is present. This applies to alerts, confirms and prompts.
 
-
-##### assert_alert_text(text)
+### assert_alert_text(text)
 
 Assert alert text. This will fail if there is no alert present.
 
-
-##### assert_alert_text_is_not(text)
+### assert_alert_text_is_not(text)
 
 Assert alert text is not text. This will fail if there is no alert present.
 
-
-##### dismiss_alert(ignore_not_present=False)
+### dismiss_alert(ignore_not_present=False)
 
 Dismiss an alert, confirm or prompt box. When ignore_not_present is True the error when alert is not present is ignored.
 
-
-##### get_alert_text()
+### get_alert_text()
 
 Get text of alert, confirm or prompt box
 
-
-##### send_text_to_alert(text)
+### send_text_to_alert(text)
 
 Send text to an alert
 
-
-##### submit_prompt_alert(text)
+### submit_prompt_alert(text)
 
 Send text to a prompt alert and accept it. If there is no prompt alert present this will fail.
 
-
-##### verify_alert_is_not_present()
+### verify_alert_is_not_present()
 
 DEPRECATED, use verify_alert_not_present
 
-
-##### verify_alert_is_present()
+### verify_alert_is_present()
 
 DEPRECATED, use verify_alert_present
 
-
-##### verify_alert_not_present()
+### verify_alert_not_present()
 
 Verify an alert is not present. This applies to alerts, confirms and prompts.
 
-
-##### verify_alert_present()
+### verify_alert_present()
 
 Verify an alert is present. This applies to alerts, confirms and prompts.
 
-
-##### verify_alert_text(text)
+### verify_alert_text(text)
 
 Verify alert text. This will fail if there is no alert present.
 
-
-##### verify_alert_text_is_not(text)
+### verify_alert_text_is_not(text)
 
 Verify alert text is not text. This will fail if there is no alert present.
 
-
-##### wait_for_alert_present(timeout=30)
+### wait_for_alert_present(timeout=30)
 
 Wait for an alert to be present
 
+## API
 
-### API
-
-
-##### assert_response_status_code(response, status_code)
+### assert_response_status_code(response, status_code)
 
 assert response status code
 
-
-##### http_get(url, headers={}, params={})
+### http_get(url, headers={}, params={})
 
 Perform an HTTP GET request to the URL, with the given headers and params.
 Headers and params must be Python dictionaries and are optional.
@@ -108,46 +99,38 @@ http_get('http://google.com/')
 assert_equals(data.last_response.status_code, 200)
 ```
 
-
-##### http_post(url, headers={}, data={}, verify_ssl_cert=True)
+### http_post(url, headers={}, data={}, verify_ssl_cert=True)
 
 Perform an HTTP POST request to the URL, with the given headers and data.
 Headers and params must be Python dictionaries and are optional.
 The response is stored in 'data.last_response'
 Returns the response.
 
-
-##### verify_response_status_code(response, status_code)
+### verify_response_status_code(response, status_code)
 
 Verify response status code
 
+## Browser
 
-### Browser
-
-
-##### activate_browser(browser_id)
+### activate_browser(browser_id)
 
 Activates a browser to use in subsequent actions.
 When opening more than one browser (not windows or tabs) for a single test, the new browser can be assigned to an ID.
 Default browser ID is 'main'.
 
-
-##### close()
+### close()
 
 DEPRECATED, use close_browser or close_window instead.
 
-
-##### close_browser()
+### close_browser()
 
 Closes the webdriver browser and all it's windows/tabs
 
-
-##### get_browser()
+### get_browser()
 
 Returns the active browser driver object
 
-
-##### get_window_size()
+### get_window_size()
 
 Return the window size with the following format:
     
@@ -158,26 +141,21 @@ size = {
 }
 ```
 
+### maximize_window()
 
-##### maximize_window()
-
-
-##### open_browser(browser_id=None)
+### open_browser(browser_id=None)
 
 Open a new browser.
 browser_id is optional and only used to manage more than one browser for the same test.
 Default browser ID is 'main'.
 
-
-##### set_window_size(width, height)
+### set_window_size(width, height)
 
 Set the width and height of the window (in pixels)
 
+## Cookies
 
-### Cookies
-
-
-##### add_cookie(cookie_dict)
+### add_cookie(cookie_dict)
 
 Add a cookie to the current session.
     
@@ -195,212 +173,171 @@ function will fail with "Message: unable to set cookie"
 
 add_cookie({'name': 'foo', 'value': 'bar'})
 
-
-##### assert_cookie_present(name)
+### assert_cookie_present(name)
 
 Assert a cookie exists in the current session by the cookie name
 
-
-##### assert_cookie_value(name, value)
+### assert_cookie_value(name, value)
 
 Assert the value of a cookie.
 This will fail if the cookie does not exist.
 
-
-##### delete_all_cookies()
+### delete_all_cookies()
 
 Delete all cookies from the current session.
 Note: this only deletes cookies from the current domain.
 
-
-##### delete_cookie(name)
+### delete_cookie(name)
 
 Delete a cookie from the current session.
 
-
-##### get_cookie(name)
+### get_cookie(name)
 
 Get a cookie by its name.
 Returns the cookie if found, None if not.
 
-
-##### get_cookies()
+### get_cookies()
 
 Returns a list of dictionaries, corresponding to cookies present in the current session.
 
-
-##### verify_cookie_exists(name)
+### verify_cookie_exists(name)
 
 DEPRECATED, use verify_cookie_present instead.
 
-
-##### verify_cookie_present(name)
+### verify_cookie_present(name)
 
 Verify a cookie exists in the current session by the cookie name
 
-
-##### verify_cookie_value(name, value)
+### verify_cookie_value(name, value)
 Verify the value of a cookie.
 This will fail if the cookie does not exist.
 
+## Element
 
-### Element
-
-
-##### assert_element_attribute(element, attribute, value)
+### assert_element_attribute(element, attribute, value)
 
 Assert value of element attribute
 
-
-##### assert_element_attribute_is_not(element, attribute, value)
+### assert_element_attribute_is_not(element, attribute, value)
 
 Assert the value of attribute of element is not 'value'
 
-
-##### assert_element_checked(element)
+### assert_element_checked(element)
 
 Assert element is checked. This applies to checkboxes and radio buttons.
 
-
-##### assert_element_displayed(element)
+### assert_element_displayed(element)
 
 Assert element is displayed (visible to the user)
 
-
-##### assert_element_enabled(element)
+### assert_element_enabled(element)
 
 Assert that element is enabled
 
-
-##### assert_element_has_attribute(element, attribute)
+### assert_element_has_attribute(element, attribute)
 
 Assert element has attribute
 
-
-##### assert_element_has_focus(element)
+### assert_element_has_focus(element)
 
 Assert element has focus
 
-
-##### assert_element_has_not_attribute(element, attribute)
+### assert_element_has_not_attribute(element, attribute)
 
 Assert element does not have attribute
 
-
-##### assert_element_has_not_focus(element)
+### assert_element_has_not_focus(element)
 
 Assert element does not have focus
 
-
-##### assert_element_not_checked(element)
+### assert_element_not_checked(element)
 
 Assert element is not checked.
 This applies to checkboxes and radio buttons.
 
-
-##### assert_element_not_displayed(element)
+### assert_element_not_displayed(element)
 
 Assert element is not displayed (visible to the user)
 
-
-##### assert_element_not_enabled(element)
+### assert_element_not_enabled(element)
 
 Assert that element is not enabled
 
-
-##### assert_element_not_present(element)
+### assert_element_not_present(element)
 
 Assert element is not present in the DOM
 
-
-##### assert_element_present(element)
+### assert_element_present(element)
 
 Assert element is present in the DOM
 
-
-##### assert_element_text(element, text)
+### assert_element_text(element, text)
 
 Assert the text of the element
 
-
-##### assert_element_text_contains(element, text)
+### assert_element_text_contains(element, text)
 
 Assert element contains text
 
-
-##### assert_element_text_is_not(element, text)
+### assert_element_text_is_not(element, text)
 
 Assert the text of the element is not *text*
 
-
-##### assert_element_text_not_contains(element, text)
+### assert_element_text_not_contains(element, text)
 
 Assert element does not contain *text*
 
-
-##### check_element(element)
+### check_element(element)
 
 Check an element (checkbox or radiobutton).
 If element is already checked this is is ignored.
 
-
-##### clear(element)
+### clear(element)
 
 DEPRECATED, use clear_element instead
 
-
-##### clear_element(element)
+### clear_element(element)
 
 Clear element (e.g. a text input)
 
-
-##### click(element)
+### click(element)
 
 Perform a mouse click on element
 
-
-##### double_click(element)
+### double_click(element)
 
 Perform a double click on element
 
-
-##### focus_element(element)
+### focus_element(element)
 
 Give focus to element
 
-
-##### get_element_attribute(element, attribute)
+### get_element_attribute(element, attribute)
 
 Get the attribute value of element.
 If the attribute is not present in element, None is returned.
    
-
-##### get_element_text(element)
+### get_element_text(element)
 
 Get the element text
 
-
-##### get_element_value(element)
+### get_element_value(element)
 
 Get the element value attribute
 
-
-##### javascript_click(element)
+### javascript_click(element)
 
 Click an element using Javascript
 
-
-##### mouse_hover(element)
+### mouse_hover(element)
 
 DEPRECATED, use mouse_over instead
 
-
-##### mouse_over(element)
+### mouse_over(element)
 
 Perform a mouse over on the element
 
-
-##### press_key(element, key)
+### press_key(element, key)
 
 Press a given key in the element.
 Key must be a string with a value defined in selenium.webdriver.common.keys.Keys
@@ -412,290 +349,232 @@ press_key('TAB')
 press_key('LEFT')
 ```
 
-
-##### send_keys(element, text)
+### send_keys(element, text)
 
 Send text to element
 
-
-##### submit_form(element)
+### submit_form(element)
 
 Submit form. Element can be the form itself or any child element.
 
-
-##### uncheck_element(checkbox)
+### uncheck_element(checkbox)
 
 Uncheck a checkbox. If element is already checked this is is ignored.
 
-
-##### verify_element_attribute(element, attribute, value)
+### verify_element_attribute(element, attribute, value)
 
 Verify the value of attribute of element
 
-
-##### verify_element_attribute_is_not(element, attribute, value)
+### verify_element_attribute_is_not(element, attribute, value)
 
 Verify the value of attribute of element is not *value*
 
-
-##### verify_element_checked(element)
+### verify_element_checked(element)
 
 Verify element is checked. This applies to checkboxes and radio buttons.
 
-
-##### verify_element_displayed(element)
+### verify_element_displayed(element)
 
 Verify element is displayed (visible to the user)
 
-
-##### verify_element_enabled(element)
+### verify_element_enabled(element)
 
 Verify that element is enabled
 
-
-##### verify_element_has_attribute(element, attribute)
+### verify_element_has_attribute(element, attribute)
 
 Verify element has attribute
 
-
-##### verify_element_has_focus(element)
+### verify_element_has_focus(element)
 
 Verify element has focus
 
-
-##### verify_element_has_not_attribute(element, attribute)
+### verify_element_has_not_attribute(element, attribute)
 
 Verify element does not have attribute
 
-
-##### verify_element_has_not_focus(element)
+### verify_element_has_not_focus(element)
 
 Verify element does not have focus
 
-
-##### verify_element_not_checked(element)
+### verify_element_not_checked(element)
 
 Verify element is not checked. This applies to checkboxes and radio buttons.
 
-
-##### verify_element_not_displayed(element)
+### verify_element_not_displayed(element)
 
 Verify element is not displayed (visible to the user)
 
-
-##### verify_element_not_enabled(element)
+### verify_element_not_enabled(element)
 
 Verify that element is not enabled
 
-
-##### verify_element_not_present(element)
+### verify_element_not_present(element)
 
 Verify element is not present in the DOM
 
-
-##### verify_element_present(element)
+### verify_element_present(element)
 
 Verify element is present in the DOM
 
-
-##### verify_element_text(element, text)
+### verify_element_text(element, text)
 
 Verify the text of the element
 
-
-##### verify_element_text_contains(element, text)
+### verify_element_text_contains(element, text)
 
 Verify element contains text
 
-
-##### verify_element_text_is_not(element, text)
+### verify_element_text_is_not(element, text)
 
 Verify the text of the element is not *text*
 
-
-##### verify_element_text_not_contains(element, text)
+### verify_element_text_not_contains(element, text)
 
 Verify element does not contain text
 
-
-##### verify_exists(element)
+### verify_exists(element)
 
 DEPRECATED, use verify_element_present
 
-
-##### verify_is_enabled(element)
+### verify_is_enabled(element)
 
 DEPRECATED, use verify_element_enabled
 
-
-##### verify_is_not_enabled(element)
+### verify_is_not_enabled(element)
 
 DEPRECATED, use verify_element_not_enabled
 
-
-##### verify_is_not_selected(element)
+### verify_is_not_selected(element)
 
 DEPRECATED, use verify_element_not_checked
 
-
-##### verify_is_not_visible(element)
+### verify_is_not_visible(element)
 
 DEPRECATED, use verify_element_not_displayed
 
-
-##### verify_is_selected(element)
+### verify_is_selected(element)
 
 DEPRECATED, use verify_element_checked
 
-
-##### verify_is_visible(element)
+### verify_is_visible(element)
 
 DEPRECATED, use verify_element_displayed
 
-
-##### verify_not_exists(element)
+### verify_not_exists(element)
 
 DEPRECATED, use verify_element_not_present
 
-
-##### verify_text_in_element(element, text)
+### verify_text_in_element(element, text)
 
 DEPRECATED, use verify_element_text or verify_element_text_contains
 
-
-##### wait_for_element_displayed(element, timeout=30)
+### wait_for_element_displayed(element, timeout=30)
 
 Wait for element to be present and displayed
 
-
-##### wait_for_element_enabled(element, timeout=30)
+### wait_for_element_enabled(element, timeout=30)
 
 Wait for element to be enabled
 
-
-##### wait_for_element_has_attribute(element, attribute timeout=30)
+### wait_for_element_has_attribute(element, attribute timeout=30)
 
 Wait for element to have attribute
 
-
-##### wait_for_element_has_not_attribute(element, attribute timeout=30)
+### wait_for_element_has_not_attribute(element, attribute timeout=30)
 
 Wait for element to not have attribute
 
-
-##### wait_for_element_not_displayed(element, timeout=30)
+### wait_for_element_not_displayed(element, timeout=30)
 
 Wait for element to be not displayed
 
-
-##### wait_for_element_not_enabled(element, timeout=30)
+### wait_for_element_not_enabled(element, timeout=30)
 
 Wait for element to be not enabled
 
-
-##### wait_for_element_not_exist(element, timeout=20)
+### wait_for_element_not_exist(element, timeout=20)
 
 DEPRECATED, use wait_for_element_not_present
 
-
-##### wait_for_element_not_present(element, timeout=30)
+### wait_for_element_not_present(element, timeout=30)
 
 Wait for element to stop being present in the DOM.
 If element is already not present, this will be ignored.
 
-
-##### wait_for_element_not_visible(element, timeout=20)
+### wait_for_element_not_visible(element, timeout=20)
 
 DEPRECATED, use wait_for_element_not_displayed
 
-
-##### wait_for_element_present(element, timeout=30)
+### wait_for_element_present(element, timeout=30)
 
 Wait for element to be present in the DOM
 
-
-##### wait_for_element_text(element, text, timeout=30)
+### wait_for_element_text(element, text, timeout=30)
 
 Wait for element text to match given text
 
-
-##### wait_for_element_text_contains(element, text, timeout=30)
+### wait_for_element_text_contains(element, text, timeout=30)
 
 Wait for element text to contain given text
 
-
-##### wait_for_element_text_is_not(element, text, timeout=30)
+### wait_for_element_text_is_not(element, text, timeout=30)
 
 Wait for element text to not match given text
 
-
-##### wait_for_element_text_not_contains(element, text, timeout=30)
+### wait_for_element_text_not_contains(element, text, timeout=30)
 
 Wait for element text to not contain given text
 
-
-##### wait_for_element_visible(element, timeout=20)
+### wait_for_element_visible(element, timeout=20)
 
 DEPRECATED, use wait_for_element_displayed
 
+## Frames
 
-### Frames
-
-
-##### switch_to_default_content()
+### switch_to_default_content()
 
 Switch to default content (default frame)
 
-
-##### switch_to_frame(frame)
+### switch_to_frame(frame)
 
 Switch to frame. frame must be the index, name, or the frame webelement itself.
 
-
-##### switch_to_parent_frame()
+### switch_to_parent_frame()
 
 Switch to the parent of the current frame
 
+## Select
 
-### Select
-
-
-##### assert_selected_option_by_text(element, text)
+### assert_selected_option_by_text(element, text)
 
 Assert the option selected in a \<select\> by the option text
 
-
-##### assert_selected_option_by_value(element, text)
+### assert_selected_option_by_value(element, text)
 
 Assert the option selected in a \<select\> by the option value
 
-
-##### select_by_index(element, text)
+### select_by_index(element, text)
 
 DEPRECATED, use select_option_by_index instead
 
-
-##### select_by_text(element, text)
+### select_by_text(element, text)
 
 DEPRECATED, use select_option_by_text instead
 
-
-##### select_by_value(element, value)
+### select_by_value(element, value)
 
 DEPRECATED, use select_option_by_value instead
 
-
-##### select_option_by_index(element, text)
+### select_option_by_index(element, text)
 
 Select an option from a \<select\> element by index (starts from 0)
 
-
-##### select_option_by_text(element, text)
+### select_option_by_text(element, text)
 
 Select an option from a \<select\> element by the option text
 
-
-##### select_option_by_value(element, value)
+### select_option_by_value(element, value)
 
 Select an option from a \<select\> element by the option value. 
 
@@ -717,77 +596,61 @@ select_option_by_text('#countrySelect', 'Canada')
 select_option_by_value('#countrySelect', 'CA')
 ```
 
-
-##### verify_selected_option(element, text)
+### verify_selected_option(element, text)
 
 DEPRECATED, use verify_selected_option_by_text or verify_selected_option_by_value
 
-
-##### verify_selected_option_by_text(element, text)
+### verify_selected_option_by_text(element, text)
 
 Verify the option selected in a \<select\> by the option text
 
-
-##### verify_selected_option_by_value(element, text)
+### verify_selected_option_by_value(element, text)
 
 Verify the option selected in a \<select\> by the option value
 
+## Window
 
-### Window
-
-
-##### assert_page_contains_text(text)
+### assert_page_contains_text(text)
 
 Assert the given text is present anywhere in the page (in the entire DOM)
 
-
-##### assert_page_not_contains_text(text)
+### assert_page_not_contains_text(text)
 
 Assert the given text is present anywhere in the page (in the entire DOM)
 
-
-##### assert_title(title)
+### assert_title(title)
 
 Assert the page title
 
-
-##### assert_title_contains(partial_title)
+### assert_title_contains(partial_title)
 
 Assert the page title contains partial_title
 
-
-##### assert_title_is_not(title)
+### assert_title_is_not(title)
 
 Assert the page title is not title
 
-
-##### assert_title_not_contains(text)
+### assert_title_not_contains(text)
 
 Assert the page title does not contain text
 
-
-
-##### assert_url(url)
+### assert_url(url)
 
 Assert the current URL
 
-
-##### assert_url_contains(partial_url)
+### assert_url_contains(partial_url)
 
 Assert the current URL contains partial_url
 
-
-##### assert_url_is_not(url)
+### assert_url_is_not(url)
 
 Assert the current URL is not url
 
-
-##### assert_url_not_contains(partial_url)
+### assert_url_not_contains(partial_url)
 
 Assert the current URL does not contain partial_url
 
-
-##### execute_javascript(script, *args)
+### execute_javascript(script, *args)
 
 Execute javascript code
 
@@ -803,374 +666,301 @@ element = actions.get_browser().find('#myElement')
 actions.execute_javascript('arguments[0].click()', element)
 ```
 
-
-##### get(url)
+### get(url)
 
 Navigate to a URL, same as *navigate(url)*
 
-
-##### get_active_element()
+### get_active_element()
 
 Returns the element with focus, or BODY if nothing has focus
 
-
-##### get_current_url()
+### get_current_url()
 
 Returns the current browser URL
 
-
-##### get_page_source()
+### get_page_source()
 
 Get the entire source code of the page
 
+### get_window_title()
 
-##### get_window_title()
-
-
-##### go_back()
+### go_back()
 
 Goes one step backward in the browser history
 
-
-##### go_forward()
+### go_forward()
 
 Goes one step forward in the browser history
 
-
-##### navigate(url)
+### navigate(url)
 
 Navigate to a URL
 
-
-##### refresh_page()
+### refresh_page()
 
 Refreshes the page
 
-
-##### verify_page_contains_text(text)
-
-Verify the given text is present anywhere in the page (in the entire DOM)
-
-
-##### verify_page_not_contains_text(text)
+### verify_page_contains_text(text)
 
 Verify the given text is present anywhere in the page (in the entire DOM)
 
+### verify_page_not_contains_text(text)
 
-##### verify_text(text)
+Verify the given text is present anywhere in the page (in the entire DOM)
+
+### verify_text(text)
 
 DEPRECATED, use verify_page_contains_text
 
-
-##### verify_title(title)
+### verify_title(title)
 
 Verify the page title
 
-
-##### verify_title_contains(partial_title)
+### verify_title_contains(partial_title)
 
 Verify the page title contains partial_title
 
-
-##### verify_title_is_not(title)
+### verify_title_is_not(title)
 
 Verify the page title is not *title*
 
-
-##### verify_title_not_contains(text)
+### verify_title_not_contains(text)
 
 Verify the page title does not contain *text*
 
-
-##### verify_url(url)
+### verify_url(url)
 
 Verify the current URL
 
-
-##### verify_url_contains(partial_url)
+### verify_url_contains(partial_url)
 
 Verify the current URL contains partial_url
 
-
-##### verify_url_is_not(url)
+### verify_url_is_not(url)
 
 Verify the current URL is not url
 
-
-##### verify_url_not_contains(partial_url)
+### verify_url_not_contains(partial_url)
 
 Verify the current URL does not contain partial_url
 
-
-##### wait_for_page_contains_text(text, timeout=30)
+### wait_for_page_contains_text(text, timeout=30)
 
 Wait for page to contain text in the DOM
 
-
-##### wait_for_page_not_contains_text(text, timeout=30)
+### wait_for_page_not_contains_text(text, timeout=30)
 
 Wait for page to not contain text in the DOM
 
-
-##### wait_for_title(title, timeout=30)
+### wait_for_title(title, timeout=30)
 
 Wait for page title to be the given value
 
-
-##### wait_for_title_contains(partial_title, timeout=30)
+### wait_for_title_contains(partial_title, timeout=30)
 
 Wait for page title to contain partial_title
 
-
-##### wait_for_title_is_not(title, timeout=30)
+### wait_for_title_is_not(title, timeout=30)
 
 Wait for page title to not be the given value
 
-
-##### wait_for_title_not_contains(partial_title, timeout=30)
+### wait_for_title_not_contains(partial_title, timeout=30)
 
 Wait for page title to not contain partial_title
 
+## Windows / Tabs
 
-### Windows / Tabs
-
-
-##### assert_amount_of_windows(amount)
+### assert_amount_of_windows(amount)
 
 Assert the amount of open windows/tabs
 
-
-##### assert_window_present_by_partial_title(title)
+### assert_window_present_by_partial_title(title)
 
 Assert there is a window/tab present by partial title
 
-
-##### assert_window_present_by_partial_url(partial_url)
+### assert_window_present_by_partial_url(partial_url)
 
 Assert there is a window/tab present by partial URL
 
-
-##### assert_window_present_by_title(title)
+### assert_window_present_by_title(title)
 
 Assert there is a window/tab present by title
 
-
-##### assert_window_present_by_url(url)
+### assert_window_present_by_url(url)
 
 Assert there is a window/tab present by URL
 
-
-##### close_window()
+### close_window()
 
 Close current window/tab.
 If there is only one window, this will close the browser, use close_browser instead.
 If there are other windows open, this will switch to the first window afterwards.
 
-
-##### close_window_by_index()
+### close_window_by_index()
 
 Close window/tab by index.
 Note: "The order in which the window handles are returned is arbitrary."
 
-
-##### close_window_by_partial_title(partial_title)
+### close_window_by_partial_title(partial_title)
 
 Close window/tab by partial title
 
-
-##### close_window_by_partial_url(partial_url)
+### close_window_by_partial_url(partial_url)
 
 Close window/tab by partial URL
 
-
-##### close_window_by_title(title)
+### close_window_by_title(title)
 
 Close window/tab by title
 
-
-##### close_window_by_url(url)
+### close_window_by_url(url)
 
 Close window/tab by URL
 
+### get_window_handle()
 
-##### get_window_handle()
-
-
-##### get_window_handles()
+### get_window_handles()
 
 Return a list with the handles of all the open windows/tabs
 
-
-##### get_window_index()
+### get_window_index()
 
 Get the index of the current window/tab from the list of window handles
 
-
-##### get_window_titles()
+### get_window_titles()
 
 Return a list with the titles of all the open windows/tabs
 
-
-##### switch_to_first_window()
+### switch_to_first_window()
 
 Switch to first window/tab (in the list of window handles)
 
-
-##### switch_to_last_window()
+### switch_to_last_window()
 
 Switch to last window/tab (in the list of window handles)
 
-
-##### switch_to_next_window()
+### switch_to_next_window()
 
 Switch to next window/tab in the list of window handles.
 If current window is the last in the list this will circle back from the start.
 
+### switch_to_previous_window()
 
-##### switch_to_previous_window()
 Switch to previous window/tab in the list of window handles.
 If current window is the first in the list of window handles this will circle back from the top.
 
-
-##### switch_to_window_by_index(index)
+### switch_to_window_by_index(index)
 
 Switch to window/tab by index.
 Note: "The order in which the window handles are returned is arbitrary."
 
-
-##### switch_to_window_by_partial_title(partial_title)
+### switch_to_window_by_partial_title(partial_title)
 
 Switch to window/tab by partial Title
 
-
-##### switch_to_window_by_partial_url(partial_url)
+### switch_to_window_by_partial_url(partial_url)
 
 Switch to window/tab by partial URL
 
-
-##### switch_to_window_by_title(title)
-
-Switch to window/tab by title
-
-
-##### switch_to_window_by_url(url)
+### switch_to_window_by_title(title)
 
 Switch to window/tab by title
 
+### switch_to_window_by_url(url)
 
-##### verify_amount_of_windows(amount)
+Switch to window/tab by title
+
+### verify_amount_of_windows(amount)
 
 Verify the amount of open windows/tabs
 
-
-##### verify_window_present_by_partial_title(title)
+### verify_window_present_by_partial_title(title)
 
 Verify there is a window/tab present by partial title
 
-
-##### verify_window_present_by_partial_url(partial_url)
+### verify_window_present_by_partial_url(partial_url)
 
 Verify there is a window/tab present by partial URL
 
-
-##### verify_window_present_by_title(title)
+### verify_window_present_by_title(title)
 
 Verify there is a window/tab present by title
 
-
-##### verify_window_present_by_url(url)
+### verify_window_present_by_url(url)
 
 Verify there is a window/tab present by URL
 
-
-##### wait_for_window_present_by_partial_title(partial_title, timeout=30)
+### wait_for_window_present_by_partial_title(partial_title, timeout=30)
 
 Wait for window/tab present by partial title
 
-
-##### wait_for_window_present_by_partial_url(partial_url, timeout=30)
+### wait_for_window_present_by_partial_url(partial_url, timeout=30)
 
 Wait for window/tab present by partial url
 
-
-##### wait_for_window_present_by_title(title, timeout=30)
+### wait_for_window_present_by_title(title, timeout=30)
 
 Wait for window/tab present by title
 
-
-##### wait_for_window_present_by_url(url, timeout=30)
+### wait_for_window_present_by_url(url, timeout=30)
 
 Wait for window/tab present by url
 
+## General Actions
 
-### General Actions
-
-
-##### capture(message='')
+### capture(message='')
 
 DEPRECATED, use take_screenshot instead.
 Take a screenshot of the browser, the message is optional
 
-
-##### set_browser_capability(capability_key, capability_value)
+### set_browser_capability(capability_key, capability_value)
 
 Set a browser capability.
 This must be called before the browser is started.
 
-
-##### take_screenshot(message='')
+### take_screenshot(message='')
 
 Take a screenshot. *message* will be used for the filename.
 
-
-##### assert_contains(element, value)
+### assert_contains(element, value)
 
 DEPRECATED. Assert that the element contains the value
 
-
-##### assert_equals(actual, expected)
+### assert_equals(actual, expected)
 
 DEPRECATED. Assert that the actual value equals the expected value
 
-
-##### assert_false(condition)
+### assert_false(condition)
 
 DEPRECATED. Assert that the condition is false
 
-
-##### assert_true(condition)
+### assert_true(condition)
 
 DEPRECATED. Assert that the condition is true
 
-
-##### debug()
+### debug()
 
 DEPRECATED, use interactive_mode instead.
 
-
-##### error(message='')
+### error(message='')
 
 Add an error to the test. The test will continue.
 
-
-##### fail(message='')
+### fail(message='')
 
 Mark the test as failure and stop
 
-
-##### get_search_timeout()
+### get_search_timeout()
 
 Get search timeout.
 
-
-##### interactive_mode()
+### interactive_mode()
 
 Starts an interactive console at this point of the test.
 The test should be run with the '-i' flag, otherwise this action will be ignored.
 See [Interactive Mode](Interactive-mode.html) for more details.
 
-
-##### random(args)
+### random(args)
 
 Generate a random string. Options:
 
@@ -1179,34 +969,25 @@ Generate a random string. Options:
 
 For example: random('cccddd') => 'aeg147'
 
-
-##### set_search_timeout(timeout)
+### set_search_timeout(timeout)
 
 Set the search timeout value. Timeout must be either int or float.
 
-
-##### set_trace()
+### set_trace()
 
 Perform a pdb.set_trace().
-The test should be run with the '-i' flag, otherwise this action will be ignored 
+The test should be run with the '-i' flag, otherwise this action will be ignored. 
 Read more about the Python debugger [here](https://docs.python.org/3/library/pdb.html).
 
-
-##### step(message)
+### step(message)
 
 Add a step to the report
 
-
-##### store(key, value)
+### store(key, value)
 
 Store a value in data object.
 
-
-##### wait(seconds)
+### wait(seconds)
 
 Pause execution for the given amount of seconds.
 Seconds can be an int or float.
-
-
-
-Next, go to [Custom Actions](custom-actions.html)

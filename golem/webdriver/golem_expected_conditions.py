@@ -57,7 +57,7 @@ class window_present_by_partial_title(object):
 
 
 class window_present_by_partial_url(object):
-    """An expectation for checking a window is present by partial url """
+    """An expectation for checking a window is present by partial url"""
     def __init__(self, partial_url):
         self.partial_url = partial_url
 

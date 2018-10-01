@@ -13,9 +13,10 @@ from golem.core.exceptions import ElementNotFound, ElementNotDisplayed
 class GolemExtendedDriver:
 
     def accept_alert(self, ignore_not_present=False):
-        """Dismiss alert.
-        When ignore_not_present is True the error when alert
-        is not present is ignored.
+        """Accepts alert.
+
+        :Args:
+         - ignore_not_present: ignore NoAlertPresentException
         """
         try:
             self.switch_to.alert.accept()
@@ -24,7 +25,7 @@ class GolemExtendedDriver:
                 raise
 
     def alert_is_present(self):
-        """an alert is present"""
+        """Returns whether an alert is present"""
         try:
             self.switch_to.alert
             return True
@@ -34,6 +35,9 @@ class GolemExtendedDriver:
     def check_element(self, element):
         """Check an element (checkbox or radiobutton).
         If element is already checked this is is ignored.
+
+        :Args:
+         - element: an element tuple, a CSS string or a WebElement object
         """
         element = self.find(element)
         element.check()
@@ -41,6 +45,9 @@ class GolemExtendedDriver:
     def close_window_by_index(self, index):
         """Close window/tab by index.
         Note: "The order in which the window handles are returned is arbitrary."
+
+        :Args:
+         - index: index of the window to close from window_handles
         """
         if index > len(self.window_handles) - 1:
             raise ValueError('Cannot close window {}, current amount is {}'
@@ -111,8 +118,9 @@ class GolemExtendedDriver:
 
     def dismiss_alert(self, ignore_not_present=False):
         """Dismiss alert.
-        When ignore_not_present is True the error when alert
-        is not present is ignored.
+
+        :Args:
+         - ignore_not_present: ignore NoAlertPresentException
         """
         try:
             self.switch_to.alert.dismiss()
@@ -123,6 +131,9 @@ class GolemExtendedDriver:
     def element_is_present(self, element):
         """If element is present, return the element.
         If element is not present return False
+
+        :Args:
+        - element: an element tuple, a CSS string or a WebElement object
         """
         try:
             element = self.find(element, timeout=0)
@@ -137,6 +148,30 @@ class GolemExtendedDriver:
     #     actionChains.drag_and_drop(source_element, target_element).perform()
 
     def find(self, *args, **kwargs) -> ExtendedRemoteWebElement:
+        """Find a WebElement
+
+        Search criteria:
+        The first argument must be: an element tuple, a CSS string or
+        a WebElement object.
+        Keyword search criteria: id, name, link_text, partial_link_text,
+        css, xpath, tag_name.
+        Only one search criteria should be provided.
+
+        Other args:
+        - timeout: timeout (in seconds) to wait for element to be present.
+                   by default it uses the *search_timeout* setting value
+        - wait_displayed: wait for element to be displayed (visible).
+                          by default uses the *wait_displayed* setting value
+
+        :Usage:
+            driver.find('div#someId > input.class')
+            driver.find(('id', 'someId'))
+            driver.find(id='someId')
+            driver.find(xpath='//div/input', timeout=5, wait_displayed=True)
+
+        :Returns:
+          a golem.webdriver.extended_webelement.ExtendedRemoteWebElement
+        """
         if len(args) == 1:
             kwargs['element'] = args[0]
         return common._find(self, **kwargs)
@@ -146,6 +181,23 @@ class GolemExtendedDriver:
     ##  -> List[ExtendedRemoteWebElement]
     # typing not supported in 3.4
     def find_all(self, *args, **kwargs):
+        """Find all WebElements that match the search criteria.
+
+        Search criteria:
+        The first argument must be: an element tuple, a CSS string or
+        a WebElement object.
+        Keyword search criteria: id, name, link_text, partial_link_text,
+        css, xpath, tag_name.
+        Only one search criteria should be provided.
+
+        :Usage:
+            driver.find_all('div#someId > span.class')
+            driver.find(('tag_name', 'input'))
+            driver.find(xpath='//div/input')
+
+        :Returns:
+            a list of ExtendedRemoteWebElement
+        """
         if len(args) == 1:
             kwargs['element'] = args[0]
         return common._find_all(self, **kwargs)
@@ -175,6 +227,7 @@ class GolemExtendedDriver:
         return urls
 
     def navigate(self, url):
+        """Alternative to driver.get()"""
         self.get(url)
 
     def switch_to_first_window(self):
@@ -248,18 +301,30 @@ class GolemExtendedDriver:
     def uncheck_element(self, element):
         """Uncheck a checkbox element.
         If element is already unchecked this is is ignored.
+
+        :Args:
+        - element: an element tuple, a CSS string or a WebElement object
         """
         element = self.find(element)
         element.uncheck()
 
     def wait_for_alert_present(self, timeout):
-        """Wait for an alert to be present"""
+        """Wait for an alert to be present
+
+        :Args:
+        - timeout: time to wait (in seconds)
+        """
         wait = WebDriverWait(self, timeout)
         message = 'Timeout waiting for alert to be present'
         wait.until(ec.alert_is_present(), message=message)
 
     def wait_for_element_displayed(self, element, timeout):
-        """Wait for element to be present and displayed"""
+        """Wait for element to be present and displayed
+
+        :Args:
+        - element: an element tuple, a CSS string or a WebElement object
+        - timeout: time to wait (in seconds)
+        """
         try:
             element = self.find(element, timeout=timeout, wait_displayed=True)
         except ElementNotDisplayed:
@@ -268,32 +333,70 @@ class GolemExtendedDriver:
             raise TimeoutException(message)
 
     def wait_for_element_enabled(self, element, timeout):
-        """Wait for element to be enabled"""
+        """Wait for element to be enabled
+
+        :Args:
+        - element: an element tuple, a CSS string or a WebElement object
+        - timeout: time to wait (in seconds)
+        """
         element = self.find(element, timeout=0)
         return element.wait_enabled(timeout)
 
     def wait_for_element_has_attribute(self, element, attribute, timeout):
-        """Wait for element to have attribute"""
+        """Wait for element to have attribute
+
+        :Args:
+        - element: an element tuple, a CSS string or a WebElement object
+        - attribute: attribute name
+        - timeout: time to wait (in seconds)
+
+        :Usage:
+           driver.wait_for_element_has_attribute('#someId', 'onclick', 5)
+        """
         element = self.find(element, timeout=0)
         return element.wait_has_attribute(attribute, timeout)
 
     def wait_for_element_has_not_attribute(self, element, attribute, timeout):
-        """Wait for element to not have attribute"""
+        """Wait for element to not have attribute
+
+        :Args:
+        - element: an element tuple, a CSS string or a WebElement object
+        - attribute: attribute name
+        - timeout: time to wait (in seconds)
+
+        :Usage:
+           driver.wait_for_element_has_not_attribute('#someId', 'onclick', 5)
+        """
         element = self.find(element, timeout=0)
         return element.wait_has_not_attribute(attribute, timeout)
 
     def wait_for_element_not_displayed(self, element, timeout):
-        """Wait for element to be not displayed"""
+        """Wait for element to be not displayed
+
+        :Args:
+        - element: an element tuple, a CSS string or a WebElement object
+        - timeout: time to wait (in seconds)
+        """
         element = self.find(element, timeout=0)
         return element.wait_not_displayed(timeout)
 
     def wait_for_element_not_enabled(self, element, timeout):
-        """Wait for element to be not enabled"""
+        """Wait for element to be not enabled
+
+        :Args:
+        - element: an element tuple, a CSS string or a WebElement object
+        - timeout: time to wait (in seconds)
+        """
         element = self.find(element, timeout=0)
         return element.wait_not_enabled(timeout)
 
     def wait_for_element_not_present(self, element, timeout):
-        """Wait for element present in the DOM"""
+        """Wait for element present in the DOM
+
+        :Args:
+        - element: an element tuple, a CSS string or a WebElement object
+        - timeout: time to wait (in seconds)
+        """
         found_element = None
         try:
             found_element = self.find(element, timeout=0)
@@ -306,7 +409,12 @@ class GolemExtendedDriver:
             wait.until(ec.staleness_of(found_element), message=message)
 
     def wait_for_element_present(self, element, timeout):
-        """Wait for element present in the DOM"""
+        """Wait for element present in the DOM
+
+        :Args:
+        - element: an element tuple, a CSS string or a WebElement object
+        - timeout: time to wait (in seconds)
+        """
         try:
             self.find(element, timeout=timeout, wait_displayed=False)
         except ElementNotFound:
@@ -315,57 +423,111 @@ class GolemExtendedDriver:
             raise TimeoutException(message)
 
     def wait_for_element_text(self, element, text, timeout):
-        """Wait for element text to match given text"""
+        """Wait for element text to match given text
+
+        :Args:
+        - element: an element tuple, a CSS string or a WebElement object
+        - text: expected element text to be
+        - timeout: time to wait (in seconds)
+        """
         element = self.find(element, timeout=0)
         return element.wait_text(text, timeout)
 
     def wait_for_element_text_contains(self, element, text, timeout):
-        """Wait for element to contain text"""
+        """Wait for element to contain text
+
+        :Args:
+        - element: an element tuple, a CSS string or a WebElement object
+        - text: expected element to be contained by element
+        - timeout: time to wait (in seconds)
+        """
         element = self.find(element, timeout=0)
         return element.wait_text_contains(text, timeout)
 
     def wait_for_element_text_is_not(self, element, text, timeout):
-        """Wait for element text to not match given text"""
+        """Wait for element text to not match given text
+
+        :Args:
+        - element: an element tuple, a CSS string or a WebElement object
+        - text: expected text to not be element's text
+        - timeout: time to wait (in seconds)
+        """
         element = self.find(element, timeout=0)
         return element.wait_text_is_not(text, timeout)
 
     def wait_for_element_text_not_contains(self, element, text, timeout):
-        """Wait for element to not contain text"""
+        """Wait for element to not contain text
+
+        :Args:
+        - element: an element tuple, a CSS string or a WebElement object
+        - text: expected text to not be contained in element
+        - timeout: time to wait (in seconds)
+        """
         element = self.find(element, timeout=0)
         return element.wait_text_not_contains(text, timeout)
 
     def wait_for_page_contains_text(self, text, timeout):
-        """Wait for page to contains text"""
+        """Wait for page to contains text
+
+        :Args:
+        - text: text to be contained in page source
+        - timeout: time to wait (in seconds)
+        """
         wait = WebDriverWait(self, timeout)
         message = "Timeout waiting for page to contain '{}'".format(text)
         wait.until(gec.text_to_be_present_in_page(text), message=message)
 
     def wait_for_page_not_contains_text(self, text, timeout):
-        """Wait for page to not contain text"""
+        """Wait for page to not contain text
+
+        :Args:
+        - text: text to not be contained in page source
+        - timeout: time to wait (in seconds)
+        """
         wait = WebDriverWait(self, timeout)
         message = "Timeout waiting for page to not contain '{}'".format(text)
         wait.until_not(gec.text_to_be_present_in_page(text), message=message)
 
     def wait_for_title(self, title, timeout):
-        """Wait for page title to be the given value"""
+        """Wait for page title to be the given value
+
+        :Args:
+        - title: expected title
+        - timeout: time to wait (in seconds)
+        """
         wait = WebDriverWait(self, timeout)
         message = 'Timeout waiting for title to be \'{}\''.format(title)
         wait.until(ec.title_is(title), message=message)
 
     def wait_for_title_contains(self, partial_title, timeout):
-        """Wait for page title to contain partial_title"""
+        """Wait for page title to contain partial_title
+
+        :Args:
+        - partial_title: expected partial title
+        - timeout: time to wait (in seconds)
+        """
         wait = WebDriverWait(self, timeout)
         message = 'Timeout waiting for title to contain \'{}\''.format(partial_title)
         wait.until(ec.title_contains(partial_title), message=message)
 
     def wait_for_title_is_not(self, title, timeout):
-        """Wait for page title to not be the given value"""
+        """Wait for page title to not be the given value
+
+        :Args:
+        - title: not expected title
+        - timeout: time to wait (in seconds)
+        """
         wait = WebDriverWait(self, timeout)
         message = 'Timeout waiting for title to not be \'{}\''.format(title)
         wait.until_not(ec.title_is(title), message=message)
 
     def wait_for_title_not_contains(self, partial_title, timeout):
-        """Wait for page title to not contain partial_title"""
+        """Wait for page title to not contain partial_title
+
+        :Args:
+        - partial_title: not expected partial title
+        - timeout: time to wait (in seconds)
+        """
         wait = WebDriverWait(self, timeout)
         message = 'Timeout waiting for title to not contain \'{}\''.format(partial_title)
         wait.until_not(ec.title_contains(partial_title), message=message)

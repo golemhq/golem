@@ -36,6 +36,7 @@ Type: golem -h <command> for more help
 RUN_USAGE_MSG = """
 Usage: golem run <project> <test|suite|dir> [-b|--browsers]
                  [-t|--threads] [-e|--environments]
+                 [-i|--interactive]
 
   Run tests, suites or entire test directories
 
@@ -48,6 +49,7 @@ Usage: golem run <project> <test|suite|dir> [-b|--browsers]
     -b, --browsers      a list of browsers
     -t, --threads       amount of threads, default is 1
     -e, --environments  a list of environments
+    -i, --interactive   run in interactive mode
 """
 
 GUI_USAGE_MSG = """

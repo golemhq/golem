@@ -1,40 +1,17 @@
 Golem
 =================================
 
-Contents
-********
-
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-   :glob:
-
-   installation
-   quick-start
-   adding-tests
-   managing-test-data
-   using-page-objects
-   suites
-   golem-actions
-   custom-actions
-   the-cli
-   the-web-module
-   settings
-   browser-web-drivers
-   Interactive-mode
-   golem-api
-   environments
-
-
 Intro
 ********
-Golem is a complete test automation tool and framework for end-to-end testing. It creates powerful, robust and maintainable test suites , yet, it is easy to pick up and learn even without a lot of programming knowledge. It is based on Selenium Webdriver and it can be extended using Python.
+Golem is a complete test automation tool and framework for end-to-end testing.
+It creates powerful, robust and maintainable test suites, yet, it is easy to pick up and learn even without a lot of programming knowledge.
+It is based on Selenium Webdriver and it can be extended using Python.
 
 **It can:**
 
 - Use the Page Object pattern
 - Write tests with multi data sets (data-driven)
-- Run tests in parallel.
+- Run tests in parallel
 - Test APIs
 - Run tests remotely (Selenium Grid or a cloud testing provider)
 - It can be executed from Jenkins or any other CI tool 
@@ -47,9 +24,40 @@ Golem is a complete test automation tool and framework for end-to-end testing. I
 - An interactive console
 
 
-Next, go to `installation 
-<installation.html>`_.
+Selenium
+********
 
+Some prior knowledge of Selenium is required to work with Golem.
+Golem extends Selenium webdriver and webelement classes and uses a simplified interface for finding elements.
+It is advised to understand how standard Selenium works.
+`This guide <https://selenium-python.readthedocs.io/>`_ is a good place to start.
+
+
+Contents
+********
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   installation
+   tutorial-part-1
+   tutorial-part-2
+   browsers
+   finding-elements
+   golem-actions
+   tests
+   pages
+   suites
+   test-data
+   running-tests
+   settings
+   golem-test-framework
+   Interactive-mode
+   golem_public_api/webdriver-class
+   golem_public_api/webelement-class
+   golem_public_api/golem-expected-conditions
+   golem_public_api/the-cli
 
 
 .. Indices and tables
