@@ -61,11 +61,11 @@ function saveTestCase(){
         success: function(data) {
             unsavedChanges = false;
             codeEditor.markClean();
-            utils.toast('success', "Test "+testCaseName+" saved", 3000);
+            Main.Utils.toast('success', "Test "+testCaseName+" saved", 3000);
             if(data.error != null){
                 $(".error-container").show();
                 $(".error-container pre").html(data.error);
-                utils.toast('info', "There are errors in the code", 3000)
+                Main.Utils.toast('info', "There are errors in the code", 3000)
             }
             else{
                 $(".error-container").hide();

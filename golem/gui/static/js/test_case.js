@@ -1,4 +1,3 @@
-
 var globalActions = [];
 var pageObjects = [];
 var selectedPageObjectsElements = [];
@@ -124,7 +123,7 @@ var testCase = new function(){
         var callback = function(newPageName){
             testCase.addNewPage(newPageName);
         }
-        utils.displayPromptModal(title, message, inputValue, placeholderValue, callback);
+        Main.Utils.displayPromptModal(title, message, inputValue, placeholderValue, callback);
     }
 
     this.addNewPage = function(newPageName){
@@ -148,7 +147,7 @@ var testCase = new function(){
                     testCase.addPageToList(data.element.full_path)
                 }
                 else{
-                    utils.displayErrorModal(data.errors);
+                    Main.Utils.displayErrorModal(data.errors);
                 }
             }
         });
@@ -287,6 +286,8 @@ function stepFirstInputChange(elem){
             var input = "<input type='text' class='form-control \
                                     parameter-input "+customClass+"' \
                                     placeholder='"+parameter.name+"'>";
+            var input = `<input type="text" class="form-control parameter-input ${customClass}"
+                         placeholder="${parameter.name}">`;
         }
         else if(parameter.type == 'multiline-value'){
             var customClass = 'multiline-value-input';
@@ -589,13 +590,11 @@ function saveTestCase(config){
         type: 'POST',
         success: function(data) {
             unsavedChanges = false;
-            utils.toast('success', "Test "+testCaseName+" saved", 3000);
+            Main.Utils.toast('success', "Test "+testCaseName+" saved", 3000);
             if(runAfter){
                 //testRunner.runTestCase();
                 testRunner.askForEnvBeforeRun();
             }
-        },
-        error: function() {
         }
     });
 }

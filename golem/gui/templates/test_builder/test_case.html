@@ -1,10 +1,8 @@
 {% extends "layout.html" %} 
 
-{% block head_declarations %} 
-
+{% block head_declarations %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/test_case.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_common.css') }}">
-
 {% endblock %} 
 
 {% block content %}
@@ -378,17 +376,13 @@
         <h4 class="modal-title">Running Test Case</h4>
       </div>
       <div class="modal-body">
-
         <div id="testResultContainer">
-            <div id="testResultLogs">
-            </div>
+            <div id="testResultLogs"></div>
             <div id="testResults"></div>
         </div>
-
         <div id="loaderContainer" class="text-center">
             <label class="loader"></label>
         </div>
-
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" onclick="testRunner.runTestCase()">Re-run Test</button>
@@ -398,29 +392,19 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-
 <!-- page modal -->
 <div class="modal fade" id="pageModal" tabindex="-1" role="dialog">
   <div class="modal-dialog" style>
     <div class="modal-content">
       <div class="modal-header" style="padding-top: 10px; padding-bottom: 5px; height: 41px;">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <!-- <h4 class="modal-title">a</h4> -->
       </div>
       <div class="modal-body">
-
         <iframe id="pageModalIframe"></iframe>
-
       </div>
-      <!-- <div class="modal-footer">
-        <button type="button" class="btn btn-default" onclick="testRunner.runTestCase()">Re-run Test</button>
-        <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Dismiss</button>
-      </div> -->
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-
-
 
 <script src="{{ url_for('static', filename='js/external/sortable.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/jquery.autocomplete.min.js') }}"></script>
@@ -431,5 +415,4 @@
     var testCaseName = "{{test_case_name}}";
     var fullTestCaseName = "{{full_test_case_name}}";
 </script>
-
 {% endblock %}

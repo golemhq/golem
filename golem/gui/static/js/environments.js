@@ -31,11 +31,11 @@ function saveEnvironments(){
         type: 'POST',
         success: function(error) {
             if(error.length == 0){
-                utils.toast('success', "Settings saved", 2000);
+                Main.Utils.toast('success', "Settings saved", 2000);
                 environmentsEditor.markClean();
             }
             else{
-                utils.toast('error', error, 2000);
+                Main.Utils.toast('error', error, 2000);
             }
         },
         error: function() {

@@ -1,6 +1,4 @@
 
-
-
 $(document).ready(function() {
 
     $('#testCasesTree').treed();
@@ -246,7 +244,7 @@ function saveTestSuite(){
         contentType: 'application/json; charset=utf-8',
         type: 'POST',
         success: function(data) {
-            utils.toast('success', "Suite "+suite+" saved", 3000)
+            Main.Utils.toast('success', "Suite "+suite+" saved", 3000)
         },
         error: function() {
         }
@@ -338,7 +336,7 @@ function runSuite(){
          success: function(data) {
             var url = '/report/project/' + project + '/suite/' + suite + '/' + data + '/';
             let msg = 'Running suite ' + suite + " - <a href='" + url + "'>open</a>";
-            utils.toast('info', msg, 15000)
+            Main.Utils.toast('info', msg, 15000)
          },
          error: function() {}
      });

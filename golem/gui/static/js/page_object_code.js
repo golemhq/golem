@@ -41,11 +41,8 @@ function loadGuiView(){
     if(!codeEditor.isClean()){
         savePageObject();
     }
-
     codeEditor.markClean();
-
     // redirect to gui view
-    //window.location.replace("/project/"+project+"/page/"+pageObjectName+"/");
     var pathname = window.location.pathname;
     window.location.replace(pathname.replace('/code/', '/'));
 }
@@ -66,11 +63,11 @@ function savePageObject(){
         type: 'POST',
         success: function(data) {
             codeEditor.markClean();
-            utils.toast('success', "Page "+pageObjectName+" saved", 3000);
+            Main.Utils.toast('success', "Page "+pageObjectName+" saved", 3000);
             if(data.error != null){
                 $(".error-container").show();
                 $(".error-container pre").html(data.error);
-                utils.toast('info', "There are errors in the code", 3000)
+                Main.Utils.toast('info', "There are errors in the code", 3000)
             }
             else{
                 $(".error-container").hide();
