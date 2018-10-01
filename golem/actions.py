@@ -1161,6 +1161,11 @@ def get_current_url():
     return get_browser().current_url
 
 
+def get_data():
+    """Return test data"""
+    return execution.data
+
+
 def get_element_attribute(element, attribute):
     """Get the attribute value of element.
     If the attribute is not present in element, None is returned.
@@ -1516,6 +1521,20 @@ def select_option_by_value(element, value):
     element = get_browser().find(element)
     with _step("Select option of value '{}' from element {}".format(value, element.name)):
         element.select.select_by_value(value)
+
+
+def send_secure_keys(element, text):
+    """Send keys to element.
+    Text is hidden from logs and report (masked by asterisks).
+
+    Parameters:
+    element : element
+    text : value
+    """
+    element = get_browser().find(element)
+    hidden_text = len(text)*'*'
+    with _step("Write '{}' in element {}".format(hidden_text, element.name)):
+        element.send_keys(text)
 
 
 def send_keys(element, text):

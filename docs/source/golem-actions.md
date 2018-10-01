@@ -349,6 +349,10 @@ press_key('TAB')
 press_key('LEFT')
 ```
 
+### send_secure_keys(element, text)
+
+Send keys to element. Text is hidden from logs and report (masked by asterisks).
+
 ### send_keys(element, text)
 
 Send text to element
@@ -949,6 +953,10 @@ Add an error to the test. The test will continue.
 ### fail(message='')
 
 Mark the test as failure and stop
+
+### get_data()
+
+Return test data.
 
 ### get_search_timeout()
 
