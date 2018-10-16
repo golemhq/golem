@@ -1,17 +1,15 @@
 """Helper general purpose functions"""
-import csv
 import importlib
 import shutil
 import json
 import os
-import sys
 import uuid
 import traceback
 import glob
-from ast import literal_eval
+import re
 from datetime import datetime
+from distutils.version import StrictVersion
 
-import golem
 from golem.core import settings_manager
 from golem.core import file_manager
 
@@ -345,8 +343,7 @@ def extract_version_from_webdriver_filename(filename):
     if '_' in filename:
         components = filename.replace('.exe', '').split('_')
         if len(components) > 1:
-            parsed_version = components[-1] 
-            from distutils.version import StrictVersion
+            parsed_version = components[-1]
             try:
                 StrictVersion(parsed_version)
                 version = parsed_version
@@ -367,7 +364,13 @@ def match_latest_executable_path(glob_path):
     for matched_file in matched_files:
         found_files.append((matched_file, extract_version_from_webdriver_filename(matched_file)))
     if found_files:
-        highest_version = sorted(found_files, key=lambda tup: tup[1], reverse=True)
+        highest_version = sorted(found_files, key=lambda tup: StrictVersion(tup[1]), reverse=True)
         return highest_version[0][0]
     else:
         return None
+
+
+def get_valid_filename(s):
+    """Receives a string and returns a valid filename"""
+    s = str(s).strip().replace(' ', '_')
+    return re.sub(r'(?u)[^-\w.]', '', s)

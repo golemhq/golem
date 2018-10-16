@@ -19,13 +19,7 @@
 			<div class="col-md-10 col-xs-9">{{test_case_data.module}}</div>
 			{% endif %}
 			<div class="col-md-2 col-xs-3">Result</div>
-			<div class="col-md-10 col-xs-9">{{test_case_data.result}} 
-			{%if test_case_data.result == 'pass' %}
-				<span class="passed-green"><span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span></span>
-			{%else%}
-				<span class="failed-red"><span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></span>
-			{% endif %}
-			</div>
+			<div class="col-md-10 col-xs-9" data="test-result">{{test_case_data.result}}</div>
 			{% if test_case_data.url %}
 			<div class="col-md-2 col-xs-3">URL</div>
 			<div class="col-md-10 col-xs-9">{{test_case_data.url}}</div>
@@ -58,13 +52,15 @@
 		{% for step in test_case_data.steps %}
 			<div class="step">
 				<span>{{loop.index}}.</span>
+				<span>{{step.message}}</span>
+				{% if step.error %}
+				<span>- {{step.error.message}}</span>
+				{% endif %}
 				{% if step.screenshot %}
-					<span class="cursor-pointer" data-toggle="collapse" data-target="#{{step.screenshot}}" aria-expanded="false" aria-controls="{{step.screenshot}}">{{step.message}} <span class="glyphicon glyphicon-picture" aria-hidden="true"></span></span>
-					<div class="collapse text-center" id="{{step.screenshot}}">
-						<img class="step-screenshot cursor-pointer" src="/report/screenshot/{{project}}/{{suite}}/{{execution}}/{{test_case}}/{{test_set}}/{{step.screenshot}}/" onclick="reportUtils.expandImg(event);">
-					</div>
-				{% else %}
-					{{step.message}}
+				<span class="cursor-pointer" data-toggle="collapse" data-target="#{{step.screenshot | replace('.', '')}}" aria-expanded="false" aria-controls="{{step.screenshot | replace('.', '')}}"><span class="glyphicon glyphicon-picture" aria-hidden="true"></span></span>
+				<div class="collapse text-center" id="{{step.screenshot | replace('.', '')}}">
+					<img class="step-screenshot cursor-pointer" src="/report/screenshot/{{project}}/{{suite}}/{{execution}}/{{test_case}}/{{test_set}}/{{step.screenshot}}/" onclick="Main.ReportUtils.expandImg(event);">
+				</div>
 				{% endif %}
 			</div>
 		{% endfor %}
@@ -72,14 +68,14 @@
 
 	<div class="col-md-12 project-container font-17" id="log" style="padding-left: 30px; padding-right: 30px; padding-bottom: 15px;">
 		<h3 class="no-margin-top">Log <small><a class="btn btn-default btn-xs" onclick="setLogLevel('debug')">DEBUG</a> <a class="btn btn-default btn-xs" onclick="setLogLevel('info')">INFO</a></small></h3>
-		<div id="debugLogLines" style="font-family: monospace; font-size: 14px;">
+		<div id="debugLogLines" style="font-family: monospace; font-size: 14px; display: none">
 			{% for line in test_case_data.debug_log %}
 				<div class="step">
 					<span>{{line}}</span>
 				</div>
 			{% endfor %}
 		</div>
-		<div id="infoLogLines" style="font-family: monospace; font-size: 14px; display: none">
+		<div id="infoLogLines" style="font-family: monospace; font-size: 14px;">
 			{% for line in test_case_data.info_log %}
 				<div class="step">
 					<span>{{line}}</span>

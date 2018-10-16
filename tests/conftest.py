@@ -6,6 +6,9 @@ from subprocess import call, Popen, PIPE, STDOUT
 
 import pytest
 
+from golem.cli import commands
+from golem.core import test_execution
+
 
 # FIXTURES
 
@@ -44,8 +47,6 @@ def _create_testdir(base_dir):
     os.chdir(base_dir)
     testdir_name = Test_utils.random_string(4, 'testdir_')
     full_path = os.path.join(base_dir, testdir_name)
-    # call(['golem-admin', 'createdirectory', testdir_name])
-    from golem.cli import commands
     commands.createdirectory_command(testdir_name)
     return testdir_name, full_path
 
@@ -86,14 +87,11 @@ def testdir_function():
             'base_path': base_dir,
             'name': testdir_name}
     os.chdir(base_dir)
-    shutil.rmtree(testdir_name, ignore_errors=True)
+    shutil.rmtree(full_path, ignore_errors=True)
 
 
 def _create_project(testdir, project_name):
     os.chdir(testdir)
-    # call(['golem', 'createproject', project_name])
-    from golem.cli import commands
-    from golem.core import test_execution
     test_execution.root_path = testdir
     commands.createproject_command(project_name)
 
@@ -105,12 +103,6 @@ def project_session(testdir_session):
     if not session_project:
         project_name = Test_utils.random_string(4, 'project_')
         _create_project(testdir_session['path'], project_name)
-        # os.chdir(testdir_session['path'])
-        # call(['golem', 'createproject', project_name])
-        # from golem.cli import commands
-        # from golem import execution
-        # execution.root_path = testdir_session['path']
-        # commands.createproject_command(project_name)
         session_project = {
             'name': project_name,
             'testdir_fixture': testdir_session,
@@ -126,8 +118,6 @@ def project_session(testdir_session):
 def project_class(testdir_session):
     project_name = Test_utils.random_string(4, 'project_')
     _create_project(testdir_session['path'], project_name)
-    # os.chdir(testdir_session['path'])
-    # call(['golem', 'createproject', project_name])
     yield {
             'name': project_name,
             'testdir_fixture': testdir_session,
@@ -141,8 +131,6 @@ def project_class(testdir_session):
 def project_function(testdir_session):
     project_name = Test_utils.random_string(4, 'project_')
     _create_project(testdir_session['path'], project_name)
-    # os.chdir(testdir_session['path'])
-    # call(['golem', 'createproject', project_name])
     yield {
             'name': project_name,
             'testdir_fixture': testdir_session,
@@ -156,8 +144,6 @@ def project_function(testdir_session):
 def project_function_clean(testdir_function):
     project_name = Test_utils.random_string(4, 'project_')
     _create_project(testdir_function['path'], project_name)
-    # os.chdir(testdir_function['path'])
-    # call(['golem', 'createproject', project_name])
     yield {
             'name': project_name,
             'testdir_fixture': testdir_function,
@@ -186,6 +172,10 @@ class Test_utils:
         random_str = (''.join(random.choice(string.ascii_lowercase)
                       for _ in range(length)))
         return prefix + random_str
+
+    @staticmethod
+    def random_numeric_string(length, prefix=''):
+        return ''.join(random.choice(string.digits) for _ in range(length))
 
     @staticmethod
     def run_command(cmd):

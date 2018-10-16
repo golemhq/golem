@@ -1,46 +1,46 @@
 Installation
 ==================================================
 
-##### Requirements
+## Requirements
 
-**Python**
+### Python
 
 Golem requires Python 3.4 or higher.
 
-- Windows:
+**Windows**:
 
 The Windows installer works fine, you can get it from here: [python.org/downloads/](http://www.python.org/downloads/)
 
-- Mac:
+**Mac**:
 
 To install on Mac OS follow this instructions: [Installing Python 3 on Mac OS X](http://python-guide.readthedocs.io/en/latest/starting/install3/osx/)
 
-- Linux:
+**Linux**:
 
 Debian 8 and Ubuntu 14.04 comes with Python 3.4 pre-installed, newer Linux distributions might come with newer Python versions. 
 
 Since Linux tends to have both Python 2 and 3 installed alongside eachother, the command to execute the latter should be 'python3' instead of just 'python'.
 
-**PIP**
+### PIP
 
-PIP is the package manager for Python and is required to install Golem and it's dependencies. Check if you already have it, it come bundled with the newer versions of Python.
+PIP is the package manager for Python. It is required to install Golem and its dependencies. Check if you already have it. PIP comes bundled with the newer versions of Python.
 
 ```
 pip --version
-
+```
 or
-
+```
 pip3 --version
 ```
 
 If you don't have PIP installed, follow [these instructions](https://pip.pypa.io/en/stable/installing/).
 
 
-##### Using virtualenv (optional)
+## Create a Virtual Environment
 
-It is recommended to install Golem and it's dependencies in a [virtual environment](http://www.virtualenv.org/en/latest/) instead of globally. To do that, follow this steps:
+It is recommended to install Golem and its dependencies in a [virtual environment](http://www.virtualenv.org/en/latest/) instead of globally. To do that, follow this steps:
 
-Install virtualenv
+### Install Virtualenv
 
 ```
 pip install virtualenv
@@ -52,51 +52,39 @@ Create a new virtualenv in the './env' folder
 virtualenv env
 ```
 
-If the virtual environment is not being created with Python 3 you should instead use the following command:
+If the virtual environment is being created with Python 2 instead of 3, use the following command instead:
 
 ```
 virtualenv env -p python3
 ```
 
+### Activate the Environment
 
-- **Windows**:
+To use a virtual environment it needs to be activated first.
+
+**Windows**:
 
 ```
 env\scripts\activate
 ```
 
-- **Mac/Linux**:
+**Mac/Linux**:
 
 ```
 source env/bin/activate
 ```
 
-##### Install Using PIP
+## Install Golem Using PIP
 
-The quickest and the prefered way to install Golem.
+The quickest and the preferred way to install Golem.
 
 ```
 pip install golem-framework
 ```
 
 
-##### Install From Source
-
-Only install from source if you need the latest development version.
-
-**1. Clone the Golem repo locally**
+## Installing From Source
 
 ```
-git clone https://github.com/lucianopuccio/Golem.git golem
+pip install -U https://github.com/lucianopuccio/golem/archive/master.tar.gz
 ```
-
-**2. Install using setup.py**
-
-```
-cd golem
-python setup.py install
-```
-
-<br>
-
-Next, go to [Quick Start](quick-start.html)

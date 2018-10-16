@@ -52,7 +52,7 @@ def _find_webelement(root, selector_type, selector_value, element_name,
                 time.sleep(0.5)
 
             if not webelement.is_displayed():
-                msg = ('Timeout waiting for element {0} to be visible, '
+                msg = ('Timeout waiting for element {0} to be displayed, '
                        'using selector {1}:\'{2}\''
                        .format(element_name, selector_type, selector_value))
                 raise ElementNotDisplayed(msg)

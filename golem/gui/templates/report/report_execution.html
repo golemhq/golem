@@ -5,8 +5,6 @@
 {% endblock %}
 
 {% block content %}
-
-
 <div class="content-wrapper">
     <h2 style="display:inline-block;"><a class="link-without-decoration" href="/report/project/{{project}}/">{{project|replace("_", " ")}}</a> - <a class="link-without-decoration" href="/report/project/{{project}}/suite/{{suite}}/">{{suite|replace("_", " ")}}</a> <small>({{formatted_date}})</small></h2>
 	    <a style="display:inline-block; float:right; margin-top:20px; margin-bottom:10px;" class="btn btn-default btn-sm" href="/getHTMLReport?project={{project}}&suite={{suite}}&execution={{execution}}">
@@ -20,30 +18,24 @@
 					<table id="generalTable" class="table general-table margin-bottom-5">
 						<thead>
 							<tr>
-								<th>Module</th>
-								<th>Total Tests</th>
-								<th>Tests Ok</th>
-								<th>Tests Failed</th>
-								<th>Percentage</th>
-								<th>Total Time</th>
-								<th>Net Time</th>
+								<th data="module">Module</th>
+								<th data="total-tests">Total Tests</th>
+								<th data="result" result="success">Success</th>
+								<th data="result" result="failure">Failure</th>
+								<th data="percentage">Percentage</th>
+								<th data="total-time">Total Time</th>
+								<th data="net-time">Net Time</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr class="total-row general-table-row cursor-pointer" id="totalRow">
-								<td class="module">Total</td>
-								<td class="total-tests"></td>
-								<td class="tests-ok"></td>
-								<td class="tests-failed"></td>
-								<td class="percentage">
-									<div class="progress">
-										<div aria-valuenow="10" style="width: 100%;" class="progress-bar pending pending-grey-background" data-transitiongoal="10"></div>
-										<div aria-valuenow="10" style="width: 0%;" class="progress-bar fail-bar failed-red-background" data-transitiongoal="10"></div>	
-										<div aria-valuenow="20" style="width: 0%;" class="progress-bar ok-bar passed-green-background" data-transitiongoal="20"></div>
-									</div>
-								</td>
-								<td class="total-time"></td>
-								<td class="net-time"></td>
+								<td data="module">Total</td>
+								<td data="total-tests"></td>
+								<td data="result" result="success">0</td>
+								<td data="result" result="failure">0</td>
+								<td data="percentage"><div class="progress"></div></td>
+								<td data="total-time"></td>
+								<td data="net-time"></td>
 							</tr>
 						</tbody>
 					</table>
@@ -63,15 +55,7 @@
 									    Module <i class="fa fa-filter funnel-icon" aria-hidden="true" style="display:none"></i></span>
 									</a>
 								  	<ul class="dropdown-menu">
-								  		<form>
-										    <!-- <li>
-										    	<div class="checkbox">
-												    <label>
-												      <input type="checkbox"> Check me out
-												    </label>
-											  	</div>
-											</li> -->
-										</form>
+								  		<form></form>
 								  	</ul>
 								</th>
 								<th class="test-name-header" colname="test-name">Test Name</th>
@@ -118,17 +102,14 @@
 		</div>
 	</div>
 </div>
-
 {% endblock %}
 
 {% block footer_declarations %}
-
 <script type="text/javascript">
 	var project = '{{project}}';
 	var suite = '{{suite}}';
 	var execution = '{{execution}}';
 </script>
 <script src="{{ url_for('static', filename='js/external/datatable/datatables.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/report.js') }}"></script>
 <script src="{{ url_for('static', filename='js/report_execution.js') }}"></script>
 {% endblock %}

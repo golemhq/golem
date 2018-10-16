@@ -87,54 +87,6 @@ class Test_create_report_directory:
 
 class Test_generate_report:
 
-    def test_generate_report(self, project_session):
-        project = project_session['name']
-        testdir = project_session['testdir']
-        timestamp = utils.get_timestamp()
-        test_name = 'testing_report_002'
-        exec_dir = report.create_execution_directory(testdir, project, timestamp,
-                                                     test_name=test_name)
-        report_dir = report.create_report_directory(exec_dir, test_name,
-                                                    is_suite=True)
-        test_data = {
-            'var1': 'value1',
-            'var2': 'value2'
-        }
-        result = {
-            'result': 'pass',
-            'error': '',
-            'description': 'description of the test',
-            'steps': ['step1', 'step2'],
-            'test_elapsed_time': 22.22,
-            'test_timestamp': '2018.02.04.02.16.42.729',
-            'browser': 'chrome',
-            'browser_full_name': '',
-            'set_name': 'set_001',
-        }
-        report.generate_report(report_dir, test_name, test_data, result)
-        expected = {
-            'test_case': test_name,
-            'result': 'pass',
-            'steps': ['step1', 'step2'],
-            'description': 'description of the test',
-            'error': '',
-            'short_error': '',
-            'test_elapsed_time': 22.22,
-            'test_timestamp': '2018.02.04.02.16.42.729',
-            'browser': 'chrome',
-            'environment': '',
-            'set_name': 'set_001',
-            'test_data': {
-                'var1': "'value1'",
-                'var2': "'value2'"
-            }
-        }
-        path = os.path.join(report_dir, 'report.json')
-        with open(path) as report_file:
-            actual = json.load(report_file)
-            assert actual == expected
-
-
     def test_generate_report_with_env(self, project_session):
         project = project_session['name']
         testdir = project_session['testdir']
@@ -154,10 +106,13 @@ class Test_generate_report:
         test_data = test_runner.Data(test_data)
 
         result = {
-            'result': 'pass',
-            'error': '',
+            'result': 'success',
+            'errors': [],
             'description': 'description of the test',
-            'steps': ['step1', 'step2'],
+            'steps': [
+                {'message': 'step1', 'screenshot': None, 'error': None},
+                {'message': 'step2', 'screenshot': None, 'error': None}
+            ],
             'test_elapsed_time': 22.22,
             'test_timestamp': '2018.02.04.02.16.42.729',
             'browser': 'chrome',
@@ -165,42 +120,22 @@ class Test_generate_report:
             'set_name': 'set_001',
         }
         report.generate_report(report_dir, test_name, test_data, result)
-        expected_a = {
-            'test_case': test_name,
-            'result': 'pass',
-            'steps': ['step1', 'step2'],
-            'description': 'description of the test',
-            'error': '',
-            'short_error': '',
-            'test_elapsed_time': 22.22,
-            'test_timestamp': '2018.02.04.02.16.42.729',
-            'browser': 'chrome',
-            'environment': 'env01',
-            'set_name': 'set_001',
-            'test_data': {
-                'env': "{'name': 'env01', 'url': '1.1.1.1'}",
-                'var2': "'value2'"
-            }
-        }
-        expected_b = {
-            'test_case': test_name,
-            'result': 'pass',
-            'steps': ['step1', 'step2'],
-            'description': 'description of the test',
-            'error': '',
-            'short_error': '',
-            'test_elapsed_time': 22.22,
-            'test_timestamp': '2018.02.04.02.16.42.729',
-            'browser': 'chrome',
-            'environment': 'env01',
-            'set_name': 'set_001',
-            'test_data': {
-                'env': "{'url': '1.1.1.1', 'name': 'env01'}",
-                'var2': "'value2'"
-            }
-        }
         path = os.path.join(report_dir, 'report.json')
         with open(path) as report_file:
             actual = json.load(report_file)
-            # TODO
-            assert actual == expected_a or actual == expected_b
+            assert len(actual.items()) == 11
+            assert actual['test_case'] == test_name
+            assert actual['result'] == 'success'
+            assert actual['steps'][0]['message'] == 'step1'
+            assert actual['steps'][1]['message'] == 'step2'
+            assert actual['description'] == 'description of the test'
+            assert actual['errors'] == []
+            assert actual['test_elapsed_time'] == 22.22
+            assert actual['test_timestamp'] == '2018.02.04.02.16.42.729'
+            assert actual['browser'] == 'chrome'
+            assert actual['environment'] == 'env01'
+            assert actual['set_name'] == 'set_001'
+            test_data_a = "{'url': '1.1.1.1', 'name': 'env01'}"
+            test_data_b = "{'name': 'env01', 'url': '1.1.1.1'}"
+            assert actual['test_data']['env'] in [test_data_a, test_data_b]
+            assert actual['test_data']['var2'] == "'value2'"

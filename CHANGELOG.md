@@ -3,6 +3,68 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2018-09-30
+
+### Added
+
+- New actions: go_back, set_search_timeout, get_search_timeout, double_click, focus_element, set_trace, error,
+execute_javascript, fail, javascript_click, verify_selected_option_by_text, verify_selected_option_by_value,
+get_alert_text, send_text_to_alert, submit_prompt_alert, verify_alert_text, verify_alert_text_is_not, wait_for_alert_present
+verify_element_has_attribute, verify_element_has_not_attribute, verify_element_has_focus, verify_element_has_not_focus,
+verify_page_not_contains_text, verify_element_text, verify_element_text_is_not, verify_element_text_not_contains, verify_title
+verify_title_contains, verify_title_is_not, verify_title_not_contains, verify_url, verify_url_contains, verify_url_is_not
+verify_url_not_contains, wait_for_element_present, wait_for_element_not_enabled, wait_for_page_contains_text,
+wait_for_page_not_contains_text, wait_for_element_text, wait_for_element_text_is_not, wait_for_element_text_contains,
+wait_for_element_text_not_contains, wait_for_element_has_attribute, wait_for_element_has_not_attribute, wait_for_title,
+wait_for_title_is_not, wait_for_title_contains, wait_for_title_not_contains, verify_element_attribute_value,
+verify_element_attribute_is_not, go_forward, check_element, uncheck_element, submit_form, switch_to_frame, switch_to_parent_frame
+get_active_element, get_window_title, get_window_titles, get_window_handle, get_window_handles, get_window_index,
+switch_to_window_by_index, switch_to_first_window, switch_to_last_window, switch_to_window_by_title, switch_to_window_by_partial_title
+switch_to_window_by_url, switch_to_window_by_partial_url, verify_amount_of_windows, close_window
+verify_window_present_by_title, verify_window_present_by_partial_title, maximize_window, get_page_source, switch_to_next_window
+switch_to_previous_window, close_window_by_index, close_window_by_title, close_window_by_url, close_window_by_partial_title,
+close_window_by_partial_url, get_element_attribute, get_element_value, get_element_text, wait_for_window_present_by_title,
+wait_for_window_present_by_partial_title, get_window_size, get_data, send_secure_keys
+
+- Added verify_* actions for soft assertions and assert_* for hard assertions
+
+### Changed
+
+- Renamed actions:
+  - capture -> take_screenshot
+  - clear -> clear_element
+  - close -> close_browser
+  - debug -> interactive_mode
+  - mouse_hover -> mouse_over
+  - select_by_index -> select_option_by_index
+  - select_by_text -> select_option_by_text
+  - select_by_value -> select_option_by_value
+  - verify_alert_is_present -> verify_alert_present
+  - verify_alert_is_not_present -> verify_alert_not_present
+  - verify_cookie_exists -> verify_cookie_present
+  - verify_is_enabled -> verify_element_enabled
+  - verify_is_not_enabled -> verify_element_not_enabled
+  - verify_is_selected -> verify_element_checked
+  - verify_is_not_selected -> verify_element_not_checked
+  - verify_is_visible -> verify_element_displayed
+  - verify_is_not_visible -> verify_element_not_displayed
+  - verify_exists -> verify_element_present
+  - verify_not_exists -> verify_element_not_present
+  - verify_text -> verify_page_contains_text
+  - verify_text_in_element -> verify_element_text_contains
+  - wait_for_element_not_exist -> wait_for_element_not_present
+  - wait_for_element_visible -> wait_for_element_displayed
+  - wait_for_element_not_visible -> wait_for_element_not_displayed
+
+- Changed test results: 'pass' -> 'success'; 'fail' -> 'failure', 'error', 'code error'.
+- report.json format changed. NOTE: previous reports (<0.6.0) won´t work in the UI report viewer
+- Docs were rewritten
+
+### Removed
+- Deprecated actions: assert_contains, assert_equals, assert_false, assert_true, verify_selected_option
+
+## [0.5.0] - 2018-05-12
+
 ### Added
 - Support for Edge and Opera
 - Extend WebDriver and WebElement

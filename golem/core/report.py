@@ -64,19 +64,18 @@ def create_report_directory(execution_directory, test_case_name, is_suite):
 def generate_report(report_directory, test_case_name, test_data, result):
     """Generate the json report for a single test execution."""
     json_report_path = os.path.join(report_directory, 'report.json')
-
-    short_error = ''
-    if result['error']:
-        short_error = '\n'.join(result['error'].split('\n')[-2:])
+    # short_error = ''
+    # if result['error']:
+    #     short_error = '\n'.join(result['error'].split('\n')[-2:])
 
     # TODO
-    serializable_data = {}
+    serialized_data = {}
     for key, value in test_data.items():
         try:
             json.dumps('{"{}":"{}"}'.format(key, value))
-            serializable_data[key] = value
+            serialized_data[key] = value
         except:
-            serializable_data[key] = repr(value)
+            serialized_data[key] = repr(value)
     
     env_name = ''
     if 'env' in test_data:
@@ -96,23 +95,18 @@ def generate_report(report_directory, test_case_name, test_data, result):
     elif browser == 'firefox-remote':
         output_browser = 'firefox (remote)'
 
-    # cast steps to str
-    steps = [str(x) for x in result['steps']]
-
     report = {
         'test_case': test_case_name,
         'result': result['result'],
-        'steps': steps,
+        'steps': result['steps'],
+        'errors': result['errors'],
         'description': result['description'],
-        'error': result['error'],
-        'short_error': short_error,
-        'test_elapsed_time': result['test_elapsed_time'],
-        'test_timestamp': result['test_timestamp'],
         'browser': output_browser,
-        'test_data': serializable_data,
+        'test_data': serialized_data,
         'environment': env_name,
-        'set_name': result['set_name']
+        'set_name': result['set_name'],
+        'test_elapsed_time': result['test_elapsed_time'],
+        'test_timestamp': result['test_timestamp']
     }
-
     with open(json_report_path, 'w', encoding='utf-8') as json_file:
         json.dump(report, json_file, indent=4)

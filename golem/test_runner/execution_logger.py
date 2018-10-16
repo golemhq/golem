@@ -10,6 +10,8 @@ stream_handler = None
 file_handler_debug = None
 file_handler_info = None
 
+VALID_LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+
 
 def get_logger(log_directory=None, console_log_level='INFO',
                log_all_events=True):
@@ -62,15 +64,14 @@ def get_logger(log_directory=None, console_log_level='INFO',
 
 def reset_logger(logger):    
     logger.removeHandler(stream_handler)
+    file_handler_debug.close()
     logger.removeHandler(file_handler_debug)
+    file_handler_info.close()
     logger.removeHandler(file_handler_info)
-    # logging.shutdown()
-    # import importlib
-    # importlib.reload(logging)
 
 
 def _get_log_level(log_level_string):
-    """return the logging log leve.
+    """return the logging log level.
     Validates log_level_string is a valid value"""
     log_level = ''
     if log_level_string == 'DEBUG':

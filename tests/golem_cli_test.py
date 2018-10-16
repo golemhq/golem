@@ -86,11 +86,9 @@ class Test_golem:
         command = 'golem run {} {}'.format(project, test)
         result = test_utils.run_command(command)
         # TODO: the result is not in order
-        # assert 'Executing:' in result
-        # assert '{} in chrome with the following data: {{}}'.format(test) in result
         assert 'INFO Test execution started: {}'.format(test) in result
         assert 'INFO Browser: chrome' in result
-        assert 'INFO Test passed' in result
+        assert 'INFO Test Result: SUCCESS' in result
 
     def test_golem_run_suite(self, project_session, test_utils):
         path = project_session['testdir']
@@ -214,7 +212,7 @@ class Test_golem:
         # assert '{} in firefox with the following data: {{}}'.format(test) in result
         assert 'INFO Test execution started: {}'.format(test) in result
         assert 'INFO Browser: firefox' in result
-        assert 'INFO Test passed' in result
+        assert 'INFO Test Result: SUCCESS' in result
 
     def test_golem_run_not_match_test_or_suite(self, project_session, test_utils):
         path = project_session['testdir']
