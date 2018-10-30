@@ -1,16 +1,16 @@
 language: python
 
 python:
-  - "3.4"
+  # - "3.4" #removed due to fail with pytest installation
   - "3.5"
   - "3.6"
-  # - "3.7"
+  # - "3.7" #not available in travis yet
 
 install:
   - pip install -r requirements.txt
   - python setup.py install
   # travis uses an older version of pytest for python 3.4
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then pip install --upgrade pytest; fi 
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then pip install --upgrade pytest; fi
 
 script: 
   # - python setup.py test
