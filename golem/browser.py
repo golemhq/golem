@@ -1,6 +1,8 @@
 """Functions to interact with a webdriver browser object."""
 # import time
 # import types
+import platform
+import re
 import traceback
 from contextlib import contextmanager
 
@@ -156,7 +158,9 @@ def open_browser(browser_id=None):
     else:
         raise Exception('Error: {} is not a valid driver'.format(browser_definition['name']))
 
-    driver.maximize_window()
+    if not(re.match(browser_definition['name'], 'headless') or (re.match(browser_definition['name'], 'chrome') and
+                                                                (platform.system() == 'Darwin'))):
+        driver.maximize_window()
 
     if not browser_id:
         if len(execution.browsers) == 0:
