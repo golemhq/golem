@@ -1,6 +1,7 @@
 """Functions to interact with a webdriver browser object."""
 # import time
 # import types
+import platform
 import traceback
 from contextlib import contextmanager
 
@@ -59,7 +60,7 @@ def open_browser(browser_id=None):
             msg = '{} setting is not defined'.format(exec_path_setting)
             execution.logger.error(msg)
             raise Exception(msg)
-    
+
     @contextmanager
     def validate_remote_url(remote_url):
         if remote_url:
@@ -108,7 +109,7 @@ def open_browser(browser_id=None):
     # Edge
     elif browser_definition['name'] == 'edge':
         with validate_exec_path('edge', 'edgedriver_path', settings) as ex_path:
-            driver = GolemEdgeDriver(executable_path=ex_path)        
+            driver = GolemEdgeDriver(executable_path=ex_path)
     # Edge remote
     elif browser_definition['name'] == 'edge-remote':
         with validate_remote_url(settings['remote_url']) as remote_url:
@@ -156,7 +157,11 @@ def open_browser(browser_id=None):
     else:
         raise Exception('Error: {} is not a valid driver'.format(browser_definition['name']))
 
-    driver.maximize_window()
+    # currently there is no way to maximize chrome window on OSX, adding workaround
+    # https://bugs.chromium.org/p/chromedriver/issues/detail?id=2389&q=&colspec=ID%20Status%20Pri%20Owner%20Summary
+    if not('headless' in browser_definition['name'] or ('chrome' in browser_definition['name'] and
+                                                        (platform.system() == 'Darwin'))):
+        driver.maximize_window()
 
     if not browser_id:
         if len(execution.browsers) == 0:
