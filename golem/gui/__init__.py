@@ -409,13 +409,12 @@ def getHTMLReport():
                                                       suite=suite,
                                                       execution=execution)
 
-    total_cases = execution_data['total_cases']
-    total_cases_ok = execution_data['total_cases_ok']
-    total_cases_fail = execution_data['total_cases_fail']
-    total_pending = execution_data['total_pending']
+    total_cases = execution_data['total_tests']
+    total_cases_ok = execution_data['totals_by_result']['success']
+    total_cases_fail = total_cases - total_cases_ok
     net_elapsed_time = execution_data['net_elapsed_time']
     total_time = 0
-    for test in execution_data['test_cases']:
+    for test in execution_data['tests']:
         total_time += test['test_elapsed_time']
 
     project_title = '' + project + ' - ' + suite + ''
@@ -542,7 +541,7 @@ def getHTMLReport():
     )
 
     count = 0
-    for test in execution_data['test_cases']:
+    for test in execution_data['tests']:
         test_name = test['name']
         test_folder = test['test_set']
         test_environment = test['environment']
@@ -563,7 +562,7 @@ def getHTMLReport():
 
         test_case_steps = report_parser.return_html_test_steps(test_case_data, file_name)
 
-        if test_result == 'pass':
+        if test_result == 'success':
             pass_or_fail = """<span class="passed-green" style="font-size: 20px"><strong>&#9745;</strong></span>"""
         else:
             pass_or_fail = """<span class="failed-red" style="font-size: 20px"><strong>&#9746;</strong></span></span>"""

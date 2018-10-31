@@ -1379,7 +1379,7 @@ def mouse_hover(element):
     Parameters:
     element : element
     """
-    execution.logger.warning('mouse_over is DEPRECATED, use mouse_over instead')
+    execution.logger.warning('mouse_hover is DEPRECATED, use mouse_over instead')
 
 
 def mouse_over(element):
