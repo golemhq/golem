@@ -1,6 +1,4 @@
 """Functions to interact with a webdriver browser object."""
-# import time
-# import types
 import platform
 import traceback
 from contextlib import contextmanager
@@ -16,7 +14,6 @@ from golem.webdriver import (GolemChromeDriver,
                              GolemIeDriver,
                              GolemOperaDriver,
                              GolemRemoteDriver)
-from golem.webdriver.extended_driver import GolemExtendedDriver
 
 
 def element(*args, **kwargs):
@@ -74,7 +71,7 @@ def open_browser(browser_id=None):
     browser_definition = execution.browser_definition
     settings = execution.settings
     # remote
-    if browser_definition['remote'] is True:
+    if browser_definition['remote']:
         with validate_remote_url(settings['remote_url']) as remote_url:
             driver = GolemRemoteDriver(command_executor=remote_url,
                                        desired_capabilities=browser_definition['capabilities'])
@@ -82,7 +79,8 @@ def open_browser(browser_id=None):
     elif browser_definition['name'] == 'chrome':
         with validate_exec_path('chrome', 'chromedriver_path', settings) as ex_path:
             chrome_options = webdriver.ChromeOptions()
-            chrome_options.add_argument('--start-maximized')
+            if settings['start_maximized']:
+                chrome_options.add_argument('start-maximized')
             driver = GolemChromeDriver(executable_path=ex_path,
                                        chrome_options=chrome_options)
     # Chrome remote
@@ -132,7 +130,7 @@ def open_browser(browser_id=None):
     elif browser_definition['name'] == 'ie-remote':
         with validate_remote_url(settings['remote_url']) as remote_url:
             driver = GolemRemoteDriver(command_executor=remote_url,
-                                       desired_capabilities=DesiredCapabilities.IE)
+                                       desired_capabilities=DesiredCapabilities.INTERNETEXPLORER)
     # Opera
     elif browser_definition['name'] == 'opera':
         with validate_exec_path('opera', 'operadriver_path', settings) as ex_path:
@@ -145,23 +143,15 @@ def open_browser(browser_id=None):
         with validate_remote_url(settings['remote_url']) as remote_url:
             driver = GolemRemoteDriver(command_executor=remote_url,
                                        desired_capabilities=DesiredCapabilities.OPERA)
-    # Safari
-    # elif browser_definition['name'] == 'safari':
-    #     with validate_exec_path('safari', 'safaridriver_path', settings) as ex_path:
-    #         driver = GolemSafariDriver(executable_path=ex_path)
-    # Safari remote
-    # elif browser_definition['name'] == 'safari-remote':
-    #     with validate_remote_url(settings['remote_url']) as remote_url:
-    #         driver = GolemRemoteDriver(command_executor=remote_url,
-    #                                   desired_capabilities=DesiredCapabilities.SAFARI)
     else:
         raise Exception('Error: {} is not a valid driver'.format(browser_definition['name']))
 
-    # currently there is no way to maximize chrome window on OSX, adding workaround
-    # https://bugs.chromium.org/p/chromedriver/issues/detail?id=2389&q=&colspec=ID%20Status%20Pri%20Owner%20Summary
-    if not('headless' in browser_definition['name'] or ('chrome' in browser_definition['name'] and
-                                                        (platform.system() == 'Darwin'))):
-        driver.maximize_window()
+    if settings['start_maximized']:
+        # currently there is no way to maximize chrome window on OSX, adding workaround
+        # https://bugs.chromium.org/p/chromedriver/issues/detail?id=2389
+        if not('headless' in browser_definition['name'] or ('chrome' in browser_definition['name'] and
+                                                            (platform.system() == 'Darwin'))):
+            driver.maximize_window()
 
     if not browser_id:
         if len(execution.browsers) == 0:

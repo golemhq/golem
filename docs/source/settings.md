@@ -105,3 +105,7 @@ Default is 'INFO'
 - *log_all_events*
 
 Log all events or just Golem events. Default is true.
+
+- *start_maximized*
+
+Start the brownser maximized. Default is true.

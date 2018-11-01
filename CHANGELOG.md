@@ -3,6 +3,9 @@
 
 ## [Unreleased]
 
+### Added
+- 'start_maximized' setting key
+
 ## [0.6.0] - 2018-09-30
 
 ### Added

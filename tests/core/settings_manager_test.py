@@ -52,30 +52,6 @@ class Test__read_json_with_comments:
 
 class Test_assign_settings_default_values:
 
-    def test_default_values_definition(self):
-        expected_defaults = [
-            ('search_timeout', 0),
-            ('wait_displayed', False),
-            ('screenshot_on_error', True),
-            ('screenshot_on_step', False),
-            ('screenshot_on_end', False),
-            ('test_data', 'csv'),
-            ('wait_hook', None),
-            ('default_browser', 'chrome'),
-            ('chromedriver_path', None),
-            ('edgedriver_path', None),
-            ('geckodriver_path', None),
-            ('iedriver_path', None),
-            ('operadriver_path', None),
-            # ('safaridriver_path', None),
-            ('remote_url', None),
-            ('remote_browsers', {}),
-            ('console_log_level', 'INFO'),
-            ('log_all_events', True)
-        ]
-        actual_defaults = settings_manager.DEFAULTS
-        assert actual_defaults == expected_defaults
-
 
     def test_assign_settings_default_values_all_missing(self):
         normalized = settings_manager.assign_settings_default_values({})
@@ -96,7 +72,8 @@ class Test_assign_settings_default_values:
             'remote_url': None,
             'remote_browsers': {},
             'console_log_level': 'INFO',
-            'log_all_events': True
+            'log_all_events': True,
+            'start_maximized': True
         }
         assert normalized == expected
 
@@ -104,7 +81,7 @@ class Test_assign_settings_default_values:
     def test_assign_settings_default_values_all_none(self):
         input_settings = {
             'search_timeout': None,
-            'wait_displayed': False,
+            'wait_displayed': None,
             'screenshot_on_error': None,
             'screenshot_on_step': None,
             'screenshot_on_end': None,
@@ -116,11 +93,11 @@ class Test_assign_settings_default_values:
             'geckodriver_path': None,
             'iedriver_path': None,
             'operadriver_path': None,
-            # 'safaridriver_path': None,
             'remote_url': None,
             'remote_browsers': None,
             'console_log_level': None,
-            'log_all_events': None
+            'log_all_events': None,
+            'start_maximized': None
         }
         normalized = settings_manager.assign_settings_default_values(input_settings)
         expected = {
@@ -140,7 +117,8 @@ class Test_assign_settings_default_values:
             'remote_url': None,
             'remote_browsers': {},
             'console_log_level': 'INFO',
-            'log_all_events': True
+            'log_all_events': True,
+            'start_maximized': True
         }
         assert normalized == expected
 
@@ -160,11 +138,11 @@ class Test_assign_settings_default_values:
             'geckodriver_path': '',
             'iedriver_path': '',
             'operadriver_path': '',
-            # 'safaridriver_path': '',
             'remote_url': '',
             'remote_browsers': '',
             'console_log_level': '',
-            'log_all_events': ''
+            'log_all_events': '',
+            'start_maximized': ''
         }
         normalized = settings_manager.assign_settings_default_values(input_settings)
         expected = {
@@ -184,15 +162,16 @@ class Test_assign_settings_default_values:
             'screenshot_on_error': True,
             'screenshot_on_step': False,
             'test_data': 'csv',
-            'wait_hook': None
+            'wait_hook': None,
+            'start_maximized': True
         }
         assert normalized == expected
 
 
 class Test_get_global_settings:
 
-    def test_get_global_settings_default(self, testdir_session):
-        testdir = testdir_session['path']
+    def test_get_global_settings_default(self, testdir_function):
+        testdir = testdir_function['path']
         global_settings = settings_manager.get_global_settings(testdir)
         expected = {
             'console_log_level': 'INFO',
@@ -202,7 +181,6 @@ class Test_get_global_settings:
             'geckodriver_path': './drivers/geckodriver*',
             'iedriver_path': './drivers/iedriver*',
             'operadriver_path': './drivers/operadriver*',
-            # 'safari_path': './drivers/safari*',
             'search_timeout': 20,
             'wait_displayed': False,
             'log_all_events': True,
@@ -212,7 +190,8 @@ class Test_get_global_settings:
             'screenshot_on_error': True,
             'screenshot_on_step': False,
             'test_data': 'csv',
-            'wait_hook': None
+            'wait_hook': None,
+            'start_maximized': True
         }
         assert global_settings == expected
 
@@ -228,9 +207,9 @@ class Test_get_global_settings_as_string:
 
 class Test_get_project_settings:
 
-    def test_get_project_settings_default(self, project_class):
-        testdir = project_class['testdir']
-        project = project_class['name']
+    def test_get_project_settings_default(self, project_function_clean):
+        testdir = project_function_clean['testdir']
+        project = project_function_clean['name']
         project_settings = settings_manager.get_project_settings(testdir, project)
         expected = {            
             'console_log_level': 'INFO',
@@ -240,7 +219,6 @@ class Test_get_project_settings:
             'geckodriver_path': './drivers/geckodriver*',
             'iedriver_path': './drivers/iedriver*',
             'operadriver_path': './drivers/operadriver*',
-            # 'safari_path': './drivers/safari*',
             'search_timeout': 20,
             'wait_displayed': False,
             'log_all_events': True,
@@ -250,7 +228,8 @@ class Test_get_project_settings:
             'screenshot_on_error': True,
             'screenshot_on_step': False,
             'test_data': 'csv',
-            'wait_hook': None
+            'wait_hook': None,
+            'start_maximized': True
         }
         assert project_settings == expected
 

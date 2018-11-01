@@ -77,11 +77,11 @@ DEFAULTS = [
     ('geckodriver_path', None),
     ('iedriver_path', None),
     ('operadriver_path', None),
-    # ('safaridriver_path', None),
     ('remote_url', None),
     ('remote_browsers', {}),
     ('console_log_level', 'INFO'),
-    ('log_all_events', True)
+    ('log_all_events', True),
+    ('start_maximized', True)
 ]
 
 
