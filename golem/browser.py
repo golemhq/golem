@@ -163,7 +163,7 @@ def open_browser(browser_id=None):
     if settings['start_maximized']:
         # currently there is no way to maximize chrome window on OSX, adding workaround
         # https://bugs.chromium.org/p/chromedriver/issues/detail?id=2389
-        if not('headless' in browser_definition['name'] or ('chrome' in browser_definition['name'] and
+        if not('headless' in browser_definition['name'] or ('chrome' == browser_definition['name'] and
                                                             (platform.system() == 'Darwin'))):
             driver.maximize_window()
 
