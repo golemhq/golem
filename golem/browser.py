@@ -83,11 +83,6 @@ def open_browser(browser_id=None):
                 chrome_options.add_argument('start-maximized')
             driver = GolemChromeDriver(executable_path=ex_path,
                                        chrome_options=chrome_options)
-    # Chrome remote
-    elif browser_definition['name'] == 'chrome-remote':
-        with validate_remote_url(settings['remote_url']) as remote_url:
-            driver = GolemRemoteDriver(command_executor=remote_url,
-                                       desired_capabilities=DesiredCapabilities.CHROME)
     # Chrome headless
     elif browser_definition['name'] == 'chrome-headless':
         with validate_exec_path('chrome', 'chromedriver_path', settings) as ex_path:
@@ -96,13 +91,18 @@ def open_browser(browser_id=None):
             chrome_options.add_argument('--window-size=1600,1600')
             driver = GolemChromeDriver(executable_path=ex_path,
                                        chrome_options=chrome_options)
+    # Chrome remote
+    elif browser_definition['name'] == 'chrome-remote':
+        with validate_remote_url(settings['remote_url']) as remote_url:
+            driver = GolemRemoteDriver(command_executor=remote_url,
+                                       desired_capabilities=DesiredCapabilities.CHROME)
     # Chrome remote headless
     elif browser_definition['name'] == 'chrome-remote-headless':
         with validate_remote_url(settings) as remote_url:
             chrome_options = webdriver.ChromeOptions()
             chrome_options.add_argument('headless')
             desired_capabilities = chrome_options.to_capabilities()
-            driver = GolemChromeDriver(command_executor=remote_url,
+            driver = GolemRemoteDriver(command_executor=remote_url,
                                        desired_capabilities=desired_capabilities)
     # Edge
     elif browser_definition['name'] == 'edge':
@@ -117,11 +117,25 @@ def open_browser(browser_id=None):
     elif browser_definition['name'] == 'firefox':
         with validate_exec_path('firefox', 'geckodriver_path', settings) as ex_path:
             driver = GolemGeckoDriver(executable_path=ex_path)
+    # Firefox headless
+    elif browser_definition['name'] == 'firefox-headless':
+        with validate_exec_path('firefox', 'geckodriver_path', settings) as ex_path:
+            firefox_options = webdriver.FirefoxOptions()
+            firefox_options.headless = True
+            driver = GolemGeckoDriver(executable_path=ex_path, firefox_options=firefox_options)
     # Firefox remote
     elif browser_definition['name'] == 'firefox-remote':
         with validate_remote_url(settings['remote_url']) as remote_url:
             driver = GolemRemoteDriver(command_executor=remote_url,
                                        desired_capabilities=DesiredCapabilities.FIREFOX)
+    # Firefox remote headless
+    elif browser_definition['name'] == 'firefox-remote-headless':
+        with validate_remote_url(settings['remote_url']) as remote_url:
+            firefox_options = webdriver.FirefoxOptions()
+            firefox_options.headless = True
+            desired_capabilities = firefox_options.to_capabilities()
+            driver = GolemRemoteDriver(command_executor=remote_url,
+                                       desired_capabilities=desired_capabilities)
     # IE
     elif browser_definition['name'] == 'ie':
         with validate_exec_path('internet explorer', 'iedriver_path', settings) as ex_path:

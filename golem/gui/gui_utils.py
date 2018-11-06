@@ -1,6 +1,4 @@
 """Helper functions to deal with Golem GUI module application."""
-import datetime
-import os
 import subprocess
 import inspect
 
@@ -11,7 +9,7 @@ from golem.core import utils
 def run_test_case(project, test_case_name, environment):
     """Run a test case. This is used when running tests from the GUI"""
     timestamp = utils.get_timestamp()
-    param_list = ['golem','run', project, test_case_name,
+    param_list = ['golem', 'run', project, test_case_name,
                   '--timestamp', timestamp]
     if environment:
         param_list.append('--environments')
@@ -130,13 +128,12 @@ def get_supported_browsers_suggestions():
         'edge',
         'edge-remote',
         'firefox',
+        'firefox-headless',
         'firefox-remote',
+        'firefox-remote-headless',
         'ie',
         'ie-remote',
         'opera',
         'opera-remote',
-        # 'safari',
-        # 'safari-remote'
     ]
     return supported_browsers
-

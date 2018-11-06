@@ -5,6 +5,7 @@
 
 ### Added
 - 'start_maximized' setting key
+- Firefox headless ('firefox-headless' and 'firefox-remote-headless')
 
 ## [0.6.0] - 2018-09-30
 

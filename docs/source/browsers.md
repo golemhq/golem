@@ -107,13 +107,15 @@ The browser (or browsers) that a test or suite will use can be specified from a 
 
 **Valid options are**:
 * chrome
-* chrome-remote
 * chrome-headless
+* chrome-remote
 * chrome-remote-headless
 * edge
 * edge-remote
 * firefox
+* firefox-headless
 * firefox-remote
+* firefox-remote-headless
 * ie
 * ie-remote
 * opera
@@ -129,6 +131,14 @@ Requirements: chrome 58+, chromedriver 2.32+
 
 ```
 golem run <project> <test> -b chrome-headless
+```
+
+### Firefox Headless
+
+Chrome can run in headless mode (without a GUI). Set the browser of a test or suite to 'firefox-headless' or 'firefox-remote-headless'.
+
+```
+golem run <project> <test> -b firefox-headless
 ```
 
 ## Working with the Browser
