@@ -3,23 +3,22 @@ import os
 from golem.core import settings_manager
 
 
-class Test_create_global_settings_file:
+class TestCreateGlobalSettingsFile:
 
     def test_create_global_settings_file(self, testdir_class):
-        testdir = testdir_class['path']
-        settings_path = os.path.join(testdir, 'settings.json')
+        settings_path = os.path.join(testdir_class.path, 'settings.json')
         os.remove(settings_path)
-        settings_manager.create_global_settings_file(testdir)
+        settings_manager.create_global_settings_file(testdir_class.path)
         with open(settings_path) as settings_file:
             actual = settings_file.read()
             assert actual == settings_manager.SETTINGS_FILE_CONTENT
     
 
-class Test_create_project_settings_file:
+class TestCreateProjectSettingsFile:
 
     def test_create_project_settings_file(self, project_class):
-        testdir = project_class['testdir']
-        project = project_class['name']
+        testdir = project_class.testdir
+        project = project_class.name
         settings_path = os.path.join(testdir, 'projects', project, 'settings.json')
         os.remove(settings_path)
         settings_manager.create_project_settings_file(testdir, project)
@@ -28,10 +27,9 @@ class Test_create_project_settings_file:
             assert actual == settings_manager.REDUCED_SETTINGS_FILE_CONTENT
 
 
-class Test__read_json_with_comments:
+class TestReadJsonWithComments:
 
     def test__read_json_with_comments(self, testdir_class):
-        testdir = testdir_class['path']
         file_content = ('{\n'
                         '// a commented line\n'
                         '"search_timeout": 10,\n'
@@ -39,7 +37,7 @@ class Test__read_json_with_comments:
                         '// another commented line\n'
                         '"screenshot_on_error": true\n'
                         '}')
-        path = os.path.join(testdir, 'temp_settings01.json')
+        path = os.path.join(testdir_class.path, 'temp_settings01.json')
         with open(path, 'w') as json_file:
             json_file.write(file_content)
         result = settings_manager._read_json_with_comments(path)
@@ -50,8 +48,7 @@ class Test__read_json_with_comments:
         assert result == expected
 
 
-class Test_assign_settings_default_values:
-
+class TestAssignSettingsDefaultValues:
 
     def test_assign_settings_default_values_all_missing(self):
         normalized = settings_manager.assign_settings_default_values({})
@@ -76,7 +73,6 @@ class Test_assign_settings_default_values:
             'start_maximized': True
         }
         assert normalized == expected
-
 
     def test_assign_settings_default_values_all_none(self):
         input_settings = {
@@ -121,7 +117,6 @@ class Test_assign_settings_default_values:
             'start_maximized': True
         }
         assert normalized == expected
-
 
     def test_assign_settings_default_values_all_empty_str(self):
         input_settings = {
@@ -168,11 +163,10 @@ class Test_assign_settings_default_values:
         assert normalized == expected
 
 
-class Test_get_global_settings:
+class TestGetGlobalSettings:
 
     def test_get_global_settings_default(self, testdir_function):
-        testdir = testdir_function['path']
-        global_settings = settings_manager.get_global_settings(testdir)
+        global_settings = settings_manager.get_global_settings(testdir_function.path)
         expected = {
             'console_log_level': 'INFO',
             'default_browser': 'chrome',
@@ -196,20 +190,19 @@ class Test_get_global_settings:
         assert global_settings == expected
 
 
-class Test_get_global_settings_as_string:
+class TestGetGlobalSettingsAsString:
 
     def test_get_global_settings_as_string(self, testdir_session):
-        testdir = testdir_session['path']
-        global_settings = settings_manager.get_global_settings_as_string(testdir)
+        global_settings = settings_manager.get_global_settings_as_string(testdir_session.path)
         expected = settings_manager.SETTINGS_FILE_CONTENT
         assert global_settings == expected
 
 
-class Test_get_project_settings:
+class TestGetProjectSettings:
 
     def test_get_project_settings_default(self, project_function_clean):
-        testdir = project_function_clean['testdir']
-        project = project_function_clean['name']
+        testdir = project_function_clean.testdir
+        project = project_function_clean.name
         project_settings = settings_manager.get_project_settings(testdir, project)
         expected = {            
             'console_log_level': 'INFO',
@@ -236,45 +229,42 @@ class Test_get_project_settings:
     # TODO: test project override global settings
 
 
-class Test_get_project_settings_as_string:
+class TestGetProjectSettingsAsString:
 
     def test_get_project_settings_as_string(self, project_session):
-        testdir = project_session['testdir']
-        project = project_session['name']
         project_settings = settings_manager.get_project_settings_as_string(
-                                            testdir, project)
+            project_session.testdir, project_session.name)
         expected = settings_manager.REDUCED_SETTINGS_FILE_CONTENT
         assert project_settings == expected
 
 
-class Test_save_global_settings:
+class TestSaveGlobalSettings:
 
     def test_save_global_settings(self, testdir_class):
-        testdir = testdir_class['path']
         input_settings = ('// test\n'
                           '{\n'
                           '"test": "test"\n'
                           '}')
-        settings_manager.save_global_settings(testdir, input_settings)
-        actual = settings_manager.get_global_settings_as_string(testdir)
+        settings_manager.save_global_settings(testdir_class.path, input_settings)
+        actual = settings_manager.get_global_settings_as_string(testdir_class.path)
         assert actual == input_settings
 
 
-class Test_save_project_settings:
+class TestSaveProjectSettings:
 
     def test_save_project_settings(self, project_class):
-        testdir = project_class['testdir']
-        project = project_class['name']
+        testdir = project_class.testdir
+        project = project_class.name
         input_settings = ('// test\n'
                           '{\n'
                           '"test": "test"\n'
                           '}')
-        settings_manager.save_global_settings(testdir, input_settings)
-        actual = settings_manager.get_global_settings_as_string(testdir)
+        settings_manager.save_project_settings(testdir, project, input_settings)
+        actual = settings_manager.get_project_settings_as_string(testdir, project)
         assert actual == input_settings
 
 
-class Test_get_remote_browsers:
+class TestGetRemoteBrowsers:
 
     def test_get_remote_browsers(self):
         settings = {
@@ -307,7 +297,7 @@ class Test_get_remote_browsers:
         assert rb == expected
 
 
-class Test_get_remote_browser_list:
+class TestGetRemoteBrowserList:
 
     def test_get_remote_browser_list(self):
         input_settings = {
@@ -320,7 +310,6 @@ class Test_get_remote_browser_list:
         expected = ['browser01', 'browser02']
         assert sorted(remote_browsers) == sorted(expected)
 
-
     def test_get_remote_browser_list_empty(self):
         input_settings = {
             'another_setting': '',
@@ -329,7 +318,6 @@ class Test_get_remote_browser_list:
         remote_browsers = settings_manager.get_remote_browser_list(input_settings)
         expected = []
         assert remote_browsers == expected
-
 
     def test_get_remote_browser_list_not_present(self):
         input_settings = {

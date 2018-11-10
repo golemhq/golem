@@ -13,31 +13,29 @@ ENV_DATA = ('{\n'
             '}')
 
 ENV_DATA_INVALID_JSON = ('{\n'
-    '    \'test\': {\n'
-    '        "url": "http://localhost:8000"\n'
-    '    }\n'
-    '}')
+                         '    \'test\': {\n'
+                         '        "url": "http://localhost:8000"\n'
+                         '    }\n'
+                         '}')
 
 
-class Test_get_envs:
+class TestGetEnvs:
 
     def test_get_envs(self, project_session):
-        testdir = project_session['testdir']
-        project = project_session['name']
+        testdir = project_session.testdir
+        project = project_session.name
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
-
         with open(env_json_path, 'w') as env_json_file:
             env_json_file.write(ENV_DATA)
         envs = environment_manager.get_envs(testdir, project)
-        expected_envs = ['test', 'development']
         assert len(envs) == 2
         assert 'test' in envs
         assert 'development' in envs
 
     def test_get_envs_empty_file(self, project_session):
-        testdir = project_session['testdir']
-        project = project_session['name']
+        testdir = project_session.testdir
+        project = project_session.name
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         with open(env_json_path, 'w') as env_json_file:
@@ -46,8 +44,8 @@ class Test_get_envs:
         assert envs == []
 
     def test_get_envs_invalid_json(self, project_session):
-        testdir = project_session['testdir']
-        project = project_session['name']
+        testdir = project_session.testdir
+        project = project_session.name
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         with open(env_json_path, 'w') as env_json_file:
@@ -57,8 +55,8 @@ class Test_get_envs:
         assert envs == expected_envs
 
     def test_get_envs_file_not_exist(self, project_session):
-        testdir = project_session['testdir']
-        project = project_session['name']
+        testdir = project_session.testdir
+        project = project_session.name
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         if os.path.isfile(env_json_path):
@@ -68,11 +66,11 @@ class Test_get_envs:
         assert envs == expected_envs
 
 
-class Test_get_environment_data:
+class TestGetEnvironmentData:
 
     def test_get_environment_data(self, project_session):
-        testdir = project_session['testdir']
-        project = project_session['name']
+        testdir = project_session.testdir
+        project = project_session.name
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         with open(env_json_path, 'w') as env_json_file:
@@ -89,8 +87,8 @@ class Test_get_environment_data:
         assert result == expected
 
     def test_get_environment_data_empty_file(self, project_session):
-        testdir = project_session['testdir']
-        project = project_session['name']
+        testdir = project_session.testdir
+        project = project_session.name
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         with open(env_json_path, 'w') as env_json_file:
@@ -99,8 +97,8 @@ class Test_get_environment_data:
         assert result == {}
 
     def test_get_environment_data_invalid_json(self, project_session):
-        testdir = project_session['testdir']
-        project = project_session['name']
+        testdir = project_session.testdir
+        project = project_session.name
         env_json_path = os.path.join(testdir, 'projects',
                                      project, 'environments.json')
         with open(env_json_path, 'w') as env_json_file:
@@ -109,75 +107,70 @@ class Test_get_environment_data:
         assert result == {}
 
     def test_get_environment_data_file_not_exist(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         result = environment_manager.get_environment_data(testdir, project)
         assert result == {}
 
 
-class Test_get_environments_as_string:
+class TestGetEnvironmentsAsString:
 
     def test_get_environments_as_string(self, project_session):
-        testdir = project_session['testdir']
-        project = project_session['name']
-        env_json_path = os.path.join(testdir, 'projects',
-                                     project, 'environments.json')
+        testdir = project_session.testdir
+        project = project_session.name
+        env_json_path = os.path.join(testdir, 'projects', project, 'environments.json')
         with open(env_json_path, 'w') as env_json_file:
             env_json_file.write(ENV_DATA)
         result = environment_manager.get_environments_as_string(testdir, project)
         assert result == ENV_DATA
 
     def test_get_environments_as_string_empty_file(self, project_session):
-        project = project_session['name']
-        testdir = project_session['testdir']
-        env_json_path = os.path.join(testdir, 'projects',
-                                     project, 'environments.json')
+        project = project_session.name
+        testdir = project_session.testdir
+        env_json_path = os.path.join(testdir, 'projects', project, 'environments.json')
         with open(env_json_path, 'w') as env_json_file:
             env_json_file.write('')
         result = environment_manager.get_environments_as_string(testdir, project)
         assert result == ''
 
     def test_get_environments_as_string_file_not_exist(self, project_function):
-        project = project_function['name']
-        testdir = project_function['testdir']
+        project = project_function.name
+        testdir = project_function.testdir
         path = os.path.join(testdir, 'projects', project, 'environments.json')
         os.remove(path)
         result = environment_manager.get_environments_as_string(testdir, project)
         assert result == ''
 
 
-class Test_save_environments:
+class TestSaveEnvironments:
 
     def test_save_environments(self, project_session):
-        project = project_session['name']
-        testdir = project_session['testdir']
+        project = project_session.name
+        testdir = project_session.testdir
         error = environment_manager.save_environments(testdir, project, ENV_DATA)
         assert error == ''
-        env_json_path = os.path.join(testdir, 'projects',
-                                     project, 'environments.json')
+        env_json_path = os.path.join(testdir, 'projects', project, 'environments.json')
         with open(env_json_path) as json_file:
             file_content = json_file.read()
             assert file_content == ENV_DATA
 
     def test_save_environments_empty_env_data(self, project_session):
-        project = project_session['name']
-        testdir = project_session['testdir']
+        project = project_session.name
+        testdir = project_session.testdir
         error = environment_manager.save_environments(testdir, project, '')
         assert error == ''
-        env_json_path = os.path.join(testdir, 'projects',
-                                     project, 'environments.json')
+        env_json_path = os.path.join(testdir, 'projects', project, 'environments.json')
         with open(env_json_path) as json_file:
             file_content = json_file.read()
             assert file_content == ''
 
     def test_save_environments_invalid_json(self, project_function):
-        project = project_function['name']
-        testdir = project_function['testdir']
-        env_json_path = os.path.join(testdir, 'projects',
-                                     project, 'environments.json')
+        project = project_function.name
+        testdir = project_function.testdir
+        env_json_path = os.path.join(testdir, 'projects', project, 'environments.json')
         original_json = '{"test": "value"}'
         with open(env_json_path, 'w') as json_file:
-            file_content = json_file.write(original_json)
+            json_file.write(original_json)
         error = environment_manager.save_environments(testdir, project,
                                                       ENV_DATA_INVALID_JSON)
         assert error == 'must be valid JSON'

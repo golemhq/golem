@@ -1,22 +1,17 @@
-import os
+import pytest
+
+from golem.gui import gui_utils
+from golem import browser, execution
+from golem.core import settings_manager
+from golem.test_runner import start_execution, execution_logger
 
 
-class Test_get_browser:
+class TestGetBrowser:
 
-    def test_driver_path_is_not_defined(self, project_function_clean, test_utils):
-        # Setup
-        testdir = project_function_clean['testdir']
-        project = project_function_clean['name']
-        settings_path = os.path.join(testdir, 'settings.json')
-        content = '{}'
-        with open(settings_path, 'w') as f:
-            f.write(content)
-        test_content = ('def test(data):\n'
-                        '    open_browser()')
-        test_path = os.path.join(testdir, 'projects', project, 'tests', 'test_one.py')
-        with open(test_path, 'w') as f:
-            f.write(test_content)
-        # Test
+    def test_driver_path_is_not_defined(self):
+        execution.settings = settings_manager.assign_settings_default_values({})
+        execution.logger = execution_logger.get_logger()
+        default_browsers = gui_utils.get_supported_browsers_suggestions()
         drivers = [
             ('chromedriver_path', 'chrome'),
             ('chromedriver_path', 'chrome-headless'),
@@ -26,28 +21,28 @@ class Test_get_browser:
             ('operadriver_path', 'opera'),
         ]
         for setting_path, browser_name in drivers:
-            result = test_utils.run_command('golem run {} test_one -b {}'.format(project, browser_name))
-            assert 'Exception: {} setting is not defined'.format(setting_path) in result
+            execution.browser_definition = start_execution.define_drivers([browser_name], [], default_browsers)[0]
+            with pytest.raises(Exception) as excinfo:
+                browser.open_browser()
+                expected = 'Exception: {} setting is not defined'.format(setting_path)
+                assert expected in str(excinfo.value)
 
-    def test_executable_not_present(self, project_function_clean, test_utils):
-        # Setup
-        testdir = project_function_clean['testdir']
-        project = project_function_clean['name']
-        test_content = ('def test(data):\n'
-                        '    open_browser()')
-        test_path = os.path.join(testdir, 'projects', project, 'tests', 'test_one.py')
-        with open(test_path, 'w') as f:
-            f.write(test_content)
-        # Test
+    def test_executable_not_present(self):
+        execution.settings = settings_manager.assign_settings_default_values({})
+        execution.logger = execution_logger.get_logger()
+        default_browsers = gui_utils.get_supported_browsers_suggestions()
         drivers = [
-            ('./drivers/chromedriver*', 'chrome'),
-            ('./drivers/chromedriver*', 'chrome-headless'),
-            ('./drivers/edgedriver*', 'edge'),
-            ('./drivers/geckodriver*', 'firefox'),
-            ('./drivers/iedriver*', 'ie'),
-            ('./drivers/operadriver*', 'opera'),
+            ('chromedriver_path', './drivers/chromedriver*', 'chrome'),
+            ('chromedriver_path', './drivers/chromedriver*', 'chrome-headless'),
+            ('edgedriver_path', './drivers/edgedriver*', 'edge'),
+            ('geckodriver_path', './drivers/geckodriver*', 'firefox'),
+            ('iedriver_path', './drivers/iedriver*', 'ie'),
+            ('operadriver_path', './drivers/operadriver*', 'opera'),
         ]
-        for setting_path, browser_name in drivers:
-            result = test_utils.run_command('golem run {} test_one -b {}'.format(project, browser_name))
-            msg = 'No executable file found using path {}'.format(setting_path)
-            assert msg in result
+        for setting_key, setting_path, browser_name in drivers:
+            execution.browser_definition = start_execution.define_drivers([browser_name], [], default_browsers)[0]
+            execution.settings[setting_key] = setting_path
+            with pytest.raises(Exception) as excinfo:
+                browser.open_browser()
+                expected = 'No executable file found using path {}'.format(setting_path)
+                assert expected in str(excinfo.value)

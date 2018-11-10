@@ -1,5 +1,4 @@
 import os
-from collections import OrderedDict
 
 import pytest
 
@@ -43,7 +42,7 @@ def teardown(data):
 """
 
 
-class Test__parse_step:
+class TestParseSteps:
     
     possible_steps = [
         # action without parameters
@@ -204,7 +203,7 @@ class Test__parse_step:
         assert parsed == expected
 
 
-class Test__get_parsed_steps:
+class TestGetParsedSteps:
 
     def test__get_parsed_steps(self):
         def func1():
@@ -220,9 +219,7 @@ class Test__get_parsed_steps:
     def test__get_parsed_steps_empty_lines(self):
         def func1():
             min(2, 3)
-
             max(2, 3)
-
         result = test_case._get_parsed_steps(func1)
         expected = [
             {'method_name': 'min', 'parameters': ['2', '3']},
@@ -233,32 +230,30 @@ class Test__get_parsed_steps:
     def test__get_parsed_steps_pass(self):
         def func1():
             pass
-    
         result = test_case._get_parsed_steps(func1)
         assert result == []
 
 
-class Test_get_test_case_content:
+class TestGetTestCaseContent:
 
     def test_get_test_case_content(self, project_class):
-        testdir = project_class['testdir']
-        project = project_class['name']
-
         test_name = 'some_test_case'
-        path = os.path.join(testdir, 'projects', project,
+        path = os.path.join(project_class.testdir, 'projects', project_class.name,
                             'tests', test_name + '.py')
         with open(path, 'w') as ff:
             ff.write(SAMPLE_TEST_CONTENT)
-        test_content = test_case.get_test_case_content(testdir, project, test_name)
+        test_content = test_case.get_test_case_content(project_class.testdir, project_class.name, test_name)
         assert test_content['description'] == 'some description'
         assert test_content['pages'] == ['page1', 'page2']
         assert test_content['steps']['setup'] == [{'method_name': 'page1.func1', 'parameters': []}]
-        assert test_content['steps']['test'] == [{'method_name': 'page2.func2', 'parameters': ["'a'", "'b'"]}, {'method_name': 'click', 'parameters': ['page2.elem1']}]
+        expected_test_steps = [{'method_name': 'page2.func2', 'parameters': ["'a'", "'b'"]},
+                               {'method_name': 'click', 'parameters': ['page2.elem1']}]
+        assert test_content['steps']['test'] == expected_test_steps
         assert test_content['steps']['teardown'] == []
 
     def test_get_test_case_content_empty_test(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         test_name = 'some_test_case'
         test_case.new_test_case(testdir, project, [], test_name)
         test_content = test_case.get_test_case_content(testdir, project, test_name)
@@ -269,29 +264,28 @@ class Test_get_test_case_content:
         assert test_content['steps']['teardown'] == []
 
 
-class Test_get_test_case_code:
+class TestGetTestCaseCode:
 
     def test_get_test_case_code(self, project_class):
         test_name = 'some_test_case2'
-        root_path = project_class['testdir']
-        project = project_class['name']
-        path = os.path.join(root_path, 'projects', project, 'tests', test_name + '.py')
-        with open(path, 'w') as ff:
-            ff.write(SAMPLE_TEST_CONTENT)
+        testdir = project_class.testdir
+        project = project_class.name
+        path = os.path.join(testdir, 'projects', project, 'tests', test_name + '.py')
+        with open(path, 'w') as f:
+            f.write(SAMPLE_TEST_CONTENT)
         test_code = test_case.get_test_case_code(path)
         assert test_code == SAMPLE_TEST_CONTENT
 
 
-class Test_new_test_case:
+class TestNewTestCase:
 
     def test_new_test_case(self, project_class):
-        root_path = project_class['testdir']
-        project = project_class['name']
+        testdir = project_class.testdir
+        project = project_class.name
         test_name = 'new_test_case_001'
         parents = ['aaaa', 'bbbb']
-        errors = test_case.new_test_case(root_path, project, parents, test_name)
-
-        path = os.path.join(root_path, 'projects', project, 'tests',
+        errors = test_case.new_test_case(testdir, project, parents, test_name)
+        path = os.path.join(testdir, 'projects', project, 'tests',
                             os.sep.join(parents), test_name + '.py')
         assert os.path.isfile(path)
         assert errors == []
@@ -299,17 +293,17 @@ class Test_new_test_case:
         assert test_code == NEW_TEST_CONTENT
 
     def test_new_test_case_file_exists(self, project_class):
-        root_path = project_class['testdir']
-        project = project_class['name']
+        testdir = project_class.testdir
+        project = project_class.name
         test_name = 'new_test_case_002'
         parents = ['aaaa', 'bbbb']
-        test_case.new_test_case(root_path, project, parents, test_name)
-        errors = test_case.new_test_case(root_path, project, parents, test_name)
+        test_case.new_test_case(testdir, project, parents, test_name)
+        errors = test_case.new_test_case(testdir, project, parents, test_name)
         assert errors == ['a test with that name already exists']
 
     def test_new_test_case_with_parents(self, project_session):            
-        testdir = project_session['testdir']
-        project = project_session['name']
+        testdir = project_session.testdir
+        project = project_session.name
         test_name = 'test_new_test_0001'
         parents = ['asd01', 'asd02']
         errors = test_case.new_test_case(testdir, project, parents, test_name)
@@ -326,8 +320,8 @@ class Test_new_test_case:
         assert os.path.isfile(init_path)
 
     def test_new_test_case_with_parents_already_exist(self, project_session):
-        testdir = project_session['testdir']
-        project = project_session['name']
+        testdir = project_session.testdir
+        project = project_session.name
         test_name1 = 'test_new_0004'
         test_name2 = 'test_new_0005'
         parents = ['asf01']
@@ -339,11 +333,11 @@ class Test_new_test_case:
         assert os.path.isfile(path)
 
 
-class Test_save_test_case:
+class TestSaveTestCase:
 
     def test_save_test_case_data_infile(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         test_case.new_test_case(testdir, project, ['a', 'b'], 'test_one')
         description = 'description'
         page_objects = ['page1', 'page2']
@@ -360,11 +354,9 @@ class Test_save_test_case:
             'key': '\'value\''
         }]
         test_execution.settings['test_data'] = 'infile'
-        test_case.save_test_case(testdir, project, 'a.b.test_one',
-                                 description, page_objects, test_steps,
-                                 test_data)
-        path = os.path.join(testdir, 'projects', project, 'tests',
-                            'a', 'b', 'test_one.py')
+        test_case.save_test_case(testdir, project, 'a.b.test_one', description,
+                                 page_objects, test_steps, test_data)
+        path = os.path.join(testdir, 'projects', project, 'tests', 'a', 'b', 'test_one.py')
         expected = (
             '\n'
             'description = \'description\'\n'
@@ -390,8 +382,8 @@ class Test_save_test_case:
             assert f.read() == expected
 
     def test_save_test_case_data_csv(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         test_case.new_test_case(testdir, project, ['a', 'b'], 'test_one')
         description = 'description'
         page_objects = []
@@ -406,11 +398,9 @@ class Test_save_test_case:
             'key': '\'value\''
         }]
         test_execution.settings['test_data'] = 'csv'
-        test_case.save_test_case(testdir, project, 'a.b.test_one',
-                                 description, page_objects, test_steps,
-                                 test_data)
-        path = os.path.join(testdir, 'projects', project, 'tests',
-                            'a', 'b', 'test_one.py')
+        test_case.save_test_case(testdir, project, 'a.b.test_one', description,
+                                 page_objects, test_steps, test_data)
+        path = os.path.join(testdir, 'projects', project, 'tests', 'a', 'b', 'test_one.py')
         expected = (
             '\n'
             'description = \'description\'\n'
@@ -427,24 +417,20 @@ class Test_save_test_case:
             '    pass\n')
         with open(path) as f:
             assert f.read() == expected
-
-        data_path = os.path.join(testdir, 'projects', project, 'tests',
-                                 'a', 'b', 'test_one.csv')
+        data_path = os.path.join(testdir, 'projects', project, 'tests', 'a', 'b', 'test_one.csv')
         expected = ('key\n'
                     '\'value\'\n')
         with open(data_path) as f:
             assert f.read() == expected
 
 
-class Test_save_test_case_code:
+class TestSaveTestCaseCode:
 
     def test_save_test_case_code_csv_data(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         test_name = 'test_one'
-        test_data = [
-            {'key': "'value'"}
-        ]
+        test_data = [{'key': "'value'"}]
         test_execution.settings['test_data'] = 'csv'
         test_case.new_test_case(testdir, project, [], test_name)
         test_case.save_test_case_code(testdir, project, test_name,
@@ -453,7 +439,7 @@ class Test_save_test_case_code:
         with open(path) as f:
             assert f.read() == SAMPLE_TEST_CONTENT
         path = os.path.join(testdir, 'projects', project, 'tests', test_name + '.csv')
-        expected = ('key\n'
-            '\'value\'\n')
+        expected = ('key\n' 
+                    '\'value\'\n')
         with open(path) as f:
             assert f.read() == expected

@@ -7,7 +7,7 @@ from golem.gui import user
 from golem.core import utils
 
 
-class Test_golem:
+class TestGolem:
 
     run_commands = [
         ('golem', messages.USAGE_MSG),
@@ -24,26 +24,23 @@ class Test_golem:
     ]
 
     @pytest.mark.parametrize('command,expected', run_commands)
-    def test_golem_command_output(self, command, expected,
-                                  testdir_session, test_utils):
-        path = testdir_session['path']
-        os.chdir(path)
+    def test_golem_command_output(self, command, expected, testdir_session, test_utils):
+        os.chdir(testdir_session.path)
         result = test_utils.run_command(command)
         assert result == expected
 
     def test_golem_createproject(self, testdir_session, test_utils):
-        path = testdir_session['path']
-        os.chdir(path)
+        os.chdir(testdir_session.path)
         project = 'testproject1'
         cmd = 'golem createproject {}'.format(project)
         result = test_utils.run_command(cmd)
         assert result == 'Project {} created'.format(project)
-        projects = utils.get_projects(path)
+        projects = utils.get_projects(testdir_session.path)
         assert project in projects
 
     def test_golem_createsuite(self, project_session, test_utils):
-        path = project_session['testdir']
-        project = project_session['name']
+        path = project_session.testdir
+        project = project_session.name
         os.chdir(path)
         suite = 'suite1'
         command = 'golem createsuite {} {}'.format(project, suite)
@@ -54,8 +51,8 @@ class Test_golem:
         assert os.path.isfile(spath)
 
     def test_golem_createtest(self, project_session, test_utils):
-        path = project_session['testdir']
-        project = project_session['name']
+        path = project_session.testdir
+        project = project_session.name
         os.chdir(path)
         test = 'test1'
         command = 'golem createtest {} {}'.format(project, test)
@@ -66,46 +63,41 @@ class Test_golem:
         assert os.path.isfile(tpath)
 
     def test_golem_createuser(self, testdir_session, test_utils):
-        path = testdir_session['path']
-        os.chdir(path)
+        os.chdir(testdir_session.path)
         username = 'user1'
         password = '123456'
         command = 'golem createuser {} {}'.format(username, password)
         result = test_utils.run_command(command)
         msg = 'User {} was created successfully'.format(username)
         assert result == msg
-        assert user.user_exists(username, path)
+        assert user.user_exists(username, testdir_session.path)
 
     def test_golem_run_test(self, project_session, test_utils):
-        path = project_session['testdir']
-        project = project_session['name']
+        path = project_session.testdir
+        project = project_session.name
         os.chdir(path)
         test = 'test2'
         command = 'golem createtest {} {}'.format(project, test)
         test_utils.run_command(command)
         command = 'golem run {} {}'.format(project, test)
         result = test_utils.run_command(command)
-        # TODO: the result is not in order
         assert 'INFO Test execution started: {}'.format(test) in result
         assert 'INFO Browser: chrome' in result
         assert 'INFO Test Result: SUCCESS' in result
 
     def test_golem_run_suite(self, project_session, test_utils):
-        path = project_session['testdir']
-        project = project_session['name']
+        path = project_session.testdir
+        project = project_session.name
         os.chdir(path)
         suite = 'suite2'
         command = 'golem createsuite {} {}'.format(project, suite)
         test_utils.run_command(command)
         command = 'golem run {} {}'.format(project, suite)
         result = test_utils.run_command(command)
-        # TODO: the result is not in order
-        # assert 'Executing:' in result
         assert 'No tests were found' in result
 
     def test_golem_createproject_no_args(self, testdir_session, test_utils):
-        path = testdir_session['path']
-        os.chdir(path)
+        os.chdir(testdir_session.path)
         result = test_utils.run_command('golem createproject')
         expected = ('usage: golem createproject [-h] project\n'
                     'golem createproject: error: the following '
@@ -113,8 +105,8 @@ class Test_golem:
         assert result == expected
 
     def test_golem_createproject_project_exists(self, project_session, test_utils):
-        path = project_session['testdir']
-        project = project_session['name']
+        path = project_session.testdir
+        project = project_session.name
         os.chdir(path)
         cmd = 'golem createproject {}'.format(project)
         result = test_utils.run_command(cmd)
@@ -123,8 +115,7 @@ class Test_golem:
         assert result == expected
 
     def test_golem_createsuite_no_args(self, project_session, test_utils):
-        path = project_session['testdir']
-        project = project_session['name']
+        path = project_session.testdir
         os.chdir(path)
         result = test_utils.run_command('golem createsuite')
         expected = ('usage: golem createsuite [-h] project suite\n'
@@ -133,8 +124,7 @@ class Test_golem:
         assert result == expected
 
     def test_golem_createsuite_project_does_not_exist(self, testdir_session, test_utils):
-        path = testdir_session['path']
-        os.chdir(path)
+        os.chdir(testdir_session.path)
         project = 'project_does_not_exist'
         suite = 'suite_test_00002'
         cmd = 'golem createsuite {} {}'.format(project, suite)
@@ -144,8 +134,8 @@ class Test_golem:
         assert result == expected
 
     def test_golem_createsuite_already_exists(self, project_session, test_utils):
-        path = project_session['testdir']
-        project = project_session['name']
+        path = project_session.testdir
+        project = project_session.name
         os.chdir(path)
         suite = 'suite_test_00003'
         command = 'golem createsuite {} {}'.format(project, suite)
@@ -156,8 +146,7 @@ class Test_golem:
         assert result == expected
 
     def test_golem_createtest_no_args(self, project_session, test_utils):
-        path = project_session['testdir']
-        project = project_session['name']
+        path = project_session.testdir
         os.chdir(path)
         result = test_utils.run_command('golem createtest')
         expected = ('usage: golem createtest [-h] project test\n'
@@ -166,8 +155,7 @@ class Test_golem:
         assert result == expected
 
     def test_golem_createtest_project_not_exist(self, testdir_session, test_utils):
-        path = testdir_session['path']
-        os.chdir(path)
+        os.chdir(testdir_session.path)
         project = 'project_not_exist'
         test = 'test_0004'
         cmd = 'golem createtest {} {}'.format(project, test)
@@ -177,8 +165,8 @@ class Test_golem:
         assert result == expected
 
     def test_golem_createtest_already_exists(self, project_session, test_utils):
-        path = project_session['testdir']
-        project = project_session['name']
+        path = project_session.testdir
+        project = project_session.name
         os.chdir(path)
         test = 'test_0005'
         cmd = 'golem createtest {} {}'.format(project, test)
@@ -188,8 +176,7 @@ class Test_golem:
         assert result == expected
 
     def test_golem_run_no_args(self, project_session, test_utils):
-        path = project_session['testdir']
-        project = project_session['name']
+        path = project_session.testdir
         os.chdir(path)
         result = test_utils.run_command('golem run')
         expected = messages.RUN_USAGE_MSG
@@ -199,24 +186,21 @@ class Test_golem:
         assert result == expected
 
     def test_golem_run_test_b_flag(self, project_session, test_utils):
-        path = project_session['testdir']
-        project = project_session['name']
+        path = project_session.testdir
+        project = project_session.name
         os.chdir(path)
         test = 'test2'
         command = 'golem createtest {} {}'.format(project, test)
         test_utils.run_command(command)
         command = 'golem run {} {} -b firefox'.format(project, test)
         result = test_utils.run_command(command)
-        # TODO: the result is not in order
-        # assert 'Executing:' in result
-        # assert '{} in firefox with the following data: {{}}'.format(test) in result
         assert 'INFO Test execution started: {}'.format(test) in result
         assert 'INFO Browser: firefox' in result
         assert 'INFO Test Result: SUCCESS' in result
 
     def test_golem_run_not_match_test_or_suite(self, project_session, test_utils):
-        path = project_session['testdir']
-        project = project_session['name']
+        path = project_session.testdir
+        project = project_session.name
         os.chdir(path)
         test = 'test001_does_not_exist'
         command = 'golem run {} {}'.format(project, test)
@@ -226,9 +210,8 @@ class Test_golem:
         assert result == expected
 
     def test_golem_run_project_does_not_exist(self, testdir_session, test_utils):
-        path = testdir_session['path']
         project = 'project_does_not_exist_4564546'
-        os.chdir(path)
+        os.chdir(testdir_session.path)
         test = 'test002_does_not_exist'
         command = 'golem run {} {}'.format(project, test)
         result = test_utils.run_command(command)

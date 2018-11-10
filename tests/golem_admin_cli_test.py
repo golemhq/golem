@@ -3,11 +3,9 @@ import os
 import pytest
 
 from golem.cli import messages
-from golem.gui import user
-from golem.core import utils
 
 
-class Test_golem_admin:
+class TestGolemAdmin:
 
     run_commands = [
         ('golem-admin', messages.ADMIN_USAGE_MSG),
@@ -29,21 +27,21 @@ class Test_golem_admin:
         assert result == expected
     
     def test_createdirectory_already_exists(self, dir_function, test_utils):
-        path = dir_function['path']
+        path = dir_function.path
+        os.chdir(path)
         name = 'testdir_001'
         cmd = 'golem-admin createdirectory {}'.format(name)
-        test_utils.run_command(cmd)
+        _ = test_utils.run_command(cmd)
         result = test_utils.run_command(cmd)
         expected = ('golem-admin createdirectory: error: the directory {} '
                     'already exists'.format(name))
         assert result == expected
 
     def test_createdirectory(self, dir_function, test_utils):
-        path = dir_function['path']
         name = 'testdir_test_002'
         cmd = 'golem-admin createdirectory {}'.format(name)
         result = test_utils.run_command(cmd)
-        full_path = os.path.join(path, name)
+        full_path = os.path.join(dir_function.path, name)
         expected = ('New golem test directory created at {}\n'
                     'Use credentials to access the GUI module:\n'
                     'user: admin\n'

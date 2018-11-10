@@ -1,3 +1,5 @@
+import pytest
+
 from golem.gui import gui_utils
 
 
@@ -77,11 +79,10 @@ DOCSTRINGS = [
 ]
 
 
-class Test_Golem_action_parser:
+class TestGolemActionParser:
 
-    def test__parse_docstring(self):
-
-        for docstring in DOCSTRINGS:
-            expected = gui_utils.Golem_action_parser()._parse_docstring(docstring['actual'])
-            assert expected == docstring['expected']
-
+    @pytest.mark.parametrize('actual,expected',
+                             [(x['actual'], x['expected']) for x in DOCSTRINGS])
+    def test__parse_docstring(self, actual, expected):
+        expected = gui_utils.Golem_action_parser()._parse_docstring(actual)
+        assert expected == expected
