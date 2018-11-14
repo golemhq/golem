@@ -100,7 +100,7 @@ class ExecutionRunner:
             envs = self.suite.envs
         elif all_project_envs:
             # if there are available envs, use the first by default
-            envs = [all_project_envs[0]]
+            envs = [sorted(all_project_envs)[0]]
         else:
             envs = ['']
         return envs

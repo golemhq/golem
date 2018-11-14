@@ -127,7 +127,7 @@ class TestSelectEnvironments:
         with open(path, 'w+') as f:
             f.write('{"env3": {}, "env4": {}}')
         result_envs = execution_runner._select_environments()
-        assert sorted(result_envs) == sorted(['env3'])
+        assert result_envs == ['env3']
 
     def test__select_environments_all_envs_empty(self, project_function):
         """Verify that _select_environments uses the correct order
