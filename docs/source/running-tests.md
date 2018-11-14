@@ -3,7 +3,7 @@ Running tests
 
 ## Run from the Command Line
 
-The command to run tests or suites from the command line is:
+The command to run tests or suites from the command line:
 
 ```bash
 golem run <project> <test|suite|dir> [-b|--browsers] [-t|--threads]
@@ -29,4 +29,36 @@ If not provided, the environments defined inside the suite will be used.
 **-i|--interactive**
 
 Run the test in interactive mode.
-This is required for the *interactive_mode* and *set_trace* actions. 
+This is required for the *interactive_mode* and *set_trace* actions.
+
+
+### Run a single test
+
+```bash
+golem run project test_name
+golem run project test_name.py
+golem run project folder.test_name
+golem run project folder/test_name.py
+```
+
+All paths are relative to the *project/tests/* folder.
+
+### Run a suite
+
+```bash
+golem run project suite_name
+golem run project suite_name.py
+golem run project folder.suite_name
+golem run project folder/suite_name.py
+```
+
+All paths are relative to the *project/suites/* folder.
+
+### Run every test in a directory
+
+```bash
+golem run project folder/
+golem run project .         ## run every test
+```
+
+All paths are relative to the *project/tests/* folder.

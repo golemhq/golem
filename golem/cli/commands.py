@@ -7,9 +7,8 @@ from golem.core import (utils,
                         test_case,
                         settings_manager)
 from golem.gui import gui_start
-from golem.test_runner import (start_execution,
-                               interactive as interactive_module)
-from .argument_parser import get_parser
+from golem.test_runner.execution_runner import ExecutionRunner
+from golem.test_runner import interactive as interactive_module
 from . import messages
 
 
@@ -17,7 +16,7 @@ def command_dispatcher(args):
     if args.help:
         display_help(args.help, args.command)
     elif args.command == 'run':
-        run_command(args.project, args.test_or_suite,
+        run_command(args.project, args.test_query,
                     args.browsers, args.threads,
                     args.environments, args.interactive,
                     args.timestamp)
@@ -53,69 +52,60 @@ def display_help(help, command):
         print(messages.USAGE_MSG)
 
 
-def run_command(project='', test_or_suite='', browsers=[], threads=1,
-                environments=[], interactive=False, timestamp=None):
-    test_execution.thread_amount = threads
-    test_execution.cli_drivers = browsers
-    test_execution.cli_environments = environments
-    test_execution.timestamp = timestamp
-    test_execution.interactive = interactive
-    root_path = test_execution.root_path
+def run_command(project='', test_query='', browsers=None, processes=1,
+                environments=None, interactive=False, timestamp=None):
+    execution_runner = ExecutionRunner(browsers, processes, environments,
+                                       interactive, timestamp)
     if project:
-        existing_projects = utils.get_projects(root_path)
+        existing_projects = utils.get_projects(test_execution.root_path)
         if project in existing_projects:
-            test_execution.project = project
-            settings = settings_manager.get_project_settings(root_path, project)
+            execution_runner.project = project
+            settings = settings_manager.get_project_settings(test_execution.root_path,
+                                                             project)
             test_execution.settings = settings
-            # settings are accessible from a test
-            # test_execution is not accessible from a test
-            # the test needs to know if interactive is true
+            # add --interactive value to settings to make
+            # it available from inside a test
             test_execution.settings['interactive'] = interactive
-            if test_or_suite:
-                if suite_module.suite_exists(root_path, test_execution.project,
-                                         test_or_suite):
-                    test_execution.suite = test_or_suite
-                    # execute test suite
-                    start_execution.run_test_or_suite(root_path,
-                                                      test_execution.project,
-                                                      suite=test_execution.suite)
-                elif test_case.test_case_exists(root_path, test_execution.project,
-                                                test_or_suite):
-                    test_execution.test = test_or_suite
-                    # execute test case
-                    start_execution.run_test_or_suite(root_path,
-                                                      test_execution.project,
-                                                      test=test_execution.test)
+            if test_query:
+                if suite_module.suite_exists(test_execution.root_path,
+                                             project, test_query):
+                    execution_runner.run_suite(test_query)
+                elif test_case.test_case_exists(test_execution.root_path,
+                                                project, test_query):
+                    execution_runner.run_test(test_query)
                 else:
-                    # TODO run directory
-                    # test_or_suite does not match any existing suite or test
-                    msg = ('golem run: error: the value {0} does not match an existing '
-                           'test or suite'.format(test_or_suite))
-                    sys.exit(msg)
+                    if test_query == '.':
+                        test_query = ''
+                    path = os.path.join(test_execution.root_path, 'projects',
+                                        project, 'tests', test_query)
+                    if os.path.isdir(path):
+                        execution_runner.run_directory(test_query)
+                    else:
+                        msg = ('golem run: error: the value {} does not match '
+                               'an existing test, suite or directory'.format(test_query))
+                        sys.exit(msg)
             else:
                 print(messages.RUN_USAGE_MSG)
-                test_cases = utils.get_test_cases(root_path, project)
+                test_cases = utils.get_test_cases(test_execution.root_path, project)
                 print('Test Cases:')
                 utils.display_tree_structure_command_line(test_cases['sub_elements'])
-                test_suites = utils.get_suites(root_path, project)
+                test_suites = utils.get_suites(test_execution.root_path, project)
                 print('\nTest Suites:')
                 # TODO print suites in structure
                 for suite in test_suites['sub_elements']:
                     print('  ' + suite['name'])
         else:
-            msg = ('golem run: error: the project {0} does not exist'.format(project))
+            msg = ('golem run: error: the project {} does not exist'.format(project))
             sys.exit(msg)
-
-    elif test_execution.interactive:
-        interactive_module.interactive(test_execution.settings,
-                                       test_execution.cli_drivers)
+    elif interactive:
+        interactive_module.interactive(test_execution.settings, browsers)
     else:
         print(messages.RUN_USAGE_MSG)
         print('Projects:')
-        for proj in utils.get_projects(root_path):
-            print('  {}'.format(proj))
+        for project in utils.get_projects(test_execution.root_path):
+            print('  {}'.format(project))
 
-
+8
 def gui_command(port=5000):
     gui_start.run_gui(port)
 

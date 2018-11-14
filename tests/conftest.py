@@ -2,171 +2,172 @@ import os
 import shutil
 import random
 import string
-from subprocess import call, Popen, PIPE, STDOUT
+from types import SimpleNamespace
+from subprocess import Popen, PIPE, STDOUT
 
 import pytest
 
 from golem.cli import commands
-from golem.core import test_execution
+from golem.core import test_execution, settings_manager, suite, test_case
 
 
 # FIXTURES
 
-BASE_DIR = None
-
-session_testdir = {}
-
-session_project = {}
+BASEDIR = None
 
 
-def get_base_dir():
-    global BASE_DIR
-    if not BASE_DIR:
-        BASE_DIR = os.getcwd()
-    return BASE_DIR
+def get_basedir():
+    global BASEDIR
+    if not BASEDIR:
+        BASEDIR = os.getcwd()
+    return BASEDIR
 
 
 @pytest.fixture(scope="function")
 def dir_function():
-    base_dir = get_base_dir()
-    dirname = Test_utils().random_string(4, 'tempdir_')
-    path = os.path.join(base_dir, dirname)
+    """An empty directory"""
+    basedir = get_basedir()
+    dirname = TestUtils().random_string(4, 'tempdir_')
+    path = os.path.join(basedir, dirname)
     os.mkdir(path)
     os.chdir(path)
-    yield {
-        'name': dirname,
-        'path': path,
-        'base_path': base_dir
-    }
-    os.chdir(base_dir)
+    directory = SimpleNamespace(name=dirname, path=path, basedir=basedir)
+    yield directory
+    os.chdir(basedir)
     shutil.rmtree(dirname, ignore_errors=True)
 
 
-def _create_testdir(base_dir):
-    base_dir = get_base_dir()
-    os.chdir(base_dir)
-    testdir_name = Test_utils.random_string(4, 'testdir_')
-    full_path = os.path.join(base_dir, testdir_name)
-    commands.createdirectory_command(testdir_name)
-    return testdir_name, full_path
+class TestDirectory:
+    """Creates and and removes a test directory"""
+
+    def __init__(self, basedir):
+        self.basedir = basedir
+        self.name = TestUtils.random_string(4, 'testdir_')
+        self.path = os.path.join(self.basedir, self.name)
+        self.settings = None
+        os.chdir(self.basedir)
+        commands.createdirectory_command(self.name)
+
+    def activate(self):
+        if not self.settings:
+            self.settings = settings_manager.get_global_settings(self.path)
+        test_execution.root_path = self.path
+        test_execution.settings = self.settings
+        return self
+
+    def remove(self):
+        os.chdir(self.basedir)
+        shutil.rmtree(self.name, ignore_errors=True)
 
 
 @pytest.fixture(scope="session")
 def testdir_session():
-    base_dir = get_base_dir()
-    global session_testdir
-    if not session_testdir:
-        testdir_name, full_path = _create_testdir(base_dir)
-        session_testdir = {
-            'path': full_path,
-            'base_path': base_dir,
-            'name': testdir_name}
-    yield session_testdir
-    os.chdir(base_dir)
-    shutil.rmtree(session_testdir['name'], ignore_errors=True)
+    """A test directory with scope session"""
+    basedir = get_basedir()
+    testdir = TestDirectory(basedir)
+    yield testdir
+    testdir.remove()
 
 
-@pytest.fixture(scope="class")   
+@pytest.fixture(scope="class")
 def testdir_class():
-    base_dir = get_base_dir()
-    testdir_name, full_path = _create_testdir(base_dir)
-    yield {
-            'path': full_path,
-            'base_path': base_dir,
-            'name': testdir_name}
-    os.chdir(base_dir)
-    shutil.rmtree(testdir_name, ignore_errors=True)
+    """A test directory with scope class"""
+    basedir = get_basedir()
+    testdir = TestDirectory(basedir)
+    yield testdir
+    testdir.remove()
 
 
-@pytest.fixture(scope="function")   
+@pytest.fixture(scope="function")
 def testdir_function():
-    base_dir = get_base_dir()
-    testdir_name, full_path = _create_testdir(base_dir)
-    yield {
-            'path': full_path,
-            'base_path': base_dir,
-            'name': testdir_name}
-    os.chdir(base_dir)
-    shutil.rmtree(full_path, ignore_errors=True)
+    """A test directory with scope function"""
+    basedir = get_basedir()
+    testdir = TestDirectory(basedir)
+    yield testdir
+    testdir.remove()
 
 
-def _create_project(testdir, project_name):
-    os.chdir(testdir)
-    test_execution.root_path = testdir
-    commands.createproject_command(project_name)
+class Project:
+    """Creates and removes a project inside a test directory"""
+
+    def __init__(self, testdir_fixture):
+        self.testdir_fixture = testdir_fixture
+        self.testdir = testdir_fixture.path
+        self.name = TestUtils.random_string(4, 'project_')
+        self.path = os.path.join(testdir_fixture.path, 'projects', self.name)
+        self.settings = None
+        os.chdir(self.testdir)
+        test_execution.root_path = self.testdir
+        commands.createproject_command(self.name)
+
+    def activate(self):
+        if not self.settings:
+            self.settings = settings_manager.get_project_settings(self.testdir, self.name)
+        test_execution.root_path = self.testdir
+        test_execution.settings = self.settings
+        return self
+
+    def remove(self):
+        shutil.rmtree(self.path, ignore_errors=True)
 
 
 @pytest.mark.usefixtures("testdir_session")
 @pytest.fixture(scope="session")
 def project_session(testdir_session):
-    global session_project
-    if not session_project:
-        project_name = Test_utils.random_string(4, 'project_')
-        _create_project(testdir_session['path'], project_name)
-        session_project = {
-            'name': project_name,
-            'testdir_fixture': testdir_session,
-            'testdir': testdir_session['path']}
-    yield session_project
-    if os.path.exists(testdir_session['path']):
-        os.chdir(os.path.join(testdir_session['path'], 'projects'))
-        shutil.rmtree(session_project['name'], ignore_errors=True)
+    """A project with scope session"""
+    project = Project(testdir_session)
+    yield project
+    project.remove()
 
 
 @pytest.mark.usefixtures("testdir_session")
 @pytest.fixture(scope="class")
 def project_class(testdir_session):
-    project_name = Test_utils.random_string(4, 'project_')
-    _create_project(testdir_session['path'], project_name)
-    yield {
-            'name': project_name,
-            'testdir_fixture': testdir_session,
-            'testdir': testdir_session['path']}
-    os.chdir(os.path.join(testdir_session['path'], 'projects'))
-    shutil.rmtree(project_name, ignore_errors=True)
+    """A project with scope class inside
+    a test directory with scope session.
+    """
+    project = Project(testdir_session)
+    yield project
+    project.remove()
 
 
 @pytest.mark.usefixtures("testdir_session")
 @pytest.fixture(scope="function")
 def project_function(testdir_session):
-    project_name = Test_utils.random_string(4, 'project_')
-    _create_project(testdir_session['path'], project_name)
-    yield {
-            'name': project_name,
-            'testdir_fixture': testdir_session,
-            'testdir': testdir_session['path']}
-    os.chdir(os.path.join(testdir_session['path'], 'projects'))
-    shutil.rmtree(project_name, ignore_errors=True)
+    """A project with scope function inside
+    a test directory with scope session.
+    """
+    project = Project(testdir_session)
+    yield project
+    project.remove()
 
 
 @pytest.mark.usefixtures("testdir_function")
 @pytest.fixture(scope="function")
 def project_function_clean(testdir_function):
-    project_name = Test_utils.random_string(4, 'project_')
-    _create_project(testdir_function['path'], project_name)
-    yield {
-            'name': project_name,
-            'testdir_fixture': testdir_function,
-            'testdir': testdir_function['path']}
-    os.chdir(os.path.join(testdir_function['path'], 'projects'))
-    shutil.rmtree(project_name, ignore_errors=True)
+    """A project with scope function inside
+    a session with scope function.
+    """
+    project = Project(testdir_function)
+    yield project
+    project.remove()
 
 
 @pytest.fixture(scope="function")
 def test_utils():    
-    yield Test_utils
+    yield TestUtils
 
 
 # TEST UTILS   
 
-class Test_utils:
+class TestUtils:
 
     @staticmethod
     def create_empty_file(path, filename):
         filepath = os.path.join(path, filename)
         os.makedirs(path, exist_ok=True)
         open(filepath, 'w+').close()
-    
+
     @staticmethod
     def random_string(length, prefix=''):
         random_str = (''.join(random.choice(string.ascii_lowercase)
@@ -174,7 +175,7 @@ class Test_utils:
         return prefix + random_str
 
     @staticmethod
-    def random_numeric_string(length, prefix=''):
+    def random_numeric_string(length):
         return ''.join(random.choice(string.digits) for _ in range(length))
 
     @staticmethod
@@ -191,4 +192,25 @@ class Test_utils:
     def set_project_setting(testdir, setting, setting_value):
         setting_path = os.path.join(testdir, 'settings.json')
         with open(setting_path, 'w') as f:
-            f.write('{{"{0}": "{1}"\}}'.format(setting, setting_value))
+            f.write('{{"{}": "{}"\}}'.format(setting, setting_value))
+
+    @staticmethod
+    def create_test(testdir, project, parents, name, content=None):
+        if content is None:
+            content = ('def test(data):\n'
+                       '    print("hello")\n')
+        test_case.new_test_case(testdir, project, parents, name)
+        path = os.path.join(testdir, 'projects', project, 'tests',
+                            os.sep.join(parents), name + '.py')
+        with open(path, 'w+') as f:
+            f.write(content)
+
+    @staticmethod
+    def create_suite(testdir, project, parents, name, content=None, tests=None):
+        if content is None and tests is not None:
+            content = 'tests = {}'.format(str(tests))
+        suite.new_suite(testdir, project, parents, name)
+        path = os.path.join(testdir, 'projects', project, 'suites',
+                            os.sep.join(parents), name+'.py')
+        with open(path, 'w+') as f:
+            f.write(content)

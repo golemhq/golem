@@ -6,6 +6,9 @@
 ### Added
 - 'start_maximized' setting key
 - Firefox headless ('firefox-headless' and 'firefox-remote-headless')
+- Run every test in tests folder: ```golem run <project> .```
+- Run every test in a sub-folder: ```golem run <project> foo/bar/```
+- Run test or suite from relative path: ```golem run <project> path/to/test.py```
 
 ## [0.6.0] - 2018-09-30
 

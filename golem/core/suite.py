@@ -2,7 +2,6 @@
 Suites are modules located inside the /suites/ directory
 """
 import os
-import importlib
 
 from golem.core import utils, file_manager
 
@@ -127,7 +126,18 @@ def suite_exists(workspace, project, full_suite_name):
     """suite exists.
     full_suite_name must be a relative dot path
     """
+    suite_folder = os.path.join(workspace, 'projects', project, 'suites')
     suite, parents = utils.separate_file_from_parents(full_suite_name)
-    path = os.path.join(workspace, 'projects', project, 'suites',
-                        os.sep.join(parents), '{}.py'.format(suite))
+    path = os.path.join(suite_folder, os.sep.join(parents), '{}.py'.format(suite))
+    if os.path.isfile(path):
+        return True
+    path = os.path.join(suite_folder, full_suite_name)
     return os.path.isfile(path)
+
+
+def generate_suite_path(root_path, project, suite_name):
+    """Generate full path to a python file of a suite."""
+    suite_name, parents = utils.separate_file_from_parents(suite_name)
+    suite_path = os.path.join(root_path, 'projects', project, 'suites',
+                              os.sep.join(parents), '{}.py'.format(suite_name))
+    return suite_path

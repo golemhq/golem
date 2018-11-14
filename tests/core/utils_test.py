@@ -7,11 +7,11 @@ import pytest
 from golem.core import utils, page_object, test_case, suite
 
 
-class Test_get_test_cases:
+class TestGetTestCases:
 
     def test_get_test_cases(self, project_class):
-        testdir = project_class['testdir']
-        project = project_class['name']
+        testdir = project_class.testdir
+        project = project_class.name
         test_case.new_test_case(testdir, project, ['subdir1', 'subdir2'], 'test3')
         test_case.new_test_case(testdir, project, ['subdir1'], 'test2')
         test_case.new_test_case(testdir, project, [], 'test1')
@@ -57,23 +57,20 @@ class Test_get_test_cases:
         assert tests == expected
 
     def test_get_test_cases_no_tests(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
-        tests = utils.get_test_cases(testdir, project)
+        tests = utils.get_test_cases(project_function.testdir, project_function.name)
         expected = {'type': 'directory', 'name': 'tests', 'dot_path': '.', 'sub_elements': []}
         assert tests == expected
 
 
-class Test_get_pages:
+class TestGetPages:
 
     def test_get_pages(self, project_class):
-        testdir = project_class['testdir']
-        project = project_class['name']
+        testdir = project_class.testdir
+        project = project_class.name
         page_object.new_page_object(testdir, project, ['subdir1', 'subdir2'], 'test3')
         page_object.new_page_object(testdir, project, ['subdir1'], 'test2')
         page_object.new_page_object(testdir, project, [], 'test1')
         pages = utils.get_pages(testdir, project)
-
         expected = {
             'type': 'directory',
             'name': 'pages',
@@ -116,21 +113,18 @@ class Test_get_pages:
         assert pages == expected
 
     def test_get_pages_no_pages(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
-        pages = utils.get_pages(testdir, project)
+        pages = utils.get_pages(project_function.testdir, project_function.name)
         expected = {'type': 'directory', 'name': 'pages', 'dot_path': '.', 'sub_elements': []}
         assert pages == expected
 
 
-class Test_get_suites:
+class TestGetSuites:
 
     def test_get_suites(self, project_class):
-        testdir = project_class['testdir']
-        project = project_class['name']
+        testdir = project_class.testdir
+        project = project_class.name
         suite.new_suite(testdir, project, [], 'suite1')
         suite.new_suite(testdir, project, [], 'suite2')
-        
         suites = utils.get_suites(testdir, project)
         expected_result = {
             'type': 'directory',
@@ -154,40 +148,52 @@ class Test_get_suites:
         assert suites == expected_result
 
     def test_get_suites_no_suites(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
-        
-        suites = utils.get_suites(testdir, project)
+        suites = utils.get_suites(project_function.testdir, project_function.name)
         expected = {'type': 'directory', 'name': 'suites', 'dot_path': '.', 'sub_elements': []}
         assert suites == expected
 
 
-class Test_get_projects:
+class TestGetProjects:
 
     def test_get_projects(self, testdir_function):
-        testdir = testdir_function['path']
+        testdir = testdir_function.path
         utils.create_new_project(testdir, 'project1')
         utils.create_new_project(testdir, 'project2')
         projects = utils.get_projects(testdir)
         assert projects.sort() == ['project1', 'project2'].sort()
 
     def test_get_projects_no_project(self, testdir_function):
-        projects = utils.get_projects(testdir_function['path'])
+        projects = utils.get_projects(testdir_function.path)
         assert projects == []
 
 
-class Test_create_test_dir:
+class TestGetDirectoryTests:
+
+    def test_get_directory_test_cases(self, project_function, test_utils):
+        testdir = project_function.testdir
+        project = project_function.name
+        test_utils.create_test(testdir, project, ['foo'], 'test_one')
+        test_utils.create_test(testdir, project, ['foo', 'bar'], 'test_two')
+        test_utils.create_test(testdir, project, ['foo', 'bar', 'baz'], 'test_three')
+        expected = ['foo.test_one', 'foo.bar.test_two', 'foo.bar.baz.test_three']
+        tests = utils.get_directory_tests(testdir, project, 'foo')
+        assert tests == expected
+        tests = utils.get_directory_tests(testdir, project, 'foo/')
+        assert tests == expected
+        expected = ['foo.bar.test_two', 'foo.bar.baz.test_three']
+        tests = utils.get_directory_tests(testdir, project, 'foo/bar')
+        assert tests == expected
+
+
+class TestCreateTestDir:
 
     def test_new_directory_contents(self, dir_function):
-        path = dir_function['path']
         name = 'testdirectory_001'
         utils.create_test_dir(name)
-        testdir = os.path.join(path, name)
+        testdir = os.path.join(dir_function.path, name)
         listdir = os.listdir(testdir)
-        files = [name for name in listdir 
-                 if os.path.isfile(os.path.join(testdir, name))]
-        dirs = [name for name in listdir 
-                 if os.path.isdir(os.path.join(testdir, name))]
+        files = [name for name in listdir if os.path.isfile(os.path.join(testdir, name))]
+        dirs = [name for name in listdir if os.path.isdir(os.path.join(testdir, name))]
         if '.DS_Store' in files:
             files.remove('.DS_Store')
         assert len(files) == 4
@@ -203,11 +209,11 @@ class Test_create_test_dir:
         assert 'drivers' in dirs
 
 
-class Test_delete_element:
+class TestDeleteElement:
 
     def test_delete_tests(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         os.chdir(testdir)
         test_case.new_test_case(testdir, project, ['subdir1'], 'test1')
         test_case.new_test_case(testdir, project, ['subdir1'], 'test2')
@@ -217,44 +223,44 @@ class Test_delete_element:
         errors_two = utils.delete_element(testdir, project, 'test', 'test3')
         assert errors_one == []
         assert errors_two == []
-        path = os.path.join(testdir, 'projects', project, 'tests', 'subdir1', 'test1.py')
+        path = os.path.join(project_function.path, 'tests', 'subdir1', 'test1.py')
         assert not os.path.exists(path)
-        path = os.path.join(testdir, 'projects', project, 'tests', 'test3.py')
+        path = os.path.join(project_function.path, 'tests', 'test3.py')
         assert not os.path.exists(path)
-        path = os.path.join(testdir, 'projects', project, 'tests', 'subdir1', 'test2.py')
+        path = os.path.join(project_function.path, 'tests', 'subdir1', 'test2.py')
         assert os.path.exists(path)
-        path = os.path.join(testdir, 'projects', project, 'tests', 'test4.py')
+        path = os.path.join(project_function.path, 'tests', 'test4.py')
         assert os.path.exists(path)
 
     def test_delete_pages(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         os.chdir(testdir)
         page_object.new_page_object(testdir, project, [], 'page1')
         page_object.new_page_object(testdir, project, [], 'page2')
         errors = utils.delete_element(testdir, project, 'page', 'page1')
         assert errors == []
-        path = os.path.join(testdir, 'projects', project, 'pages', 'page1.py')
+        path = os.path.join(project_function.path, 'pages', 'page1.py')
         assert not os.path.exists(path)
-        path = os.path.join(testdir, 'projects', project, 'pages', 'page2.py')
+        path = os.path.join(project_function.path, 'pages', 'page2.py')
         assert os.path.exists(path)
 
     def test_delete_suites(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         os.chdir(testdir)
         suite.new_suite(testdir, project, [], 'suite1')
         suite.new_suite(testdir, project, [], 'suite2')
         errors = utils.delete_element(testdir, project, 'suite', 'suite1')
         assert errors == []
-        path = os.path.join(testdir, 'projects', project, 'suites', 'suite1.py')
+        path = os.path.join(project_function.path, 'suites', 'suite1.py')
         assert not os.path.exists(path)
-        path = os.path.join(testdir, 'projects', project, 'suites', 'suite2.py')
+        path = os.path.join(project_function.path, 'suites', 'suite2.py')
         assert os.path.exists(path)
 
     def test_delete_element_does_not_exist(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         os.chdir(testdir)
         errors = utils.delete_element(testdir, project, 'suite', 'suite1')
         assert errors == ['File suite1 does not exist']
@@ -263,97 +269,96 @@ class Test_delete_element:
         """"test that when a test is deleted the data files
         are deleted as well
         """
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         os.chdir(testdir)
         test_case.new_test_case(testdir, project, [], 'test1')
-        data_path_data = os.path.join(testdir, 'projects', project, 'data', 'test1.csv')
+        data_path_data = os.path.join(project_function.path, 'data', 'test1.csv')
         os.makedirs(os.path.dirname(data_path_data))
         open(data_path_data, 'x').close()
-        data_path_tests = os.path.join(testdir, 'projects', project, 'tests', 'test1.csv')
+        data_path_tests = os.path.join(project_function.path, 'tests', 'test1.csv')
         open(data_path_tests, 'x').close()
         errors = utils.delete_element(testdir, project, 'test', 'test1')
         assert errors == []
-        test_path = os.path.join(testdir, 'projects', project, 'tests', 'test1.py')
+        test_path = os.path.join(project_function.path, 'tests', 'test1.py')
         assert not os.path.exists(test_path)
         assert not os.path.exists(data_path_data)
         assert not os.path.exists(data_path_tests)
 
 
-class Test_duplicate_element:
+class TestDuplicateElement:
 
     def test_duplicate_test(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         os.chdir(testdir)
         test_case.new_test_case(testdir, project, [], 'test1')
-        data_path_data = os.path.join(testdir, 'projects', project, 'data', 'test1.csv')
+        data_path_data = os.path.join(project_function.path, 'data', 'test1.csv')
         os.makedirs(os.path.dirname(data_path_data))
         open(data_path_data, 'x').close()
-        data_path_tests = os.path.join(testdir, 'projects', project, 'tests', 'test1.csv')
+        data_path_tests = os.path.join(project_function.path, 'tests', 'test1.csv')
         open(data_path_tests, 'x').close()
         errors = utils.duplicate_element(testdir, project, 'test', 'test1', 'subdir.test2')
         assert errors == []
-
-        path = os.path.join(testdir, 'projects', project, 'tests', 'test1.py')
+        path = os.path.join(project_function.path, 'tests', 'test1.py')
         assert os.path.isfile(path)
-        path = os.path.join(testdir, 'projects', project, 'tests', 'test1.csv')
+        path = os.path.join(project_function.path, 'tests', 'test1.csv')
         assert os.path.isfile(path)
-        path = os.path.join(testdir, 'projects', project, 'data', 'test1.csv')
+        path = os.path.join(project_function.path, 'data', 'test1.csv')
         assert os.path.isfile(path)
-        path = os.path.join(testdir, 'projects', project, 'tests', 'subdir', 'test2.py')
+        path = os.path.join(project_function.path, 'tests', 'subdir', 'test2.py')
         assert os.path.isfile(path)
-        path = os.path.join(testdir, 'projects', project, 'tests', 'subdir', 'test2.csv')
+        path = os.path.join(project_function.path, 'tests', 'subdir', 'test2.csv')
         assert os.path.isfile(path)
-        path = os.path.join(testdir, 'projects', project, 'data', 'subdir', 'test2.csv')
+        path = os.path.join(project_function.path, 'data', 'subdir', 'test2.csv')
         assert os.path.isfile(path)
 
     def test_duplicate_page(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         os.chdir(testdir)
         page_object.new_page_object(testdir, project, [], 'page1')
         errors = utils.duplicate_element(testdir, project, 'page', 'page1', 'sub.page2')
         assert errors == []
-        path = os.path.join(testdir, 'projects', project, 'pages', 'page1.py')
+        path = os.path.join(project_function.path, 'pages', 'page1.py')
         assert os.path.isfile(path)
-        path = os.path.join(testdir, 'projects', project, 'pages', 'sub', 'page2.py')
+        path = os.path.join(project_function.path, 'pages', 'sub', 'page2.py')
         assert os.path.isfile(path)
 
     def test_duplicate_page_to_same_folder(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         os.chdir(testdir)
         page_object.new_page_object(testdir, project, [], 'page1')
         errors = utils.duplicate_element(testdir, project, 'page', 'page1', 'page2')
         assert errors == []
-        path = os.path.join(testdir, 'projects', project, 'pages', 'page1.py')
+        path = os.path.join(project_function.path, 'pages', 'page1.py')
         assert os.path.isfile(path)
-        path = os.path.join(testdir, 'projects', project, 'pages', 'page2.py')
+        path = os.path.join(project_function.path, 'pages', 'page2.py')
         assert os.path.isfile(path)
 
     def test_duplicate_suite(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         os.chdir(testdir)
         suite.new_suite(testdir, project, [], 'suite1')
         errors = utils.duplicate_element(testdir, project, 'suite', 'suite1', 'sub.suite2')
         assert errors == []
-        path = os.path.join(testdir, 'projects', project, 'suites', 'suite1.py')
+        path = os.path.join(project_function.path, 'suites', 'suite1.py')
         assert os.path.isfile(path)
-        path = os.path.join(testdir, 'projects', project, 'suites', 'sub', 'suite2.py')
+        path = os.path.join(project_function.path, 'suites', 'sub', 'suite2.py')
         assert os.path.isfile(path)
 
     def test_duplicate_same_file(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         os.chdir(testdir)
         errors = utils.duplicate_element(testdir, project, 'suite', 'suite1', 'suite1')
         assert errors == ['New file cannot be the same as the original']
 
     def test_duplicate_destination_already_exists(self, project_function):
-        testdir = project_function['testdir']
-        project = project_function['name']
+        testdir = project_function.testdir
+        project = project_function.name
         os.chdir(testdir)
         suite.new_suite(testdir, project, [], 'suite1')
         suite.new_suite(testdir, project, [], 'suite2')
@@ -361,56 +366,53 @@ class Test_duplicate_element:
         assert errors == ['A file with that name already exists']
 
 
-class Test_choose_driver_by_precedence:
+class TestChooseBrowserByPrecedence:
 
-    def test_choose_driver_by_precedence(self):
-        selected = utils.choose_driver_by_precedence(cli_drivers=['a', 'b'],
-                                                     suite_drivers=['c', 'd'],
-                                                     settings_default_driver='default')
+    def test_choose_browser_by_precedence(self):
+        selected = utils.choose_browser_by_precedence(cli_browsers=['a', 'b'],
+                                                      suite_browsers=['c', 'd'],
+                                                      settings_default_browser='default')
         assert selected == ['a', 'b']
-        selected = utils.choose_driver_by_precedence(cli_drivers=[],
-                                                     suite_drivers=['c', 'd'],
-                                                     settings_default_driver='default')
+        selected = utils.choose_browser_by_precedence(cli_browsers=[],
+                                                      suite_browsers=['c', 'd'],
+                                                      settings_default_browser='default')
         assert selected == ['c', 'd']
-        selected = utils.choose_driver_by_precedence(cli_drivers=[],
-                                                     suite_drivers=[],
-                                                     settings_default_driver='default')
+        selected = utils.choose_browser_by_precedence(cli_browsers=[],
+                                                      suite_browsers=[],
+                                                      settings_default_browser='default')
         assert selected == ['default']
-        selected = utils.choose_driver_by_precedence(cli_drivers=[],
-                                                     suite_drivers=[],
-                                                     settings_default_driver=None)
+        selected = utils.choose_browser_by_precedence(cli_browsers=[],
+                                                      suite_browsers=[],
+                                                      settings_default_browser=None)
         assert selected == ['chrome']
 
 
-class Test_import_module:
+class TestImportModule:
 
     def test_import_module_success(self, dir_function):
         filename = 'python_module.py'
-        filepath = os.path.join(dir_function['path'], filename)
+        filepath = os.path.join(dir_function.path, filename)
         filecontent = ('foo = 2\n'
                        'def bar(a, b):\n'
                        '    baz = ""\n')
         with open(filepath, 'w') as f:
             f.write(filecontent)
         module, error = utils.import_module(filepath)
-        assert type(module) == types.ModuleType
+        assert isinstance(module, types.ModuleType)
         assert error is None
-        
         foo = getattr(module, 'foo')
         assert type(foo) == int
-
         bar = getattr(module, 'bar')
-        assert type(bar) == types.FunctionType
-
+        assert isinstance(bar, types.FunctionType)
         args = list(inspect.signature(bar).parameters)
         code = inspect.getsource(bar)
         assert args == ['a', 'b']
         assert code == 'def bar(a, b):\n    baz = ""\n'
 
     def test_module_does_not_exist(self, dir_function):
-        filepath = os.path.join(dir_function['path'], 'non_existent.py')
+        filepath = os.path.join(dir_function.path, 'non_existent.py')
         module, error = utils.import_module(filepath)
-        assert module == None
+        assert module is None
 
     syntax_tests = [
         (
@@ -442,14 +444,14 @@ class Test_import_module:
     @pytest.mark.parametrize('filecontent, expected', syntax_tests)
     def test_incorrect_syntax(self, filecontent, expected, dir_function):
         filename = 'test_python_syntax.py'
-        filepath = os.path.join(dir_function['path'], filename)
+        filepath = os.path.join(dir_function.path, filename)
         with open(filepath, 'w') as f:
             f.write(filecontent)
         _, error = utils.import_module(filepath)
         assert expected in error
 
 
-class Test_extract_version_from_webdriver_filename:
+class TestExtractVersionFromWebDriverFilename:
 
     filenames = [
         ('chromedriver_2.3', '2.3'),
@@ -467,13 +469,13 @@ class Test_extract_version_from_webdriver_filename:
         assert result == expected
 
 
-class Test_match_latest_executable_path:
+class TestMatchLatestExecutablePath:
 
     def test_match_latest_executable_path(self, dir_function, test_utils):
         """the latest version filepath matching glob pattern
         is returned
         """
-        basedir = dir_function['path']
+        basedir = dir_function.path
         test_utils.create_empty_file(basedir, 'chromedriver_2.2')
         test_utils.create_empty_file(basedir, 'chromedriver_2.4')
         test_utils.create_empty_file(basedir, 'chromedriver_2.3')
@@ -481,31 +483,32 @@ class Test_match_latest_executable_path:
         result = utils.match_latest_executable_path('chromedriver*')
         assert result == os.path.join(basedir, 'chromedriver_2.4')
 
-    def test_match_latest_executable_path__compare_versions_not_strings(self, dir_function, test_utils):
+    def test_match_latest_executable_path__compare_versions_not_strings(self, dir_function,
+                                                                        test_utils):
         """2.12 should be higher than 2.9
         (but it's when not comparing just strings)
         e.g. '2.9' > '2.12'
         """
-        basedir = dir_function['path']
+        basedir = dir_function.path
         test_utils.create_empty_file(basedir, 'chromedriver_2.9')
         test_utils.create_empty_file(basedir, 'chromedriver_2.12')
         result = utils.match_latest_executable_path('chromedriver*')
         assert result == os.path.join(basedir, 'chromedriver_2.12')
 
     def test_match_latest_executable_path_exe(self, dir_function, test_utils):
-        """test that match_latest workds for filenames ending in .exe"""
-        basedir = dir_function['path']
-        filepath = test_utils.create_empty_file(basedir, 'chromedriver_2.4.exe')
-        filepath = test_utils.create_empty_file(basedir, 'chromedriver_2.3.exe')
-        filepath = test_utils.create_empty_file(basedir, 'geckodriver_5.6.7.exe')
+        """test that match_latest works for filenames ending in .exe"""
+        basedir = dir_function.path
+        test_utils.create_empty_file(basedir, 'chromedriver_2.4.exe')
+        test_utils.create_empty_file(basedir, 'chromedriver_2.3.exe')
+        test_utils.create_empty_file(basedir, 'geckodriver_5.6.7.exe')
         result = utils.match_latest_executable_path('chromedriver*')
         assert result == os.path.join(basedir, 'chromedriver_2.4.exe')
 
     def test_match_latest_executable_path_subdir(self, dir_function, test_utils):
-        """test that match_latest workds passing a rel path
+        """test that match_latest works passing a rel path
         to a subdir
         """
-        basedir = dir_function['path']
+        basedir = dir_function.path
         path = os.path.join(basedir, 'drivers')
         test_utils.create_empty_file(path, 'chromedriver_2.2')
         test_utils.create_empty_file(path, 'chromedriver_2.4')
@@ -514,20 +517,20 @@ class Test_match_latest_executable_path:
         result = utils.match_latest_executable_path('./drivers/chromedriver*')
         assert result == os.path.join(path, 'chromedriver_2.4')
 
-    def test_no_asterisc(self, dir_function, test_utils):
+    def test_no_asterisk(self, dir_function, test_utils):
         """test that match_latest still works using
         no wildcards
         """
-        basedir = dir_function['path']
+        basedir = dir_function.path
         path = os.path.join(basedir, 'drivers')
         test_utils.create_empty_file(path, 'chromedriver_2.2')
         test_utils.create_empty_file(path, 'chromedriver_2.4')
         result = utils.match_latest_executable_path('./drivers/chromedriver_2.2')
         assert result == os.path.join(path, 'chromedriver_2.2')
 
-    def test_asterisc_subdir(self, dir_function, test_utils):
+    def test_asterisk_subdir(self, dir_function, test_utils):
         """test that '*' wildcard can be used for dirs"""
-        basedir = dir_function['path']
+        basedir = dir_function.path
         path = os.path.join(basedir, 'drivers')
         test_utils.create_empty_file(path, 'chromedriver_2.2')
         test_utils.create_empty_file(path, 'chromedriver_2.4')

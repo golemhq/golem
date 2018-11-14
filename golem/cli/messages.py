@@ -2,7 +2,7 @@
 USAGE_MSG = """
 Usage: golem
 
-  golem run <project> <test|suite|dir> [-b -t -e]
+  golem run <project> <test|suite|directory> [-b -t -e -i]
   golem gui [-p]
   golem createproject <project>
   golem createtest <project> <test>
@@ -11,7 +11,13 @@ Usage: golem
 
 Usage: golem run
 
-  Run tests or suites
+  Run tests, suites or directories 
+  
+  Examples:
+    golem run project_name test_name
+    golem run project_name suite_name
+    golem run project_name folder/
+    golem run project_name .
 
   positional arguments:
     projects            name of the project
@@ -22,6 +28,7 @@ Usage: golem run
     -b, --browsers      a list of browsers
     -t, --threads       amount of threads, default is 1
     -e, --environments  a list of environments
+    -i, --interactive   run in interactive mode
 
 Usage: golem gui
   
@@ -34,12 +41,32 @@ Type: golem -h <command> for more help
 """
 
 RUN_USAGE_MSG = """
-Usage: golem run <project> <test|suite|dir> [-b|--browsers]
-                 [-t|--threads] [-e|--environments]
-                 [-i|--interactive]
+Usage: golem run <project> <test|suite|directory> [-b|--browsers]
+                 [-t|--threads] [-e|--environments] [-i|--interactive]
 
-  Run tests, suites or entire test directories
+  Run tests, suites or directories
+  
+  Run test:
+    golem run project test_name
+    golem run project test_name.py
+    golem run project folder.test_name
+    golem run project folder/test_name.py
+  
+  Run suite:
+    golem run project suite_name
+    golem run project suite_name.py
+    golem run project folder.suite_name
+    golem run project folder/suite_name.py
+  
+  Run every test in a directory:
+    golem run project folder/
 
+  Run every test in project/tests/ folder:
+    golem run project .
+  
+  Start quick interactive console:
+    golem run -i
+    
   positional arguments:
     project             name of the project
     test|suite|dir      name of a single test, a suite or a
