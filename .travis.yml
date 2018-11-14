@@ -12,11 +12,5 @@ install:
   # travis uses an older version of pytest for python 3.4
   - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then pip install --upgrade pytest; fi
 
-script: 
-  # - python setup.py test
+script:
   - pytest tests
-
-branches:
-  only:
-    - master
-    - develop
