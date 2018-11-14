@@ -3,19 +3,4 @@ root_path = None
 
 project = None
 
-test = None
-
-suite = None
-
 settings = {}
-
-thread_amount = None
-
-timestamp = None
-
-cli_drivers = []
-
-interactive = False
-
-test_data = None
-

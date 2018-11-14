@@ -82,7 +82,7 @@ class TestGetFilesDotPath:
         project = project_function.name
         page_object.new_page_object(testdir, project, [], 'page1')
         page_object.new_page_object(testdir, project, ['dir', 'subdir'], 'page2')
-        base_path = os.path.join(testdir, 'projects', project, 'pages')
+        base_path = os.path.join(project_function.path, 'pages')
         dot_files = file_manager.get_files_dot_path(base_path)
         expected_result = [
             'page1',
@@ -94,7 +94,7 @@ class TestGetFilesDotPath:
         testdir = project_function.testdir
         project = project_function.name
         page_object.new_page_object(testdir, project, [], 'page2')
-        base_path = os.path.join(testdir, 'projects', project, 'pages')
+        base_path = os.path.join(project_function.path, 'pages')
         another_extension = os.path.join(base_path, 'another.json')
         open(another_extension, 'w+').close()
         dot_files = file_manager.get_files_dot_path(base_path, extension='.py')
@@ -162,7 +162,7 @@ class TestNewDirectoryOfType:
         testdir = project_class.testdir
         errors = file_manager.new_directory_of_type(testdir, project, [],
                                                     'new_test_dir', 'tests')
-        expected_dir = os.path.join(testdir, 'projects', project, 'tests', 'new_test_dir')
+        expected_dir = os.path.join(project_class.path, 'tests', 'new_test_dir')
         expected_init_path = os.path.join(expected_dir, '__init__.py')
         assert os.path.isdir(expected_dir)
         assert os.path.isfile(expected_init_path)
@@ -173,8 +173,7 @@ class TestNewDirectoryOfType:
         project = project_class.name
         errors = file_manager.new_directory_of_type(testdir, project, [],
                                                     'new_pages_dir', 'pages')
-        expected_dir = os.path.join(testdir, 'projects', project, 'pages',
-                                    'new_pages_dir')
+        expected_dir = os.path.join(project_class.path, 'pages', 'new_pages_dir')
         expected_init_path = os.path.join(expected_dir, '__init__.py')
         assert os.path.isdir(expected_dir)
         assert os.path.isfile(expected_init_path)
@@ -185,8 +184,7 @@ class TestNewDirectoryOfType:
         project = project_class.name
         errors = file_manager.new_directory_of_type(testdir, project, [],
                                                     'new_suites_dir', 'suites')
-        expected_dir = os.path.join(testdir, 'projects', project, 'suites',
-                                    'new_suites_dir')
+        expected_dir = os.path.join(project_class.path, 'suites', 'new_suites_dir')
         expected_init_path = os.path.join(expected_dir, '__init__.py')
         assert os.path.isdir(expected_dir)
         assert os.path.isfile(expected_init_path)

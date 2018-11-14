@@ -8,7 +8,7 @@ from subprocess import Popen, PIPE, STDOUT
 import pytest
 
 from golem.cli import commands
-from golem.core import test_execution
+from golem.core import test_execution, settings_manager, suite, test_case
 
 
 # FIXTURES
@@ -44,8 +44,16 @@ class TestDirectory:
         self.basedir = basedir
         self.name = TestUtils.random_string(4, 'testdir_')
         self.path = os.path.join(self.basedir, self.name)
+        self.settings = None
         os.chdir(self.basedir)
         commands.createdirectory_command(self.name)
+
+    def activate(self):
+        if not self.settings:
+            self.settings = settings_manager.get_global_settings(self.path)
+        test_execution.root_path = self.path
+        test_execution.settings = self.settings
+        return self
 
     def remove(self):
         os.chdir(self.basedir)
@@ -86,13 +94,21 @@ class Project:
         self.testdir_fixture = testdir_fixture
         self.testdir = testdir_fixture.path
         self.name = TestUtils.random_string(4, 'project_')
+        self.path = os.path.join(testdir_fixture.path, 'projects', self.name)
+        self.settings = None
         os.chdir(self.testdir)
         test_execution.root_path = self.testdir
         commands.createproject_command(self.name)
 
+    def activate(self):
+        if not self.settings:
+            self.settings = settings_manager.get_project_settings(self.testdir, self.name)
+        test_execution.root_path = self.testdir
+        test_execution.settings = self.settings
+        return self
+
     def remove(self):
-        os.chdir(os.path.join(self.testdir, 'projects'))
-        shutil.rmtree(self.name, ignore_errors=True)
+        shutil.rmtree(self.path, ignore_errors=True)
 
 
 @pytest.mark.usefixtures("testdir_session")
@@ -151,7 +167,7 @@ class TestUtils:
         filepath = os.path.join(path, filename)
         os.makedirs(path, exist_ok=True)
         open(filepath, 'w+').close()
-    
+
     @staticmethod
     def random_string(length, prefix=''):
         random_str = (''.join(random.choice(string.ascii_lowercase)
@@ -176,4 +192,25 @@ class TestUtils:
     def set_project_setting(testdir, setting, setting_value):
         setting_path = os.path.join(testdir, 'settings.json')
         with open(setting_path, 'w') as f:
-            f.write('{{"{0}": "{1}"\}}'.format(setting, setting_value))
+            f.write('{{"{}": "{}"\}}'.format(setting, setting_value))
+
+    @staticmethod
+    def create_test(testdir, project, parents, name, content=None):
+        if content is None:
+            content = ('def test(data):\n'
+                       '    print("hello")\n')
+        test_case.new_test_case(testdir, project, parents, name)
+        path = os.path.join(testdir, 'projects', project, 'tests',
+                            os.sep.join(parents), name + '.py')
+        with open(path, 'w+') as f:
+            f.write(content)
+
+    @staticmethod
+    def create_suite(testdir, project, parents, name, content=None, tests=None):
+        if content is None and tests is not None:
+            content = 'tests = {}'.format(str(tests))
+        suite.new_suite(testdir, project, parents, name)
+        path = os.path.join(testdir, 'projects', project, 'suites',
+                            os.sep.join(parents), name+'.py')
+        with open(path, 'w+') as f:
+            f.write(content)

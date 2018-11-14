@@ -14,8 +14,7 @@ class TestCreateExecutionDirectoryTest:
         test_name = 'test_execution_directory'
         directory = report.create_execution_directory(testdir, project, timestamp,
                                                       test_name=test_name)
-        path = os.path.join(testdir, 'projects', project, 'reports',
-                            'single_tests', test_name, timestamp)
+        path = os.path.join(project_session.path, 'reports', 'single_tests', test_name, timestamp)
         assert os.path.isdir(path)
         assert directory == path
 
@@ -26,8 +25,7 @@ class TestCreateExecutionDirectoryTest:
         test_name = 'a.b.test_execution_directory'
         directory = report.create_execution_directory(testdir, project, timestamp,
                                                       test_name=test_name)
-        path = os.path.join(testdir, 'projects', project, 'reports',
-                            'single_tests', test_name, timestamp)
+        path = os.path.join(project_session.path, 'reports', 'single_tests', test_name, timestamp)
         assert os.path.isdir(path)
         assert directory == path
 
@@ -38,8 +36,7 @@ class TestCreateExecutionDirectoryTest:
         suite_name = 'suite_execution_directory'
         directory = report.create_execution_directory(testdir, project, timestamp,
                                                       suite_name=suite_name)
-        path = os.path.join(testdir, 'projects', project, 'reports',
-                            suite_name, timestamp)
+        path = os.path.join(project_session.path, 'reports', suite_name, timestamp)
         assert os.path.isdir(path)
         assert directory == path
 
@@ -50,8 +47,7 @@ class TestCreateExecutionDirectoryTest:
         suite_name = 'a.b.suite_execution_directory'
         directory = report.create_execution_directory(testdir, project, timestamp,
                                                       suite_name=suite_name)
-        path = os.path.join(testdir, 'projects', project, 'reports',
-                            suite_name, timestamp)
+        path = os.path.join(project_session.path, 'reports', suite_name, timestamp)
         assert os.path.isdir(path)
         assert directory == path
 

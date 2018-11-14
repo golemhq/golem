@@ -19,7 +19,7 @@ class TestCreateProjectSettingsFile:
     def test_create_project_settings_file(self, project_class):
         testdir = project_class.testdir
         project = project_class.name
-        settings_path = os.path.join(testdir, 'projects', project, 'settings.json')
+        settings_path = os.path.join(project_class.path, 'settings.json')
         os.remove(settings_path)
         settings_manager.create_project_settings_file(testdir, project)
         with open(settings_path) as settings_file:

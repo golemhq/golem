@@ -3,7 +3,7 @@ import pytest
 from golem.gui import gui_utils
 from golem import browser, execution
 from golem.core import settings_manager
-from golem.test_runner import start_execution, execution_logger
+from golem.test_runner import execution_runner, execution_logger
 
 
 class TestGetBrowser:
@@ -21,7 +21,8 @@ class TestGetBrowser:
             ('operadriver_path', 'opera'),
         ]
         for setting_path, browser_name in drivers:
-            execution.browser_definition = start_execution.define_drivers([browser_name], [], default_browsers)[0]
+            execution.browser_definition = execution_runner.define_browsers(
+                [browser_name], [], default_browsers)[0]
             with pytest.raises(Exception) as excinfo:
                 browser.open_browser()
                 expected = 'Exception: {} setting is not defined'.format(setting_path)
@@ -40,7 +41,8 @@ class TestGetBrowser:
             ('operadriver_path', './drivers/operadriver*', 'opera'),
         ]
         for setting_key, setting_path, browser_name in drivers:
-            execution.browser_definition = start_execution.define_drivers([browser_name], [], default_browsers)[0]
+            execution.browser_definition = execution_runner.define_browsers(
+                [browser_name], [], default_browsers)[0]
             execution.settings[setting_key] = setting_path
             with pytest.raises(Exception) as excinfo:
                 browser.open_browser()

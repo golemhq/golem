@@ -323,10 +323,15 @@ def test_case_exists(workspace, project, full_test_case_name):
 
     full_test_case_name is a relative dot path to the test.
     """
+    # TODO
     test, parents = utils.separate_file_from_parents(full_test_case_name)
-    path = os.path.join(workspace, 'projects', project, 'tests',
-                        os.sep.join(parents), '{}.py'.format(test))
-    return os.path.isfile(path)
+    tests_folder = os.path.join(workspace, 'projects', project, 'tests')
+    path = os.path.join(tests_folder, os.sep.join(parents), '{}.py'.format(test))
+    if os.path.isfile(path):
+        return True
+    else:
+        path = os.path.join(tests_folder, full_test_case_name)
+        return os.path.isfile(path)
 
 
 def import_test_case_module(workspace, project, full_test_case_name):

@@ -2,14 +2,14 @@ import os
 import json
 
 from golem.test_runner import test_runner
-from golem.test_runner.start_execution import define_drivers
+from golem.test_runner.execution_runner import define_browsers
 from golem.gui import gui_utils
 from golem.core import settings_manager
 
 
-def _define_drivers_mock(selected_drivers):
+def _define_browsers_mock(selected_browsers):
     default_browsers = gui_utils.get_supported_browsers_suggestions()
-    return define_drivers(selected_drivers, [], default_browsers)
+    return define_browsers(selected_browsers, [], default_browsers)
 
 
 class TestGetSetName:
@@ -106,7 +106,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         # run test
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
@@ -160,7 +160,7 @@ def teardown(data):
         report_directory = self._mock_report_directory(testdir, project,
                                                        test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_data = dict(username='username1', password='password1')
         # run test
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
@@ -217,7 +217,7 @@ def test(data)
         report_directory = self._mock_report_directory(testdir, project,
                                                        test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -271,7 +271,7 @@ element2 = ('css', '.oh.no')
         self._create_page(testdir, project, 'page1', page_content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -325,7 +325,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -375,7 +375,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -417,7 +417,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -459,7 +459,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -500,7 +500,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -541,7 +541,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -582,7 +582,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -623,7 +623,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -664,7 +664,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -703,7 +703,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -742,7 +742,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -782,7 +782,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -821,7 +821,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -860,7 +860,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -899,7 +899,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -938,7 +938,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -974,7 +974,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -1013,7 +1013,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -1052,7 +1052,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)
@@ -1090,7 +1090,7 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
         settings = settings_manager.get_project_settings(testdir, project)
-        browser = _define_drivers_mock(['chrome'])[0]
+        browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
                              test_data={}, browser=browser, settings=settings,
                              report_directory=report_directory)

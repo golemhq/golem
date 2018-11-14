@@ -238,8 +238,7 @@ class TestGetTestCaseContent:
 
     def test_get_test_case_content(self, project_class):
         test_name = 'some_test_case'
-        path = os.path.join(project_class.testdir, 'projects', project_class.name,
-                            'tests', test_name + '.py')
+        path = os.path.join(project_class.path, 'tests', test_name + '.py')
         with open(path, 'w') as ff:
             ff.write(SAMPLE_TEST_CONTENT)
         test_content = test_case.get_test_case_content(project_class.testdir, project_class.name, test_name)
@@ -268,9 +267,7 @@ class TestGetTestCaseCode:
 
     def test_get_test_case_code(self, project_class):
         test_name = 'some_test_case2'
-        testdir = project_class.testdir
-        project = project_class.name
-        path = os.path.join(testdir, 'projects', project, 'tests', test_name + '.py')
+        path = os.path.join(project_class.path, 'tests', test_name + '.py')
         with open(path, 'w') as f:
             f.write(SAMPLE_TEST_CONTENT)
         test_code = test_case.get_test_case_code(path)
@@ -285,8 +282,7 @@ class TestNewTestCase:
         test_name = 'new_test_case_001'
         parents = ['aaaa', 'bbbb']
         errors = test_case.new_test_case(testdir, project, parents, test_name)
-        path = os.path.join(testdir, 'projects', project, 'tests',
-                            os.sep.join(parents), test_name + '.py')
+        path = os.path.join(project_class.path, 'tests', os.sep.join(parents), test_name+'.py')
         assert os.path.isfile(path)
         assert errors == []
         test_code = test_case.get_test_case_code(path)
@@ -307,16 +303,13 @@ class TestNewTestCase:
         test_name = 'test_new_test_0001'
         parents = ['asd01', 'asd02']
         errors = test_case.new_test_case(testdir, project, parents, test_name)
-        path = os.path.join(testdir, 'projects', project, 'tests',
-                            os.sep.join(parents), test_name + '.py')
+        path = os.path.join(project_session.path, 'tests', os.sep.join(parents), test_name + '.py')
         assert errors == []
         assert os.path.isfile(path)
         # verify that each parent dir has __init__.py file
-        init_path = os.path.join(testdir, 'projects', project, 'tests',
-                                 'asd01', '__init__.py')
+        init_path = os.path.join(project_session.path, 'tests', 'asd01', '__init__.py')
         assert os.path.isfile(init_path)
-        init_path = os.path.join(testdir, 'projects', project, 'tests',
-                                 'asd01', 'asd02', '__init__.py')
+        init_path = os.path.join(project_session.path, 'tests', 'asd01', 'asd02', '__init__.py')
         assert os.path.isfile(init_path)
 
     def test_new_test_case_with_parents_already_exist(self, project_session):
@@ -327,8 +320,7 @@ class TestNewTestCase:
         parents = ['asf01']
         test_case.new_test_case(testdir, project, parents, test_name1)
         errors = test_case.new_test_case(testdir, project, parents, test_name2)
-        path = os.path.join(testdir, 'projects', project, 'tests',
-                            os.sep.join(parents), test_name2 + '.py')
+        path = os.path.join(project_session.path, 'tests', os.sep.join(parents), test_name2 + '.py')
         assert errors == []
         assert os.path.isfile(path)
 
@@ -356,7 +348,7 @@ class TestSaveTestCase:
         test_execution.settings['test_data'] = 'infile'
         test_case.save_test_case(testdir, project, 'a.b.test_one', description,
                                  page_objects, test_steps, test_data)
-        path = os.path.join(testdir, 'projects', project, 'tests', 'a', 'b', 'test_one.py')
+        path = os.path.join(project_function.path, 'tests', 'a', 'b', 'test_one.py')
         expected = (
             '\n'
             'description = \'description\'\n'
@@ -400,7 +392,7 @@ class TestSaveTestCase:
         test_execution.settings['test_data'] = 'csv'
         test_case.save_test_case(testdir, project, 'a.b.test_one', description,
                                  page_objects, test_steps, test_data)
-        path = os.path.join(testdir, 'projects', project, 'tests', 'a', 'b', 'test_one.py')
+        path = os.path.join(project_function.path, 'tests', 'a', 'b', 'test_one.py')
         expected = (
             '\n'
             'description = \'description\'\n'
@@ -417,7 +409,7 @@ class TestSaveTestCase:
             '    pass\n')
         with open(path) as f:
             assert f.read() == expected
-        data_path = os.path.join(testdir, 'projects', project, 'tests', 'a', 'b', 'test_one.csv')
+        data_path = os.path.join(project_function.path, 'tests', 'a', 'b', 'test_one.csv')
         expected = ('key\n'
                     '\'value\'\n')
         with open(data_path) as f:
@@ -435,10 +427,10 @@ class TestSaveTestCaseCode:
         test_case.new_test_case(testdir, project, [], test_name)
         test_case.save_test_case_code(testdir, project, test_name,
                                       SAMPLE_TEST_CONTENT, test_data)
-        path = os.path.join(testdir, 'projects', project, 'tests', test_name + '.py')
+        path = os.path.join(project_function.path, 'tests', test_name + '.py')
         with open(path) as f:
             assert f.read() == SAMPLE_TEST_CONTENT
-        path = os.path.join(testdir, 'projects', project, 'tests', test_name + '.csv')
+        path = os.path.join(project_function.path, 'tests', test_name + '.csv')
         expected = ('key\n' 
                     '\'value\'\n')
         with open(path) as f:

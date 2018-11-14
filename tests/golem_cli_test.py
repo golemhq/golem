@@ -39,27 +39,25 @@ class TestGolem:
         assert project in projects
 
     def test_golem_createsuite(self, project_session, test_utils):
-        path = project_session.testdir
         project = project_session.name
-        os.chdir(path)
+        os.chdir(project_session.testdir)
         suite = 'suite1'
         command = 'golem createsuite {} {}'.format(project, suite)
         result = test_utils.run_command(command)
         msg = 'Suite {} created for project {}'.format(suite, project)
         assert result == msg
-        spath = os.path.join(path, 'projects', project, 'suites', suite+'.py')
+        spath = os.path.join(project_session.path, 'suites', suite+'.py')
         assert os.path.isfile(spath)
 
     def test_golem_createtest(self, project_session, test_utils):
-        path = project_session.testdir
         project = project_session.name
-        os.chdir(path)
+        os.chdir(project_session.testdir)
         test = 'test1'
         command = 'golem createtest {} {}'.format(project, test)
         result = test_utils.run_command(command)
         msg = 'Test {} created for project {}'.format(test, project)
         assert result == msg
-        tpath = os.path.join(path, 'projects', project, 'tests', test+'.py')
+        tpath = os.path.join(project_session.path, 'tests', test+'.py')
         assert os.path.isfile(tpath)
 
     def test_golem_createuser(self, testdir_session, test_utils):
@@ -94,7 +92,7 @@ class TestGolem:
         test_utils.run_command(command)
         command = 'golem run {} {}'.format(project, suite)
         result = test_utils.run_command(command)
-        assert 'No tests were found' in result
+        assert 'No tests were found in suite suite2' in result
 
     def test_golem_createproject_no_args(self, testdir_session, test_utils):
         os.chdir(testdir_session.path)
@@ -205,8 +203,8 @@ class TestGolem:
         test = 'test001_does_not_exist'
         command = 'golem run {} {}'.format(project, test)
         result = test_utils.run_command(command)
-        expected = ('golem run: error: the value {0} does not match '
-                    'an existing test or suite'.format(test))
+        expected = ('golem run: error: the value {} does not match '
+                    'an existing test, suite or directory'.format(test))
         assert result == expected
 
     def test_golem_run_project_does_not_exist(self, testdir_session, test_utils):

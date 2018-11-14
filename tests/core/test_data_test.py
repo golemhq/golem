@@ -13,7 +13,7 @@ class TestSaveExternalTestDataFile:
                            {'key1': 'value3', 'key2': 'value4'}]
         test_data.save_external_test_data_file(testdir, project, test_name,
                                                input_test_data)
-        data_path = os.path.join(testdir, 'projects', project, 'tests', test_name+'.csv')
+        data_path = os.path.join(project_function_clean.path, 'tests', test_name+'.csv')
         with open(data_path) as f:
             result = f.read()
             expected = ('key1,key2\nvalue1,value2\nvalue3,value4\n')
@@ -26,7 +26,7 @@ class TestSaveExternalTestDataFile:
         test_name = test_utils.random_string(10, 'test')
         input_test_data = []
         test_data.save_external_test_data_file(testdir, project, test_name, input_test_data)
-        data_path = os.path.join(testdir, 'projects', project, 'tests', test_name+'.csv')
+        data_path = os.path.join(project_function_clean.path, 'tests', test_name+'.csv')
         assert not os.path.isfile(data_path)
 
     def test_save_external_data_empty_data_file_exists(self, project_function_clean,
@@ -35,7 +35,7 @@ class TestSaveExternalTestDataFile:
         project = project_function_clean.name
         test_name = test_utils.random_string(10, 'test')
         input_test_data = []
-        data_path = os.path.join(testdir, 'projects', project, 'tests', test_name+'.csv')
+        data_path = os.path.join(project_function_clean.path, 'tests', test_name+'.csv')
         open(data_path, 'w+').close()
         test_data.save_external_test_data_file(testdir, project, test_name, input_test_data)
         with open(data_path) as f:
@@ -52,7 +52,7 @@ class TestSaveExternalTestDataFile:
                            {'key1': '\'quoted_string\''}]
         test_data.save_external_test_data_file(testdir, project, test_name,
                                                input_test_data)
-        data_path = os.path.join(testdir, 'projects', project, 'tests', test_name+'.csv')
+        data_path = os.path.join(project_function_clean.path, 'tests', test_name+'.csv')
         with open(data_path) as f:
             result = f.read()
             expected = ('key1\n'
@@ -69,7 +69,7 @@ class TestGetExternalTestData:
         testdir = project_function_clean.testdir
         project = project_function_clean.name
         test_name = test_utils.random_string(10, 'test')
-        data_path = os.path.join(testdir, 'projects', project, 'tests', test_name + '.csv')
+        data_path = os.path.join(project_function_clean.path, 'tests', test_name + '.csv')
         input = ('key1,key2\nvalue1,value2\nvalue3,value4\n')
         with open(data_path, 'w+') as f:
             f.write(input)
@@ -90,7 +90,7 @@ class TestGetExternalTestData:
         testdir = project_function_clean.testdir
         project = project_function_clean.name
         test_name = test_utils.random_string(10, 'test')
-        data_path = os.path.join(testdir, 'projects', project, 'tests', test_name + '.csv')
+        data_path = os.path.join(project_function_clean.path, 'tests', test_name + '.csv')
         input = ('key1\n'
                  'string with spaces\n'
                  '"string ""with"" quotes"\n'
@@ -124,7 +124,7 @@ class TestGetInternalTestData:
                         "        'key2': 'value4',\n"
                         "    },\n"
                         "]\n")
-        test_path = os.path.join(testdir, 'projects', project, 'tests', test_name+'.py')
+        test_path = os.path.join(project_function_clean.path, 'tests', test_name+'.py')
         with open(test_path, 'w+') as f:
             f.write(test_content)
         expected = [
@@ -142,7 +142,7 @@ class TestGetInternalTestData:
                         "    'key1': 'value1',\n"
                         "    'key2': 'value2',\n"
                         "}\n")
-        test_path = os.path.join(testdir, 'projects', project, 'tests', test_name+'.py')
+        test_path = os.path.join(project_function_clean.path, 'tests', test_name+'.py')
         with open(test_path, 'w+') as f:
             f.write(test_content)
         expected = [{'key1': 'value1', 'key2': 'value2'}]
@@ -169,7 +169,7 @@ class TestGetInternalTestData:
                         "        'key12': \"te's't\",\n"
                         "    }\n"
                         "]\n")
-        test_path = os.path.join(testdir, 'projects', project, 'tests', test_name+'.py')
+        test_path = os.path.join(project_function_clean.path, 'tests', test_name+'.py')
         with open(test_path, 'w+') as f:
             f.write(test_content)
         expected = [
@@ -209,7 +209,7 @@ class TestGetInternalTestData:
                         "        'key12': \"te's't\",\n"
                         "    }\n"
                         "]\n")
-        test_path = os.path.join(testdir, 'projects', project, 'tests', test_name+'.py')
+        test_path = os.path.join(project_function_clean.path, 'tests', test_name+'.py')
         with open(test_path, 'w+') as f:
             f.write(test_content)
         expected = [
@@ -235,7 +235,7 @@ class TestGetInternalTestData:
         project = project_function_clean.name
         test_name = 'test_get_internal_test_data_no_data_var'
         test_content = "there_is = 'no data here'\n"
-        test_path = os.path.join(testdir, 'projects', project, 'tests', test_name+'.py')
+        test_path = os.path.join(project_function_clean.path, 'tests', test_name+'.py')
         with open(test_path, 'w+') as f:
             f.write(test_content)
         internal_data = test_data.get_internal_test_data(testdir, project, test_name)
@@ -246,7 +246,7 @@ class TestGetInternalTestData:
         project = project_function_clean.name
         test_name = 'test_get_internal_test_data'
         test_content = "data = 'just a string'\n"
-        test_path = os.path.join(testdir, 'projects', project, 'tests', test_name+'.py')
+        test_path = os.path.join(project_function_clean.path, 'tests', test_name+'.py')
         with open(test_path, 'w+') as f:
             f.write(test_content)
         internal_data = test_data.get_internal_test_data(testdir, project, test_name)
@@ -266,7 +266,7 @@ class TestGetTestData:
                         "    'key1': 'value1',\n"
                         "    'key2': 'value2',\n"
                         "}\n")
-        test_path = os.path.join(testdir, 'projects', project, 'tests', test_name + '.py')
+        test_path = os.path.join(project_class.path, 'tests', test_name + '.py')
         with open(test_path, 'w+') as f:
             f.write(test_content)
         expected = [{'key1': 'value1', 'key2': 'value2'}]
@@ -282,10 +282,10 @@ class TestGetTestData:
                         "    'key1': 'value1',\n"
                         "    'key2': 'value2',\n"
                         "}\n")
-        test_path = os.path.join(testdir, 'projects', project, 'tests', test_name + '.py')
+        test_path = os.path.join(project_class.path, 'tests', test_name + '.py')
         with open(test_path, 'w+') as f:
             f.write(test_content)
-        data_path = os.path.join(testdir, 'projects', project, 'tests', test_name + '.csv')
+        data_path = os.path.join(project_class.path, 'tests', test_name + '.csv')
         with open(data_path, 'w+') as f:
             f.write('key1,key2\nvalue3,value4\n')
         returned_data = test_data.get_test_data(testdir, project, test_name)
@@ -298,7 +298,7 @@ class TestGetTestData:
         project = project_class.name
         test_name = test_utils.random_string(5, 'test')
         test_content = "there_is = 'no data'\n"
-        test_path = os.path.join(testdir, 'projects', project, 'tests', test_name + '.py')
+        test_path = os.path.join(project_class.path, 'tests', test_name + '.py')
         with open(test_path, 'w+') as f:
             f.write(test_content)
         returned_data = test_data.get_test_data(testdir, project, test_name)

@@ -33,7 +33,6 @@ def get_suites(workspace, project):
 
 
 def get_projects(workspace):
-    projects = []
     path = os.path.join(workspace, 'projects')
     projects = next(os.walk(path))[1]
     projects = [x for x in projects if x != '__pycache__']
@@ -44,12 +43,13 @@ def project_exists(workspace, project):
     return project in get_projects(workspace)
 
 
-def get_directory_test_cases(workspace, project, suite):
-    '''Return a list with all the test cases of a given directory'''
-    tests = list()
-    path = os.path.join(workspace, 'projects', project, 'tests', suite)
-    files = file_manager.get_files_dot_path(path, extension='.py')
-    tests = ['.'.join((suite, x)) for x in files]
+def get_directory_tests(workspace, project, directory):
+    """Return a list with all the test cases of a given directory"""
+    path = os.path.join(workspace, 'projects', project, 'tests', directory)
+    tests = file_manager.get_files_dot_path(path, extension='.py')
+    if directory:
+        dotpath = '.'.join(os.path.normpath(directory).split(os.sep))
+        tests = ['.'.join([dotpath, x]) for x in tests]
     return tests
 
 
@@ -266,8 +266,8 @@ def duplicate_element(workspace, project, element_type, original_file_dot_path,
     return errors
 
 
-def choose_driver_by_precedence(cli_drivers=None, suite_drivers=None,
-                                settings_default_driver=None):
+def choose_browser_by_precedence(cli_browsers=None, suite_browsers=None,
+                                 settings_default_browser=None):
     """ Defines which browser(s) to use by order of precedence
     The order is the following:
     1. browsers defined by CLI
@@ -275,16 +275,15 @@ def choose_driver_by_precedence(cli_drivers=None, suite_drivers=None,
     3. 'default_driver' setting
     4. chrome
     """
-    chosen_drivers = []
-    if cli_drivers:
-        chosen_drivers = cli_drivers
-    elif suite_drivers:
-        chosen_drivers = suite_drivers
-    elif settings_default_driver:
-        chosen_drivers = [settings_default_driver]
+    if cli_browsers:
+        browsers = cli_browsers
+    elif suite_browsers:
+        browsers = suite_browsers
+    elif settings_default_browser:
+        browsers = [settings_default_browser]
     else:
-        chosen_drivers = ['chrome']  # default default
-    return chosen_drivers
+        browsers = ['chrome']  # default default
+    return browsers
 
 
 # TODO

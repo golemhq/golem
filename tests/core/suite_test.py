@@ -67,7 +67,7 @@ class TestSaveSuite:
             "    'test02'\n"
             "]\n"
         )
-        path = os.path.join(testdir, 'projects', project, 'suites', suite_name + '.py')
+        path = os.path.join(project_session.path, 'suites', suite_name + '.py')
         with open(path) as suite_file:
             content = suite_file.read()
             assert content == expected
@@ -94,7 +94,7 @@ class TestSaveSuite:
             "\n"
             "tests = []\n"
         )
-        path = os.path.join(testdir, 'projects', project, 'suites', suite_name + '.py')
+        path = os.path.join(project_session.path, 'suites', suite_name + '.py')
         with open(path) as suite_file:
             content = suite_file.read()
             assert content == expected
@@ -107,7 +107,7 @@ class TestNewSuite:
         project = project_session.name
         suite_name = 'test_save_suite_0003'
         errors = suite.new_suite(testdir, project, [], suite_name)
-        path = os.path.join(testdir, 'projects', project, 'suites', suite_name + '.py')
+        path = os.path.join(project_session.path, 'suites', suite_name + '.py')
         assert errors == []
         assert os.path.isfile(path)
         # verify new suite content
@@ -126,16 +126,14 @@ class TestNewSuite:
         suite_name = 'test_save_suite_004'
         parents = ['asd01', 'asd02']
         errors = suite.new_suite(testdir, project, parents, suite_name)
-        path = os.path.join(testdir, 'projects', project, 'suites',
+        path = os.path.join(project_session.path, 'suites',
                             os.sep.join(parents), suite_name + '.py')
         assert errors == []
         assert os.path.isfile(path)
         # verify that each parent dir has __init__.py file
-        init_path = os.path.join(testdir, 'projects', project, 'suites',
-                                 'asd01', '__init__.py')
+        init_path = os.path.join(project_session.path, 'suites', 'asd01', '__init__.py')
         assert os.path.isfile(init_path)
-        init_path = os.path.join(testdir, 'projects', project, 'suites',
-                                 'asd01', 'asd02', '__init__.py')
+        init_path = os.path.join(project_session.path, 'suites', 'asd01', 'asd02', '__init__.py')
         assert os.path.isfile(init_path)
 
     def test_new_suite_already_exists(self, project_session):
@@ -154,7 +152,7 @@ class TestNewSuite:
         parents = ['asf01']
         suite.new_suite(testdir, project, parents, suite_name1)
         errors = suite.new_suite(testdir, project, parents, suite_name2)
-        path = os.path.join(testdir, 'projects', project, 'suites',
+        path = os.path.join(project_session.path, 'suites',
                             os.sep.join(parents), suite_name2 + '.py')
         assert errors == []
         assert os.path.isfile(path)

@@ -35,7 +35,7 @@ def create_execution_directory(workspace, project, timestamp,
 
 
 def create_report_directory(execution_directory, test_case_name, is_suite):
-    """Create direcoty to store a single test report.
+    """Create directory to store a single test report.
     
     execution_directory takes the following format for suites:
       <workspace>/projects/<project>/reports/<suite_name>/<timestamp>/

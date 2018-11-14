@@ -22,7 +22,7 @@ class TestGetPageObjectContent:
         project = project_session.name
         page_name = 'page_test_get_content_ab1412'
         page_object.new_page_object(testdir, project, [], page_name)
-        page_path = os.path.join(testdir, 'projects', project, 'pages', page_name + '.py')
+        page_path = os.path.join(project_session.path, 'pages', page_name + '.py')
         with open(page_path, 'w') as page_file:
             page_file.write('elem1 = (\'id\', \'someId\', \'Elem1\')\n')
             page_file.write('def func1(c, b, a):\n')
@@ -66,7 +66,7 @@ class TestGetPageObjectCode:
         page_name = 'page_test_get_code_ab8456'
 
         page_object.new_page_object(testdir, project, [], page_name)
-        page_path = os.path.join(testdir, 'projects', project, 'pages', page_name + '.py')
+        page_path = os.path.join(project_session.path, 'pages', page_name + '.py')
         file_content = 'test=("id", "xyz")\ntest2=("id", "abc")\n'
         with open(page_path, 'w') as page_file:
             page_file.write(file_content)
@@ -76,8 +76,7 @@ class TestGetPageObjectCode:
     def test_get_page_object_code_file_not_exist(self, project_session):
         testdir = project_session.testdir
         project = project_session.name
-        page_path = os.path.join(testdir, 'projects', project, 'pages', 'does',
-                                 'not', 'exist54654.py')
+        page_path = os.path.join(project_session.path, 'pages', 'does', 'not', 'exist54654.py')
         code = page_object.get_page_object_code(page_path)
         assert code == ''
 
@@ -87,8 +86,7 @@ class TestSavePageObject:
     def test_save_page_object(self, project_session):
         testdir = project_session.testdir
         project = project_session.name
-        page_path = os.path.join(testdir, 'projects', project, 'pages', 'testa',
-                                 'testb', 'page_test987.py')
+        page_path = os.path.join(project_session.path, 'pages', 'testa', 'testb', 'page_test987.py')
         page_object.new_page_object(testdir, project, ['testa', 'testb'], 'page_test987')
         page_name = 'testa.testb.page_test987'
         elements = [
@@ -132,7 +130,7 @@ class TestSavePageObjectCode:
                      "   pass")
         full_page_name = '{}.{}'.format('.'.join(parents), page_name)
         page_object.save_page_object_code(testdir, project, full_page_name, page_code)
-        full_path = os.path.join(testdir, 'projects', project, 'pages',
+        full_path = os.path.join(project_session.path, 'pages',
                                  os.sep.join(parents), page_name + '.py')
         with open(full_path) as page_file:
             content = page_file.read()
@@ -147,7 +145,7 @@ class TestNewPageObject:
         page_name = 'page_name_x2'
         parents = ['new', 'page', 'object']
         page_object.new_page_object(testdir, project, parents, page_name)
-        full_path = os.path.join(testdir, 'projects', project, 'pages',
+        full_path = os.path.join(project_session.path, 'pages',
                                  os.sep.join(parents), page_name + '.py')
         assert os.path.isfile(full_path)
 
@@ -166,8 +164,7 @@ class TestNewPageObject:
         page_name = 'page_name_x3'
         parents = ['subdir']
         page_object.new_page_object(testdir, project, parents, page_name)
-        init_path = os.path.join(testdir, 'projects', project, 'pages',
-                                 'subdir', '__init__.py')
+        init_path = os.path.join(project_session.path, 'pages', 'subdir', '__init__.py')
         assert os.path.isfile(init_path)
 
 

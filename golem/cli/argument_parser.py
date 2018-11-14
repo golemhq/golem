@@ -9,10 +9,9 @@ def get_parser():
     # run
     parser_run = subparsers.add_parser('run', add_help=False)
     parser_run.add_argument('project', nargs='?', default='')
-    parser_run.add_argument('test_or_suite', nargs='?', default='')
+    parser_run.add_argument('test_query', nargs='?', default='')
     parser_run.add_argument('-b', '--browsers', action='store',
-                            nargs='*', default=[],
-                            type=str)
+                            nargs='*', default=[], type=str)
     parser_run.add_argument('-t', '--threads', action='store', nargs='?',
                             default=1, type=int)
     parser_run.add_argument('-e', '--environments', action='store',
@@ -21,7 +20,6 @@ def get_parser():
                             default=False)
     parser_run.add_argument('--timestamp', action='store', nargs='?', type=str)
     parser_run.add_argument('-h', '--help', action='store_true')
-
 
     # gui
     parser_gui = subparsers.add_parser('gui', add_help=False)
