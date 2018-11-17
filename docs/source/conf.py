@@ -29,8 +29,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Golem'
-copyright = '2017, Luciano Puccio'
-author = 'Luciano Puccio'
+copyright = '2017, Luciano Renzi'
+author = 'Luciano Renzi'
 
 html_theme = 'alabaster'
 html_sidebars = {
@@ -43,7 +43,7 @@ html_sidebars = {
 }
 html_theme_options = {
     'description': 'test automation framework',
-    'github_user': 'lucianopuccio',
+    'github_user': 'golemhq',
     'github_repo': 'golem',
     'github_type': 'star',
     'github_count': False
@@ -114,7 +114,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'Golem.tex', 'Golem Documentation',
-     'Luciano Puccio', 'manual'),
+     'Luciano Renzi', 'manual'),
 ]
 
 

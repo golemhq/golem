@@ -118,7 +118,7 @@ The latests versions of the webdrivers can be found here:
 * Firefox: (https://github.com/mozilla/geckodriver/releases)
 * IE: (http://selenium-release.storage.googleapis.com/index.html)
 
-For more information check [this page](https://golem-framework.readthedocs.io/en/latest/web-drivers.html) of the documentation.
+For more information check [this page](https://golem-framework.readthedocs.io/en/latest/browsers.html) of the documentation.
 
 **Start the Web Module**
 
@@ -149,20 +149,6 @@ Documentation
 --------------------------------------
 
 Read the full documentation here: [https://golem-framework.readthedocs.io/](https://golem-framework.readthedocs.io/)
-
-
-Example Projects
---------------------------------------
-
-Here is a repo with example working projects usign Golem: [https://github.com/lucianopuccio/golem-demo](https://github.com/lucianopuccio/golem-demo)
-
-
-Roadmap
---------------------------------------
-
-- Integrate with Appium for mobile testing
-- Improve API test Golem actions
-- Video recording
 
 
 License

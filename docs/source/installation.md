@@ -86,5 +86,5 @@ pip install golem-framework
 ## Installing From Source
 
 ```
-pip install -U https://github.com/lucianopuccio/golem/archive/master.tar.gz
+pip install -U https://github.com/golemhq/golem/archive/master.tar.gz
 ```

@@ -32,7 +32,7 @@ webdriver-manager update -d chrome
 ```
 
 
-To learn more about the Webdriver Manager see: <https://github.com/lucianopuccio/webdriver-manager>
+To learn more about the Webdriver Manager see: <https://github.com/golemhq/webdriver-manager>
 
 
 ### Webdriver Executables

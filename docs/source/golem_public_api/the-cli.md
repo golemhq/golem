@@ -70,4 +70,4 @@ Add a new user, projects is a list of projects that the user can access and repo
 
 **webdriver-manager update -b chrome**
 
-To learn more about the Webdriver Manager see: <https://github.com/lucianopuccio/webdriver-manager>.
+To learn more about the Webdriver Manager see: <https://github.com/golemhq/webdriver-manager>.

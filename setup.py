@@ -26,9 +26,9 @@ setup(
     version=golem.__version__,
     description='Test automation framework for functional tests using Selenium',
     # long_description=long_description,
-    url='https://github.com/lucianopuccio/golem',
-    author='Luciano Puccio',
-    author_email='me@mail.com',
+    url='https://github.com/golemhq/golem',
+    author='Luciano Renzi',
+    author_email='luciano@lucianorenzi.com',
     license='MIT',
     classifiers=[
         'Development Status :: 4 - Beta',
