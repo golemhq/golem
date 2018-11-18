@@ -109,9 +109,11 @@ def create_new_project(workspace, project):
 
     settings_manager.create_project_settings_file(workspace, project)
 
-    environments_path = os.path.join(workspace, 'projects', project, 'environments.json')
-    with open(environments_path, 'a') as environments_file:
-        environments_file.write('{}')
+    for project_base_file in ('environments.json', 'secrets.json'):
+        base_file_path = os.path.join(workspace, 'projects', project, project_base_file)
+        with open(base_file_path, 'a') as base_file:
+            base_file.write('{}')
+
     print('Project {} created'.format(project))
 
 

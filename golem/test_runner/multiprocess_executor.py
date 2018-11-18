@@ -28,6 +28,7 @@ def multiprocess_executor(project, execution_list, processes=1):
                 project,
                 test.name,
                 test.data_set,
+                test.secrets,
                 test.browser,
                 test_execution.settings,
                 test.reportdir)

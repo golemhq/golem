@@ -21,6 +21,16 @@ class Data(dict):
     __delattr__ = dict.__delitem__
 
 
+class Secrets(dict):
+    """dot notation access to dictionary attributes"""
+    def __getattr__(*args):
+        val = dict.get(*args)
+        return Secrets(val) if type(val) is dict else val
+
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+
 def _get_set_name(test_data):
     """Get the set_name from test_data
     Return the value of 'set_name' key if present in the data
@@ -38,10 +48,10 @@ def _get_set_name(test_data):
     return set_name
 
 
-def run_test(workspace, project, test_name, test_data, browser,
+def run_test(workspace, project, test_name, test_data, secrets, browser,
              settings, report_directory):
     """Run a single test"""
-    runner = TestRunner(workspace, project, test_name, test_data, browser,
+    runner = TestRunner(workspace, project, test_name, test_data, secrets, browser,
                         settings, report_directory)
     runner.prepare()
 
@@ -50,7 +60,7 @@ class TestRunner:
 
     __test__ = False  # ignore this class from Pytest
 
-    def __init__(self, workspace, project, test_name, test_data, browser,
+    def __init__(self, workspace, project, test_name, test_data, secrets, browser,
                  settings, report_directory):
         self.result = {
             'result': '',
@@ -67,6 +77,7 @@ class TestRunner:
         self.project = project
         self.test_name = test_name
         self.test_data = test_data
+        self.secrets = secrets
         self.browser = browser
         self.settings = settings
         self.report_directory = report_directory
@@ -88,6 +99,7 @@ class TestRunner:
         execution.settings = self.settings
         execution.report_directory = self.report_directory
         execution.data = Data(self.test_data)
+        execution.secrets = Secrets(self.secrets)
         self._print_test_info()
         # add the 'project' directory to python path
         # to enable relative imports from the test

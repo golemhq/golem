@@ -109,7 +109,7 @@ def teardown(data):
         browser = _define_browsers_mock(['chrome'])[0]
         # run test
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -162,9 +162,10 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_data = dict(username='username1', password='password1')
+        secrets = dict(very='secret')
         # run test
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data=test_data, browser=browser, settings=settings,
+                             test_data=test_data, secrets=secrets, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -219,7 +220,7 @@ def test(data)
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -273,7 +274,7 @@ element2 = ('css', '.oh.no')
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -327,7 +328,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -377,7 +378,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -419,7 +420,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -461,7 +462,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -502,7 +503,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -543,7 +544,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -584,7 +585,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -625,7 +626,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -666,7 +667,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -705,7 +706,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -744,7 +745,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -784,7 +785,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -823,7 +824,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -862,7 +863,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -901,7 +902,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -940,7 +941,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -976,7 +977,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -1015,7 +1016,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -1054,7 +1055,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
@@ -1092,7 +1093,7 @@ def teardown(data):
         settings = settings_manager.get_project_settings(testdir, project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
-                             test_data={}, browser=browser, settings=settings,
+                             test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
         records = caplog.records
