@@ -161,10 +161,13 @@ def open_browser(browser_id=None):
         raise Exception('Error: {} is not a valid driver'.format(browser_definition['name']))
 
     if settings['start_maximized']:
-        # currently there is no way to maximize chrome window on OSX, adding workaround
+        # currently there is no way to maximize chrome window on OSX (chromedriver 2.43), adding workaround
         # https://bugs.chromium.org/p/chromedriver/issues/detail?id=2389
-        if not('headless' in browser_definition['name'] or ('chrome' == browser_definition['name'] and
-                                                            (platform.system() == 'Darwin'))):
+        # https://bugs.chromium.org/p/chromedriver/issues/detail?id=2522
+        # TODO: assess if this work-around is still needed when chromedriver 2.44 is released
+        if not ('headless' in browser_definition['name'] or ('chrome' == browser_definition['name']
+                                                             and (platform.system() == 'Darwin')
+                                                             and browser_definition['remote'] is False)):
             driver.maximize_window()
 
     if not browser_id:
