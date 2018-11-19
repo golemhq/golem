@@ -371,14 +371,19 @@ class GolemExtendedDriver:
         return element.wait_has_not_attribute(attribute, timeout)
 
     def wait_for_element_not_displayed(self, element, timeout):
-        """Wait for element to be not displayed
+        """Wait for element to be not displayed.
+        When element is not displayed this is ignored.
+        When element is not present this will raise ElementNotFound.
 
         :Args:
         - element: an element tuple, a CSS string or a WebElement object
         - timeout: time to wait (in seconds)
         """
-        element = self.find(element, timeout=0)
-        return element.wait_not_displayed(timeout)
+        try:
+            element = self.find(element, timeout=0, wait_displayed=False)
+            element.wait_not_displayed(timeout=timeout)
+        except ElementNotDisplayed:
+            pass
 
     def wait_for_element_not_enabled(self, element, timeout):
         """Wait for element to be not enabled
@@ -391,7 +396,7 @@ class GolemExtendedDriver:
         return element.wait_not_enabled(timeout)
 
     def wait_for_element_not_present(self, element, timeout):
-        """Wait for element present in the DOM
+        """Wait for element not present in the DOM
 
         :Args:
         - element: an element tuple, a CSS string or a WebElement object

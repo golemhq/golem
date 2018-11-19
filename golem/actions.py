@@ -2544,6 +2544,8 @@ def wait_for_element_has_not_attribute(element, attribute, timeout=30):
 
 def wait_for_element_not_displayed(element, timeout=30):
     """Wait for element to be not displayed
+    When element is not displayed this is ignored.
+    When element is not present this will raise ElementNotFound.
 
     Parameters:
     element : element

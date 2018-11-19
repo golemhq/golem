@@ -734,7 +734,9 @@ driver.wait_for_element_has_not_attribute('#someId', 'onclick', 5)
    
 #### **wait_for_element_not_displayed**(element, timeout) <small>[Golem]</small>
 
-Wait for element to be not displayed
+Wait for element to be not displayed.
+When element is not displayed this is ignored.
+When element is not present this will raise ElementNotFound.
 
 Args:
 * element: an element tuple, a CSS string or a WebElement object
@@ -750,7 +752,7 @@ Args:
 
 #### **wait_for_element_not_present**(element, timeout) <small>[Golem]</small>
 
-Wait for element present in the DOM
+Wait for element not present in the DOM
 
 Args:
 * element: an element tuple, a CSS string or a WebElement object

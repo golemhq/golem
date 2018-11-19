@@ -491,7 +491,9 @@ Wait for element to not have attribute
 
 ### wait_for_element_not_displayed(element, timeout=30)
 
-Wait for element to be not displayed
+Wait for element to be not displayed.
+When element is not displayed this is ignored.
+When element is not present this will raise ElementNotFound.
 
 ### wait_for_element_not_enabled(element, timeout=30)
 
