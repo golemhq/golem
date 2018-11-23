@@ -1,6 +1,8 @@
 {% extends "layout.html" %} 
 
-{% block head_declarations %} 
+{% block title %}Golem : {{project|capitalize}} : {{page_name}}{% endblock %}
+
+{% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/codemirror.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/page_object_code.css') }}">
 {% endblock %} 
@@ -26,7 +28,6 @@
 <script src="{{ url_for('static', filename='js/external/code_mirror/codemirror.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/code_mirror/python.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page_object_code.js') }}"></script>
-
 <script>
     var project = "{{project}}";
     var pageObjectName = "{{page_name}}";

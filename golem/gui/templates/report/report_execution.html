@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 
-{% block head_declarations %}
+{% block title %}Golem : {{project|capitalize}} : {{suite}} {{formatted_date}}{% endblock %}
+
+{% block head %}
 <link href="{{ url_for('static', filename='css/report.css') }}" rel="stylesheet" type="text/css" media="screen">
 {% endblock %}
 

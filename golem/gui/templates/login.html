@@ -1,15 +1,8 @@
 {% extends "layout.html" %} 
 
-{% block title %}
-Login
-{% endblock %} 
-
-{% block head_declarations %}
-{{ super() }}
-{% endblock %} 
+{% block title %}Golem : Login{% endblock %}
 
 {% block content %}
-
 <div class="row">
 	<div class="col-md-4 col-md-offset-4">
 		<h4>Login</h4>
@@ -29,7 +22,7 @@ Login
 			    </div>
 			</div>
 			<div class="form-group">
-				<label for="name" class="col-sm-3 control-label">Password</label>
+				<label for="password" class="col-sm-3 control-label">Password</label>
 			    <div class="col-sm-9">
 			    	<input type="password" class="form-control" id="password" name="password" placeholder="Password">
 			    </div>
@@ -37,9 +30,6 @@ Login
 			<input type="hidden" id="next" name="next" value="{{next_url}}">
 			<button type="submit" class="btn btn-default">Log in</button>
 		</form>
-
-
 	</div>
 </div>
-
 {% endblock %}

@@ -1,18 +1,20 @@
 {% extends "layout.html" %}
 
-{% block head_declarations %}
+{% block title %}Golem : {{project|capitalize}} : Reports{% endblock %}
+
+{% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}"/>
 {% endblock %}
 
 {% block content %}
 <div class="all-projects-container">
-	<h2 class="">Reports{% if project %} - {{project|replace("_", " ")}}{% endif %}</h2>
+	<h3>{% if project %}{{project|replace("_", " ")|capitalize}} - {% endif %}{% if suite %}{{suite|replace("_", " ")|capitalize}} - {% endif %}Reports</h3>
 </div>
 {% endblock %}
 
 {% block footer_declarations %}
 <script>
-	var projectName = '{{project}}';
+	var projects = {{projects|tojson}};
 	var suiteName = '{{suite}}'
 </script>
 <script src="{{ url_for('static', filename='js/report_dashboard.js') }}"></script>

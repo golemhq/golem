@@ -1,6 +1,8 @@
 {% extends "layout.html" %} 
 
-{% block head_declarations %}
+{% block title %}Golem : {{project|capitalize}} : {{full_test_case_name}}{% endblock %}
+
+{% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/test_case.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_common.css') }}">
 {% endblock %} 
@@ -265,10 +267,10 @@
 
     <div class="clearfix"></div>
 
-    <div class="col-sm-12 gray-1-background" id="datosContainerContainer" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
+    <div class="col-sm-12 gray-1-background" id="dataContainerContainer" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
 
         <h4>Data</h4>
-        <div id="datosContainer">
+        <div>
 
             <div id="datos">
                 <table class="table table-bordered table-condensed" id="dataTable"> 
@@ -365,7 +367,6 @@
     </div>
 
 </div>
-
 
 <!-- execution modal -->
 <div class="modal fade" id="testRunModal" tabindex="-1" role="dialog" style="top: 15%">

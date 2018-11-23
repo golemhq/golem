@@ -1,16 +1,19 @@
 """Helper functions to deal with Golem GUI module application."""
 import subprocess
 import inspect
+from functools import wraps
+
+from flask import abort, render_template
+from flask_login import current_user
 
 import golem.actions
-from golem.core import utils
+from golem.core import utils, test_execution
 
 
 def run_test_case(project, test_case_name, environment):
     """Run a test case. This is used when running tests from the GUI"""
     timestamp = utils.get_timestamp()
-    param_list = ['golem', 'run', project, test_case_name,
-                  '--timestamp', timestamp]
+    param_list = ['golem', 'run', project, test_case_name, '--timestamp', timestamp]
     if environment:
         param_list.append('--environments')
         param_list.append(environment)
@@ -137,3 +140,45 @@ def get_supported_browsers_suggestions():
         'opera-remote',
     ]
     return supported_browsers
+
+
+def project_exists(func):
+    """A wrapper that checks if the requested project exists.
+      * The annotated function must have a `project` argument.
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not utils.project_exists(test_execution.root_path, kwargs['project']):
+            abort(404, 'The project {} does not exist.'.format(kwargs['project']))
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def gui_permissions_required(func):
+    """A wrapper that checks if the current user
+    has GUI permissions to the project.
+      * The annotated function must have a `project` argument.
+      * The current user must be available in `flask_login.current_user`
+      * The user object must have a `has_gui_permissions(project) method`
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not current_user.has_gui_permissions(kwargs['project']):
+            return render_template('not_permission.html')
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def report_permissions_required(func):
+    """A wrapper that checks if the current user
+    has project permissions to the project.
+      * The annotated function must have a `project` argument.
+      * The current user must be available in `flask_login.current_user`
+      * The user object must have a `has_report_permissions(project) method`
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not current_user.has_report_permissions(kwargs['project']):
+            return render_template('not_permission.html')
+        return func(*args, **kwargs)
+    return wrapper

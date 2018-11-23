@@ -17,7 +17,7 @@ def get_date_time_from_timestamp(timestamp):
     return date_time_string
 
 
-def get_last_executions(root_path, project=None, suite=None, limit=5):
+def get_last_executions(root_path, projects=None, suite=None, limit=5):
     """Get the last n executions.
     
     Get the executions of one suite or all the suites,
@@ -29,26 +29,20 @@ def get_last_executions(root_path, project=None, suite=None, limit=5):
     """
     last_execution_data = {}
     path = os.path.join(root_path, 'projects')
-    projects = []
-    # use one project or all the projects
-    if project:
-        projects = [project]
-    else:
+    # if no projects provided, search every project
+    if not projects:
         projects = os.walk(path).__next__()[1]
     for project in projects:
         last_execution_data[project] = {}
         report_path = os.path.join(path, project, 'reports')
-        executed_suites = []
         # use one suite or all the suites
         if suite:
             executed_suites = [suite]
         else:
             executed_suites = os.walk(report_path).__next__()[1]
             executed_suites = [x for x in executed_suites if x != 'single_tests']
-
         for exec_suite in executed_suites:
             last_execution_data[project][exec_suite] = []
-            suite_executions = []
             suite_path = os.path.join(report_path, exec_suite)
             suite_executions = os.walk(suite_path).__next__()[1]
             last_executions = sorted(suite_executions)
@@ -59,9 +53,8 @@ def get_last_executions(root_path, project=None, suite=None, limit=5):
     return last_execution_data
 
 
-def _parse_execution_data(execution_directory=None, workspace=None,
-                         project=None, suite=None, execution=None):
-    """ """
+def _parse_execution_data(execution_directory=None, workspace=None, project=None,
+                          suite=None, execution=None):
     execution_data = {
         'tests': [],
         'total_tests': 0,

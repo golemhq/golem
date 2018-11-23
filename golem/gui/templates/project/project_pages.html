@@ -1,21 +1,21 @@
 {% extends "layout.html" %}
 
-{% block head_declarations %}
+{% block title %}Golem : {{project|capitalize}} : Pages{% endblock %}
+
+{% block head %}
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/project_dashboard.css') }}">
-	{{ super() }}
 {% endblock %} 
 
 {% block content %}
 <div class="row" style="padding-right: 15px; padding-left: 15px">
 	<div class="col-md-10 col-md-offset-1">
-		<h3>{{project|replace("_", " ")}} - Pages</h3>
+		<h3>{{project|capitalize|replace("_", " ")}} - Pages</h3>
         <br>
 		<div id="pagesContainer" class="col-md-12 box-container gray-border-3">
 			<ul id="pagesTree" class='page-tree'></ul>
 		</div>
 	</div>
 </div>
-
 <script src="{{ url_for('static', filename='js/external/treeview.js') }}"></script>
 <script src="{{ url_for('static', filename='js/project.js') }}"></script>
 <script src="{{ url_for('static', filename='js/project_pages.js') }}"></script>

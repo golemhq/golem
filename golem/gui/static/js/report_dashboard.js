@@ -1,17 +1,17 @@
 
 $(document).ready(function() {
 	let limit;
-	if(projectName == "") limit = 5;
+	if(projects == []) limit = 5;
 	else if(suiteName == "") limit = 10
 	else limit = 50;
 	$.ajax({
 		url: "/report/get_last_executions/",
-		data: {
-            "project": projectName,
+		data: JSON.stringify({
+            "projects": projects,
             "suite": suiteName,
             "limit": limit
-        },
-        dataType: 'json',
+        }),
+        contentType: 'application/json; charset=utf-8',
         type: 'POST',
 		success: function( data ) {	
 	  		for(project in data.projects){
@@ -28,7 +28,7 @@ const ReportDashboardMain = new function(){
 
     this.loadProject = function(project, projectData){
         let projectContainer;
-        if(suiteName || projectName)
+        if(suiteName || projects.length == 1)
             projectContainer = ReportDashboard.generateProjectContainerSingleSuite(project);
         else
             projectContainer = ReportDashboard.generateProjectContainer(project);
@@ -124,6 +124,7 @@ const ReportDashboardMain = new function(){
                 });
             }
         );
+
     }
 
     this.updateChart = function(data){

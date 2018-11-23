@@ -1,11 +1,8 @@
 {% extends "layout.html" %}
 
-{% block head_declarations %}
-	{{ super() }}
-{% endblock %}
+{% block title %}Golem{% endblock %}
 
 {% block content %}
-
 <div class="row">
     <div class="col-sm-4 col-sm-offset-4">
         <h4>Select a Project</h4>
@@ -14,7 +11,6 @@
             	<a href="/project/{{project}}/" class="list-group-item">{{ project }}</a>
             {% endfor %}
         </div>
-
         {% if current_user.is_admin %}
             <div id="projectCreationButton">
                 <button class="btn btn-default">Create Project</button>
@@ -31,7 +27,5 @@
         {% endif %} 
     </div>
 </div>
-
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
-
 {% endblock %}

@@ -68,7 +68,7 @@ class TestGolem:
         result = test_utils.run_command(command)
         msg = 'User {} was created successfully'.format(username)
         assert result == msg
-        assert user.user_exists(username, testdir_session.path)
+        assert user.get_user_data(username=username)
 
     def test_golem_run_test(self, project_session, test_utils):
         path = project_session.testdir

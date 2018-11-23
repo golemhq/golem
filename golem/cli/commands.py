@@ -105,7 +105,7 @@ def run_command(project='', test_query='', browsers=None, processes=1,
         for project in utils.get_projects(test_execution.root_path):
             print('  {}'.format(project))
 
-8
+
 def gui_command(port=5000):
     gui_start.run_gui(port)
 

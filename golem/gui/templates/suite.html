@@ -1,36 +1,24 @@
 {% extends "layout.html" %} 
 
-{% block head_declarations %} 
+{% block title %}Golem : {{project|capitalize}} : {{suite}}{% endblock %}
 
+{% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/suite.css') }}">
-
 {% endblock %} 
 
 {% block content %}
-
 <div>
-	
-    <div class="col-md-8 col-md-offset-2" id="datosContainerContainer">
-
+    <div class="col-md-8 col-md-offset-2" id="dataContainerContainer">
         <div class="col-xs-6 header-col">
-            <h3 id="suiteName">
-                <!-- <small>
-                    <a href="/p/{{project}}/" class="link-without-underline">
-                        <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
-                    </a>
-                </small> -->
-            {{suite}}</h3>
+            <h3 id="suiteName">{{suite}}</h3>
         </div>
-
         <div class="col-xs-6 text-right header-col" style="padding-top: 20px">
             <button id="runTest" class="btn btn-default btn-sm" onclick="runSuite()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Suite</button>
             <button id="save" class="btn btn-default btn-sm" onclick="saveTestSuite();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
         </div>
-
         <div class="clearfix"></div>
 
         <h4>Settings</h4>
-
         <form class="form-horizontal">
         <div>
             <div class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Browsers</div>
@@ -50,9 +38,7 @@
                 <input type="number" class="form-control" id="workers" value="{{worker_amount}}" placeholder="Amount of workers">
             </div>
         </div>
-
         </form>
-        
         <div class="clearfix"></div> 
         <br>       
         <ul id="suiteTests" class="tree" style="padding-left: 15px">
@@ -71,11 +57,9 @@
                     </li>
                 {%- endfor %}
             </ul>
-
+        </ul>
         <div class="clearfix"></div>
-
     </div>
-
 </div>
 
 <script src="{{ url_for('static', filename='js/external/jquery.autocomplete.min.js') }}"></script>
@@ -86,5 +70,4 @@
     var suite = "{{suite}}";
     var selectedTests = {{selected_tests|tojson}};
 </script>
-
 {% endblock %}
