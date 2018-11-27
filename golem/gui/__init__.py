@@ -1113,6 +1113,19 @@ def page_exists():
         return jsonify(page_exists)
 
 
+@app.route("/get_amount_of_tests/", methods=['GET'])
+@login_required
+def get_amount_of_tests():
+    project = request.args['project']
+    tests = utils.get_directory_tests(test_execution.root_path, project, '')
+    amount = len(tests)
+    response = jsonify(amount)
+    if amount > 0:
+        response.cache_control.max_age = 108000
+        response.cache_control.public = True
+    return response
+
+
 ############
 # END OF API
 ############

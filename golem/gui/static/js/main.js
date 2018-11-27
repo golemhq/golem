@@ -180,6 +180,36 @@ const Main = new function(){
         this.capitalizeWords = function(str){
             return str.replace(/(^|\s)\S/g, l => l.toUpperCase())
         }
+
+        // Displays a dismissable info bar prepended in the container
+        this.infoBar = function(container, content){
+            let bar = `<div class="info-bar alert alert-info alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                ${content}
+            </div>`;
+            container.prepend(bar);
+        }
+
+        // incomplete, not used
+        this.MultiselectWidget = new function(){
+
+            this._tag = function(value){
+                let badge = `<div class="tag label btn md">
+                    <span>test</span>
+                    <a style="opacity: 0.6;" onclick="this.parentElement.remove()"><i class="remove glyphicon glyphicon-remove-sign glyphicon-white"></i></a>
+                </div>`;
+                return $(badge)
+            }
+
+            this.initialize = function(container, values, id, placeholder){
+                let widget = `<input type="text" class="form-control" id="${id}" placeholder="${placeholder}">
+                                <div class="tag-container"></div>`;
+                container.append(widget);
+                values.forEach(function(value){
+                    $(container).find('.tag-container').append(Main.Utils.MultiselectWidget._tag(value))
+                })
+            }
+        }
     }
 
 

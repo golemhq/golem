@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}Golem : {{project|capitalize}} : Reports{% endblock %}
+{% block title %}{% if project %}Golem : {{project|capitalize}} : Reports{% else %}Golem : Reports{% endif %}{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}"/>

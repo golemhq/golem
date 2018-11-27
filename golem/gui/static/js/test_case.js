@@ -53,24 +53,17 @@ var testCase = new function(){
     this.generatePageInput = function(pageName){
         var pageInput = "\
             <div class='input-group'> \
-                <input type='text' disabled class='form-control no-border-radius \
-                    selected-page' value='"+pageName+"'> \
-                <span class='input-group-btn input-middle-btn'>\
+                <input type='text' disabled class='form-control selected-page' value='"+pageName+"'> \
+                <div class='input-group-btn'> \
                     <button class='btn btn-default' type='button' onclick='testCase.loadPageInModal(this)'>\
-                    <span class='glyphicon glyphicon-edit' aria-hidden='true'></span></button>\
-                </span>\
-                <span class='input-group-btn input-middle-btn'> \
-                    <button class='btn btn-default' type='button' \
-                        onclick='openPageObjectInNewWindow(this)'> \
-                            <span class='glyphicon glyphicon-new-window' aria-hidden='true'> \
-                            </span>\
+                        <span class='glyphicon glyphicon-edit' aria-hidden='true'></span></button>\
+                    <button class='btn btn-default' type='button' onclick='openPageObjectInNewWindow(this)'> \
+                        <span class='glyphicon glyphicon-new-window' aria-hidden='true'></span>\
                     </button> \
-                </span> \
-                <span class='input-group-btn'> \
                     <button class='btn btn-default' type='button' onclick='testCase.deletePageObject(this)'> \
                         <span class='glyphicon glyphicon-remove' aria-hidden='true'></span> \
                     </button> \
-                </span> \
+                </div> \
             </div>";
         return pageInput
     }
@@ -89,12 +82,9 @@ var testCase = new function(){
             "<div class='step'> \
                 <div class='step-numbering'></div> \
                 <div class='col-sm-3 step-input-container step-first-input-container'> \
-                    <div class='input-group'> \
-                        <input type='text' class='form-control step-first-input' \
-                            placeholder='action'> \
-                    </div> \
+                        <input type='text' class='form-control step-first-input' placeholder='action'> \
                 </div> \
-                <div class='params col-sm-6'> \
+                <div class='params'> \
                 </div> \
                 <div class='step-remove-icon'> \
                     <a href='javascript:void(0)' onclick='deleteStep(this);'> \
@@ -257,7 +247,7 @@ function startStepFirstInputAutocomplete(){
 
 
 function stepFirstInputChange(elem){
-    var step = $(elem).parent().parent().parent();
+    var step = $(elem).parent().parent();//.parent();
     var hasParameter = step.find('.parameter-input').length > 0
     var placeholder = ''
     var elemValue = $(elem).val();
@@ -308,11 +298,7 @@ function stepFirstInputChange(elem){
         //                             placeholder='"+parameter.name+"'>";
         // }
         
-        var newInput = $("<div class='col-sm-6 step-input-container parameter-container'> \
-                            <div class='input-group'> \
-                            "+input+" \
-                            </div> \
-                        </div>");
+        var newInput = $("<div class='step-input-container parameter-container'>"+input+"</div>");
 
         newInput.on('change', function(){
             unsavedChanges = true;
@@ -337,7 +323,7 @@ function startAllValueInputAutocomplete(){
 
     var lookup = []
 
-    var allValues = getLoadedDatosWithValues();
+    var allValues = getLoadedDataWithValues();
 
     for(value in allValues){
         lookup.push({
@@ -423,26 +409,26 @@ function getPageObjectDataFromPageObjects(poName){
 }
 
 
-function getLoadedDatos(){
-    var datos = [];
+function getLoadedData(){
+    var data = [];
     $(".dato").each(function(){
-        datos.push(
+        data.push(
             $(this).find(".dato-variable").val());
     });
-    return datos;
+    return data;
 }
 
-function getLoadedDatosWithValues(){
-    var datos = [];
+function getLoadedDataWithValues(){
+    var data = [];
     $("#dataTable thead input").each(function(){
         if($(this).val() != ''){
-            datos.push({
+            data.push({
                 'name': $(this).val(),
                 'value': $(this).val()
             });
         }
     });
-    return datos;
+    return data;
 }
 
 

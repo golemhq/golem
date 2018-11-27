@@ -26,100 +26,95 @@
     <div id="error-container" class="error-container" style="display: none;">
         <pre style="color: red"></pre>
     </div>
-    <div id="codeEditorContainer" class="col-sm-12" style="border: 1px solid #e0e0e0; padding-left:0px; padding-right: 0px">
-    </div>
-
+    <div id="codeEditorContainer"></div>
     {% if test_data or test_data_setting == 'csv' %}
-    <div id="dataContainerContainer" class="col-sm-12 light-gray-block" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
+    <div id="dataContainerContainer" class="col-sm-12 light-gray-block">
         <h4>Data</h4>
-        <div>
-
-            <div id="datos">
-                <table class="table table-bordered table-condensed" id="dataTable"> 
-                    {% if test_data[0] %}
-                    <thead> 
-                        <tr> 
-                            <th class="index">#</th> 
-                            {% for key, val in test_data[0].items() %}
-                            <th>
-                                <div class="input-group">
-                                    <input class="form-control" type="text" value="{{key}}">
-                                </div>
-                            </th>
-                            {% endfor %}
-                            <th>
-                                <div class="input-group">
-                                    <input class="form-control" type="text">
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in test_data %}
-                        <tr>
-                            <th scope="row" class="index">{{loop.index}}</th> 
-                            {% for key, value in row.items() %}
-                            <td>
-                                <div class="input-group">
-                                    <input class="form-control" type="text" value="{{value}}">
-                                </div>
-                            </td>
-                            {% endfor %}
-                            <td><div class="input-group"><input class="form-control" type="text"></div>
-                            </td> 
-                        </tr>
+        <div id="dataTableContainer">
+            <table class="table table-bordered table-condensed" id="dataTable">
+                {% if test_data[0] %}
+                <thead>
+                    <tr>
+                        <th class="index">#</th>
+                        {% for key, val in test_data[0].items() %}
+                        <th>
+                            <div class="input-group">
+                                <input class="form-control" type="text" value="{{key}}">
+                            </div>
+                        </th>
                         {% endfor %}
-                        <tr>
-                            <th scope="row" class="index">{{test_data|length + 1}}</th> 
-                            {% for item in test_data[0].items() %}
-                            <td><div class="input-group"><input class="form-control" type="text"></div>
-                            </td> 
-                            {% endfor %}
-                            <td><div class="input-group"><input class="form-control" type="text"></div>
-                            </td> 
-                        </tr>
-                    </tbody>
-
-                    {% else %}
-                    <thead> 
-                        <tr> 
-                            <th class="index">#</th> 
-                            {% for i in range(4) %}
-                            <th>
-                                <div class="input-group">
-                                    <input class="form-control" type="text">
-                                </div>
-                            </th>
-                            {% endfor %}
-                        </tr> 
-                    </thead> 
-                    <tbody>
-                        {% for i in range(3) %}
-                        <tr> 
-                            <th scope="row" class="index">{{i+1}}</th>
-                            {% for j in range(4) %}
-                            <td>
-                                <div class="input-group">
-                                    <input class="form-control" type="text">
-                                </div>
-                            </td>
-                            {% endfor %}
-                        </tr>
+                        <th>
+                            <div class="input-group">
+                                <input class="form-control" type="text">
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in test_data %}
+                    <tr>
+                        <th scope="row" class="index">{{loop.index}}</th>
+                        {% for key, value in row.items() %}
+                        <td>
+                            <div class="input-group">
+                                <input class="form-control" type="text" value="{{value}}">
+                            </div>
+                        </td>
                         {% endfor %}
-                    </tbody>     
-                    {% endif %}
-                </table>
-            </div>
-            <div style="display: table-cell; position: relative;">
-                <a href="javascript:void(0)" onclick="dataTable.addColumnToDataTable();">
-                    <img src="{{ url_for('static', filename='img/plus_sign.png') }}" class="add-new-icon" style="margin-left: 5px;">
-                </a>
-            </div>
-            <div class="text-right" style="width: 100%">
-                <a href="javascript:void(0)" onclick="dataTable.addRowToDataTable();">
-                    <img src="{{ url_for('static', filename='img/plus_sign.png') }}" class="add-new-icon" style="margin-right: 30px;">
-                </a>
-            </div>
+                        <td><div class="input-group"><input class="form-control" type="text"></div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <th scope="row" class="index">{{test_data|length + 1}}</th>
+                        {% for item in test_data[0].items() %}
+                        <td><div class="input-group"><input class="form-control" type="text"></div>
+                        </td>
+                        {% endfor %}
+                        <td><div class="input-group"><input class="form-control" type="text"></div>
+                        </td>
+                    </tr>
+                </tbody>
+
+                {% else %}
+                <thead>
+                    <tr>
+                        <th class="index">#</th>
+                        {% for i in range(4) %}
+                        <th>
+                            <div class="input-group">
+                                <input class="form-control" type="text">
+                            </div>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in range(3) %}
+                    <tr>
+                        <th scope="row" class="index">{{i+1}}</th>
+                        {% for j in range(4) %}
+                        <td>
+                            <div class="input-group">
+                                <input class="form-control" type="text">
+                            </div>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% endif %}
+            </table>
+        </div>
+        <div style="display: table-cell; position: relative;">
+            <a href="javascript:void(0)" onclick="dataTable.addColumnToDataTable();">
+                <img src="{{ url_for('static', filename='img/plus_sign.png') }}" class="add-new-icon" style="margin-left: 5px;">
+            </a>
+        </div>
+        <div class="text-right" style="width: 100%">
+            <a href="javascript:void(0)" onclick="dataTable.addRowToDataTable();">
+                <img src="{{ url_for('static', filename='img/plus_sign.png') }}" class="add-new-icon" style="margin-right: 30px;">
+            </a>
         </div>
     </div>
     {% endif %}

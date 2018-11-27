@@ -6,8 +6,7 @@ $(document).ready(function() {
     if(codeError !== null){
         $(".error-container").show();
         $(".error-container pre").html(codeError);
-    }      
-
+    }
     codeEditor = CodeMirror($("#codeEditorContainer")[0], {
         value: pageObjectCode,
         mode:  "python",

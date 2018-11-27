@@ -2,16 +2,21 @@
 var Project = new function(){
 
     this.generateNewElement = function(element){
-        var li = "\
+        var li = $("\
             <li class='tree-element' fullpath='"+element.dotPath+"' name='"+element.name+"' type='"+element.type+"'>\
                 <a href='"+element.url+"'>"+element.name+"</a> \
                 <span class='pull-right tree-element-buttons'> \
                     <button class='rename-button' onclick='Project.renameFilePrompt(this)'><i class='glyphicon glyphicon-edit'></i></button> \
-                    <button class='duplicate-button' onclick='Project.duplicateElementPrompt(this)'><i class='glyphicon glyphicon-copy'></i></button> \
+                    <button class='duplicate-button' onclick='Project.duplicateElementPrompt(this)'><i class='glyphicon glyphicon-duplicate'></i></button> \
                     <button class='delete-button' onclick='Project.deleteElementConfirm(this)'><i class='glyphicon glyphicon-remove'></i></button> \
                 </span>\
-            </li>";
-        return $(li)
+            </li>");
+
+        if(element.type == 'test' || element.type == 'page'){
+            let codeLink = `<a href="${element.url}code" class="code-button"><i class="fa fa-code" style="font-weight: 900;font-size: 18px;"></i></a>`
+            li.find("span.tree-element-buttons").prepend(codeLink);
+        }
+        return li
     }
 
     this.addBranchToTree = function(branchName, dot_path){
@@ -69,7 +74,7 @@ var Project = new function(){
         var li = "\
             <li class='form-container' fullpath='"+dot_path+"'>\
             <span class='new-element-form' style='display: none;'>\
-                <input class='new-element-input new-test-case' type='text'\
+                <input class='new-element-input new-test-case form-control' style='max-width: 300px'type='text'\
                     onblur='Project.addElement(event);' onkeyup='if(event.keyCode==13){Project.addElement(event)}'>\
             </span>\
             <span class='display-new-element-link'>\

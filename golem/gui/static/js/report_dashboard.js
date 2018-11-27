@@ -32,6 +32,9 @@ const ReportDashboardMain = new function(){
             projectContainer = ReportDashboard.generateProjectContainerSingleSuite(project);
         else
             projectContainer = ReportDashboard.generateProjectContainer(project);
+        if(Object.keys(projectData).length == 0){
+            projectContainer.append('<p>There are no executions for this project</p>')
+        }
         for(suite in projectData){
             let suiteContainer;
             if(suiteName)
@@ -163,7 +166,7 @@ const ReportDashboard = new function(){
         let projectContainer = " \
             <div class='col-md-12 project-container' id='"+projectName+"'> \
                 <h3 class='no-margin-top'> \
-                    <a href='/report/project/"+projectName+"/' class='link-without-underline'>"+projectName.replace('_',' ')+"</a> \
+                    <a href='/report/project/"+projectName+"/' class='link-without-decoration'>"+projectName.replace('_',' ')+"</a> \
                 </h3> \
             </div>";
         return $(projectContainer)
@@ -182,7 +185,7 @@ const ReportDashboard = new function(){
                     <div class='widget-header'> \
                         <h3><i class='fa fa-table'></i><span class='suite-name'> \
                             <a href='/report/project/"+projectName+"/suite/"+suiteName+"/' \
-                                class='link-without-underline'>"+suiteName+"</a> \
+                                class='link-without-decoration'><strong>"+suiteName+"</strong></a> \
                         </span></h3> \
                     </div> \
                     <div class='flex-row'>\
@@ -216,7 +219,7 @@ const ReportDashboard = new function(){
         let executionsContainer = "\
             <div class='suite-container' id='"+suiteName+"'> \
                 <div class='widget widget-table'> \
-                    <div class='' style='height: 218px'> \
+                    <div style='height: 218px; padding: 10px'> \
                         <canvas></canvas>\
                     </div> \
                     <div class='widget-content table-content'> \

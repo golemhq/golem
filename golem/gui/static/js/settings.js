@@ -4,8 +4,8 @@ var globalSettingsEditor = null;
 
 $(document).ready(function() {    
     if(settingsCode != null){
-        $("#settingsContainer").show();
-        projectSettingsEditor = CodeMirror($("#settingsContainer")[0], {
+        $("#projectSettingsContainer").show();
+        projectSettingsEditor = CodeMirror($("#projectSettingsContainer>.codeEditorContainer")[0], {
           value: settingsCode,
           mode: "application/ld+json",
           lineNumbers: true,
@@ -16,7 +16,7 @@ $(document).ready(function() {
       })
     }
 
-    globalSettingsEditor = CodeMirror($("#globalSettingsContainer")[0], {
+    globalSettingsEditor = CodeMirror($("#globalSettingsContainer>.codeEditorContainer")[0], {
         value: globalSettingsCode,
         mode: "application/ld+json",
         lineNumbers: true,

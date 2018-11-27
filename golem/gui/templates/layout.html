@@ -5,32 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap-theme.min.css') }}">
+    <!--<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap-theme.min.css') }}">-->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr/toastr.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome/font-awesome.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/temp.css') }}">
+    <!--<link rel="stylesheet" href="{{ url_for('static', filename='css/temp.css') }}">-->
     <script src="{{ url_for('static', filename='js/external/jquery.min.js') }}"></script>
     {% block head %}{% endblock %}
 </head>
 <body>
 <div class="container-fluid">
-
-    <script>
-    if({% if no_sidebar %}true{%else%}false{%endif%}){
-      document.write("<div id='wrapper' class='no-sidebar'>") 
-    }
-    else if(localStorage.getItem('sidebarCollapse') == 'true'){
-      document.write("<div id='wrapper' class='sidebar-collapsed'>")
-    }
-    else{
-      document.write("<div id='wrapper'>") 
-    }
-    </script>
+    <div id='wrapper'>
+        <script>
+            let noSidebar = {% if no_sidebar %}true{% else %}false{% endif %};
+            let clsName = '';
+            if(noSidebar){
+                clsName = 'no-sidebar'
+            }
+            else if(localStorage.getItem('sidebarCollapse') == 'true'){
+                clsName = 'sidebar-collapsed'
+            }
+            document.getElementById('wrapper').className = clsName
+        </script>
         <nav id="sidebar" class="">
             <div class="sidebar-header">
                 <a href="/"><h3>Golem</h3><strong>G</strong></a>
-        </div>
+            </div>
         <ul class="list-unstyled components">
             {% if project%}
             <li>

@@ -17,24 +17,23 @@
             <button id="save" class="btn btn-default btn-sm" onclick="saveTestSuite();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
         </div>
         <div class="clearfix"></div>
-
         <h4>Settings</h4>
         <form class="form-horizontal">
         <div>
             <div class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Browsers</div>
-            <div class="input-group form-group col-xs-10" style="">    
+            <div class="form-group col-xs-10" style="">
                 <input type="text" class="form-control" id="browsers" value="{{ browsers if browsers else ''}}" placeholder="list of browsers">
-            </div> 
+            </div>
         </div>
         <div>
             <div class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Environments</div>
-            <div class="input-group form-group col-xs-10" style="">    
+            <div class="form-group col-xs-10" style="">
                 <input type="text" class="form-control" id="environments" value="{{ environments if environments else ''}}" placeholder="list of environments">
             </div> 
         </div>
         <div>
             <div for="workers" class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Workers</div>
-            <div class="input-group form-group col-sm-3">
+            <div class="form-group col-sm-3">
                 <input type="number" class="form-control" id="workers" value="{{worker_amount}}" placeholder="Amount of workers">
             </div>
         </div>

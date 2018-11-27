@@ -3,13 +3,16 @@
     padding:0;
     list-style:none
 }
+
 .tree ul {
     margin-left:1em;
     position:relative
 }
+
 .tree ul ul {
     margin-left:.5em
 }
+
 .tree ul:before {
     content:"";
     display:block;
@@ -20,6 +23,7 @@
     left:0;
     border-left:1px solid
 }
+
 .tree li {
     margin:0;
     padding:0 1em;
@@ -28,6 +32,7 @@
     font-weight:700;
     position:relative
 }
+
 .tree ul li:before {
     content:"";
     display:block;
@@ -39,19 +44,23 @@
     top:1em;
     left:0
 }
+
 .tree ul li:last-child:before {
     background:#fff;
     height:auto;
     top:1em;
     bottom:0
 }
+
 .indicator {
     margin-right: 4px;
 }
+
 .tree li a {
     text-decoration: none;
     color:#369;
 }
+
 .tree li button, .tree li button:active, .tree li button:focus {
     text-decoration: none;
     color:#369;
@@ -61,8 +70,6 @@
     padding:0px 0px 0px 0px;
     outline: 0;
 }
-
-
 
 .select-testcase-checkbox {
     float: left;

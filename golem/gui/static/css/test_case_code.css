@@ -3,12 +3,31 @@ html {
     overflow-y: scroll;
 }
 
+#codeEditorContainer {
+    width: 100%;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+	border: 1px solid #e0e0e0;
+}
+
+#dataContainerContainer {
+    border-left: 1px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px
+}
 
 .CodeMirror {
 	font-size:13px;
-	height: 400px;
+	border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    height: auto;
 }
 
+.CodeMirror-scroll {
+    min-height: 300px
+}
 
 .light-gray-block {
 	background-color: #F8F8F8; 
@@ -22,7 +41,6 @@ html {
     margin-bottom: 5px;
     width: 100%;
 }
-
 
 .add-new-icon {
 	width: 25px;

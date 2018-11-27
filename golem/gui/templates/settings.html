@@ -10,27 +10,21 @@
 {% block content %}
 <div class="col-lg-8 col-lg-offset-2">
     <div class="col-sm-6 header-col">
-        <h3 id="settingsTitle">
-            <small>
-                <a href="/p/{{project}}/" class="link-without-underline">
-                    <span class="glyphicon glyphicon glyphicon-menu-left" aria-hidden="true"></span>
-                </a>
-            </small>
-            {% if project %}{{project|capitalize|replace("_", " ")}} - {% endif %} Settings</h3>
+        <h3 id="settingsTitle">{% if project %}{{project|capitalize|replace("_", " ")}} - {% endif %} Settings</h3>
     </div>
     <div class="col-sm-6 text-right header-col" style="padding-top: 20px">
         <button id="save" class="btn btn-default btn-sm" onclick="saveSettings();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
     </div>
     <div class="clearfix"></div>
-
-    <div class="codeEditorContainer" id="settingsContainer" style="display: none">
-        <h5>Project Settings</h5>
+    <div id="projectSettingsContainer" style="display: none">
+        <h4>Project Settings</h4>
+        <div class="codeEditorContainer" id="settingsContainer">
+        </div>
     </div>
-
-    <div class="codeEditorContainer" id="globalSettingsContainer">
-        <h5>Global Settings</h5>
+    <div id="globalSettingsContainer">
+        <h4>Global Settings</h4>
+        <div class="codeEditorContainer"></div>
     </div>
-
     <div style="margin-top: 15px"><i class="fa fa-info-circle" aria-hidden="true"></i> Project settings override global settings.</div>
     <br>
 </div>
