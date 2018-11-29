@@ -958,6 +958,10 @@ Mark the test as failure and stop
 
 Return test data.
 
+### get_secrets()
+
+Return the secrets object.
+
 ### get_search_timeout()
 
 Get search timeout.
@@ -994,6 +998,10 @@ Add a step to the report
 ### store(key, value)
 
 Store a value in data object.
+
+### store_secret(key, value)
+
+Store a value in the secrets object.
 
 ### wait(seconds)
 

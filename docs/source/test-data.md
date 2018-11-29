@@ -159,3 +159,41 @@ There are two ways to define the environment (or environments) for a test or sui
     ```python
     environments = ['testing']
     ```
+    
+## Secrets
+
+Secrets are defined in the *secrets.json* file inside a project.
+Secrets can be used to store specific data which you do not want to expose in golem test reports / logging such as passwords, hostnames of database systems and temporary test data needed for text execution
+
+*Please note:* When using secrets in conjunction with default Golem actions, their values can be exposed in the test reports and logs. Exposure is caused by the fact that most default golem actions log their actions.
+
+**secrets.json**
+```json
+{
+  "database": {
+    "host": "db-server.local",
+    "user": "db_consumer",
+    "password": "abc",
+    "port": 5432,
+    "schema": "public"
+  },
+  "secret_user_1": "Joe"
+}
+```
+
+During text execution secrets can be stored and retrieved, see examples below.
+
+1. storing and retrieving a secret from a test
+```python
+def test(data):
+    store_secret('password', 'my_password')
+    print(get_secrets().password)
+```
+
+2. storing and retrieving a secret from a page
+```python
+from golem import actions
+def some_function():
+    actions.store_secret('password', 'my_password')
+    print(actions.get_secrets().password)
+```

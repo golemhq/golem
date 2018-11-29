@@ -1166,6 +1166,11 @@ def get_data():
     return execution.data
 
 
+def get_secrets():
+    """Return secrets"""
+    return execution.secrets
+
+
 def get_element_attribute(element, attribute):
     """Get the attribute value of element.
     If the attribute is not present in element, None is returned.
@@ -1627,6 +1632,17 @@ def store(key, value):
     """
     execution.logger.info("Store value '{}' in key '{}'".format(value, key))
     setattr(execution.data, key, value)
+
+
+def store_secret(key, value):
+    """Store a key value pair into secrets
+
+    Parameters:
+    key : value
+    value : value
+    """
+    execution.logger.info("Stored a key and value into secrets")
+    setattr(execution.secrets, key, value)
 
 
 def submit_form(form_element):

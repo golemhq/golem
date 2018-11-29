@@ -9,7 +9,8 @@ from golem.core import (test_execution,
                         report,
                         test_data,
                         environment_manager,
-                        settings_manager)
+                        settings_manager,
+                        secrets_manager)
 from golem.core import suite as suite_module
 from golem.gui import gui_utils, report_parser
 from golem.test_runner.multiprocess_executor import multiprocess_executor
@@ -130,6 +131,7 @@ class ExecutionRunner:
         execution_list = []
         testdir = test_execution.root_path
         envs_data = environment_manager.get_environment_data(testdir, self.project)
+        secrets = secrets_manager.get_secrets(testdir, self.project)
         for test in self.tests:
             data_sets = test_data.get_test_data(testdir, self.project, test)
             for data_set in data_sets:
@@ -140,7 +142,7 @@ class ExecutionRunner:
                         data_set_env['env'] = envs_data[env]
                         data_set_env['env']['name'] = env
                     for browser in self.execution.browsers:
-                        testdef = SimpleNamespace(name=test, data_set=data_set_env,
+                        testdef = SimpleNamespace(name=test, data_set=data_set_env, secrets=secrets,
                                                   browser=browser, reportdir=None)
                         execution_list.append(testdef)
         return execution_list
@@ -306,7 +308,7 @@ class ExecutionRunner:
                 # run tests serially
                 for test in self.execution.tests:
                     run_test(test_execution.root_path, self.project, test.name,
-                             test.data_set, test.browser, test_execution.settings,
+                             test.data_set, test.secrets, test.browser, test_execution.settings,
                              test.reportdir)
             else:
                 # run tests using multiprocessing

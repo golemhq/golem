@@ -155,7 +155,7 @@ class TestDefineExecutionList:
         execution_runner.project = project_function_clean.name
         execution_list = execution_runner._define_execution_list()
         expected_list = [
-            SimpleNamespace(name='test_001', data_set={}, browser='chrome', reportdir=None)
+            SimpleNamespace(name='test_001', data_set={}, secrets={}, browser='chrome', reportdir=None)
         ]
         assert execution_list == expected_list
 
@@ -189,9 +189,9 @@ class TestDefineExecutionList:
         execution_runner.project = project_function_clean.name
         execution_list = execution_runner._define_execution_list()
         expected_list = [
-            SimpleNamespace(name=test_name, data_set={'col1': 'a', 'col2': 'b'},
+            SimpleNamespace(name=test_name, data_set={'col1': 'a', 'col2': 'b'}, secrets={},
                             browser='chrome', reportdir=None),
-            SimpleNamespace(name=test_name, data_set={'col1': 'c', 'col2': 'd'},
+            SimpleNamespace(name=test_name, data_set={'col1': 'c', 'col2': 'd'}, secrets={},
                             browser='chrome', reportdir=None)
         ]
         assert execution_list == expected_list
@@ -230,11 +230,11 @@ class TestDefineExecutionList:
         execution_runner.project = project
         execution_list = execution_runner._define_execution_list()
         expected_list = [
-            SimpleNamespace(name='test_one_001', data_set={'col1': 'a', 'col2': 'b'},
+            SimpleNamespace(name='test_one_001', data_set={'col1': 'a', 'col2': 'b'}, secrets={},
                             browser='chrome', reportdir=None),
-            SimpleNamespace(name='test_one_001', data_set={'col1': 'c', 'col2': 'd'},
+            SimpleNamespace(name='test_one_001', data_set={'col1': 'c', 'col2': 'd'}, secrets={},
                             browser='chrome', reportdir=None),
-            SimpleNamespace(name='test_two_001', data_set={},
+            SimpleNamespace(name='test_two_001', data_set={}, secrets={},
                             browser='chrome', reportdir=None)
         ]
         assert execution_list == expected_list
@@ -265,9 +265,9 @@ class TestDefineExecutionList:
         execution_runner.project = project
         execution_list = execution_runner._define_execution_list()
         expected_list = [
-            SimpleNamespace(name='test_one_003', data_set={'env': {'url': 'xxx', 'name': 'stage'}},
+            SimpleNamespace(name='test_one_003', data_set={'env': {'url': 'xxx', 'name': 'stage'}}, secrets={},
                             browser='chrome', reportdir=None),
-            SimpleNamespace(name='test_one_003', data_set={'env': {'url': 'yyy', 'name': 'preview'}},
+            SimpleNamespace(name='test_one_003', data_set={'env': {'url': 'yyy', 'name': 'preview'}}, secrets={},
                             browser='chrome', reportdir=None)
         ]
         assert execution_list == expected_list
@@ -295,10 +295,10 @@ class TestDefineExecutionList:
         execution_runner.project = project
         execution_list = execution_runner._define_execution_list()
         expected_list = [
-            SimpleNamespace(name='test_one_004', data_set={}, browser='chrome', reportdir=None),
-            SimpleNamespace(name='test_one_004', data_set={}, browser='firefox', reportdir=None),
-            SimpleNamespace(name='test_two_004', data_set={}, browser='chrome', reportdir=None),
-            SimpleNamespace(name='test_two_004', data_set={}, browser='firefox', reportdir=None)
+            SimpleNamespace(name='test_one_004', data_set={}, secrets={}, browser='chrome', reportdir=None),
+            SimpleNamespace(name='test_one_004', data_set={}, secrets={}, browser='firefox', reportdir=None),
+            SimpleNamespace(name='test_two_004', data_set={}, secrets={}, browser='chrome', reportdir=None),
+            SimpleNamespace(name='test_two_004', data_set={}, secrets={}, browser='firefox', reportdir=None)
         ]
         assert execution_list == expected_list
 
@@ -348,18 +348,40 @@ class TestDefineExecutionList:
         execution_runner.project = project
         execution_list = execution_runner._define_execution_list()
         expected_list = [
-            SimpleNamespace(browser='chrome', data_set={'col1': 'a', 'env': {'url': 'xxx', 'name': 'stage'}}, name='test_one_005', reportdir=None),
-            SimpleNamespace(browser='firefox', data_set={'col1': 'a', 'env': {'url': 'xxx', 'name': 'stage'}}, name='test_one_005', reportdir=None),
-            SimpleNamespace(browser='chrome', data_set={'col1': 'a', 'env': {'url': 'yyy', 'name': 'preview'}}, name='test_one_005', reportdir=None),
-            SimpleNamespace(browser='firefox', data_set={'col1': 'a', 'env': {'url': 'yyy', 'name': 'preview'}}, name='test_one_005', reportdir=None),
-            SimpleNamespace(browser='chrome', data_set={'col1': 'b', 'env': {'url': 'xxx', 'name': 'stage'}}, name='test_one_005', reportdir=None),
-            SimpleNamespace(browser='firefox', data_set={'col1': 'b', 'env': {'url': 'xxx', 'name': 'stage'}}, name='test_one_005', reportdir=None),
-            SimpleNamespace(browser='chrome', data_set={'col1': 'b', 'env': {'url': 'yyy', 'name': 'preview'}}, name='test_one_005', reportdir=None),
-            SimpleNamespace(browser='firefox', data_set={'col1': 'b', 'env': {'url': 'yyy', 'name': 'preview'}}, name='test_one_005', reportdir=None),
-            SimpleNamespace(browser='chrome', data_set={'env': {'url': 'xxx', 'name': 'stage'}}, name='test_two_005', reportdir=None),
-            SimpleNamespace(browser='firefox', data_set={'env': {'url': 'xxx', 'name': 'stage'}}, name='test_two_005', reportdir=None),
-            SimpleNamespace(browser='chrome', data_set={'env': {'url': 'yyy', 'name': 'preview'}}, name='test_two_005', reportdir=None),
-            SimpleNamespace(browser='firefox', data_set={'env': {'url': 'yyy','name': 'preview'}}, name='test_two_005', reportdir=None)
+            SimpleNamespace(browser='chrome', data_set={'col1': 'a', 'env': {'url': 'xxx', 'name': 'stage'}}, secrets={}, name='test_one_005', reportdir=None),
+            SimpleNamespace(browser='firefox', data_set={'col1': 'a', 'env': {'url': 'xxx', 'name': 'stage'}}, secrets={}, name='test_one_005', reportdir=None),
+            SimpleNamespace(browser='chrome', data_set={'col1': 'a', 'env': {'url': 'yyy', 'name': 'preview'}}, secrets={}, name='test_one_005', reportdir=None),
+            SimpleNamespace(browser='firefox', data_set={'col1': 'a', 'env': {'url': 'yyy', 'name': 'preview'}}, secrets={}, name='test_one_005', reportdir=None),
+            SimpleNamespace(browser='chrome', data_set={'col1': 'b', 'env': {'url': 'xxx', 'name': 'stage'}}, secrets={}, name='test_one_005', reportdir=None),
+            SimpleNamespace(browser='firefox', data_set={'col1': 'b', 'env': {'url': 'xxx', 'name': 'stage'}}, secrets={}, name='test_one_005', reportdir=None),
+            SimpleNamespace(browser='chrome', data_set={'col1': 'b', 'env': {'url': 'yyy', 'name': 'preview'}}, secrets={}, name='test_one_005', reportdir=None),
+            SimpleNamespace(browser='firefox', data_set={'col1': 'b', 'env': {'url': 'yyy', 'name': 'preview'}}, secrets={}, name='test_one_005', reportdir=None),
+            SimpleNamespace(browser='chrome', data_set={'env': {'url': 'xxx', 'name': 'stage'}}, secrets={}, name='test_two_005', reportdir=None),
+            SimpleNamespace(browser='firefox', data_set={'env': {'url': 'xxx', 'name': 'stage'}}, secrets={}, name='test_two_005', reportdir=None),
+            SimpleNamespace(browser='chrome', data_set={'env': {'url': 'yyy', 'name': 'preview'}}, secrets={}, name='test_two_005', reportdir=None),
+            SimpleNamespace(browser='firefox', data_set={'env': {'url': 'yyy','name': 'preview'}}, secrets={}, name='test_two_005', reportdir=None)
+        ]
+        assert execution_list == expected_list
+
+    def test_define_execution_list_with_secrets(self, project_function_clean):
+        """Verify that the execution list is generated properly when there's only
+        one test without datasets, one driver and zero environments
+        """
+        secrets = {"a": "secret", "b": "secret02"}
+        testdir = project_function_clean.testdir
+        project = project_function_clean.name
+        secrets_path = os.path.join(project_function_clean.path, 'secrets.json')
+        with open(secrets_path, 'w') as secrets_file:
+            secrets_file.write(json.dumps(secrets, indent=True))
+        execution_runner = exc_runner.ExecutionRunner()
+        execution_runner.tests = ['test_001']
+        execution_runner.execution.processes = 1
+        execution_runner.execution.browsers = ['chrome']
+        execution_runner.execution.envs = ['']
+        execution_runner.project = project_function_clean.name
+        execution_list = execution_runner._define_execution_list()
+        expected_list = [
+            SimpleNamespace(name='test_001', data_set={}, secrets={"a": "secret", "b": "secret02"}, browser='chrome', reportdir=None)
         ]
         assert execution_list == expected_list
 

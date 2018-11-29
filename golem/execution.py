@@ -7,6 +7,7 @@ browser_definition = None
 browsers = {}
 steps = []
 data = None
+secrets = None
 description = None
 errors = []
 settings = None
@@ -22,6 +23,7 @@ def _reset():
     global browsers
     global steps
     global data
+    global secrets
     global description
     global errors
     global settings
