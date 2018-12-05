@@ -102,32 +102,46 @@ const ReportDashboardMain = new function(){
     }
 
     this.loadChartAndBars = function(project, suite, execution, row){
-
-        $.post(
-            "/report/get_execution_data/",
-            {
+         $.ajax({
+            url: "/report/get_execution_data/",
+            data: {
                 project: project,
                 suite: suite,
                 execution: execution
             },
-            function( executionData ) {
+            dataType: 'json',
+            type: 'GET',
+            success: function( executionData ) {
+
                 let results = Object.keys(executionData.totals_by_result).sort()
                 let container = row.find('td.result>div.progress');
-                // Create a progress bar for each result
-                Main.ReportUtils.createProgressBars(container, results)
                 results.forEach(function(result){
+                    if(!Main.ReportUtils.hasProgressBarForResult(container, result)){
+                        Main.ReportUtils.createProgressBars(container, [result])
+                    }
                     let percentage = executionData.totals_by_result[result] * 100 / executionData.total_tests;
                     Main.ReportUtils.animateProgressBar(container, result, percentage);
                 });
+                if(!('pending' in executionData.totals_by_result)){
+                    Main.ReportUtils.animateProgressBar(container, 'pending', 0);
+                }
                 ReportDashboardMain.updateChart({
                     project: project,
                     suite: suite,
                     label: execution,
                     totalsByResult: executionData.totals_by_result
                 });
+                if(executionData.has_finished){
+                    row.find('.spinner').hide();
+                }
+                else{
+                    row.find('.spinner').show();
+                    window.setTimeout(function(){
+                        ReportDashboardMain.loadChartAndBars(project, suite, execution, row);
+                    }, 2000, project, suite, execution, row)
+                }
             }
-        );
-
+        });
     }
 
     this.updateChart = function(data){
@@ -154,6 +168,15 @@ const ReportDashboardMain = new function(){
             }
             let indexOfDatasetLabel = chart.data.datasets.map(function(o) { return o.label; }).indexOf(result);
             chart.data.datasets[indexOfDatasetLabel].data[indexOfLabel] = data.totalsByResult[result];
+
+            if(!('pending' in data.totalsByResult)){
+                // when suite finishes, set pending to 0
+                indexOfDatasetLabel = chart.data.datasets.map(function(o) { return o.label; }).indexOf('pending');
+                let pendingDataset = chart.data.datasets[indexOfDatasetLabel];
+                if(pendingDataset != undefined){
+                    pendingDataset.data[indexOfLabel] = 0;
+                }
+            }
         };
         chart.update();
     }
@@ -198,6 +221,7 @@ const ReportDashboard = new function(){
                                             <th>Date & Time</th> \
                                             <th>Environment</th> \
                                             <th>Result &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</th> \
+                                            <th></th> \
                                         </tr> \
                                     </thead> \
                                     <tbody></tbody> \
@@ -231,6 +255,7 @@ const ReportDashboard = new function(){
                                         <th>Date & Time</th> \
                                         <th>Environment</th> \
                                         <th>Result &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</th> \
+                                        <th></th> \
                                     </tr> \
                                 </thead> \
                                 <tbody></tbody> \
@@ -250,6 +275,7 @@ const ReportDashboard = new function(){
                 <td class="date">${data.dateTime}</td>
                 <td class="environment">${data.environment}</td>
                 <td class="result"><div class="progress"></div></td>
+                <td class="spinner-container"><i class="fa fa-cog fa-spin spinner" style="display: none"></td>
             </tr>`;
         return $(row);
     };

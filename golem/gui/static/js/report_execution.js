@@ -19,28 +19,33 @@ const ExecutionReport = new function(){
 	this.tests = {};
 
 	this.getReportData = function(){
-		$.post(
-			"/report/get_execution_data/",
-			{ 
-				project: project,
-				suite: suite,
-				execution: execution,
-			},
-			function(executionData) {	
+		 $.ajax({
+            url: "/report/get_execution_data/",
+            data: {
+                project: project,
+                suite: suite,
+                execution: execution
+            },
+            dataType: 'json',
+            type: 'GET',
+            success: function(executionData) {
 	  			if(executionData.has_finished){
 	  				ExecutionReport.suiteFinished = true;
 	  				ExecutionReport.netTime = executionData.net_elapsed_time;
 	  			}
-	  			ExecutionReport.loadReport(executionData);	  		
-				if(!ExecutionReport.suiteFinished){
+	  			ExecutionReport.loadReport(executionData);
+				if(ExecutionReport.suiteFinished){
+                    $(".spinner").hide()
+				}
+				else{
+				    $(".spinner").show()
 					if(ExecutionReport.queryDelay <= 10000){
 						ExecutionReport.queryDelay += 50;
 					}
-					setTimeout(function(){ExecutionReport.getReportData()},
-							   ExecutionReport.queryDelay);
+					setTimeout(function(){ExecutionReport.getReportData()}, ExecutionReport.queryDelay);
 				}
 	  		}
-		)
+        });
 	}
 
 	this.loadReport = function(execution_data){
@@ -319,7 +324,6 @@ const DetailTable = new function(){
 		if(test.set_name){
 			DetailTable.hasSetNameColumn = true;
 			DetailTable.displaySetNameColumn();
-			console.log(test.set_name);
 			row.find('.set-name').html(test.set_name.toString());
 			DetailTable.updateColumnHeaderFilterOptions('set-name', test.set_name);
 		}

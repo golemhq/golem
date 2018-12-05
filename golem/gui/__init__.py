@@ -1077,16 +1077,19 @@ def get_last_executions():
         return jsonify(projects=project_data)
 
 
-@app.route("/report/get_execution_data/", methods=['POST'])
+@app.route("/report/get_execution_data/", methods=['GET'])
 @login_required
 def get_execution_data():
-    if request.method == 'POST':
-        project = request.form['project']
-        suite = request.form['suite']
-        execution = request.form['execution']
+    if request.method == 'GET':
+        project = request.args['project']
+        suite = request.args['suite']
+        execution = request.args['execution']
         execution_data = report_parser.get_execution_data(workspace=root_path, project=project,
                                                           suite=suite, execution=execution)
         response = jsonify(execution_data)
+        if execution_data['has_finished']:
+            response.cache_control.max_age = 60*60*24*5
+            response.cache_control.public = True
         return response
 
 
