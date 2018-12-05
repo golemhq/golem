@@ -17,11 +17,11 @@
 
 /* data table */
 
-#datosContainerContainer {
+#dataContainerContainer {
 	padding-bottom: 10px;
 }
 
-#datos {
+#dataTableContainer {
 	display: table-cell;
 	width: 100%;
 	position: relative;
@@ -49,28 +49,4 @@
 	border: 0px;
 	padding: 4px 4px;
 	height: 25px;
-}
-
-
-/* execution modal */
-
-@media (min-width: 768px){
-	#testRunModal.modal .modal-dialog {
-    	width: 760px;
-    	margin: 30px auto;
-    }
-}
-
-#testRunModal.modal {
-	top: 10%!important;
-}
-
-#testRunModal .modal-body {
-	max-height: calc(90vh - 200px);
-	overflow-y: auto;
-}
-
-#testResultLogs {
-	font-family: monospace;
-	margin-bottom: 20px;
 }

@@ -31,7 +31,7 @@ function saveEnvironments(){
         type: 'POST',
         success: function(error) {
             if(error.length == 0){
-                Main.Utils.toast('success', "Settings saved", 2000);
+                Main.Utils.toast('success', "Environments saved", 2000);
                 environmentsEditor.markClean();
             }
             else{

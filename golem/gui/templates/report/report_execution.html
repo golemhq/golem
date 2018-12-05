@@ -1,12 +1,14 @@
 {% extends "layout.html" %}
 
-{% block head_declarations %}
+{% block title %}Golem : {{project|capitalize}} : {{suite}} {{formatted_date}}{% endblock %}
+
+{% block head %}
 <link href="{{ url_for('static', filename='css/report.css') }}" rel="stylesheet" type="text/css" media="screen">
 {% endblock %}
 
 {% block content %}
 <div class="content-wrapper">
-    <h2 style="display:inline-block;"><a class="link-without-decoration" href="/report/project/{{project}}/">{{project|replace("_", " ")}}</a> - <a class="link-without-decoration" href="/report/project/{{project}}/suite/{{suite}}/">{{suite|replace("_", " ")}}</a> <small>({{formatted_date}})</small></h2>
+    <h2 style="display:inline-block;"><a class="link-without-decoration" href="/report/project/{{project}}/">{{project|replace("_", " ")}}</a> - <a class="link-without-decoration" href="/report/project/{{project}}/suite/{{suite}}/">{{suite|replace("_", " ")}}</a> <small>({{formatted_date}}) <i class="fa fa-cog fa-spin spinner" style="display: none"></i></small></h2>
 	    <a style="display:inline-block; float:right; margin-top:20px; margin-bottom:10px;" class="btn btn-default btn-sm" href="/getHTMLReport?project={{project}}&suite={{suite}}&execution={{execution}}">
 		    <span class="glyphicon glyphicon-export" aria-hidden="true"></span> Download HTML Report
 		</a>

@@ -2,6 +2,7 @@
 $(document).ready(function() {
     getSuites(project);
     generateHealthChart(project);
+    checkIfProjectHasNoTests();
 });
 
 
@@ -117,4 +118,23 @@ function loadHealthData(healthData){
             maintainAspectRatio : true,
         }
     });
+}
+
+
+function checkIfProjectHasNoTests(){
+    $.ajax({
+        url: "/get_amount_of_tests/",
+        data: {
+            "project": project,
+        },
+        dataType: 'json',
+        type: 'GET',
+        success: function(amountOfTests) {
+            if(amountOfTests == 0){
+                let content = `This project has no tests. Create the first test <strong><a href="/project/${project}/tests/" class="alert-link">here</a>.</strong>`;
+                Main.Utils.infoBar($("#infoBarContainer"), content)
+            }
+        }
+    });
+
 }

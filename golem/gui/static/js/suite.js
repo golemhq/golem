@@ -1,15 +1,11 @@
 
 $(document).ready(function() {
-
     $('#testCasesTree').treed();
-
     $("#allTestCasesCheckbox").change(function(){
         checkUncheckAllTestCases(this.checked);
     });
-
     // check the selected tests cases
     checkSelectedTests(selectedTests);
-
     // if a test is unchecked, all parent and grandparent branches must be unchecked too
     // if a test is checked, and all it's siblings are checked, the parent must be checked
     $(".select-testcase-checkbox").change(function(){
@@ -33,14 +29,13 @@ $(document).ready(function() {
         }
     });
 
-
     $.ajax({
         url: "/get_supported_browsers/",
         data: {
             project: project
         },
         dataType: 'json',
-        type: 'POST',
+        type: 'GET',
         success: function(browserSuggestions) {
             startBrowsersAutocomplete(browserSuggestions);
         }
@@ -52,7 +47,7 @@ $(document).ready(function() {
             project: project
         },
         dataType: 'json',
-        type: 'POST',
+        type: 'GET',
         success: function(environments) {
             startEnvironmentsAutocomplete(environments);
         }
@@ -372,8 +367,10 @@ function startEnvironmentsAutocomplete(environments){
 function updateTestCount(){
     var totalCheckedTests = getCheckedTestAmount();
     var totalTests = getAllTestAmount();
-
     $("#testCount").html(totalCheckedTests+"/"+totalTests);
 }
 
 
+//function loadBrowsers(browsers){
+//    Main.Utils.MultiselectWidget.initialize($("#browserWidget"), browsers, 'browsers', 'list of browsers');
+//}

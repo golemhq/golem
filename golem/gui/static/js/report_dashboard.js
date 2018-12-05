@@ -1,17 +1,17 @@
 
 $(document).ready(function() {
 	let limit;
-	if(projectName == "") limit = 5;
+	if(projects == []) limit = 5;
 	else if(suiteName == "") limit = 10
 	else limit = 50;
 	$.ajax({
 		url: "/report/get_last_executions/",
-		data: {
-            "project": projectName,
+		data: JSON.stringify({
+            "projects": projects,
             "suite": suiteName,
             "limit": limit
-        },
-        dataType: 'json',
+        }),
+        contentType: 'application/json; charset=utf-8',
         type: 'POST',
 		success: function( data ) {	
 	  		for(project in data.projects){
@@ -28,10 +28,13 @@ const ReportDashboardMain = new function(){
 
     this.loadProject = function(project, projectData){
         let projectContainer;
-        if(suiteName || projectName)
+        if(suiteName || projects.length == 1)
             projectContainer = ReportDashboard.generateProjectContainerSingleSuite(project);
         else
             projectContainer = ReportDashboard.generateProjectContainer(project);
+        if(Object.keys(projectData).length == 0){
+            projectContainer.append('<p>There are no executions for this project</p>')
+        }
         for(suite in projectData){
             let suiteContainer;
             if(suiteName)
@@ -99,31 +102,46 @@ const ReportDashboardMain = new function(){
     }
 
     this.loadChartAndBars = function(project, suite, execution, row){
-
-        $.post(
-            "/report/get_execution_data/",
-            {
+         $.ajax({
+            url: "/report/get_execution_data/",
+            data: {
                 project: project,
                 suite: suite,
                 execution: execution
             },
-            function( executionData ) {
+            dataType: 'json',
+            type: 'GET',
+            success: function( executionData ) {
+
                 let results = Object.keys(executionData.totals_by_result).sort()
                 let container = row.find('td.result>div.progress');
-                // Create a progress bar for each result
-                Main.ReportUtils.createProgressBars(container, results)
                 results.forEach(function(result){
+                    if(!Main.ReportUtils.hasProgressBarForResult(container, result)){
+                        Main.ReportUtils.createProgressBars(container, [result])
+                    }
                     let percentage = executionData.totals_by_result[result] * 100 / executionData.total_tests;
                     Main.ReportUtils.animateProgressBar(container, result, percentage);
                 });
+                if(!('pending' in executionData.totals_by_result)){
+                    Main.ReportUtils.animateProgressBar(container, 'pending', 0);
+                }
                 ReportDashboardMain.updateChart({
                     project: project,
                     suite: suite,
                     label: execution,
                     totalsByResult: executionData.totals_by_result
                 });
+                if(executionData.has_finished){
+                    row.find('.spinner').hide();
+                }
+                else{
+                    row.find('.spinner').show();
+                    window.setTimeout(function(){
+                        ReportDashboardMain.loadChartAndBars(project, suite, execution, row);
+                    }, 2000, project, suite, execution, row)
+                }
             }
-        );
+        });
     }
 
     this.updateChart = function(data){
@@ -150,6 +168,15 @@ const ReportDashboardMain = new function(){
             }
             let indexOfDatasetLabel = chart.data.datasets.map(function(o) { return o.label; }).indexOf(result);
             chart.data.datasets[indexOfDatasetLabel].data[indexOfLabel] = data.totalsByResult[result];
+
+            if(!('pending' in data.totalsByResult)){
+                // when suite finishes, set pending to 0
+                indexOfDatasetLabel = chart.data.datasets.map(function(o) { return o.label; }).indexOf('pending');
+                let pendingDataset = chart.data.datasets[indexOfDatasetLabel];
+                if(pendingDataset != undefined){
+                    pendingDataset.data[indexOfLabel] = 0;
+                }
+            }
         };
         chart.update();
     }
@@ -162,7 +189,7 @@ const ReportDashboard = new function(){
         let projectContainer = " \
             <div class='col-md-12 project-container' id='"+projectName+"'> \
                 <h3 class='no-margin-top'> \
-                    <a href='/report/project/"+projectName+"/' class='link-without-underline'>"+projectName.replace('_',' ')+"</a> \
+                    <a href='/report/project/"+projectName+"/' class='link-without-decoration'>"+projectName.replace('_',' ')+"</a> \
                 </h3> \
             </div>";
         return $(projectContainer)
@@ -181,7 +208,7 @@ const ReportDashboard = new function(){
                     <div class='widget-header'> \
                         <h3><i class='fa fa-table'></i><span class='suite-name'> \
                             <a href='/report/project/"+projectName+"/suite/"+suiteName+"/' \
-                                class='link-without-underline'>"+suiteName+"</a> \
+                                class='link-without-decoration'><strong>"+suiteName+"</strong></a> \
                         </span></h3> \
                     </div> \
                     <div class='flex-row'>\
@@ -194,6 +221,7 @@ const ReportDashboard = new function(){
                                             <th>Date & Time</th> \
                                             <th>Environment</th> \
                                             <th>Result &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</th> \
+                                            <th></th> \
                                         </tr> \
                                     </thead> \
                                     <tbody></tbody> \
@@ -215,7 +243,7 @@ const ReportDashboard = new function(){
         let executionsContainer = "\
             <div class='suite-container' id='"+suiteName+"'> \
                 <div class='widget widget-table'> \
-                    <div class='' style='height: 218px'> \
+                    <div style='height: 218px; padding: 10px'> \
                         <canvas></canvas>\
                     </div> \
                     <div class='widget-content table-content'> \
@@ -227,6 +255,7 @@ const ReportDashboard = new function(){
                                         <th>Date & Time</th> \
                                         <th>Environment</th> \
                                         <th>Result &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</th> \
+                                        <th></th> \
                                     </tr> \
                                 </thead> \
                                 <tbody></tbody> \
@@ -246,6 +275,7 @@ const ReportDashboard = new function(){
                 <td class="date">${data.dateTime}</td>
                 <td class="environment">${data.environment}</td>
                 <td class="result"><div class="progress"></div></td>
+                <td class="spinner-container"><i class="fa fa-cog fa-spin spinner" style="display: none"></td>
             </tr>`;
         return $(row);
     };

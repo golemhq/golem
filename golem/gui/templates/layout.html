@@ -1,72 +1,36 @@
 <!doctype html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1" name="viewport">
-    <meta content="" name="description">
-    <meta content="" name="author">
-
-    <!--CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap-theme.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr/toastr.min.css') }}" rel="stylesheet"/>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr/toastr.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome/font-awesome.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/temp.css') }}">
-
-    <!-- JQUERY -->
     <script src="{{ url_for('static', filename='js/external/jquery.min.js') }}"></script>
-
-    <title>Golem</title>
-
-    {% block head_declarations %}
-    {% endblock %}
+    {% block head %}{% endblock %}
 </head>
-
 <body>
-
-  <div class="container-fluid">
-
-
-
-
-
-<!-- <div class="wrapper"> -->
-    <!-- Sidebar Holder -->
-
-<script>
-    if({% if no_sidebar %}true{%else%}false{%endif%}){
-      document.write("<div id='wrapper' class='no-sidebar'>") 
-    }
-    else if(localStorage.getItem('sidebarCollapse') == 'true'){
-      document.write("<div id='wrapper' class='sidebar-collapsed'>")
-    }
-    else{
-      document.write("<div id='wrapper'>") 
-    }
-  </script>
-
-  <nav id="sidebar" class="">
-        <div class="sidebar-header">
-            <a href="/">
-              <h3>Golem</h3>
-              <strong>G</strong>
-            </a>
-        </div>
-
+<div class="container-fluid">
+    <div id='wrapper'>
+        <script>
+            let noSidebar = {% if no_sidebar %}true{% else %}false{% endif %};
+            let clsName = '';
+            if(noSidebar){
+                clsName = 'no-sidebar'
+            }
+            else if(localStorage.getItem('sidebarCollapse') == 'true'){
+                clsName = 'sidebar-collapsed'
+            }
+            document.getElementById('wrapper').className = clsName
+        </script>
+        <nav id="sidebar" class="">
+            <div class="sidebar-header">
+                <a href="/"><h3>Golem</h3><strong>G</strong></a>
+            </div>
         <ul class="list-unstyled components">
             {% if project%}
-            
-           <!--  <li>
-                <a href="/p/{{project}}/">
-                    <i class="fa fa-home" aria-hidden="true"></i>
-                    Project
-                </a>
-            </li> -->
-            
             <li>
                 <a href="/project/{{project}}/suites/">
                     <i class="glyphicon glyphicon-tasks"></i>
@@ -120,38 +84,37 @@
         </ul>
 
         <ul class="list-unstyled components">
-          {% if g.user.is_authenticated %}
-          <li>
-              <a href="#pageSubmenu" id="userMenu" data-toggle="collapse" aria-expanded="false">
-                  <i class="fa fa-user-circle-o" aria-hidden="true"></i>
-                  {{ g.user.username }}
-              </a>
-              <ul class="collapse list-unstyled" id="pageSubmenu">
-                  <li><a href="/logout/">Log out</a></li>
-              </ul>
-          </li>
-          {% else %}
-          <li>
-              <a href="/login/">
-                  <i class="glyphicon glyphicon-send"></i>
-                  Log in
-              </a>
-          </li>
-          {% endif %}
+            {% if g.user.is_authenticated %}
+            <li>
+                <a href="#pageSubmenu" id="userMenu" data-toggle="collapse" aria-expanded="false">
+                    <i class="fa fa-user-circle-o" aria-hidden="true"></i>
+                    {{ g.user.username }}
+                </a>
+                <ul class="collapse list-unstyled" id="pageSubmenu">
+                    <li><a href="/logout/">Log out</a></li>
+                </ul>
+            </li>
+            {% else %}
+            <li>
+                <a href="/login/">
+                    <i class="glyphicon glyphicon-send"></i>
+                    Log in
+                </a>
+            </li>
+            {% endif %}
         </ul>
-        
 
         <ul class="list-unstyled">
             <li>
-              <a href="#" id="sidebarCollapse" class="collapse-sidebar"><i class="glyphicon" aria-hidden="true"></i></a>
+                <a href="#" id="sidebarCollapse" class="collapse-sidebar"><i class="glyphicon" aria-hidden="true"></i></a>
             </li>
         </ul>
     </nav>
-    
+
     <!-- Page Content Holder -->
     <div id="content" class="container-fluid">
-      {% block content %}
-      {% endblock %}
+        {% block content %}
+        {% endblock %}
     </div>
 </div>
 
@@ -159,110 +122,164 @@
 
 <!-- Error Modal -->
 <div class="modal fade" id="errorModal" tabindex="-1" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Error</h4>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Error</h4>
+            </div>
+            <div class="modal-body">
+                <ul id="errorList">
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Continue</button>
+            </div>
+        </div>
     </div>
-    <div class="modal-body">
-        <ul id="errorList">
-        </ul>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Continue</button>
-    </div>
-</div>
-</div>
 </div>
 
 <!-- Confirm Modal -->
 <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title"></h4>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary confirm">Delete</button>
+            </div>
+        </div>
     </div>
-    <div class="modal-body">
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">No</button>
-        <button type="button" class="btn btn-primary confirm">Delete</button>
-    </div>
-</div>
-</div>
 </div>
 
 <!-- Prompt Modal -->
 <div class="modal fade" id="promptModal" tabindex="-1" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title"></h4>
-    </div>
-    <div class="modal-body">
-      <div class='description'></div>
-      <br>
-      <input type="text" class="form-control" id="promptModalInput" onkeyup="if(event.keyCode==13){$('#prompSaveButton').click()}">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">
+                <div class='description'></div>
+                <br>
+                <input type="text" class="form-control" id="promptModalInput" onkeyup="if(event.keyCode==13){$('#prompSaveButton').click()}">
 
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Cancel</button>
+                <button type="button" id="prompSaveButton" class="btn btn-primary confirm">Save</button>
+            </div>
+        </div>
     </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Cancel</button>
-        <button type="button" id="prompSaveButton" class="btn btn-primary confirm">Save</button>
-    </div>
-</div>
-</div>
 </div>
 
 <!-- Select Prompt Modal -->
 <div class="modal fade" id="selectPromptModal" tabindex="-1" role="dialog">
-  <div class="modal-dialog" style="width: 400px">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title"></h4>
+    <div class="modal-dialog" style="width: 400px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">
+                <div class='description'></div>
+                <div class="row">
+                    <div class="col-sm-8 col-sm-offset-2">
+                        <select id="selectPromptSelect" class="form-control"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Cancel</button>
+                <button type="button" id="selectPromptContinueButton" class="btn btn-primary confirm">Continue</button>
+            </div>
+        </div>
     </div>
-    <div class="modal-body">
-      <div class='description'></div>
-      <div class="row">
-      <div class="col-sm-8 col-sm-offset-2">
-        <select id="selectPromptSelect" class="form-control"></select>
-      </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Cancel</button>
-        <button type="button" id="selectPromptContinueButton" class="btn btn-primary confirm">Continue</button>
-    </div>
-</div>
-</div>
 </div>
 
 <!-- Screenshot Modal -->
 <div class="modal fade screenshot-modal" id="screenshotModal" tabindex="-1" role="dialog">
-  <div class="modal-dialog screenshot-modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body">
-        <img id="expandedScreenshot">
-      </div>
+    <div class="modal-dialog screenshot-modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <img id="expandedScreenshot">
+            </div>
+        </div>
     </div>
-  </div>
+</div>
+
+<!-- Select Test Run Config modal -->
+<div class="modal fade" id="runTestConfigModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" style="width: 550px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Run Test Configurations</h4>
+            </div>
+            <div class="modal-body row">
+                <div class="info-bar-container"></div>
+                <div class="col-sm-8 col-sm-offset-2">
+                    <label for="runTestBrowsers">Browsers</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="runTestBrowsers" placeholder="browsers">
+                    </div>
+                    <label for="runTestEnvironments">Environments</label>
+                    <div class="input-group">
+                         <input type="text" class="form-control" id="runTestEnvironments" placeholder="environments">
+                    </div>
+                    <label for="runTestWorkers">Workers</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="runTestWorkers" aria-describedby="runTestWorkersAddon" value="1" placeholder="Workers">
+                    </div>
+                    <br>
+                    <div class="text-right">
+                        <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Cancel</button>
+                        <button type="button" id="TestRunConfigRunTest" class="btn btn-primary confirm" onclick="Main.TestRunner.runTestFromConfigModal()">Run Test</button>
+                    </div>
+                </div>
+                <br>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- test run modal -->
+<div class="modal fade" id="testRunModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding-bottom: 10px; border-bottom: none">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Running Test <span id="runModalTestTitle"></span> <i id="testRunModalLoadingIcon" class="fa fa-cog fa-spin"></i></h4>
+            </div>
+            <div class="modal-body">
+                <div id="testRunModalTabNavContainer">
+                    <ul class="nav nav-tabs run-test-tabs" id="testRunModalTabNav" role="tablist"></ul>
+                </div>
+                <div class="tab-content" id="TestRunModalTabContainer"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" onclick="Main.TestRunner.rerunTest()">Re-run Test</button>
+                <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Dismiss</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="{{ url_for('static', filename='js/external/bootstrap.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/toastr.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/external/chart.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
   var username = "{{g.user.username}}";
 </script>
-{% block footer_declarations %}{% endblock %} 
-
+{% block footer_declarations %}{% endblock %}
 </body>
-
 </html>

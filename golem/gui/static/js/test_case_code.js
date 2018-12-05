@@ -39,13 +39,10 @@ function convertTabToSpaces(cm) {
   }
 }
 
-function saveTestCase(){
-    // if(!unsavedChanges && codeEditor.isClean()){
-    //     return
-    // }
+function saveTestCase(callback){
     var content = codeEditor.getValue();
     // get data from table
-    var testData = dataTable.getData();
+    var testData = TestCommon.DataTable.getData();
     var data = {
         'content': content,
         'testData': testData,
@@ -70,6 +67,9 @@ function saveTestCase(){
             else{
                 $(".error-container").hide();
                 $(".error-container pre").html('');
+                if(callback != undefined){
+                    callback()
+                }
             }
         }
     });
@@ -83,7 +83,7 @@ function watchForUnsavedChanges(){
     });
 
     window.addEventListener("beforeunload", function (e) {
-        if(unsavedChanges || !codeEditor.isClean()){
+        if(hasUnsavedChanges()){
             var confirmationMessage = 'There are unsaved changes';
             (e || window.event).returnValue = confirmationMessage; //Gecko + IE
             return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
@@ -93,14 +93,30 @@ function watchForUnsavedChanges(){
 
 
 function loadGuiView(){
-    if(!codeEditor.isClean()){
-        saveTestCase();
+    let callback = function(){
+        codeEditor.markClean();
+        unsavedChanges = false;
+        // redirect to gui view
+        window.location.replace("/project/"+project+"/test/"+fullTestCaseName+"/");
     }
-
-    codeEditor.markClean();
-    unsavedChanges = false;
-
-    // redirect to gui view
-    window.location.replace("/project/"+project+"/test/"+fullTestCaseName+"/");
+    if(hasUnsavedChanges()){
+        saveTestCase(callback);
+    }
+    else {
+        callback()
+    }
 }
 
+
+function runTest(){
+    let run = () => Main.TestRunner.runTest(project, fullTestCaseName);
+    if(hasUnsavedChanges())
+        saveTestCase(run)
+    else
+        run()
+}
+
+
+function hasUnsavedChanges(){
+    return !codeEditor.isClean() || unsavedChanges
+}

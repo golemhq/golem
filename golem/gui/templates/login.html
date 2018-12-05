@@ -1,20 +1,14 @@
 {% extends "layout.html" %} 
 
-{% block title %}
-Login
-{% endblock %} 
-
-{% block head_declarations %}
-{{ super() }}
-{% endblock %} 
+{% block title %}Golem : Login{% endblock %}
 
 {% block content %}
-
 <div class="row">
-	<div class="col-md-4 col-md-offset-4">
-		<h4>Login</h4>
+	<div class="col-xs-12 col-sm-1" style="min-width: 300px; left: 50%; transform: translate(-50%, 0);">
+		<h3>Login</h3>
+        <br>
 		{% if errors %}
-			<ul id="errorList">
+			<ul id="errorList" class="no-bullets no-padding-left">
 				{% for error in errors %}
 					<li>{{error}}</li>
 				{% endfor %}
@@ -22,24 +16,17 @@ Login
 		{% endif %}
 
 		<form class="form-horizontal" action="/login/" method="POST">
-			<div class="form-group">
-				<label for="username" class="col-sm-3 control-label">Username</label>
-			    <div class="col-sm-9">
-			    	<input type="text" class="form-control" id="username" name="username" placeholder="Username" autofocus>
-			    </div>
+            <div style="margin-bottom: 15px">
+                <input type="text" class="form-control" id="username" name="username" placeholder="Username" autofocus>
 			</div>
-			<div class="form-group">
-				<label for="name" class="col-sm-3 control-label">Password</label>
-			    <div class="col-sm-9">
-			    	<input type="password" class="form-control" id="password" name="password" placeholder="Password">
-			    </div>
+			<div style="margin-bottom: 15px">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password">
 			</div>
 			<input type="hidden" id="next" name="next" value="{{next_url}}">
-			<button type="submit" class="btn btn-default">Log in</button>
+			<div class="text-center">
+                <button type="submit" class="btn btn-default" style="width: 100%">Log in</button>
+            </div>
 		</form>
-
-
 	</div>
 </div>
-
 {% endblock %}

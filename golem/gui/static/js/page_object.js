@@ -1,6 +1,6 @@
 var unsavedChanges = false;
 
-var selectors = [
+const SELECTORS = [
     'id',
     'name',
     'text',
@@ -11,32 +11,25 @@ var selectors = [
     'tag_name',];
 
 
-$(document).ready(function() {      
-
+$(document).ready(function() {
     startAllSelectorInputAutocomplete();
-
     $(".element-name").keyup(function(){
-        $(this).parent().parent().parent().find('.element-display-name').val($(this).val());
+        $(this).closest('.element').find('.element-display-name').val($(this).val());
     });
-
     // set unsaved changes watcher
     watchForUnsavedChanges();
 });
 
 
-
 function startAllSelectorInputAutocomplete(){
-    var lookup = []
-
-    for(sel in selectors){
+    let lookup = []
+    for(sel in SELECTORS){
         lookup.push({
-            'value': selectors[sel],
-            'data': selectors[sel]
+            'value': SELECTORS[sel],
+            'data': SELECTORS[sel]
         })        
     }
-
     $(".element-selector").each(function(){
-
         autocomplete = $(this).autocomplete({
             lookup: lookup,
             minChars: 0,
@@ -49,7 +42,6 @@ function startAllSelectorInputAutocomplete(){
             }
         });
     })
-
 }
 
 function addPageObjectInput(){
@@ -57,28 +49,16 @@ function addPageObjectInput(){
         "<div class='element col-md-12 clearfix'> \
             <div style='width: calc(100% - 34px)'>\
                 <div class='col-xs-3 no-pad-left padding-right-5'> \
-                    <div class='input-group po-input-group'> \
-                        <input type='text' class='form-control element-name' value='' \
-                            placeholder='name'> \
-                    </div> \
+                    <input type='text' class='form-control element-name' placeholder='name'> \
                 </div> \
                 <div class='col-xs-3 padding-left-5 padding-right-5'> \
-                    <div class='input-group po-input-group'> \
-                        <input type='text' class='form-control element-selector' \
-                            value='' placeholder='selector'> \
-                    </div> \
+                    <input type='text' class='form-control element-selector' placeholder='selector'> \
                 </div> \
                 <div class='col-xs-3 padding-left-5 padding-right-5'> \
-                    <div class='input-group po-input-group'> \
-                        <input type='text' class='form-control element-value' \
-                            value='' placeholder='value'> \
-                    </div> \
+                    <input type='text' class='form-control element-value' placeholder='value'> \
                 </div> \
                 <div class='col-xs-3 padding-left-5 no-pad-right'> \
-                    <div class='input-group po-input-group'> \
-                        <input type='text' class='form-control element-display-name' \
-                            value='' placeholder='display name'> \
-                    </div> \
+                    <input type='text' class='form-control element-display-name' placeholder='display name'> \
                 </div> \
             </div>\
             <div class='step-remove-icon'>\
@@ -101,19 +81,18 @@ function addPageObjectInput(){
 
 
 function savePageObject(){
-    var elements = [];
-    var functions = [];
-    var importLines = [];
-    var errors = false;
-
+    let elements = [];
+    let functions = [];
+    let importLines = [];
+    let errors = false;
     $(".element").each(function(){
         if($(this).find('.element-name').val().length > 0){
-            var name = $(this).find('.element-name').val().trim();
-            var selector = $(this).find('.element-selector').val();
-            var value = $(this).find('.element-value').val();
-            var display_name = $(this).find('.element-display-name').val();
+            let name = $(this).find('.element-name').val().trim();
+            let selector = $(this).find('.element-selector').val();
+            let value = $(this).find('.element-value').val();
+            let display_name = $(this).find('.element-display-name').val();
             // validate the name is a valid python variable name
-            var validChars = /^[0-9a-zA-Z\_]+$/;
+            let validChars = /^[0-9a-zA-Z\_]+$/;
             if(!name.match(validChars)){
                 Main.Utils.displayErrorModal(['Element names should contain only letters, numbers and underscores']);
                 errors = true;
@@ -138,10 +117,7 @@ function savePageObject(){
     $(".import-line").each(function(){
         importLines.push($(this).val());
     });
-
-    if(errors){
-        return
-    }
+    if(errors){ return }
     $.ajax({
         url: "/save_page_object/",
         data: JSON.stringify({
@@ -156,10 +132,7 @@ function savePageObject(){
         type: 'POST',
         success: function(data) {
             Main.Utils.toast('success', "Page "+pageObjectName+" saved", 3000);
-
             unsavedChanges = false;
-        },
-        error: function() {
         }
     });
 }
@@ -169,10 +142,9 @@ function watchForUnsavedChanges(){
     $("input").on("change keyup paste", function(){
         unsavedChanges = true;
     });
-
     window.addEventListener("beforeunload", function (e) {
         if(unsavedChanges){
-            var confirmationMessage = 'There are unsaved changes';
+            let confirmationMessage = 'There are unsaved changes';
             (e || window.event).returnValue = confirmationMessage; //Gecko + IE
             return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
         }
@@ -184,17 +156,14 @@ function loadCodeView(){
     if(unsavedChanges){
         savePageObject();
     }
-
     unsavedChanges = false;
-
     // redirect to gui view
-    //window.location.replace("/project/"+project+"/page/"+pageObjectName+"/code/");
     var pathname = window.location.pathname;
     window.location.replace(pathname + 'code/');
 }
 
 
 function deleteElement(elem){
-    $(elem).parent().parent().remove();
+    $(elem).closest('.element').remove();
     unsavedChanges = true;
 }

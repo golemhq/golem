@@ -621,9 +621,9 @@ def assert_page_contains_text(text):
     Parameters:
     text : value
     """
-    _add_step("Verify '{}' is present in page".format(text))
+    _add_step("Assert '{}' is present in the page".format(text))
     _run_wait_hook()
-    assert text in get_browser().page_source, "text '{}' not found in page".format(text)
+    assert text in get_browser().page_source, "text '{}' not found in the page".format(text)
     _screenshot_on_step()
 
 
@@ -633,9 +633,9 @@ def assert_page_not_contains_text(text):
     Parameters:
     text : value
     """
-    _add_step("Assert '{}' is not present in page".format(text))
+    _add_step("Assert '{}' is not present in the page".format(text))
     _run_wait_hook()
-    assert text not in get_browser().page_source, "text '{}' was found in page".format(text)
+    assert text not in get_browser().page_source, "text '{}' was found in the page".format(text)
     _screenshot_on_step()
 
 
@@ -2235,8 +2235,8 @@ def verify_page_contains_text(text):
     Parameters:
     text : value
     """
-    with _verify_step("Verify '{}' is present in page".format(text)) as s:
-        s.error = "text '{}' not found in page".format(text)
+    with _verify_step("Verify '{}' is present in the page".format(text)) as s:
+        s.error = "text '{}' not found in the page".format(text)
         s.condition = text in get_browser().page_source
 
 
@@ -2246,8 +2246,8 @@ def verify_page_not_contains_text(text):
     Parameters:
     text : value
     """
-    with _verify_step("Verify '{}' is not present in page".format(text)) as s:
-        s.error = "text '{}' was found in page".format(text)
+    with _verify_step("Verify '{}' is not present in the page".format(text)) as s:
+        s.error = "text '{}' was found in the page".format(text)
         s.condition = text not in get_browser().page_source
 
 
@@ -2560,6 +2560,8 @@ def wait_for_element_has_not_attribute(element, attribute, timeout=30):
 
 def wait_for_element_not_displayed(element, timeout=30):
     """Wait for element to be not displayed
+    When element is not displayed this is ignored.
+    When element is not present this will raise ElementNotFound.
 
     Parameters:
     element : element

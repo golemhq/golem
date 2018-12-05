@@ -1,21 +1,11 @@
 
-
-
 .element {
 	margin-bottom: 10px;
 	width: 100%;
 }
 
-.po-input-group {
-	width: 100%;
-}
-
 .function {
     margin-bottom: 10px;
-}
-
-.no-border-radius {
-    border-radius: 0px;
 }
 
 pre {

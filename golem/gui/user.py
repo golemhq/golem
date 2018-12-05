@@ -2,19 +2,44 @@
 import json
 import os
 
+from golem.core import test_execution
+
+
+def get_user_data(username=None, id_=None):
+    if not username and not id_:
+        raise ValueError('either username or id is required')
+    user_data = None
+    with open(os.path.join(test_execution.root_path, 'users.json')) as f:
+        users_data = json.load(f)
+        for user in users_data:
+            if username and user['username'] == username:
+                user_data = user
+            if id_ and user['id'] == id_:
+                user_data = user
+    return user_data
+
+
+def get_user_from_id(id_):
+    user_data = get_user_data(id_=id_)
+    user_ = None
+    if user_data:
+        user_ = User(user_data['id'], user_data['username'], user_data['is_admin'],
+                   user_data['gui_projects'], user_data['report_projects'])
+    return user_
+
 
 class User:
-    id = None
-    username = None
-    is_admin = False
+
+    def __init__(self, id_, username, is_admin, gui_projects, report_projects):
+        self.id = id_
+        self.username = username
+        self.is_admin = is_admin
+        self.gui_permissions = gui_projects
+        self.report_permissions = report_projects
 
     @property
     def is_authenticated(self):
         return True
-
-    # @property
-    # def is_admin(self):
-    #     return self.is_admin
 
     @property
     def is_active(self):
@@ -27,61 +52,15 @@ class User:
     def get_id(self):
         return self.id
 
+    def has_gui_permissions(self, project):
+        return (project in self.gui_permissions or
+                '*' in self.gui_permissions or
+                self.is_admin)
+
+    def has_report_permissions(self, project):
+        return (project in self.report_permissions or
+                '*' in self.report_permissions or
+                self.is_admin)
+
     def __repr__(self):
-        return '<User %r>' % (self.username)
-
-
-def user_exists(username, root_path):
-    with open(os.path.join(root_path, 'users.json')) as users_file:
-        user_data = json.load(users_file)
-        for user in user_data:
-            if user['username'] == username:
-                return user['id']
-        return False
-
-
-def password_is_correct(username, password, root_path):
-    with open(os.path.join(root_path, 'users.json')) as users_file:
-        user_data = json.load(users_file)
-        for user in user_data:
-            if user['username'] == username:
-                return bool(user['password'] == password)
-        return False
-
-
-def get_user(user_id, root_path):
-    with open(os.path.join(root_path, 'users.json')) as users_file:
-        user_data = json.load(users_file)
-        for user in user_data:
-            if user['id'] == user_id:
-                new_user = User
-                new_user.username = user['username']
-                new_user.id = user['id']
-                new_user.is_admin = user['is_admin']
-                return new_user
-
-
-def has_permissions_to_project(user_id, project, root_path, module='gui'):
-    with open(os.path.join(root_path, 'users.json')) as users_file:
-        user_data = json.load(users_file)
-        has_permission = False
-        for user in user_data:
-            if user['id'] == user_id:
-                if module == 'gui':
-                    project_in_projects = project in user['gui_projects']
-                    asterisc_in_projects = '*' in user['gui_projects']
-                elif module == 'report':
-                    project_in_projects = project in user['report_projects']
-                    asterisc_in_projects = '*' in user['report_projects']
-                is_admin = user['is_admin']
-                if project_in_projects or asterisc_in_projects or is_admin:
-                    has_permission = True
-        return has_permission
-
-
-def is_admin(user_id, root_path):
-    with open(os.path.join(root_path, 'users.json')) as users_file:
-        user_data = json.load(users_file)
-        for user in user_data:
-            if user['id'] == user_id:
-                return user['is_admin']
+        return '<User {}>'.format(self.username)

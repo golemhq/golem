@@ -1,17 +1,8 @@
 .box-container{
     margin-bottom: 15px;
     padding: 10px;
+    border-radius: 3px
 }
-
-/*@media (min-width: 768px){
-    .left-column{
-        padding-left: 0px;
-        padding-right: 0px
-    }
-    .right-column{
-        padding-right: 0px
-    }
-}*/
 
 .tree {
     font-size: 16px
@@ -22,13 +13,16 @@
     padding:0;
     list-style:none
 }
+
 .tree ul {
     margin-left:1em;
     position:relative
 }
+
 .tree ul ul {
     margin-left:.5em
 }
+
 .tree ul:before {
     content:"";
     display:block;
@@ -39,14 +33,15 @@
     left:0;
     border-left:1px solid
 }
+
 .tree li {
-    margin:0;
     padding:0 1em;
     line-height:2em;
     color:#369;
     font-weight:700;
     position:relative
 }
+
 .tree ul li:before {
     content:"";
     display:block;
@@ -58,30 +53,41 @@
     top:1em;
     left:0
 }
+
 .tree ul li:last-child:before {
     background:#fff;
     height:auto;
     top:1em;
     bottom:0
 }
+
 .indicator {
     margin-right:5px;
 }
+
 .tree li a {
     text-decoration: none;
     color:#369;
 }
-.tree li button, .tree li button:active, .tree li button:focus {
+
+.tree li button {
     text-decoration: none;
-    color:#369;
-    border:none;
-    background:transparent;
-    margin:0px 0px 0px 0px;
-    padding:0px 0px 0px 0px;
+    color: #369;
+    border: none;
+    background: transparent;
+    margin: 0px;
+    padding: 0px;
     outline: 0;
 }
 
+.tree-element:not(.branch):hover {
+    background-color: #fafafa;
+    margin-left: 1px;
+}
 
+.tree-element:not(.branch):hover > a {
+    margin-left: -1px;
+}
 
 .tree-element-buttons {
     display: none;
@@ -93,4 +99,14 @@ li.tree-element:hover > .tree-element-buttons {
 
 li.tree-element:hover > .tree-element-buttons button {
     display: inline-block !important;
+}
+
+li.tree-element > .tree-element-buttons > button {
+    margin-right: 2px;
+}
+
+.new-element-input {
+    max-width: 500px;
+    font-size: 16px;
+    padding-left: 2px
 }

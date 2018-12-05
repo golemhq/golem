@@ -4,6 +4,7 @@
 	border: 1px solid #e4e4e4;
 	margin-bottom: 15px;
 	padding-top: 15px;
+	border-radius: 3px
 }
 
 .widget {
@@ -12,10 +13,7 @@
     margin-bottom: 15px;
     background-color: #f9f9f9;
     border-color: #d3d3d3;
-}
-
-.widget.widget-table {
-	/*overflow: hidden;*/
+    border-radius: 3px
 }
 
 .widget .widget-header {
@@ -38,7 +36,7 @@
     float: left;
 }
 
-.table-content{
+.table-content {
 	padding: 10px !important;
 }
 
@@ -92,4 +90,16 @@
 
 #detailTable th.filtered .funnel-icon {
     color: black;
+}
+
+#detailTable td.set-name {
+    text-overflow: ellipsis;
+    max-width: 250px;
+    overflow: hidden;
+}
+
+.spinner-container {
+    width: 18px;
+    padding-left: 0px !important;
+    padding-right: 4px !important;
 }
