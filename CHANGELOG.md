@@ -3,6 +3,17 @@
 
 ## [Unreleased]
 
+## [0.6.2] - 2018-12-05
+
+### Added
+- Secrets data feature :: r-roos
+    * https://golem-framework.readthedocs.io/en/latest/test-data.html#secrets
+- GUI improvements #149 :: Luciano Renzi
+
+### Fixed
+
+- Maximize Chrome in macOS issue #130 :: Filip Richtárik, r-roos
+
 ## [0.6.1] - 2018-11-14
 
 ### Added
