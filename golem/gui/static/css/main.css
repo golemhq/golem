@@ -163,7 +163,6 @@ body .container-fluid {
 }
 
 #sidebar .collapse-sidebar::before {
-    /*content: '\e257';*/
     display: block;
     position: absolute;
     right: 20px;
@@ -264,7 +263,7 @@ body .container-fluid {
 ----------------------------------------------------- */
 
 .form-control {
-    border-radius: 3px;
+    border-radius: 3px !important;
 }
 
 .modal-content {
@@ -275,10 +274,6 @@ body .container-fluid {
 
 .modal-backdrop.in {
     opacity: .3;
-}
-
-.modal-open {
-    padding-right: 0px !important;
 }
 
 /*
@@ -535,6 +530,13 @@ ul.no-bullets {
     animation: spin 1s linear infinite;
 }
 
+.loader-sm {
+    border: 3px solid #f3f3f3; /* Light grey */
+    border-top: 3px solid #3498db; /* Blue */
+    width: 19px;
+    height: 19px;
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -620,4 +622,61 @@ ul.no-bullets {
 .tag .remove {
     vertical-align: bottom;
     top: 0;
+}
+
+/* TEST RUN CONFIG MODAL */
+
+#runTestConfigModal .input-group {
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+/* TEST RUN MODAL */
+
+@media (min-width: 768px){
+	#testRunModal.modal .modal-dialog {
+    	width: 760px;
+    }
+}
+
+#testRunModal.modal {
+}
+
+#testRunModal .modal-dialog {
+    margin-top: 60px;
+}
+
+#testRunModal .modal-body {
+    padding: 0px;
+    min-height: 200px;
+}
+
+#testRunModalTabNavContainer {
+    max-height: 106px;
+    overflow-y: auto;
+}
+
+#TestRunModalTabContainer {
+    max-height: calc(100vh - 300px);
+    overflow-y: auto;
+}
+
+#testRunModalTabNav {
+    padding-left: 15px;
+    display: none;
+}
+
+.test-run-tab>a {
+    padding: 7px !important;
+}
+
+.test-run-tab-content {
+    padding: 15px
+}
+
+.test-result-logs{
+    font-family: "monospace", Lucida Console;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ddd;
 }

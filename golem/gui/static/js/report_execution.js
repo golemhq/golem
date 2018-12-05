@@ -319,7 +319,8 @@ const DetailTable = new function(){
 		if(test.set_name){
 			DetailTable.hasSetNameColumn = true;
 			DetailTable.displaySetNameColumn();
-			row.find('.set-name').html(test.set_name);
+			console.log(test.set_name);
+			row.find('.set-name').html(test.set_name.toString());
 			DetailTable.updateColumnHeaderFilterOptions('set-name', test.set_name);
 		}
 		ExecutionReport.tests[test.test_set] = test;

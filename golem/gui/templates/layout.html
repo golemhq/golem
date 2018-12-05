@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap.min.css') }}">
-    <!--<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap-theme.min.css') }}">-->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr/toastr.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome/font-awesome.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <!--<link rel="stylesheet" href="{{ url_for('static', filename='css/temp.css') }}">-->
     <script src="{{ url_for('static', filename='js/external/jquery.min.js') }}"></script>
     {% block head %}{% endblock %}
 </head>
@@ -219,9 +217,65 @@
     </div>
 </div>
 
+<!-- Select Test Run Config modal -->
+<div class="modal fade" id="runTestConfigModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" style="width: 550px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Run Test Configurations</h4>
+            </div>
+            <div class="modal-body row">
+                <div class="info-bar-container"></div>
+                <div class="col-sm-8 col-sm-offset-2">
+                    <label for="runTestBrowsers">Browsers</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="runTestBrowsers" placeholder="browsers">
+                    </div>
+                    <label for="runTestEnvironments">Environments</label>
+                    <div class="input-group">
+                         <input type="text" class="form-control" id="runTestEnvironments" placeholder="environments">
+                    </div>
+                    <label for="runTestWorkers">Workers</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="runTestWorkers" aria-describedby="runTestWorkersAddon" value="1" placeholder="Workers">
+                    </div>
+                    <br>
+                    <div class="text-right">
+                        <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Cancel</button>
+                        <button type="button" id="TestRunConfigRunTest" class="btn btn-primary confirm" onclick="Main.TestRunner.runTestFromConfigModal()">Run Test</button>
+                    </div>
+                </div>
+                <br>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- test run modal -->
+<div class="modal fade" id="testRunModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding-bottom: 10px; border-bottom: none">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Running Test <span id="runModalTestTitle"></span> <i id="testRunModalLoadingIcon" class="fa fa-cog fa-spin"></i></h4>
+            </div>
+            <div class="modal-body">
+                <div id="testRunModalTabNavContainer">
+                    <ul class="nav nav-tabs run-test-tabs" id="testRunModalTabNav" role="tablist"></ul>
+                </div>
+                <div class="tab-content" id="TestRunModalTabContainer"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" onclick="Main.TestRunner.rerunTest()">Re-run Test</button>
+                <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Dismiss</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="{{ url_for('static', filename='js/external/bootstrap.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/toastr.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/external/chart.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
   var username = "{{g.user.username}}";

@@ -1,66 +1,269 @@
-var globalActions = [];
-var pageObjects = [];
-var selectedPageObjectsElements = [];
-var selectedPageObjectsFunctions = [];
-var unsavedChanges = false;
-var checkDelay = 2000;
 
-$(document).ready(function() {      
-
-    getGlobalActions();
-    getPageObjects();
-    getPageObjectElements();
-    //startAllElementInputAutocomplete();
-    startStepFirstInputAutocomplete();
-    startAllValueInputAutocomplete();  
-
-    $(".dato-variable").blur(function() {
-        startAllValueInputAutocomplete();
-    });
-
-    $(".dato-variable").keyup(function(e) {
-        if (e.which == 13) // Enter key
-        startAllValueInputAutocomplete();
-    });
-
-    $(".page-objects-input").blur(function(e) {
-        getPageObjectElements();
-    });
-
-    $(".page-objects-input").keyup(function(e) {
-        if (e.which == 13) // Enter key
-        getPageObjectElements();
-    });
-
-    $('#pageModal').on('hidden.bs.modal', function () {
-        getPageObjectElements()
-    });
-
-    // set unsaved changes watcher
-    watchForUnsavedChanges();
-
-    // start sortable steps
-    startSortableSteps();
-
-    // lock the file for current user
-    //testManager.setFileLockInterval();
-    //testManager.setUnlockFileOnUnload();
+$(document).ready(function() {
+    Test.initialize(project, testCaseName, fullTestCaseName, importedPages);
 });
 
 
-var testCase = new function(){
+var Test = new function(){
+
+    this.project = '';
+    this.name = '';
+    this.fullName = '';
+    this.golemActions = [];
+    this.allPages = [];
+    this.importedPages = [];
+    this.unsavedChanges = false;
+
+    this.initialize = function(project, testCaseName, fullTestCaseName, importedPages){
+        Test.project = project;
+        Test.name = testCaseName;
+        Test.fullName = fullTestCaseName;
+        importedPages.forEach(function(page){
+            Test.getPageContents(page)
+        });
+        Test.getAllProjectPages();
+        Test.getGolemActions();
+        Test.refreshActionInputsAutocomplete();
+        Test.refreshValueInputsAutocomplete();
+        $('#pageModal').on('hidden.bs.modal', function(){
+            Test.importedPages.forEach(function(page){
+                Test.getPageContents(page.name)
+            })
+        });
+        Test.Utils.watchForUnsavedChanges();
+        Test.Utils.startSortableSteps();
+    }
+
+    this.getGolemActions = function(){
+        $.ajax({
+            url: "/get_golem_actions/",
+            dataType: 'json',
+            type: 'GET',
+            success: function(golemActions) {
+                Test.golemActions = golemActions;
+                Test.refreshActionInputsAutocomplete();
+            }
+        });
+    }
+
+    this.getAllProjectPages = function(){
+        $.ajax({
+            url: "/get_page_objects/",
+            data: {
+                "project": Test.project,
+            },
+            dataType: 'json',
+            type: 'POST',
+            success: function(pages) {
+                Test.allPages = pages;
+                Test.refreshPagesAutocomplete();
+            }
+        });
+    }
+
+    this.getPageContents = function(page){
+        $.ajax({
+            url: "/get_page_contents/",
+            data: {
+                 "project": Test.project,
+                 "page": page,
+            },
+            dataType: 'json',
+            type: 'GET',
+            success: function(result) {
+                if(result.error == 'page does not exist'){
+                    // mark page as not existent
+                    $("input[value='"+thisPageName+"']").addClass('not-exist');
+                }
+                else{
+                    Test.importedPages.push({
+                        'name': page,
+                        'elements': result.content.elements,
+                        'functions': result.content.functions
+                    })
+                    Test.refreshElementInputsAutocomplete();
+                    Test.refreshActionInputsAutocomplete();
+                }
+            }
+        });
+    }
+
+    this.refreshActionInputsAutocomplete = function(){
+        let lookup = []
+        Test.golemActions.forEach(function(action){
+            lookup.push(action.name)
+        })
+        Test.importedPages.forEach(function(page){
+            page.functions.forEach(function(func){
+                lookup.push(func.full_function_name)
+            })
+        });
+        autocomplete = $(".step-first-input").autocomplete({
+            lookup: lookup,
+            minChars: 0,
+            triggerSelectOnValidInput: false,
+            onSelect: function (suggestion) { Test.onActionInputChange($(this)) }
+        });
+    }
+
+    this.refreshValueInputsAutocomplete = function(){
+        let dataTableHeaders = TestCommon.DataTable.getHeaders();
+        let lookup = []
+        dataTableHeaders.forEach(function(header){
+            lookup.push(`data.${header}`)
+        });
+        $(".value-input").each(function(){
+            autocomplete = $(this).autocomplete({
+                lookup: lookup,
+                minChars: 0,
+                onSelect: function (suggestion) { Test.unsavedChanges = true }
+            });
+        })
+    }
+
+    this.refreshElementInputsAutocomplete = function(){
+        let lookup = [];
+        Test.importedPages.forEach(function(page){
+            page.elements.forEach(function(element){
+                lookup.push(element.element_name)
+            })
+        });
+        $(".element-input").each(function(){
+            autocomplete = $(this).autocomplete({
+                lookup: lookup,
+                minChars: 0,
+                onSelect: function (suggestion) { Test.unsavedChanges = true; },
+                onSearchStart: function () {},
+                beforeRender: function (container) {},
+                onSearchComplete: function (query, suggestions) {
+                }
+            });
+        })
+    }
+
+    this.refreshPagesAutocomplete = function(){
+        let pages = Test.Utils.getNotImportedPages();
+        autocomplete = $(".page-objects-autocomplete").autocomplete({
+            lookup: pages,
+            minChars: 0,
+            noCache: true,
+            onSelect: function (suggestion) {
+                Test.addPageToList(suggestion.value)
+                $("input.page-objects-input.page-objects-autocomplete").val('');
+            },
+        });
+    }
+
+    this.onActionInputChange = function(elem){
+        let step = $(elem).closest('.step');
+        let elemValue = $(elem).val();
+        let hasParameters = step.find('.parameter-input').length > 0;
+        if(hasParameters){
+            step.find('.parameter-container').remove();
+        }
+        let actionParameters;
+        if(Test.Utils.isGolemAction(elemValue)){
+            actionParameters = Test.golemActions.filter(x => x.name == elemValue)[0].parameters;
+        }
+        else{
+            // this is a page object function
+            actionParameters = Test.Utils.getPageFunctionParameters(elemValue)
+        }
+        actionParameters.forEach(function(parameter){
+            let customClass
+            if(parameter.type == 'value'){ customClass = 'value-input' }
+            else if(parameter.type == 'element'){ customClass = 'element-input' }
+            else if(parameter.type == 'both'){ customClass = 'element-input value-input' }
+            let input = `<input type="text" class="form-control parameter-input ${customClass}" placeholder="${parameter.name}">`;
+            let paramContainer = $("<div class='step-input-container parameter-container'>"+input+"</div>");
+            paramContainer.on('change', function(){ Test.unsavedChanges = true });
+            step.find('.params').append(paramContainer);
+            step.find(".parameter-input").first().focus();
+            Test.refreshValueInputsAutocomplete();
+            Test.refreshElementInputsAutocomplete();
+            Test.unsavedChanges = true;
+        })
+        return false
+    }
+
+    this.runTest = function(){
+        if(Test.unsavedChanges)
+            Test.save({runAfter: true})
+        else
+            Main.TestRunner.runTest(Test.project, Test.fullName);
+    }
+
+    this.loadCodeView = function(){
+        if(Test.unsavedChanges){
+            Test.save({runAfter: false});
+        }
+        Test.unsavedChanges = false;
+        window.location.replace(`/project/${Test.project}/test/${Test.fullName}/code/`);
+    }
+
+    this.save = function(config){
+        runAfter = config.runAfter || false;
+        let description = $("#description").val();
+        let pageObjects = Test.importedPages.map(x => x.name);
+        let testData = TestCommon.DataTable.getData();
+        let testSteps = {
+            'setup': [],
+            'test': [],
+            'teardown': []
+        };
+        $("#setupSteps .step").each(function(){
+            let thisStep = Test.Utils.getStepValues(this);
+            if(thisStep.action.length > 0){
+                testSteps.setup.push(thisStep);
+            }
+        });
+        $("#testSteps .step").each(function(){
+            let thisStep = Test.Utils.getStepValues(this);
+            if(thisStep.action.length > 0){
+                testSteps.test.push(thisStep);
+            }
+        });
+        $("#teardownSteps .step").each(function(){
+            let thisStep = Test.Utils.getStepValues(this);
+            if(thisStep.action.length > 0){
+                testSteps.teardown.push(thisStep);
+            }
+        });
+        let data = {
+            'description': description,
+            'pageObjects': pageObjects,
+            'testData': testData,
+            'testSteps': testSteps,
+            'project': Test.project,
+            'testCaseName': Test.fullName
+        }
+        $.ajax({
+            url: "/save_test_case/",
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            type: 'POST',
+            success: function(data) {
+                Test.unsavedChanges = false;
+                Main.Utils.toast('success', "Test "+Test.name+" saved", 3000);
+                if(runAfter){
+                    Main.TestRunner.runTest(Test.project, Test.name); //, 'runButton': $("button#runTest")})
+                }
+            }
+        });
+    }
 
     this.generatePageInput = function(pageName){
-        var pageInput = "\
-            <div class='input-group'> \
-                <input type='text' disabled class='form-control selected-page' value='"+pageName+"'> \
+        let pageInput = "\
+            <div class='input-group page'> \
+                <input type='text' disabled class='form-control page-name' value='"+pageName+"'> \
                 <div class='input-group-btn'> \
-                    <button class='btn btn-default' type='button' onclick='testCase.loadPageInModal(this)'>\
+                    <button class='btn btn-default' type='button' onclick='Test.loadPageInModal(this)'>\
                         <span class='glyphicon glyphicon-edit' aria-hidden='true'></span></button>\
-                    <button class='btn btn-default' type='button' onclick='openPageObjectInNewWindow(this)'> \
+                    <button class='btn btn-default' type='button' onclick='Test.Utils.openPageInNewWindow(this)'> \
                         <span class='glyphicon glyphicon-new-window' aria-hidden='true'></span>\
                     </button> \
-                    <button class='btn btn-default' type='button' onclick='testCase.deletePageObject(this)'> \
+                    <button class='btn btn-default' type='button' onclick='Test.deletePageObject(this)'> \
                         <span class='glyphicon glyphicon-remove' aria-hidden='true'></span> \
                     </button> \
                 </div> \
@@ -69,15 +272,10 @@ var testCase = new function(){
     }
 
     this.addFirstStepInput = function(targetSection){
-        if(targetSection == 'setup'){
-            var section = $("#setupSteps .steps");
-        }
-        else if(targetSection == 'test'){
-            var section = $("#testSteps .steps");
-        }
-        else if(targetSection == 'teardown'){
-            var section = $("#teardownSteps .steps");
-        }
+        let section;
+        if(targetSection == 'setup'){ section = $("#setupSteps .steps") }
+        else if(targetSection == 'test'){ section = $("#testSteps .steps") }
+        else if(targetSection == 'teardown'){ section = $("#teardownSteps .steps") }
         section.append(
             "<div class='step'> \
                 <div class='step-numbering'></div> \
@@ -87,31 +285,31 @@ var testCase = new function(){
                 <div class='params'> \
                 </div> \
                 <div class='step-remove-icon'> \
-                    <a href='javascript:void(0)' onclick='deleteStep(this);'> \
+                    <a href='javascript:void(0)' onclick='Test.Utils.deleteStep(this);'> \
                         <span class='glyphicon glyphicon-remove' aria-hidden='true'></span> \
                     </a> \
                 </div> \
             </div>");
-
         // give focus to the last step action input
         section.find(".step-first-input").last().focus();
-
-        fillStepNumbering();
-        startStepFirstInputAutocomplete();
+        Test.Utils.fillStepNumbering();
+        Test.refreshActionInputsAutocomplete()
     }
 
     this.deletePageObject = function(elem){
-        $(elem).parent().parent().remove();
-        unsavedChanges = true;
+        let pageName = $(elem).closest('.page').find('input.page-name').val();
+        Test.importedPages = Test.importedPages.filter(page => page.name !== pageName)
+        $(elem).closest('.page' ).remove();
+        Test.unsavedChanges = true;
     }
 
     this.displayNewPagePrompt = function(){
-        var title = 'Add New Page';
-        var message = ''; //Create a duplicate of <i>'+elemFullPath+'</i>. Enter a name for the new file..';
-        var inputValue = '';
-        var placeholderValue = 'page name';
-        var callback = function(newPageName){
-            testCase.addNewPage(newPageName);
+        let title = 'Add New Page';
+        let message = '';
+        let inputValue = '';
+        let placeholderValue = 'page name';
+        let callback = function(newPageName){
+            Test.addNewPage(newPageName);
         }
         Main.Utils.displayPromptModal(title, message, inputValue, placeholderValue, callback);
     }
@@ -120,7 +318,7 @@ var testCase = new function(){
         $.ajax({
             url: "/new_tree_element/",
             data: {
-                "project": project,
+                "project": Test.project,
                 "elementType": 'page',
                 "isDir": false,
                 "fullPath": newPageName,
@@ -130,11 +328,8 @@ var testCase = new function(){
             type: 'POST',
             success: function(data) {
                 if(data.errors.length == 0){
-                    pageObjects.push({
-                        'value': data.element.full_path,
-                        'data': data.element.full_path,
-                    });
-                    testCase.addPageToList(data.element.full_path)
+                    Test.allPages.push(data.element.full_path);
+                    Test.addPageToList(data.element.full_path)
                 }
                 else{
                     Main.Utils.displayErrorModal(data.errors);
@@ -144,607 +339,157 @@ var testCase = new function(){
     }
 
     this.addPageToList = function(pageName){
-        var newPageInput = testCase.generatePageInput(pageName);
+        let newPageInput = Test.generatePageInput(pageName);
         $("#pageObjects").append(newPageInput);
-        getPageObjectElements();
-        unsavedChanges = true;
+        Test.getPageContents(pageName)
+        Test.unsavedChanges = true;
     }
 
     this.loadPageInModal = function(elem){
-        var inputVal = $(elem).parent().parent().find('input').val();
-        $("#pageModalIframe").attr('src', '/project/'+project+'/page/'+inputVal+'/no_sidebar/');
+        let inputVal = $(elem).closest('.page').find('input.page-name').val();
+        $("#pageModalIframe").attr('src', '/project/'+Test.project+'/page/'+inputVal+'/no_sidebar/');
         $("#pageModal").modal('show');        
     }
-}
 
+    this.Utils = new function(){
 
-function getPageObjects(){
-    $.ajax({
-        url: "/get_page_objects/",
-        data: {
-            "project": project,
-        },
-        dataType: 'json',
-        type: 'POST',
-        success: function(data) {
-            for(po in data){
-                var po = data[po];
-                pageObjects.push({
-                    'value': po,
-                    'data': po,
-                });
-            }
-            startPageObjectsAutocomplete();
-        },
-        error: function() {
+        this.getNotImportedPages = function(){
+            let notImported = [];
+            let importedPagesNames = Test.importedPages.map(x => x.name);
+            Test.allPages.forEach(function(page){
+                if($.inArray(page, importedPagesNames) == -1){
+                    notImported.push(page);
+                }
+            })
+            return notImported
         }
-    });
-}
 
+        this.getPageFunctionParameters = function(functionName){
+            for(var i = 0; i < Test.importedPages.length; i++) {
+                let page = Test.importedPages[i];
+                for(var j = 0; j < page.functions.length; j++) {
+                    let func = page.functions[j];
+                    if(func.full_function_name == functionName){
+                        return func.arguments.map(x => ({'name': x, 'type': 'both'}))
+                    }
+                }
+            }
+            return false
+        }
 
-function startPageObjectsAutocomplete(){
-    autocomplete = $(".page-objects-autocomplete").autocomplete({
-        //lookup: getPageObjectsNotYetSelected(),
-        lookup: function (query, done) {
-        // Do Ajax call or lookup locally, when done,
-        // call the callback and pass your results:
-            var result = {
-                suggestions: getPageObjectsNotYetSelected()
+        this.isGolemAction = function(value){
+            for(ac in Test.golemActions){
+                if(Test.golemActions[ac].name == value){ return true }
+            }
+            return false
+        }
+
+        this.collapseTeardown = function(){
+            $("#showTeardownLink").show();
+            $("#teardownSteps").slideUp('fast');
+        }
+
+        this.collapseSetup = function(){
+            $("#showSetupLink").show();
+            $("#setupSteps").slideUp('fast');
+        }
+
+        this.showSetupSteps = function(){
+            $("#showSetupLink").hide();
+            $("#setupSteps").slideDown('fast');
+        }
+
+        this.showTeardownSteps = function(){
+            $("#showTeardownLink").hide();
+            $("#teardownSteps").slideDown('fast');
+        }
+
+        this.startSortableSteps = function(){
+            let setupSteps = document.querySelector("[id='setupSteps']>.steps");
+            let testSteps = document.querySelector("[id='testSteps']>.steps");
+            let teardownSteps = document.querySelector("[id='teardownSteps']>.steps");
+            let settings = {
+                handle: '.step-numbering',
+                draggable: '.step',
+                onEnd: function (/**Event*/evt) {
+                    Test.Utils.fillStepNumbering();
+                }
             };
-            done(result);
-        },
-        minChars: 0,
-        noCache: true,
-        onSelect: function (suggestion) {
-            testCase.addPageToList(suggestion.value)
-            $("input.page-objects-input.page-objects-autocomplete").val('');
-        },
-    });
-}
-
-
-function startStepFirstInputAutocomplete(){
-
-   var lookup = []
-
-    for(ac in globalActions){
-        lookup.push({
-            'value': globalActions[ac].name,
-            'data': globalActions[ac].name
-        })        
-    }
-
-    for(f in selectedPageObjectsFunctions){
-        lookup.push({
-            'value': selectedPageObjectsFunctions[f].full_function_name,
-            'data': selectedPageObjectsFunctions[f].full_function_name
-        })        
-    }
-
-    autocomplete = $(".step-first-input").autocomplete({
-        lookup: lookup,
-        minChars: 0,
-        triggerSelectOnValidInput: false,
-        onSelect: function (suggestion) {
-            // not this is not always called, 
-            // sometimes the onchange is called before
-            stepFirstInputChange($(this));
-            unsavedChanges = true;
-        },
-        // onSelect: function (suggestion) {
-        //     // not this is not always called, 
-        //     // sometimes the onchange is called before
-        //     stepFirstInputChange($(this));
-        //     unsavedChanges = true;
-        // },
-        onSearchStart: function () {
-        },
-        beforeRender: function (container) {},
-        onSearchComplete: function (query, suggestions) {
+            Sortable.create(setupSteps, settings);
+            Sortable.create(testSteps, settings);
+            Sortable.create(teardownSteps, settings);
         }
-    });
-}
 
-
-function stepFirstInputChange(elem){
-    var step = $(elem).parent().parent();//.parent();
-    var hasParameter = step.find('.parameter-input').length > 0
-    var placeholder = ''
-    var elemValue = $(elem).val();
-    
-    if(hasParameter){     
-        // the step already has parameters, remove them and update
-        step.find('.parameter-container').remove();
-    }
-
-    // var pageObjects = getSelectedPageObjects();
-
-    if(isInGlobalActions(elemValue)){
-        // this is a global action
-        var actionParameters = getGlobalActionParameters(elemValue);
-    }
-    else{
-        // this is a page object function
-        var actionParameters = getPageObjectFunctionParameters(elemValue);
-    }
-
-    for(p in actionParameters){
-        var parameter = actionParameters[p];    
-
-        if(parameter.type == 'value'){
-            var customClass = 'value-input';
-            var input = "<input type='text' class='form-control \
-                                    parameter-input "+customClass+"' \
-                                    placeholder='"+parameter.name+"'>";
-            var input = `<input type="text" class="form-control parameter-input ${customClass}"
-                         placeholder="${parameter.name}">`;
-        }
-        else if(parameter.type == 'multiline-value'){
-            var customClass = 'multiline-value-input';
-            var input = "<textarea type='text' class='form-control \
-                            parameter-input "+customClass+"' \
-                            placeholder='"+parameter.name+"' rows='2'></textarea>";
-        }
-        else if(parameter.type == 'element'){
-            var customClass = 'element-input';
-            var input = "<input type='text' class='form-control \
-                                    parameter-input "+customClass+"' \
-                                    placeholder='"+parameter.name+"'>";
-        }
-        // else if(parameter.type == 'custom-param'){
-        //     var customClass = 'element-input value-input';
-        //     var input = "<input type='text' class='form-control \
-        //                             parameter-input "+customClass+"' \
-        //                             placeholder='"+parameter.name+"'>";
-        // }
-        
-        var newInput = $("<div class='step-input-container parameter-container'>"+input+"</div>");
-
-        newInput.on('change', function(){
-            unsavedChanges = true;
-        });
-
-        step.find('.params').append(newInput);
-
-        // five focus to the first parameter input
-        step.find(".parameter-input").first().focus();
-
-        // getPageObjectElements();
-
-        startAllValueInputAutocomplete();
-        startAllElementInputAutocomplete();
-        unsavedChanges = true;      
-    }
-    return false
-}
-
-
-function startAllValueInputAutocomplete(){
-
-    var lookup = []
-
-    var allValues = getLoadedDataWithValues();
-
-    for(value in allValues){
-        lookup.push({
-            'value': 'data.' + allValues[value].name,
-            'data': 'data.' + allValues[value].name
-        })        
-    }
-
-    $(".value-input").each(function(){
-
-        autocomplete = $(this).autocomplete({
-            lookup: lookup,
-            minChars: 0,
-            onSelect: function (suggestion) {
-                //stepFirstInputChange($(this));
-                unsavedChanges = true;
-            },
-            onSearchStart: function () {},
-            beforeRender: function (container) {},
-            onSearchComplete: function (query, suggestions) {
-            }
-        });
-    })
-}
-
-
-function startAllElementInputAutocomplete(){
-
-    var lookup = []
-
-    //getSelectedPageObjectElements();
-
-    for(elem in selectedPageObjectsElements){
-        lookup.push({
-            'value': selectedPageObjectsElements[elem].element_full_name,
-            'data': selectedPageObjectsElements[elem].element_full_name
-        })        
-    }
-
-    $(".element-input").each(function(){
-
-        autocomplete = $(this).autocomplete({
-            lookup: lookup,
-            minChars: 0,
-            onSelect: function (suggestion) {
-                //stepFirstInputChange($(this));
-                unsavedChanges = true;
-            },
-            onSearchStart: function () {},
-            beforeRender: function (container) {},
-            onSearchComplete: function (query, suggestions) {
-            }
-        });
-    })
-
-}
-
-
-function isInPageObjectArray(value){
-    for(po in pageObjects){
-        if(value == pageObjects[po].value){
-            return true;
-        }
-    }
-    return false
-}
-
-function isInGlobalActions(value){
-    for(ac in globalActions){
-        if(value == globalActions[ac].name){
-            return true
-        }
-    }
-    return false
-}
-
-function getPageObjectDataFromPageObjects(poName){
-    for(po in pageObjects){
-        if(poName == pageObjects[po].value){
-            return pageObjects[po]
-        }
-    }
-}
-
-
-function getLoadedData(){
-    var data = [];
-    $(".dato").each(function(){
-        data.push(
-            $(this).find(".dato-variable").val());
-    });
-    return data;
-}
-
-function getLoadedDataWithValues(){
-    var data = [];
-    $("#dataTable thead input").each(function(){
-        if($(this).val() != ''){
-            data.push({
-                'name': $(this).val(),
-                'value': $(this).val()
+        this.fillStepNumbering = function(){
+            let count = 1;
+            $("#setupSteps .step").each(function(){
+                $(this).find('.step-numbering').html(count);
+                count++;
+            });
+            count = 1;
+            $("#testSteps .step").each(function(){
+                $(this).find('.step-numbering').html(count);
+                count++;
+            });
+            count = 1;
+            $("#teardownSteps .step").each(function(){
+                $(this).find('.step-numbering').html(count);
+                count++;
             });
         }
-    });
-    return data;
-}
 
-
-function getGlobalActions(){
-    $.ajax({
-        url: "/get_global_actions/",
-        data: {},
-        dataType: 'json',
-        type: 'POST',
-        success: function(data) {
-            globalActions = data;
-            startStepFirstInputAutocomplete();
-        },
-        error: function() {}
-    });   
-}
-
-
-function getGlobalActionParameters(actionName){
-    for(a in globalActions){
-        if(globalActions[a].name == actionName){
-            return globalActions[a].parameters
-        }
-    }
-    return false
-}
-
-
-function getPageObjectFunctionParameters(functionName){
-    for(a in selectedPageObjectsFunctions){
-        if(selectedPageObjectsFunctions[a].full_function_name == functionName){
-            var parameters = [];
-            for(p in selectedPageObjectsFunctions[a].arguments){
-                var thisArgument = selectedPageObjectsFunctions[a].arguments[p];
-                parameters.push({
-                    name: thisArgument,
-                    type: 'element'
-                })
+        this.openPageInNewWindow = function(elem){
+            let inputVal = $(elem).closest('.page').find('input.page-name').val();
+            if(inputVal.length > 0){
+                let url = `/project/${Test.project}/page/${inputVal}/`;
+                window.open(url, '_blank');
             }
-            return parameters
         }
-    }
-    return false
-}
 
-
-function getPageObjectElements(){
-    var selectedPageObjects = getSelectedPageObjects();
-
-    selectedPageObjectsElements = [];
-    selectedPageObjectsFunctions = [];
-
-    for(po in selectedPageObjects){
-        var thisPageName = selectedPageObjects[po];
-        $.ajax({
-            url: "/get_selected_page_object_elements/",
-            data: {
-                 "project": project,
-                 "pageObject": thisPageName,
-             },
-             dataType: 'json',
-             type: 'POST',
-             success: function(data) {
-                if(data.error == 'page does not exist'){
-                    // mark page as not exist
-                    $("input[value='"+thisPageName+"']").addClass('not-exist');
-                    // $("input[value='"+thisPageName+"']").attr('data-toggle', 'tooltip');
-                    // $("input[value='"+thisPageName+"']").attr('title', 'tooltip');
-                    // $("input[value='"+thisPageName+"']").tooltip();
+        this.watchForUnsavedChanges = function(){
+            $(".page-objects-input").on("change keyup paste", function(){
+                Test.unsavedChanges = true;
+            });
+            $(".step-first-input").on("change keyup paste", function(){
+                Test.unsavedChanges = true;
+            });
+            $(".parameter-input").on("change keyup paste", function(){
+                Test.unsavedChanges = true;
+            });
+            $("#description").on("change keyup paste", function(){
+                Test.unsavedChanges = true;
+            });
+            $("#dataTable").on("change keyup paste", function(){
+                Test.unsavedChanges = true;
+            });
+            window.addEventListener("beforeunload", function (e) {
+                if(Test.unsavedChanges){
+                    let confirmationMessage = 'There are unsaved changes';
+                    (e || window.event).returnValue = confirmationMessage;
+                    return confirmationMessage;
                 }
-                else{
-                    // TODO
-                    // concat elements
-                    selectedPageObjectsElements = selectedPageObjectsElements.concat(data.content.elements);
-                    // remove duplicates
-                    // selectedPageObjectsElements = selectedPageObjectsElements.filter(function (x, i, a) { 
-                    //     return selectedPageObjectsElements.indexOf(x) == i; 
-                    // });
-                    // concat functions
-                    selectedPageObjectsFunctions = selectedPageObjectsFunctions.concat(data.content.functions);
-                    // remove duplicates
-                    // selectedPageObjectsFunctions = selectedPageObjectsFunctions.filter(function (x, i, a) { 
-                    //     return selectedPageObjectsFunctions.indexOf(x) == i; 
-                    // });
-                    startAllElementInputAutocomplete();
-                    startStepFirstInputAutocomplete();
-                } 
-             },
-             error: function() {
-             }
-         });
-    }
-}
-
-
-function saveTestCase(config){
-    runAfter = config.runAfter || false;
-    // if(!unsavedChanges){
-    //     return
-    // }
-    var description = $("#description").val();
-    var pageObjects = getSelectedPageObjects();
-    
-    // get data from table
-    var testData = dataTable.getData();
-
-    var testSteps = {
-        'setup': [],
-        'test': [],
-        'teardown': []
-    };
-    $("#setupSteps .step").each(function(){
-        var thisStep = getThisStep(this);
-        if(thisStep.action.length > 0){
-            testSteps.setup.push(thisStep);    
+            });
         }
-    });
-    $("#testSteps .step").each(function(){
-        var thisStep = getThisStep(this);
-        if(thisStep.action.length > 0){
-            testSteps.test.push(thisStep);    
-        }
-    });
-    $("#teardownSteps .step").each(function(){
-        var thisStep = getThisStep(this);
-        if(thisStep.action.length > 0){
-            testSteps.teardown.push(thisStep);    
-        }
-    });
 
-    var data = {
-        'description': description,
-        'pageObjects': pageObjects,
-        'testData': testData,
-        'testSteps': testSteps,
-        'project': project,
-        'testCaseName': fullTestCaseName
-    }
+        this.deleteStep = function(elem){
+            $(elem).closest('.step').remove();
+            Test.unsavedChanges = true;
+        }
 
-    $.ajax({
-        url: "/save_test_case/",
-        data: JSON.stringify(data),
-        dataType: 'json',
-        contentType: 'application/json; charset=utf-8',
-        type: 'POST',
-        success: function(data) {
-            unsavedChanges = false;
-            Main.Utils.toast('success', "Test "+testCaseName+" saved", 3000);
-            if(runAfter){
-                //testRunner.runTestCase();
-                testRunner.askForEnvBeforeRun();
+        this.getStepValues = function(elem){
+            let thisStep = {
+                'action': '',
+                'parameters': []
             }
-        }
-    });
-}
-
-
-function dataTableHeaderInputChange(){
-    startAllValueInputAutocomplete();
-}
-
-
-// U T I L S
-
-function getSelectedPageObjects(){
-    var selectedPageObjects = [];
-    $(".selected-page").each(function(){
-        if($(this).val().length > 0){
-            selectedPageObjects.push($(this).val());
-        }
-    })
-    return selectedPageObjects
-}
-
-
-function openPageObjectInNewWindow(elem){
-    var inputVal = $(elem).parent().parent().find('input').val();
-    if(inputVal.length > 0){
-        var url = "/project/"+project+"/page/"+inputVal+"/";
-        window.open(url, '_blank');
-    }
-}
-
-
-function watchForUnsavedChanges(){
-    $(".page-objects-input").on("change keyup paste", function(){
-        unsavedChanges = true;
-    });
-
-    $(".step-first-input").on("change keyup paste", function(){
-        unsavedChanges = true;
-    });
-
-    $(".parameter-input").on("change keyup paste", function(){
-        unsavedChanges = true;
-    });
-
-    $("#description").on("change keyup paste", function(){
-        unsavedChanges = true;
-    });
-    
-    $("#dataTable").on("change keyup paste", function(){
-        unsavedChanges = true;
-    });
-
-    window.addEventListener("beforeunload", function (e) {
-        if(unsavedChanges){
-            var confirmationMessage = 'There are unsaved changes';
-            (e || window.event).returnValue = confirmationMessage; //Gecko + IE
-            return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
-        }
-    });
-}
-
-
-function fillStepNumbering(){
-    var count = 1;
-    $("#setupSteps .step").each(function(){
-        $(this).find('.step-numbering').html(count);
-        count++;
-    });
-    var count = 1;
-    $("#testSteps .step").each(function(){
-        $(this).find('.step-numbering').html(count);
-        count++;
-    });
-    var count = 1;
-    $("#teardownSteps .step").each(function(){
-        $(this).find('.step-numbering').html(count);
-        count++;
-    });
-}
-
-
-function deleteStep(elem){
-    $(elem).parent().parent().remove();
-    unsavedChanges = true;
-}
-
-
-function loadCodeView(){
-    if(unsavedChanges){
-        saveTestCase({runAfter: false});
-    }
-    unsavedChanges = false;
-    // redirect to gui view
-    window.location.replace("/project/"+project+"/test/"+fullTestCaseName+"/code/");
-}
-
-
-function showSetupSteps(){
-    $("#showSetupLink").hide();
-    $("#setupSteps").slideDown('fast');
-}
-
-
-function showTeardownSteps(){
-    $("#showTeardownLink").hide();
-    $("#teardownSteps").slideDown('fast');
-}
-
-
-function startSortableSteps(){
-    var setupSteps = $("#setupSteps .steps").get(0);
-    var testSteps = $("#testSteps .steps").get(0);
-    var teardownSteps = $("#teardownSteps .steps").get(0);
-    var settings = {
-        handle: '.step-numbering',        
-        // Element dragging ended
-        onEnd: function (/**Event*/evt) {
-            fillStepNumbering();
-        }
-    };
-    var sortable = Sortable.create(setupSteps, settings);
-    var sortable = Sortable.create(testSteps, settings);
-    var sortable = Sortable.create(teardownSteps, settings);
-}
-
-
-function getThisStep(elem){
-    var thisStep = {
-        'action': '',
-        'parameters': []
-    }
-    if($(elem).find('.step-first-input').val().length > 0){
-        thisStep.action = $(elem).find('.step-first-input').val();
-        $(elem).find('.parameter-input').each(function(){
-            if($(this).val().length > 0){
-                thisStep.parameters.push($(this).val());
+            if($(elem).find('.step-first-input').val().length > 0){
+                thisStep.action = $(elem).find('.step-first-input').val();
+                $(elem).find('.parameter-input').each(function(){
+                    if($(this).val().length > 0){
+                        thisStep.parameters.push($(this).val());
+                    }
+                });
             }
-        });
-    }
-    return thisStep
-}
-
-
-function getPageObjectsNotYetSelected(){
-    var selectedPageObjects = getSelectedPageObjects();
-    var pageObjectsNotYetSelected = [];
-    for(p in pageObjects){
-        if($.inArray(pageObjects[p].data, selectedPageObjects) == -1){
-            pageObjectsNotYetSelected.push(pageObjects[p]);
+            return thisStep
         }
     }
-    return pageObjectsNotYetSelected
 }
-
-
-function collapseTeardown(){
-    $("#showTeardownLink").show();
-    $("#teardownSteps").slideUp('fast');   
-}
-
-
-function collapseSetup(){
-    $("#showSetupLink").show();
-    $("#setupSteps").slideUp('fast');
-}
-

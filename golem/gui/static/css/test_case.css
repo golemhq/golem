@@ -1,7 +1,12 @@
 
-html {
-    overflow-y: scroll;
+body {
+    overflow: scroll
 }
+
+body.modal-open {
+    overflow: hidden
+}
+
 
 .input-group {
     margin-bottom: 5px;
@@ -63,8 +68,6 @@ html {
     width: 100%;
 	clear: both;
 	margin-bottom: 5px;
-	/*padding-right: 15px;
-    padding-left: 15px;*/
 }
 
 .add-new-icon {
@@ -114,7 +117,7 @@ html {
     }
 }
 
-#pageObjects input.selected-page {
+#pageObjects>.page>.page-name{
 	cursor: default;
 }
 

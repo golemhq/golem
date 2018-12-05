@@ -758,20 +758,19 @@ def get_page_objects():
         return json.dumps(page_objects)
 
 
-@app.route("/get_selected_page_object_elements/", methods=['POST'])
+@app.route("/get_page_contents/")
 @login_required
 def get_selected_page_object_elements():
-    if request.method == 'POST':
-        project = request.form['project']
-        page_name = request.form['pageObject']
+        project = request.args['project']
+        page = request.args['page']
         result = {
-            'error': None,
-            'content': []
+            'error': '',
+            'contents': []
         }
-        if not page_object.page_exists(root_path, project, page_name):
+        if not page_object.page_exists(root_path, project, page):
             result['error'] = 'page does not exist'
         else:
-            result['content'] = page_object.get_page_object_content(project, page_name)
+            result['content'] = page_object.get_page_object_content(project, page)
         return json.dumps(result)
 
 
@@ -790,12 +789,14 @@ def new_tree_element():
         full_path = full_path.split('.')
         element_name = full_path.pop()
         parents = full_path
-        # verify that the string only contains letters, numbers
-        # dashes or underscores
-        for c in element_name:
-            if not c.isalnum() and c not in ['-', '_']:
-                errors.append('Only letters, numbers, \'-\' and \'_\' are allowed')
-                break
+        # verify that the string only contains letters, numbers dashes or underscores
+        if len(element_name) == 0:
+            errors.append('Name cannot be empty')
+        else:
+            for c in element_name:
+                if not c.isalnum() and c not in ['-', '_']:
+                    errors.append('Only letters, numbers, \'-\' and \'_\' are allowed')
+                    break
         if not errors:
             if elem_type == 'test':
                 if is_dir:
@@ -865,12 +866,14 @@ def save_test_case_code():
         return json.dumps({'error': error})
 
 
-@app.route("/get_global_actions/", methods=['POST'])
+@app.route("/get_golem_actions/", methods=['GET'])
 @login_required
-def get_global_actions():
-    if request.method == 'POST':
-        global_actions = gui_utils.Golem_action_parser().get_actions()
-        return json.dumps(global_actions)
+def get_golem_actions():
+    global_actions = gui_utils.Golem_action_parser().get_actions()
+    response = jsonify(global_actions)
+    response.cache_control.max_age = 60*60
+    response.cache_control.public = True
+    return response
 
 
 @app.route("/save_page_object/", methods=['POST'])
@@ -905,10 +908,12 @@ def save_page_object_code():
 @login_required
 def run_test_case():
     if request.method == 'POST':
-        project = request.form['project']
-        test_name = request.form['testCaseName']
-        environment = request.form['environment']
-        timestamp = gui_utils.run_test_case(project, test_name, environment)
+        project = request.json['project']
+        test_name = request.json['testName']
+        browsers = request.json['browsers']
+        environments = request.json['environments']
+        processes = request.json['processes']
+        timestamp = gui_utils.run_test_case(project, test_name, browsers, environments, processes)
         return json.dumps(timestamp)
 
 
@@ -934,35 +939,36 @@ def check_test_case_run_result():
         project = request.form['project']
         test_case_name = request.form['testCaseName']
         timestamp = request.form['timestamp']
-        path = os.path.join(root_path, 'projects', project, 'reports',
+        path = os.path.join(test_execution.root_path, 'projects', project, 'reports',
                             'single_tests', test_case_name, timestamp)
-        sets = []
+        sets = {}
         result = {
-            'reports': [],
-            'logs': [],
-            'complete': False
+            'sets': {},
+            'is_finished': False
         }
         if os.path.isdir(path):
             for elem in os.listdir(path):
                 if os.path.isdir(os.path.join(path, elem)):
-                    sets.append(elem)
-        # is execution finished?
-        result['complete'] = report_parser.is_execution_finished(path, sets)
-        for data_set in sets:
-            report_path = os.path.join(path, data_set, 'report.json')
+                    sets[elem] ={
+                        'log': [],
+                        'report': None
+                    }
+        result['is_finished'] = report_parser.is_execution_finished(path, sets)
+        for set_name in sets:
+            report_path = os.path.join(path, set_name, 'report.json')
             if os.path.exists(report_path):
                 test_case_data = report_parser.get_test_case_data(root_path,
                                                                   project,
                                                                   test_case_name,
                                                                   execution=timestamp,
-                                                                  test_set=data_set,
+                                                                  test_set=set_name,
                                                                   is_single=True)
-                result['reports'].append(test_case_data)
-            log_path = os.path.join(path, data_set, 'execution_info.log')
+                sets[set_name]['report'] = test_case_data
+            log_path = os.path.join(path, set_name, 'execution_info.log')
             if os.path.exists(log_path):
                 with open(log_path) as log_file:
-                    log = log_file.readlines()
-                    result['logs'].append(log)
+                    sets[set_name]['log'] = log_file.readlines()
+        result['sets'] = sets
         return json.dumps(result)
 
 
@@ -1003,9 +1009,11 @@ def save_settings():
             'errors': []
         }
         settings_manager.save_global_settings(root_path, global_settings)
-        settings_manager.save_project_settings(root_path, project, project_settings)
-        # re-read settings
-        test_execution.settings = settings_manager.get_project_settings(root_path, project)
+        test_execution.settings = settings_manager.get_global_settings(root_path)
+        if project_settings:
+            settings_manager.save_project_settings(root_path, project, project_settings)
+            # re-read project settings
+            test_execution.settings = settings_manager.get_project_settings(root_path, project)
         return json.dumps(result)
 
 
@@ -1041,20 +1049,20 @@ def save_environments():
 #         return json.dumps('ok')
 
 
-@app.route("/get_supported_browsers/", methods=['POST'])
+@app.route("/get_supported_browsers/", methods=['GET'])
 @login_required
 def get_supported_browsers():
-    project = request.form['project']
+    project = request.args['project']
     settings = settings_manager.get_project_settings(root_path, project)
     remote_browsers = settings_manager.get_remote_browser_list(settings)
     default_browsers = gui_utils.get_supported_browsers_suggestions()
     return json.dumps(remote_browsers + default_browsers)
 
 
-@app.route("/get_environments/", methods=['POST'])
+@app.route("/get_environments/", methods=['GET'])
 @login_required
 def get_environments():
-    project = request.form['project']
+    project = request.args['project']
     return json.dumps(environment_manager.get_envs(root_path, project))
 
 
@@ -1124,6 +1132,12 @@ def get_amount_of_tests():
         response.cache_control.max_age = 108000
         response.cache_control.public = True
     return response
+
+
+@app.route("/get_default_browser/", methods=['GET'])
+@login_required
+def get_default_browser():
+    return jsonify(test_execution.settings['default_browser'])
 
 
 ############

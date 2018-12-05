@@ -10,13 +10,22 @@ import golem.actions
 from golem.core import utils, test_execution
 
 
-def run_test_case(project, test_case_name, environment):
+def run_test_case(project, test_case_name, browsers=None, environments=None, processes=1):
     """Run a test case. This is used when running tests from the GUI"""
     timestamp = utils.get_timestamp()
     param_list = ['golem', 'run', project, test_case_name, '--timestamp', timestamp]
-    if environment:
+    if browsers:
+        param_list.append('--browsers')
+        for browser in browsers:
+            param_list.append(browser)
+    if environments:
         param_list.append('--environments')
-        param_list.append(environment)
+        for environment in environments:
+            param_list.append(environment)
+    if processes:
+        param_list.append('--threads')
+        param_list.append(str(processes))
+
     subprocess.Popen(param_list)
     return timestamp
 

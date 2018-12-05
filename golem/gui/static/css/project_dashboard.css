@@ -70,7 +70,7 @@
     color:#369;
 }
 
-.tree li button, .tree li button:active, .tree li button:focus {
+.tree li button {
     text-decoration: none;
     color: #369;
     border: none;
@@ -99,6 +99,10 @@ li.tree-element:hover > .tree-element-buttons {
 
 li.tree-element:hover > .tree-element-buttons button {
     display: inline-block !important;
+}
+
+li.tree-element > .tree-element-buttons > button {
+    margin-right: 2px;
 }
 
 .new-element-input {

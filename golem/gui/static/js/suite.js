@@ -29,14 +29,13 @@ $(document).ready(function() {
         }
     });
 
-
     $.ajax({
         url: "/get_supported_browsers/",
         data: {
             project: project
         },
         dataType: 'json',
-        type: 'POST',
+        type: 'GET',
         success: function(browserSuggestions) {
             startBrowsersAutocomplete(browserSuggestions);
         }
@@ -48,7 +47,7 @@ $(document).ready(function() {
             project: project
         },
         dataType: 'json',
-        type: 'POST',
+        type: 'GET',
         success: function(environments) {
             startEnvironmentsAutocomplete(environments);
         }

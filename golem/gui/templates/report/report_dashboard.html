@@ -17,5 +17,6 @@
 	var projects = {{projects|tojson}};
 	var suiteName = '{{suite}}'
 </script>
+<script src="{{ url_for('static', filename='js/external/chart.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/report_dashboard.js') }}"></script>
 {% endblock %}

@@ -1,8 +1,4 @@
 
-html {
-    overflow-y: scroll;
-}
-
 #codeEditorContainer {
     width: 100%;
     border-top-left-radius: 3px;

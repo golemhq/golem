@@ -2,19 +2,21 @@
 var Project = new function(){
 
     this.generateNewElement = function(element){
-        var li = $("\
-            <li class='tree-element' fullpath='"+element.dotPath+"' name='"+element.name+"' type='"+element.type+"'>\
-                <a href='"+element.url+"'>"+element.name+"</a> \
-                <span class='pull-right tree-element-buttons'> \
-                    <button class='rename-button' onclick='Project.renameFilePrompt(this)'><i class='glyphicon glyphicon-edit'></i></button> \
-                    <button class='duplicate-button' onclick='Project.duplicateElementPrompt(this)'><i class='glyphicon glyphicon-duplicate'></i></button> \
-                    <button class='delete-button' onclick='Project.deleteElementConfirm(this)'><i class='glyphicon glyphicon-remove'></i></button> \
-                </span>\
-            </li>");
-
+        var li = $(`<li class="tree-element"fullpath="${element.dotPath}" name="${element.name}" type="${element.type}">
+                        <a href="${element.url}">${element.name}</a>
+                <span class="pull-right tree-element-buttons">
+                    <button class="rename-button" onclick="Project.renameFilePrompt(this)"><i class="glyphicon glyphicon-edit"></i></button>
+                    <button class="duplicate-button" onclick="Project.duplicateElementPrompt(this)"><i class="glyphicon glyphicon-duplicate"></i></button>
+                    <button class="delete-button" onclick="Project.deleteElementConfirm(this)"><i class="glyphicon glyphicon-trash"></i></button>
+            </li>`);
         if(element.type == 'test' || element.type == 'page'){
-            let codeLink = `<a href="${element.url}code" class="code-button"><i class="fa fa-code" style="font-weight: 900;font-size: 18px;"></i></a>`
+            let codeIcon = '<i class="glyphicon glyphicon-chevron-left" style="-webkit-text-stroke: 0.5px white;"></i><i class="glyphicon glyphicon-chevron-right" style="margin-left: -8px; -webkit-text-stroke: 0.5px white;"></i>';
+            let codeLink = `<a href="${element.url}code" class="code-button" style="margin-right: -2px;">${codeIcon}</a>`;
             li.find("span.tree-element-buttons").prepend(codeLink);
+            if(element.type == 'test'){
+                let runButton = `<button class="run-test-button" onclick="Main.TestRunner.openConfigModal(project, '${element.dotPath}')"><is class="glyphicon glyphicon-play-circle"></span></button>`;
+                li.find("span.tree-element-buttons").prepend(runButton);
+            }
         }
         return li
     }
@@ -183,7 +185,6 @@ var Project = new function(){
         });
     }
 
-
     this.getElementFullPath = function(elem, elementName){
         var dotted_branches = '';
         elem.parents('.branch').each(function(){
@@ -211,7 +212,6 @@ var Project = new function(){
         Main.Utils.displayConfirmModal('Delete', message, callback);
 
     }
-
 
     this.deleteElement = function(element, fullPath, elemType){
         $.ajax({
@@ -249,15 +249,12 @@ var Project = new function(){
         Main.Utils.displayPromptModal(title, message, inputValue, placeholderValue, callback)
     }
 
-
     this.duplicateFile = function(elemFullPath, elemType, originalElement, newFileFullPath){
-        //var newFileFullPath = $("#promptModalInput").val();
         if(newFileFullPath === elemFullPath){
             // new file name is the same as original
             // don't show error message, do nothing
             return
         }
-
         $.ajax({
             url: "/duplicate_element/",
             data: {
@@ -292,7 +289,6 @@ var Project = new function(){
         });
     }
 
-
     this.renameFilePrompt = function(elementDuplicateButton){
         var element =  $(elementDuplicateButton).parent().parent();
         var elemFullPath = element.attr('fullpath');
@@ -306,7 +302,6 @@ var Project = new function(){
         }
         Main.Utils.displayPromptModal(title, message, inputValue, placeholderValue, callback)
     }
-
 
     this.renameFile = function(fullFilename, elemType, originalElement, newFullFilename){
         if(newFullFilename === fullFilename){

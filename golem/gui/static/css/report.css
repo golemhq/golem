@@ -91,3 +91,9 @@
 #detailTable th.filtered .funnel-icon {
     color: black;
 }
+
+#detailTable td.set-name {
+    text-overflow: ellipsis;
+    max-width: 250px;
+    overflow: hidden;
+}
