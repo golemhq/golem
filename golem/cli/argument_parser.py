@@ -18,6 +18,8 @@ def get_parser():
                             nargs='*', default=[], type=str)
     parser_run.add_argument('-i', '--interactive', action='store_true',
                             default=False)
+    parser_run.add_argument('-j', '--junit', action='store_true',
+                            default=False)
     parser_run.add_argument('--timestamp', action='store', nargs='?', type=str)
     parser_run.add_argument('-h', '--help', action='store_true')
 

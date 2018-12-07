@@ -2,7 +2,7 @@
 USAGE_MSG = """
 Usage: golem
 
-  golem run <project> <test|suite|directory> [-b -t -e -i]
+  golem run <project> <test|suite|directory> [-b -t -e -i -j]
   golem gui [-p]
   golem createproject <project>
   golem createtest <project> <test>
@@ -29,6 +29,7 @@ Usage: golem run
     -t, --threads       amount of threads, default is 1
     -e, --environments  a list of environments
     -i, --interactive   run in interactive mode
+    -j, --junit         output junit.xml file
 
 Usage: golem gui
   
@@ -42,7 +43,7 @@ Type: golem -h <command> for more help
 
 RUN_USAGE_MSG = """
 Usage: golem run <project> <test|suite|directory> [-b|--browsers]
-                 [-t|--threads] [-e|--environments] [-i|--interactive]
+                 [-t|--threads] [-e|--environments] [-i|--interactive] [-j|--junit]
 
   Run tests, suites or directories
   
@@ -77,6 +78,8 @@ Usage: golem run <project> <test|suite|directory> [-b|--browsers]
     -t, --threads       amount of threads, default is 1
     -e, --environments  a list of environments
     -i, --interactive   run in interactive mode
+    -j, --junit         output junit.xml file
+
 """
 
 GUI_USAGE_MSG = """

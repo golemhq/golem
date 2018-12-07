@@ -19,7 +19,7 @@ def command_dispatcher(args):
         run_command(args.project, args.test_query,
                     args.browsers, args.threads,
                     args.environments, args.interactive,
-                    args.timestamp)
+                    args.junit, args.timestamp)
     elif args.command == 'gui':
         gui_command(args.port)
     elif args.command == 'createproject':
@@ -53,7 +53,7 @@ def display_help(help, command):
 
 
 def run_command(project='', test_query='', browsers=None, processes=1,
-                environments=None, interactive=False, timestamp=None):
+                environments=None, interactive=False, junit=False, timestamp=None):
     execution_runner = ExecutionRunner(browsers, processes, environments,
                                        interactive, timestamp)
     if project:
@@ -72,7 +72,7 @@ def run_command(project='', test_query='', browsers=None, processes=1,
                     execution_runner.run_suite(test_query)
                 elif test_case.test_case_exists(test_execution.root_path,
                                                 project, test_query):
-                    execution_runner.run_test(test_query)
+                    execution_runner.run_test(test_query, junit)
                 else:
                     if test_query == '.':
                         test_query = ''
