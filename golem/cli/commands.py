@@ -66,13 +66,17 @@ def run_command(project='', test_query='', browsers=None, processes=1,
             # add --interactive value to settings to make
             # it available from inside a test
             test_execution.settings['interactive'] = interactive
+
+            # add --junit value to settings to output junit.xml for ci tools.
+            test_execution.settings['junit'] = junit
+
             if test_query:
                 if suite_module.suite_exists(test_execution.root_path,
                                              project, test_query):
                     execution_runner.run_suite(test_query)
                 elif test_case.test_case_exists(test_execution.root_path,
                                                 project, test_query):
-                    execution_runner.run_test(test_query, junit)
+                    execution_runner.run_test(test_query)
                 else:
                     if test_query == '.':
                         test_query = ''
