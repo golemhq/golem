@@ -262,6 +262,60 @@ def generate_execution_report(execution_directory, elapsed_time):
         json.dump(data, json_file, indent=4)
 
 
+def generate_junit_execution_report(suite_name, execution_directory, elapsed_time):
+    """Generate a junit xml report of the entire suite execution for use with CI tools."""
+
+    xml = """<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="{0}" tests="{1}" failures="{2}" errors="{3}" time="{4}">{5}</testsuite></testsuites>"""
+
+    testcase = """<testcase name="{0}" classname="{1}" time="{2}">{3}</testcase>"""
+
+    data = _parse_execution_data(execution_directory=execution_directory)
+    data['net_elapsed_time'] = elapsed_time
+
+    testcase_data = ""
+
+    for test in data['tests']:
+        test_class_name = ''
+        if test['module'] != '':
+            test_class_name += test['module'] + '.'
+
+        if test['module'] != '':
+            test_class_name += test['sub_modules'] + '.'
+
+        test_class_name += test['name']
+        name = test['full_name']
+        test_elapsed_time = test['test_elapsed_time']
+
+        if test['result'] == 'code error':
+            result_text = '<error message="code error" type=""></error>'
+        elif test['result'] == 'failure':
+            result_text = '<failure message="test failed" type=""></failure>'
+        elif test['result'] == 'success':
+            result_text = 'success'
+        else:
+            result_text = ''
+
+        testcase_data += testcase.format(name, test_class_name, test_elapsed_time, result_text)
+
+    if 'failure' not in data['totals_by_result']:
+        data['totals_by_result']['failure'] = 0
+
+    if 'code error' not in data['totals_by_result']:
+        data['totals_by_result']['code error'] = 0
+
+    xml_report = xml.format(
+        suite_name,
+        data['total_tests'],
+        data['totals_by_result']['failure'],
+        data['totals_by_result']['code error'],
+        data['net_elapsed_time'],
+        testcase_data)
+
+    report_path = os.path.join(execution_directory, 'execution_report.xml')
+    with open(report_path, 'w', encoding='utf-8') as xml_file:
+        xml_file.write(xml_report)
+        
+
 def return_html_test_steps(test_case_data, file_name):
     report_html = """
     """
