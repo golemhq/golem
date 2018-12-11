@@ -326,3 +326,7 @@ class ExecutionRunner:
         # generate execution_result.json
         elapsed_time = round(time.time() - start_time, 2)
         report_parser.generate_execution_report(self.execution.reportdir, elapsed_time)
+
+        # generate execution_result.xml if junit enabled
+        if test_execution.settings['junit']:
+            report_parser.generate_junit_execution_report(self.suite_name, self.execution.reportdir, elapsed_time)
