@@ -155,26 +155,37 @@ const Main = new function(){
 
         this.getResultIcon = function(result){
             let classValue;
+            let svg;
             switch(result) {
+                case Main.ResultsEnum.pending.code:
+                    svg = $(`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`);
+                    break;
                 case Main.ResultsEnum.success.code:
-                    classValue = 'fa fa-check-circle-o';
+                    svg = $(`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-reactid="251"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`)
                     break;
                 case Main.ResultsEnum.failure.code:
-                    classValue = 'fa fa-times-circle';
+                    svg = $(`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`);
                     break;
                 case Main.ResultsEnum.error.code:
-                    classValue = 'fa fa-exclamation-circle';
+                    svg = $(`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12" y2="16"></line></svg>`);
                     break;
                 case Main.ResultsEnum['code error'].code:
-                    classValue = 'fa fa-exclamation-circle';
+                    svg = $(`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12" y2="16"></line></svg>`);
+                    break;
+                case Main.ResultsEnum.running.code:
+                    // TODO
+                    return `<i class="fa fa-cog fa-spin spinner" style=""></i>`
                     break;
                 default:
-                    classValue = 'fa fa-question-circle-o'
+                    svg = $(`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17"></line></svg>`);
             }
+            svg.css('height', '1em');
+            svg.css('width', '1em');
+            svg.css('vertical-align', '-0.15em');
             let color = Main.ReportUtils.getResultColor(result);
-            let html = $(`<span><i class="${classValue}"></i></span>`);
+            let html = $(`<span></span>`).append(svg);
             html.css('color', color);
-            return html[0].outerHTML
+            return html.get(0).outerHTML
         }
 
         this.capitalizeWords = function(str){
@@ -564,6 +575,10 @@ const Main = new function(){
         },
         'pending': {
             code: 'pending',
+            color: '#74c0fc'
+        },
+        'running': {
+            code: 'running',
             color: '#74c0fc'
         },
         'skipped': {

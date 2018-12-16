@@ -1,4 +1,5 @@
 """Helper functions to deal with Golem GUI module application."""
+import os
 import subprocess
 import inspect
 from functools import wraps
@@ -8,6 +9,7 @@ from flask_login import current_user
 
 import golem.actions
 from golem.core import utils, test_execution
+from golem.gui import report_parser
 
 
 def run_test_case(project, test_case_name, browsers=None, environments=None, processes=1):
@@ -50,9 +52,9 @@ class Golem_action_parser:
         '''This is the description of the action function
         
         parameters:
-        param1  element
-        param2  value
-        param3 (int, float)  value
+        param1 : element
+        param2 : value
+        param3 (int, float) :  value
         '''
 
     This would generate the following list:
@@ -191,3 +193,71 @@ def report_permissions_required(func):
             return render_template('not_permission.html')
         return func(*args, **kwargs)
     return wrapper
+
+
+def generate_html_report(project, suite, execution, report_directory,
+                         report_name='report.html', no_images=False):
+    """Generate static HTML report.
+    Report is generated at /<report_directory>/<report_name>
+    """
+    from golem.gui import app
+    formatted_date = report_parser.get_date_time_from_timestamp(execution)
+    css = {}
+    js = {}
+    boostrap_path = os.path.join(app.static_folder, 'css', 'bootstrap', 'bootstrap.min.css')
+    datatables_js = os.path.join(app.static_folder, 'js', 'external', 'datatable', 'datatables.min.js')
+    css['bootstrap'] = open(boostrap_path).read()
+    css['main'] = open(os.path.join(app.static_folder, 'css', 'main.css')).read()
+    css['report'] = open(os.path.join(app.static_folder, 'css', 'report.css')).read()
+    js['jquery'] = open(os.path.join(app.static_folder, 'js', 'external', 'jquery.min.js')).read()
+    js['datatables'] = open(datatables_js).read()
+    js['bootstrap'] = open(os.path.join(app.static_folder, 'js', 'external', 'bootstrap.min.js')).read()
+    js['main'] = open(os.path.join(app.static_folder, 'js', 'main.js')).read()
+    js['report_execution'] = open(os.path.join(app.static_folder, 'js', 'report_execution.js')).read()
+    execution_data = report_parser.get_execution_data(workspace=test_execution.root_path,
+                                                      project=project, suite=suite,
+                                                      execution=execution)
+    detail_test_data = {}
+    for test in execution_data['tests']:
+        test_detail = report_parser.get_test_case_data(test_execution.root_path, project,
+                                                       test['full_name'], suite=suite,
+                                                       execution=execution,
+                                                       test_set=test['test_set'],
+                                                       is_single=False,
+                                                       encode_screenshots=True,
+                                                       no_screenshots=no_images)
+        detail_test_data[test['test_set']] = test_detail
+    html_string = render_template('report/report_execution_static.html', project=project,
+                                  suite=suite, execution=execution, execution_data=execution_data,
+                                  detail_test_data=detail_test_data, formatted_date=formatted_date,
+                                  css=css, js=js, static=True)
+    _, file_extension = os.path.splitext(report_name)
+    if not file_extension:
+        report_name = '{}.html'.format(report_name)
+    destination = os.path.join(report_directory, report_name)
+    with open(destination, 'w+') as f:
+        f.write(html_string)
+    return html_string
+
+
+def get_or_generate_html_report(project, suite, execution, no_images=False):
+    """Get the HTML report as a string.
+    If it does not exist, generate it.:
+    Report is generated at
+    /<testdir>/projects/<project>/reports/<suite>/<execution>/report.html|report-no-images.html
+    """
+    if no_images:
+        report_filename = 'report-no-images.html'
+    else:
+        report_filename = 'report.html'
+    report_directory = os.path.join(test_execution.root_path, 'projects', project,
+                                    'reports', suite, execution)
+    report_filepath = os.path.join(report_directory, report_filename)
+    if os.path.isfile(report_filepath):
+        html_string = open(report_filepath).read()
+    else:
+        html_string = generate_html_report(project, suite, execution,
+                                           report_directory=report_directory,
+                                           report_name=report_filename,
+                                           no_images=no_images)
+    return html_string

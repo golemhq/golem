@@ -1,5 +1,4 @@
 """The Golem GUI application using Flask."""
-import time
 import json
 import os
 from urllib.parse import urlparse, urljoin
@@ -17,6 +16,7 @@ from golem.core import suite as suite_module
 from . import gui_utils, report_parser, user
 from .gui_utils import (project_exists, gui_permissions_required,
                         report_permissions_required)
+
 
 app = Flask(__name__)
 
@@ -358,7 +358,51 @@ def report_dashboard_suite(project, suite):
 def report_execution(project, suite, execution):
     formatted_date = report_parser.get_date_time_from_timestamp(execution)
     return render_template('report/report_execution.html', project=project, suite=suite,
-                           execution=execution, formatted_date=formatted_date)
+                           execution=execution, execution_data=None, formatted_date=formatted_date, static=False)
+
+
+# REPORT EXECUTION VIEW STATIC HTML
+@app.route("/report/project/<project>/suite/<suite>/<execution>/html/")
+@login_required
+@project_exists
+@report_permissions_required
+def report_execution_static_html(project, suite, execution):
+    html_report_string = gui_utils.get_or_generate_html_report(project, suite, execution)
+    return html_report_string
+
+
+# REPORT EXECUTION VIEW STATIC HTML DOWNLOAD
+@app.route("/report/project/<project>/suite/<suite>/<execution>/html/download/")
+@login_required
+@project_exists
+@report_permissions_required
+def report_execution_static_html_download(project, suite, execution):
+    html_report_string = gui_utils.get_or_generate_html_report(project, suite, execution)
+    headers = {"Content-disposition": "attachment; filename={}".format('report.html')}
+    return Response(html_report_string, mimetype="text/html", headers=headers)
+
+
+# REPORT EXECUTION VIEW STATIC HTML NO IMAGES
+@app.route("/report/project/<project>/suite/<suite>/<execution>/html-no-images/")
+@login_required
+@project_exists
+@report_permissions_required
+def report_execution_static_html_no_images(project, suite, execution):
+    html_report_string = gui_utils.get_or_generate_html_report(project, suite, execution,
+                                                               no_images=True)
+    return html_report_string
+
+
+# REPORT EXECUTION VIEW STATIC HTML NO IMAGES DOWNLOAD
+@app.route("/report/project/<project>/suite/<suite>/<execution>/html-no-images/download/")
+@login_required
+@project_exists
+@report_permissions_required
+def report_execution_static_html_no_images_download(project, suite, execution):
+    html_report_string = gui_utils.get_or_generate_html_report(project, suite, execution,
+                                                               no_images=True)
+    headers = {"Content-disposition": "attachment; filename={}".format('report-no-images.html')}
+    return Response(html_report_string, mimetype="text/html", headers=headers)
 
 
 # REPORT TEST VIEW
@@ -393,241 +437,6 @@ def screenshot_file2(project, test, execution, test_set, scr):
                                    'reports', 'single_tests', test, execution, test_set)
     return send_from_directory(screenshot_path, scr)
 
-
-# GENERATE HTML REPORT FILE
-@app.route("/getHTMLReport")
-def getHTMLReport():
-    project = request.args.get('project')
-    suite = request.args.get('suite')
-    execution = request.args.get('execution')
-
-    execution_data = report_parser.get_execution_data(workspace=root_path,
-                                                      project=project,
-                                                      suite=suite,
-                                                      execution=execution)
-
-    total_cases = execution_data['total_tests']
-    total_cases_ok = execution_data['totals_by_result']['success']
-    total_cases_fail = total_cases - total_cases_ok
-    net_elapsed_time = execution_data['net_elapsed_time']
-    total_time = 0
-    for test in execution_data['tests']:
-        total_time += test['test_elapsed_time']
-
-    project_title = '' + project + ' - ' + suite + ''
-    formatted_date = report_parser.get_date_time_from_timestamp(execution)
-
-    okPercentage = total_cases_ok * 100 / total_cases
-    failPercentage = total_cases_fail * 100 / total_cases + okPercentage
-
-    main_css = open(os.path.join(os.path.dirname(__file__), "static/css/main.css"), 'r').read()
-    main_js = open(os.path.join(os.path.dirname(__file__), "static/js/main.js"), 'r').read()
-    report_css = open(os.path.join(os.path.dirname(__file__), "static/css/report.css"), 'r').read()
-
-    bootstrap_css = open(os.path.join(os.path.dirname(__file__), "static/css/bootstrap/bootstrap.min.css"), 'r').read()
-    bootstrap_theme_css = open(os.path.join(os.path.dirname(__file__), "static/css/bootstrap/bootstrap-theme.min.css"),
-                               'r').read()
-    jquery_js = open(os.path.join(os.path.dirname(__file__), "static/js/external/jquery.min.js"), 'r').read()
-    bootstrap_js = open(os.path.join(os.path.dirname(__file__), "static/js/external/bootstrap.min.js"), 'r').read()
-
-    report_html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>{bootstrap_css}</style>
-        <style>{bootstrap_theme_css}</style>
-        <style>{main_css}</style>
-        <style>{report_css}</style>
-
-        <script>{jquery_js}</script>
-        <script>{bootstrap_js}</script>
-        <script>{main_js}</script>
-
-    </head>
-    <body>
-        <div id="content" class="container-fluid">
-            <div class="content-wrapper">
-                <h2 style="display:inline-block;">{project_title} <small>({formatted_date})</small></h2>
-            </div>
-            <div class="col-md-12 project-container">
-            <h3 class="no-margin-top">General</h3>
-            <div class="widget widget-table">
-                <div class="widget-content">
-                    <div class="table-responsive">
-                        <table id="generalTable" class="table general-table margin-bottom-5">
-                            <thead>
-                                <tr>
-                                    <th>Module</th>
-                                    <th>Total Tests</th>
-                                    <th>Tests OK</th>
-                                    <th>Tests Failed</th>
-                                    <th>Percentage</th>
-                                    <th>Total Time</th>
-                                    <th>Net Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="total-row general-table-row cursor-pointer">
-                                    <td class="module"></td>
-                                    <td class="total-tests">{total_cases}</td>
-                                    <td class="tests-ok">{total_cases_ok}</td>
-                                    <td class="tests-failed">{total_cases_fail}</td>
-                                    <td class="percentage">
-                                        <div class="progress">
-                                            <div aria-valuenow="10" style="width: 100%;" class="progress-bar pending pending-grey-background" data-transitiongoal="10"></div>
-                                            <div aria-valuenow="10" style="width: 0%;" class="progress-bar fail-bar failed-red-background" data-transitiongoal="10"></div>
-                                            <div aria-valuenow="20" style="width: 0%;" class="progress-bar ok-bar passed-green-background" data-transitiongoal="20"></div>
-                                        </div>
-                                    </td>
-                                    <td class="total-time"></td>
-                                    <td class="net-time"></td>
-                                </tr>
-                                <tr class="total-row general-table-row cursor-pointer">
-                                    <td class="module">Total</td>
-                                    <td class="total-tests">{total_cases}</td>
-                                    <td class="tests-ok">{total_cases_ok}</td>
-                                    <td class="tests-failed">{total_cases_fail}</td>
-                                    <td class="percentage">
-                                        <div class="progress">
-                                            <div aria-valuenow="10" style="width: 100%;" class="progress-bar pending pending-grey-background" data-transitiongoal="10"></div>
-                                            <div aria-valuenow="10" style="width: 0%;" class="progress-bar fail-bar failed-red-background" data-transitiongoal="10"></div>
-                                            <div aria-valuenow="20" style="width: 0%;" class="progress-bar ok-bar passed-green-background" data-transitiongoal="20"></div>
-                                        </div>
-                                    </td>
-                                    <td class="total-time">{total_time}</td>
-                                    <td class="net-time">{net_time}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <h3 class="no-margin-top">Detail</h3>
-            <div class="widget widget-table">
-                        <div class="widget-content">
-                                <div class="table-responsive">
-                                        <table id="detailTable" class="table detail-table margin-bottom-5">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Module</th>
-                                    <th>Test Name</th>
-                                    <th>Set Name</th>
-                                    <th>Environment</th>
-                                    <th>Browser</th>
-                                    <th>Result</th>
-                                    <th>Time</th>
-                                    <th>&nbsp;</th>
-                                </tr>
-                            </thead>
-                            <tbody>""".format(
-        bootstrap_css=bootstrap_css,
-        bootstrap_theme_css=bootstrap_theme_css,
-        main_css=main_css,
-        report_css=report_css,
-        jquery_js=jquery_js,
-        bootstrap_js=bootstrap_js,
-        main_js=main_js,
-        project_title=project_title,
-        total_cases=total_cases,
-        total_cases_ok=total_cases_ok,
-        total_cases_fail=total_cases_fail,
-        total_time=time.strftime('%Mm %Ss', time.gmtime(total_time)),
-        net_time=time.strftime('%Mm %Ss', time.gmtime(net_elapsed_time)),
-        formatted_date=formatted_date
-    )
-
-    count = 0
-    for test in execution_data['tests']:
-        test_name = test['name']
-        test_folder = test['test_set']
-        test_environment = test['environment']
-        test_full_name = test['full_name']
-        test_module = test['module']
-        test_browser = test['browser']
-        test_result = test['result']
-        test_set_name = test['set_name']
-        test_start_date_time = test['start_date_time']
-        test_sub_modules = test['sub_modules']
-        test_test_elapsed_time = test['test_elapsed_time']
-        test_case_data = report_parser.get_test_case_data(root_path, project, test_full_name,
-                                                          suite=suite, execution=execution,
-                                                          test_set=test_folder, is_single=False)
-
-        file_name = os.path.join(root_path, 'projects', project, 'reports', suite, execution, test_full_name,
-                                 test['test_set'])
-
-        test_case_steps = report_parser.return_html_test_steps(test_case_data, file_name)
-
-        if test_result == 'success':
-            pass_or_fail = """<span class="passed-green" style="font-size: 20px"><strong>&#9745;</strong></span>"""
-        else:
-            pass_or_fail = """<span class="failed-red" style="font-size: 20px"><strong>&#9746;</strong></span></span>"""
-
-        report_html += """
-            <tr>
-                <td>
-                    {count_plus_one}
-                </td>
-                <td>{test_module}</td>
-                <td>{test_full_name}</td>
-                <td>{test_set_name}</td>
-                <td>{test_environment}</td>
-                <td>{test_browser}</td>
-                <td>{pass_or_fail} {test_result}</td>
-                <td>{test_test_elapsed_time}</td>
-                <td class="link">
-                    <a href="javascript:;" data-toggle="collapse" data-target="#{test_full_name_css}_{count}" aria-expanded="false" aria-controls="{test_full_name_css}_{count}">
-                        <span style="font-size: 20px"><strong>&#8853;</strong></span>
-                    </a>
-                </td>
-            </tr>
-            <tr style="height:0px !important;">
-                <td style="height:0px !important; padding-top:0px !important; padding-bottom: 0px !important;"colspan="9">
-                    <div class="collapse" id="{test_full_name_css}_{count}">
-                        <div class="row">
-                            <ol>
-                                {test_case_steps}
-                            </ol>
-                        </div>
-                    </div>
-                </td>
-            </tr>""".format(
-                count_plus_one=count+1,
-                test_module=test_module,
-                test_full_name=test_full_name,
-                test_set_name=test_set_name,
-                test_environment=test_environment,
-                test_browser=test_browser,
-                pass_or_fail=pass_or_fail,
-                test_result=test_result,
-                test_test_elapsed_time=test_test_elapsed_time,
-                test_full_name_css=test_full_name.replace('.', '-'),
-                count=count,
-                test_case_steps=test_case_steps)
-        count += 1
-
-    report_html += """
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    </div>
-    <script>
-        utils.animateProgressBar($('.fail-bar'), {failPercentage});
-        utils.animateProgressBar($('.ok-bar'), {okPercentage});
-    </script>
-    </body>
-    </html>
-    """.format(failPercentage=failPercentage, okPercentage=okPercentage)
-
-    return Response(report_html,
-                    mimetype="text/html",
-                    headers={
-                        "Content-disposition": "attachment; "
-                                               "filename=%s" % suite + '_report.html'
-                    })
 
 ###############
 # END OF REPORT
@@ -970,6 +779,26 @@ def check_test_case_run_result():
                     sets[set_name]['log'] = log_file.readlines()
         result['sets'] = sets
         return json.dumps(result)
+
+
+@app.route("/report/get_test_set_detail/", methods=['GET'])
+@login_required
+def get_test_set_detail():
+    project = request.args['project']
+    suite = request.args['suite']
+    execution = request.args['execution']
+    test_full_name = request.args['testFullName']
+    test_set = request.args['testSet']
+
+    test_detail = report_parser.get_test_case_data(root_path, project, test_full_name,
+                                                   suite=suite, execution=execution,
+                                                   test_set=test_set, is_single=False,
+                                                   encode_screenshots=True)
+    response = jsonify(test_detail)
+    if test_detail['has_finished']:
+        response.cache_control.max_age = 60*60*100
+        response.cache_control.public = True
+    return response
 
 
 @app.route("/run_suite/", methods=['POST'])
