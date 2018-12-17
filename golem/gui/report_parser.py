@@ -5,6 +5,9 @@ import base64
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
+from golem.core import test_execution
+from golem.test_runner.conf import ResultsEnum
+
 
 def get_date_time_from_timestamp(timestamp):
     """Get the date time from a timestamp.
@@ -110,9 +113,13 @@ def _parse_execution_data(execution_directory=None, workspace=None, project=None
             # but the report.json may still not be generated
             # check if the test has finished (report.json file exists)
             report_json_path = os.path.join(test_set_path, 'report.json')
-            if not os.path.exists(report_json_path):
-                # test has not finished, add empty test case to the list
-                new_test_case['result'] = 'pending'
+            if not os.path.isfile(report_json_path):
+                # test has not finished, add empty test case to the list (pending or running)
+                status = ResultsEnum.PENDING
+                report_log_path = os.path.join(test_set_path, 'execution_info.log')
+                if os.path.isfile(report_log_path):
+                    status = ResultsEnum.RUNNING
+                new_test_case['result'] = status
                 execution_data['tests'].append(new_test_case)
                 execution_data['totals_by_result']['pending'] = execution_data['totals_by_result'].get('pending', 0) + 1
             else:
@@ -167,8 +174,15 @@ def get_execution_data(execution_directory=None, workspace=None,
 
 
 def get_test_case_data(root_path, project, test, suite=None, execution=None,
-                       test_set=None, is_single=False):
-    """Retrieves all the data of a single test case execution."""
+                       test_set=None, is_single=False, encode_screenshots=False,
+                       no_screenshots=False):
+    """Retrieves all the data of a single test case execution.
+
+    :Args:
+      - encode_screenshots: return screenshot files encoded as a base64 string or
+                            the screenshot filename (rel to its folder).
+      - no_screenshots: convert screenshot values to None
+    """
     # TODO execution and test_set are not optional
     test_case_data = {
         'module': '',
@@ -185,6 +199,7 @@ def get_test_case_data(root_path, project, test, suite=None, execution=None,
         'steps': [],
         'debug_log': [],
         'info_log': [],
+        'has_finished': False
     }
     if is_single:
         test_case_dir = os.path.join(root_path, 'projects', project, 'reports',
@@ -193,7 +208,8 @@ def get_test_case_data(root_path, project, test, suite=None, execution=None,
         test_case_dir = os.path.join(root_path, 'projects', project, 'reports',
                                      suite, execution, test, test_set)
     report_json_path = os.path.join(test_case_dir, 'report.json')
-    if os.path.exists(report_json_path):
+    if os.path.isfile(report_json_path):
+        test_case_data['has_finished'] = True
         with open(report_json_path, 'r') as json_file:
             report_data = json.load(json_file)
             module = ''
@@ -217,6 +233,15 @@ def get_test_case_data(root_path, project, test, suite=None, execution=None,
             test_case_data['browser'] = report_data['browser']
             test_case_data['environment'] = report_data['environment']
             test_case_data['steps'] = report_data['steps']
+            if no_screenshots:
+                for step in test_case_data['steps']:
+                    step['screenshot'] = None
+            elif encode_screenshots:
+                for step in test_case_data['steps']:
+                    if step['screenshot'] is not None:
+                        image_filename = os.path.join(test_case_dir, step['screenshot'])
+                        b64 = base64.b64encode(open(image_filename, "rb").read()).decode('utf-8')
+                        step['screenshot'] = b64
             test_case_data['test_set'] = test_set
             test_case_data['execution'] = execution
             test_case_data['data'] = report_data['test_data']
@@ -295,7 +320,7 @@ def generate_junit_execution_report(suite_name, execution_directory, timestamp):
     doc = minidom.parseString(xmlstring).toprettyxml(indent=" " * 4, encoding='UTF-8')
     with open("report.xml", "w") as f:
         f.write(doc.decode('UTF-8'))
-        
+
 
 def return_html_test_steps(test_case_data, file_name):
     report_html = """
