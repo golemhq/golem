@@ -2,7 +2,7 @@
 USAGE_MSG = """
 Usage: golem
 
-  golem run <project> <test|suite|directory> [-b -t -e -i]
+  golem run <project> <test|suite|directory> [-b -t -e -i -r -n -f]
   golem gui [-p]
   golem createproject <project>
   golem createtest <project> <test>
@@ -20,15 +20,19 @@ Usage: golem run
     golem run project_name .
 
   positional arguments:
-    projects            name of the project
-    test|suite|dir      name of a single test, a suite or a
-                        directory of tests.
+    projects             name of the project
+    test|suite|dir       name of a single test, a suite or a
+                         directory of tests.
 
   optional arguments:
-    -b, --browsers      a list of browsers
-    -t, --threads       amount of threads, default is 1
-    -e, --environments  a list of environments
-    -i, --interactive   run in interactive mode
+    -b, --browsers       a list of browsers
+    -t, --threads        amount of threads, default is 1
+    -e, --environments   a list of environments
+    -i, --interactive    run in interactive mode
+    -r, --report         output junit and/or html report file
+    -n, --report-name    filename for output report without extension or path
+    -f, --report-folder  absolute path of location save report
+
 
 Usage: golem gui
   
@@ -42,7 +46,8 @@ Type: golem -h <command> for more help
 
 RUN_USAGE_MSG = """
 Usage: golem run <project> <test|suite|directory> [-b|--browsers]
-                 [-t|--threads] [-e|--environments] [-i|--interactive]
+                 [-t|--threads] [-e|--environments] [-i|--interactive] 
+                 [-r|--report] [-n|--report-name] [-f|--report-folder]
 
   Run tests, suites or directories
   
@@ -68,15 +73,18 @@ Usage: golem run <project> <test|suite|directory> [-b|--browsers]
     golem run -i
     
   positional arguments:
-    project             name of the project
-    test|suite|dir      name of a single test, a suite or a
-                        directory of tests.
+    project              name of the project
+    test|suite|dir       name of a single test, a suite or a
+                         directory of tests.
 
   optional arguments:
-    -b, --browsers      a list of browsers
-    -t, --threads       amount of threads, default is 1
-    -e, --environments  a list of environments
-    -i, --interactive   run in interactive mode
+    -b, --browsers       a list of browsers
+    -t, --threads        amount of threads, default is 1
+    -e, --environments   a list of environments
+    -i, --interactive    run in interactive mode
+    -r, --report         output junit and/or html report file
+    -n, --report-name    filename for output report without extension or path
+    -f, --report-folder  absolute path of location save report 
 """
 
 GUI_USAGE_MSG = """

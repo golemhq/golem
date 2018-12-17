@@ -21,6 +21,10 @@ def get_parser():
     parser_run.add_argument('--timestamp', action='store', nargs='?', type=str)
     parser_run.add_argument('-h', '--help', action='store_true')
 
+    parser_run.add_argument('-r', '--report', action='store', nargs='+', type=str)
+    parser_run.add_argument('-n', '--report-name', action='store', nargs='?', type=str)
+    parser_run.add_argument('-f', '--report-folder', action='store', nargs='?', type=str)
+
     # gui
     parser_gui = subparsers.add_parser('gui', add_help=False)
 
