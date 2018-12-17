@@ -2,6 +2,8 @@
 import json
 import os
 import base64
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
 
 
 def get_date_time_from_timestamp(timestamp):
@@ -262,58 +264,37 @@ def generate_execution_report(execution_directory, elapsed_time):
         json.dump(data, json_file, indent=4)
 
 
-def generate_junit_execution_report(suite_name, execution_directory, elapsed_time):
-    """Generate a junit xml report of the entire suite execution for use with CI tools."""
+def generate_junit_execution_report(suite_name, execution_directory, timestamp):
+    data = get_execution_data(execution_directory=execution_directory)
 
-    xml = """<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="{0}" tests="{1}" failures="{2}" errors="{3}" time="{4}">{5}</testsuite></testsuites>"""
+    totals_by_result = data['totals_by_result']
+    junit_errors = totals_by_result.get('code error', 0)
+    junit_failure = totals_by_result.get('failure', 0) + totals_by_result.get('error', 0)
+    testsuites_attrs = {
+        'name': suite_name,
+        'errors': str(junit_errors),
+        'failures': str(junit_failure),
+        'tests': str(data['total_tests']),
+        'time': str(data['net_elapsed_time'])
+    }
+    testsuites = ET.Element('testsuites', testsuites_attrs)
 
-    testcase = """<testcase name="{0}" classname="{1}" time="{2}">{3}</testcase>"""
-
-    data = _parse_execution_data(execution_directory=execution_directory)
-    data['net_elapsed_time'] = elapsed_time
-
-    testcase_data = ""
+    testsuites_attrs['timestamp'] = timestamp
+    testsuite = ET.SubElement(testsuites, 'testsuite', testsuites_attrs)
 
     for test in data['tests']:
-        test_class_name = ''
-        if test['module'] != '':
-            test_class_name += test['module'] + '.'
+        test_attrs = {
+            'name': test['full_name'],
+            'classname': '{}.{}'.format(test['full_name'], test['test_set']),
+            'status': test['result'],
+            'time': str(test['test_elapsed_time'])
+        }
+        testcase = ET.SubElement(testsuite, 'testcase', test_attrs)
 
-        if test['module'] != '':
-            test_class_name += test['sub_modules'] + '.'
-
-        test_class_name += test['name']
-        name = test['full_name']
-        test_elapsed_time = test['test_elapsed_time']
-
-        if test['result'] == 'code error':
-            result_text = '<error message="code error" type=""></error>'
-        elif test['result'] == 'failure':
-            result_text = '<failure message="test failed" type=""></failure>'
-        elif test['result'] == 'success':
-            result_text = 'success'
-        else:
-            result_text = ''
-
-        testcase_data += testcase.format(name, test_class_name, test_elapsed_time, result_text)
-
-    if 'failure' not in data['totals_by_result']:
-        data['totals_by_result']['failure'] = 0
-
-    if 'code error' not in data['totals_by_result']:
-        data['totals_by_result']['code error'] = 0
-
-    xml_report = xml.format(
-        suite_name,
-        data['total_tests'],
-        data['totals_by_result']['failure'],
-        data['totals_by_result']['code error'],
-        data['net_elapsed_time'],
-        testcase_data)
-
-    report_path = os.path.join(execution_directory, 'execution_report.xml')
-    with open(report_path, 'w', encoding='utf-8') as xml_file:
-        xml_file.write(xml_report)
+    xmlstring = ET.tostring(testsuites)
+    doc = minidom.parseString(xmlstring).toprettyxml(indent=" " * 4, encoding='UTF-8')
+    with open("report.xml", "w") as f:
+        f.write(doc.decode('UTF-8'))
         
 
 def return_html_test_steps(test_case_data, file_name):
