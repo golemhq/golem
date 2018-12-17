@@ -285,3 +285,4 @@ def generate_execution_report(execution_directory, elapsed_time):
     report_path = os.path.join(execution_directory, 'execution_report.json')
     with open(report_path, 'w', encoding='utf-8') as json_file:
         json.dump(data, json_file, indent=4)
+
