@@ -11,6 +11,9 @@ import golem.actions
 from golem.core import utils, test_execution
 from golem.gui import report_parser
 
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
+
 
 def run_test_case(project, test_case_name, browsers=None, environments=None, processes=1):
     """Run a test case. This is used when running tests from the GUI"""
@@ -261,3 +264,40 @@ def get_or_generate_html_report(project, suite, execution, no_images=False):
                                            report_name=report_filename,
                                            no_images=no_images)
     return html_string
+
+
+def generate_junit_report(project, suite, execution, report_directory,
+                          report_name='report.xml'):
+
+    data = report_parser.get_execution_data(workspace=test_execution.root_path,
+                                                      project=project, suite=suite,
+                                                      execution=execution)
+    totals_by_result = data['totals_by_result']
+    junit_errors = totals_by_result.get('code error', 0)
+    junit_failure = totals_by_result.get('failure', 0) + totals_by_result.get('error', 0)
+    testsuites_attrs = {
+        'name': suite,
+        'errors': str(junit_errors),
+        'failures': str(junit_failure),
+        'tests': str(data['total_tests']),
+        'time': str(data['net_elapsed_time'])
+    }
+    testsuites = ET.Element('testsuites', testsuites_attrs)
+
+    timestamp = ''
+    testsuites_attrs['timestamp'] = timestamp
+    testsuite = ET.SubElement(testsuites, 'testsuite', testsuites_attrs)
+
+    for test in data['tests']:
+        test_attrs = {
+            'name': test['full_name'],
+            'classname': '{}.{}'.format(test['full_name'], test['test_set']),
+            'status': test['result'],
+            'time': str(test['test_elapsed_time'])
+        }
+        testcase = ET.SubElement(testsuite, 'testcase', test_attrs)
+
+    xmlstring = ET.tostring(testsuites)
+    doc = minidom.parseString(xmlstring).toprettyxml(indent=" " * 4, encoding='UTF-8')
+    with open(report_name, "w") as f:
+        f.write(doc.decode('UTF-8'))
