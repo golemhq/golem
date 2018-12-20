@@ -326,3 +326,7 @@ class ExecutionRunner:
         # generate execution_result.json
         elapsed_time = round(time.time() - start_time, 2)
         report_parser.generate_execution_report(self.execution.reportdir, elapsed_time)
+
+        # exit to the console with exit status code 1 in case a test fails
+        if test_execution.has_failed_tests.value:
+            sys.exit(1)

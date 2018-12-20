@@ -4,7 +4,7 @@ import os
 import time
 import traceback
 
-from golem.core import report, utils, test_case
+from golem.core import report, utils, test_case, test_execution
 from golem.test_runner.test_runner_utils import import_page_into_test_module
 from golem.test_runner import execution_logger
 from golem.test_runner.conf import ResultsEnum
@@ -57,7 +57,6 @@ def run_test(workspace, project, test_name, test_data, secrets, browser,
 
 
 class TestRunner:
-
     __test__ = False  # ignore this class from Pytest
 
     def __init__(self, workspace, project, test_name, test_data, secrets, browser,
@@ -228,6 +227,11 @@ class TestRunner:
         self.result['test_timestamp'] = self.test_timestamp
         self.result['browser'] = execution.browser_definition['name']
         self.result['browser_full_name'] = execution.browser_definition['full_name']
+
+        # Report a test has failed in the test execution, this will later determine the exit status
+        if self.result['result'] in [ResultsEnum.CODE_ERROR, ResultsEnum.ERROR, ResultsEnum.FAILURE]:
+            test_execution.has_failed_tests.value = True
+
         report.generate_report(self.report_directory, self.test_name, execution.data, self.result)
         execution_logger.reset_logger(execution.logger)
         execution._reset()
