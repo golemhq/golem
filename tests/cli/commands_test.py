@@ -190,7 +190,6 @@ class TestRunCommand:
         assert str(excinfo.value) == msg
 
 
-
 class TestCreateDirectoryCommand:
 
     def test_createdirectory_command(self, dir_function):
@@ -198,3 +197,39 @@ class TestCreateDirectoryCommand:
         commands.createdirectory_command(name)
         testdir = os.path.join(dir_function.path, name)
         assert os.path.isdir(testdir)
+
+
+class TestExitStatuses:
+    content = """
+description = 'A test which deliberately fails'
+
+def setup(data):
+    pass
+
+def test(data):
+    step('test step')
+    raise Exception('Intentional exception to trigger exit status == 1')
+
+def teardown(data):
+    pass
+"""
+
+    def test_exit_code_one_on_test_failure_when_using_single_processing_capabilities(self, project_function, test_utils):
+        project = project_function.name
+        test_utils.create_test(project_function.testdir, project, [], 'test_one', content=self.content)
+        test_utils.create_test(project_function.testdir, project, [], 'test_two')
+
+        with pytest.raises(SystemExit) as wrapped_execution:
+            commands.run_command(project=project, test_query='.', processes=1)
+
+        assert wrapped_execution.value.code == 1
+
+    def test_exit_code_one_on_test_failure_when_using_multi_processing_capabilities(self, project_function, test_utils):
+        project = project_function.name
+        test_utils.create_test(project_function.testdir, project, [], 'test_one', content=self.content)
+        test_utils.create_test(project_function.testdir, project, [], 'test_two')
+
+        with pytest.raises(SystemExit) as wrapped_execution:
+            commands.run_command(project=project, test_query='.', processes=2)
+
+        assert wrapped_execution.value.code == 1

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Golem : {{project|capitalize}} : {{suite}} {{formatted_date}}</title>
+    <style desc="bootstrap css">{{css.bootstrap | safe}}</style>
+    <style desc="main css">{{css.main}}</style>
+    <style desc="report css">{{css.report}}</style>
+    <style>
+        #content {
+            margin-left: 0px !important
+        }
+    </style>
+    <script desc="jquery js">{{js.jquery | safe}}</script>
+</head>
+<body>
+<div class="container-fluid">
+    <div id='wrapper'>
+        <!-- Page Content Holder -->
+        <div id="content" class="container-fluid">
+            <div class="content-wrapper">
+                <h2 style="display:inline-block;"><a class="link-without-decoration" href="/report/project/{{project}}/">{{project|replace("_", " ")}}</a> - <a class="link-without-decoration" href="/report/project/{{project}}/suite/{{suite}}/">{{suite|replace("_", " ")}}</a>
+                    <small>({{formatted_date}}) <i class="fa fa-cog fa-spin spinner" style="display: none"></i></small>
+                </h2>
+                <div class="col-md-12 report-container">
+                    <h3 class="no-margin-top">General</h3>
+                    <div class="table-container">
+                        <table id="generalTable" class="table general-table table-responsive margin-bottom-5">
+                            <thead>
+                            <tr>
+                                <th data="module">Module</th>
+                                <th data="total-tests">Total Tests</th>
+                                <th data="result" result="success">Success</th>
+                                <th data="result" result="failure">Failure</th>
+                                <th data="percentage">Percentage</th>
+                                <th data="total-time">Total Time</th>
+                                <th data="net-time">Net Time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr class="total-row general-table-row cursor-pointer" id="totalRow">
+                                <td data="module">Total</td>
+                                <td data="total-tests"></td>
+                                <td data="result" result="success">0</td>
+                                <td data="result" result="failure">0</td>
+                                <td data="percentage">
+                                    <div class="progress"></div>
+                                </td>
+                                <td data="total-time"></td>
+                                <td data="net-time"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <h3 class="no-margin-top">Detail</h3>
+                    <div class="table-container">
+                        <table id="detailTable" class="table detail-table table-responsive margin-bottom-5">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th class="dropdown filter-table-dropdown" colname="module">
+                                    <a type="button" class="link-without-decoration" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Module <span class="icon funnel-icon" aria-hidden="true" style="display:none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></span>
+                                    </a>
+                                    <ul class="dropdown-menu"><form></form></ul>
+                                </th>
+                                <th class="test-name-header" colname="test-name">Test Name</th>
+                                <th class="dropdown filter-table-dropdown" colname="set-name"
+                                    style="display:none">
+                                    <a type="button" class="link-without-decoration" data-toggle="dropdown"
+                                       aria-haspopup="true" aria-expanded="false">
+                                        set Name <span class="icon funnel-icon" aria-hidden="true" style="display:none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></span>
+                                    </a>
+                                    <ul class="dropdown-menu"><form></form></ul>
+                                </th>
+                                <th class="dropdown filter-table-dropdown" colname="environment">
+                                    <a type="button" class="link-without-decoration" data-toggle="dropdown"
+                                       aria-haspopup="true" aria-expanded="false">
+                                        Environment <span class="icon funnel-icon" aria-hidden="true" style="display:none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></span>
+                                    </a>
+                                    <ul class="dropdown-menu"><form></form></ul>
+                                </th>
+                                <th class="dropdown filter-table-dropdown" colname="browser">
+                                    <a type="button" class="link-without-decoration" data-toggle="dropdown"
+                                       aria-haspopup="true" aria-expanded="false">
+                                        Browser <span class="icon funnel-icon" aria-hidden="true" style="display:none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></span>
+                                    </a>
+                                    <ul class="dropdown-menu"><form></form></ul>
+                                </th>
+                                <th class="dropdown filter-table-dropdown" colname="result">
+                                    <a type="button" class="link-without-decoration" data-toggle="dropdown"
+                                       aria-haspopup="true" aria-expanded="false">
+                                        Result <span class="icon funnel-icon" aria-hidden="true" style="display:none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></span>
+                                    </a>
+                                    <ul class="dropdown-menu"><form></form></ul>
+                                </th>
+                                <th>Time</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screenshot Modal -->
+            <div class="modal fade screenshot-modal" id="screenshotModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog screenshot-modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <img id="expandedScreenshot">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script desc="bootstrap js">{{js.bootstrap | safe}}</script>
+            <script desc="main js">{{js.main | safe}}</script>
+            <script type="text/javascript">
+                const global = {
+                        project: '{{project}}',
+                        suite: '{{suite}}',
+                        execution: '{{execution}}',
+                        executionData: {{execution_data|tojson}},
+                        detailTestData: {{detail_test_data|tojson}},
+                        static: {{static|tojson}},
+	            }
+            </script>
+            <script desc="datatables js">{{js.datatables | safe}}</script>
+            <script desc="report_execution js">{{js.report_execution | safe}}</script>
+        </div>
+    </div>
+</div>

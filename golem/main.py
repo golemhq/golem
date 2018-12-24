@@ -18,4 +18,3 @@ def execute_from_command_line(root_path):
     parser = argument_parser.get_parser()
     args = parser.parse_args()
     commands.command_dispatcher(args)
-

@@ -1,15 +1,15 @@
 import os
 import json
 
-from golem.test_runner import test_runner
-from golem.test_runner.execution_runner import define_browsers
+from golem.test_runner import test_runner, execution_runner
+# from golem.test_runner.execution_runner import ExecutionRunner
 from golem.gui import gui_utils
 from golem.core import settings_manager
 
 
 def _define_browsers_mock(selected_browsers):
     default_browsers = gui_utils.get_supported_browsers_suggestions()
-    return define_browsers(selected_browsers, [], default_browsers)
+    return execution_runner.define_browsers(selected_browsers, [], default_browsers)
 
 
 class TestGetSetName:
@@ -86,7 +86,7 @@ class TestRunTest:
             return json.load(f)
 
     # A2
-    def test_run_test__success(self, project_function_clean, caplog, test_utils):
+    def test_run_test__success2(self, project_function_clean, caplog, test_utils):
         """Test runs successfully"""
         testdir = project_function_clean.testdir
         project = project_function_clean.name

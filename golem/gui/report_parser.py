@@ -5,7 +5,6 @@ import base64
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
-from golem.core import test_execution
 from golem.test_runner.conf import ResultsEnum
 
 
@@ -293,8 +292,9 @@ def generate_junit_execution_report(suite_name, execution_directory, timestamp):
     data = get_execution_data(execution_directory=execution_directory)
 
     totals_by_result = data['totals_by_result']
-    junit_errors = totals_by_result.get('code error', 0)
-    junit_failure = totals_by_result.get('failure', 0) + totals_by_result.get('error', 0)
+    junit_errors = totals_by_result.get(ResultsEnum.CODE_ERROR, 0)
+    junit_failure = (totals_by_result.get(ResultsEnum.FAILURE, 0) +
+                     totals_by_result.get(ResultsEnum.ERROR, 0))
     testsuites_attrs = {
         'name': suite_name,
         'errors': str(junit_errors),
@@ -317,23 +317,6 @@ def generate_junit_execution_report(suite_name, execution_directory, timestamp):
         testcase = ET.SubElement(testsuite, 'testcase', test_attrs)
 
     xmlstring = ET.tostring(testsuites)
-    doc = minidom.parseString(xmlstring).toprettyxml(indent=" " * 4, encoding='UTF-8')
-    with open("report.xml", "w") as f:
+    doc = minidom.parseString(xmlstring).toprettyxml(indent=' ' * 4, encoding='UTF-8')
+    with open(os.path.join(execution_directory, 'report.xml'), 'w') as f:
         f.write(doc.decode('UTF-8'))
-
-
-def return_html_test_steps(test_case_data, file_name):
-    report_html = """
-    """
-    for step in test_case_data['steps']:
-        if step['screenshot'] is not None:
-            image_filename = os.path.join(file_name, step['screenshot'] + '.png')
-            if (os.path.isfile(image_filename)):
-                b64 = base64.encodestring(open(image_filename, "rb").read())
-
-                image_img = '<img alt="%s" title="%s" src="data:image/png;base64,%s" width="700"/>' % (
-                'test', 'test', b64.decode("utf8"))
-                report_html += """<li>{}<br>{}</li>""".format(step['message'], image_img)
-        else:
-            report_html += """<li>{}</li>""".format(step['message'])
-    return report_html

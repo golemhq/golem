@@ -9,7 +9,7 @@
 {% block content %}
 <div class="col-md-10 col-md-offset-1">
 	<h2>Test: {{test_case_data.name|replace("_", " ")}} <small><a href="/project/{{project}}/test/{{test_case}}/"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></a></small></h2>
-    <div class="col-md-12 project-container font-17" id="testDetails" style="padding-left: 30px; padding-right: 30px; padding-bottom: 15px;">
+    <div class="col-md-12 test-report-box font-17" id="testDetails" style="padding: 15px 30px">
 		<h3 class="no-margin-top">Details</h3>
 		<div class="row">
 			<div class="col-md-2 col-xs-3">Description</div>
@@ -48,7 +48,7 @@
 		</div>
 	</div>
 
-	<div class="col-md-12 project-container font-17" id="steps" style="padding-left: 30px; padding-right: 30px; padding-bottom: 15px;">
+	<div class="col-md-12 test-report-box font-17" id="steps" style="padding: 15px 30px">
 		<h3 class="no-margin-top">Steps</h3>
 		{% for step in test_case_data.steps %}
 			<div class="step">
@@ -67,7 +67,7 @@
 		{% endfor %}
 	</div>
 
-	<div class="col-md-12 project-container font-17" id="log" style="padding-left: 30px; padding-right: 30px; padding-bottom: 15px;">
+	<div class="col-md-12 test-report-box font-17" id="log" style="padding: 15px 30px">
 		<h3 class="no-margin-top">Log <small><a class="btn btn-default btn-xs" onclick="setLogLevel('debug')">DEBUG</a> <a class="btn btn-default btn-xs" onclick="setLogLevel('info')">INFO</a></small></h3>
 		<div id="debugLogLines" style="font-family: monospace; font-size: 14px; display: none">
 			{% for line in test_case_data.debug_log %}

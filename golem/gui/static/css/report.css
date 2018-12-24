@@ -36,6 +36,23 @@
     float: left;
 }
 
+.report-container {
+	background-color: #f9f9f9;
+	border: 1px solid #e4e4e4;
+	margin-bottom: 15px;
+	padding-top: 15px;
+	border-radius: 3px
+}
+
+.table-container {
+    border-width: 1px;
+    border-style: solid;
+    margin-bottom: 15px;
+    background-color: white;
+    border-color: #d3d3d3;
+    border-radius: 3px
+}
+
 .table-content {
 	padding: 10px !important;
 }
@@ -45,6 +62,14 @@
     position: relative;
     top: 50%;
     transform: translateY(-50%);
+}
+
+#detailTable {
+    border-collapse: inherit;
+}
+
+#detailTable thead th {
+    border-bottom: 1px solid #ddd;
 }
 
 #generalTable td,
@@ -102,4 +127,79 @@
     width: 18px;
     padding-left: 0px !important;
     padding-right: 4px !important;
+}
+
+#detailTable tr.test-detail-row td{
+    padding: 0px !important;
+    border-top: 0px;
+}
+
+#detailTable div.test-detail {
+    padding: 5px 15px 15px 15px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+#detailTable div.test-detail.collapse.in{
+    display: flex;
+}
+
+.test-detail-box {
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    border-radius: 3px;
+    padding: 10px 15px;
+    word-break: break-word;
+}
+
+.test-detail-box-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.test-detail-box-title > a{
+    font-weight: normal;
+}
+
+#detailTable div.test-detail .logs {
+    margin-right: 7px;
+    width: calc(50% - 7px);
+}
+
+#detailTable .info-log, #detailTable .debug-log {
+    font-family: "monospace", Lucida Console;
+}
+
+.test-detail-row .logs a.active {
+    color: black;
+}
+
+#detailTable .detail-right-column {
+    margin-left: 7px;
+    width: calc(50% - 7px);
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+#detailTable div.test-detail .step-list {
+}
+
+#detailTable div.test-detail .step-list ol {
+    margin-left: 15px;
+    padding-left: 0px;
+    margin-bottom: 0px;
+}
+
+#detailTable .detail-description {
+    margin-bottom: 10px;
+}
+
+/* Single Test Report */
+.test-report-box {
+    border: 1px solid #e4e4e4;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+    border-radius: 3px;
+    padding: 15px 30px
 }

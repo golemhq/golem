@@ -680,3 +680,9 @@ ul.no-bullets {
     padding-bottom: 15px;
     border-bottom: 1px solid #ddd;
 }
+
+.icon svg {
+    height: 1em;
+    width: 1em;
+    vertical-align: -0.15em;
+}
