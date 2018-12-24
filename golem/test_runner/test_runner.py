@@ -49,10 +49,10 @@ def _get_set_name(test_data):
 
 
 def run_test(workspace, project, test_name, test_data, secrets, browser,
-             settings, report_directory):
+             settings, report_directory, execution_has_failed_tests=None):
     """Run a single test"""
     runner = TestRunner(workspace, project, test_name, test_data, secrets, browser,
-                        settings, report_directory)
+                        settings, report_directory, execution_has_failed_tests)
     runner.prepare()
 
 
@@ -60,7 +60,7 @@ class TestRunner:
     __test__ = False  # ignore this class from Pytest
 
     def __init__(self, workspace, project, test_name, test_data, secrets, browser,
-                 settings, report_directory):
+                 settings, report_directory, execution_has_failed_tests=None):
         self.result = {
             'result': '',
             'errors': [],
@@ -84,6 +84,7 @@ class TestRunner:
         self.test_timestamp = utils.get_timestamp()
         self.test_start_time = time.time()
         self.logger = None
+        self.execution_has_failed_tests = execution_has_failed_tests
 
     def prepare(self):
         self.result['set_name'] = _get_set_name(self.test_data)
@@ -227,11 +228,10 @@ class TestRunner:
         self.result['test_timestamp'] = self.test_timestamp
         self.result['browser'] = execution.browser_definition['name']
         self.result['browser_full_name'] = execution.browser_definition['full_name']
-
         # Report a test has failed in the test execution, this will later determine the exit status
-        if self.result['result'] in [ResultsEnum.CODE_ERROR, ResultsEnum.ERROR, ResultsEnum.FAILURE]:
-            test_execution.has_failed_tests.value = True
-
+        _error_codes = [ResultsEnum.CODE_ERROR, ResultsEnum.ERROR, ResultsEnum.FAILURE]
+        if self.execution_has_failed_tests is not None and self.result['result'] in _error_codes:
+            self.execution_has_failed_tests.value = True
         report.generate_report(self.report_directory, self.test_name, execution.data, self.result)
         execution_logger.reset_logger(execution.logger)
         execution._reset()

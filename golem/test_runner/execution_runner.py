@@ -2,6 +2,7 @@ import os
 import sys
 import traceback
 import time
+import multiprocessing
 from types import SimpleNamespace
 
 from golem.core import (test_execution,
@@ -77,8 +78,19 @@ class ExecutionRunner:
         self.selected_browsers = None
         self.suite = SimpleNamespace(processes=None, browsers=None, envs=None,
                                      before=None, after=None)
+        has_failed_tests = self._create_execution_has_failed_tests_flag()
         self.execution = SimpleNamespace(processes=1, browsers=[], envs=[],
-                                         tests=[], reportdir=None)
+                                         tests=[], reportdir=None,
+                                         has_failed_tests=has_failed_tests)
+
+    @staticmethod
+    def _create_execution_has_failed_tests_flag():
+        """Multiprocessing safe flag to track if any test has failed or
+        errored during the execution
+
+        Returns a multiprocessing.managers.ValueProxy
+        """
+        return multiprocessing.Manager().Value('error', False)
 
     def _select_environments(self):
         """Define the environments to use for the test.
@@ -308,11 +320,13 @@ class ExecutionRunner:
                 # run tests serially
                 for test in self.execution.tests:
                     run_test(test_execution.root_path, self.project, test.name,
-                             test.data_set, test.secrets, test.browser, test_execution.settings,
-                             test.reportdir)
+                             test.data_set, test.secrets, test.browser,
+                             test_execution.settings, test.reportdir,
+                             self.execution.has_failed_tests)
             else:
                 # run tests using multiprocessing
                 multiprocess_executor(self.project, self.execution.tests,
+                                      self.execution.has_failed_tests,
                                       self.execution.processes)
 
         # run suite `after` function
@@ -328,5 +342,5 @@ class ExecutionRunner:
         report_parser.generate_execution_report(self.execution.reportdir, elapsed_time)
 
         # exit to the console with exit status code 1 in case a test fails
-        if test_execution.has_failed_tests.value:
+        if self.execution.has_failed_tests.value:
             sys.exit(1)
