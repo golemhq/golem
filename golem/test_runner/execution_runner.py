@@ -341,6 +341,12 @@ class ExecutionRunner:
         elapsed_time = round(time.time() - start_time, 2)
         report_parser.generate_execution_report(self.execution.reportdir, elapsed_time)
 
-        # exit to the console with exit status code 1 in case a test fails
+        # generate execution_result.xml if junit enabled
+        if test_execution.settings['junit'] and self.is_suite:
+            report_parser.generate_junit_execution_report(self.suite_name,
+                                                          self.execution.reportdir,
+                                                          self.timestamp)
+        
+    # exit to the console with exit status code 1 in case a test fails
         if self.execution.has_failed_tests.value:
             sys.exit(1)

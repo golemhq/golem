@@ -19,7 +19,7 @@ def command_dispatcher(args):
         run_command(args.project, args.test_query,
                     args.browsers, args.threads,
                     args.environments, args.interactive,
-                    args.timestamp)
+                    args.junit, args.timestamp)
     elif args.command == 'gui':
         gui_command(args.port)
     elif args.command == 'createproject':
@@ -53,7 +53,7 @@ def display_help(help, command):
 
 
 def run_command(project='', test_query='', browsers=None, processes=1,
-                environments=None, interactive=False, timestamp=None):
+                environments=None, interactive=False, junit=False, timestamp=None):
     execution_runner = ExecutionRunner(browsers, processes, environments,
                                        interactive, timestamp)
     if project:
@@ -66,6 +66,10 @@ def run_command(project='', test_query='', browsers=None, processes=1,
             # add --interactive value to settings to make
             # it available from inside a test
             test_execution.settings['interactive'] = interactive
+
+            # add --junit value to settings to output junit.xml for ci tools.
+            test_execution.settings['junit'] = junit
+
             if test_query:
                 if suite_module.suite_exists(test_execution.root_path,
                                              project, test_query):
