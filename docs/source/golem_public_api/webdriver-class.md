@@ -47,7 +47,7 @@ Goes one step backward in the browser history.
 Usage:	driver.back()
 
 #### **check_element**(element) <small>[Golem]</small>
-Check an element (checkbox or radiobutton). If element is already checked this is is ignored.
+Check an element (checkbox or radiobutton). If element is already checked this is ignored.
 
 Args:
 
@@ -509,7 +509,7 @@ Refreshes the current page.
 #### **save_screenshot**(filename) <small>[Selenium]</small>
 
 Saves a screenshot of the current window to a PNG image file.
-ReturnsFalse if there is any IOError, else returns True. Use full paths in your filename.
+Returns False if there is any IOError, else returns True. Use full paths in your filename.
 
 Args:	
 * filename: The full path you wish to save your screenshot to. This should end with a .png extension.
@@ -679,7 +679,7 @@ Usage:	title = driver.title
 #### **uncheck_element(element)** <small>[Golem]</small>
 
 Uncheck a checkbox element.
-If element is already unchecked this is is ignored.
+If element is already unchecked this is ignored.
 
 Args
 * element: an element tuple, a CSS string or a WebElement object

@@ -13,13 +13,13 @@ The Windows installer works fine, you can get it from here: [python.org/download
 
 **Mac**:
 
-To install on Mac OS follow this instructions: [Installing Python 3 on Mac OS X](http://python-guide.readthedocs.io/en/latest/starting/install3/osx/)
+To install on Mac OS follow these instructions: [Installing Python 3 on Mac OS X](http://python-guide.readthedocs.io/en/latest/starting/install3/osx/)
 
 **Linux**:
 
 Debian 8 and Ubuntu 14.04 comes with Python 3.4 pre-installed, newer Linux distributions might come with newer Python versions. 
 
-Since Linux tends to have both Python 2 and 3 installed alongside eachother, the command to execute the latter should be 'python3' instead of just 'python'.
+Since Linux tends to have both Python 2 and 3 installed alongside each other, the command to execute the latter should be 'python3' instead of just 'python'.
 
 ### PIP
 
@@ -38,7 +38,7 @@ If you don't have PIP installed, follow [these instructions](https://pip.pypa.io
 
 ## Create a Virtual Environment
 
-It is recommended to install Golem and its dependencies in a [virtual environment](http://www.virtualenv.org/en/latest/) instead of globally. To do that, follow this steps:
+It is recommended to install Golem and its dependencies in a [virtual environment](http://www.virtualenv.org/en/latest/) instead of globally. To do that, follow these steps:
 
 ### Install Virtualenv
 

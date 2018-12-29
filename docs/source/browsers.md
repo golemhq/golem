@@ -105,7 +105,7 @@ The browser (or browsers) that a test or suite will use can be specified from a 
     ```
 
 
-**Valid options are**:
+### Valid options:
 * chrome
 * chrome-headless
 * chrome-remote

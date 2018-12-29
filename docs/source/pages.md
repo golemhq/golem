@@ -7,7 +7,7 @@ It can be used as a Page Object.
 ## Page Elements
 
 A way to store element selectors in a page is by using a tuple.
-This is the default behaviour for the Web Module.
+This is the default behavior for the Web Module.
 
 ```python
 input = ('id', 'myID', 'My Input')
