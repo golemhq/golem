@@ -81,7 +81,8 @@ DEFAULTS = [
     ('remote_browsers', {}),
     ('console_log_level', 'INFO'),
     ('log_all_events', True),
-    ('start_maximized', True)
+    ('start_maximized', True),
+    ('screenshots', {})
 ]
 
 

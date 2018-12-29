@@ -17,6 +17,7 @@ import requests
 from golem import browser, execution
 from golem.core import utils
 from golem.test_runner import execution_logger
+from golem.report import utils as report_utils
 
 
 def _add_error(message, description='', log_level='ERROR'):
@@ -81,22 +82,46 @@ def _assert_step(step_message, error='', take_screenshots=True):
         _screenshot_on_step()
 
 
-def _capture_screenshot(image_filename):
-    """take a screenshot and store it in report_directory.
-    Report_directory must already exist.
+def _capture_screenshot(image_name):
+    """take a screenshot and store it in execution.report_directory.
+    report_directory must already exist.
+
+    Screenshot format, size and quality can be modified using the
+      'screenshots' setting key.
+    Pillow must be installed in order to modify the screenshot before saving.
+    'screenshots' setting can have the following attributes:
+      - format: must be 'PNG' or 'JPEG'
+      - quality: must be an int in 1..95 range.
+          Default is 75. Only applies to JPEG.
+      - width and height: must be int greater than 0
+      - resize: must be an int greater than 0.
+          Str in the format '55' or '55%' is also allowed.
     """
-    if execution.report_directory:
-        img_path = os.path.join(execution.report_directory, image_filename)
-        get_browser().get_screenshot_as_file(img_path)
-    else:
+    if not execution.report_directory:
         execution.logger.debug('cannot take screenshot, report directory does not exist')
+        return
+
+    if not execution.settings['screenshots']:
+        path = os.path.join(execution.report_directory, image_name + '.png')
+        get_browser().get_screenshot_as_file(path)
+    else:
+        screenshot_settings = execution.settings['screenshots']
+        format = screenshot_settings.get('format', 'PNG').upper()
+        if format == 'JPG':
+            format = 'JPEG'
+        quality = screenshot_settings.get('quality', None)
+        width = screenshot_settings.get('width', None)
+        height = screenshot_settings.get('height', None)
+        resize = screenshot_settings.get('resize', None)
+        report_utils.save_screenshot(execution.report_directory, image_name, format,
+                                     quality, width, height, resize)
 
 
 def _generate_screenshot_name(message):
     """Generate a valid filename from a message string"""
     sanitized_filename = utils.get_valid_filename(message)
     random_id = str(uuid.uuid4())[:5]
-    return '{}_{}.png'.format(sanitized_filename, random_id)
+    return '{}_{}'.format(sanitized_filename, random_id)
 
 
 def _run_wait_hook():

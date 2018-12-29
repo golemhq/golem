@@ -12,14 +12,14 @@ golem run <project> <test|suite|dir> [-b|--browsers] [-t|--threads]
 
 **-b|--browsers**
 
-One or more browsers to use for this tests.
+One or more browsers to use for these tests.
 If not provided, the browsers defined inside the suite will be used.
 If the suite does not have browsers defined or this is a test, the *default_browser* setting will be used.
 The valid options are listed [here](browsers.html#specifying-the-browser-for-a-test).
 
 **-t|--threads**
 
-The amount of tests to run in parallel. The default is 1.
+The number of tests to run in parallel. The default is 1.
 
 **-e|--environments**
 

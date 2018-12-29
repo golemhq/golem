@@ -162,11 +162,11 @@ Add a cookie to the current session.
 Required keys are: "name" and "value". Optional keys are: "path", "domain", "secure", "expiry"
 
 Note:
-* If a cookie with the same name exists, it will be overriden.
+* If a cookie with the same name exists, it will be overridden.
 * This function cannot set the domain of a cookie, the domain URL
 must be visited by the browser first.
 * The domain is set automatically to the current domain the browser is in.
-* If the browser did not visit any url (initial blank page) this
+* If the browser did not visit any URL (initial blank page) this
 function will fail with "Message: unable to set cookie"
 
 **Example usage:**

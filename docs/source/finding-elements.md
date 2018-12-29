@@ -49,7 +49,7 @@ The browser has two methods used to find elements: **find** and **find_all**
 GolemExtendedDriver.**find**(*element=None, id=None, name=None, link_text=None, partial_link_text=None, css=None, xpath=None, tag_name=None, timeout=None, wait_displayed=None*)
 
 The **find()** method provides a few ways to find elements.
-Only one search criteria must be be provided. *element* must be a css selector string, an element tuple or a WebElement object.
+Only one search criteria must be provided. *element* must be a CSS selector string, an element tuple or a WebElement object.
 
 The *timeout* argument determines how much time to wait until the element is present.
 If this is not provided, the value defined in settings by the *search_timeout* key will be used.
@@ -103,8 +103,8 @@ element = browser.find(tag_name='input')
 GolemExtendedDriver.**find_all**(*element=None, id=None, name=None, link_text=None, partial_link_text=None, css=None, xpath=None, tag_name=None*)
 
 Finds all the elements that match the selected criteria.
-Only one search criteria must be be provided. Returns a list of WebElements.
-*element* must be a css selector string, an element tuple or a WebElement object.
+Only one search criteria must be provided. Returns a list of WebElements.
+*element* must be a CSS selector string, an element tuple or a WebElement object.
 
 ```python
 from golem import actions

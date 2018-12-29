@@ -34,7 +34,7 @@ The executables can be downloaded manually from these locations:
 * Edge: <https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/>
 * Opera: <https://github.com/operasoftware/operachromiumdriver/releases>
 
-By default the executables are downloaded into the *drivers* folder inside the Test Directory.
+By default, the executables are downloaded into the *drivers* folder inside the Test Directory.
 
 The settings.json file contains a key for each browser that should point to the Webdriver file for that browser.
 For example:

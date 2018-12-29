@@ -1,11 +1,11 @@
 Test data
 ==================================================
 
-The data for each test can be stored inside the test or in a separate csv file.
+The data for each test can be stored inside the test or in a separate CSV file.
 To select which location Golem should use, set the *test_data* setting to 'csv' or 'infile'.
 
 
-## csv Data
+## CSV Data
 
 When *"test_data"* setting is set to "csv" the data will be saved in a separate csv file in the same folder as the test.
 

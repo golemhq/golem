@@ -123,7 +123,7 @@ Every action that starts with "verify" is a soft assertion, meaning that the err
 
 ### Hard Assertions
 
-Every action that start with "assert" is a hard assertion, meaning that it will stop the test execution at that point. The teardown method will still be executed afterwards.
+Every action that starts with "assert" is a hard assertion, meaning that it will stop the test execution at that point. The teardown method will still be executed afterward.
 
 ### Assertion Actions Example
 

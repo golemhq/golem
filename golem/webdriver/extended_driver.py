@@ -34,7 +34,7 @@ class GolemExtendedDriver:
 
     def check_element(self, element):
         """Check an element (checkbox or radiobutton).
-        If element is already checked this is is ignored.
+        If element is already checked this is ignored.
 
         :Args:
          - element: an element tuple, a CSS string or a WebElement object
@@ -300,7 +300,7 @@ class GolemExtendedDriver:
 
     def uncheck_element(self, element):
         """Uncheck a checkbox element.
-        If element is already unchecked this is is ignored.
+        If element is already unchecked this is ignored.
 
         :Args:
         - element: an element tuple, a CSS string or a WebElement object
