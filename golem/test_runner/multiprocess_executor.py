@@ -8,7 +8,7 @@ from golem.core import test_execution
 from golem.test_runner.test_runner import run_test
 
 
-def multiprocess_executor(project, execution_list, processes=1):
+def multiprocess_executor(project, execution_list, has_failed_tests, processes=1):
     """Runs a list of tests in parallel using multiprocessing.
 
     execution_list is a list tests containing
@@ -31,7 +31,8 @@ def multiprocess_executor(project, execution_list, processes=1):
                 test.secrets,
                 test.browser,
                 test_execution.settings,
-                test.reportdir)
+                test.reportdir,
+                has_failed_tests)
         apply_async = pool.apply_async(run_test, args=args)
         results.append(apply_async)
     map(ApplyResult.wait, results)

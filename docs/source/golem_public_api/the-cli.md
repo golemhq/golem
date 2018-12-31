@@ -21,7 +21,7 @@ Used to generate a new test directory.
 
 Run a test case or suite from a project. 
 
-Threads indicates the amount of test cases to execute in parallel, default is 1. 
+Threads indicates the number of test cases to execute in parallel, the default is 1. 
 
 Browsers indicates which browser(s) to use:
 

@@ -3,6 +3,50 @@ import os
 from golem.core import settings_manager
 
 
+DEFAULT_EMPTY = {
+    'search_timeout': 0,
+    'wait_displayed': False,
+    'screenshot_on_error': True,
+    'screenshot_on_step': False,
+    'screenshot_on_end': False,
+    'test_data': 'csv',
+    'wait_hook': None,
+    'default_browser': 'chrome',
+    'chromedriver_path': None,
+    'edgedriver_path': None,
+    'geckodriver_path': None,
+    'iedriver_path': None,
+    'operadriver_path': None,
+    'remote_url': None,
+    'remote_browsers': {},
+    'console_log_level': 'INFO',
+    'log_all_events': True,
+    'start_maximized': True,
+    'screenshots': {}
+}
+
+DEFAULT_PREDEFINED = {
+    'console_log_level': 'INFO',
+    'default_browser': 'chrome',
+    'chromedriver_path': './drivers/chromedriver*',
+    'edgedriver_path': './drivers/edgedriver*',
+    'geckodriver_path': './drivers/geckodriver*',
+    'iedriver_path': './drivers/iedriver*',
+    'operadriver_path': './drivers/operadriver*',
+    'search_timeout': 20,
+    'wait_displayed': False,
+    'log_all_events': True,
+    'remote_browsers': {},
+    'remote_url': 'http://localhost:4444/wd/hub',
+    'screenshot_on_end': False,
+    'screenshot_on_error': True,
+    'screenshot_on_step': False,
+    'test_data': 'csv',
+    'wait_hook': None,
+    'start_maximized': True,
+    'screenshots': {}
+}
+
 class TestCreateGlobalSettingsFile:
 
     def test_create_global_settings_file(self, testdir_class):
@@ -52,27 +96,7 @@ class TestAssignSettingsDefaultValues:
 
     def test_assign_settings_default_values_all_missing(self):
         normalized = settings_manager.assign_settings_default_values({})
-        expected = {
-            'search_timeout': 0,
-            'wait_displayed': False,
-            'screenshot_on_error': True,
-            'screenshot_on_step': False,
-            'screenshot_on_end': False,
-            'test_data': 'csv',
-            'wait_hook': None,
-            'default_browser': 'chrome',
-            'chromedriver_path': None,
-            'edgedriver_path': None,
-            'geckodriver_path': None,
-            'iedriver_path': None,
-            'operadriver_path': None,
-            'remote_url': None,
-            'remote_browsers': {},
-            'console_log_level': 'INFO',
-            'log_all_events': True,
-            'start_maximized': True
-        }
-        assert normalized == expected
+        assert normalized == DEFAULT_EMPTY
 
     def test_assign_settings_default_values_all_none(self):
         input_settings = {
@@ -93,30 +117,11 @@ class TestAssignSettingsDefaultValues:
             'remote_browsers': None,
             'console_log_level': None,
             'log_all_events': None,
-            'start_maximized': None
+            'start_maximized': None,
+            'screenshots': None
         }
         normalized = settings_manager.assign_settings_default_values(input_settings)
-        expected = {
-            'search_timeout': 0,
-            'wait_displayed': False,
-            'screenshot_on_error': True,
-            'screenshot_on_step': False,
-            'screenshot_on_end': False,
-            'test_data': 'csv',
-            'wait_hook': None,
-            'default_browser': 'chrome',
-            'chromedriver_path': None,
-            'edgedriver_path': None,
-            'geckodriver_path': None,
-            'iedriver_path': None,
-            'operadriver_path': None,
-            'remote_url': None,
-            'remote_browsers': {},
-            'console_log_level': 'INFO',
-            'log_all_events': True,
-            'start_maximized': True
-        }
-        assert normalized == expected
+        assert normalized == DEFAULT_EMPTY
 
     def test_assign_settings_default_values_all_empty_str(self):
         input_settings = {
@@ -137,57 +142,18 @@ class TestAssignSettingsDefaultValues:
             'remote_browsers': '',
             'console_log_level': '',
             'log_all_events': '',
-            'start_maximized': ''
+            'start_maximized': '',
+            'screenshots': ''
         }
         normalized = settings_manager.assign_settings_default_values(input_settings)
-        expected = {
-            'search_timeout': 0,
-            'wait_displayed': False,
-            'console_log_level': 'INFO',
-            'default_browser': 'chrome',
-            'chromedriver_path': None,
-            'edgedriver_path': None,
-            'geckodriver_path': None,
-            'iedriver_path': None,
-            'operadriver_path': None,
-            'log_all_events': True,
-            'remote_browsers': {},
-            'remote_url': None,
-            'screenshot_on_end': False,
-            'screenshot_on_error': True,
-            'screenshot_on_step': False,
-            'test_data': 'csv',
-            'wait_hook': None,
-            'start_maximized': True
-        }
-        assert normalized == expected
+        assert normalized == DEFAULT_EMPTY
 
 
 class TestGetGlobalSettings:
 
     def test_get_global_settings_default(self, testdir_function):
         global_settings = settings_manager.get_global_settings(testdir_function.path)
-        expected = {
-            'console_log_level': 'INFO',
-            'default_browser': 'chrome',
-            'chromedriver_path': './drivers/chromedriver*',
-            'edgedriver_path': './drivers/edgedriver*',
-            'geckodriver_path': './drivers/geckodriver*',
-            'iedriver_path': './drivers/iedriver*',
-            'operadriver_path': './drivers/operadriver*',
-            'search_timeout': 20,
-            'wait_displayed': False,
-            'log_all_events': True,
-            'remote_browsers': {},
-            'remote_url': 'http://localhost:4444/wd/hub',
-            'screenshot_on_end': False,
-            'screenshot_on_error': True,
-            'screenshot_on_step': False,
-            'test_data': 'csv',
-            'wait_hook': None,
-            'start_maximized': True
-        }
-        assert global_settings == expected
+        assert global_settings == DEFAULT_PREDEFINED
 
 
 class TestGetGlobalSettingsAsString:
@@ -204,27 +170,7 @@ class TestGetProjectSettings:
         testdir = project_function_clean.testdir
         project = project_function_clean.name
         project_settings = settings_manager.get_project_settings(testdir, project)
-        expected = {            
-            'console_log_level': 'INFO',
-            'default_browser': 'chrome',
-            'chromedriver_path': './drivers/chromedriver*',
-            'edgedriver_path': './drivers/edgedriver*',
-            'geckodriver_path': './drivers/geckodriver*',
-            'iedriver_path': './drivers/iedriver*',
-            'operadriver_path': './drivers/operadriver*',
-            'search_timeout': 20,
-            'wait_displayed': False,
-            'log_all_events': True,
-            'remote_browsers': {},
-            'remote_url': 'http://localhost:4444/wd/hub',
-            'screenshot_on_end': False,
-            'screenshot_on_error': True,
-            'screenshot_on_step': False,
-            'test_data': 'csv',
-            'wait_hook': None,
-            'start_maximized': True
-        }
-        assert project_settings == expected
+        assert project_settings == DEFAULT_PREDEFINED
 
     # TODO: test project override global settings
 

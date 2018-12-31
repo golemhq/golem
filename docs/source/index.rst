@@ -51,6 +51,7 @@ Contents
    suites
    test-data
    running-tests
+   report
    settings
    golem-test-framework
    Interactive-mode

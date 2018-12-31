@@ -37,11 +37,11 @@ And the same test as seen with the Web Module:
 
 ![empty test](_static/img/empty-test.png "Empty Test")
 
-The **description** is used to define the goal of the test and its value is displayed in the generated report, afterwards. The description is optional.
+The **description** is used to define the goal of the test and its value is displayed in the generated report, afterward. The description is optional.
 
 **Pages** is a list of the pages of the application under test that this test will interact with. More about pages later.
 
-After that, a test implements three functions: **setup**, **test** and **teardown**. These functions are always executed in that order.
+After that, a test implements three functions: **setup**, **test**, and **teardown**. These functions are always executed in that order.
 
 Use the **setup** function to separate the preconditions from the main test steps.
 
@@ -80,7 +80,7 @@ In the previous example, *navigate*, *send_keys*, *click*, and *verify_element_t
 ### Opening and Closing the Browser
 
 There is no need to open or close the browser.
-The first action that requires a browser will open one. At the end Golem will close the browser.
+The first action that requires a browser will open one. At the end, Golem will close the browser.
 However, this can be done explicitly with the *open_browser* and *close_browser* actions.
 
 
@@ -264,17 +264,17 @@ And from the Web Module:
 
 
 With this change, the 'Search input', 'Search button' and 'Article Title' elements are defined in a separate file.
-A test that needs to interact with this elements, just needs to import the page object and reference them.
+A test that needs to interact with these elements, just needs to import the page object and reference them.
 This reduces the required time to write new tests and the maintenance of existing tests.
 In the future, when the selector of an element changes, even if it's used by hundreds of tests, its definition needs to be modified in a single file.
 
 
 ## Creating a suite
 
-A suite lets you arbitrarily select a sub-set of all the tests to execute as a group.
-Let's say, you want to test only the most important tests, or the tests for a specific module.
+A suite lets you arbitrarily select a subset of all the tests to execute as a group.
+Let's say, you want to test only the most important tests or the tests for a specific module.
 
-A suite contains a list of *tests*, a list of *browsers*, a list of *environments* and the amount of *workers*. Consider the following example:
+A suite contains a list of *tests*, a list of *browsers*, a list of *environments* and the number of *workers*. Consider the following example:
 
 
 **full_regression.py**
@@ -309,7 +309,7 @@ How many tests can be parallelized depends on your test infrastructure.
 
 ### Execution report
 
-When the suite finishes a json report is generated in the *reports* folder. This report can be visualized using the Web Module. 
+When the suite finishes a JSON report is generated in the *reports* folder. This report can be visualized using the Web Module. 
 
 <br>
 

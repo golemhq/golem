@@ -2,8 +2,9 @@
 import json
 import os
 import base64
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
 
-from golem.core import test_execution
 from golem.test_runner.conf import ResultsEnum
 
 
@@ -286,3 +287,36 @@ def generate_execution_report(execution_directory, elapsed_time):
     with open(report_path, 'w', encoding='utf-8') as json_file:
         json.dump(data, json_file, indent=4)
 
+
+def generate_junit_execution_report(suite_name, execution_directory, timestamp):
+    data = get_execution_data(execution_directory=execution_directory)
+
+    totals_by_result = data['totals_by_result']
+    junit_errors = totals_by_result.get(ResultsEnum.CODE_ERROR, 0)
+    junit_failure = (totals_by_result.get(ResultsEnum.FAILURE, 0) +
+                     totals_by_result.get(ResultsEnum.ERROR, 0))
+    testsuites_attrs = {
+        'name': suite_name,
+        'errors': str(junit_errors),
+        'failures': str(junit_failure),
+        'tests': str(data['total_tests']),
+        'time': str(data['net_elapsed_time'])
+    }
+    testsuites = ET.Element('testsuites', testsuites_attrs)
+
+    testsuites_attrs['timestamp'] = timestamp
+    testsuite = ET.SubElement(testsuites, 'testsuite', testsuites_attrs)
+
+    for test in data['tests']:
+        test_attrs = {
+            'name': test['full_name'],
+            'classname': '{}.{}'.format(test['full_name'], test['test_set']),
+            'status': test['result'],
+            'time': str(test['test_elapsed_time'])
+        }
+        testcase = ET.SubElement(testsuite, 'testcase', test_attrs)
+
+    xmlstring = ET.tostring(testsuites)
+    doc = minidom.parseString(xmlstring).toprettyxml(indent=' ' * 4, encoding='UTF-8')
+    with open(os.path.join(execution_directory, 'report.xml'), 'w') as f:
+        f.write(doc.decode('UTF-8'))
