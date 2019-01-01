@@ -1,10 +1,12 @@
 """Functions to parse Golem report files."""
 import json
 import os
+import errno
 import base64
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
+from golem.core import test_execution
 from golem.test_runner.conf import ResultsEnum
 
 
@@ -16,8 +18,10 @@ def get_date_time_from_timestamp(timestamp):
     Example:
     '2017.12.20.10.31' -> '2017/12/20 10:31'
     """
+    date_time_string = timestamp
     sp = timestamp.split('.')
-    date_time_string = '{0}/{1}/{2} {3}:{4}'.format(sp[0], sp[1], sp[2], sp[3], sp[4])
+    if len(sp) >= 5:
+        date_time_string = '{0}/{1}/{2} {3}:{4}'.format(sp[0], sp[1], sp[2], sp[3], sp[4])
     return date_time_string
 
 
@@ -288,7 +292,8 @@ def generate_execution_report(execution_directory, elapsed_time):
         json.dump(data, json_file, indent=4)
 
 
-def generate_junit_execution_report(suite_name, execution_directory, timestamp):
+def generate_junit_report(execution_directory, suite_name, timestamp,
+                          report_folder=None, report_name=None):
     data = get_execution_data(execution_directory=execution_directory)
 
     totals_by_result = data['totals_by_result']
@@ -318,5 +323,40 @@ def generate_junit_execution_report(suite_name, execution_directory, timestamp):
 
     xmlstring = ET.tostring(testsuites)
     doc = minidom.parseString(xmlstring).toprettyxml(indent=' ' * 4, encoding='UTF-8')
-    with open(os.path.join(execution_directory, 'report.xml'), 'w') as f:
-        f.write(doc.decode('UTF-8'))
+    if not report_folder:
+        report_folder = execution_directory
+    if not report_name:
+        report_name = 'report'
+
+    report_path = os.path.join(report_folder, report_name + '.xml')
+    if not os.path.exists(os.path.dirname(report_path)):
+        os.makedirs(os.path.dirname(report_path), exist_ok=True)
+
+    try:
+        with open(report_path, 'w') as f:
+            f.write(doc.decode('UTF-8'))
+    except IOError as e:
+        if e.errno == errno.EACCES:
+            print('ERROR: cannot write to {}, PermissionError (Errno 13)'
+                  .format(report_path))
+        else:
+            print('ERROR: There was an error writing to {}'.format(report_path))
+
+    return doc
+
+
+def get_or_generate_junit_report(project, suite, execution):
+    """Get the HTML report as a string.
+    If it does not exist, generate it:
+    Report is generated at
+    <testdir>/projects/<project>/reports/<suite>/<execution>/report.html|report-no-images.html
+    """
+    report_filename = 'report'
+    report_directory = os.path.join(test_execution.root_path, 'projects', project,
+                                    'reports', suite, execution)
+    report_filepath = os.path.join(report_directory, report_filename + '.xml')
+    if os.path.isfile(report_filepath):
+        xml_string = open(report_filepath).read()
+    else:
+        xml_string = generate_junit_report(report_directory, suite, execution)
+    return xml_string

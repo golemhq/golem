@@ -358,7 +358,8 @@ def report_dashboard_suite(project, suite):
 def report_execution(project, suite, execution):
     formatted_date = report_parser.get_date_time_from_timestamp(execution)
     return render_template('report/report_execution.html', project=project, suite=suite,
-                           execution=execution, execution_data=None, formatted_date=formatted_date, static=False)
+                           execution=execution, execution_data=None,
+                           formatted_date=formatted_date, static=False)
 
 
 # REPORT EXECUTION VIEW STATIC HTML
@@ -403,6 +404,27 @@ def report_execution_static_html_no_images_download(project, suite, execution):
                                                                no_images=True)
     headers = {"Content-disposition": "attachment; filename={}".format('report-no-images.html')}
     return Response(html_report_string, mimetype="text/html", headers=headers)
+
+
+# REPORT EXECUTION VIEW JUNIT
+@app.route("/report/project/<project>/suite/<suite>/<execution>/junit/")
+@login_required
+@project_exists
+@report_permissions_required
+def report_execution_junit(project, suite, execution):
+    junit_report_string = report_parser.get_or_generate_junit_report(project, suite, execution)
+    return Response(junit_report_string, mimetype='text/xml')
+
+
+# REPORT EXECUTION VIEW JUNIT DOWNLOAD
+@app.route("/report/project/<project>/suite/<suite>/<execution>/junit/download/")
+@login_required
+@project_exists
+@report_permissions_required
+def report_execution_junit_download(project, suite, execution):
+    junit_report_string = report_parser.get_or_generate_junit_report(project, suite, execution)
+    headers = {"Content-disposition": "attachment; filename={}".format('report.xml')}
+    return Response(junit_report_string, mimetype='text/xml', headers=headers)
 
 
 # REPORT TEST VIEW

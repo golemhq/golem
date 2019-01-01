@@ -64,13 +64,18 @@ class ExecutionRunner:
       run_directory
     """
 
-    def __init__(self, browsers=None, processes=1, environments=None,
-                 interactive=False, timestamp=None):
+    def __init__(self, browsers=None, processes=1, environments=None, interactive=False,
+                 timestamp=None, reports=None, report_folder=None, report_name=None):
+        if reports is None:
+            reports = []
         self.project = None
         self.cli_args = SimpleNamespace(browsers=browsers, processes=processes,
                                         envs=environments)
         self.interactive = interactive
         self.timestamp = timestamp
+        self.reports = reports
+        self.report_folder = report_folder
+        self.report_name = report_name
         self.tests = []
         self.is_suite = False
         self.suite_name = None
@@ -298,9 +303,9 @@ class ExecutionRunner:
         for test in self.execution.tests:
             test.reportdir = report.create_report_directory(self.execution.reportdir,
                                                             test.name, self.is_suite)
-        self.execute()
+        self._execute()
 
-    def execute(self):
+    def _execute(self):
         start_time = time.time()
         suite_error = False
 
@@ -341,12 +346,24 @@ class ExecutionRunner:
         elapsed_time = round(time.time() - start_time, 2)
         report_parser.generate_execution_report(self.execution.reportdir, elapsed_time)
 
-        # generate execution_result.xml if junit enabled
-        if test_execution.settings['junit'] and self.is_suite:
-            report_parser.generate_junit_execution_report(self.suite_name,
-                                                          self.execution.reportdir,
-                                                          self.timestamp)
-        
-    # exit to the console with exit status code 1 in case a test fails
+        # generate requested reports
+        if self.is_suite:
+            report_name = self.report_name or 'report'
+            if 'junit' in self.reports:
+                report_parser.generate_junit_report(self.execution.reportdir,
+                                                    self.suite_name, self.timestamp,
+                                                    self.report_folder, report_name)
+            if 'html' in self.reports:
+                gui_utils.generate_html_report(self.project, self.suite_name,
+                                               self.timestamp, self.report_folder,
+                                               report_name)
+            if 'html-no-images' in self.reports:
+                if 'html' in self.reports:
+                    report_name = report_name + '-no-images'
+                gui_utils.generate_html_report(self.project, self.suite_name, self.timestamp,
+                                               self.report_folder, report_name,
+                                               no_images=True)
+
+        # exit to the console with exit status code 1 in case a test fails
         if self.execution.has_failed_tests.value:
             sys.exit(1)
