@@ -1,5 +1,6 @@
 """Helper functions to deal with Golem GUI module application."""
 import os
+import errno
 import subprocess
 import inspect
 from functools import wraps
@@ -10,6 +11,9 @@ from flask_login import current_user
 import golem.actions
 from golem.core import utils, test_execution
 from golem.gui import report_parser
+
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
 
 
 def run_test_case(project, test_case_name, browsers=None, environments=None, processes=1):
@@ -195,12 +199,24 @@ def report_permissions_required(func):
     return wrapper
 
 
-def generate_html_report(project, suite, execution, report_directory,
-                         report_name='report.html', no_images=False):
+def generate_html_report(project, suite, execution, report_directory=None,
+                         report_name=None, no_images=False):
     """Generate static HTML report.
-    Report is generated at /<report_directory>/<report_name>
+    Report is generated in <report_directory>/<report_name>
+    By default it's generated in <testdir>/projects/<project>/reports/<suite>/<timestamp>
+    Default name is 'report.html' and 'report-no-images.html'
     """
-    from golem.gui import app
+    from golem import gui
+    app = gui.app
+    if not report_directory:
+        report_directory = os.path.join(test_execution.root_path, 'projects', project,
+                                        'reports', suite, execution)
+    if not report_name:
+        if no_images:
+            report_name = 'report-no-images'
+        else:
+            report_name = 'report'
+
     formatted_date = report_parser.get_date_time_from_timestamp(execution)
     css = {}
     js = {}
@@ -227,32 +243,45 @@ def generate_html_report(project, suite, execution, report_directory,
                                                        encode_screenshots=True,
                                                        no_screenshots=no_images)
         detail_test_data[test['test_set']] = test_detail
-    html_string = render_template('report/report_execution_static.html', project=project,
-                                  suite=suite, execution=execution, execution_data=execution_data,
-                                  detail_test_data=detail_test_data, formatted_date=formatted_date,
-                                  css=css, js=js, static=True)
+    with app.app_context():
+        html_string = render_template('report/report_execution_static.html', project=project,
+                                      suite=suite, execution=execution, execution_data=execution_data,
+                                      detail_test_data=detail_test_data, formatted_date=formatted_date,
+                                      css=css, js=js, static=True)
     _, file_extension = os.path.splitext(report_name)
     if not file_extension:
         report_name = '{}.html'.format(report_name)
     destination = os.path.join(report_directory, report_name)
-    with open(destination, 'w+') as f:
-        f.write(html_string)
+
+    if not os.path.exists(os.path.dirname(destination)):
+        os.makedirs(os.path.dirname(destination), exist_ok=True)
+
+    try:
+        with open(destination, 'w') as f:
+            f.write(html_string)
+    except IOError as e:
+        if e.errno == errno.EACCES:
+            print('ERROR: cannot write to {}, PermissionError (Errno 13)'
+                  .format(destination))
+        else:
+            print('ERROR: There was an error writing to {}'.format(destination))
+
     return html_string
 
 
 def get_or_generate_html_report(project, suite, execution, no_images=False):
     """Get the HTML report as a string.
-    If it does not exist, generate it.:
+    If it does not exist, generate it:
     Report is generated at
-    /<testdir>/projects/<project>/reports/<suite>/<execution>/report.html|report-no-images.html
+    <testdir>/projects/<project>/reports/<suite>/<execution>/report.html|report-no-images.html
     """
     if no_images:
-        report_filename = 'report-no-images.html'
+        report_filename = 'report-no-images'
     else:
-        report_filename = 'report.html'
+        report_filename = 'report'
     report_directory = os.path.join(test_execution.root_path, 'projects', project,
                                     'reports', suite, execution)
-    report_filepath = os.path.join(report_directory, report_filename)
+    report_filepath = os.path.join(report_directory, report_filename + '.html')
     if os.path.isfile(report_filepath):
         html_string = open(report_filepath).read()
     else:

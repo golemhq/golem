@@ -1,8 +1,9 @@
 import os
 import json
 
+import pytest
+
 from golem.test_runner import test_runner, execution_runner
-# from golem.test_runner.execution_runner import ExecutionRunner
 from golem.gui import gui_utils
 from golem.core import settings_manager
 
@@ -139,6 +140,7 @@ def teardown(data):
         assert len(report.keys()) == 11
 
     # A2
+    @pytest.mark.slow
     def test_run_test__success_with_data(self, project_function_clean, caplog, test_utils):
         """Test runs successfully with test data"""
         testdir = project_function_clean.testdir
@@ -350,6 +352,7 @@ def teardown(data):
         assert report['steps'][1]['message'] == 'teardown step'
 
     # A4
+    @pytest.mark.slow
     def test_run_test__failure_and_error_in_setup(self, project_function_clean,
                                                   caplog, test_utils):
         """The test ends with 'failure' when the setup function throws AssertionError,
@@ -434,6 +437,7 @@ def teardown(data):
         assert report['errors'][1]['message'] == 'error in teardown'
 
     # A6
+    @pytest.mark.slow
     def test_run_test__failure_in_setup_exception_in_teardown(self, project_function_clean,
                                                               caplog, test_utils):
         """Setup throws AssertionError
@@ -476,6 +480,7 @@ def teardown(data):
         assert report['errors'][1]['message'] == "NameError: name 'bar' is not defined"
 
     # A8
+    @pytest.mark.slow
     def test_run_test__failure_in_setup_failure_in_teardown(self, project_function_clean,
                                                             caplog, test_utils):
         """Setup throws AssertionError

@@ -17,22 +17,7 @@ Used to generate a new test directory.
 
 ### run
 
-**golem run \<project\> \<test\>|\<suite\> [-t|--threads -b|--browsers -e|--environments -i|--interactive ]**
-
-Run a test case or suite from a project. 
-
-Threads indicates the number of test cases to execute in parallel, the default is 1. 
-
-Browsers indicates which browser(s) to use:
-
-```
-golem run project_name test_name -b firefox chrome
-```
-
-Environments can be a list of environments defined in the environments.json. If not provided it will try to use the first if possible.
-See [Test Data - Environments](test-data.html#environments) for more detail.
-
-Interactive runs the test in interactive mode. Required for *interactive_mode* and *set_trace* actions.
+See [Running Tests](../running-tests.html)
 
 ### gui
 

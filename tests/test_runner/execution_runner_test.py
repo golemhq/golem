@@ -90,6 +90,7 @@ class TestDefineBrowsers:
 class TestSelectEnvironments:
     """Tests for golem.test_runner.execution_runner._select_environments()"""
 
+    @pytest.mark.slow
     def test__select_environments(self, project_session):
         """Verify that _select_environments uses the correct order
         of precedence"""
@@ -101,6 +102,7 @@ class TestSelectEnvironments:
         result_envs = execution_runner._select_environments()
         assert result_envs == cli_envs
 
+    @pytest.mark.slow
     def test__select_environments_cli_envs_empty(self, project_function):
         """Verify that _select_environments uses the correct order
         of precedence when cli environments is empty"""
@@ -116,6 +118,7 @@ class TestSelectEnvironments:
         result_envs = execution_runner._select_environments()
         assert result_envs == suite_envs
 
+    @pytest.mark.slow
     def test__select_environments_cli_envs_empty_suite_envs_empty(self, project_function):
         """Verify that _select_environments uses the correct order
         of precedence when cli environments and suite environments are empty"""
@@ -129,6 +132,7 @@ class TestSelectEnvironments:
         result_envs = execution_runner._select_environments()
         assert result_envs == ['env3']
 
+    @pytest.mark.slow
     def test__select_environments_all_envs_empty(self, project_function):
         """Verify that _select_environments uses the correct order
         of precedence when cli environments, suite environments and 
@@ -143,6 +147,7 @@ class TestSelectEnvironments:
 
 class TestDefineExecutionList:
 
+    @pytest.mark.slow
     def test_define_execution_list(self, project_function_clean):
         """Verify that the execution list is generated properly when there's only
         one test without datasets, one driver and zero environments
@@ -159,6 +164,7 @@ class TestDefineExecutionList:
         ]
         assert execution_list == expected_list
 
+    @pytest.mark.slow
     def test_define_execution_list_multiple_data_sets(self, project_function_clean):
         """Verify that the execution list is generated properly when a test
         has multiple data sets
@@ -196,6 +202,7 @@ class TestDefineExecutionList:
         ]
         assert execution_list == expected_list
 
+    @pytest.mark.slow
     def test_define_execution_list_multiple_tests(self, project_function_clean):
         """Verify that the execution list is generated properly when there
         are multiple tests in the list
@@ -239,6 +246,7 @@ class TestDefineExecutionList:
         ]
         assert execution_list == expected_list
 
+    @pytest.mark.slow
     def test_define_execution_list_multiple_envs(self, project_function_clean):
         """Verify that the execution list is generated properly when the execution
         has multiple envs
@@ -272,6 +280,7 @@ class TestDefineExecutionList:
         ]
         assert execution_list == expected_list
 
+    @pytest.mark.slow
     def test_define_execution_list_multiple_drivers(self, project_function_clean):
         """Verify that the execution list is generated properly when there
         are multiple drivers in the list
@@ -302,6 +311,7 @@ class TestDefineExecutionList:
         ]
         assert execution_list == expected_list
 
+    @pytest.mark.slow
     def test_define_execution_list_multiple_tests_datasets_drivers_envs(
             self, project_function_clean):
         """Verify that the execution list is generated properly when there
@@ -363,6 +373,7 @@ class TestDefineExecutionList:
         ]
         assert execution_list == expected_list
 
+    @pytest.mark.slow
     def test_define_execution_list_with_secrets(self, project_function_clean):
         """Verify that the execution list is generated properly when there's only
         one test without datasets, one driver and zero environments
@@ -388,6 +399,7 @@ class TestDefineExecutionList:
 
 class TestCreateExecutionDirectory:
 
+    @pytest.mark.slow
     def test__create_execution_directory_is_suite(self, project_class):
         """Verify that create_execution_directory works as expected when 
         a suite is passed on
@@ -405,6 +417,7 @@ class TestCreateExecutionDirectory:
         expected_path = os.path.join(project_class.path, 'reports', suite_name, timestamp)
         assert os.path.isdir(expected_path)
 
+    @pytest.mark.slow
     def test__create_execution_directory_is_not_suite(self, project_class):
         """Verify that create_execution_directory works as expected when 
         a not suite is passed on

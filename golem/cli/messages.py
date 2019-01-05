@@ -2,7 +2,8 @@
 USAGE_MSG = """
 Usage: golem
 
-  golem run <project> <test|suite|directory> [-b -t -e -i -j]
+  golem run <project> <test|suite|directory> [-b -t -e -i -r]
+            [--report-folder] [--report-name] [--timestamp]
   golem gui [-p]
   golem createproject <project>
   golem createtest <project> <test>
@@ -20,16 +21,21 @@ Usage: golem run
     golem run project_name .
 
   positional arguments:
-    projects            name of the project
-    test|suite|dir      name of a single test, a suite or a
-                        directory of tests.
+    projects             name of the project
+    test|suite|dir       name of a single test, a suite or a
+                         directory of tests.
 
   optional arguments:
-    -b, --browsers      a list of browsers
-    -t, --threads       amount of threads, default is 1
-    -e, --environments  a list of environments
-    -i, --interactive   run in interactive mode
-    -j, --junit         output junit.xml file
+    -b, --browsers       a list of browsers
+    -t, --threads        amount of threads, default is 1
+    -e, --environments   a list of environments
+    -i, --interactive    run in interactive mode
+    -r, --report         select reports to generate. Options are:
+                         'junit', 'html', and 'html-no-images'
+    --report-folder      absolute path of location to save report
+    --report-name        filename for generated report without path or extension.
+    --timestamp          used by the execution. Default is auto-generated
+
 
 Usage: golem gui
   
@@ -43,7 +49,9 @@ Type: golem -h <command> for more help
 
 RUN_USAGE_MSG = """
 Usage: golem run <project> <test|suite|directory> [-b|--browsers]
-                 [-t|--threads] [-e|--environments] [-i|--interactive] [-j|--junit]
+                 [-t|--threads] [-e|--environments] [-i|--interactive] 
+                 [-r|--report] [--report-folder] [--report-name]
+                 [--timestamp] 
 
   Run tests, suites or directories
   
@@ -69,17 +77,24 @@ Usage: golem run <project> <test|suite|directory> [-b|--browsers]
     golem run -i
     
   positional arguments:
-    project             name of the project
-    test|suite|dir      name of a single test, a suite or a
-                        directory of tests.
+    project              name of the project
+    test|suite|dir       name of a single test, a suite or a
+                         directory of tests.
 
   optional arguments:
-    -b, --browsers      a list of browsers
-    -t, --threads       amount of threads, default is 1
-    -e, --environments  a list of environments
-    -i, --interactive   run in interactive mode
-    -j, --junit         output junit.xml file
-
+    -b, --browsers       a list of browsers
+    -t, --threads        amount of threads, default is 1
+    -e, --environments   a list of environments
+    -i, --interactive    run in interactive mode
+    -r, --report         select reports to generate. Options are:
+                         'junit', 'html', and 'html-no-images'
+    --report-folder      absolute path of location to save report. Default is
+                         <testdir>/projects/<project>/<suite>/<timestamp>
+    --report-name        filename for output report without path or extension.
+                         Default is 'report'.
+    --timestamp          used by the execution. Default is 
+                         auto-generated with the format:
+                         'year.month.day.hour.minutes.seconds.milliseconds'
 """
 
 GUI_USAGE_MSG = """

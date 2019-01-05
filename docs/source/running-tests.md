@@ -7,7 +7,8 @@ The command to run tests or suites from the command line:
 
 ```bash
 golem run <project> <test|suite|dir> [-b|--browsers] [-t|--threads]
-          [-e|--environments] [-i|--interactive]
+          [-e|--environments] [-i|--interactive] [-r|--report]
+          [--report-folder] [--report-name] [--timestamp]
 ```
 
 **-b|--browsers**
@@ -15,7 +16,7 @@ golem run <project> <test|suite|dir> [-b|--browsers] [-t|--threads]
 One or more browsers to use for these tests.
 If not provided, the browsers defined inside the suite will be used.
 If the suite does not have browsers defined or this is a test, the *default_browser* setting will be used.
-The valid options are listed [here](browsers.html#specifying-the-browser-for-a-test).
+The valid options are listed [here](browsers.html#valid-options).
 
 **-t|--threads**
 
@@ -30,6 +31,27 @@ If not provided, the environments defined inside the suite will be used.
 
 Run the test in interactive mode.
 This is required for the *interactive_mode* and *set_trace* actions.
+
+See [Interactive Mode](Interactive-mode.html)
+
+**-r|--report**
+
+Select which reports should be generated at the end of the execution.
+Options are: *junit*, *html*, and *html-no-images*
+
+**--report-folder**
+
+Absolute path to the generated reports.
+The default is ```/<testdir>/projects/<project>/<suite>/<timestamp>```
+
+**--report-name**
+
+Name of the generated reports. The default is 'report'
+
+**--timestamp**
+
+Used by the execution. Optional. 
+The default is auto-generated with the format: 'year.month.day.hour.minutes.seconds.milliseconds' 
 
 
 ### Run a single test

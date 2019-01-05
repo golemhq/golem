@@ -1,9 +1,45 @@
 Report
 ==================================================
 
+## Generate Reports After Execution
+
+Different reports can be generated after the execution of a suite.
+
+### Report Types
+
+The options are:
+
+* junit
+* html 
+* html-no-images
+
+```bash
+golem run project suite -r junit html html-no-images
+```
+
+### Report Location
+
+By default the reports are generated in ```/<testdir>/projects/<project>/reports/<suite>/<timestamp>```
+
+The location of the reports can be modified with the --report-folder argument:
+
+```bash
+golem run project suite -r html --report-folder /the/path/to/the/report
+```
+
+### Report Name
+
+By default the report name is 'report' ('report.xml' for *junit* reports, 'report.html' and 'report-no-images.html' for *html* reports)
+
+The name of the reports can be modified with the --report-name argument:
+
+```bash
+golem run project suite -r html --report-name report_name
+```
+
 ## Modify Screenshot Format, Size, and Quality 
 
-This helps reduce the size on disk of the generated screenshots and reports.
+The size and compression of the screenshots can be modified to reduce the size on disk.
 
 For example:
 
