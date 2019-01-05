@@ -153,7 +153,7 @@ def project_function_clean(testdir_function):
     project.remove()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def test_utils():    
     yield TestUtils
 
@@ -214,3 +214,34 @@ class TestUtils:
                             os.sep.join(parents), name+'.py')
         with open(path, 'w+') as f:
             f.write(content)
+
+
+def pytest_addoption(parser):
+    parser.addoption('--integration', action='store_true', help='run integration tests only')
+    parser.addoption('--fast', action='store_true', help='run integration tests only')
+    parser.addoption('--all', action='store_true', help='run all tests')
+
+
+def pytest_runtest_setup(item):
+    """Filter tests
+
+    '' (no option): Run all non integration tests
+    '--integration' Run integration tests only
+    '--fast':       Run fast tests only
+    '--all':        Run all tests
+    """
+    if item.config.getoption('--all'):
+        pass  # run all tests
+    else:
+        if item.config.getoption('--integration'):
+            # skip non integration tests
+            if 'integration' not in item.keywords:
+                pytest.skip('skipping non integration test')
+        else:
+            # skip integration tests
+            if 'integration' in item.keywords:
+                pytest.skip('skipping integration test')
+        if item.config.getoption('--fast'):
+            # skip slow test
+            if 'slow' in item.keywords:
+                pytest.skip('skipping slow test')

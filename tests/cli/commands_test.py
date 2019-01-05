@@ -8,21 +8,25 @@ from golem.core import file_manager
 
 class TestRunCommand:
 
+    @pytest.mark.slow
     def test_golem_run_project_param_is_missing(self, project_session, capsys):
         commands.run_command()
         captured = capsys.readouterr()
         assert messages.RUN_USAGE_MSG in captured.out
 
+    @pytest.mark.slow
     def test_golem_run_project_does_not_exist(self, project_session):
         with pytest.raises(SystemExit) as excinfo:
             commands.run_command(project='incorrect')
         assert str(excinfo.value) == 'golem run: error: the project incorrect does not exist'
 
+    @pytest.mark.slow
     def test_golem_run_missing_test_query(self, project_session, capsys):
         commands.run_command(project=project_session.name)
         captured = capsys.readouterr()
         assert messages.RUN_USAGE_MSG in captured.out
 
+    @pytest.mark.slow
     def test_golem_run_suite(self, project_function, test_utils, caplog):
         project = project_function.name
         test_name = 'test_one'
@@ -39,6 +43,7 @@ class TestRunCommand:
         report = os.path.join(path, timestamp, 'execution_report.json')
         assert os.path.isfile(report)
 
+    @pytest.mark.slow
     def test_golem_run_suite_in_folder(self, project_function, test_utils, caplog):
         project = project_function.name
         test_name = 'test_one'
@@ -50,6 +55,7 @@ class TestRunCommand:
         assert records[0].message == 'Test execution started: {}'.format(test_name)
         assert records[4].message == 'Test Result: SUCCESS'
 
+    @pytest.mark.slow
     def test_golem_run_suite_py(self, project_function, test_utils, caplog):
         project = project_function.name
         test_name = 'test_one'
@@ -60,6 +66,7 @@ class TestRunCommand:
         assert records[0].message == 'Test execution started: {}'.format(test_name)
         assert records[4].message == 'Test Result: SUCCESS'
 
+    @pytest.mark.slow
     def test_golem_run_suite_py_in_folder(self, project_function, test_utils, caplog):
         project = project_function.name
         test_name = 'test_one'
@@ -70,6 +77,7 @@ class TestRunCommand:
         assert records[0].message == 'Test execution started: {}'.format(test_name)
         assert records[4].message == 'Test Result: SUCCESS'
 
+    @pytest.mark.slow
     @pytest.mark.skipif("os.name != 'nt'")
     def test_golem_run_suite_py_in_folder_windows_path(self, project_function, test_utils,
                                                        caplog):
@@ -83,6 +91,7 @@ class TestRunCommand:
         assert records[0].message == 'Test execution started: {}'.format(test_name)
         assert records[4].message == 'Test Result: SUCCESS'
 
+    @pytest.mark.slow
     def test_golem_run_test(self, project_function, test_utils, caplog):
         project = project_function.name
         test_name = 'test_one'
@@ -97,6 +106,7 @@ class TestRunCommand:
         # only one timestamp
         assert len(os.listdir(path)) == 1
 
+    @pytest.mark.slow
     def test_golem_run_test_py(self, project_function, test_utils, caplog):
         project = project_function.name
         test_name = 'test_one'
@@ -111,6 +121,7 @@ class TestRunCommand:
         # only one timestamp
         assert len(os.listdir(path)) == 1
 
+    @pytest.mark.slow
     def test_golem_run_test_in_folder(self, project_function, test_utils, caplog):
         project = project_function.name
         test_utils.create_test(project_function.testdir, project, ['folder'], 'test_one')
@@ -119,6 +130,7 @@ class TestRunCommand:
         assert records[0].message == 'Test execution started: folder.test_one'
         assert records[4].message == 'Test Result: SUCCESS'
 
+    @pytest.mark.slow
     def test_golem_run_test_py_in_folder(self, project_function, test_utils, caplog):
         project = project_function.name
         test_utils.create_test(project_function.testdir, project, ['folder'], 'test_one')
@@ -127,6 +139,7 @@ class TestRunCommand:
         assert records[0].message == 'Test execution started: folder.test_one'
         assert records[4].message == 'Test Result: SUCCESS'
 
+    @pytest.mark.slow
     @pytest.mark.skipif("os.name != 'nt'")
     def test_golem_run_test_py_in_folder_windows_path(self, project_function, test_utils,
                                                       caplog):
@@ -137,6 +150,7 @@ class TestRunCommand:
         assert records[0].message == 'Test execution started: folder.test_one'
         assert records[4].message == 'Test Result: SUCCESS'
 
+    @pytest.mark.slow
     def test_golem_run_directory(self, project_function, test_utils):
         project = project_function.name
         test_utils.create_test(project_function.testdir, project, [], 'test_one')
@@ -156,6 +170,7 @@ class TestRunCommand:
         assert 'foo.bar.test_four' in tests
         assert 'test_one' not in tests
 
+    @pytest.mark.slow
     def test_golem_run_directory_all_tests(self, project_function, test_utils):
         project = project_function.name
         test_utils.create_test(project_function.testdir, project, [], 'test_one')
@@ -173,6 +188,7 @@ class TestRunCommand:
         assert 'foo.test_two' in tests
         assert 'foo.bar.test_three' in tests
 
+    @pytest.mark.slow
     def test_golem_run_directory_no_tests_present(self, project_function):
         project = project_function.name
         with pytest.raises(SystemExit) as excinfo:
@@ -214,6 +230,7 @@ def teardown(data):
     pass
 """
 
+    @pytest.mark.slow
     def test_exit_code_one_on_test_failure_when_using_single_processing_capabilities(self, project_function, test_utils):
         project = project_function.name
         test_utils.create_test(project_function.testdir, project, [], 'test_one', content=self.content)
@@ -224,6 +241,7 @@ def teardown(data):
 
         assert wrapped_execution.value.code == 1
 
+    @pytest.mark.slow
     def test_exit_code_one_on_test_failure_when_using_multi_processing_capabilities(self, project_function, test_utils):
         project = project_function.name
         test_utils.create_test(project_function.testdir, project, [], 'test_one', content=self.content)

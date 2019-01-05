@@ -14,18 +14,21 @@ class TestGolemAdmin:
         ('golem-admin -h createdirectory', messages.ADMIN_USAGE_MSG)
     ]
 
+    @pytest.mark.slow
     @pytest.mark.parametrize('command,expected', run_commands,)
     def test_golem_admin_command_output(self, command, expected, test_utils):
         result = test_utils.run_command(command)
         assert result == expected
 
+    @pytest.mark.slow
     def test_createdirectory_whitout_args(self, test_utils):
         result = test_utils.run_command('golem-admin createdirectory')
         expected = ('usage: golem-admin createdirectory [-h] name\n'
                     'golem-admin createdirectory: error: the following '
                     'arguments are required: name')
         assert result == expected
-    
+
+    @pytest.mark.slow
     def test_createdirectory_already_exists(self, dir_function, test_utils):
         path = dir_function.path
         os.chdir(path)
@@ -37,6 +40,7 @@ class TestGolemAdmin:
                     'already exists'.format(name))
         assert result == expected
 
+    @pytest.mark.slow
     def test_createdirectory(self, dir_function, test_utils):
         name = 'testdir_test_002'
         cmd = 'golem-admin createdirectory {}'.format(name)
