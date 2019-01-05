@@ -24,7 +24,7 @@ def save_screenshot(reportdir, image_name, format='PNG', quality=None, width=Non
                                  ' screenshot format, size or quality')
         return
 
-    extension = '.png'
+    extension = 'png'
     resample_filter = Image.BOX  # for PNG
 
     # validate format
@@ -70,7 +70,7 @@ def save_screenshot(reportdir, image_name, format='PNG', quality=None, width=Non
 
     if format == 'JPEG':
         pil_image = pil_image.convert('RGB')
-        extension = '.jpg'
+        extension = 'jpg'
         resample_filter = Image.BICUBIC
 
     if any([width, height, resize]):
@@ -91,11 +91,15 @@ def save_screenshot(reportdir, image_name, format='PNG', quality=None, width=Non
             new_height = round(pil_image.size[1] * resize / 100)
         pil_image = pil_image.resize((new_width, new_height), resample=resample_filter)
 
-    path = os.path.join(reportdir, image_name + extension)
+    screenshot_filename = '{}.{}'.format(image_name, extension)
+    screenshot_path = os.path.join(reportdir, screenshot_filename)
     if format == 'PNG':
-        pil_image.save(path, format=format, optimize=True)
+        pil_image.save(screenshot_path, format=format, optimize=True)
     elif format == 'JPEG':
         if quality is None:
-            pil_image.save(path, format=format, optimize=True)
+            pil_image.save(screenshot_path, format=format, optimize=True)
         else:
-            pil_image.save(path, format=format, optimize=True, quality=quality)
+            pil_image.save(screenshot_path, format=format, optimize=True,
+                           quality=quality)
+
+    return screenshot_filename

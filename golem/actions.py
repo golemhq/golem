@@ -99,11 +99,12 @@ def _capture_screenshot(image_name):
     """
     if not execution.report_directory:
         execution.logger.debug('cannot take screenshot, report directory does not exist')
-        return
+        return None
 
     if not execution.settings['screenshots']:
-        path = os.path.join(execution.report_directory, image_name + '.png')
-        get_browser().get_screenshot_as_file(path)
+        screenshot_filename = '{}.png'.format(image_name)
+        screenshot_path = os.path.join(execution.report_directory, screenshot_filename)
+        get_browser().get_screenshot_as_file(screenshot_path)
     else:
         screenshot_settings = execution.settings['screenshots']
         format = screenshot_settings.get('format', 'PNG').upper()
@@ -113,8 +114,10 @@ def _capture_screenshot(image_name):
         width = screenshot_settings.get('width', None)
         height = screenshot_settings.get('height', None)
         resize = screenshot_settings.get('resize', None)
-        report_utils.save_screenshot(execution.report_directory, image_name, format,
-                                     quality, width, height, resize)
+        screenshot_filename = report_utils.save_screenshot(execution.report_directory,
+                                                           image_name, format, quality,
+                                                           width, height, resize)
+    return screenshot_filename
 
 
 def _generate_screenshot_name(message):
@@ -148,8 +151,8 @@ def _screenshot_on_condition(condition):
         if condition and not last_screenshot:
             last_step_message = last_step['message']
             screenshot_name = _generate_screenshot_name(last_step_message)
-            _capture_screenshot(screenshot_name)
-            last_step['screenshot'] = screenshot_name
+            screenshot_filename = _capture_screenshot(screenshot_name)
+            last_step['screenshot'] = screenshot_filename
     else:
         raise Exception('There is no step to attach the screenshot')
 
@@ -1102,6 +1105,8 @@ def error(message, description=''):
     _add_step('ERROR', log_step=False)
     _add_error(message, description)
     _append_error(message, description)
+    if execution.browser:
+        _screenshot_on_error()
 
 
 def execute_javascript(script, *args):
@@ -1806,9 +1811,9 @@ def take_screenshot(message='Screenshot'):
     """
     _add_step(message)
     screenshot_name = _generate_screenshot_name(message)
-    _capture_screenshot(screenshot_name)
+    screenshot_filename = _capture_screenshot(screenshot_name)
     last_step = execution.steps[-1]
-    last_step['screenshot'] = screenshot_name
+    last_step['screenshot'] = screenshot_filename
 
 
 def uncheck_element(checkbox):
