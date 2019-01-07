@@ -150,26 +150,27 @@ def get_execution_data(execution_directory=None, workspace=None,
                        project=None, suite=None, execution=None):
     """Retrieve the data of all the tests of a suite execution.
     
-    From the execution_report.json if it exists, otherwise it parses
+    From the report.json if it exists, otherwise it parses
     the tests one by one.
     
-    The `execution_report.json` should be generated when the suite
+    The `report.json` should be generated when the suite
     execution ends.
     """
     has_finished = False
-    if execution_directory:
-        report_path = os.path.join(execution_directory, 'execution_report.json')
-    else:
-        report_path = os.path.join(workspace, 'projects', project,
-                                   'reports', suite, execution,
-                                   'execution_report.json')
-    if os.path.exists(report_path):
-        # get execution_report.json data
-        with open(report_path) as json_file:
-            data = json.load(json_file)
+    if execution_directory is None:
+        execution_directory = os.path.join(workspace, 'projects', project, 'reports',
+                                   suite, execution)
+    if os.path.isfile(os.path.join(execution_directory, 'report.json')):
+        with open(os.path.join(execution_directory, 'report.json')) as f:
+            data = json.load(f)
+            has_finished = True
+    elif os.path.isfile(os.path.join(execution_directory, 'execution_report.json')):
+        # backward compatibility
+        # TODO remove
+        with open(os.path.join(execution_directory, 'execution_report.json')) as f:
+            data = json.load(f)
             has_finished = True
     else:
-        # execution_report.json does not exist
         data = _parse_execution_data(execution_directory, workspace,
                                      project, suite, execution)
     data['has_finished'] = has_finished
@@ -287,9 +288,26 @@ def generate_execution_report(execution_directory, elapsed_time):
     each time it is requested by the reports module."""
     data = _parse_execution_data(execution_directory=execution_directory)
     data['net_elapsed_time'] = elapsed_time
-    report_path = os.path.join(execution_directory, 'execution_report.json')
+    report_path = os.path.join(execution_directory, 'report.json')
     with open(report_path, 'w', encoding='utf-8') as json_file:
         json.dump(data, json_file, indent=4)
+    return data
+
+
+def save_execution_json_report(report_data, reportdir, report_name='report'):
+    """Save execution report data to the specified reportdir and name"""
+    report_path = os.path.join(reportdir, '{}.json'.format(report_name))
+    if not os.path.exists(os.path.dirname(report_path)):
+        os.makedirs(os.path.dirname(report_path), exist_ok=True)
+    try:
+        with open(report_path, 'w') as f:
+            json.dump(report_data, f, indent=4)
+    except IOError as e:
+        if e.errno == errno.EACCES:
+            print('ERROR: cannot write to {}, PermissionError (Errno 13)'
+                  .format(report_path))
+        else:
+            print('ERROR: There was an error writing to {}'.format(report_path))
 
 
 def generate_junit_report(execution_directory, suite_name, timestamp,

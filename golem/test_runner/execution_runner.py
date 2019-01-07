@@ -76,6 +76,7 @@ class ExecutionRunner:
         self.reports = reports
         self.report_folder = report_folder
         self.report_name = report_name
+        self.report = {}
         self.tests = []
         self.is_suite = False
         self.suite_name = None
@@ -342,17 +343,21 @@ class ExecutionRunner:
                 print('ERROR: suite before function failed')
                 print(traceback.format_exc())
 
-        # generate execution_result.json
+        # generate report.json
         elapsed_time = round(time.time() - start_time, 2)
-        report_parser.generate_execution_report(self.execution.reportdir, elapsed_time)
+        self.report = report_parser.generate_execution_report(self.execution.reportdir,
+                                                              elapsed_time)
 
         # generate requested reports
         if self.is_suite:
             report_name = self.report_name or 'report'
+            report_folder = self.report_folder or self.execution.reportdir
             if 'junit' in self.reports:
                 report_parser.generate_junit_report(self.execution.reportdir,
                                                     self.suite_name, self.timestamp,
                                                     self.report_folder, report_name)
+            if 'json' in self.reports and (self.report_folder or self.report_name):
+                report_parser.save_execution_json_report(self.report, report_folder, report_name)
             if 'html' in self.reports:
                 gui_utils.generate_html_report(self.project, self.suite_name,
                                                self.timestamp, self.report_folder,

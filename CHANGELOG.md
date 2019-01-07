@@ -3,6 +3,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Report filename from 'execution_report.json' to 'report.json'
+
 ## [0.6.2] - 2018-12-05
 
 ### Added

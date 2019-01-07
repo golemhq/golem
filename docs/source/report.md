@@ -9,12 +9,14 @@ Different reports can be generated after the execution of a suite.
 
 The options are:
 
-* junit
 * html 
 * html-no-images
+* json
+* junit
 
+Example:
 ```bash
-golem run project suite -r junit html html-no-images
+golem run project suite -r junit html html-no-images json
 ```
 
 ### Report Location
@@ -37,7 +39,12 @@ The name of the reports can be modified with the --report-name argument:
 golem run project suite -r html --report-name report_name
 ```
 
-## Modify Screenshot Format, Size, and Quality 
+### JSON Report
+
+The JSON report is always generated in the default location with the name 'report.json'.
+It can be generated in a different location or with a different name by specifying the options explained above. 
+
+## Modify Screenshot Format, Size, and Quality
 
 The size and compression of the screenshots can be modified to reduce the size on disk.
 

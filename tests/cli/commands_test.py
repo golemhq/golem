@@ -40,7 +40,7 @@ class TestRunCommand:
         path = os.path.join(project_function.path, 'reports', 'suite_one')
         assert os.path.isdir(path)
         timestamp = os.listdir(path)[0]
-        report = os.path.join(path, timestamp, 'execution_report.json')
+        report = os.path.join(path, timestamp, 'report.json')
         assert os.path.isfile(report)
 
     @pytest.mark.slow
