@@ -379,8 +379,8 @@ def report_execution_static_html(project, suite, execution):
 @report_permissions_required
 def report_execution_static_html_download(project, suite, execution):
     html_report_string = gui_utils.get_or_generate_html_report(project, suite, execution)
-    headers = {"Content-disposition": "attachment; filename={}".format('report.html')}
-    return Response(html_report_string, mimetype="text/html", headers=headers)
+    headers = {'Content-disposition': 'attachment; filename={}'.format('report.html')}
+    return Response(html_report_string, mimetype='text/html', headers=headers)
 
 
 # REPORT EXECUTION VIEW STATIC HTML NO IMAGES
@@ -402,8 +402,8 @@ def report_execution_static_html_no_images(project, suite, execution):
 def report_execution_static_html_no_images_download(project, suite, execution):
     html_report_string = gui_utils.get_or_generate_html_report(project, suite, execution,
                                                                no_images=True)
-    headers = {"Content-disposition": "attachment; filename={}".format('report-no-images.html')}
-    return Response(html_report_string, mimetype="text/html", headers=headers)
+    headers = {'Content-disposition': 'attachment; filename={}'.format('report-no-images.html')}
+    return Response(html_report_string, mimetype='text/html', headers=headers)
 
 
 # REPORT EXECUTION VIEW JUNIT
@@ -423,8 +423,32 @@ def report_execution_junit(project, suite, execution):
 @report_permissions_required
 def report_execution_junit_download(project, suite, execution):
     junit_report_string = report_parser.get_or_generate_junit_report(project, suite, execution)
-    headers = {"Content-disposition": "attachment; filename={}".format('report.xml')}
+    headers = {'Content-disposition': 'attachment; filename={}'.format('report.xml')}
     return Response(junit_report_string, mimetype='text/xml', headers=headers)
+
+
+# REPORT EXECUTION VIEW JSON
+@app.route("/report/project/<project>/suite/<suite>/<execution>/json/")
+@login_required
+@project_exists
+@report_permissions_required
+def report_execution_json(project, suite, execution):
+    json_report = report_parser.get_execution_data(workspace=root_path, project=project,
+                                                   suite=suite, execution=execution)
+    return jsonify(json_report)
+
+
+# REPORT EXECUTION VIEW JSON DOWNLOAD
+@app.route("/report/project/<project>/suite/<suite>/<execution>/json/download/")
+@login_required
+@project_exists
+@report_permissions_required
+def report_execution_json_download(project, suite, execution):
+    report_data = report_parser.get_execution_data(workspace=root_path, project=project,
+                                                   suite=suite, execution=execution)
+    json_report = json.dumps(report_data, indent=4)
+    headers = {'Content-disposition': 'attachment; filename={}'.format('report.json')}
+    return Response(json_report, mimetype='application/json', headers=headers)
 
 
 # REPORT TEST VIEW

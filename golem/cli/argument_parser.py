@@ -7,7 +7,7 @@ def get_parser():
     subparsers = parser.add_subparsers(dest='command')
 
     # run
-    report_choices = ['junit', 'html', 'html-no-images']
+    report_choices = ['junit', 'html', 'html-no-images', 'json']
     parser_run = subparsers.add_parser('run', add_help=False)
     parser_run.add_argument('project', nargs='?', default='')
     parser_run.add_argument('test_query', nargs='?', default='')
