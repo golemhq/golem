@@ -160,11 +160,11 @@ def createuser_command(username, password, is_admin=False,
 
 
 def createdirectory_command(dir_name):
-    """Generate a new 'golem' directory"""
-    if os.path.exists(dir_name):
+    """Create a new Golem test directory"""
+    abspath = os.path.abspath(dir_name)
+    if os.path.exists(abspath) and os.listdir(abspath):
         msg = ('golem-admin createdirectory: error: the directory {} '
-               'already exists'.format(dir_name))
+               'is not empty'.format(abspath))
         sys.exit(msg)
     else:
-        destination = os.path.join(os.getcwd(), dir_name)
-        utils.create_test_dir(destination)
+        utils.create_test_dir(abspath)

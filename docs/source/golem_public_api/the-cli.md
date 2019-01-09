@@ -11,6 +11,7 @@ The list of available Golem CLI commands:
 **golem-admin createdirectory \<name\>**
 
 Used to generate a new test directory.
+Name must be a relative or absolute path for the new test directory. Use '.' to use CWD.
 
 
 ## golem

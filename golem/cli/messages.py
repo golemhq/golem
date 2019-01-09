@@ -165,4 +165,8 @@ Usage: golem-admin
 
   Create a new directory with the structure and files
   required for golem projects.
+  
+  positional arguments:
+    directory-name      relative or absolute path for the
+                        new test directory. Use '.' to use cwd
 """
