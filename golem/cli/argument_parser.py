@@ -24,6 +24,7 @@ def get_parser():
     parser_run.add_argument('--report-name', action='store', nargs='?', type=str)
     parser_run.add_argument('--timestamp', action='store', nargs='?', type=str)
     parser_run.add_argument('-h', '--help', action='store_true')
+    parser_run.add_argument('-tags', '--tags', action='store', nargs='*', default=[], type=str)
 
     # gui
     parser_gui = subparsers.add_parser('gui', add_help=False)

@@ -14,6 +14,7 @@ from golem.core import (test_execution,
                         settings_manager,
                         secrets_manager)
 from golem.core import suite as suite_module
+from golem.core import tags_manager
 from golem.gui import gui_utils, report_parser
 from golem.test_runner.multiprocess_executor import multiprocess_executor
 from golem.test_runner.test_runner import run_test
@@ -66,7 +67,7 @@ class ExecutionRunner:
     """
 
     def __init__(self, browsers=None, processes=1, environments=None, interactive=False,
-                 timestamp=None, reports=None, report_folder=None, report_name=None):
+                 timestamp=None, reports=None, report_folder=None, report_name=None, tags=None):
         if reports is None:
             reports = []
         self.project = None
@@ -77,6 +78,7 @@ class ExecutionRunner:
         self.reports = reports
         self.report_folder = report_folder
         self.report_name = report_name
+        self.tags = tags
         self.report = {}
         self.tests = []
         self.is_suite = False
@@ -151,6 +153,11 @@ class ExecutionRunner:
         testdir = test_execution.root_path
         envs_data = environment_manager.get_environment_data(testdir, self.project)
         secrets = secrets_manager.get_secrets(testdir, self.project)
+
+        # Filter out test cases which do not contain a matching tag
+        if len(self.tags) > 0:
+            self.tests = tags_manager.filter_tests_by_tags(testdir, self.project, self.tests, self.tags)
+
         for test in self.tests:
             data_sets = test_data.get_test_data(testdir, self.project, test)
             for data_set in data_sets:
