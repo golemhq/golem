@@ -18,7 +18,7 @@ Name must be a relative or absolute path for the new test directory. Use '.' to 
 
 ### run
 
-See [Running Tests](../running-tests.html)
+See [Running Tests](running-tests.html)
 
 ### gui
 
@@ -48,7 +48,8 @@ Creates a new suite inside the given project.
 
 **golem createuser \<username\> \<password\> [-a|--admin -p|--projects -r|--reports]**
 
-Add a new user, projects is a list of projects that the user can access and reports determines which project reports the user can see. In both cases use '*' to give the user access to all projects
+Add a new user, projects is a list of projects that the user can access and reports determines which project reports the user can see.
+In both cases use '*' to give the user access to all projects
 
 ## webdriver-manager
 

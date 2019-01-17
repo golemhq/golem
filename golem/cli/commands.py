@@ -159,12 +159,18 @@ def createuser_command(username, password, is_admin=False,
         print('User {} was created successfully'.format(username))
 
 
-def createdirectory_command(dir_name):
-    """Create a new Golem test directory"""
+def createdirectory_command(dir_name, no_confirm=False):
+    """Create a new Golem test directory
+
+    dir_name must be an absolute or relative path.
+    If the path exists and is not empty and no_confirm
+    is False the user will be prompted to continue.
+    """
     abspath = os.path.abspath(dir_name)
     if os.path.exists(abspath) and os.listdir(abspath):
-        msg = ('golem-admin createdirectory: error: the directory {} '
-               'is not empty'.format(abspath))
-        sys.exit(msg)
-    else:
-        utils.create_test_dir(abspath)
+        # directory is not empty
+        if not no_confirm:
+            msg = 'Directory {} is not empty, continue? [Y/n]'.format(dir_name)
+            if not utils.prompt_yes_no(msg):
+                return
+    utils.create_test_dir(abspath)

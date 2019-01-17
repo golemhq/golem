@@ -23,7 +23,7 @@ class TestGolemAdmin:
     @pytest.mark.slow
     def test_createdirectory_whitout_args(self, test_utils):
         result = test_utils.run_command('golem-admin createdirectory')
-        expected = ('usage: golem-admin createdirectory [-h] name\n'
+        expected = ('usage: golem-admin createdirectory [-y] [-h] name\n'
                     'golem-admin createdirectory: error: the following '
                     'arguments are required: name')
         assert result == expected
@@ -84,14 +84,18 @@ class TestGolemAdmin:
 
     @pytest.mark.slow
     def test_createdirectory_not_empty(self, dir_function, test_utils):
-        """A test directory cannot be created if the destination is not empty"""
+        """A test directory can be created if the destination is not empty
+        by confirming the operation
+        """
         basedir = dir_function.path
         name = 'testdir_test_005'
         full_path = os.path.join(basedir, name)
         os.mkdir(full_path)
         open(os.path.join(full_path, 'text-file.txt'), 'w').close()
-        cmd = 'golem-admin createdirectory {}'.format(name)
+        cmd = 'golem-admin createdirectory {} -y'.format(name)
         result = test_utils.run_command(cmd)
-        expected = ('golem-admin createdirectory: error: the directory {} '
-                    'is not empty'.format(full_path))
+        expected = ('New golem test directory created at {}\n'
+                    'Use credentials to access the GUI module:\n'
+                    'user: admin\n'
+                    'password: admin'.format(full_path))
         assert result == expected

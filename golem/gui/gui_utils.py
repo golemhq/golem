@@ -1,5 +1,6 @@
 """Helper functions to deal with Golem GUI module application."""
 import os
+import sys
 import errno
 import subprocess
 import inspect
@@ -12,14 +13,13 @@ import golem.actions
 from golem.core import utils, test_execution
 from golem.gui import report_parser
 
-import xml.etree.ElementTree as ET
-from xml.dom import minidom
-
 
 def run_test_case(project, test_case_name, browsers=None, environments=None, processes=1):
     """Run a test case. This is used when running tests from the GUI"""
+    script_name = sys.argv[0]
     timestamp = utils.get_timestamp()
-    param_list = ['golem', 'run', project, test_case_name, '--timestamp', timestamp]
+    param_list = [script_name, 'run', project, test_case_name, '--timestamp', timestamp]
+
     if browsers:
         param_list.append('--browsers')
         for browser in browsers:
@@ -38,9 +38,9 @@ def run_test_case(project, test_case_name, browsers=None, environments=None, pro
 
 def run_suite(project, suite_name):
     """Run a suite. This is used when running suites from the GUI"""
+    script_name = sys.argv[0]
     timestamp = utils.get_timestamp()
-    subprocess.Popen(['golem', 'run', project, suite_name,
-                      '--timestamp', timestamp])
+    subprocess.Popen([script_name, 'run', project, suite_name, '--timestamp', timestamp])
     return timestamp
 
 

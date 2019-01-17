@@ -12,6 +12,6 @@ def main():
         print(messages.ADMIN_USAGE_MSG)
     elif args.command:
         if args.command == 'createdirectory':
-            commands.createdirectory_command(args.name)
+            commands.createdirectory_command(args.name, args.no_confirm)
     else:
         print(messages.ADMIN_USAGE_MSG)

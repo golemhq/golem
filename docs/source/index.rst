@@ -54,12 +54,10 @@ Contents
    report
    settings
    golem-test-framework
-   Interactive-mode
-   golem_public_api/webdriver-class
-   golem_public_api/webelement-class
-   golem_public_api/golem-expected-conditions
-   golem_public_api/the-cli
-
+   interactive-mode
+   command-line-interface
+   golem_public_api/index
+   guides/index
 
 .. Indices and tables
 .. ==================

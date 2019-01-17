@@ -54,8 +54,7 @@ def get_parser():
     parser_createuser = subparsers.add_parser('createuser', add_help=False)
     parser_createuser.add_argument('username')
     parser_createuser.add_argument('password')
-    parser_createuser.add_argument('-a', '--admin', action='store_true',
-                                   default=False)
+    parser_createuser.add_argument('-a', '--admin', action='store_true', default=False)
     parser_createuser.add_argument('-p', '--projects', nargs='+', default=[])
     parser_createuser.add_argument('-r', '--reports', nargs='+', default=[])
     parser_createuser.add_argument('-h', '--help', action='store_true')
@@ -69,9 +68,10 @@ def get_admin_parser():
     subparsers = parser.add_subparsers(dest='command')
     
     # createdirectory
-    parser_createdirectory = subparsers.add_parser('createdirectory',
-                                                   add_help=False)
+    parser_createdirectory = subparsers.add_parser('createdirectory', add_help=False)
     parser_createdirectory.add_argument('name')
+    parser_createdirectory.add_argument('-y', '--yes', action='store_true',
+                                        default=False, dest='no_confirm')
     parser_createdirectory.add_argument('-h', '--help', action='store_true')
     
     return parser
