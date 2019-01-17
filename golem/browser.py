@@ -98,7 +98,7 @@ def open_browser(browser_id=None):
                                        desired_capabilities=DesiredCapabilities.CHROME)
     # Chrome remote headless
     elif browser_definition['name'] == 'chrome-remote-headless':
-        with validate_remote_url(settings) as remote_url:
+        with validate_remote_url(settings['remote_url']) as remote_url:
             chrome_options = webdriver.ChromeOptions()
             chrome_options.add_argument('headless')
             desired_capabilities = chrome_options.to_capabilities()
