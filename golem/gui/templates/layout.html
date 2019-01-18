@@ -29,95 +29,99 @@
             <div class="sidebar-header">
                 <a href="/"><h3>Golem</h3><strong>G</strong></a>
             </div>
-        <ul class="list-unstyled components">
-            {% if project%}
-            <li>
-                <a href="/project/{{project}}/suites/">
-                    <i class="glyphicon glyphicon-tasks"></i>
-                    Suites
-                </a>
-            </li>
-            <li>
-                <a href="/project/{{project}}/tests/">
-                    <i class="fa fa-file-code-o" aria-hidden="true"></i>
-                    Tests
-                </a>
-            </li>
-            <li>
-                <a href="/project/{{project}}/pages/">
-                    <i class="fa fa-book" aria-hidden="true"></i>
-                    Pages
-                </a>
-            </li>
-            <li>
-                <a href="/report/project/{{project}}/">
-                    <i class="fa fa-bar-chart" aria-hidden="true"></i>
-                    Reports
-                </a>
-            </li>
-            <li>
-                <a href="/project/{{project}}/settings/">
-                    <i class="fa fa-cogs" aria-hidden="true"></i>
-                    Settings
-                </a>
-            </li>
-            <li>
-                <a href="/project/{{project}}/environments/">
-                    <i class="fa fa-sitemap" aria-hidden="true"></i>
-                    Environments
-                </a>
-            </li>
-            {% else %}
-            <li>
-                <a href="/report/">
-                    <i class="fa fa-bar-chart" aria-hidden="true"></i>
-                    Reports
-                </a>
-            </li>
-            <li>
-                <a href="/settings/">
-                    <i class="fa fa-cogs" aria-hidden="true"></i>
-                    Settings
-                </a>
-            </li>
-            {% endif %}
-        </ul>
+            <ul class="list-unstyled components">
+                {% if project%}
+                <li>
+                    <a href="/project/{{project}}/suites/">
+                        <i class="glyphicon glyphicon-tasks"></i>
+                        Suites
+                    </a>
+                </li>
+                <li>
+                    <a href="/project/{{project}}/tests/">
+                        <i class="fa fa-file-code-o" aria-hidden="true"></i>
+                        Tests
+                    </a>
+                </li>
+                <li>
+                    <a href="/project/{{project}}/pages/">
+                        <i class="fa fa-book" aria-hidden="true"></i>
+                        Pages
+                    </a>
+                </li>
+                <li>
+                    <a href="/report/project/{{project}}/">
+                        <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                        Reports
+                    </a>
+                </li>
+                <li>
+                    <a href="/project/{{project}}/settings/">
+                        <i class="fa fa-cogs" aria-hidden="true"></i>
+                        Settings
+                    </a>
+                </li>
+                <li>
+                    <a href="/project/{{project}}/environments/">
+                        <i class="fa fa-sitemap" aria-hidden="true"></i>
+                        Environments
+                    </a>
+                </li>
+                {% else %}
+                <li>
+                    <a href="/report/">
+                        <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                        Reports
+                    </a>
+                </li>
+                <li>
+                    <a href="/settings/">
+                        <i class="fa fa-cogs" aria-hidden="true"></i>
+                        Settings
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
 
-        <ul class="list-unstyled components">
-            {% if g.user.is_authenticated %}
-            <li>
-                <a href="#pageSubmenu" id="userMenu" data-toggle="collapse" aria-expanded="false">
-                    <i class="fa fa-user-circle-o" aria-hidden="true"></i>
-                    {{ g.user.username }}
-                </a>
-                <ul class="collapse list-unstyled" id="pageSubmenu">
-                    <li><a href="/logout/">Log out</a></li>
-                </ul>
-            </li>
-            {% else %}
-            <li>
-                <a href="/login/">
-                    <i class="glyphicon glyphicon-send"></i>
-                    Log in
-                </a>
-            </li>
-            {% endif %}
-        </ul>
-
-        <ul class="list-unstyled">
-            <li>
-                <a href="#" id="sidebarCollapse" class="collapse-sidebar"><i class="glyphicon" aria-hidden="true"></i></a>
-            </li>
-        </ul>
-    </nav>
-
-    <!-- Page Content Holder -->
-    <div id="content" class="container-fluid">
-        {% block content %}
-        {% endblock %}
+            <ul class="list-unstyled components">
+                {% if g.user.is_authenticated %}
+                <li>
+                    <a href="#pageSubmenu" id="userMenu" data-toggle="collapse" aria-expanded="false">
+                        <i class="fa fa-user-circle-o" aria-hidden="true"></i>
+                        {{ g.user.username }}
+                    </a>
+                    <ul class="collapse list-unstyled" id="pageSubmenu">
+                        <li><a href="/logout/">Log out</a></li>
+                    </ul>
+                </li>
+                {% else %}
+                <li>
+                    <a href="/login/">
+                        <i class="glyphicon glyphicon-send"></i>
+                        Log in
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+            <ul class="list-unstyled">
+                <li>
+                    <a href="#" id="sidebarCollapse" class="collapse-sidebar"><i class="glyphicon" aria-hidden="true"></i></a>
+                </li>
+            </ul>
+            <div id="sidebarVersion">
+                <span>{{config.GOLEM_VERSION}}</span>
+                <span>-</span>
+                <a href="https://github.com/golemhq/golem" target="_blank"><i class="fa fa-github"></i></a>
+                <span>-</span>
+                <a href="https://golem-framework.readthedocs.io/" target="_blank"><i class="fa fa-book"></i></a>
+            </div>
+        </nav>
+        <!-- Page Content Holder -->
+        <div id="content" class="container-fluid">
+            {% block content %}
+            {% endblock %}
+        </div>
     </div>
-</div>
-
 </div>
 
 <!-- Error Modal -->

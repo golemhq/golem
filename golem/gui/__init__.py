@@ -8,6 +8,7 @@ from flask import (abort, Flask, g, jsonify, redirect, render_template, request,
 from flask_login import (current_user, login_user, login_required,
                          LoginManager, logout_user)
 
+import golem
 from golem.core import (environment_manager, file_manager, lock, page_object,
                         settings_manager, test_case, test_execution, utils)
 from golem.core import test_data as test_data_module
@@ -27,6 +28,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 root_path = None
+
+app.config['GOLEM_VERSION'] = golem.__version__
 
 
 # LOGIN VIEW

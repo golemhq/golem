@@ -188,6 +188,34 @@ body .container-fluid {
     background: #6d7fcc;
 }
 
+#sidebarVersion {
+    padding: 10px;
+    position: absolute;
+    bottom: 0px;
+    text-align: center;
+    width: 100%;
+}
+
+#sidebarVersion a, #sidebarVersion span {
+    display: inline-block !important;
+    font-size: 1.2em;
+    padding: 0px !important;
+    opacity: 0.5
+}
+
+#sidebarVersion a i{
+    margin: 0px !important
+}
+
+#sidebarVersion a:hover {
+    color: inherit !important;
+    background: inherit !important;
+    opacity: 1
+}
+
+#wrapper.sidebar-collapsed #sidebarVersion {
+    display: none
+}
 
 /* ---------------------------------------------------
     Sidebar Mediaqueries
