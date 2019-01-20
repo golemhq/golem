@@ -1816,6 +1816,40 @@ def take_screenshot(message='Screenshot'):
     last_step['screenshot'] = screenshot_filename
 
 
+def timer_start(timer_name=''):
+    """Start a timer.
+    By default start a timer with empty name.
+    Use actions.timer_stop() to stop the timer.
+    Returns: the current time
+
+    Parameters:
+    timer_name (optional) : value
+    """
+    current_time = None
+    if timer_name in execution.timers:
+        execution.logger.debug('timer "{}" is already been started'.format(timer_name))
+    else:
+        execution.timers[timer_name] = time.time()
+    return current_time
+
+
+def timer_stop(timer_name=''):
+    """Stop a timer by its name.
+    By default stops a timer with empty name.
+    Returns: the elapsed time
+
+    Parameters:
+    timer_name (optional) : value
+    """
+    elapsed_time = None
+    if timer_name in execution.timers:
+        elapsed_time = round(time.time() - execution.timers[timer_name], 4)
+        execution.logger.debug('timer {} stopped: {}'.format(timer_name, elapsed_time))
+    else:
+        execution.logger.debug('timer {} has not been started'.format(timer_name))
+    return elapsed_time
+
+
 def uncheck_element(checkbox):
     """Uncheck a checkbox element
     If checkbox is already unchecked this is is ignored.

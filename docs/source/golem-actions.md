@@ -914,20 +914,6 @@ Wait for window/tab present by url
 
 ## General Actions
 
-### capture(message='')
-
-DEPRECATED, use take_screenshot instead.
-Take a screenshot of the browser, the message is optional
-
-### set_browser_capability(capability_key, capability_value)
-
-Set a browser capability.
-This must be called before the browser is started.
-
-### take_screenshot(message='')
-
-Take a screenshot. *message* will be used for the filename.
-
 ### assert_contains(element, value)
 
 DEPRECATED. Assert that the element contains the value
@@ -943,6 +929,11 @@ DEPRECATED. Assert that the condition is false
 ### assert_true(condition)
 
 DEPRECATED. Assert that the condition is true
+
+### capture(message='')
+
+DEPRECATED, use take_screenshot instead.
+Take a screenshot of the browser, the message is optional
 
 ### debug()
 
@@ -983,6 +974,11 @@ Generate a random string. Options:
 
 For example: random('cccddd') => 'aeg147'
 
+### set_browser_capability(capability_key, capability_value)
+
+Set a browser capability.
+This must be called before the browser is started.
+
 ### set_search_timeout(timeout)
 
 Set the search timeout value. Timeout must be either int or float.
@@ -1004,6 +1000,19 @@ Store a value in data object.
 ### store_secret(key, value)
 
 Store a value in the secrets object.
+
+### take_screenshot(message='')
+
+Take a screenshot. *message* will be used for the filename.
+
+### timer_start(timer_name='')
+
+Start a timer. By default start a timer with empty name. Use actions.timer_stop() to stop the timer.
+Returns: the current time.
+
+### timer_stop(timer_name='')
+
+Stop a timer by its name. By default stops a timer with empty name. Returns: the elapsed time.
 
 ### wait(seconds)
 

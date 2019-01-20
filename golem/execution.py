@@ -15,6 +15,7 @@ project = None
 workspace = None
 report_directory = None
 logger = None
+timers = {}
 
 
 def _reset():
@@ -31,6 +32,7 @@ def _reset():
     global workspace
     global report_directory
     global logger
+    global timers
     browser = None
     browser_definition = None
     browsers = {}
@@ -42,3 +44,4 @@ def _reset():
     workspace = None
     report_directory = None
     logger = None
+    timers = {}

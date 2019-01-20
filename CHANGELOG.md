@@ -3,6 +3,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Actions: timer_start, timer_stop
+
 ### Changed
 
 - Report filename from 'execution_report.json' to 'report.json'
