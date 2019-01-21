@@ -1,10 +1,16 @@
 # Changelog
 
-
-## [Unreleased]
+## [0.7.0] - 2019-01-21
 
 ### Added
 
+- Generate JUnit (XML) report :: Daniel Maddern
+- Generate JUnit and HTML reports after execution
+    * report options: 'junit', 'json', 'html', 'html-no-images'
+- Specify name and location for the generated reports
+- Modify screenshot format, size and compression
+- Exit with status code = 1 when execution has errors/failures :: r-roos
+- Document Golem standalone generation using PyInstaller
 - Actions: timer_start, timer_stop
 
 ### Changed
