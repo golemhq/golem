@@ -228,7 +228,6 @@ const Main = new function(){
 
         this.getResultColor = function(result){
             if(result in Main.ResultsEnum){
-
                 return Main.ResultsEnum[result].color
             }
             else{
@@ -475,9 +474,8 @@ const Main = new function(){
                 let tab = $(`<div role="tabpanel" class="tab-pane test-run-tab-content" id="${setName}" set-name="${setName}">
                                 <div class="test-result-logs"></div><div class="test-results"></div>
                              </div>`);
-                let tabNav = $(`<li role="presentation" class="test-run-tab" set-name="${setName}"><a href="#${setName}" aria-controls="${setName}"
-                                    role="tab" data-toggle="tab">${setName} <i class="fa fa-cog fa-spin"></a></li>`);
-                    if(amountOfTabs == 0){
+                let tabNav = $(`<li role="presentation" class="test-run-tab" set-name="${setName}" running="true"><a href="#${setName}" aria-controls="${setName}" role="tab" data-toggle="tab">${setName} <i class="fa fa-cog fa-spin"></a></li>`);
+                if(amountOfTabs == 0){
                     tab.addClass('active');
                     tabNav.addClass('active');
                 }
@@ -548,9 +546,12 @@ const Main = new function(){
             // If this test set has finished
             if(values.report != null){
                 let tabNav = $(`.test-run-tab[set-name='${setName}']`);
-                tabNav.find('i').remove();
-                tabNav.find('a').append(Main.Utils.getResultIcon(values.report.result));
-                Main.TestRunner._loadSetReport(setName, values.report, timestamp);
+                if(tabNav.attr('running') == 'true'){
+                    tabNav.removeAttr('running');
+                    tabNav.find('i').remove();
+                    tabNav.find('a').append(Main.Utils.getResultIcon(values.report.result));
+                    Main.TestRunner._loadSetReport(setName, values.report, timestamp);
+                }
             }
         }
     }
