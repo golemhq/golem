@@ -48,7 +48,7 @@ class TestGolemRun:
         assert 'INFO Test Result: SUCCESS' in result
 
     @pytest.mark.slow
-    def test_golem_run_suite(self, project_session, test_utils):
+    def test_golem_run_suite_with_no_tests(self, project_session, test_utils):
         path = project_session.testdir
         project = project_session.name
         os.chdir(path)
@@ -57,7 +57,7 @@ class TestGolemRun:
         test_utils.run_command(command)
         command = 'golem run {} {}'.format(project, suite)
         result = test_utils.run_command(command)
-        assert 'No tests were found in suite suite2' in result
+        assert 'No tests were found for suite suite2' in result
 
     @pytest.mark.slow
     def test_golem_run_no_args(self, project_session, test_utils):
@@ -111,11 +111,13 @@ class TestGolemRun:
         """A fixture of a project with class scope with one suite with
         one test
         """
+        suite_name = 'suite1'
         test_utils.create_test(project_class.testdir, project_class.name,
                                parents=[], name='test1')
         test_utils.create_suite(project_class.testdir, project_class.name,
-                                parents=[], name='suite1', content=None,
+                                parents=[], name=suite_name, content=None,
                                 tests=['test1'])
+        project_class.suite_name = suite_name
         return project_class
 
     @pytest.mark.slow
@@ -125,11 +127,11 @@ class TestGolemRun:
         """
         project = _project_with_suite.name
         timestamp = '0.1.2.3.001'
-        cmd = ('golem run {} suite1 -r html html-no-images junit --timestamp {}'
-               .format(project, timestamp))
+        cmd = ('golem run {} {} -r html html-no-images junit --timestamp {}'
+               .format(project, _project_with_suite.suite_name, timestamp))
         test_utils.run_command(cmd)
         reportdir = os.path.join(_project_with_suite.testdir, 'projects', project,
-                                 'reports', 'suite1', timestamp)
+                                 'reports', _project_with_suite.suite_name, timestamp)
         assert os.path.isfile(os.path.join(reportdir, 'report.html'))
         assert os.path.isfile(os.path.join(reportdir, 'report-no-images.html'))
         assert os.path.isfile(os.path.join(reportdir, 'report.xml'))
@@ -142,8 +144,8 @@ class TestGolemRun:
         project = _project_with_suite.name
         timestamp = '0.1.2.3.002'
         reportdir = os.path.join(_project_with_suite.testdir, 'report-folder')
-        cmd = ('golem run {} suite1 -r html html-no-images junit json --report-folder {} '
-               '--timestamp {}'.format(project, reportdir, timestamp))
+        cmd = ('golem run {} {} -r html html-no-images junit json --report-folder {} '
+               '--timestamp {}'.format(project, _project_with_suite.suite_name,reportdir, timestamp))
         test_utils.run_command(cmd)
         assert os.path.isfile(os.path.join(reportdir, 'report.html'))
         assert os.path.isfile(os.path.join(reportdir, 'report-no-images.html'))
@@ -157,10 +159,10 @@ class TestGolemRun:
         project = _project_with_suite.name
         timestamp = '0.1.2.3.003'
         reportdir = os.path.join(_project_with_suite.testdir, 'projects', project,
-                                 'reports', 'suite1', timestamp)
+                                 'reports', _project_with_suite.suite_name, timestamp)
         report_name = 'foo'
-        cmd = ('golem run {} suite1 -r html html-no-images junit json --report-name {} '
-               '--timestamp {}'.format(project, report_name, timestamp))
+        cmd = ('golem run {} {} -r html html-no-images junit json --report-name {} '
+               '--timestamp {}'.format(project, _project_with_suite.suite_name, report_name, timestamp))
         test_utils.run_command(cmd)
         assert os.path.isfile(os.path.join(reportdir, 'foo.html'))
         assert os.path.isfile(os.path.join(reportdir, 'foo-no-images.html'))
@@ -175,15 +177,14 @@ class TestGolemRun:
         timestamp = '0.1.2.3.004'
         reportdir = os.path.join(_project_with_suite.testdir, 'report-folder')
         report_name = 'foo'
-        cmd = ('golem run {} suite1 -r html html-no-images junit json --report-folder {} '
+        cmd = ('golem run {} {} -r html html-no-images junit json --report-folder {} '
                '--report-name {} --timestamp {}'
-               .format(project, reportdir, report_name, timestamp))
+               .format(project, _project_with_suite.suite_name, reportdir, report_name, timestamp))
         test_utils.run_command(cmd)
         assert os.path.isfile(os.path.join(reportdir, 'foo.html'))
         assert os.path.isfile(os.path.join(reportdir, 'foo-no-images.html'))
         assert os.path.isfile(os.path.join(reportdir, 'foo.xml'))
         assert os.path.isfile(os.path.join(reportdir, 'foo.json'))
-
 
 
 class TestGolemCreateProject:

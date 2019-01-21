@@ -4,6 +4,7 @@ import traceback
 import time
 import multiprocessing
 from types import SimpleNamespace
+from collections import OrderedDict
 
 from golem.core import (test_execution,
                         utils,
@@ -165,6 +166,29 @@ class ExecutionRunner:
                         execution_list.append(testdef)
         return execution_list
 
+    def _print_number_of_tests_found(self):
+        """Print number of tests and test sets to console"""
+        test_number = len(self.tests)
+        set_number = len(self.execution.tests)
+        if test_number > 1 or set_number > 1:
+            msg = 'Tests found: {}'.format(test_number)
+            if test_number != set_number:
+                msg = '{} ({} sets)'.format(msg, set_number)
+            print(msg)
+
+    def _print_results(self):
+        result_string = ''
+        for result, number in OrderedDict(self.report['totals_by_result']).items():
+            result_string += ' {} {},'.format(number, result)
+        elapsed_time = self.report['net_elapsed_time']
+        if elapsed_time > 60:
+            in_elapsed_time = ' in {} minutes'.format(round(elapsed_time / 60, 2))
+        else:
+            in_elapsed_time = ' in {} seconds'.format(elapsed_time)
+        output = 'Result:{}{}'.format(result_string[:-1], in_elapsed_time)
+        print()
+        print(output)
+
     def run_test(self, test):
         """Run a single test.
         `test` can be a path to a Python file or an import path.
@@ -196,7 +220,7 @@ class ExecutionRunner:
         self.tests = suite_module.get_suite_test_cases(test_execution.root_path,
                                                        self.project, suite)
         if len(self.tests) == 0:
-            sys.exit('No tests were found in suite {}'.format(suite))
+            sys.exit('No tests were found for suite {}'.format(suite))
         suite_amount_workers = suite_module.get_suite_amount_of_workers(
             test_execution.root_path, self.project, suite)
         self.suite.processes = suite_amount_workers
@@ -298,6 +322,8 @@ class ExecutionRunner:
         # The result is a list that contains all the requested combinations
         self.execution.tests = self._define_execution_list()
 
+        self._print_number_of_tests_found()
+
         # for each test, create the test report directory
         # for example, in a suite 'suite1' with a 'test1':
         # reports/suite1/2017.07.02.19.22.20.001/test1/set_00001/
@@ -347,6 +373,9 @@ class ExecutionRunner:
         elapsed_time = round(time.time() - start_time, 2)
         self.report = report_parser.generate_execution_report(self.execution.reportdir,
                                                               elapsed_time)
+
+        if self.is_suite:
+            self._print_results()
 
         # generate requested reports
         if self.is_suite:

@@ -9,18 +9,7 @@ from golem.test_runner.test_runner import run_test
 
 
 def multiprocess_executor(project, execution_list, has_failed_tests, processes=1):
-    """Runs a list of tests in parallel using multiprocessing.
-
-    execution_list is a list tests containing
-      'name',
-      'data_set',
-      'browser',
-      'reportdir'
-    """
-    print('Executing:')
-    for test in execution_list:
-        print('{} in {} with the following data: {}'
-              .format(test.name, test.browser['name'], test.data_set))
+    """Runs a list of tests in parallel using multiprocessing"""
     pool = Pool(processes=processes, maxtasksperchild=1)
     results = []
     for test in execution_list:
