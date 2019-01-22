@@ -124,15 +124,6 @@ def create_test_dir(workspace):
     file_manager.create_directory(path_list=[workspace, 'drivers'],
                                   add_init=False)
 
-    golem_start_py_content = ("import os\n\n"
-                              "from golem.main import execute_from_command_line"
-                              "\n\n"
-                              "if __name__ == '__main__':\n"
-                              "    execute_from_command_line(os.getcwd())\n")
-    golem_start_py_path = os.path.join(workspace, 'golem_start.py')
-    with open(golem_start_py_path, 'a') as golem_start_py_file:
-        golem_start_py_file.write(golem_start_py_content)
-
     settings_manager.create_global_settings_file(workspace)
 
     users_path = os.path.join(workspace, 'users.json')
@@ -375,3 +366,15 @@ def get_valid_filename(s):
     """Receives a string and returns a valid filename"""
     s = str(s).strip().replace(' ', '_')
     return re.sub(r'(?u)[^-\w.]', '', s)
+
+
+def prompt_yes_no(question, default=True):
+    """Prompt the user through the console for yes or no"""
+    while True:
+        choice = input(question).lower()
+        if choice in ['yes', 'y']:
+            return True
+        elif choice in ['no', 'n']:
+            return False
+        elif not choice:
+            return default

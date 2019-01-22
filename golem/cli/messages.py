@@ -161,8 +161,32 @@ Usage: golem createuser <username> <password> [-a|--admin]
 ADMIN_USAGE_MSG = """
 Usage: golem-admin
 
-  golem-admin createdirectory <directory-name>
+  golem-admin createdirectory <directory-name> [-y|--yes]
 
   Create a new directory with the structure and files
   required for golem projects.
+  
+  positional arguments:
+    directory-name      relative or absolute path for the
+                        new test directory. Use '.' to use cwd.
+  
+  optional arguments:
+    -y, --yes           Do not ask for confirmation
+"""
+
+
+STANDALONE_USAGE = """
+Golem Standalone
+
+  Includes golem-admin, golem and webdriver-manager interfaces
+
+  Example:
+    golem golem-admin createdirectory <directory-name>
+    golem webdriver-manager update
+    golem run <project> <test>
+
+  Type the following for more help:
+    golem golem-admin -h
+    golem webdriver-manager -h
+    golem -h
 """

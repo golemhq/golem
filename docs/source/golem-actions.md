@@ -963,7 +963,7 @@ Get search timeout.
 
 Starts an interactive console at this point of the test.
 The test should be run with the '-i' flag, otherwise this action will be ignored.
-See [Interactive Mode](Interactive-mode.html) for more details.
+See [Interactive Mode](interactive-mode.html) for more details.
 
 ### random(args)
 
