@@ -155,6 +155,8 @@ class ExecutionRunner:
         secrets = secrets_manager.get_secrets(testdir, self.project)
 
         # Filter out test cases which do not contain a matching tag
+        if self.tags is None:
+            self.tags = []
         if len(self.tags) > 0:
             self.tests = tags_manager.filter_tests_by_tags(testdir, self.project, self.tests, self.tags)
 
