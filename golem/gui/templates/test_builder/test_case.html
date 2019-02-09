@@ -34,6 +34,13 @@
         <div class="col-sm-6 same-heigth-col gray-1-background" id="descriptionContainer" style="border: 1px solid #e0e0e0;  border-top-left-radius: 3px; ">
             <h4>Description</h4>
             <textarea id="description" class="form-control" rows="3">{{test_case_contents.description }}</textarea>
+            <br>
+            <div class="form-horizontal">
+                <div class="col-xs-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Tags</div>
+                <div class="col-xs-10" style="padding-right: 0px; padding-left: 0px;">
+                    <input type="text" class="form-control" id="tags" value="{{ ', '.join(test_case_contents.tags)}}">
+                </div>
+            </div>
         </div>
         <div class="col-sm-6 same-heigth-col gray-1-background" id="pageObjectsContainerContainer" style="border-top: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; border-top-right-radius: 3px;">
             <h4>Pages</h4>

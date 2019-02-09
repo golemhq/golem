@@ -10,7 +10,8 @@ from flask_login import (current_user, login_user, login_required,
 
 import golem
 from golem.core import (environment_manager, file_manager, lock, page_object,
-                        settings_manager, test_case, test_execution, utils)
+                        settings_manager, test_case, test_execution, utils,
+                        tags_manager)
 from golem.core import test_data as test_data_module
 from golem.core import suite as suite_module
 
@@ -785,8 +786,9 @@ def save_test_case():
         page_objects = request.json['pageObjects']
         test_data_content = request.json['testData']
         test_steps = request.json['testSteps']
-        test_case.save_test_case(root_path, project, test_name, description,
-                                 page_objects, test_steps, test_data_content)
+        tags = request.json['tags']
+        test_case.save_test_case(root_path, project, test_name, description, page_objects,
+                                 test_steps, test_data_content, tags)
         return json.dumps('ok')
 
 
@@ -1019,6 +1021,22 @@ def get_amount_of_tests():
 @login_required
 def get_default_browser():
     return jsonify(test_execution.settings['default_browser'])
+
+
+@app.route("/project/tests/tags/", methods=['POST'])
+@login_required
+def get_project_tests_tags():
+    project = request.form['project']
+    tags = tags_manager.get_all_project_tests_tags(test_execution.root_path, project)
+    return jsonify(tags)
+
+
+@app.route("/project/tags/", methods=['POST'])
+@login_required
+def get_project_tags():
+    project = request.form['project']
+    tags = tags_manager.get_project_unique_tags(test_execution.root_path, project)
+    return jsonify(tags)
 
 
 ############

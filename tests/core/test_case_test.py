@@ -347,7 +347,7 @@ class TestSaveTestCase:
         }]
         test_execution.settings['test_data'] = 'infile'
         test_case.save_test_case(testdir, project, 'a.b.test_one', description,
-                                 page_objects, test_steps, test_data)
+                                 page_objects, test_steps, test_data, [])
         path = os.path.join(project_function.path, 'tests', 'a', 'b', 'test_one.py')
         expected = (
             '\n'
@@ -391,7 +391,7 @@ class TestSaveTestCase:
         }]
         test_execution.settings['test_data'] = 'csv'
         test_case.save_test_case(testdir, project, 'a.b.test_one', description,
-                                 page_objects, test_steps, test_data)
+                                 page_objects, test_steps, test_data, [])
         path = os.path.join(project_function.path, 'tests', 'a', 'b', 'test_one.py')
         expected = (
             '\n'

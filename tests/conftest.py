@@ -204,6 +204,7 @@ class TestUtils:
                             os.sep.join(parents), name + '.py')
         with open(path, 'w+') as f:
             f.write(content)
+        return path
 
     @staticmethod
     def create_suite(testdir, project, parents, name, content=None, tests=None):
