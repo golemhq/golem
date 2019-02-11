@@ -2656,7 +2656,7 @@ def wait_for_element_not_exist(element, timeout=20):
     timeout (optional, default: 20) : value
     """
     execution.logger.warning('wait_for_element_not_exists is DEPRECATED, use wait_for_element_not_present')
-    wait_for_element_not_present()
+    wait_for_element_not_present(element, timeout)
 
 
 def wait_for_element_not_present(element, timeout=30):

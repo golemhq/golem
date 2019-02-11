@@ -203,7 +203,7 @@ def get_project_settings_as_string(workspace, project):
 
 def save_global_settings(workspace, global_settings):
     """Save global settings.
-    input settings must be to be the string content of file."""
+    input settings must be the string content of file."""
     settings_path = os.path.join(workspace, 'settings.json')
     if global_settings is not None:
         with open(settings_path, 'w') as global_settings_file:
@@ -212,7 +212,7 @@ def save_global_settings(workspace, global_settings):
 
 def save_project_settings(workspace, project, project_settings):
     """Save project settings.
-    input settings must be to be the string content of file."""
+    input settings must be the string content of file."""
     project_path = os.path.join(workspace, 'projects', project, 'settings.json')
     with open(project_path, 'w') as project_settings_file:
         project_settings_file.write(project_settings)
