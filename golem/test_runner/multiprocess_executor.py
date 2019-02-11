@@ -31,3 +31,4 @@ def multiprocess_executor(project, execution_list, has_failed_tests, processes=1
     except KeyboardInterrupt:
         print("KeyboardInterrupt detected, ending test run.")
         pool.terminate()
+        pool.join()
