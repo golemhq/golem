@@ -46,7 +46,7 @@ class TestSaveSuite:
             'env02'
         ]
         suite.save_suite(testdir, project, suite_name, test_cases,
-                         workers, browsers, environments)
+                         workers, browsers, environments, [])
         expected = (
             "\n"
             "\n"
@@ -82,7 +82,7 @@ class TestSaveSuite:
         workers = 2
         environments = []
         suite.save_suite(testdir, project, suite_name, test_cases,
-                         workers, browsers, environments)
+                         workers, browsers, environments, [])
         expected = (
             "\n"
             "\n"
@@ -166,7 +166,7 @@ class TestGetSuiteAmountOfWorkers:
         suite_name = 'test_suite_workers_001'
         suite.new_suite(testdir, project, [], suite_name)
         worker_amount = 2
-        suite.save_suite(testdir, project, suite_name, [], worker_amount, [], [])
+        suite.save_suite(testdir, project, suite_name, [], worker_amount, [], [], [])
         workers = suite.get_suite_amount_of_workers(testdir, project, suite_name)
         assert workers == worker_amount
 
@@ -179,7 +179,7 @@ class TestGetSuiteEnvironments:
         suite_name = 'test_suite_002'
         suite.new_suite(testdir, project, [], suite_name)
         environments = ['env1', 'env2']
-        suite.save_suite(testdir, project, suite_name, [], 1, [], environments)
+        suite.save_suite(testdir, project, suite_name, [], 1, [], environments, [])
         result = suite.get_suite_environments(testdir, project, suite_name)
         assert result == environments
 
@@ -192,7 +192,7 @@ class TestGetSuiteTestCases:
         suite_name = 'test_suite_003'
         suite.new_suite(testdir, project, [], suite_name)
         tests = ['test_name_01', 'test_name_02']
-        suite.save_suite(testdir, project, suite_name, tests, 1, [], [])
+        suite.save_suite(testdir, project, suite_name, tests, 1, [], [], [])
         result = suite.get_suite_test_cases(testdir, project, suite_name)
         assert result == tests
 
@@ -204,7 +204,7 @@ class TestGetSuiteTestCases:
         suite_name = 'test_suite_004'
         suite.new_suite(testdir, project, [], suite_name)
         tests = ['*']
-        suite.save_suite(testdir, project, suite_name, tests, 1, [], [])
+        suite.save_suite(testdir, project, suite_name, tests, 1, [], [], [])
         result = suite.get_suite_test_cases(testdir, project, suite_name)
         expected = ['test_name_01', 'a.b.test_name_02']
         assert result == expected
@@ -218,7 +218,7 @@ class TestGetSuiteBrowsers:
         suite_name = 'test_suite_005'
         suite.new_suite(testdir, project, [], suite_name)
         browsers = ['browser1', 'browser2']
-        suite.save_suite(testdir, project, suite_name, [], 1, browsers, [])
+        suite.save_suite(testdir, project, suite_name, [], 1, browsers, [], [])
         result = suite.get_suite_browsers(testdir, project, suite_name)
         assert result == browsers
 

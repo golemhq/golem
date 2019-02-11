@@ -19,10 +19,9 @@ def _format_list_items(list_items):
 
 
 def save_suite(root_path, project, suite_name, test_cases, workers,
-               browsers, environments):
+               browsers, environments, tags):
     """Save suite content to file."""
     suite_name, parents = utils.separate_file_from_parents(suite_name)
-
     suite_path = os.path.join(root_path, 'projects', project, 'suites',
                               os.sep.join(parents), '{}.py'.format(suite_name))
     with open(suite_path, 'w', encoding='utf-8') as suite_file:
@@ -31,6 +30,11 @@ def save_suite(root_path, project, suite_name, test_cases, workers,
         suite_file.write('\n')
         suite_file.write('environments = {}\n'.format(_format_list_items(environments)))
         suite_file.write('\n')
+        if tags:
+            suite_file.write('tags = {}\n'.format(_format_list_items(tags)))
+            suite_file.write('\n')
+        if not workers:
+            workers = 1
         suite_file.write('workers = {}'.format(workers))
         suite_file.write('\n\n')
         suite_file.write('tests = {}\n'.format(_format_list_items(test_cases)))
@@ -141,3 +145,12 @@ def generate_suite_path(root_path, project, suite_name):
     suite_path = os.path.join(root_path, 'projects', project, 'suites',
                               os.sep.join(parents), '{}.py'.format(suite_name))
     return suite_path
+
+
+def get_tags(root_path, project, suite):
+    """Get the list of tags defined in a suite"""
+    tags = []
+    suite_module = get_suite_module(root_path, project, suite)
+    if hasattr(suite_module, 'tags'):
+        tags = suite_module.tags
+    return tags

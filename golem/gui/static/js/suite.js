@@ -30,6 +30,18 @@ $(document).ready(function() {
     });
 
     $.ajax({
+        url: "/project/tags/",
+        data: {
+            "project": project
+        },
+        dataType: 'json',
+        type: 'POST',
+        success: function(tags) {
+            startTagsAutocomplete(tags)
+        },
+    });
+
+    $.ajax({
         url: "/get_supported_browsers/",
         data: {
             project: project
@@ -205,26 +217,22 @@ function uncheckParentAndGrandParents(elem){
 
 
 function saveTestSuite(){
-    var browsers = [];
-    if($("#browsers").val().length > 0){
-        $($("#browsers").val().split(',')).each(function(){
-            if(this.trim().length > 0){
-                browsers.push(this.trim());
-            }
-        });
+    let getCommaSeparatedValues = function(input){
+         let values = []
+         if(input.val().length > 0){
+            $(input.val().split(',')).each(function(){
+                if(this.trim().length > 0){
+                    values.push(this.trim());
+                }
+            });
+        }
+        return values
     }
-
-    var environments = [];
-    if($("#environments").val().length > 0){
-        $($("#environments").val().split(',')).each(function(){
-            if(this.trim().length > 0){
-                environments.push(this.trim());
-            }
-        });
-    }
-
-    var workers = $("#workers").val();
-    var testCases = getAllCheckedTests();
+    let browsers = getCommaSeparatedValues($("#browsers"));
+    let environments = getCommaSeparatedValues($("#environments"));
+    let tags = getCommaSeparatedValues($("#tags"));
+    let workers = $("#workers").val();
+    let testCases = getAllCheckedTests();
     $.ajax({
         url: "/save_suite/",
         data: JSON.stringify({
@@ -232,6 +240,7 @@ function saveTestSuite(){
                 "suite": suite,
                 "browsers": browsers,
                 "environments": environments,
+                "tags": tags,
                 "workers": workers,
                 "testCases": testCases
             }),
@@ -319,7 +328,6 @@ function getNodeFullPath(thisLi, nodeName){
 
 
 function runSuite(){
- 
     $.ajax({
         url: "/run_suite/",
         data: {
@@ -329,13 +337,12 @@ function runSuite(){
          dataType: 'json',
          type: 'POST',
          success: function(data) {
-            var url = '/report/project/' + project + '/suite/' + suite + '/' + data + '/';
+            let url = '/report/project/' + project + '/suite/' + suite + '/' + data + '/';
             let msg = 'Running suite ' + suite + " - <a href='" + url + "'>open</a>";
             Main.Utils.toast('info', msg, 15000)
          },
          error: function() {}
      });
-
 }
 
 
@@ -363,6 +370,20 @@ function startEnvironmentsAutocomplete(environments){
         }
     });
 }
+
+
+function startTagsAutocomplete(tags){
+    $('#tags').autocomplete({
+        lookup: tags,
+        minChars: 0,
+        delimiter: ', ',
+        triggerSelectOnValidInput: false,
+        onSelect: function (suggestion) {
+            $('#tags').val($('#tags').val()+', ');
+        }
+    });
+}
+
 
 function updateTestCount(){
     var totalCheckedTests = getCheckedTestAmount();

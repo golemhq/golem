@@ -22,19 +22,25 @@
         <div>
             <div class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Browsers</div>
             <div class="form-group col-xs-10" style="">
-                <input type="text" class="form-control" id="browsers" value="{{ browsers if browsers else ''}}" placeholder="list of browsers">
+                <input type="text" class="form-control" id="browsers" value="{{ ', '.join(browsers) + ', ' if browsers else ''}}" placeholder="browsers">
             </div>
         </div>
         <div>
             <div class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Environments</div>
             <div class="form-group col-xs-10" style="">
-                <input type="text" class="form-control" id="environments" value="{{ environments if environments else ''}}" placeholder="list of environments">
+                <input type="text" class="form-control" id="environments" value="{{ ', '.join(environments) + ', ' if environments else ''}}" placeholder="environments">
             </div> 
+        </div>
+        <div>
+            <div class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Tags</div>
+            <div class="form-group col-xs-10" style="">
+                <input type="text" class="form-control" id="tags" value="{{ ', '.join(tags) + ', ' if tags else ''}}" placeholder="tags">
+            </div>
         </div>
         <div>
             <div for="workers" class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Workers</div>
             <div class="form-group col-sm-3">
-                <input type="number" class="form-control" id="workers" value="{{worker_amount}}" placeholder="Amount of workers">
+                <input type="number" class="form-control" id="workers" value="{{worker_amount}}" placeholder="workers">
             </div>
         </div>
         </form>

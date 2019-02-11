@@ -1,4 +1,5 @@
 import os
+import json
 
 from golem.core import tags_manager
 
@@ -35,12 +36,13 @@ class TestGetTestsTags:
         assert os.path.isfile(cache_path)
         assert tags[test_name] == ["foo", "bar"]
         # verify that when a test is updated, the cache is updated as well
-        last_modified_time = os.path.getmtime(cache_path)
         content = 'tags = ["baz"]'
         with open(test_path, 'w') as f:
             f.write(content)
         tags = tags_manager.get_tests_tags(testdir, project, [test_name])
-        assert os.path.getmtime(cache_path) > last_modified_time
+        with open(cache_path) as f:
+            cache = json.load(f)
+            assert cache[test_name]['tags'] == ['baz']
         assert tags[test_name] == ['baz']
 
 
