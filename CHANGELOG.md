@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- New args to ```golem gui``` command: --host (default 127.0.0.1), -d|--debug (default False)
+
 ## [0.7.0] - 2019-01-21
 
 ### Added

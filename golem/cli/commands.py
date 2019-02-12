@@ -22,7 +22,7 @@ def command_dispatcher(args):
                     args.timestamp, args.report,
                     args.report_folder, args.report_name)
     elif args.command == 'gui':
-        gui_command(args.port)
+        gui_command(args.host, args.port, args.debug)
     elif args.command == 'createproject':
         createproject_command(args.project)
     elif args.command == 'createtest':
@@ -108,8 +108,8 @@ def run_command(project='', test_query='', browsers=None, processes=1,
             print('  {}'.format(project))
 
 
-def gui_command(port=5000):
-    gui_start.run_gui(port)
+def gui_command(host=None, port=5000, debug=False):
+    gui_start.run_gui(host, port, debug)
 
 
 def createproject_command(project):

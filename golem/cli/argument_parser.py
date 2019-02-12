@@ -27,14 +27,13 @@ def get_parser():
 
     # gui
     parser_gui = subparsers.add_parser('gui', add_help=False)
-
-    parser_gui.add_argument('-p', '--port', action='store',
-                            nargs='?', default=5000, type=int)
+    parser_gui.add_argument('--host', action='store', nargs='?', default=None)
+    parser_gui.add_argument('-p', '--port', action='store', nargs='?', default=5000, type=int)
+    parser_gui.add_argument('-d', '--debug', action='store_true', default=False)
     parser_gui.add_argument('-h', '--help', action='store_true')
 
     # createproject
-    parser_createproject = subparsers.add_parser('createproject',
-                                                 add_help=False)
+    parser_createproject = subparsers.add_parser('createproject', add_help=False)
     parser_createproject.add_argument('project')
     parser_createproject.add_argument('-h', '--help', action='store_true')
 

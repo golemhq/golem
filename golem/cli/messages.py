@@ -4,7 +4,7 @@ Usage: golem
 
   golem run <project> <test|suite|directory> [-b -t -e -i -r]
             [--report-folder] [--report-name] [--timestamp]
-  golem gui [-p]
+  golem gui [--host -p -d]
   golem createproject <project>
   golem createtest <project> <test>
   golem createsuite <project> <suite>
@@ -42,7 +42,10 @@ Usage: golem gui
   Start the Golem GUI module
 
   optional arguments:
+    --host              Default host is 127.0.0.1 (localhost). Use
+                        0.0.0.0 to make the GUI publicly accessible.  
     -p, --port          which port to use, default is 5000
+    -d, --debug         Run the GUI in debug mode, default is False    
 
 Type: golem -h <command> for more help
 """
@@ -105,7 +108,10 @@ Usage: golem gui [-p|--port]
   Start the Golem GUI module
 
   optional arguments:
+    --host              Default host is 127.0.0.1 (localhost). Use
+                        0.0.0.0 to make the GUI publicly accessible.  
     -p, --port          which port to use, default is 5000
+    -d, --debug         Run the GUI in debug mode, default is False  
 """
 
 CREATEPROJECT_USAGE_MSG = """
