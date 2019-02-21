@@ -1,6 +1,8 @@
 
 $(document).ready(function() {
     $('#testCasesTree').treed();
+    // get the tags for all the tests in the project
+    getTestsTags();
     $("#allTestCasesCheckbox").change(function(){
         checkUncheckAllTestCases(this.checked);
     });
@@ -21,7 +23,6 @@ $(document).ready(function() {
             // uncheck the root checkbox 
             $("#allTestCasesCheckbox").prop('checked', false);
         }
-
         // is this a branch?
         var li = $(this).parent();
         if( li.hasClass('branch') ){
@@ -86,7 +87,6 @@ function checkSelectedTests(selectedTests){
             var lastChar = splitTest[splitTest.length-1].substr(-1);
             if (lastChar == '/') {
                 branchLi = findBranchAndCheckDescendents(splitTest, $("#testCasesTree"));
-
             }
             else{
                 var rootUl = $("#testCasesTree");
@@ -135,7 +135,6 @@ function checkBranchTestCases(branch, isChecked){
     branch.find($(".select-testcase-checkbox")).each(function(){
         $(this).prop('checked', isChecked);
     });
-
 }
 
 
@@ -188,7 +187,6 @@ function verifyIfAllCheckboxesAreCheckedInLevelAndCheckParent(branch){
         else{
             branch.find('>input').prop('checked', true);
         }
-        
         var parentBranch;
         if(branch.parent().closest('.branch').length == 1){
             parentBranch = branch.parent().closest('.branch');
@@ -196,7 +194,6 @@ function verifyIfAllCheckboxesAreCheckedInLevelAndCheckParent(branch){
         else{
             parentBranch = $("#suiteTests");
         }
-
         if(parentBranch.length == 1){
             verifyIfAllCheckboxesAreCheckedInLevelAndCheckParent(parentBranch);
         }
@@ -389,6 +386,38 @@ function updateTestCount(){
     var totalCheckedTests = getCheckedTestAmount();
     var totalTests = getAllTestAmount();
     $("#testCount").html(totalCheckedTests+"/"+totalTests);
+}
+
+
+function getTestsTags(tests){
+    $.ajax({
+        url: "/project/tests/tags/",
+        data: {
+            "project": project
+        },
+        dataType: 'json',
+        type: 'POST',
+        success: function(testsTags) {
+            displayTags(testsTags)
+        },
+    });
+}
+
+
+function displayTags(testsTags){
+    Object.keys(testsTags).forEach(test => {
+        let timeout = 0;
+        let tags = testsTags[test];
+        setTimeout(function(){
+            let testElement = $(`li[data-type='test'][full-name='${test}']`);
+            let tagContainer = $(`<div class="tag-container"></div>`);
+            tags.forEach(function(tag){
+                let tagElement = $(`<span class="tag">${tag}</span>`);
+                tagContainer.append(tagElement)
+            })
+            testElement.append(tagContainer);
+            }, timeout, tags)
+    });
 }
 
 

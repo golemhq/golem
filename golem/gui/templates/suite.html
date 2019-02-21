@@ -51,15 +51,17 @@
             <h4> Test Cases <small id="testCount"></small></h4>
             <ul id="testCasesTree">
                  {%- for elem in all_test_cases recursive %}
-                    <li>
-                        {%- if elem.type == 'directory' -%}
+                    {%- if elem.type == 'directory' -%}
+                        <li data-type="folder">
                             <input type="checkbox" name="checkbox" class="select-testcase-checkbox">
                             <a href="#" class="branch-name">{{ elem.name }}</a>
                             <ul>{{ loop(elem.sub_elements) }}</ul>
-                        {%- else %}
+                        </li>
+                    {%- else %}
+                        <li data-type="test" full-name="{{elem.dot_path}}">
                             <label full-name="{{elem.dot_path}}"><input type="checkbox" name="checkbox" class="select-testcase-checkbox test-checkbox"><span class="node-name">{{ elem.name }}</span></label>
-                        {%- endif %}
-                    </li>
+                        </li>
+                    {%- endif %}
                 {%- endfor %}
             </ul>
         </ul>
