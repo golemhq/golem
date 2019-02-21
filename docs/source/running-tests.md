@@ -1,86 +1,83 @@
 Running tests
 ==================================================
 
-## Run from the Command Line
+## Run a single test
 
-The command to run tests or suites from the command line:
-
-```bash
-golem run <project> <test|suite|dir> [-b|--browsers] [-t|--threads]
-          [-e|--environments] [-i|--interactive] [-r|--report]
-          [--report-folder] [--report-name] [--timestamp]
+A single test can be run using the file path or the test module path.
+In both cases it should be relative to the *tests* folder.
 ```
-
-**-b|--browsers**
-
-One or more browsers to use for these tests.
-If not provided, the browsers defined inside the suite will be used.
-If the suite does not have browsers defined or this is a test, the *default_browser* setting will be used.
-The valid options are listed [here](browsers.html#valid-options).
-
-**-t|--threads**
-
-The number of tests to run in parallel. The default is 1.
-
-**-e|--environments**
-
-The environments to use for this execution.
-If not provided, the environments defined inside the suite will be used.
-
-**-i|--interactive**
-
-Run the test in interactive mode.
-This is required for the *interactive_mode* and *set_trace* actions.
-
-See [Interactive Mode](Interactive-mode.html)
-
-**-r|--report**
-
-Select which reports should be generated at the end of the execution.
-Options are: *junit*, *html*, and *html-no-images*
-
-**--report-folder**
-
-Absolute path to the generated reports.
-The default is ```/<testdir>/projects/<project>/<suite>/<timestamp>```
-
-**--report-name**
-
-Name of the generated reports. The default is 'report'
-
-**--timestamp**
-
-Used by the execution. Optional. 
-The default is auto-generated with the format: 'year.month.day.hour.minutes.seconds.milliseconds' 
-
-
-### Run a single test
-
-```bash
 golem run project test_name
 golem run project test_name.py
 golem run project folder.test_name
 golem run project folder/test_name.py
 ```
 
-All paths are relative to the *project/tests/* folder.
+## Run a suite
 
-### Run a suite
+Similar to a test, a suite can be run using the file path or the test module path.
+In both cases it should be relative to the *suites* folder.
 
-```bash
+```
 golem run project suite_name
 golem run project suite_name.py
 golem run project folder.suite_name
 golem run project folder/suite_name.py
 ```
 
-All paths are relative to the *project/suites/* folder.
+## Run every test in a directory
 
-### Run every test in a directory
+To select all the tests in a directory and subdirectories a relative path can be supplied.
+The path has to be relative to the *tests* folder.
 
-```bash
+```
 golem run project folder/
-golem run project .         ## run every test
 ```
 
-All paths are relative to the *project/tests/* folder.
+### Run every test in a project
+
+```
+golem run project .
+```
+
+## Select Browsers
+
+```
+golem run project suite -b chrome firefox
+```
+
+Every selected test will be run for each of the selected browsers.
+Browsers can also be defined inside a suite.
+If no browser is set, the default defined in settings will be used.
+The valid options for browsers are listed [here](browsers.html#valid-options).
+
+## Run Tests in Parallel
+
+To run tests in parallel the number of processes must be set to more than 1.
+This can be done through the *golem run* command or by the *processes* attribute of a suite. 
+
+```
+golem run project suite_name -p 3
+```
+
+## Select Environments
+
+Select which [environments](test-data.html#environments) to use for a test execution:
+
+```
+golem run project suite -e internal staging
+```
+
+## Filter Tests by Tags
+
+The selected tests for an execution can be filtered by tags.
+
+```
+golem run project suite -t smoke "release 42.11.01"
+```
+
+Multiple tags are always used with *and* operator.
+To use a combination of *and*, *or*, and *not*, a tag expression must be used:
+
+```
+golem run project suite --t "smoke and (regression or not 'release 001')"
+``` 

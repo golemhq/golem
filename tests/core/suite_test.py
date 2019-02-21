@@ -40,13 +40,13 @@ class TestSaveSuite:
             'browser01',
             'browser02',
         ]
-        workers = 2
+        processes = 2
         environments = [
             'env01',
             'env02'
         ]
         suite.save_suite(testdir, project, suite_name, test_cases,
-                         workers, browsers, environments, [])
+                         processes, browsers, environments, [])
         expected = (
             "\n"
             "\n"
@@ -60,7 +60,7 @@ class TestSaveSuite:
             "    'env02'\n"
             "]\n"
             "\n"
-            "workers = 2\n"
+            "processes = 2\n"
             "\n"
             "tests = [\n"
             "    'test01',\n"
@@ -79,10 +79,10 @@ class TestSaveSuite:
         suite.new_suite(testdir, project, [], suite_name)
         test_cases = []
         browsers = []
-        workers = 2
+        processes = 2
         environments = []
         suite.save_suite(testdir, project, suite_name, test_cases,
-                         workers, browsers, environments, [])
+                         processes, browsers, environments, [])
         expected = (
             "\n"
             "\n"
@@ -90,7 +90,7 @@ class TestSaveSuite:
             "\n"
             "environments = []\n"
             "\n"
-            "workers = 2\n"
+            "processes = 2\n"
             "\n"
             "tests = []\n"
         )
@@ -116,7 +116,7 @@ class TestNewSuite:
             expected = ('\n'
                         'browsers = []\n\n'
                         'environments = []\n\n'
-                        'workers = 1\n\n'
+                        'processes = 1\n\n'
                         'tests = []\n')
             assert content == expected
 
@@ -158,17 +158,17 @@ class TestNewSuite:
         assert os.path.isfile(path)
 
 
-class TestGetSuiteAmountOfWorkers:
+class TestGetSuiteAmountOfProcesses:
 
-    def test_get_suite_amount_of_workers(self, project_function):
+    def test_get_suite_amount_of_processes(self, project_function):
         testdir = project_function.testdir
         project = project_function.name
-        suite_name = 'test_suite_workers_001'
+        suite_name = 'test_suite_processes_001'
         suite.new_suite(testdir, project, [], suite_name)
-        worker_amount = 2
-        suite.save_suite(testdir, project, suite_name, [], worker_amount, [], [], [])
-        workers = suite.get_suite_amount_of_workers(testdir, project, suite_name)
-        assert workers == worker_amount
+        processes = 2
+        suite.save_suite(testdir, project, suite_name, [], processes, [], [], [])
+        suite_processes = suite.get_suite_amount_of_processes(testdir, project, suite_name)
+        assert suite_processes == processes
 
 
 class TestGetSuiteEnvironments:

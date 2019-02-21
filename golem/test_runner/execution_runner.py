@@ -74,21 +74,21 @@ class ExecutionRunner:
             tags = []
         self.project = None
         self.cli_args = SimpleNamespace(browsers=browsers, processes=processes,
-                                        envs=environments)
+                                        envs=environments, tags=tags)
         self.interactive = interactive
         self.timestamp = timestamp
         self.reports = reports
         self.report_folder = report_folder
         self.report_name = report_name
-        self.tags = tags
         self.report = {}
         self.tests = []
         self.is_suite = False
         self.suite_name = None
         self.test_name = None
         self.selected_browsers = None
+        self.start_time = None
         self.suite = SimpleNamespace(processes=None, browsers=None, envs=None,
-                                     before=None, after=None)
+                                     before=None, after=None, tags=None)
         has_failed_tests = self._create_execution_has_failed_tests_flag()
         self.execution = SimpleNamespace(processes=1, browsers=[], envs=[],
                                          tests=[], reportdir=None,
@@ -156,10 +156,6 @@ class ExecutionRunner:
         envs_data = environment_manager.get_environment_data(testdir, self.project)
         secrets = secrets_manager.get_secrets(testdir, self.project)
 
-        # Filter out test cases which do not contain a matching tag
-        if len(self.tags) > 0:
-            self.tests = tags_manager.filter_tests_by_tags(testdir, self.project, self.tests, self.tags)
-
         for test in self.tests:
             data_sets = test_data.get_test_data(testdir, self.project, test)
             for data_set in data_sets:
@@ -179,24 +175,39 @@ class ExecutionRunner:
         """Print number of tests and test sets to console"""
         test_number = len(self.tests)
         set_number = len(self.execution.tests)
-        if test_number > 1 or set_number > 1:
+        if test_number > 0:
             msg = 'Tests found: {}'.format(test_number)
             if test_number != set_number:
                 msg = '{} ({} sets)'.format(msg, set_number)
             print(msg)
 
-    def _print_results(self):
-        result_string = ''
-        for result, number in OrderedDict(self.report['totals_by_result']).items():
-            result_string += ' {} {},'.format(number, result)
-        elapsed_time = self.report['net_elapsed_time']
-        if elapsed_time > 60:
-            in_elapsed_time = ' in {} minutes'.format(round(elapsed_time / 60, 2))
+    def _filter_tests_by_tags(self):
+        tests = []
+        tags = self.cli_args.tags or self.suite.tags
+        try:
+            tests = tags_manager.filter_tests_by_tags(test_execution.root_path,
+                                                      self.project, self.tests, tags)
+        except tags_manager.InvalidTagExpression as e:
+            print('{}: {}'.format(e.__class__.__name__, e))
+            self.execution.has_failed_tests.value = True
         else:
-            in_elapsed_time = ' in {} seconds'.format(elapsed_time)
-        output = 'Result:{}{}'.format(result_string[:-1], in_elapsed_time)
-        print()
-        print(output)
+            if len(tests) == 0:
+                print("No tests found with tag(s): {}".format(', '.join(tags)))
+        return tests
+
+    def _print_results(self):
+        if self.report['total_tests'] > 0:
+            result_string = ''
+            for result, number in OrderedDict(self.report['totals_by_result']).items():
+                result_string += ' {} {},'.format(number, result)
+            elapsed_time = self.report['net_elapsed_time']
+            if elapsed_time > 60:
+                in_elapsed_time = ' in {} minutes'.format(round(elapsed_time / 60, 2))
+            else:
+                in_elapsed_time = ' in {} seconds'.format(elapsed_time)
+            output = 'Result:{}{}'.format(result_string[:-1], in_elapsed_time)
+            print()
+            print(output)
 
     def run_test(self, test):
         """Run a single test.
@@ -229,10 +240,10 @@ class ExecutionRunner:
         self.tests = suite_module.get_suite_test_cases(test_execution.root_path,
                                                        self.project, suite)
         if len(self.tests) == 0:
-            sys.exit('No tests were found for suite {}'.format(suite))
-        suite_amount_workers = suite_module.get_suite_amount_of_workers(
+            print('No tests found for suite {}'.format(suite))
+        suite_amount_processes = suite_module.get_suite_amount_of_processes(
             test_execution.root_path, self.project, suite)
-        self.suite.processes = suite_amount_workers
+        self.suite.processes = suite_amount_processes
         self.suite.browsers = suite_module.get_suite_browsers(test_execution.root_path,
                                                               self.project, suite)
         self.suite.envs = suite_module.get_suite_environments(test_execution.root_path,
@@ -241,6 +252,7 @@ class ExecutionRunner:
                                                               self.project, suite)
         self.suite.before = getattr(suite_imported_module, 'before', None)
         self.suite.after = getattr(suite_imported_module, 'after', None)
+        self.suite.tags = getattr(suite_imported_module, 'tags', None)
         self.suite_name = suite
         self.is_suite = True
         self._prepare()
@@ -253,7 +265,7 @@ class ExecutionRunner:
         self.tests = utils.get_directory_tests(test_execution.root_path,
                                                self.project, directory)
         if len(self.tests) == 0:
-            sys.exit('No tests were found in {}'.format(os.path.join('tests', directory)))
+            print('No tests were found in {}'.format(os.path.join('tests', directory)))
         self.is_suite = True
         if directory == '':
             suite_name = 'all'
@@ -270,51 +282,6 @@ class ExecutionRunner:
         if not self.timestamp:
             self.timestamp = utils.get_timestamp()
 
-        # get amount of processes (parallel executions), default is 1
-        if self.cli_args.processes > 1:
-            # the processes arg passed through cli has higher priority
-            self.execution.processes = self.cli_args.processes
-        elif self.suite.processes:
-            self.execution.processes = self.suite.processes
-
-        # select the browsers to use in this execution
-        # the order of precedence is:
-        # 1. browsers defined by CLI
-        # 2. browsers defined inside a suite
-        # 3. 'default_browser' setting key
-        # 4. default default is 'chrome'
-        self.selected_browsers = utils.choose_browser_by_precedence(
-            cli_browsers=self.cli_args.browsers,
-            suite_browsers=self.suite.browsers,
-            settings_default_browser=test_execution.settings['default_browser'])
-
-        # Define the attributes for each browser.
-        # A browser name can be predefined ('chrome, 'chrome-headless', 'firefox', etc)
-        # or it can be defined by the user with the 'remote_browsers' setting.
-        # Remote browsers have extra details such as capabilities
-        #
-        # Each defined browser must have the following attributes:
-        # 'name': real name,
-        # 'full_name': the remote_browser name defined by the user,
-        # 'remote': is this a remote_browser or not
-        # 'capabilities': full capabilities defined in the remote_browsers setting
-        remote_browsers = settings_manager.get_remote_browsers(test_execution.settings)
-        default_browsers = gui_utils.get_supported_browsers_suggestions()
-        self.execution.browsers = define_browsers(self.selected_browsers, remote_browsers,
-                                                  default_browsers)
-        # Select which environments to use
-        # The user can define environments in the environments.json file.
-        # The suite/test can be executed in one or more of these environments.
-        # Which environments will be used is defined by this order of preference:
-        # 1. envs passed by CLI
-        # 2. envs defined inside the suite
-        # 3. The first env defined for the project
-        # 4. no envs at all
-        #
-        # Note, in the case of 4, the test might fail if it tries
-        # to use env variables
-        self.execution.envs = self._select_environments()
-
         # create the execution report directory
         # if this is a suite, the directory takes this structure:
         #   reports/<suite_name>/<timestamp>/
@@ -323,26 +290,78 @@ class ExecutionRunner:
         #   reports/single_tests/<test_name>/<timestamp>/
         self.execution.reportdir = self._create_execution_directory()
 
-        # Generate the execution list
-        # Each test must be executed for each:
-        # * data set
-        # * environment
-        # * browser
-        # The result is a list that contains all the requested combinations
-        self.execution.tests = self._define_execution_list()
+        # Filter tests by tags
+        if self.cli_args.tags or self.suite.tags:
+            self.tests = self._filter_tests_by_tags()
 
-        self._print_number_of_tests_found()
+        if self.tests:
+            # get amount of processes (parallel executions), default is 1
+            if self.cli_args.processes > 1:
+                # the processes arg passed through cli has higher priority
+                self.execution.processes = self.cli_args.processes
+            elif self.suite.processes:
+                self.execution.processes = self.suite.processes
 
-        # for each test, create the test report directory
-        # for example, in a suite 'suite1' with a 'test1':
-        # reports/suite1/2017.07.02.19.22.20.001/test1/set_00001/
-        for test in self.execution.tests:
-            test.reportdir = report.create_report_directory(self.execution.reportdir,
-                                                            test.name, self.is_suite)
-        self._execute()
+            # select the browsers to use in this execution
+            # the order of precedence is:
+            # 1. browsers defined by CLI
+            # 2. browsers defined inside a suite
+            # 3. 'default_browser' setting key
+            # 4. default default is 'chrome'
+            self.selected_browsers = utils.choose_browser_by_precedence(
+                cli_browsers=self.cli_args.browsers,
+                suite_browsers=self.suite.browsers,
+                settings_default_browser=test_execution.settings['default_browser'])
+
+            # Define the attributes for each browser.
+            # A browser name can be predefined ('chrome, 'chrome-headless', 'firefox', etc)
+            # or it can be defined by the user with the 'remote_browsers' setting.
+            # Remote browsers have extra details such as capabilities
+            #
+            # Each defined browser must have the following attributes:
+            # 'name': real name,
+            # 'full_name': the remote_browser name defined by the user,
+            # 'remote': is this a remote_browser or not
+            # 'capabilities': full capabilities defined in the remote_browsers setting
+            remote_browsers = settings_manager.get_remote_browsers(test_execution.settings)
+            default_browsers = gui_utils.get_supported_browsers_suggestions()
+            self.execution.browsers = define_browsers(self.selected_browsers, remote_browsers,
+                                                      default_browsers)
+            # Select which environments to use
+            # The user can define environments in the environments.json file.
+            # The suite/test can be executed in one or more of these environments.
+            # Which environments will be used is defined by this order of preference:
+            # 1. envs passed by CLI
+            # 2. envs defined inside the suite
+            # 3. The first env defined for the project
+            # 4. no envs at all
+            #
+            # Note, in the case of 4, the test might fail if it tries
+            # to use env variables
+            self.execution.envs = self._select_environments()
+
+            # Generate the execution list
+            # Each test must be executed for each:
+            # * data set
+            # * environment
+            # * browser
+            # The result is a list that contains all the requested combinations
+            self.execution.tests = self._define_execution_list()
+
+            self._print_number_of_tests_found()
+
+            # for each test, create the test report directory
+            # for example, in a suite 'suite1' with a 'test1':
+            # reports/suite1/2017.07.02.19.22.20.001/test1/set_00001/
+            for test in self.execution.tests:
+                test.reportdir = report.create_report_directory(self.execution.reportdir,
+                                                                test.name, self.is_suite)
+            self._execute()
+        else:
+            self._finalize()
 
     def _execute(self):
-        start_time = time.time()
+        self.start_time = time.time()
         suite_error = False
 
         # run suite `before` function
@@ -355,7 +374,7 @@ class ExecutionRunner:
 
         if not suite_error:
             if self.interactive and self.execution.processes != 1:
-                print('WARNING: to run in debug mode, threads must equal one')
+                print('WARNING: to run in debug mode, processes must equal one')
 
             if self.execution.processes == 1:
                 # run tests serially
@@ -378,11 +397,17 @@ class ExecutionRunner:
                 print('ERROR: suite before function failed')
                 print(traceback.format_exc())
 
+        self._finalize()
+
+    def _finalize(self):
+        if self.start_time:
+            elapsed_time = round(time.time() - self.start_time, 2)
+        else:
+            elapsed_time = 0
+
         # generate report.json
-        elapsed_time = round(time.time() - start_time, 2)
         self.report = report_parser.generate_execution_report(self.execution.reportdir,
                                                               elapsed_time)
-
         if self.is_suite:
             self._print_results()
 

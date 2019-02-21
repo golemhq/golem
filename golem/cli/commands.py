@@ -16,10 +16,8 @@ def command_dispatcher(args):
     if args.help:
         display_help(args.help, args.command)
     elif args.command == 'run':
-        run_command(args.project, args.test_query,
-                    args.browsers, args.threads,
-                    args.environments, args.interactive,
-                    args.timestamp, args.report,
+        run_command(args.project, args.test_query, args.browsers, args.processes,
+                    args.environments, args.interactive, args.timestamp, args.report,
                     args.report_folder, args.report_name, args.tags)
     elif args.command == 'gui':
         gui_command(args.port)
@@ -30,9 +28,9 @@ def command_dispatcher(args):
     elif args.command == 'createsuite':
         createsuite_command(args.project, args.suite)
     elif args.command == 'createuser':
-        createuser_command(args.username, args.password,
-                           args.admin, args.projects, args.reports)
-    elif args.command == None:
+        createuser_command(args.username, args.password, args.admin, args.projects,
+                           args.reports)
+    elif args.command is None:
         print(messages.USAGE_MSG)
 
 

@@ -38,7 +38,7 @@
             <div class="form-horizontal">
                 <div class="col-xs-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Tags</div>
                 <div class="col-xs-10" style="padding-right: 0px; padding-left: 0px;">
-                    <input type="text" class="form-control" id="tags" value="{{ ', '.join(test_case_contents.tags)}}">
+                    <input type="text" class="form-control" id="tags" value="{{ ', '.join(test_case_contents.tags) + ', ' if test_case_contents.tags else '' }}">
                 </div>
             </div>
         </div>

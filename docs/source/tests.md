@@ -17,6 +17,8 @@ golem createtest project_name test_name
 
 description = ''
 
+tags = []
+
 pages = []
 
 def setup(data):

@@ -263,7 +263,7 @@ def suite_view(project, suite):
         abort(404, 'The suite {} does not exist'.format(suite))
     all_test_cases = utils.get_test_cases(root_path, project)
     selected_tests = suite_module.get_suite_test_cases(root_path, project, suite)
-    worker_amount = suite_module.get_suite_amount_of_workers(root_path, project, suite)
+    processes = suite_module.get_suite_amount_of_processes(root_path, project, suite)
     browsers = suite_module.get_suite_browsers(root_path, project, suite)
     default_browser = test_execution.settings['default_browser']
     environments = suite_module.get_suite_environments(root_path, project, suite)
@@ -271,7 +271,7 @@ def suite_view(project, suite):
     return render_template('suite.html', project=project,
                            all_test_cases=all_test_cases['sub_elements'],
                            selected_tests=selected_tests, suite=suite,
-                           worker_amount=worker_amount, browsers=browsers,
+                           processes=processes, browsers=browsers,
                            default_browser=default_browser, environments=environments,
                            tags=tags)
 
@@ -869,12 +869,12 @@ def save_suite():
         project = request.json['project']
         suite_name = request.json['suite']
         test_cases = request.json['testCases']
-        workers = request.json['workers']
+        processes = request.json['processes']
         tags = request.json['tags']
         browsers = request.json['browsers']
         environments = request.json['environments']
         suite_module.save_suite(root_path, project, suite_name, test_cases,
-                                workers, browsers, environments, tags)
+                                processes, browsers, environments, tags)
         return json.dumps('ok')
 
 

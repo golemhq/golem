@@ -57,7 +57,7 @@ class TestGolemRun:
         test_utils.run_command(command)
         command = 'golem run {} {}'.format(project, suite)
         result = test_utils.run_command(command)
-        assert 'No tests were found for suite suite2' in result
+        assert 'No tests found for suite suite2' in result
 
     @pytest.mark.slow
     def test_golem_run_no_args(self, project_session, test_utils):
@@ -115,7 +115,7 @@ class TestGolemRun:
         test_utils.create_test(project_class.testdir, project_class.name,
                                parents=[], name='test1')
         test_utils.create_suite(project_class.testdir, project_class.name,
-                                parents=[], name=suite_name, content=None,
+                                name=suite_name, content=None,
                                 tests=['test1'])
         project_class.suite_name = suite_name
         return project_class

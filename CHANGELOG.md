@@ -1,5 +1,20 @@
 # Changelog
 
+### [Unreleased]
+
+### Changed
+
+- **-t, \-\-threads** argument changed to **-p, \-\-processes**
+
+### Added
+
+- Filter tests by tags :: r-roos, Luciano Renzi
+    * New argument for *golem run* command: ```-t, --tags```
+    * Add and edit tags using the UI
+    * Accept *tag expressions* for complex comparisons 
+    * Docs: [Filter Tests by Tags](https://golem-framework.readthedocs.io/en/latest/running-tests.html#filter-tests-by-tags)
+    
+
 ## [0.7.0] - 2019-01-21
 
 ### Added

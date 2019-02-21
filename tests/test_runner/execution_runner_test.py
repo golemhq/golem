@@ -5,7 +5,10 @@ from types import SimpleNamespace
 import pytest
 
 from golem.test_runner import execution_runner as exc_runner
-from golem.core import test_case, test_data, environment_manager, utils
+from golem.core import (test_case, test_data, environment_manager,
+                        utils, settings_manager, test_execution,
+                        file_manager)
+from golem.gui import report_parser
 
 
 class TestDefineBrowsers:
@@ -433,3 +436,312 @@ class TestCreateExecutionDirectory:
         execution_runner._create_execution_directory()
         expected_path = os.path.join(project_class.path, 'reports', 'single_tests', test_name, timestamp)
         assert os.path.isdir(expected_path)
+
+
+class TestRunSingleTest:
+
+    def test_run_single_test(self, project_class, test_utils):
+        testdir = project_class.testdir
+        project = project_class.name
+        test_name = 'foo001'
+        timestamp = utils.get_timestamp()
+        test_execution.settings = settings_manager.get_project_settings(testdir, project)
+        test_utils.create_test(testdir, project, [], test_name)
+        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
+        execution_runner.project = project
+        execution_runner.run_test(test_name)
+        test_report_dir = os.path.join(testdir, 'projects', project, 'reports',
+                                       'single_tests', test_name, timestamp)
+        assert os.path.isdir(test_report_dir)
+        items = os.listdir(test_report_dir)
+        # test set dir + report.json
+        assert len(items) == 2
+
+    def test_run_single_test_with_two_sets(self, project_class, test_utils, capsys):
+        """Run a single test with two data sets.
+        It should display the number of tests and test sets found."""
+        testdir = project_class.testdir
+        project = project_class.name
+        test_name = 'foo002'
+        timestamp = utils.get_timestamp()
+        test_execution.settings = settings_manager.get_project_settings(testdir, project)
+        content = ('data = [{"foo": 1}, {"foo": 2}]\n'
+                   'def test(data):\n'
+                   '    pass\n')
+        test_utils.create_test(testdir, project, [], test_name, content=content)
+        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
+        execution_runner.project = project
+        execution_runner.run_test(test_name)
+        out, err = capsys.readouterr()
+        # number of tests is displayed
+        assert 'Tests found: 1 (2 sets)' in out
+        test_report_dir = os.path.join(testdir, 'projects', project, 'reports',
+                                       'single_tests', test_name, timestamp)
+        assert os.path.isdir(test_report_dir)
+        items = os.listdir(test_report_dir)
+        # two test set dirs + report.json
+        assert len(items) == 3
+
+    def test_run_single_test_filter_by_tags(self, project_class, test_utils):
+        """Run a single test with filtering by tags"""
+        testdir = project_class.testdir
+        project = project_class.name
+        test_name = 'foo003'
+        timestamp = utils.get_timestamp()
+        test_execution.settings = settings_manager.get_project_settings(testdir, project)
+        content = ('tags = ["alfa", "bravo"]\n'
+                   'def test(data):\n'
+                   '    pass\n')
+        test_utils.create_test(testdir, project, [], test_name, content=content)
+        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp,
+                                                      tags=['alfa'])
+        execution_runner.project = project
+        execution_runner.run_test(test_name)
+        test_report_dir = os.path.join(testdir, 'projects', project, 'reports',
+                                       'single_tests', test_name, timestamp)
+        assert os.path.isdir(test_report_dir)
+        items = os.listdir(test_report_dir)
+        # test set dir + report.json
+        assert len(items) == 2
+
+    def test_run_single_test_with_invalid_tags(self, project_class, test_utils, capsys):
+        testdir = project_class.testdir
+        project = project_class.name
+        test_name = 'foo004'
+        timestamp = utils.get_timestamp()
+        test_execution.settings = settings_manager.get_project_settings(testdir, project)
+        content = ('tags = ["alfa", "bravo"]\n'
+                   'def test(data):\n'
+                   '    pass\n')
+        test_utils.create_test(testdir, project, [], test_name, content=content)
+        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp,
+                                                      tags=['charlie'])
+        execution_runner.project = project
+        execution_runner.run_test(test_name)
+        out, err = capsys.readouterr()
+        assert 'No tests found with tag(s): charlie' in out
+        test_report_dir = os.path.join(testdir, 'projects', project, 'reports',
+                                       'single_tests', test_name, timestamp)
+        assert os.path.isdir(test_report_dir)
+        items = os.listdir(test_report_dir)
+        # only report.json is present
+        assert items == ['report.json']
+
+
+class TestRunSuite:
+
+    @pytest.fixture(scope="class")
+    def _project_with_tags(self, project_class, test_utils):
+        """A fixture of a project with tests that contain tags"""
+        testdir = project_class.testdir
+        project = project_class.name
+        tests = SimpleNamespace()
+        base_content = 'def test(data):\n     pass\n'
+        tests.test_alfa_bravo = 'test_alfa_bravo'
+        content = 'tags = ["alfa", "bravo"]'
+        test_utils.create_test(testdir, project, [], tests.test_alfa_bravo,
+                               content=base_content+content)
+        tests.test_bravo_charlie = 'test_bravo_charlie'
+        content = 'tags = ["bravo", "charlie"]'
+        test_utils.create_test(testdir, project, [], tests.test_bravo_charlie,
+                               content=base_content+content)
+        tests.test_empty_tags = 'test_empty_tags'
+        content = 'tags = []'
+        test_utils.create_test(testdir, project, [], tests.test_empty_tags,
+                               content=base_content+content)
+        tests.test_no_tags = 'test_no_tags'
+        content = 'def test(data):\n     pass'
+        test_utils.create_test(testdir, project, [], tests.test_no_tags,
+                               content=base_content+content)
+        project_class.tests = list(tests.__dict__)
+        project_class.t = tests
+        return project_class
+
+    def test_run_suite(self, _project_with_tags, test_utils, capsys):
+        testdir = _project_with_tags.testdir
+        project = _project_with_tags.name
+        test_execution.settings = settings_manager.get_project_settings(testdir, project)
+        suite_name = test_utils.random_numeric_string(10, 'suite')
+        tests = [_project_with_tags.t.test_alfa_bravo,
+                 _project_with_tags.t.test_bravo_charlie]
+        test_utils.create_suite(testdir, project, suite_name, tests=tests)
+        timestamp = utils.get_timestamp()
+        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
+        execution_runner.project = project
+        execution_runner.run_suite(suite_name)
+        out, err = capsys.readouterr()
+        assert 'Tests found: 2' in out
+        data = report_parser.get_execution_data(workspace=testdir, project=project,
+                                                suite=suite_name, execution=timestamp)
+        assert data['has_finished'] is True
+        assert data['total_tests'] == 2
+
+    def test_run_suite_without_tests(self, _project_with_tags, test_utils, capsys):
+        testdir = _project_with_tags.testdir
+        project = _project_with_tags.name
+        test_execution.settings = settings_manager.get_project_settings(testdir, project)
+        suite_name = test_utils.random_numeric_string(10, 'suite')
+        test_utils.create_suite(testdir, project, suite_name, tests=[])
+        timestamp = utils.get_timestamp()
+        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
+        execution_runner.project = project
+        execution_runner.run_suite(suite_name)
+        out, err = capsys.readouterr()
+        assert 'No tests found for suite {}'.format(suite_name) in out
+        data = report_parser.get_execution_data(workspace=testdir, project=project,
+                                                suite=suite_name, execution=timestamp)
+        assert data['has_finished'] is True
+        assert data['total_tests'] == 0
+
+    def test_run_suite_filter_by_tags(self, _project_with_tags, test_utils, capsys):
+        testdir = _project_with_tags.testdir
+        project = _project_with_tags.name
+        test_execution.settings = settings_manager.get_project_settings(testdir, project)
+        suite_name = test_utils.random_numeric_string(10, 'suite')
+        tests = [_project_with_tags.t.test_alfa_bravo,
+                 _project_with_tags.t.test_bravo_charlie]
+        test_utils.create_suite(testdir, project, suite_name, tests=tests)
+        timestamp = utils.get_timestamp()
+        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'],
+                                                      timestamp=timestamp,
+                                                      tags=['alfa', 'bravo'])
+        execution_runner.project = project
+        execution_runner.run_suite(suite_name)
+        out, err = capsys.readouterr()
+        assert 'Tests found: 1' in out
+        data = report_parser.get_execution_data(workspace=testdir, project=project,
+                                                suite=suite_name, execution=timestamp)
+        assert data['has_finished'] is True
+        assert data['total_tests'] == 1
+
+    def test_run_suite_filter_by_invalid_tags(self, _project_with_tags, test_utils, capsys):
+        testdir = _project_with_tags.testdir
+        project = _project_with_tags.name
+        test_execution.settings = settings_manager.get_project_settings(testdir, project)
+        suite_name = test_utils.random_numeric_string(10, 'suite')
+        tests = [_project_with_tags.t.test_alfa_bravo,
+                 _project_with_tags.t.test_bravo_charlie]
+        test_utils.create_suite(testdir, project, suite_name, tests=tests)
+        timestamp = utils.get_timestamp()
+        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'],
+                                                      timestamp=timestamp,
+                                                      tags=['sierra', 'tango'])
+        execution_runner.project = project
+        execution_runner.run_suite(suite_name)
+        out, err = capsys.readouterr()
+        assert 'No tests found with tag(s): sierra, tango' in out
+        data = report_parser.get_execution_data(workspace=testdir, project=project,
+                                                suite=suite_name, execution=timestamp)
+        assert data['has_finished'] is True
+        assert data['total_tests'] == 0
+
+    def test_run_suite_filter_by_invalid_tag_expression(self, _project_with_tags,
+                                                        test_utils, capsys):
+        """When a invalid tag expression is used a message is displayed
+        to the console, no tests are run, the report is generated,
+        and the execution exists with status code 1
+        """
+        testdir = _project_with_tags.testdir
+        project = _project_with_tags.name
+        test_execution.settings = settings_manager.get_project_settings(testdir, project)
+        suite_name = test_utils.random_numeric_string(10, 'suite')
+        tests = [_project_with_tags.t.test_alfa_bravo,
+                 _project_with_tags.t.test_bravo_charlie]
+        test_utils.create_suite(testdir, project, suite_name, tests=tests)
+        timestamp = utils.get_timestamp()
+        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'],
+                                                      timestamp=timestamp,
+                                                      tags=['sierra = tango'])
+        execution_runner.project = project
+        with pytest.raises(SystemExit):
+            execution_runner.run_suite(suite_name)
+        out, err = capsys.readouterr()
+        expected = ("InvalidTagExpression: unknown expression <class '_ast.Assign'>, the "
+                    "only valid operators for tag expressions are: 'and', 'or' & 'not'")
+        assert expected in out
+        data = report_parser.get_execution_data(workspace=testdir, project=project,
+                                                suite=suite_name, execution=timestamp)
+        assert data['has_finished'] is True
+        assert data['total_tests'] == 0
+
+
+class TestRunDirectory:
+
+    @pytest.fixture(scope="class")
+    def _project_with_tags(self, project_class, test_utils):
+        """A fixture of a project with tests that contain tags"""
+        testdir = project_class.testdir
+        project = project_class.name
+        tests = SimpleNamespace()
+        base_content = 'def test(data):\n     pass\n'
+        tests.test_alfa_bravo = 'test_alfa_bravo'
+        content = 'tags = ["alfa", "bravo"]'
+        test_utils.create_test(testdir, project, ['foo'], tests.test_alfa_bravo,
+                               content=base_content + content)
+        tests.test_bravo_charlie = 'test_bravo_charlie'
+        content = 'tags = ["bravo", "charlie"]'
+        test_utils.create_test(testdir, project, ['foo'], tests.test_bravo_charlie,
+                               content=base_content + content)
+        tests.test_empty_tags = 'test_empty_tags'
+        content = 'tags = []'
+        test_utils.create_test(testdir, project, [], tests.test_empty_tags,
+                               content=base_content + content)
+        tests.test_no_tags = 'test_no_tags'
+        content = 'def test(data):\n     pass'
+        test_utils.create_test(testdir, project, [], tests.test_no_tags,
+                               content=base_content + content)
+        path_list = [testdir, 'projects', project, 'tests', 'empty']
+        file_manager.create_directory(path_list=path_list, add_init=True)
+        project_class.tests = list(tests.__dict__)
+        project_class.t = tests
+        return project_class
+
+    def test_run_directory(self, _project_with_tags, capsys):
+        testdir = _project_with_tags.testdir
+        project = _project_with_tags.name
+        test_execution.settings = settings_manager.get_project_settings(testdir, project)
+        timestamp = utils.get_timestamp()
+        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
+        execution_runner.project = project
+        execution_runner.run_directory('foo')
+        out, err = capsys.readouterr()
+        assert 'Tests found: 2' in out
+        data = report_parser.get_execution_data(workspace=testdir, project=project,
+                                                suite='foo', execution=timestamp)
+        assert data['has_finished'] is True
+        assert data['total_tests'] == 2
+
+    def test_run_directory_without_tests(self, _project_with_tags, capsys):
+        testdir = _project_with_tags.testdir
+        project = _project_with_tags.name
+        test_execution.settings = settings_manager.get_project_settings(testdir, project)
+        timestamp = utils.get_timestamp()
+        dirname = 'empty'
+        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
+        execution_runner.project = project
+        execution_runner.run_directory(dirname)
+        out, err = capsys.readouterr()
+        expected = 'No tests were found in {}'.format(os.path.join('tests', dirname))
+        assert expected in out
+        data = report_parser.get_execution_data(workspace=testdir, project=project,
+                                                suite=dirname, execution=timestamp)
+        assert data['has_finished'] is True
+        assert data['total_tests'] == 0
+
+    def test_run_directory_filter_by_tags(self, _project_with_tags, test_utils, capsys):
+        testdir = _project_with_tags.testdir
+        project = _project_with_tags.name
+        test_execution.settings = settings_manager.get_project_settings(testdir, project)
+        timestamp = utils.get_timestamp()
+        dirname = 'foo'
+        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'],
+                                                      timestamp=timestamp,
+                                                      tags=['alfa', 'bravo'])
+        execution_runner.project = project
+        execution_runner.run_directory(dirname)
+        out, err = capsys.readouterr()
+        assert 'Tests found: 1' in out
+        data = report_parser.get_execution_data(workspace=testdir, project=project,
+                                                suite=dirname, execution=timestamp)
+        assert data['has_finished'] is True
+        assert data['total_tests'] == 1

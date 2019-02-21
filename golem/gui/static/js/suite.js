@@ -231,7 +231,7 @@ function saveTestSuite(){
     let browsers = getCommaSeparatedValues($("#browsers"));
     let environments = getCommaSeparatedValues($("#environments"));
     let tags = getCommaSeparatedValues($("#tags"));
-    let workers = $("#workers").val();
+    let processes = $("#processes").val();
     let testCases = getAllCheckedTests();
     $.ajax({
         url: "/save_suite/",
@@ -241,7 +241,7 @@ function saveTestSuite(){
                 "browsers": browsers,
                 "environments": environments,
                 "tags": tags,
-                "workers": workers,
+                "processes": processes,
                 "testCases": testCases
             }),
         dataType: 'json',

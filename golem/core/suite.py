@@ -18,7 +18,7 @@ def _format_list_items(list_items):
     return list_string
 
 
-def save_suite(root_path, project, suite_name, test_cases, workers,
+def save_suite(root_path, project, suite_name, test_cases, processes,
                browsers, environments, tags):
     """Save suite content to file."""
     suite_name, parents = utils.separate_file_from_parents(suite_name)
@@ -33,9 +33,9 @@ def save_suite(root_path, project, suite_name, test_cases, workers,
         if tags:
             suite_file.write('tags = {}\n'.format(_format_list_items(tags)))
             suite_file.write('\n')
-        if not workers:
-            workers = 1
-        suite_file.write('workers = {}'.format(workers))
+        if not processes:
+            processes = 1
+        suite_file.write('processes = {}'.format(processes))
         suite_file.write('\n\n')
         suite_file.write('tests = {}\n'.format(_format_list_items(test_cases)))
 
@@ -45,7 +45,7 @@ def new_suite(root_path, project, parents, suite_name):
     suite_content = ('\n'
                      'browsers = []\n\n'
                      'environments = []\n\n'
-                     'workers = 1\n\n'
+                     'processes = 1\n\n'
                      'tests = []\n')
     errors = []
     base_path = os.path.join(root_path, 'projects', project, 'suites')
@@ -65,13 +65,13 @@ def new_suite(root_path, project, parents, suite_name):
     return errors
 
 
-def get_suite_amount_of_workers(workspace, project, suite):
-    """Get the amount of workers defined in a suite.
-    Default is 1 if suite does not have workers defined"""
+def get_suite_amount_of_processes(workspace, project, suite):
+    """Get the amount of processes defined in a suite.
+    Default is 1 if suite does not have processes defined"""
     amount = 1
     suite_module = get_suite_module(workspace, project, suite)
-    if hasattr(suite_module, 'workers'):
-        amount = suite_module.workers
+    if hasattr(suite_module, 'processes'):
+        amount = suite_module.processes
     return amount
 
 
