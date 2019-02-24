@@ -83,6 +83,7 @@ class ExecutionRunner:
         self.suite_name = None
         self.test_name = None
         self.selected_browsers = None
+        self.start_time = None
         self.suite = SimpleNamespace(processes=None, browsers=None, envs=None,
                                      before=None, after=None)
         has_failed_tests = self._create_execution_has_failed_tests_flag()
@@ -188,6 +189,12 @@ class ExecutionRunner:
         output = 'Result:{}{}'.format(result_string[:-1], in_elapsed_time)
         print()
         print(output)
+
+    def _get_elapsed_time(self, start_time):
+        elapsed_time = 0
+        if start_time:
+            elapsed_time = round(time.time() - self.start_time, 2)
+        return elapsed_time
 
     def run_test(self, test):
         """Run a single test.
@@ -330,10 +337,14 @@ class ExecutionRunner:
         for test in self.execution.tests:
             test.reportdir = report.create_report_directory(self.execution.reportdir,
                                                             test.name, self.is_suite)
-        self._execute()
+        try:
+            self._execute()
+        except KeyboardInterrupt:
+            self.execution.has_failed_tests.value = True
+            self._finalize()
 
     def _execute(self):
-        start_time = time.time()
+        self.start_time = time.time()
         suite_error = False
 
         # run suite `before` function
@@ -369,8 +380,12 @@ class ExecutionRunner:
                 print('ERROR: suite before function failed')
                 print(traceback.format_exc())
 
+        self._finalize()
+
+    def _finalize(self):
+        elapsed_time = self._get_elapsed_time(self.start_time)
+
         # generate report.json
-        elapsed_time = round(time.time() - start_time, 2)
         self.report = report_parser.generate_execution_report(self.execution.reportdir,
                                                               elapsed_time)
 

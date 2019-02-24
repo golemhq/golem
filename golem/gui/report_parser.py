@@ -1,8 +1,10 @@
 """Functions to parse Golem report files."""
 import json
 import os
+import sys
 import errno
 import base64
+import traceback
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
@@ -62,7 +64,7 @@ def get_last_executions(root_path, projects=None, suite=None, limit=5):
 
 
 def _parse_execution_data(execution_directory=None, workspace=None, project=None,
-                          suite=None, execution=None):
+                          suite=None, execution=None, finalize=False):
     execution_data = {
         'tests': [],
         'total_tests': 0,
@@ -111,38 +113,38 @@ def _parse_execution_data(execution_directory=None, workspace=None, project=None
             new_test_case['full_name'] = test_case
 
             test_set_path = os.path.join(test_case_path, test_set)
-
-            # if the suite is being executed, the report dir might exist,
-            # but the report.json may still not be generated
-            # check if the test has finished (report.json file exists)
             report_json_path = os.path.join(test_set_path, 'report.json')
-            if not os.path.isfile(report_json_path):
-                # test has not finished, add empty test case to the list (pending or running)
-                status = ResultsEnum.PENDING
-                report_log_path = os.path.join(test_set_path, 'execution_info.log')
+            report_log_path = os.path.join(test_set_path, 'execution_info.log')
+            try:
+                with open(report_json_path) as f:
+                    report_data = json.load(f)
+                    status = report_data['result']
+                    new_test_case['test_elapsed_time'] = report_data['test_elapsed_time']
+                    start_date_time = get_date_time_from_timestamp(report_data['test_timestamp'])
+                    new_test_case['start_date_time'] = start_date_time
+                    new_test_case['browser'] = report_data['browser']
+                    new_test_case['data'] = report_data['test_data']
+                    new_test_case['environment'] = report_data['environment']
+                    # TODO, previous versions won't have set_name
+                    # remove the if when retro-compatibility is not required
+                    if 'set_name' in report_data:
+                        new_test_case['set_name'] = report_data['set_name']
+            except FileNotFoundError:
                 if os.path.isfile(report_log_path):
-                    status = ResultsEnum.RUNNING
-                new_test_case['result'] = status
-                execution_data['tests'].append(new_test_case)
-                execution_data['totals_by_result']['pending'] = execution_data['totals_by_result'].get('pending', 0) + 1
-            else:
-                # test has finished
-                with open(os.path.join(test_set_path, 'report.json'), 'r') as json_file:
-                    report_data = json.load(json_file)
-                new_test_case['result'] = report_data['result']
-                status = report_data['result']
-                execution_data['totals_by_result'][status] = execution_data['totals_by_result'].get(status, 0) + 1
-                new_test_case['test_elapsed_time'] = report_data['test_elapsed_time']
-                start_date_time = get_date_time_from_timestamp(report_data['test_timestamp'])
-                new_test_case['start_date_time'] = start_date_time
-                new_test_case['browser'] = report_data['browser']
-                new_test_case['data'] = report_data['test_data']
-                new_test_case['environment'] = report_data['environment']
-                # TODO, previous versions won't have set_name
-                # remove the if when retro-compatibility is not required
-                if 'set_name' in report_data:
-                    new_test_case['set_name'] = report_data['set_name']
-                execution_data['tests'].append(new_test_case)
+                    # test had been started
+                    status = ResultsEnum.STOPPED if finalize else ResultsEnum.RUNNING
+                else:
+                    # test had not been started
+                    status = ResultsEnum.NOT_RUN if finalize else ResultsEnum.PENDING
+            except json.decoder.JSONDecodeError:
+                # report.json exists but contains malformed JSON
+                status = ResultsEnum.STOPPED if finalize else ResultsEnum.RUNNING
+            except Exception:
+                sys.exit('an error occurred generating JSON report\n{}'
+                         .format(traceback.format_exc()))
+            new_test_case['result'] = status
+            execution_data['totals_by_result'][status] = execution_data['totals_by_result'].get(status, 0) + 1
+            execution_data['tests'].append(new_test_case)
     return execution_data
 
 
@@ -286,7 +288,7 @@ def generate_execution_report(execution_directory, elapsed_time):
     """Generate a json report of the entire suite execution so
     it is not required to parse the entire execution test by test
     each time it is requested by the reports module."""
-    data = _parse_execution_data(execution_directory=execution_directory)
+    data = _parse_execution_data(execution_directory=execution_directory, finalize=True)
     data['net_elapsed_time'] = elapsed_time
     report_path = os.path.join(execution_directory, 'report.json')
     with open(report_path, 'w', encoding='utf-8') as json_file:
