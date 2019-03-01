@@ -618,6 +618,41 @@ def assert_element_text_not_contains(element, text):
     _screenshot_on_step()
 
 
+def assert_element_value(element, value):
+    """Assert element value
+
+    Parameters:
+    element : element
+    value : value
+    """
+    element = get_browser().find(element, timeout=0)
+    step_message = ("Assert element {} value is '{}'".format(element.name, value))
+    _add_step(step_message)
+    _run_wait_hook()
+    element_value = element.value
+    msg = ("expected element {} value to be '{}' was '{}'"
+           .format(element.name, value, element_value))
+    assert element_value == value, msg
+    _screenshot_on_step()
+
+
+def assert_element_value_is_not(element, value):
+    """Assert element value is not `value`
+
+    Parameters:
+    element : element
+    value : value
+    """
+    element = get_browser().find(element, timeout=0)
+    step_message = ("Assert element {} value is not '{}'".format(element.name, value))
+    _add_step(step_message)
+    _run_wait_hook()
+    element_value = element.value
+    msg = ("expected element {} value to not be '{}'".format(element.name, value))
+    assert element_value != value, msg
+    _screenshot_on_step()
+
+
 def assert_equals(actual_value, expected_value):
     """DEPRECATED
     Assert actual value equals expected value
@@ -1233,7 +1268,7 @@ def get_element_value(element):
     """
     element = get_browser().find(element)
     execution.logger.debug("Get '{}' element value".format(element))
-    return element.get_attribute('value')
+    return element.value
 
 
 def get_page_source():
@@ -1582,6 +1617,20 @@ def send_keys(element, text):
     element = get_browser().find(element)
     with _step("Write '{}' in element {}".format(text, element.name)):
         element.send_keys(text)
+
+
+def send_keys_with_delay(element, text, delay=0.1):
+    """Send keys to element one by one with a delay between keys.
+    Delay must be a positive int or float.
+
+    Parameters:
+    element : element
+    text : value
+    delay (optional, 0.1) : value
+    """
+    element = get_browser().find(element)
+    with _step("Write '{}' in element {} with delay".format(text, element.name)):
+        element.send_keys_with_delay(text, delay)
 
 
 def send_text_to_alert(text):
@@ -2208,6 +2257,37 @@ def verify_element_text_not_contains(element, text):
         s.error = ("expected element {} text '{}' to not contain '{}'"
                    .format(element.name, element.text, text))
         s.condition = text not in element.text
+
+
+def verify_element_value(element, value):
+    """Verify element value
+
+    Parameters:
+    element : element
+    value : value
+    """
+    element = get_browser().find(element, timeout=0)
+    step_message = ("Verify element {} value is '{}'".format(element.name, value))
+    with _verify_step(step_message) as s:
+        element_value = element.value
+        s.error = ("expected element {} value to be '{}' was '{}'"
+                   .format(element.name, value, element_value))
+        s.condition = element_value == value
+
+
+def verify_element_value_is_not(element, value):
+    """Verify element value is not `value`
+
+    Parameters:
+    element : element
+    value : value
+    """
+    element = get_browser().find(element, timeout=0)
+    step_message = ("Verify element {} value is not '{}'".format(element.name, value))
+    with _verify_step(step_message) as s:
+        element_value = element.value
+        s.error = ("expected element {} value to not be '{}'".format(element.name, value))
+        s.condition = element_value != value
 
 
 def verify_exists(element):

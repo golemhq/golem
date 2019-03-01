@@ -131,7 +131,7 @@ Finds a list of elements within this element’s children by ID. Will return a l
 
 Use [find_all](#find-all-args-kwargs-small-golem-small) instead.
 
-#### **find_elements_by_link_text**(link_text) <small>[]</small>
+#### **find_elements_by_link_text**(link_text) <small>[Selenium]</small>
 
 Finds a list of elements within this element’s children by visible link text.
 
@@ -217,6 +217,10 @@ if element1 == element2:
     print("These 2 are equal")
 ```
 
+#### **inner_html** <small>[Golem]</small>
+
+Element innerHTML attribute
+
 #### **is_displayed**() <small>[Selenium]</small>
 
 Whether the element is visible to a user.
@@ -250,6 +254,10 @@ Returns the top lefthand corner location on the screen, or None if the element i
 #### **mouse_over**() <small>[Golem]</small>
 
 Mouse over element
+
+#### **outer_html** <small>[Golem]</small>
+
+Element outerHTML attribute
 
 #### **parent** <small>[Selenium]</small>
 
@@ -317,6 +325,17 @@ file_input.send_keys("path/to/profilepic.gif")
 # in os.path to return the actual path to support cross OS testing.
 # file_input.send_keys(os.path.abspath("path/to/profilepic.gif"))
 ```
+
+#### **send_keys_with_delay**(value, delay=0.1) <small>[Golem]</small>
+
+Send keys to element one by one with a delay between keys.
+
+Args:
+ - value: a string to type
+ - delay: time between keys (in seconds)
+
+Raises:
+ - ValueError: if delay is not a positive int or float
 
 #### **size** <small>[Selenium]</small>
 
