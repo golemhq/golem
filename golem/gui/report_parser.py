@@ -6,8 +6,24 @@ import base64
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
-from golem.core import test_execution
+from golem.core import test_execution, utils
 from golem.test_runner.conf import ResultsEnum
+
+
+def get_execution_report_default():
+    params = utils.ImmutableKeysDict(browsers=[],
+                                     processes=None,
+                                     environments=[],
+                                     tags=[],
+                                     remote_url='')
+
+    execution_report = utils.ImmutableKeysDict(tests=[],
+                                               params=params,
+                                               total_tests=0,
+                                               totals_by_result={},
+                                               net_elapsed_time=0,
+                                               has_finished=False)
+    return execution_report
 
 
 def get_date_time_from_timestamp(timestamp):
@@ -63,11 +79,7 @@ def get_last_executions(root_path, projects=None, suite=None, limit=5):
 
 def _parse_execution_data(execution_directory=None, workspace=None, project=None,
                           suite=None, execution=None):
-    execution_data = {
-        'tests': [],
-        'total_tests': 0,
-        'totals_by_result': {}
-    }
+    execution_data = get_execution_report_default()
     if not execution_directory:
         execution_directory = os.path.join(workspace, 'projects', project,
                                            'reports', suite, execution)
@@ -282,12 +294,21 @@ def is_execution_finished(path, sets):
     return is_finished
 
 
-def generate_execution_report(execution_directory, elapsed_time):
+def generate_execution_report(execution_directory, elapsed_time, browsers,
+                              processes, environments, tags, remote_url):
     """Generate a json report of the entire suite execution so
     it is not required to parse the entire execution test by test
     each time it is requested by the reports module."""
     data = _parse_execution_data(execution_directory=execution_directory)
     data['net_elapsed_time'] = elapsed_time
+    data['params']['browsers'] = browsers
+    remote_browser = any([b['remote'] for b in browsers])
+    contains_remote = any('remote' in b['name'] for b in browsers)
+    if remote_browser or contains_remote:
+        data['params']['remote_url'] = remote_url
+    data['params']['processes'] = processes
+    data['params']['environments'] = environments
+    data['params']['tags'] = tags
     report_path = os.path.join(execution_directory, 'report.json')
     with open(report_path, 'w', encoding='utf-8') as json_file:
         json.dump(data, json_file, indent=4)

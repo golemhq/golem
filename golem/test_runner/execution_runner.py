@@ -91,7 +91,7 @@ class ExecutionRunner:
                                      before=None, after=None, tags=None)
         has_failed_tests = self._create_execution_has_failed_tests_flag()
         self.execution = SimpleNamespace(processes=1, browsers=[], envs=[],
-                                         tests=[], reportdir=None,
+                                         tests=[], reportdir=None, tags=[],
                                          has_failed_tests=has_failed_tests)
 
     @staticmethod
@@ -183,16 +183,16 @@ class ExecutionRunner:
 
     def _filter_tests_by_tags(self):
         tests = []
-        tags = self.cli_args.tags or self.suite.tags
         try:
             tests = tags_manager.filter_tests_by_tags(test_execution.root_path,
-                                                      self.project, self.tests, tags)
+                                                      self.project, self.tests,
+                                                      self.execution.tags)
         except tags_manager.InvalidTagExpression as e:
             print('{}: {}'.format(e.__class__.__name__, e))
             self.execution.has_failed_tests.value = True
         else:
             if len(tests) == 0:
-                print("No tests found with tag(s): {}".format(', '.join(tags)))
+                print("No tests found with tag(s): {}".format(', '.join(self.execution.tags)))
         return tests
 
     def _print_results(self):
@@ -291,7 +291,8 @@ class ExecutionRunner:
         self.execution.reportdir = self._create_execution_directory()
 
         # Filter tests by tags
-        if self.cli_args.tags or self.suite.tags:
+        self.execution.tags = self.cli_args.tags or self.suite.tags or []
+        if self.execution.tags:
             self.tests = self._filter_tests_by_tags()
 
         if self.tests:
@@ -382,12 +383,12 @@ class ExecutionRunner:
                     run_test(test_execution.root_path, self.project, test.name,
                              test.data_set, test.secrets, test.browser,
                              test_execution.settings, test.reportdir,
-                             self.execution.has_failed_tests)
+                             self.execution.has_failed_tests, self.execution.tags)
             else:
                 # run tests using multiprocessing
                 multiprocess_executor(self.project, self.execution.tests,
                                       self.execution.has_failed_tests,
-                                      self.execution.processes)
+                                      self.execution.processes, self.execution.tags)
 
         # run suite `after` function
         if self.suite.after:
@@ -407,7 +408,12 @@ class ExecutionRunner:
 
         # generate report.json
         self.report = report_parser.generate_execution_report(self.execution.reportdir,
-                                                              elapsed_time)
+                                                              elapsed_time,
+                                                              self.execution.browsers,
+                                                              self.execution.processes,
+                                                              self.execution.envs,
+                                                              self.execution.tags,
+                                                              test_execution.settings['remote_url'])
         if self.is_suite:
             self._print_results()
 

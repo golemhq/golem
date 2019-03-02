@@ -9,13 +9,11 @@ $(document).ready(function(){
         $(".spinner").hide()
         ExecutionReport.loadReport(global.executionData);
     }
-
 	$("#generalTable").on('click', 'tr', function(){
 		let moduleName = $(this).find("td[data='module']").html();
 		if(moduleName.length == 0){moduleName = '-'}
 		DetailTable.filterDetailTableByModule(moduleName);
 	})
-
 	DetailTable.instantiateDetailTableFilterListeners();
 });
 
@@ -26,6 +24,7 @@ const ExecutionReport = new function(){
 	this.queryDelay = 1500;
 	this.netTime = undefined;
 	this.tests = {};
+	this.params = {};
 
 	this.getReportData = function(){
 		 $.ajax({
@@ -68,6 +67,20 @@ const ExecutionReport = new function(){
                 DetailTable.loadTestRowResult(test);
             }
 		}
+		// load execution params
+		Object.keys(execution_data.params).forEach(function(param){
+		    let value = execution_data.params[param];
+		    if(ExecutionReport.params[param] !== value){
+		        ExecutionReport.params[param] = value;
+		        if(param == 'browsers'){
+		            value = value.map(b => b.name)
+		        }
+		        if(value.constructor == Array){
+		            value = value.join(', ')
+		        }
+		        $(`#configSection div[data='${param}']>span.param-value`).html(value);
+		    }
+		});
 	}
 
 	this.getTestsInModule = function(module){

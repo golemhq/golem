@@ -378,3 +378,13 @@ def prompt_yes_no(question, default=True):
             return False
         elif not choice:
             return default
+
+
+class ImmutableKeysDict(dict):
+    """A dictionary where keys cannot be added after instantiation"""
+
+    def __setitem__(self, key, value):
+        if key not in self:
+            raise AttributeError("cannot add new keys to ImmutableKeysDict")
+        dict.__setitem__(self, key, value)
+
