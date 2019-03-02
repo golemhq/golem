@@ -1,8 +1,9 @@
 import os
+import json
 
 import pytest
 
-from golem.core import test_case, test_execution
+from golem.core import test_case, test_execution, settings_manager
 
 
 SAMPLE_TEST_CONTENT = """
@@ -342,12 +343,12 @@ class TestSaveTestCase:
             ],
             'teardown': []
         }
-        test_data = [{
+        data = [{
             'key': '\'value\''
         }]
-        test_execution.settings['test_data'] = 'infile'
+        settings_manager.save_project_settings(testdir, project, '{"test_data": "infile"}')
         test_case.save_test_case(testdir, project, 'a.b.test_one', description,
-                                 page_objects, test_steps, test_data, [])
+                                 page_objects, test_steps, data, [])
         path = os.path.join(project_function.path, 'tests', 'a', 'b', 'test_one.py')
         expected = (
             '\n'
@@ -386,12 +387,12 @@ class TestSaveTestCase:
             ],
             'teardown': []
         }
-        test_data = [{
+        data = [{
             'key': '\'value\''
         }]
         test_execution.settings['test_data'] = 'csv'
         test_case.save_test_case(testdir, project, 'a.b.test_one', description,
-                                 page_objects, test_steps, test_data, [])
+                                 page_objects, test_steps, data, [])
         path = os.path.join(project_function.path, 'tests', 'a', 'b', 'test_one.py')
         expected = (
             '\n'

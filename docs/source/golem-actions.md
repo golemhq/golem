@@ -287,6 +287,14 @@ Assert the text of the element is not *text*
 
 Assert element does not contain *text*
 
+### assert_element_value(element, value)
+
+Assert element value
+
+### assert_element_value_is_not(element, value)
+
+Assert element value is not *value*
+
 ### check_element(element)
 
 Check an element (checkbox or radiobutton).
@@ -356,6 +364,11 @@ Send keys to element. Text is hidden from logs and report (masked by asterisks).
 ### send_keys(element, text)
 
 Send text to element
+
+### send_keys_with_delay(element, text, delay=0.1)
+
+Send keys to element one by one with a delay between keys.
+Delay must be a positive int or float.
 
 ### submit_form(element)
 
@@ -436,6 +449,14 @@ Verify the text of the element is not *text*
 ### verify_element_text_not_contains(element, text)
 
 Verify element does not contain text
+
+### verify_element_value(element, value)
+
+Verify element value
+
+### verify_element_value_is_not(element, value)
+
+Verify element value is not *value*
 
 ### verify_exists(element)
 

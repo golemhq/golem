@@ -1,4 +1,5 @@
 # from typing import List # not supported in 3.4
+import time
 
 from selenium.webdriver.remote.webelement import WebElement as RemoteWebElement
 from selenium.webdriver.firefox.webelement import FirefoxWebElement
@@ -102,6 +103,11 @@ class ExtendedWebElement:
         script = 'return arguments[0] == document.activeElement'
         return self.parent.execute_script(script, self)
 
+    @property
+    def inner_html(self):
+        """"Element innerHTML attribute"""
+        return self.get_attribute('innerHTML')
+
     def javascript_click(self):
         """Click element using Javascript"""
         self.parent.execute_script('arguments[0].click();', self)
@@ -110,6 +116,11 @@ class ExtendedWebElement:
         """Mouse over element"""
         action_chains = ActionChains(self.parent)
         action_chains.move_to_element(self).perform()
+
+    @property
+    def outer_html(self):
+        """"Element outerHTML attribute"""
+        return self.get_attribute('outerHTML')
 
     def press_key(self, key):
         """Press a key on element
@@ -134,6 +145,25 @@ class ExtendedWebElement:
     def select(self):
         """Return a Select object"""
         return Select(self)
+
+    def send_keys_with_delay(self, value, delay=0.1):
+        """Send keys to element one by one with a delay between keys.
+
+        :Args:
+         - value: a string to type
+         - delay: time between keys (in seconds)
+
+        :Raises:
+         - ValueError: if delay is not a positive int or float
+        """
+        if not isinstance(delay, int) and not isinstance(delay, float):
+            raise ValueError('delay must be int or float')
+        elif delay < 0:
+            raise ValueError('delay must be a positive number')
+        else:
+            for c in value:
+                self.send_keys(c)
+                time.sleep(delay)
 
     def uncheck(self):
         """Uncheck element if element is checkbox.

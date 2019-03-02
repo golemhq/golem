@@ -84,11 +84,12 @@ The default is auto-generated with the format: 'year.month.day.hour.minutes.seco
 
 ### gui
 
-```
-golem gui [-p|--port]
-```
+**golem gui [--host -p|--port -d|--debug]**
 
-Start Golem Web Module (GUI). Port indicates which port number to use, default is 5000.
+Start Golem Web Module (GUI).
+Default host is 127.0.0.1 (localhost). Use host=0.0.0.0 to make the GUI publicly accessible.
+Port indicates which port number to use, default is 5000.
+Debug runs the GUI app in debug mode, default is False. Do not run in debug mode on production machines.
 
 ### createproject
 

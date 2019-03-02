@@ -7,7 +7,8 @@ import inspect
 
 from golem.core import (utils,
                         test_execution,
-                        file_manager)
+                        file_manager,
+                        settings_manager)
 from golem.core import test_data as test_data_module
 
 
@@ -275,7 +276,8 @@ def save_test_case(root_path, project, full_test_case_name, description,
         f.write('pages = {}\n'.format(_format_page_object_string(page_objects)))
         f.write('\n')
         # write test data if required or save test data to external file
-        if test_execution.settings['test_data'] == 'infile':
+        settings = settings_manager.get_project_settings(root_path, project)
+        if settings['test_data'] == 'infile':
             if test_data:
                 f.write('data = {}'.format(_format_data(test_data)))
                 test_data_module.remove_csv_if_exists(root_path, project, full_test_case_name)
@@ -323,12 +325,13 @@ def save_test_case_code(root_path, project, full_test_case_name,
     with open(test_case_path, 'w') as test_file:
         test_file.write(content)
     # save test data
-    if test_execution.settings['test_data'] == 'csv':
+    settings = settings_manager.get_project_settings(root_path, project)
+    if settings['test_data'] == 'csv':
         #save csv data
         test_data_module.save_external_test_data_file(root_path, project,
                                                       full_test_case_name,
                                                       table_test_data)
-    elif test_execution.settings['test_data'] == 'infile':
+    elif settings['test_data'] == 'infile':
         # remove csv files
         test_data_module.remove_csv_if_exists(root_path, project, full_test_case_name)
 

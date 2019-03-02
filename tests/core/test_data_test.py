@@ -63,6 +63,7 @@ class TestSaveExternalTestDataFile:
                         '\'quoted_string\'\n')
             assert result == expected
 
+
 class TestGetExternalTestData:
 
     def test_get_external_test_data(self, project_function_clean, test_utils):
