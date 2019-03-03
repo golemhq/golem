@@ -79,5 +79,5 @@ Multiple tags are always used with *and* operator.
 To use a combination of *and*, *or*, and *not*, a tag expression must be used:
 
 ```
-golem run project suite --t "smoke and (regression or not 'release 001')"
+golem run project suite -t "smoke and (regression or not 'release 001')"
 ``` 
