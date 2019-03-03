@@ -9,6 +9,8 @@ from golem.core import test_case, test_execution, settings_manager
 SAMPLE_TEST_CONTENT = """
 description = 'some description'
 
+tags = []
+
 data = [{'a': 'b'}]
 
 pages = ['page1', 'page2']
@@ -28,6 +30,8 @@ def teardown(data):
 
 NEW_TEST_CONTENT = """
 description = ''
+
+tags = []
 
 pages = []
 
@@ -354,6 +358,8 @@ class TestSaveTestCase:
             '\n'
             'description = \'description\'\n'
             '\n'
+            'tags = []\n'
+            '\n'
             'pages = [\'page1\',\n'
             '         \'page2\']\n'
             '\n'
@@ -397,6 +403,8 @@ class TestSaveTestCase:
         expected = (
             '\n'
             'description = \'description\'\n'
+            '\n'
+            'tags = []\n'
             '\n'
             'pages = []\n'
             '\n'

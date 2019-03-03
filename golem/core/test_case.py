@@ -168,6 +168,7 @@ def new_test_case(root_path, project, parents, tc_name):
     test_case_content = (
         "\n"
         "description = ''\n\n"
+        "tags = []\n\n"
         "pages = []\n\n"
         "def setup(data):\n"
         "    pass\n\n"
@@ -269,9 +270,9 @@ def save_test_case(root_path, project, full_test_case_name, description,
         f.write('\n')
         f.write(formatted_description)
         f.write('\n')
-        if tags:
-            f.write('tags = {}\n'.format(_format_tags_string(tags)))
-            f.write('\n')
+        # write tags
+        f.write('tags = {}\n'.format(_format_tags_string(tags)))
+        f.write('\n')
         # write the list of pages
         f.write('pages = {}\n'.format(_format_page_object_string(page_objects)))
         f.write('\n')
