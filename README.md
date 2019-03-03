@@ -112,11 +112,12 @@ golem run <project> <test>
 golem run <project> <suite>
 ```
 
-Flags:
+Args:
 
 * -b | --browsers: a list of browsers, by default use defined in settings.json or Chrome
-* -t | --threads: run in parallel, default 1 (not parallel)
+* -p | --processes: run in parallel, default 1 (not parallel)
 * -e | --environments: a list of environments, the default is none
+* -t | --tags: filter tests by tags
 
 Documentation
 --------------------------------------

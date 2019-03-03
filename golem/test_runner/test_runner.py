@@ -49,10 +49,10 @@ def _get_set_name(test_data):
 
 
 def run_test(workspace, project, test_name, test_data, secrets, browser,
-             settings, report_directory, execution_has_failed_tests=None):
+             settings, report_directory, execution_has_failed_tests=None, tags=None):
     """Run a single test"""
     runner = TestRunner(workspace, project, test_name, test_data, secrets, browser,
-                        settings, report_directory, execution_has_failed_tests)
+                        settings, report_directory, execution_has_failed_tests, tags)
     runner.prepare()
 
 
@@ -60,7 +60,7 @@ class TestRunner:
     __test__ = False  # ignore this class from Pytest
 
     def __init__(self, workspace, project, test_name, test_data, secrets, browser,
-                 settings, report_directory, execution_has_failed_tests=None):
+                 settings, report_directory, execution_has_failed_tests=None, tags=None):
         self.result = {
             'result': '',
             'errors': [],
@@ -85,6 +85,7 @@ class TestRunner:
         self.test_start_time = time.time()
         self.logger = None
         self.execution_has_failed_tests = execution_has_failed_tests
+        self.execution_tags = tags or []
 
     def prepare(self):
         self.result['set_name'] = _get_set_name(self.test_data)
@@ -100,6 +101,7 @@ class TestRunner:
         execution.report_directory = self.report_directory
         execution.data = Data(self.test_data)
         execution.secrets = Secrets(self.secrets)
+        execution.tags = self.execution_tags
         self._print_test_info()
         # add the 'project' directory to python path
         # to enable relative imports from the test

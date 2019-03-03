@@ -31,7 +31,7 @@ class TestRunCommand:
         project = project_function.name
         test_name = 'test_one'
         test_utils.create_test(project_function.testdir, project, [], test_name)
-        test_utils.create_suite(project_function.testdir, project, [], 'suite_one', tests=[test_name])
+        test_utils.create_suite(project_function.testdir, project, 'suite_one', tests=[test_name])
         commands.run_command(project=project, test_query='suite_one')
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
@@ -44,23 +44,25 @@ class TestRunCommand:
         assert os.path.isfile(report)
 
     @pytest.mark.slow
-    def test_golem_run_suite_in_folder(self, project_function, test_utils, caplog):
+    def test_golem_run_suite_in_folder(self, project_function, test_utils, caplog, capsys):
         project = project_function.name
         test_name = 'test_one'
         test_utils.create_test(project_function.testdir, project, [], test_name)
-        test_utils.create_suite(project_function.testdir, project, ['folder'],
-                                'suite_one', tests=[test_name])
+        test_utils.create_suite(project_function.testdir, project, 'folder.suite_one',
+                                tests=[test_name])
         commands.run_command(project=project, test_query='folder.suite_one')
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
         assert records[4].message == 'Test Result: SUCCESS'
+        out, err = capsys.readouterr()
+        assert 'Tests found: 1' in out
 
     @pytest.mark.slow
     def test_golem_run_suite_py(self, project_function, test_utils, caplog):
         project = project_function.name
         test_name = 'test_one'
         test_utils.create_test(project_function.testdir, project, [], test_name)
-        test_utils.create_suite(project_function.testdir, project, [], 'suite_one', tests=[test_name])
+        test_utils.create_suite(project_function.testdir, project, 'suite_one', tests=[test_name])
         commands.run_command(project=project, test_query='suite_one.py')
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
@@ -71,7 +73,8 @@ class TestRunCommand:
         project = project_function.name
         test_name = 'test_one'
         test_utils.create_test(project_function.testdir, project, [], test_name)
-        test_utils.create_suite(project_function.testdir, project, ['folder'], 'suite_one', tests=[test_name])
+        test_utils.create_suite(project_function.testdir, project, 'folder.suite_one',
+                                tests=[test_name])
         commands.run_command(project=project, test_query='folder/suite_one.py')
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
@@ -84,8 +87,8 @@ class TestRunCommand:
         project = project_function.name
         test_name = 'test_one'
         test_utils.create_test(project_function.testdir, project, [], test_name)
-        test_utils.create_suite(project_function.testdir, project, ['folder'],
-                                'suite_one', tests=[test_name])
+        test_utils.create_suite(project_function.testdir, project, 'folder.suite_one',
+                                tests=[test_name])
         commands.run_command(project=project, test_query='folder\\suite_one.py')
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
@@ -189,21 +192,20 @@ class TestRunCommand:
         assert 'foo.bar.test_three' in tests
 
     @pytest.mark.slow
-    def test_golem_run_directory_no_tests_present(self, project_function):
+    def test_golem_run_directory_no_tests_present(self, project_function, capsys):
         project = project_function.name
-        with pytest.raises(SystemExit) as excinfo:
-            commands.run_command(project=project, test_query='.')
-        msg = ('No tests were found in {}'
-               .format(os.path.join('tests', '')))
-        assert str(excinfo.value) == msg
-
+        # run all tests, there are no tests in project
+        commands.run_command(project=project, test_query='.')
+        msg = 'No tests were found in {}'.format(os.path.join('tests', ''))
+        out, err = capsys.readouterr()
+        assert msg in out
+        # run tests in an empty directory
         path = os.path.join(project_function.path, 'tests', 'foo')
         file_manager.create_directory(path=path, add_init=True)
-        with pytest.raises(SystemExit) as excinfo:
-            commands.run_command(project=project, test_query='foo')
-        msg = ('No tests were found in {}'
-               .format(os.path.join('tests', 'foo')))
-        assert str(excinfo.value) == msg
+        commands.run_command(project=project, test_query='foo')
+        msg = 'No tests were found in {}'.format(os.path.join('tests', 'foo'))
+        out, err = capsys.readouterr()
+        assert msg in out
 
 
 class TestCreateDirectoryCommand:

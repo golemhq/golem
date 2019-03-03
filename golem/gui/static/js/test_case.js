@@ -15,6 +15,7 @@ var Test = new function(){
     this.unsavedChanges = false;
 
     this.initialize = function(project, testCaseName, fullTestCaseName, importedPages){
+        Test.getUniqueTags(project);
         Test.project = project;
         Test.name = testCaseName;
         Test.fullName = fullTestCaseName;
@@ -229,13 +230,22 @@ var Test = new function(){
                 testSteps.teardown.push(thisStep);
             }
         });
+        let tags = [];
+        if($("#tags").val().length > 0){
+            $($("#tags").val().split(',')).each(function(){
+                if(this.trim().length > 0){
+                    tags.push(this.trim());
+                }
+            });
+        }
         let data = {
             'description': description,
             'pageObjects': pageObjects,
             'testData': testData,
             'testSteps': testSteps,
             'project': Test.project,
-            'testCaseName': Test.fullName
+            'testCaseName': Test.fullName,
+            'tags': tags,
         }
         $.ajax({
             url: "/save_test_case/",
@@ -349,6 +359,33 @@ var Test = new function(){
         let inputVal = $(elem).closest('.page').find('input.page-name').val();
         $("#pageModalIframe").attr('src', '/project/'+Test.project+'/page/'+inputVal+'/no_sidebar/');
         $("#pageModal").modal('show');        
+    }
+
+    this.getUniqueTags = function(project){
+        $.ajax({
+            url: "/project/tags/",
+            data: {
+                "project": project
+            },
+            dataType: 'json',
+            type: 'POST',
+            success: function(tags) {
+                Test.projectTags = tags;
+                Test.refreshTagInputAutocomplete();
+            },
+        });
+    }
+
+    this.refreshTagInputAutocomplete = function(){
+        $('#tags').autocomplete({
+            lookup: Test.projectTags,
+            minChars: 0,
+            delimiter: ', ',
+            triggerSelectOnValidInput: false,
+            onSelect: function (suggestion) {
+                $('#tags').val($('#tags').val()+', ');
+            }
+        });
     }
 
     this.Utils = new function(){

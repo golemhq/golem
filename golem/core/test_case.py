@@ -110,6 +110,7 @@ def get_test_case_content(root_path, project, test_case_name):
     test_contents = {
         'description': '',
         'pages': [],
+        'tags': [],
         'steps': {
             'setup': [],
             'test': [],
@@ -119,7 +120,9 @@ def get_test_case_content(root_path, project, test_case_name):
     test_module = import_test_case_module(root_path, project, test_case_name)
     # get description
     description = getattr(test_module, 'description', '')
-    
+
+    tags = getattr(test_module, 'tags', [])
+
     # get list of pages
     pages = getattr(test_module, 'pages', [])
       
@@ -143,6 +146,7 @@ def get_test_case_content(root_path, project, test_case_name):
 
     test_contents['description'] = description
     test_contents['pages'] = pages
+    test_contents['tags'] = tags
     test_contents['steps']['setup'] = setup_steps
     test_contents['steps']['test'] = test_steps
     test_contents['steps']['teardown'] = teardown_steps
@@ -164,6 +168,7 @@ def new_test_case(root_path, project, parents, tc_name):
     test_case_content = (
         "\n"
         "description = ''\n\n"
+        "tags = []\n\n"
         "pages = []\n\n"
         "def setup(data):\n"
         "    pass\n\n"
@@ -198,6 +203,15 @@ def _format_page_object_string(page_objects):
         po_string = po_string + " '" + page + "',\n" + " " * 8
     po_string = "[{}]".format(po_string.strip()[:-1])
     return po_string
+
+
+def _format_tags_string(tags):
+    """Format tags string to store in test case."""
+    tags_string = ''
+    for tag in tags:
+        tags_string = tags_string + " '" + tag + "',"
+    tags_string = "[{}]".format(tags_string.strip()[:-1])
+    return tags_string
 
 
 def _format_description(description):
@@ -244,18 +258,20 @@ def generate_test_case_path(root_path, project, full_test_case_name):
 
 
 def save_test_case(root_path, project, full_test_case_name, description,
-                   page_objects, test_steps, test_data):
+                   page_objects, test_steps, test_data, tags):
     """Save test case contents to file.
 
     full_test_case_name is a relative dot path to the test
     """
-    test_case_path = generate_test_case_path(root_path, project,
-                                             full_test_case_name)
+    test_case_path = generate_test_case_path(root_path, project, full_test_case_name)
     formatted_description = _format_description(description)
     with open(test_case_path, 'w', encoding='utf-8') as f:
         # write description
         f.write('\n')
         f.write(formatted_description)
+        f.write('\n')
+        # write tags
+        f.write('tags = {}\n'.format(_format_tags_string(tags)))
         f.write('\n')
         # write the list of pages
         f.write('pages = {}\n'.format(_format_page_object_string(page_objects)))

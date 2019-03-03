@@ -274,7 +274,8 @@ In the future, when the selector of an element changes, even if it's used by hun
 A suite lets you arbitrarily select a subset of all the tests to execute as a group.
 Let's say, you want to test only the most important tests or the tests for a specific module.
 
-A suite contains a list of *tests*, a list of *browsers*, a list of *environments* and the number of *workers*. Consider the following example:
+A suite contains a list of *tests*, *browsers*, *environments*, *tags*, and the number of *processes*.
+Consider the following example:
 
 
 **full_regression.py**
@@ -284,7 +285,9 @@ browsers = ['firefox', 'chrome']
 
 environments = []
 
-workers = 2
+processes = 2
+
+tags = []
 
 tests = [
     'test1',
@@ -303,7 +306,7 @@ tests = [
 
 ### Test Parallelization
 
-The ```workers = 2``` tells Golem how many tests should be executed at the same time. The default is one (one at a time).
+The ```processes = 2``` tells Golem how many tests should be executed at the same time. The default is one (one at a time).
 How many tests can be parallelized depends on your test infrastructure.
 
 

@@ -1,9 +1,18 @@
 # Changelog
 
-## [Unreleased]
+### [Unreleased]
+
+### Changed
+
+- **-t, \-\-threads** argument changed to **-p, \-\-processes**
 
 ### Added
 
+- Filter tests by tags :: r-roos, Luciano Renzi
+    * New argument for *golem run* command: ```-t, --tags```
+    * Add and edit tags using the UI
+    * Accept *tag expressions* for complex comparisons 
+    * Docs: [Filter Tests by Tags](https://golem-framework.readthedocs.io/en/latest/running-tests.html#filter-tests-by-tags)
 - New args to ```golem gui``` command: --host (default 127.0.0.1), -d|--debug (default False)
 - New actions: assert_element_value, assert_element_value_is_not, verify_element_value, verify_element_value_is_not, send_keys_with_delay
 - New WebElement methods: inner_html, outer_html, send_keys_with_delay

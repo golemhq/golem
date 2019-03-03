@@ -321,13 +321,13 @@ const Main = new function(){
             let error = '';
             Main.TestRunner.browsers = $("#runTestBrowsers").val();
             Main.TestRunner.environments = $("#runTestEnvironments").val();
-            let processes = parseInt($("#runTestWorkers").val());
+            let processes = parseInt($("#runTestProcesses").val());
             await Main.TestRunner._getProjectEnvironments();
             if(isNaN(processes)){
-                error = 'Workers must be an integer'
+                error = 'Processes must be an integer'
             }
             else if(Main.TestRunner.processes < 1){
-                error = 'Workers must be at least one'
+                error = 'Processes must be at least one'
             }
             else if(Main.TestRunner.projectEnvironments.length > 1 && Main.TestRunner.environments.length == 0){
                 error = 'Select at least one environment'

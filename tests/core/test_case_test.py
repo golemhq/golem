@@ -9,6 +9,8 @@ from golem.core import test_case, test_execution, settings_manager
 SAMPLE_TEST_CONTENT = """
 description = 'some description'
 
+tags = []
+
 data = [{'a': 'b'}]
 
 pages = ['page1', 'page2']
@@ -28,6 +30,8 @@ def teardown(data):
 
 NEW_TEST_CONTENT = """
 description = ''
+
+tags = []
 
 pages = []
 
@@ -346,13 +350,15 @@ class TestSaveTestCase:
         data = [{
             'key': '\'value\''
         }]
-        settings_manager.save_global_settings(testdir, json.dumps({'test_data': 'infile'}))
+        settings_manager.save_project_settings(testdir, project, '{"test_data": "infile"}')
         test_case.save_test_case(testdir, project, 'a.b.test_one', description,
-                                 page_objects, test_steps, data)
+                                 page_objects, test_steps, data, [])
         path = os.path.join(project_function.path, 'tests', 'a', 'b', 'test_one.py')
         expected = (
             '\n'
             'description = \'description\'\n'
+            '\n'
+            'tags = []\n'
             '\n'
             'pages = [\'page1\',\n'
             '         \'page2\']\n'
@@ -390,13 +396,15 @@ class TestSaveTestCase:
         data = [{
             'key': '\'value\''
         }]
-        settings_manager.save_global_settings(testdir, json.dumps({'test_data': 'csv'}))
+        test_execution.settings['test_data'] = 'csv'
         test_case.save_test_case(testdir, project, 'a.b.test_one', description,
-                                 page_objects, test_steps, data)
+                                 page_objects, test_steps, data, [])
         path = os.path.join(project_function.path, 'tests', 'a', 'b', 'test_one.py')
         expected = (
             '\n'
             'description = \'description\'\n'
+            '\n'
+            'tags = []\n'
             '\n'
             'pages = []\n'
             '\n'

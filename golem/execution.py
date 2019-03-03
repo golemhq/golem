@@ -16,6 +16,7 @@ workspace = None
 report_directory = None
 logger = None
 timers = {}
+tags = []
 
 
 def _reset():
@@ -33,6 +34,7 @@ def _reset():
     global report_directory
     global logger
     global timers
+    global tags
     browser = None
     browser_definition = None
     browsers = {}
@@ -45,3 +47,4 @@ def _reset():
     report_directory = None
     logger = None
     timers = {}
+    tags = []

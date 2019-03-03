@@ -8,7 +8,7 @@ from subprocess import Popen, PIPE, STDOUT
 import pytest
 
 from golem.cli import commands
-from golem.core import test_execution, settings_manager, suite, test_case
+from golem.core import test_execution, settings_manager, suite, test_case, utils
 
 
 # FIXTURES
@@ -175,8 +175,9 @@ class TestUtils:
         return prefix + random_str
 
     @staticmethod
-    def random_numeric_string(length):
-        return ''.join(random.choice(string.digits) for _ in range(length))
+    def random_numeric_string(length, prefix=''):
+        random_str = ''.join(random.choice(string.digits) for _ in range(length))
+        return prefix + random_str
 
     @staticmethod
     def run_command(cmd):
@@ -204,16 +205,24 @@ class TestUtils:
                             os.sep.join(parents), name + '.py')
         with open(path, 'w+') as f:
             f.write(content)
+        return path
 
     @staticmethod
-    def create_suite(testdir, project, parents, name, content=None, tests=None):
-        if content is None and tests is not None:
-            content = 'tests = {}'.format(str(tests))
-        suite.new_suite(testdir, project, parents, name)
-        path = os.path.join(testdir, 'projects', project, 'suites',
-                            os.sep.join(parents), name+'.py')
-        with open(path, 'w+') as f:
-            f.write(content)
+    def create_suite(testdir, project, name, content=None, tests=None,
+                     processes=1, browsers=None, environments=None, tags=None):
+        browsers = browsers or []
+        environments = environments or []
+        tags = tags or []
+        suite_name, parents = utils.separate_file_from_parents(name)
+        if content is None:
+            suite.new_suite(testdir, project, parents, suite_name)
+            suite.save_suite(testdir, project, name, tests, processes, browsers,
+                             environments, tags)
+        else:
+            path = os.path.join(testdir, 'projects', project, 'suites',
+                                os.sep.join(parents), name + '.py')
+            with open(path, 'w+') as f:
+                f.write(content)
 
 
 def pytest_addoption(parser):

@@ -10,7 +10,8 @@ from flask_login import (current_user, login_user, login_required,
 
 import golem
 from golem.core import (environment_manager, file_manager, lock, page_object,
-                        settings_manager, test_case, test_execution, utils)
+                        settings_manager, test_case, test_execution, utils,
+                        tags_manager)
 from golem.core import test_data as test_data_module
 from golem.core import suite as suite_module
 
@@ -262,17 +263,17 @@ def suite_view(project, suite):
         abort(404, 'The suite {} does not exist'.format(suite))
     all_test_cases = utils.get_test_cases(root_path, project)
     selected_tests = suite_module.get_suite_test_cases(root_path, project, suite)
-    worker_amount = suite_module.get_suite_amount_of_workers(root_path, project, suite)
+    processes = suite_module.get_suite_amount_of_processes(root_path, project, suite)
     browsers = suite_module.get_suite_browsers(root_path, project, suite)
-    browsers = ', '.join(browsers)
     default_browser = test_execution.settings['default_browser']
     environments = suite_module.get_suite_environments(root_path, project, suite)
-    environments = ', '.join(environments)
+    tags = suite_module.get_tags(root_path, project, suite)
     return render_template('suite.html', project=project,
                            all_test_cases=all_test_cases['sub_elements'],
                            selected_tests=selected_tests, suite=suite,
-                           worker_amount=worker_amount, browsers=browsers,
-                           default_browser=default_browser, environments=environments)
+                           processes=processes, browsers=browsers,
+                           default_browser=default_browser, environments=environments,
+                           tags=tags)
 
 
 # GLOBAL SETTINGS VIEW
@@ -785,8 +786,9 @@ def save_test_case():
         page_objects = request.json['pageObjects']
         test_data_content = request.json['testData']
         test_steps = request.json['testSteps']
-        test_case.save_test_case(root_path, project, test_name, description,
-                                 page_objects, test_steps, test_data_content)
+        tags = request.json['tags']
+        test_case.save_test_case(root_path, project, test_name, description, page_objects,
+                                 test_steps, test_data_content, tags)
         return json.dumps('ok')
 
 
@@ -867,11 +869,12 @@ def save_suite():
         project = request.json['project']
         suite_name = request.json['suite']
         test_cases = request.json['testCases']
-        workers = request.json['workers']
+        processes = request.json['processes']
+        tags = request.json['tags']
         browsers = request.json['browsers']
         environments = request.json['environments']
         suite_module.save_suite(root_path, project, suite_name, test_cases,
-                                workers, browsers, environments)
+                                processes, browsers, environments, tags)
         return json.dumps('ok')
 
 
@@ -1019,6 +1022,22 @@ def get_amount_of_tests():
 @login_required
 def get_default_browser():
     return jsonify(test_execution.settings['default_browser'])
+
+
+@app.route("/project/tests/tags/", methods=['POST'])
+@login_required
+def get_project_tests_tags():
+    project = request.form['project']
+    tags = tags_manager.get_all_project_tests_tags(test_execution.root_path, project)
+    return jsonify(tags)
+
+
+@app.route("/project/tags/", methods=['POST'])
+@login_required
+def get_project_tags():
+    project = request.form['project']
+    tags = tags_manager.get_project_unique_tags(test_execution.root_path, project)
+    return jsonify(tags)
 
 
 ############

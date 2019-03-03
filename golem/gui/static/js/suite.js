@@ -1,6 +1,8 @@
 
 $(document).ready(function() {
     $('#testCasesTree').treed();
+    // get the tags for all the tests in the project
+    getTestsTags();
     $("#allTestCasesCheckbox").change(function(){
         checkUncheckAllTestCases(this.checked);
     });
@@ -21,12 +23,23 @@ $(document).ready(function() {
             // uncheck the root checkbox 
             $("#allTestCasesCheckbox").prop('checked', false);
         }
-
         // is this a branch?
         var li = $(this).parent();
         if( li.hasClass('branch') ){
             checkBranchTestCases(li, this.checked)
         }
+    });
+
+    $.ajax({
+        url: "/project/tags/",
+        data: {
+            "project": project
+        },
+        dataType: 'json',
+        type: 'POST',
+        success: function(tags) {
+            startTagsAutocomplete(tags)
+        },
     });
 
     $.ajax({
@@ -74,7 +87,6 @@ function checkSelectedTests(selectedTests){
             var lastChar = splitTest[splitTest.length-1].substr(-1);
             if (lastChar == '/') {
                 branchLi = findBranchAndCheckDescendents(splitTest, $("#testCasesTree"));
-
             }
             else{
                 var rootUl = $("#testCasesTree");
@@ -123,7 +135,6 @@ function checkBranchTestCases(branch, isChecked){
     branch.find($(".select-testcase-checkbox")).each(function(){
         $(this).prop('checked', isChecked);
     });
-
 }
 
 
@@ -176,7 +187,6 @@ function verifyIfAllCheckboxesAreCheckedInLevelAndCheckParent(branch){
         else{
             branch.find('>input').prop('checked', true);
         }
-        
         var parentBranch;
         if(branch.parent().closest('.branch').length == 1){
             parentBranch = branch.parent().closest('.branch');
@@ -184,7 +194,6 @@ function verifyIfAllCheckboxesAreCheckedInLevelAndCheckParent(branch){
         else{
             parentBranch = $("#suiteTests");
         }
-
         if(parentBranch.length == 1){
             verifyIfAllCheckboxesAreCheckedInLevelAndCheckParent(parentBranch);
         }
@@ -205,26 +214,22 @@ function uncheckParentAndGrandParents(elem){
 
 
 function saveTestSuite(){
-    var browsers = [];
-    if($("#browsers").val().length > 0){
-        $($("#browsers").val().split(',')).each(function(){
-            if(this.trim().length > 0){
-                browsers.push(this.trim());
-            }
-        });
+    let getCommaSeparatedValues = function(input){
+         let values = []
+         if(input.val().length > 0){
+            $(input.val().split(',')).each(function(){
+                if(this.trim().length > 0){
+                    values.push(this.trim());
+                }
+            });
+        }
+        return values
     }
-
-    var environments = [];
-    if($("#environments").val().length > 0){
-        $($("#environments").val().split(',')).each(function(){
-            if(this.trim().length > 0){
-                environments.push(this.trim());
-            }
-        });
-    }
-
-    var workers = $("#workers").val();
-    var testCases = getAllCheckedTests();
+    let browsers = getCommaSeparatedValues($("#browsers"));
+    let environments = getCommaSeparatedValues($("#environments"));
+    let tags = getCommaSeparatedValues($("#tags"));
+    let processes = $("#processes").val();
+    let testCases = getAllCheckedTests();
     $.ajax({
         url: "/save_suite/",
         data: JSON.stringify({
@@ -232,7 +237,8 @@ function saveTestSuite(){
                 "suite": suite,
                 "browsers": browsers,
                 "environments": environments,
-                "workers": workers,
+                "tags": tags,
+                "processes": processes,
                 "testCases": testCases
             }),
         dataType: 'json',
@@ -319,7 +325,6 @@ function getNodeFullPath(thisLi, nodeName){
 
 
 function runSuite(){
- 
     $.ajax({
         url: "/run_suite/",
         data: {
@@ -329,13 +334,12 @@ function runSuite(){
          dataType: 'json',
          type: 'POST',
          success: function(data) {
-            var url = '/report/project/' + project + '/suite/' + suite + '/' + data + '/';
+            let url = '/report/project/' + project + '/suite/' + suite + '/' + data + '/';
             let msg = 'Running suite ' + suite + " - <a href='" + url + "'>open</a>";
             Main.Utils.toast('info', msg, 15000)
          },
          error: function() {}
      });
-
 }
 
 
@@ -364,10 +368,56 @@ function startEnvironmentsAutocomplete(environments){
     });
 }
 
+
+function startTagsAutocomplete(tags){
+    $('#tags').autocomplete({
+        lookup: tags,
+        minChars: 0,
+        delimiter: ', ',
+        triggerSelectOnValidInput: false,
+        onSelect: function (suggestion) {
+            $('#tags').val($('#tags').val()+', ');
+        }
+    });
+}
+
+
 function updateTestCount(){
     var totalCheckedTests = getCheckedTestAmount();
     var totalTests = getAllTestAmount();
     $("#testCount").html(totalCheckedTests+"/"+totalTests);
+}
+
+
+function getTestsTags(tests){
+    $.ajax({
+        url: "/project/tests/tags/",
+        data: {
+            "project": project
+        },
+        dataType: 'json',
+        type: 'POST',
+        success: function(testsTags) {
+            displayTags(testsTags)
+        },
+    });
+}
+
+
+function displayTags(testsTags){
+    Object.keys(testsTags).forEach(test => {
+        let timeout = 0;
+        let tags = testsTags[test];
+        setTimeout(function(){
+            let testElement = $(`li[data-type='test'][full-name='${test}']`);
+            let tagContainer = $(`<div class="tag-container"></div>`);
+            tags.forEach(function(tag){
+                let tagElement = $(`<span class="tag">${tag}</span>`);
+                tagContainer.append(tagElement)
+            })
+            testElement.append(tagContainer);
+            }, timeout, tags)
+    });
 }
 
 

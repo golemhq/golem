@@ -29,7 +29,7 @@ def run_test_case(project, test_case_name, browsers=None, environments=None, pro
         for environment in environments:
             param_list.append(environment)
     if processes:
-        param_list.append('--threads')
+        param_list.append('--processes')
         param_list.append(str(processes))
 
     subprocess.Popen(param_list)

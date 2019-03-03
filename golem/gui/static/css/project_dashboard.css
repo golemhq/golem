@@ -39,7 +39,9 @@
     line-height:2em;
     color:#369;
     font-weight:700;
-    position:relative
+    position:relative;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .tree ul li:before {
@@ -91,6 +93,11 @@
 
 .tree-element-buttons {
     display: none;
+    background-color: #fafafa;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    padding-left:5px;
 }
 
 li.tree-element:hover > .tree-element-buttons {

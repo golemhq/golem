@@ -16,11 +16,9 @@ def command_dispatcher(args):
     if args.help:
         display_help(args.help, args.command)
     elif args.command == 'run':
-        run_command(args.project, args.test_query,
-                    args.browsers, args.threads,
-                    args.environments, args.interactive,
-                    args.timestamp, args.report,
-                    args.report_folder, args.report_name)
+        run_command(args.project, args.test_query, args.browsers, args.processes,
+                    args.environments, args.interactive, args.timestamp, args.report,
+                    args.report_folder, args.report_name, args.tags)
     elif args.command == 'gui':
         gui_command(args.host, args.port, args.debug)
     elif args.command == 'createproject':
@@ -30,9 +28,9 @@ def command_dispatcher(args):
     elif args.command == 'createsuite':
         createsuite_command(args.project, args.suite)
     elif args.command == 'createuser':
-        createuser_command(args.username, args.password,
-                           args.admin, args.projects, args.reports)
-    elif args.command == None:
+        createuser_command(args.username, args.password, args.admin, args.projects,
+                           args.reports)
+    elif args.command is None:
         print(messages.USAGE_MSG)
 
 
@@ -55,9 +53,9 @@ def display_help(help, command):
 
 def run_command(project='', test_query='', browsers=None, processes=1,
                 environments=None, interactive=False, timestamp=None,
-                reports=None, report_folder=None, report_name=None):
+                reports=None, report_folder=None, report_name=None, tags=None):
     execution_runner = ExecutionRunner(browsers, processes, environments, interactive,
-                                       timestamp, reports, report_folder, report_name)
+                                       timestamp, reports, report_folder, report_name, tags)
     if project:
         existing_projects = utils.get_projects(test_execution.root_path)
         if project in existing_projects:
