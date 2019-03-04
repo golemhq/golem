@@ -84,7 +84,7 @@ def get_files_dot_path(base_path, extension=None):
     all_files = []
     files_with_dotted_path = []
     for path, subdirs, files in os.walk(base_path):
-        if not '__pycache__' in path:
+        if '__pycache__' not in path:
             for name in files:
                 if name not in ['__init__.py', '.DS_Store']:
                     root, ext = os.path.splitext(name)
@@ -118,7 +118,9 @@ def rename_file(old_path, old_file, new_path, new_file):
     os.makedirs(new_path, exist_ok=True)
     old_fullpath = os.path.join(old_path, old_file)
     new_fullpath = os.path.join(new_path, new_file)
-    if os.path.isfile(new_fullpath):
+    if not os.path.isfile(old_fullpath):
+        error = 'File {} does not exist'.format(old_fullpath)
+    elif os.path.isfile(new_fullpath):
         error = 'File {} already exists'.format(new_fullpath)
     else:
         try:

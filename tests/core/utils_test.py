@@ -535,3 +535,17 @@ class TestMatchLatestExecutablePath:
         test_utils.create_empty_file(path, 'chromedriver_2.4')
         result = utils.match_latest_executable_path('./*/chromedriver*')
         assert result == os.path.join(path, 'chromedriver_2.4')
+
+
+class TestGetValidFilename:
+
+    filenames = [
+        ('foo bar', 'foo_bar'),
+        ('this is a test with "quotes"', 'this_is_a_test_with_quotes'),
+        ('with %## Symbols', 'with__Symbols')
+    ]
+
+    @pytest.mark.parametrize('filename, expected', filenames)
+    def test_get_valid_filename(self, filename, expected):
+        result = utils.get_valid_filename(filename)
+        print(filename, result)

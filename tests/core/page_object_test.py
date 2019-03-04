@@ -6,8 +6,7 @@ from golem.core import page_object
 class TestPageExists:
 
     def test_page_exists(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
+        testdir, project = project_session.values()
         page_object.new_page_object(testdir, project, [], 'page_x001_exist')
         exists = page_object.page_exists(testdir, project, 'page_x001_exist')
         not_exists = page_object.page_exists(testdir, project, 'page_x001_not_exist')
@@ -74,8 +73,6 @@ class TestGetPageObjectCode:
         assert code == file_content
 
     def test_get_page_object_code_file_not_exist(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
         page_path = os.path.join(project_session.path, 'pages', 'does', 'not', 'exist54654.py')
         code = page_object.get_page_object_code(page_path)
         assert code == ''

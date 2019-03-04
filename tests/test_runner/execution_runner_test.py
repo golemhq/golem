@@ -91,7 +91,6 @@ class TestDefineBrowsers:
 
 
 class TestSelectEnvironments:
-    """Tests for golem.test_runner.execution_runner._select_environments()"""
 
     @pytest.mark.slow
     def test__select_environments(self, project_session):

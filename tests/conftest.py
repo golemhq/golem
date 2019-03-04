@@ -49,11 +49,11 @@ class TestDirectory:
         commands.createdirectory_command(self.name)
 
     def activate(self):
-        if not self.settings:
+        if self.settings is None:
             self.settings = settings_manager.get_global_settings(self.path)
         test_execution.root_path = self.path
         test_execution.settings = self.settings
-        return self
+        return self.path
 
     def remove(self):
         os.chdir(self.basedir)
@@ -100,12 +100,15 @@ class Project:
         test_execution.root_path = self.testdir
         commands.createproject_command(self.name)
 
+    def values(self):
+        return self.testdir, self.name
+
     def activate(self):
-        if not self.settings:
+        if self.settings is None:
             self.settings = settings_manager.get_project_settings(self.testdir, self.name)
         test_execution.root_path = self.testdir
         test_execution.settings = self.settings
-        return self
+        return self.values()
 
     def remove(self):
         shutil.rmtree(self.path, ignore_errors=True)

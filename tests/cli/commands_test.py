@@ -28,10 +28,10 @@ class TestRunCommand:
 
     @pytest.mark.slow
     def test_golem_run_suite(self, project_function, test_utils, caplog):
-        project = project_function.name
+        testdir, project = project_function.values()
         test_name = 'test_one'
-        test_utils.create_test(project_function.testdir, project, [], test_name)
-        test_utils.create_suite(project_function.testdir, project, 'suite_one', tests=[test_name])
+        test_utils.create_test(testdir, project, [], test_name)
+        test_utils.create_suite(testdir, project, 'suite_one', tests=[test_name])
         commands.run_command(project=project, test_query='suite_one')
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
@@ -45,11 +45,10 @@ class TestRunCommand:
 
     @pytest.mark.slow
     def test_golem_run_suite_in_folder(self, project_function, test_utils, caplog, capsys):
-        project = project_function.name
+        testdir, project = project_function.values()
         test_name = 'test_one'
-        test_utils.create_test(project_function.testdir, project, [], test_name)
-        test_utils.create_suite(project_function.testdir, project, 'folder.suite_one',
-                                tests=[test_name])
+        test_utils.create_test(testdir, project, [], test_name)
+        test_utils.create_suite(testdir, project, 'folder.suite_one', tests=[test_name])
         commands.run_command(project=project, test_query='folder.suite_one')
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
@@ -59,10 +58,10 @@ class TestRunCommand:
 
     @pytest.mark.slow
     def test_golem_run_suite_py(self, project_function, test_utils, caplog):
-        project = project_function.name
+        testdir, project = project_function.values()
         test_name = 'test_one'
-        test_utils.create_test(project_function.testdir, project, [], test_name)
-        test_utils.create_suite(project_function.testdir, project, 'suite_one', tests=[test_name])
+        test_utils.create_test(testdir, project, [], test_name)
+        test_utils.create_suite(testdir, project, 'suite_one', tests=[test_name])
         commands.run_command(project=project, test_query='suite_one.py')
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
@@ -70,11 +69,10 @@ class TestRunCommand:
 
     @pytest.mark.slow
     def test_golem_run_suite_py_in_folder(self, project_function, test_utils, caplog):
-        project = project_function.name
+        testdir, project = project_function.values()
         test_name = 'test_one'
-        test_utils.create_test(project_function.testdir, project, [], test_name)
-        test_utils.create_suite(project_function.testdir, project, 'folder.suite_one',
-                                tests=[test_name])
+        test_utils.create_test(testdir, project, [], test_name)
+        test_utils.create_suite(testdir, project, 'folder.suite_one', tests=[test_name])
         commands.run_command(project=project, test_query='folder/suite_one.py')
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
@@ -84,11 +82,10 @@ class TestRunCommand:
     @pytest.mark.skipif("os.name != 'nt'")
     def test_golem_run_suite_py_in_folder_windows_path(self, project_function, test_utils,
                                                        caplog):
-        project = project_function.name
+        testdir, project = project_function.values()
         test_name = 'test_one'
-        test_utils.create_test(project_function.testdir, project, [], test_name)
-        test_utils.create_suite(project_function.testdir, project, 'folder.suite_one',
-                                tests=[test_name])
+        test_utils.create_test(testdir, project, [], test_name)
+        test_utils.create_suite(testdir, project, 'folder.suite_one', tests=[test_name])
         commands.run_command(project=project, test_query='folder\\suite_one.py')
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
@@ -96,9 +93,9 @@ class TestRunCommand:
 
     @pytest.mark.slow
     def test_golem_run_test(self, project_function, test_utils, caplog):
-        project = project_function.name
+        testdir, project = project_function.values()
         test_name = 'test_one'
-        test_utils.create_test(project_function.testdir, project, [], test_name)
+        test_utils.create_test(testdir, project, [], test_name)
         commands.run_command(project=project, test_query='test_one')
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
@@ -111,9 +108,9 @@ class TestRunCommand:
 
     @pytest.mark.slow
     def test_golem_run_test_py(self, project_function, test_utils, caplog):
-        project = project_function.name
+        testdir, project = project_function.values()
         test_name = 'test_one'
-        test_utils.create_test(project_function.testdir, project, [], test_name)
+        test_utils.create_test(testdir, project, [], test_name)
         commands.run_command(project=project, test_query='test_one.py')
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
@@ -126,8 +123,8 @@ class TestRunCommand:
 
     @pytest.mark.slow
     def test_golem_run_test_in_folder(self, project_function, test_utils, caplog):
-        project = project_function.name
-        test_utils.create_test(project_function.testdir, project, ['folder'], 'test_one')
+        testdir, project = project_function.values()
+        test_utils.create_test(testdir, project, ['folder'], 'test_one')
         commands.run_command(project=project, test_query='folder.test_one')
         records = caplog.records
         assert records[0].message == 'Test execution started: folder.test_one'
@@ -135,8 +132,8 @@ class TestRunCommand:
 
     @pytest.mark.slow
     def test_golem_run_test_py_in_folder(self, project_function, test_utils, caplog):
-        project = project_function.name
-        test_utils.create_test(project_function.testdir, project, ['folder'], 'test_one')
+        testdir, project = project_function.values()
+        test_utils.create_test(testdir, project, ['folder'], 'test_one')
         commands.run_command(project=project, test_query='folder/test_one.py')
         records = caplog.records
         assert records[0].message == 'Test execution started: folder.test_one'
@@ -146,8 +143,8 @@ class TestRunCommand:
     @pytest.mark.skipif("os.name != 'nt'")
     def test_golem_run_test_py_in_folder_windows_path(self, project_function, test_utils,
                                                       caplog):
-        project = project_function.name
-        test_utils.create_test(project_function.testdir, project, ['folder'], 'test_one')
+        testdir, project = project_function.values()
+        test_utils.create_test(testdir, project, ['folder'], 'test_one')
         commands.run_command(project=project, test_query='folder\\test_one.py')
         records = caplog.records
         assert records[0].message == 'Test execution started: folder.test_one'
@@ -155,11 +152,11 @@ class TestRunCommand:
 
     @pytest.mark.slow
     def test_golem_run_directory(self, project_function, test_utils):
-        project = project_function.name
-        test_utils.create_test(project_function.testdir, project, [], 'test_one')
-        test_utils.create_test(project_function.testdir, project, ['foo'], 'test_two')
-        test_utils.create_test(project_function.testdir, project, ['foo'], 'test_three')
-        test_utils.create_test(project_function.testdir, project, ['foo', 'bar'], 'test_four')
+        testdir, project = project_function.values()
+        test_utils.create_test(testdir, project, [], 'test_one')
+        test_utils.create_test(testdir, project, ['foo'], 'test_two')
+        test_utils.create_test(testdir, project, ['foo'], 'test_three')
+        test_utils.create_test(testdir, project, ['foo', 'bar'], 'test_four')
         commands.run_command(project=project, test_query='foo')
         reportsdir = os.path.join(project_function.path, 'reports', 'foo')
         assert os.path.isdir(reportsdir)
@@ -175,10 +172,10 @@ class TestRunCommand:
 
     @pytest.mark.slow
     def test_golem_run_directory_all_tests(self, project_function, test_utils):
-        project = project_function.name
-        test_utils.create_test(project_function.testdir, project, [], 'test_one')
-        test_utils.create_test(project_function.testdir, project, ['foo'], 'test_two')
-        test_utils.create_test(project_function.testdir, project, ['foo', 'bar'], 'test_three')
+        testdir, project = project_function.values()
+        test_utils.create_test(testdir, project, [], 'test_one')
+        test_utils.create_test(testdir, project, ['foo'], 'test_two')
+        test_utils.create_test(testdir, project, ['foo', 'bar'], 'test_three')
         commands.run_command(project=project, test_query='.')
         reportsdir = os.path.join(project_function.path, 'reports', 'all')
         assert os.path.isdir(reportsdir)
@@ -234,9 +231,9 @@ def teardown(data):
 
     @pytest.mark.slow
     def test_exit_code_one_on_test_failure_when_using_single_processing_capabilities(self, project_function, test_utils):
-        project = project_function.name
-        test_utils.create_test(project_function.testdir, project, [], 'test_one', content=self.content)
-        test_utils.create_test(project_function.testdir, project, [], 'test_two')
+        testdir, project = project_function.values()
+        test_utils.create_test(testdir, project, [], 'test_one', content=self.content)
+        test_utils.create_test(testdir, project, [], 'test_two')
 
         with pytest.raises(SystemExit) as wrapped_execution:
             commands.run_command(project=project, test_query='.', processes=1)
@@ -245,9 +242,9 @@ def teardown(data):
 
     @pytest.mark.slow
     def test_exit_code_one_on_test_failure_when_using_multi_processing_capabilities(self, project_function, test_utils):
-        project = project_function.name
-        test_utils.create_test(project_function.testdir, project, [], 'test_one', content=self.content)
-        test_utils.create_test(project_function.testdir, project, [], 'test_two')
+        testdir, project = project_function.values()
+        test_utils.create_test(testdir, project, [], 'test_one', content=self.content)
+        test_utils.create_test(testdir, project, [], 'test_two')
 
         with pytest.raises(SystemExit) as wrapped_execution:
             commands.run_command(project=project, test_query='.', processes=2)

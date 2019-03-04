@@ -313,14 +313,6 @@ def import_module(path):
         mod = _mod
     except:
         error = traceback.format_exc(limit=0)
-    # if not mod:
-    #     try:
-    #         spec = importlib.util.spec_from_file_location(module_name, path)
-    #         _mod = spec.loader.load_module()
-    #         spec.loader.exec_module(_mod)
-    #         mod = _mod
-    #     except:
-    #         pass
     return mod, error
 
 
