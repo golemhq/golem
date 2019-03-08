@@ -62,6 +62,7 @@ $(document).ready(function() {
         dataType: 'json',
         type: 'GET',
         success: function(environments) {
+            Suite.projectEnvironments = environments;
             startEnvironmentsAutocomplete(environments);
         }
     });
@@ -74,6 +75,12 @@ $(document).ready(function() {
 
 });
 
+
+const Suite = new function(){
+
+    this.projectEnvironments = []
+
+}
 
 function checkSelectedTests(selectedTests){
     // if '*' is in selectedTests, check all test cases regardless
@@ -163,7 +170,6 @@ var findBranchAndCheckDescendents = function(testPath, rootUl){
 }
 
 
-
 function verifyIfAllCheckboxesAreCheckedInLevelAndCheckParent(branch){
     var testCaseList = [];
     var branches = branch.find('>ul>li>input');
@@ -214,42 +220,51 @@ function uncheckParentAndGrandParents(elem){
 
 
 function saveTestSuite(){
-    let getCommaSeparatedValues = function(input){
-         let values = []
-         if(input.val().length > 0){
-            $(input.val().split(',')).each(function(){
-                if(this.trim().length > 0){
-                    values.push(this.trim());
-                }
-            });
-        }
-        return values
-    }
-    let browsers = getCommaSeparatedValues($("#browsers"));
-    let environments = getCommaSeparatedValues($("#environments"));
-    let tags = getCommaSeparatedValues($("#tags"));
-    let processes = $("#processes").val();
+    errors = []
+    let browsers = Main.Utils.csvToArray($("#browsers").val());
+    let environments = Main.Utils.csvToArray($("#environments").val());
+    let tags = Main.Utils.csvToArray($("#tags").val());
+    let processes = parseInt($("#processes").val());
     let testCases = getAllCheckedTests();
-    $.ajax({
-        url: "/save_suite/",
-        data: JSON.stringify({
-                "project": project,
-                "suite": suite,
-                "browsers": browsers,
-                "environments": environments,
-                "tags": tags,
-                "processes": processes,
-                "testCases": testCases
-            }),
-        dataType: 'json',
-        contentType: 'application/json; charset=utf-8',
-        type: 'POST',
-        success: function(data) {
-            Main.Utils.toast('success', "Suite "+suite+" saved", 3000)
-        },
-        error: function() {
+
+    environments.forEach(function(env){
+        if(!Suite.projectEnvironments.includes(env)){
+            errors.push(`Environment <strong>${env}</strong> does not exist for project ${project}`)
         }
     });
+
+    if(isNaN(processes)){
+        errors.push('Processes must be an integer')
+    }
+    else if(processes < 1){
+        errors.push('Processes must be at least one')
+    }
+
+    if(errors.length > 0){
+        errors.forEach(error => Main.Utils.toast('error', error, 4000))
+    }
+    else{
+        $.ajax({
+            url: "/save_suite/",
+            data: JSON.stringify({
+                    "project": project,
+                    "suite": suite,
+                    "browsers": browsers,
+                    "environments": environments,
+                    "tags": tags,
+                    "processes": processes,
+                    "testCases": testCases
+                }),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            type: 'POST',
+            success: function(data) {
+                Main.Utils.toast('success', "Suite "+suite+" saved", 3000)
+            },
+            error: function() {
+            }
+        });
+    }
 }
 
 

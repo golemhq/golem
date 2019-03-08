@@ -201,6 +201,12 @@ const Main = new function(){
             container.prepend(bar);
         }
 
+        // convert a comma separated string into an array
+        this.csvToArray = function(csvString){
+            let items = csvString.split(',').map(item => item.trim());
+            return items.filter(item => item.length > 0)
+        }
+
         // incomplete, not used
         this.MultiselectComponent = new function(){
 
@@ -289,10 +295,11 @@ const Main = new function(){
         this.supportedBrowsers = [];
         this.projectEnvironments = [];
         this.browsers = '';
-        this.environments = '';
+        this.environments = [];
         this.processes = 1;
 
         this.openConfigModal = async function(project, testName){
+            Main.TestRunner._clearInfoBars();
             Main.TestRunner.project = project;
             Main.TestRunner.testName = testName;
             await Main.TestRunner._getDefaultBrowser()
@@ -311,32 +318,42 @@ const Main = new function(){
             let projectEnvironments = await Main.TestRunner._getProjectEnvironments();
             if(projectEnvironments.length > 1 && Main.TestRunner.environments.length == 0){
                  Main.TestRunner.openConfigModal(project, testName);
-                 $("#runTestConfigModal .info-bar-container").html('');
-                 Main.Utils.infoBar($("#runTestConfigModal .info-bar-container"), 'Select at least one environment')
+                 Main.TestRunner._clearInfoBars();
+                 Main.TestRunner.addInfoBar('Select at least one environment');
             }
-            else{ Main.TestRunner._doRunTestCase() }
+            else{
+                Main.TestRunner._doRunTestCase()
+            }
         };
 
         this.runTestFromConfigModal = async function(){
-            let error = '';
-            Main.TestRunner.browsers = $("#runTestBrowsers").val();
-            Main.TestRunner.environments = $("#runTestEnvironments").val();
-            let processes = parseInt($("#runTestProcesses").val());
+            let errors = [];
+            // browsers
+            Main.TestRunner.browsers = Main.Utils.csvToArray($("#runTestBrowsers").val());
+            // environments
             await Main.TestRunner._getProjectEnvironments();
-            if(isNaN(processes)){
-                error = 'Processes must be an integer'
+            Main.TestRunner.environments = Main.Utils.csvToArray($("#runTestEnvironments").val());
+            if(Main.TestRunner.projectEnvironments.length > 1 && Main.TestRunner.environments.length == 0){
+                errors.push('Select at least one environment')
+            }
+            Main.TestRunner.environments.forEach(function(env){
+                if(!Main.TestRunner.projectEnvironments.includes(env)){
+                    errors.push(`Environment <strong>${env}</strong> does not exist for project ${Main.TestRunner.project}`)
+                }
+            });
+            // processes
+            Main.TestRunner.processes = parseInt($("#runTestProcesses").val());
+            if(isNaN(Main.TestRunner.processes)){
+                errors.push('Processes must be an integer')
             }
             else if(Main.TestRunner.processes < 1){
-                error = 'Processes must be at least one'
+                errors.push('Processes must be at least one')
             }
-            else if(Main.TestRunner.projectEnvironments.length > 1 && Main.TestRunner.environments.length == 0){
-                error = 'Select at least one environment'
-            }
-            Main.TestRunner.processes = processes;
-            if(error.length > 0){
+
+            if(errors.length > 0){
                 Main.TestRunner.openConfigModal(Main.TestRunner.project, Main.TestRunner.testName);
-                $("#runTestConfigModal .info-bar-container").html('');
-                Main.Utils.infoBar($("#runTestConfigModal .info-bar-container"), error);
+                Main.TestRunner._clearInfoBars();
+                errors.forEach( error => Main.TestRunner.addInfoBar(error) );
             }
             else{
                 Main.TestRunner._doRunTestCase();
@@ -349,25 +366,14 @@ const Main = new function(){
 
         this._doRunTestCase = function(){
             Main.Utils.toast('info', 'Running test ' + Main.TestRunner.testName, 3000);
-            // This is beautiful :O
-            // var csvToArray = csvstr => csvstr.length == 0 ? [] : csvstr.split(',').map(item => item.trim());
-            var csvToArray = function(csvString){
-                if(csvString.length == 0){
-                    return []
-                }
-                else{
-                    let items =csvString.split(',').map(item => item.trim());
-                    return items.filter(item => item.length > 0)
-                }
-            }
 
             $.ajax({
                 url: "/run_test_case/",
                 data: JSON.stringify({
                      "project": Main.TestRunner.project,
                      "testName": Main.TestRunner.testName,
-                     "browsers": csvToArray(Main.TestRunner.browsers),
-                     "environments": csvToArray(Main.TestRunner.environments),
+                     "browsers": Main.TestRunner.browsers,
+                     "environments": Main.TestRunner.environments,
                      "processes": Main.TestRunner.processes
                  }),
                 dataType: 'json',
@@ -553,6 +559,14 @@ const Main = new function(){
                     Main.TestRunner._loadSetReport(setName, values.report, timestamp);
                 }
             }
+        }
+
+        this.addInfoBar = function(msg){
+            Main.Utils.infoBar($("#runTestConfigModal .info-bar-container"), msg)
+        }
+
+        this._clearInfoBars = function(){
+            $("#runTestConfigModal .info-bar-container").html('');
         }
     }
 

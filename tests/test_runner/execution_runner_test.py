@@ -96,42 +96,48 @@ class TestSelectEnvironments:
     def test__select_environments(self, project_session):
         """Verify that _select_environments uses the correct order
         of precedence"""
+        testdir, project = project_session.values()
         cli_envs = ['cli_env_1', 'cli_env_2']
         execution_runner = exc_runner.ExecutionRunner()
-        execution_runner.project = project_session.name
+        execution_runner.project = project
         execution_runner.cli_args.envs = cli_envs
         execution_runner.suite.envs = ['suite_env_1', 'suite_env_2']
-        result_envs = execution_runner._select_environments()
+        project_envs = environment_manager.get_envs(testdir, project)
+        result_envs = execution_runner._select_environments(project_envs)
         assert result_envs == cli_envs
 
     @pytest.mark.slow
     def test__select_environments_cli_envs_empty(self, project_function):
         """Verify that _select_environments uses the correct order
         of precedence when cli environments is empty"""
+        testdir, project = project_function.values()
         cli_envs = []
         suite_envs = ['suite_env_1', 'suite_env_2']
         execution_runner = exc_runner.ExecutionRunner()
-        execution_runner.project = project_function.name
+        execution_runner.project = project
         execution_runner.cli_args.envs = cli_envs
         execution_runner.suite.envs = suite_envs
-        path = os.path.join(project_function.path, 'environments.json')
+        path = os.path.join(testdir, 'environments.json')
         with open(path, 'w+') as f:
             f.write('{"env1": {}, "env2": {}}')
-        result_envs = execution_runner._select_environments()
+        project_envs = environment_manager.get_envs(testdir, project)
+        result_envs = execution_runner._select_environments(project_envs)
         assert result_envs == suite_envs
 
     @pytest.mark.slow
     def test__select_environments_cli_envs_empty_suite_envs_empty(self, project_function):
         """Verify that _select_environments uses the correct order
         of precedence when cli environments and suite environments are empty"""
+        testdir, project = project_function.values()
         execution_runner = exc_runner.ExecutionRunner()
-        execution_runner.project = project_function.name
+        execution_runner.project = project
         execution_runner.cli_args.envs = []
         execution_runner.suite.envs = []
-        path = os.path.join(project_function.path, 'environments.json')
+        path = os.path.join(testdir, 'projects', project, 'environments.json')
         with open(path, 'w+') as f:
             f.write('{"env3": {}, "env4": {}}')
-        result_envs = execution_runner._select_environments()
+        project_envs = environment_manager.get_envs(testdir, project)
+        result_envs = execution_runner._select_environments(project_envs)
         assert result_envs == ['env3']
 
     @pytest.mark.slow
@@ -139,12 +145,14 @@ class TestSelectEnvironments:
         """Verify that _select_environments uses the correct order
         of precedence when cli environments, suite environments and 
         project environments are empty"""
+        testdir, project = project_function.values()
         execution_runner = exc_runner.ExecutionRunner()
-        execution_runner.project = project_function.name
+        execution_runner.project = project
         execution_runner.cli_args.envs = []
         execution_runner.cli_args.envs = []
-        result_envs = execution_runner._select_environments()
-        assert result_envs == ['']
+        project_envs = environment_manager.get_envs(testdir, project)
+        result_envs = execution_runner._select_environments(project_envs)
+        assert result_envs == []
 
 
 class TestDefineExecutionList:
@@ -744,3 +752,48 @@ class TestRunDirectory:
                                                 suite=dirname, execution=timestamp)
         assert data['has_finished'] is True
         assert data['total_tests'] == 1
+
+
+class TestRunWithEnvs:
+
+    def test_run_with_environments(self, project_function, test_utils, capsys):
+        testdir, project = project_function.values()
+        environments = json.dumps({'test': {}, 'stage': {}})
+        environment_manager.save_environments(testdir, project, environments)
+        test_utils.create_test(testdir, project, [], 'test01')
+        timestamp = utils.get_timestamp()
+        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'],
+                                                      timestamp=timestamp,
+                                                      environments=['test', 'stage'])
+        execution_runner.project = project
+        execution_runner.run_directory('')
+        out, err = capsys.readouterr()
+        assert 'Tests found: 1 (2 sets)' in out
+        data = report_parser.get_execution_data(workspace=testdir, project=project,
+                                                suite='all', execution=timestamp)
+        assert data['has_finished'] is True
+        assert data['total_tests'] == 2
+
+    def test_run_with_not_existing_environments(self, project_function, test_utils, capsys):
+        """Run tests with a not existing environment.
+        It should throw an error and finish with status code 1
+        """
+        testdir, project = project_function.activate()
+        test_utils.create_test(testdir, project, [], 'test01')
+        timestamp = utils.get_timestamp()
+        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'],
+                                                      timestamp=timestamp,
+                                                      environments=['not_existing'])
+        execution_runner.project = project
+        with pytest.raises(SystemExit) as wrapped_execution:
+            execution_runner.run_directory('')
+
+        assert wrapped_execution.value.code == 1
+        out, err = capsys.readouterr()
+        msg = ('ERROR: the following environments do not exist for project {}: '
+               'not_existing'.format(project))
+        assert msg in out
+        data = report_parser.get_execution_data(workspace=testdir, project=project,
+                                                suite='all', execution=timestamp)
+        assert data['has_finished'] is True
+        assert data['total_tests'] == 0

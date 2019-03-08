@@ -103,7 +103,7 @@ class ExecutionRunner:
         """
         return multiprocessing.Manager().Value('error', False)
 
-    def _select_environments(self):
+    def _select_environments(self, project_envs):
         """Define the environments to use for the test.
 
         The test can have a list of environments set from 2 places:
@@ -114,19 +114,17 @@ class ExecutionRunner:
         are any envs defined for the project. Otherwise just return ['']
         meaning: no envs will be used.
         """
-        all_project_envs = environment_manager.get_envs(test_execution.root_path,
-                                                        self.project)
         if self.cli_args.envs:
             # use the environments passed through command line
             envs = self.cli_args.envs
         elif self.suite.envs:
             # use the environments defined in the suite
             envs = self.suite.envs
-        elif all_project_envs:
+        elif project_envs:
             # if there are available envs, use the first by default
-            envs = [sorted(all_project_envs)[0]]
+            envs = [sorted(project_envs)[0]]
         else:
-            envs = ['']
+            envs = []
         return envs
 
     def _create_execution_directory(self):
@@ -152,6 +150,7 @@ class ExecutionRunner:
           - browsers
         """
         execution_list = []
+        envs = self.execution.envs or ['']
         testdir = test_execution.root_path
         envs_data = environment_manager.get_environment_data(testdir, self.project)
         secrets = secrets_manager.get_secrets(testdir, self.project)
@@ -159,7 +158,7 @@ class ExecutionRunner:
         for test in self.tests:
             data_sets = test_data.get_test_data(testdir, self.project, test)
             for data_set in data_sets:
-                for env in self.execution.envs:
+                for env in envs:
                     data_set_env = dict(data_set)
                     if env in envs_data:
                         # add env_data to data_set
@@ -339,7 +338,15 @@ class ExecutionRunner:
             #
             # Note, in the case of 4, the test might fail if it tries
             # to use env variables
-            self.execution.envs = self._select_environments()
+            project_envs = environment_manager.get_envs(test_execution.root_path, self.project)
+            self.execution.envs = self._select_environments(project_envs)
+            invalid_envs = [e for e in self.execution.envs if e not in project_envs]
+            if invalid_envs:
+                print('ERROR: the following environments do not exist for project {}: {}'
+                      .format(self.project, ', '.join(invalid_envs)))
+                self.execution.has_failed_tests.value = True
+                self._finalize()
+                return
 
             # Generate the execution list
             # Each test must be executed for each:
