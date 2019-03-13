@@ -150,9 +150,7 @@ class TestRenameFile:
         open(filename, 'w').close()
         open(new_filename, 'w+').close()
         error = file_manager.rename_file(basedir, filename, basedir, new_filename)
-        expected_error = ('File {} already exists'
-                          .format(os.path.join(basedir, new_filename)))
-        assert error == expected_error
+        assert error == 'A file with that name already exists'
 
     def test_rename_file_source_does_not_exist(self, dir_function):
         basedir = dir_function.path
@@ -161,15 +159,6 @@ class TestRenameFile:
         error = file_manager.rename_file(basedir, filename, basedir, new_filename)
         expected_error = ('File {} does not exist'.format(os.path.join(basedir, filename)))
         assert error == expected_error
-
-    def test_rename_file_source_is_opened(self, dir_function):
-        basedir = dir_function.path
-        filename = 'testfile.txt'
-        new_filename = 'newtestfile.txt'
-        open(filename, 'w').close()
-        with open(filename, 'w+') as f:
-            error = file_manager.rename_file(basedir, filename, basedir, new_filename)
-            assert 'There was an error renaming' in error
 
 
 class TestNewDirectoryOfType:

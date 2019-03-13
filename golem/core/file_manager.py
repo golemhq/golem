@@ -121,7 +121,7 @@ def rename_file(old_path, old_file, new_path, new_file):
     if not os.path.isfile(old_fullpath):
         error = 'File {} does not exist'.format(old_fullpath)
     elif os.path.isfile(new_fullpath):
-        error = 'File {} already exists'.format(new_fullpath)
+        error = 'A file with that name already exists'
     else:
         try:
             os.rename(old_fullpath, new_fullpath)

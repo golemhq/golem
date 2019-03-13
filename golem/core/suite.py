@@ -52,7 +52,7 @@ def new_suite(root_path, project, parents, suite_name):
     full_path = os.path.join(base_path, os.sep.join(parents))
     filepath = os.path.join(full_path, '{}.py'.format(suite_name))
     if os.path.isfile(filepath):
-        errors.append('a suite with that name already exists')
+        errors.append('A suite with that name already exists')
     if not errors:
         # create the directory structure if it does not exist
         if not os.path.isdir(full_path):

@@ -142,7 +142,7 @@ class TestNewSuite:
         suite_name = 'test_save_suite_0005'
         suite.new_suite(testdir, project, [], suite_name)
         errors = suite.new_suite(testdir, project, [], suite_name)
-        assert errors == ['a suite with that name already exists']
+        assert errors == ['A suite with that name already exists']
 
     def test_new_suite_with_parents_already_exist(self, project_session):
         testdir = project_session.testdir

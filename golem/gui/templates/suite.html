@@ -49,7 +49,7 @@
         <ul id="suiteTests" class="tree" style="padding-left: 15px">
             <input type="checkbox" id="allTestCasesCheckbox" class="select-testcase-checkbox" style="margin-top: 0px !important;">
             <h4> Test Cases <small id="testCount"></small></h4>
-            <ul id="testCasesTree">
+            <ul id="treeRoot">
                  {%- for elem in all_test_cases recursive %}
                     {%- if elem.type == 'directory' -%}
                         <li data-type="folder">

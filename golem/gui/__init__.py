@@ -557,9 +557,7 @@ def rename_element():
         elem_type = request.form['elemType']
         full_filename = request.form['fullFilename']
         new_full_filename = request.form['newFullFilename']
-
         error = ''
-
         old_filename, old_parents = utils.separate_file_from_parents(full_filename)
         new_filename, new_parents = utils.separate_file_from_parents(new_full_filename)
 
@@ -568,7 +566,7 @@ def rename_element():
         else:
             for c in new_full_filename.replace('.', ''):
                 if not c.isalnum() and c not in ['-', '_']:
-                    error = 'Only letters, numbers, \'-\' and \'_\' are allowed'
+                    error = 'Only letters, numbers and underscores are allowed'
                     break
 
         dir_type_name = ''
@@ -641,20 +639,19 @@ def new_tree_element():
         elem_type = request.form['elementType']
         is_dir = json.loads(request.form['isDir'])
         full_path = request.form['fullPath']
-        add_parents = request.form['addParents']
         full_path = full_path.replace(' ', '_')
         dot_path = full_path
         errors = []
         full_path = full_path.split('.')
         element_name = full_path.pop()
         parents = full_path
-        # verify that the string only contains letters, numbers dashes or underscores
+        # verify that the string only contains letters, numbers or underscores
         if len(element_name) == 0:
             errors.append('Name cannot be empty')
         else:
             for c in element_name:
-                if not c.isalnum() and c not in ['-', '_']:
-                    errors.append('Only letters, numbers, \'-\' and \'_\' are allowed')
+                if not c.isalnum() and c != '_':
+                    errors.append('Only letters, numbers and underscores are allowed')
                     break
         if not errors:
             if elem_type == 'test':

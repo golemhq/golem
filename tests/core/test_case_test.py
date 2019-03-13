@@ -300,7 +300,7 @@ class TestNewTestCase:
         parents = ['aaaa', 'bbbb']
         test_case.new_test_case(testdir, project, parents, test_name)
         errors = test_case.new_test_case(testdir, project, parents, test_name)
-        assert errors == ['a test with that name already exists']
+        assert errors == ['A test with that name already exists']
 
     def test_new_test_case_with_parents(self, project_session):            
         testdir = project_session.testdir

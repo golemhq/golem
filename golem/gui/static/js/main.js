@@ -43,6 +43,12 @@ const Main = new function(){
                 ulContent += "<li>"+errors[e]+"</li>";
             }
             $("#errorList").html(ulContent);
+            if(errors.length > 1){
+                $("#errorModal .modal-title").html('Errors')
+            }
+            else{
+                $("#errorModal .modal-title").html('Error')
+            }
             $("#errorModal").modal("show");
             window.setTimeout(function(){
                 $("#errorModal .dismiss-modal").focus();

@@ -264,7 +264,7 @@ class TestGolemCreateSuite:
         command = 'golem createsuite {} {}'.format(project, suite)
         test_utils.run_command(command)
         result = test_utils.run_command(command)
-        expected = ('golem createsuite: error: a suite '
+        expected = ('golem createsuite: error: A suite '
                     'with that name already exists')
         assert result == expected
 
@@ -313,7 +313,7 @@ class TestGolemCreateTest:
         cmd = 'golem createtest {} {}'.format(project, test)
         test_utils.run_command(cmd)
         result = test_utils.run_command(cmd)
-        expected = ('golem createtest: error: a test with that name already exists')
+        expected = ('golem createtest: error: A test with that name already exists')
         assert result == expected
 
 

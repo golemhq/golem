@@ -1,6 +1,6 @@
 
 $(document).ready(function() {
-    $('#testCasesTree').treed();
+    $('#treeRoot').treed();
     // get the tags for all the tests in the project
     getTestsTags();
     $("#allTestCasesCheckbox").change(function(){
@@ -93,10 +93,10 @@ function checkSelectedTests(selectedTests){
             var isDir = false;
             var lastChar = splitTest[splitTest.length-1].substr(-1);
             if (lastChar == '/') {
-                branchLi = findBranchAndCheckDescendents(splitTest, $("#testCasesTree"));
+                branchLi = findBranchAndCheckDescendents(splitTest, $("#treeRoot"));
             }
             else{
-                var rootUl = $("#testCasesTree");
+                var rootUl = $("#treeRoot");
                 checkTest(rootUl, splitTest);
             }
         }
@@ -274,7 +274,7 @@ function getAllCheckedTests(){
         testCaseList.push('*');
     }
     else{
-        var rootUl = $("#testCasesTree");
+        var rootUl = $("#treeRoot");
         testCasesList = getAllCheckedTestsInALevel(rootUl, testCaseList);
     }
     return testCaseList

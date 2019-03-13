@@ -331,8 +331,7 @@ var Test = new function(){
                 "project": Test.project,
                 "elementType": 'page',
                 "isDir": false,
-                "fullPath": newPageName,
-                "addParents": true,
+                "fullPath": newPageName
             },
             dataType: 'json',
             type: 'POST',

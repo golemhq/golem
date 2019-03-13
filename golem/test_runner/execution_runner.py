@@ -421,7 +421,7 @@ class ExecutionRunner:
                                                               self.execution.envs,
                                                               self.execution.tags,
                                                               test_execution.settings['remote_url'])
-        if self.is_suite:
+        if self.is_suite or len(self.execution.tests) > 1:
             self._print_results()
 
         # generate requested reports

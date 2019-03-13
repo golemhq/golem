@@ -219,14 +219,19 @@ def duplicate_element(workspace, project, element_type, original_file_dot_path,
     if not errors:
         if original_file_dot_path == new_file_dot_path:
             errors.append('New file cannot be the same as the original')
-        else:
-            root_path = os.path.join(workspace, 'projects', project)
-            original_file_rel_path = original_file_dot_path.replace('.', os.sep) + '.py'
-            original_file_full_path = os.path.join(root_path, folder, original_file_rel_path)
-            new_file_rel_path = new_file_dot_path.replace('.', os.sep) + '.py'
-            new_file_full_path = os.path.join(root_path, folder, new_file_rel_path)
-            if os.path.exists(new_file_full_path):
-                errors.append('A file with that name already exists')
+        for c in new_file_dot_path.replace('.', ''):
+            if not c.isalnum() and c != '_':
+                errors.append('Only letters, numbers and underscores are allowed')
+                break
+
+    if not errors:
+        root_path = os.path.join(workspace, 'projects', project)
+        original_file_rel_path = original_file_dot_path.replace('.', os.sep) + '.py'
+        original_file_full_path = os.path.join(root_path, folder, original_file_rel_path)
+        new_file_rel_path = new_file_dot_path.replace('.', os.sep) + '.py'
+        new_file_full_path = os.path.join(root_path, folder, new_file_rel_path)
+        if os.path.exists(new_file_full_path):
+            errors.append('A file with that name already exists')
 
     if not errors:
         try:
