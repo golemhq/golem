@@ -547,6 +547,14 @@ ul.no-bullets {
 .header-col{
     padding-left: 0px;
     padding-right: 0px;
+    float: left;
+    min-height: 1px;
+    position: relative;
+}
+
+.header-col-right {
+    float: right;
+    padding-top: 20px
 }
 
 .loader {
@@ -615,7 +623,9 @@ ul.no-bullets {
 
 
 #toast-container.toast-top-center>div {
-    width: 400px;
+    width: fit-content;
+    max-width: 600px;
+    word-break: break-all
 }
 
 .sub-icon {
@@ -669,11 +679,12 @@ ul.no-bullets {
     }
 }
 
-#testRunModal.modal {
-}
-
 #testRunModal .modal-dialog {
     margin-top: 60px;
+}
+
+#testRunModal #runModalTestTitle{
+    word-break: break-all;
 }
 
 #testRunModal .modal-body {
@@ -709,10 +720,23 @@ ul.no-bullets {
     margin-bottom: 15px;
     padding-bottom: 15px;
     border-bottom: 1px solid #ddd;
+    word-break: break-all
 }
 
 .icon svg {
     height: 1em;
     width: 1em;
     vertical-align: -0.15em;
+}
+
+.element-name {
+    word-break: break-all;
+}
+
+.display-flex {
+    display: flex
+}
+
+#errorModal #errorList li {
+    word-break: break-all
 }

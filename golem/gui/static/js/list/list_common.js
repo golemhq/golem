@@ -5,7 +5,7 @@ const Project = new function(){
 
     this.generateNewElement = function(element){
         let li = $(`<li class="tree-element"fullpath="${element.dotPath}" name="${element.name}" type="${element.type}">
-                        <a href="${element.url}">${element.name}</a>
+                        <a class="list-item-link" href="${element.url}">${element.name}</a>
                 <span class="pull-right tree-element-buttons">
                     <button class="rename-button" onclick="Project.renameFilePrompt(this)"><i class="glyphicon glyphicon-edit"></i></button>
                     <button class="duplicate-button" onclick="Project.duplicateElementPrompt(this)"><i class="glyphicon glyphicon-duplicate"></i></button>
@@ -74,7 +74,7 @@ const Project = new function(){
         let li = `
             <li class="form-container" fullpath="${dot_path}">
             <span class="new-element-form" style="display: none;">
-                <input class="new-element-input new-test-case form-control" style="max-width: 300px" type="text"
+                <input class="new-element-input new-test-case form-control" type="text"
                     onblur="Project.addElement(event);" onkeyup="if(event.keyCode==13){Project.addElement(event)}">
             </span>
             <span class="display-new-element-link">
@@ -230,7 +230,7 @@ const Project = new function(){
         let element =  $(elementDeleteButton).parent().parent();
         let elemFullPath = element.attr('fullpath');
         let elemType = element.attr('type');
-        let message = `Are you sure you want to delete <strong>${elemFullPath}</strong>?`;
+        let message = `<span style="word-break: break-all">Are you sure you want to delete <strong>${elemFullPath}</strong>?</span>`;
         let callback = function(){
             Project.deleteElement(element, elemFullPath, elemType);
         }
@@ -264,7 +264,7 @@ const Project = new function(){
         let elemFullPath = element.attr('fullpath');
         let elemType = element.attr('type');
         let title = 'Copy file';
-        let message = `Create a copy of <i>${elemFullPath}</i>. Enter a name for the new file...`;
+        let message = `<span style="word-break: break-all">Create a copy of <i>${elemFullPath}</i>. Enter a name for the new file...</span>`;
         let inputValue = elemFullPath;
         let placeholderValue = '';
         let callback = function(newFileFullPath){

@@ -56,6 +56,10 @@
     margin-right: 4px;
 }
 
+.tree li[data-type="test"] label {
+    margin-bottom: 0px
+}
+
 .tree li a {
     text-decoration: none;
     color:#369;
@@ -80,4 +84,8 @@
 
 .form-group{
     margin-bottom: 5px;
+}
+
+.tree li[data-type="test"] {
+    word-break: break-all
 }

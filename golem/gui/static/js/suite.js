@@ -348,9 +348,9 @@ function runSuite(){
          },
          dataType: 'json',
          type: 'POST',
-         success: function(data) {
-            let url = '/report/project/' + project + '/suite/' + suite + '/' + data + '/';
-            let msg = 'Running suite ' + suite + " - <a href='" + url + "'>open</a>";
+         success: function(timestamp) {
+            let url = `/report/project/${project}/suite/${suite}/${timestamp}/`;
+            let msg = `Running suite ${suite} - <a href="${url}"><strong>open</strong></a>`;
             Main.Utils.toast('info', msg, 15000)
          },
          error: function() {}

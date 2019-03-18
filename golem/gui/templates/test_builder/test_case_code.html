@@ -11,12 +11,12 @@
 {% block content %}
 <div>
     <div>
-        <div class="col-sm-8 header-col">
-            <h3 id="testCaseName">
-                {{full_test_case_name}}
+        <div class="header-col" style="width: calc(100% - 270px)">
+            <h3 id="testCaseName" class="element-name">
+                <span id="testName">{{full_test_case_name}}</span>
             </h3>
         </div>
-        <div class="col-sm-4 text-right header-col" style="padding-top: 20px">
+        <div class="header-col header-col-right">
             <div class="btn-group" role="group" aria-label="...">
               <button id="runTest" class="btn btn-default btn-sm" onclick="runTest()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Test</button>
               <button id="openRunTestConfig" class="btn btn-default btn-sm" onclick="Main.TestRunner.openConfigModal(project, fullTestCaseName)" style="padding-left: 7px; padding-right: 7px;"><span class="caret"></span></button>

@@ -49,18 +49,17 @@ const SuiteList = new function(){
         // the doughnut chart afterwards
         let dataContainer = {};
 
-        let table = "\
-            <table id='healthTable' class='table no-margin-bottom last-execution-table'>\
-                <thead>\
-                    <tr>\
-                        <th>Suite</th>\
-                        <th>Date &amp; Time</th>\
-                        <th>Result</th>\
-                    </tr>\
-                </thead>\
-                <tbody>\
-                </tbody>\
-            </table>";
+        let table = `
+            <table id="healthTable" class="table no-margin-bottom last-execution-table">
+                <thead>
+                    <tr>
+                        <th>Suite</th>
+                        <th>Date &amp; Time</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>`;
         $("#healthTableContainer").append(table);
 
         $.each(healthData, function(suite){
@@ -68,8 +67,8 @@ const SuiteList = new function(){
             let dateTime = Main.Utils.getDateTimeFromTimestamp(suiteData.execution);
             let newRow = $(`
                 <tr class="cursor-pointer" onclick="">
-                    <td class="">${suite}</td>
-                    <td class="">${dateTime}</td>
+                    <td class="suite-name"><span class="suite-name-span">${suite}</span></td>
+                    <td>${dateTime}</td>
                     <td class="result"><div class="progress"></div></td>
                 </tr>`);
             newRow.attr('onclick', `document.location.href='/report/project/${project}/suite/${suite}/${suiteData.execution}/'`);

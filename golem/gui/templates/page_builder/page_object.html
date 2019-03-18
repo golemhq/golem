@@ -9,10 +9,10 @@
 {% block content %}
 <div>
     <div class="col-lg-10 col-lg-offset-1 col-md-12">
-        <div class="col-sm-6 header-col">
-            <h3 id="pageObjectName">{{page_name}}</h3>
+        <div class="header-col" style="width: calc(100% - 160px)">
+            <h3 id="pageObjectName" class="element-name"><span>{{page_name}}</span></h3>
         </div>
-        <div class="col-sm-6 text-right header-col" style="padding-top: 20px">
+        <div class="header-col header-col-right">
             <button id="loadCodeButton" class="btn btn-default btn-sm" onclick="loadCodeView()"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Code<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></button>
             <button id="save" class="btn btn-default btn-sm" onclick="savePageObject();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
         </div>

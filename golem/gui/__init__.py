@@ -101,7 +101,7 @@ def project_view(project):
 @project_exists
 @gui_permissions_required
 def project_tests(project):
-    return render_template('project/project_tests.html', project=project)
+    return render_template('list/test_list.html', project=project)
 
 
 # PROJECT SUITES VIEW
@@ -110,7 +110,7 @@ def project_tests(project):
 @project_exists
 @gui_permissions_required
 def project_suites(project):
-    return render_template('project/project_suites.html', project=project)
+    return render_template('list/suite_list.html', project=project)
 
 
 # PROJECT PAGES VIEW
@@ -119,7 +119,7 @@ def project_suites(project):
 @project_exists
 @gui_permissions_required
 def project_pages(project):
-    return render_template('project/project_pages.html', project=project)
+    return render_template('list/page_list.html', project=project)
 
 
 # TEST CASE VIEW

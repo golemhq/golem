@@ -1,12 +1,4 @@
 
-#backButton, #testName {
-	display: inline;
-} 
-
-#testName {
-	word-break: break-all;
-}
-
 #testNameInput {
 	display: inline;
 }

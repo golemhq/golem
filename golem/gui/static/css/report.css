@@ -72,10 +72,9 @@
     border-bottom: 1px solid #ddd;
 }
 
-#generalTable td,
-#detailTable td {
-    padding-top: 4px !important;
-    padding-bottom: 4px !important;
+#generalTable td, #detailTable td,
+#generalTable th, #detailTable th {
+    padding: 4px 6px !important;
 }
 
 .step-screenshot {
@@ -115,6 +114,16 @@
 
 #detailTable th.filtered .funnel-icon {
     color: black;
+}
+
+#detailTable td.tc-module {
+    max-width: 300px;
+    word-break: break-all
+}
+
+#detailTable td.tc-name {
+    max-width: 400px;
+    word-break: break-all
 }
 
 #detailTable td.set-name {
@@ -206,4 +215,10 @@
 
 label {
     min-width: 120px
+}
+
+.test-report-log {
+    font-family: monospace;
+    font-size: 14px;
+    word-break: break-all
 }
