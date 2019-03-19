@@ -325,6 +325,11 @@ var Test = new function(){
     }
 
     this.addNewPage = function(newPageName){
+        let errors = Main.Utils.validateFilename(newPageName);
+        if(errors.length > 0){
+            Main.Utils.displayErrorModal(errors);
+            return
+        }
         $.ajax({
             url: "/new_tree_element/",
             data: {

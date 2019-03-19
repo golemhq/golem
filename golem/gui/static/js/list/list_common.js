@@ -1,8 +1,6 @@
 
 const Project = new function(){
 
-    this.MAXIMUM_ITEM_LENGTH = 140;
-
     this.generateNewElement = function(element){
         let li = $(`<li class="tree-element"fullpath="${element.dotPath}" name="${element.name}" type="${element.type}">
                         <a class="list-item-link" href="${element.url}">${element.name}</a>
@@ -162,7 +160,7 @@ const Project = new function(){
         else if(closestTree.hasClass('suite-tree')){
             elementType = 'suite';
         }
-        let elementName = input.val().trim();
+        let elementName = input.val().trim().replace(/\s/g, '_');
         let fullPath = Project.getElementFullPath(input, elementName)
 
         if(elementName.length == 0){
@@ -172,7 +170,7 @@ const Project = new function(){
             return
         }
 
-        let errors = Project.validateFilename(elementName, isDir);
+        let errors = Main.Utils.validateFilename(elementName, isDir);
         if(errors.length > 0){
             Main.Utils.displayErrorModal(errors);
             return
@@ -280,7 +278,7 @@ const Project = new function(){
             return
         }
 
-        let errors = Project.validateFilename(newFileFullPath);
+        let errors = Main.Utils.validateFilename(newFileFullPath);
         if(errors.length > 0){
             Main.Utils.displayErrorModal(errors);
             return
@@ -337,7 +335,7 @@ const Project = new function(){
         }
 
         newFullFilename =  newFullFilename.trim().replace(' ', '_');
-        let errors = Project.validateFilename(newFullFilename);
+        let errors = Main.Utils.validateFilename(newFullFilename);
         if(errors.length > 0){
             Main.Utils.displayErrorModal(errors);
             return
@@ -385,35 +383,5 @@ const Project = new function(){
 
     this.getFileElement = function(filePath){
         return $(`li.tree-element[fullpath="${filePath}"]`)
-    }
-
-    this.validateFilename = function(fullFilename, isDir){
-        isDir = typeof(isDir) != 'undefined' ? isDir : false;
-        let errors = []
-        let split = fullFilename.split('.');
-        let filename = split.pop();
-        split.forEach(function(node){
-            if(node.length == 0){
-                // directory is empty, e.g.: '.test_name' or 'dir..test_name'
-                errors.push('Directory name cannot be empty')
-            }
-            else if(node.length > Project.MAXIMUM_ITEM_LENGTH){
-                errors.push(`Directory name cannot exceed ${Project.MAXIMUM_ITEM_LENGTH} characters`)
-            }
-        })
-        if(filename.length == 0){
-            // new filename or directory is empty, e.g.: 'dir01.'
-            if(isDir == true)
-                errors.push('New directory cannot be empty')
-            else
-                errors.push('New filename cannot be empty')
-        }
-        else if(filename.length > Project.MAXIMUM_ITEM_LENGTH){
-            if(isDir == true)
-                errors.push(`Directory name cannot exceed ${Project.MAXIMUM_ITEM_LENGTH} characters`)
-            else
-                errors.push(`Filename cannot exceed ${Project.MAXIMUM_ITEM_LENGTH} characters`)
-        }
-        return errors
     }
 }

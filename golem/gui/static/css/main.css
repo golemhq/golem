@@ -623,8 +623,7 @@ ul.no-bullets {
 
 
 #toast-container.toast-top-center>div {
-    width: fit-content;
-    max-width: 600px;
+    width: 600px;
     word-break: break-all
 }
 

@@ -698,8 +698,6 @@ def new_project():
             errors.append('Project name is too short')
         elif len(project_name) > 50:
             errors.append('Project name is too long')
-        elif len(project_name) != len(project_name.strip()):
-            errors.append('Leading and trailing spaces are not allowed')
         elif project_name in utils.get_projects(root_path):
             errors.append('A project with that name already exists')
         else:

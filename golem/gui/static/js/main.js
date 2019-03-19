@@ -17,6 +17,9 @@ const Main = new function(){
 
     this.Utils = new function(){
 
+        // max length for tests, pages, suites and directories
+        this.MAXIMUM_FILENAME_LENGTH = 140;
+
         this.getDateTimeFromTimestamp = function(timestamp){
             var sp = timestamp.split('.');
             var dateTimeString = sp[0]+'/'+sp[1]+'/'+sp[2]+' '+sp[3]+':'+sp[4];
@@ -232,6 +235,48 @@ const Main = new function(){
                     $(container).find('.tag-container').append(Main.Utils.MultiselectComponent._tag(value))
                 })
             }
+        }
+
+        // validate a filename or directory name.
+        // a dot path is valid: 'dir1.dir2.filename1'
+        this.validateFilename = function(fullFilename, isDir){
+
+            function _validateName(name, isDir){
+                let errors = [];
+                if(name.length > Main.Utils.MAXIMUM_FILENAME_LENGTH){
+                    if(isDir)
+                        errors.push(`Directory name cannot exceed ${Main.Utils.MAXIMUM_FILENAME_LENGTH} characters`)
+                    else
+                        errors.push(`Filename cannot exceed ${Main.Utils.MAXIMUM_FILENAME_LENGTH} characters`)
+                }
+                else if(name.length == 0){
+                    // new filename or directory is empty, e.g.: 'dir01.'
+                    if(isDir)
+                        errors.push('New directory cannot be empty')
+                    else
+                        errors.push('New filename cannot be empty')
+                }
+                else if(/\W/.test(name)){
+                    errors.push('Only letters, numbers and underscores are allowed');
+                }
+                return errors
+            }
+
+            isDir = typeof(isDir) != 'undefined' ? isDir : false;
+            let errors = [];
+            let split = fullFilename.split('.');
+            let lastNode = split.pop();
+            split.forEach(function(node){
+                if(node.length == 0){
+                    // directory is empty, e.g.: '.test_name' or 'dir..test_name'
+                    errors.push('Directory name cannot be empty')
+                }
+                else{
+                    errors = errors.concat(_validateName(node, true))
+                }
+            })
+            errors = errors.concat(_validateName(lastNode, isDir));
+            return errors
         }
     }
 

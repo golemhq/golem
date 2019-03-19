@@ -112,9 +112,13 @@ var TestCommon = new function(){
                 $("#testName").show();
                 return
             }
-            // TO DO: validate
             newTestNameValue = newTestNameValue.replace(' ', '_');
 
+            let errors = Main.Utils.validateFilename(newTestNameValue);
+            if(errors.length > 0){
+                Main.Utils.displayErrorModal(errors);
+                return
+            }
             $.ajax({
                 url: "/rename_element/",
                 data: {
@@ -122,11 +126,10 @@ var TestCommon = new function(){
                      "elemType": 'test',
                      "fullFilename": fullTestCaseName,
                      "newFullFilename": newTestNameValue,
-
-                 },
-                 dataType: 'json',
-                 type: 'POST',
-                 success: function(error) {
+                },
+                dataType: 'json',
+                type: 'POST',
+                success: function(error) {
                     if(error.length == 0){
                         document.title = document.title.replace(fullTestCaseName, newTestNameValue);
                         fullTestCaseName = newTestNameValue;
@@ -135,13 +138,14 @@ var TestCommon = new function(){
                         $("#testName").html(newTestNameValue).show();
                         let new_url = "/project/" + project + "/test/" + newTestNameValue + "/";
                         window.history.pushState("object or string", "", new_url);
+                        Main.Utils.toast('success', 'File was renamed', 2000);
                     }
                     else{
                         Main.Utils.toast('error', error, 2000);
                         $("#testNameInput").hide();
                         $("#testName").show();
                     }
-                 },
+                },
              });
         };
     }
