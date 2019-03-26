@@ -90,7 +90,7 @@ var TestCommon = new function(){
     this.Header = new function(){
 
         this.startEditTestName = function(){
-            $("#testNameInput input").val(fullTestCaseName);
+            $("#testNameInput input").val(Test.fullName);
             $("#testNameInput").show();
             $("#testName").hide();
             $("#testNameInput input").focus();
@@ -105,9 +105,8 @@ var TestCommon = new function(){
         };
 
         this.saveEdition = function(){
-            let newTestNameValue = $("#testNameInput input").val();
-            newTestNameValue = newTestNameValue.trim();
-            if(newTestNameValue == fullTestCaseName){
+            let newTestNameValue = $("#testNameInput input").val().trim();
+            if(newTestNameValue == Test.fullName){
                 $("#testNameInput").hide();
                 $("#testName").show();
                 return
@@ -124,15 +123,15 @@ var TestCommon = new function(){
                 data: {
                      "project": project,
                      "elemType": 'test',
-                     "fullFilename": fullTestCaseName,
+                     "fullFilename": Test.fullName,
                      "newFullFilename": newTestNameValue,
                 },
                 dataType: 'json',
                 type: 'POST',
                 success: function(error) {
                     if(error.length == 0){
-                        document.title = document.title.replace(fullTestCaseName, newTestNameValue);
-                        fullTestCaseName = newTestNameValue;
+                        document.title = document.title.replace(Test.fullName, newTestNameValue);
+                        Test.fullName = newTestNameValue;
                         $("#testNameInput input").val('');
                         $("#testNameInput").hide();
                         $("#testName").html(newTestNameValue).show();

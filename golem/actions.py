@@ -630,7 +630,7 @@ def assert_element_value(element, value):
     _add_step(step_message)
     _run_wait_hook()
     element_value = element.value
-    msg = ("expected element {} value to be '{}' was '{}'"
+    msg = ("expected element {} value to be '{}' but was '{}'"
            .format(element.name, value, element_value))
     assert element_value == value, msg
     _screenshot_on_step()
@@ -2270,7 +2270,7 @@ def verify_element_value(element, value):
     step_message = ("Verify element {} value is '{}'".format(element.name, value))
     with _verify_step(step_message) as s:
         element_value = element.value
-        s.error = ("expected element {} value to be '{}' was '{}'"
+        s.error = ("expected element {} value to be '{}' but was '{}'"
                    .format(element.name, value, element_value))
         s.condition = element_value == value
 

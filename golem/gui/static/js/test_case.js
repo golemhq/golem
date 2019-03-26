@@ -17,7 +17,6 @@ var Test = new function(){
     this.initialize = function(project, testCaseName, fullTestCaseName, importedPages){
         Test.getUniqueTags(project);
         Test.project = project;
-        Test.name = testCaseName;
         Test.fullName = fullTestCaseName;
         importedPages.forEach(function(page){
             Test.getPageContents(page)
@@ -255,9 +254,9 @@ var Test = new function(){
             type: 'POST',
             success: function(data) {
                 Test.unsavedChanges = false;
-                Main.Utils.toast('success', "Test "+Test.name+" saved", 3000);
+                Main.Utils.toast('success', "Test "+Test.fullName+" saved", 3000);
                 if(runAfter){
-                    Main.TestRunner.runTest(Test.project, Test.name); //, 'runButton': $("button#runTest")})
+                    Main.TestRunner.runTest(Test.project, Test.fullName);
                 }
             }
         });

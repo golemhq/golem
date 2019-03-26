@@ -72,13 +72,15 @@ const ExecutionReport = new function(){
 		    let value = execution_data.params[param];
 		    if(ExecutionReport.params[param] !== value){
 		        ExecutionReport.params[param] = value;
-		        if(param == 'browsers'){
-		            value = value.map(b => b.name)
-		        }
-		        if(value.constructor == Array){
-		            value = value.join(', ')
-		        }
-		        $(`#configSection div[data='${param}']>span.param-value`).html(value);
+		        if(value != null){
+                    if(param == 'browsers'){
+                        value = value.map(b => b.name)
+                    }
+                    if(value.constructor == Array){
+                        value = value.join(', ')
+                    }
+                    $(`#configSection div[data='${param}']>span.param-value`).html(value);
+                }
 		    }
 		});
 	}

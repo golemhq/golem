@@ -13,8 +13,8 @@
             <h3 id="suiteName" class="element-name"><span>{{suite}}</span></h3>
         </div>
         <div class="header-col header-col-right">
-            <button id="runTest" class="btn btn-default btn-sm" onclick="runSuite()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Suite</button>
-            <button id="save" class="btn btn-default btn-sm" onclick="saveTestSuite();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+            <button id="runTest" class="btn btn-default btn-sm" onclick="Suite.run()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Suite</button>
+            <button id="save" class="btn btn-default btn-sm" onclick="Suite.save();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
         </div>
         <div class="clearfix"></div>
         <h4>Settings</h4>
@@ -45,27 +45,29 @@
         </div>
         </form>
         <div class="clearfix"></div> 
-        <br>       
-        <ul id="suiteTests" class="tree">
+        <br>
+        <li id="suiteTests" class="tree" data-type="folder" full-name="">
             <input type="checkbox" id="allTestCasesCheckbox" class="select-testcase-checkbox" style="margin-top: 0px !important;">
             <h4> Test Cases <small id="testCount"></small></h4>
             <ul id="treeRoot">
                  {%- for elem in all_test_cases recursive %}
                     {%- if elem.type == 'directory' -%}
-                        <li data-type="folder">
+                        <li data-type="folder" full-name="{{elem.dot_path}}">
                             <input type="checkbox" name="checkbox" class="select-testcase-checkbox">
                             <a href="#" class="branch-name">{{ elem.name }}</a>
                             <ul>{{ loop(elem.sub_elements) }}</ul>
                         </li>
                     {%- else %}
                         <li data-type="test" full-name="{{elem.dot_path}}">
-                            <label full-name="{{elem.dot_path}}"><input type="checkbox" name="checkbox" class="select-testcase-checkbox test-checkbox"><span class="node-name">{{ elem.name }}</span></label>
+                            <label full-name="{{elem.dot_path}}">
+                                <input type="checkbox" name="checkbox" class="select-testcase-checkbox test-checkbox">
+                                <span class="node-name">{{ elem.name }}</span>
+                            </label>
                         </li>
                     {%- endif %}
                 {%- endfor %}
             </ul>
-        </ul>
-        <div class="clearfix"></div>
+        </li>
     </div>
 </div>
 
@@ -73,8 +75,8 @@
 <script src="{{ url_for('static', filename='js/external/treeview.js') }}"></script>
 <script src="{{ url_for('static', filename='js/suite.js') }}"></script>
 <script>
-    var project = "{{project}}";
-    var suite = "{{suite}}";
-    var selectedTests = {{selected_tests|tojson}};
+    let project = "{{project}}";
+    let suite = "{{suite}}";
+    let selectedTests = {{selected_tests|tojson}};
 </script>
 {% endblock %}
