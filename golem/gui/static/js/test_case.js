@@ -61,12 +61,12 @@ var Test = new function(){
         });
     }
 
-    this.getPageContents = function(page){
+    this.getPageContents = function(pageName){
         $.ajax({
             url: "/get_page_contents/",
             data: {
                  "project": Test.project,
-                 "page": page,
+                 "page": pageName,
             },
             dataType: 'json',
             type: 'GET',
@@ -76,11 +76,13 @@ var Test = new function(){
                     $("input[value='"+thisPageName+"']").addClass('not-exist');
                 }
                 else{
+                    Test.importedPages = Test.importedPages.filter(page => page.name !== pageName)
                     Test.importedPages.push({
-                        'name': page,
+                        'name': pageName,
                         'elements': result.content.elements,
                         'functions': result.content.functions
-                    })
+                    });
+                    Test.refreshPagesAutocomplete()
                     Test.refreshElementInputsAutocomplete();
                     Test.refreshActionInputsAutocomplete();
                 }
@@ -91,17 +93,25 @@ var Test = new function(){
     this.refreshActionInputsAutocomplete = function(){
         let lookup = []
         Test.golemActions.forEach(function(action){
-            lookup.push(action.name)
+            lookup.push({value: action.name, data: action.description})
         })
         Test.importedPages.forEach(function(page){
             page.functions.forEach(function(func){
-                lookup.push(func.full_function_name)
+                lookup.push({value: func.full_function_name, data: func.description})
             })
         });
         autocomplete = $(".step-first-input").autocomplete({
             lookup: lookup,
             minChars: 0,
             triggerSelectOnValidInput: false,
+            formatResult: function(suggestion, currentValue) {
+                let descriptionBox = '';
+                if(suggestion.data){
+                    descriptionBox = `<div class="action-description">${suggestion.data}</div>`
+                }
+                let suggestionHTML = `<div>${suggestion.value}</div>${descriptionBox}`;
+                return suggestionHTML
+            },
             onSelect: function (suggestion) { Test.onActionInputChange($(this)) }
         });
     }
@@ -125,7 +135,7 @@ var Test = new function(){
         let lookup = [];
         Test.importedPages.forEach(function(page){
             page.elements.forEach(function(element){
-                lookup.push(element.element_name)
+                lookup.push(element.element_full_name)
             })
         });
         $(".element-input").each(function(){
@@ -148,7 +158,7 @@ var Test = new function(){
             minChars: 0,
             noCache: true,
             onSelect: function (suggestion) {
-                Test.addPageToList(suggestion.value)
+                Test.addPageToList(suggestion.value);
                 $("input.page-objects-input.page-objects-autocomplete").val('');
             },
         });
@@ -191,14 +201,6 @@ var Test = new function(){
             Test.save({runAfter: true})
         else
             Main.TestRunner.runTest(Test.project, Test.fullName);
-    }
-
-    this.loadCodeView = function(){
-        if(Test.unsavedChanges){
-            Test.save({runAfter: false});
-        }
-        Test.unsavedChanges = false;
-        window.location.replace(`/project/${Test.project}/test/${Test.fullName}/code/`);
     }
 
     this.save = function(config){
@@ -309,6 +311,7 @@ var Test = new function(){
         let pageName = $(elem).closest('.page').find('input.page-name').val();
         Test.importedPages = Test.importedPages.filter(page => page.name !== pageName)
         $(elem).closest('.page' ).remove();
+        Test.refreshPagesAutocomplete();
         Test.unsavedChanges = true;
     }
 
@@ -316,7 +319,7 @@ var Test = new function(){
         let title = 'Add New Page';
         let message = '';
         let inputValue = '';
-        let placeholderValue = 'page name';
+        let placeholderValue = 'new page name';
         let callback = function(newPageName){
             Test.addNewPage(newPageName);
         }
@@ -360,7 +363,7 @@ var Test = new function(){
 
     this.loadPageInModal = function(elem){
         let inputVal = $(elem).closest('.page').find('input.page-name').val();
-        $("#pageModalIframe").attr('src', '/project/'+Test.project+'/page/'+inputVal+'/no_sidebar/');
+        $("#pageModalIframe").attr('src', `/project/${Test.project}/page/${inputVal}/no_sidebar/`);
         $("#pageModal").modal('show');        
     }
 
@@ -487,6 +490,9 @@ var Test = new function(){
         }
 
         this.watchForUnsavedChanges = function(){
+            $("#tags").on("change keyup paste", function(){
+                Test.unsavedChanges = true;
+            });
             $(".page-objects-input").on("change keyup paste", function(){
                 Test.unsavedChanges = true;
             });

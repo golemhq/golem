@@ -21,7 +21,7 @@
               <button id="runTest" class="btn btn-default btn-sm" onclick="runTest()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Test</button>
               <button id="openRunTestConfig" class="btn btn-default btn-sm" onclick="Main.TestRunner.openConfigModal(project, fullTestCaseName)" style="padding-left: 7px; padding-right: 7px;"><span class="caret"></span></button>
             </div>
-            <button id="loadGuiButton" class="btn btn-default btn-sm" onclick="loadGuiView()"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Preview</button>
+            <a id="loadGuiButton" class="btn btn-default btn-sm" href="/project/{{project}}/test/{{full_test_case_name}}/"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Preview</a>
             <button id="save" class="btn btn-default btn-sm" onclick="saveTestCase();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
         </div>
     </div>

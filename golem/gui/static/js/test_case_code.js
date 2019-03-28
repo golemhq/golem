@@ -92,22 +92,6 @@ function watchForUnsavedChanges(){
 }
 
 
-function loadGuiView(){
-    let callback = function(){
-        codeEditor.markClean();
-        unsavedChanges = false;
-        // redirect to gui view
-        window.location.replace("/project/"+project+"/test/"+fullTestCaseName+"/");
-    }
-    if(hasUnsavedChanges()){
-        saveTestCase(callback);
-    }
-    else {
-        callback()
-    }
-}
-
-
 function runTest(){
     let run = () => Main.TestRunner.runTest(project, fullTestCaseName);
     if(hasUnsavedChanges())

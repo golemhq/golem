@@ -155,3 +155,21 @@ body.modal-open {
 .not-exist {
 	box-shadow: inset 0px 0px 4px 1px #d9534f;
 }
+
+.action-description {
+    display: none;
+    position: absolute;
+    left: 100%;
+    margin-top: -24px;
+    margin-left: 3px;
+    border-radius: 3px;
+    width: 300px;
+    background: white;
+    min-height: 50px;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.autocomplete-selected .action-description {
+    display: block
+}

@@ -96,6 +96,7 @@ const Main = new function(){
             $("#promptModal .modal-title").html(title);
             $("#promptModal .modal-body .description").html(description);
             $("#promptModal .modal-body input").val(inputValue);
+            $("#promptModal .modal-body input").attr('placeholder', inputPlaceholder);
 
             $("#promptModal").modal("show");
             $('#promptModal').on('shown.bs.modal', function () {
