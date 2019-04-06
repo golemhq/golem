@@ -5,6 +5,7 @@ include golem/gui/static/css/*
 include golem/gui/static/css/*/*
 include golem/gui/static/css/*/*/*
 include golem/gui/static/img/*
+include golem/gui/static/img/*/*
 include golem/gui/static/js/*
 include golem/gui/static/js/*/*
 include golem/gui/static/js/*/*/*

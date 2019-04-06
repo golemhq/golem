@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{% endblock %}</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/icons/favicon-32x32.png') }} ">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/icons/favicon-16x16.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='img/icons/favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr/toastr.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome/font-awesome.min.css') }}">
