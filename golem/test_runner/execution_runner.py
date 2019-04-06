@@ -208,6 +208,12 @@ class ExecutionRunner:
             print()
             print(output)
 
+    def _get_elapsed_time(self, start_time):
+        elapsed_time = 0
+        if start_time:
+            elapsed_time = round(time.time() - self.start_time, 2)
+        return elapsed_time
+
     def run_test(self, test):
         """Run a single test.
         `test` can be a path to a Python file or an import path.
@@ -294,7 +300,9 @@ class ExecutionRunner:
         if self.execution.tags:
             self.tests = self._filter_tests_by_tags()
 
-        if self.tests:
+        if not self.tests:
+            self._finalize()
+        else:
             # get amount of processes (parallel executions), default is 1
             if self.cli_args.processes > 1:
                 # the processes arg passed through cli has higher priority
@@ -364,9 +372,11 @@ class ExecutionRunner:
             for test in self.execution.tests:
                 test.reportdir = report.create_report_directory(self.execution.reportdir,
                                                                 test.name, self.is_suite)
-            self._execute()
-        else:
-            self._finalize()
+            try:
+                self._execute()
+            except KeyboardInterrupt:
+                self.execution.has_failed_tests.value = True
+                self._finalize()
 
     def _execute(self):
         self.start_time = time.time()
@@ -408,10 +418,7 @@ class ExecutionRunner:
         self._finalize()
 
     def _finalize(self):
-        if self.start_time:
-            elapsed_time = round(time.time() - self.start_time, 2)
-        else:
-            elapsed_time = 0
+        elapsed_time = self._get_elapsed_time(self.start_time)
 
         # generate report.json
         self.report = report_parser.generate_execution_report(self.execution.reportdir,
