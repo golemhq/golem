@@ -35,11 +35,11 @@
                                 <th data="result" result="failure">Failure</th>
                                 <th data="percentage">Percentage</th>
                                 <th data="total-time">Total Time</th>
-                                <th data="net-time">Net Time</th>
+                                <th data="net-time">Elapsed Time</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr class="total-row general-table-row cursor-pointer" id="totalRow">
+                            <tr class="total-row general-table-row cursor-pointer" id="totalRow" module-name="totalModuleRow">
                                 <td data="module">Total</td>
                                 <td data="total-tests"></td>
                                 <td data="result" result="success">0</td>
@@ -66,11 +66,10 @@
                                     <ul class="dropdown-menu"><form></form></ul>
                                 </th>
                                 <th class="test-name-header" colname="test-name">Test Name</th>
-                                <th class="dropdown filter-table-dropdown" colname="set-name"
-                                    style="display:none">
+                                <th class="dropdown filter-table-dropdown set-name" colname="set-name">
                                     <a type="button" class="link-without-decoration" data-toggle="dropdown"
                                        aria-haspopup="true" aria-expanded="false">
-                                        set Name <span class="icon funnel-icon" aria-hidden="true" style="display:none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></span>
+                                        Set Name <span class="icon funnel-icon" aria-hidden="true" style="display:none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></span>
                                     </a>
                                     <ul class="dropdown-menu"><form></form></ul>
                                 </th>

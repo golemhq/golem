@@ -469,6 +469,18 @@ def report_test(project, suite, execution, test, test_set):
                            test_case_data=test_case_data)
 
 
+# REPORT TEST JSON VIEW
+@app.route("/report/project/<project>/<suite>/<execution>/<test>/<test_set>/json/")
+@login_required
+@project_exists
+@report_permissions_required
+def report_test_json(project, suite, execution, test, test_set):
+    test_case_data = report_parser.get_test_case_data(root_path, project, test,
+                                                      suite=suite, execution=execution,
+                                                      test_set=test_set, is_single=False)
+    return jsonify(test_case_data)
+
+
 # TEST SCREENSHOT
 @app.route('/report/screenshot/<project>/<suite>/<execution>/<test>/<test_set>/<scr>/')
 @login_required

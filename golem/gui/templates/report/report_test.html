@@ -3,12 +3,19 @@
 {% block title %}Golem : {{project|capitalize}} : {{test_case_data.name}}{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}"/
+<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}"/>
 {% endblock %}
 
 {% block content %}
 <div class="col-md-10 col-md-offset-1">
-	<h2>Test: {{test_case_data.name|replace("_", " ")}} <small><a href="/project/{{project}}/test/{{test_case}}/"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></a></small></h2>
+	<h2>Test: {{test_case_data.name|replace("_", " ")}}
+		<small>
+			<a href="/project/{{project}}/test/{{test_case}}/"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></a>
+			<a href="/project/{{project}}/test/{{test_case}}/code/">
+				<span><i class="glyphicon glyphicon-chevron-left" style="-webkit-text-stroke: 0.5px white;"></i><i class="glyphicon glyphicon-chevron-right" style="margin-left: -8px; -webkit-text-stroke: 0.5px white;"></i></span>
+			</a>
+		</small>
+	</h2>
     <div class="col-md-12 test-report-box font-17" id="testDetails" style="padding: 15px 30px">
 		<h3 class="no-margin-top">Details</h3>
 		<div class="row">

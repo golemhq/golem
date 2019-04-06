@@ -147,6 +147,7 @@
     padding: 5px 15px 15px 15px;
     margin-left: 0px;
     margin-right: 0px;
+    transition-duration: 0.2s
 }
 
 #detailTable div.test-detail.collapse.in{
@@ -222,3 +223,12 @@ label {
     font-size: 14px;
     word-break: break-all
 }
+
+#detailTable .set-name {
+    display: none
+}
+
+#detailTable.set-name-displayed .set-name {
+    display: table-cell
+}
+

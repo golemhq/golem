@@ -171,7 +171,7 @@ def get_execution_data(execution_directory=None, workspace=None,
     has_finished = False
     if execution_directory is None:
         execution_directory = os.path.join(workspace, 'projects', project, 'reports',
-                                   suite, execution)
+                                           suite, execution)
     if os.path.isfile(os.path.join(execution_directory, 'report.json')):
         with open(os.path.join(execution_directory, 'report.json')) as f:
             data = json.load(f)

@@ -374,6 +374,10 @@ ul.no-bullets {
     cursor: pointer;
 }
 
+.cursor-auto {
+    cursor: auto;
+}
+
 .same-heigth-col {
     float: none;
     display: table-cell;
