@@ -220,12 +220,13 @@ def activate_browser(browser_id):
     When opening more than one browser (not windows or tabs)
     for a single test, the new browser can be assigned to an ID.
     Default browser ID is 'main'.
+    Returns the activated browser.
 
     Parameters:
     browser_id : value
     """
     with _step('Activate browser {}'.format(browser_id), run_wait_hook=False):
-        browser.activate_browser(browser_id)
+        return browser.activate_browser(browser_id)
 
 
 def add_cookie(cookie_dict):
@@ -1478,12 +1479,13 @@ def open_browser(browser_id=None):
     browser_id is optional and only used to manage more than one
     browser for the same test.
     Default browser ID is 'main'.
+    Returns the opened browser.
 
     Parameters:
     browser_id (optional) : value
     """
     with _step('Open browser', take_screenshots=False, run_wait_hook=False):
-        browser.open_browser(browser_id)
+        return browser.open_browser(browser_id)
 
     
 def press_key(element, key):

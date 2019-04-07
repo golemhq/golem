@@ -18,7 +18,6 @@ const Suite = new function(){
         Suite.selectedTests = selectedTests
         Suite.treeRoot.treed();
         Suite.Utils.getTestsTags(Suite.selectedTests);
-        Suite.Utils.getProjectTags();
         Suite.Utils.getSupportedBrowsers();
         Suite.Utils.getProjectEnvironments();
         Suite.TestTree.checkSelectedTests(Suite.selectedTests);
@@ -110,6 +109,10 @@ const Suite = new function(){
                 dataType: 'json',
                 type: 'POST',
                 success: function(testsTags) {
+                    let projectTags = Object.keys(testsTags).map( (key, index) => testsTags[key] ).flat();
+                    let uniqueProjectTags = ([...new Set(projectTags)]);
+                    Suite.Utils.startTagsAutocomplete(uniqueProjectTags);
+
                     Suite.TestTree.displayTags(testsTags)
                 },
             });
@@ -154,20 +157,6 @@ const Suite = new function(){
                     Suite.projectEnvironments = environments;
                     Suite.Utils.startEnvironmentsAutocomplete(environments);
                 }
-            });
-        }
-
-        this.getProjectTags = function(){
-            $.ajax({
-                url: "/project/tags/",
-                data: {
-                    "project": Suite.project
-                },
-                dataType: 'json',
-                type: 'POST',
-                success: function(tags) {
-                    Suite.Utils.startTagsAutocomplete(tags)
-                },
             });
         }
 

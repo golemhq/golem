@@ -146,7 +146,8 @@ golem run <project> <test> -b firefox-headless
 ### Opening and Closing the Browser
 
 There is no need to open or close the browser.
-The first action that requires a browser will open one. At the end Golem will close the browser.
+The first action that requires a browser will open one.
+At the end of the test, Golem will close the browser.
 However, this can be done explicitly with the *open_browser* and *close_browser* actions.
 
 

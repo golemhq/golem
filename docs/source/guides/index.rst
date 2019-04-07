@@ -6,6 +6,7 @@ Guides
    :glob:
 
    standalone-executable
+   using-multiple-browsers
 
 
 .. Indices and tables

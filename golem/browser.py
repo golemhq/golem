@@ -16,6 +16,10 @@ from golem.webdriver import (GolemChromeDriver,
                              GolemRemoteDriver)
 
 
+class InvalidBrowserIdError(Exception):
+    pass
+
+
 def element(*args, **kwargs):
     """Shortcut to golem.browser.get_browser().find()"""
     webelement = get_browser().find(*args, **kwargs)
@@ -33,6 +37,12 @@ def open_browser(browser_id=None):
 
     When opening more than one browser instance per test
     provide a browser_id to switch between browsers later on
+
+    :Raises:
+      - InvalidBrowserIdError: The browser Id is already in use
+
+    :Returns:
+      the opened browser
     """
     @contextmanager
     def validate_exec_path(browser_name, exec_path_setting, settings):
@@ -68,6 +78,15 @@ def open_browser(browser_id=None):
             raise Exception(msg)
 
     driver = None
+
+    if not browser_id:
+        if len(execution.browsers) == 0:
+            browser_id = 'main'
+        else:
+            browser_id = 'browser{}'.format(len(execution.browsers))
+    if browser_id in execution.browsers:
+        raise InvalidBrowserIdError("browser id '{}' is already in use".format(browser_id))
+
     browser_definition = execution.browser_definition
     settings = execution.settings
     # remote
@@ -169,14 +188,10 @@ def open_browser(browser_id=None):
         if not ('chrome' in browser_definition['name'] and is_mac):
             driver.maximize_window()
 
-    if not browser_id:
-        if len(execution.browsers) == 0:
-            browser_id = 'main'
-        else:
-            browser_id = 'browser{}'.format(len(execution.browsers))
     execution.browsers[browser_id] = driver
-    if not execution.browser:
-        execution.browser = driver
+    # Set the new browser as the active browser
+    execution.browser = driver
+    return execution.browser
 
 
 def get_browser() -> GolemRemoteDriver:
@@ -188,10 +203,17 @@ def get_browser() -> GolemRemoteDriver:
 
 def activate_browser(browser_id):
     """Activate a browser.
-    Only needed when the test starts more than one browser instance."""
-    if not browser_id in execution.browsers:
-        # TODO, use error() function
-        raise Exception("Error: {} is not a valid browser id. Current browsers "
-                        "are: {}".format(browser_id, ', '.join(execution.browsers.keys())))
+    Only needed when the test starts more than one browser instance.
+
+    :Raises:
+      - InvalidBrowserIdError: The browser Id does not correspond to an opened browser
+
+    :Returns:
+      the active browser
+    """
+    if browser_id not in execution.browsers:
+        raise InvalidBrowserIdError("'{}' is not a valid browser id. Current browsers are: {}"
+                                    .format(browser_id, ', '.join(execution.browsers.keys())))
     else:
         execution.browser = execution.browsers[browser_id]
+    return execution.browser

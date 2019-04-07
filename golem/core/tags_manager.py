@@ -121,30 +121,35 @@ def get_tests_tags(workspace, project, tests):
     cache_tags = {}
     if os.path.isfile(cache_file_path):
         with open(cache_file_path) as f:
-            cache_tags = json.load(f)
+            cache_tags_file_content = f.read()
+        try:
+            cache_tags = json.loads(cache_tags_file_content)
+        except json.JSONDecodeError:
+            # There is a JSON error in the file.
+            # Remove the file and call itself.
+            os.remove(cache_file_path)
+            return get_tests_tags(workspace, project, tests)
+
     for test in tests:
+        tc_name, parents = utils.separate_file_from_parents(test)
+        path = os.path.join(workspace, 'projects', project, 'tests',
+                            os.sep.join(parents), '{}.py'.format(tc_name))
+        last_modified_time = os.path.getmtime(path)
         if test in cache_tags:
-            # check if test file modification date > cache file timestamp:
             cache_timestamp = cache_tags[test]['timestamp']
-            tc_name, parents = utils.separate_file_from_parents(test)
-            path = os.path.join(workspace, 'projects', project, 'tests',
-                                os.sep.join(parents), '{}.py'.format(tc_name))
-            last_modified_time = os.path.getmtime(path)
             if last_modified_time != cache_timestamp:
                 # re-read tags
-                timestamp = time.time()
                 cache_tags[test] = {
                     'tags': get_test_tags(workspace, project, test),
-                    'timestamp': timestamp
+                    'timestamp': last_modified_time
                 }
         else:
-            timestamp = time.time()
             cache_tags[test] = {
                 'tags': get_test_tags(workspace, project, test),
-                'timestamp': timestamp
+                'timestamp': last_modified_time
             }
     with open(cache_file_path, 'w') as f:
-        json.dump(cache_tags, f, indent=4)
+        json.dump(cache_tags, f, indent=2)
     tags = {test: cache_tags[test]['tags'] for test in cache_tags}
     return tags
 

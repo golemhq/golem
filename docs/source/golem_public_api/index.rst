@@ -8,6 +8,7 @@ API Reference
    webdriver-class
    webelement-class
    golem-expected-conditions
+   browser
 
 
 .. Indices and tables
