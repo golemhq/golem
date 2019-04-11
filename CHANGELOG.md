@@ -1,10 +1,14 @@
 # Changelog
 
-### [Unreleased]
+## [0.8.0] - 2019-04-10
 
 ### Changed
 
 - **-t, \-\-threads** argument changed to **-p, \-\-processes**
+
+### Deprecated
+
+Python 3.4
 
 ### Added
 

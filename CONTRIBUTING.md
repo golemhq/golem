@@ -4,7 +4,7 @@ Thank you for your interest in contributing to Golem!
 
 ## Questions
 
-If you have a question please use the Gitter channel: 
+If you have a question please use the Gitter channel: https://gitter.im/golem-framework/golem
 
 ## Submitting a Bug
 
