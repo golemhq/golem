@@ -12,6 +12,6 @@ include golem/gui/static/js/*/*/*
 
 include golem/gui/templates/*
 include golem/gui/templates/page_builder/*
-include golem/gui/templates/project/*
+include golem/gui/templates/list/*
 include golem/gui/templates/report/*
 include golem/gui/templates/test_builder/*
