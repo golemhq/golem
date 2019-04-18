@@ -1,9 +1,8 @@
 import ast
 import json
 import os
-import time
 
-from golem.core import utils, file_manager
+from golem.core import utils, file_manager, session
 
 
 class InvalidTagExpression(Exception):
@@ -59,7 +58,7 @@ class TagExpressionConstructor:
             raise InvalidTagExpression(msg)
 
 
-def filter_tests_by_tags(workspace, project, tests, tags):
+def filter_tests_by_tags(project, tests, tags):
     """Filter a list of tests by a list of tags.
 
     Tags are concatenated with `and` operator.
@@ -88,19 +87,18 @@ def filter_tests_by_tags(workspace, project, tests, tags):
 
     result = []
     tag_expr = _construct_tag_expr(tags)
-    tests_tags = get_tests_tags(workspace, project, tests)
+    tests_tags = get_tests_tags(project, tests)
     if tag_expr:
         for test in tests:
-            # tags_in_test = get_tests_tags(workspace, project, [test])
             if _test_matches_tag_query(tag_expr, tests_tags[test]):
                 result.append(test)
     return result
 
 
-def get_test_tags(workspace, project, full_test_case_name):
+def get_test_tags(project, full_test_case_name):
     result = []
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    path = os.path.join(workspace, 'projects', project, 'tests',
+    path = os.path.join(session.testdir, 'projects', project, 'tests',
                         os.sep.join(parents), '{}.py'.format(tc_name))
     test_module, _ = utils.import_module(path)
 
@@ -110,14 +108,14 @@ def get_test_tags(workspace, project, full_test_case_name):
     return result
 
 
-def get_tests_tags(workspace, project, tests):
+def get_tests_tags(project, tests):
     """Get the tags of a list of tests
 
     Caches the results.
     Updates the cache when last modification time of file differs
     from cache timestamp.
     """
-    cache_file_path = os.path.join(workspace, 'projects', project, '.tags')
+    cache_file_path = os.path.join(session.testdir, 'projects', project, '.tags')
     cache_tags = {}
     if os.path.isfile(cache_file_path):
         with open(cache_file_path) as f:
@@ -128,11 +126,11 @@ def get_tests_tags(workspace, project, tests):
             # There is a JSON error in the file.
             # Remove the file and call itself.
             os.remove(cache_file_path)
-            return get_tests_tags(workspace, project, tests)
+            return get_tests_tags(project, tests)
 
     for test in tests:
         tc_name, parents = utils.separate_file_from_parents(test)
-        path = os.path.join(workspace, 'projects', project, 'tests',
+        path = os.path.join(session.testdir, 'projects', project, 'tests',
                             os.sep.join(parents), '{}.py'.format(tc_name))
         last_modified_time = os.path.getmtime(path)
         if test in cache_tags:
@@ -140,12 +138,12 @@ def get_tests_tags(workspace, project, tests):
             if last_modified_time != cache_timestamp:
                 # re-read tags
                 cache_tags[test] = {
-                    'tags': get_test_tags(workspace, project, test),
+                    'tags': get_test_tags(project, test),
                     'timestamp': last_modified_time
                 }
         else:
             cache_tags[test] = {
-                'tags': get_test_tags(workspace, project, test),
+                'tags': get_test_tags(project, test),
                 'timestamp': last_modified_time
             }
     with open(cache_file_path, 'w') as f:
@@ -154,16 +152,16 @@ def get_tests_tags(workspace, project, tests):
     return tags
 
 
-def get_all_project_tests_tags(workspace, project):
+def get_all_project_tests_tags(project):
     """Get all the tags of each test in a project"""
-    tests_folder_path = os.path.join(workspace, 'projects', project, 'tests')
+    tests_folder_path = os.path.join(session.testdir, 'projects', project, 'tests')
     tests = file_manager.get_files_dot_path(tests_folder_path, extension='.py')
-    return get_tests_tags(workspace, project, tests)
+    return get_tests_tags(project, tests)
 
 
-def get_project_unique_tags(workspace, project):
+def get_project_unique_tags(project):
     """Get a list of the unique tags used by all the tests of a project"""
-    tests_tags = get_all_project_tests_tags(workspace, project)
+    tests_tags = get_all_project_tests_tags(project)
     unique_tags = []
     for test, tags in tests_tags.items():
         for tag in tags:

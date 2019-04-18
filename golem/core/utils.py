@@ -10,42 +10,41 @@ import re
 from datetime import datetime
 from distutils.version import StrictVersion
 
-from golem.core import settings_manager
-from golem.core import file_manager
+from golem.core import settings_manager, file_manager, session
 
 
-def get_test_cases(workspace, project):
-    path = os.path.join(workspace, 'projects', project, 'tests')
+def get_test_cases(project):
+    path = os.path.join(session.testdir, 'projects', project, 'tests')
     test_cases = file_manager.generate_file_structure_dict(path)
     return test_cases
 
 
-def get_pages(workspace, project):
-    path = os.path.join(workspace, 'projects', project, 'pages')
+def get_pages(project):
+    path = os.path.join(session.testdir, 'projects', project, 'pages')
     pages = file_manager.generate_file_structure_dict(path)
     return pages
 
 
-def get_suites(workspace, project):
-    path = os.path.join(workspace, 'projects', project, 'suites')
+def get_suites(project):
+    path = os.path.join(session.testdir, 'projects', project, 'suites')
     suites = file_manager.generate_file_structure_dict(path)
     return suites
 
 
-def get_projects(workspace):
-    path = os.path.join(workspace, 'projects')
+def get_projects():
+    path = os.path.join(session.testdir, 'projects')
     projects = next(os.walk(path))[1]
     projects = [x for x in projects if x != '__pycache__']
     return projects
 
 
-def project_exists(workspace, project):
-    return project in get_projects(workspace)
+def project_exists(project):
+    return project in get_projects()
 
 
-def get_directory_tests(workspace, project, directory):
+def get_directory_tests(project, directory):
     """Return a list with all the test cases of a given directory"""
-    path = os.path.join(workspace, 'projects', project, 'tests', directory)
+    path = os.path.join(session.testdir, 'projects', project, 'tests', directory)
     tests = file_manager.get_files_dot_path(path, extension='.py')
     if directory:
         dotpath = '.'.join(os.path.normpath(directory).split(os.sep))
@@ -83,62 +82,56 @@ def separate_file_from_parents(full_filename):
     splitted = full_filename.split('.')
     file = splitted.pop()
     parents = splitted
-    return (file, parents)
+    return file, parents
 
 
-def is_first_level_directory(workspace, project, directory):
-    path = os.path.join(workspace, 'projects', project, 'tests', directory)
-    return os.path.isdir(path)
-
-
-def create_new_project(workspace, project):
-    file_manager.create_directory(path_list=[workspace,'projects',project],
-                                      add_init=True)
-    # TODO, remove, don't create data folder for new projects
-    # create_directory(path_list=[workspace, 'projects', project, 'data'], add_init=False)
-    path_list = [workspace, 'projects', project, 'pages']
+def create_new_project(project):
+    testdir = session.testdir
+    file_manager.create_directory(path_list=[testdir, 'projects', project], add_init=True)
+    path_list = [testdir, 'projects', project, 'pages']
     file_manager.create_directory(path_list=path_list, add_init=True)
-    path_list = [workspace, 'projects', project, 'reports']
+    path_list = [testdir, 'projects', project, 'reports']
     file_manager.create_directory(path_list=path_list, add_init=False)
-    path_list = [workspace, 'projects', project, 'tests']
+    path_list = [testdir, 'projects', project, 'tests']
     file_manager.create_directory(path_list=path_list, add_init=True)
-    path_list = [workspace, 'projects', project, 'suites']
+    path_list = [testdir, 'projects', project, 'suites']
     file_manager.create_directory(path_list=path_list, add_init=True)
-    extend_path = os.path.join(workspace, 'projects', project, 'extend.py')
+    extend_path = os.path.join(testdir, 'projects', project, 'extend.py')
     open(extend_path, 'a').close()
 
-    settings_manager.create_project_settings_file(workspace, project)
+    settings_manager.create_project_settings_file(project)
 
     for project_base_file in ('environments.json', 'secrets.json'):
-        base_file_path = os.path.join(workspace, 'projects', project, project_base_file)
+        base_file_path = os.path.join(testdir, 'projects', project, project_base_file)
         with open(base_file_path, 'a') as base_file:
             base_file.write('{}')
 
     print('Project {} created'.format(project))
 
 
-def create_test_dir(workspace):
-    file_manager.create_directory(path_list=[workspace], add_init=True)
-    file_manager.create_directory(path_list=[workspace, 'projects'],
+def create_test_dir(testdir):
+    file_manager.create_directory(path_list=[testdir], add_init=True)
+    file_manager.create_directory(path_list=[testdir, 'projects'],
                                   add_init=True)
-    file_manager.create_directory(path_list=[workspace, 'drivers'],
+    file_manager.create_directory(path_list=[testdir, 'drivers'],
                                   add_init=False)
 
-    settings_manager.create_global_settings_file(workspace)
+    settings_manager.create_global_settings_file(testdir)
 
-    users_path = os.path.join(workspace, 'users.json')
+    users_path = os.path.join(testdir, 'users.json')
     open(users_path, 'a').close()
-    create_user(workspace, 'admin', 'admin', True, ["*"], ["*"])
+    create_user('admin', 'admin', True, ["*"], ["*"], testdir=testdir)
 
-    print('New golem test directory created at {}'.format(workspace))
+    print('New golem test directory created at {}'.format(testdir))
     print('Use credentials to access the GUI module:')
     print('user: admin')
     print('password: admin')
 
 
-def create_user(workspace, username, password, is_admin, projects, reports):
+def create_user(username, password, is_admin, projects, reports, testdir=None):
     errors = []
-    with open(os.path.join(workspace, 'users.json')) as users_file:
+    testdir = testdir or session.testdir
+    with open(os.path.join(testdir, 'users.json')) as users_file:
         try:
             user_data = json.load(users_file)
         except:
@@ -157,13 +150,13 @@ def create_user(workspace, username, password, is_admin, projects, reports):
             'report_projects': reports
         }
         user_data.append(new_user)
-        with open(os.path.join(workspace, 'users.json'), 'w') as users_file:
+        with open(os.path.join(testdir, 'users.json'), 'w') as users_file:
             json.dump(user_data, users_file, indent=4)
 
     return errors
 
 
-def delete_element(workspace, project, element_type, dot_path):
+def delete_element(project, element_type, dot_path):
     """Delete a test, page or suite given it's full path
     separated by dots.
     """
@@ -177,7 +170,7 @@ def delete_element(workspace, project, element_type, dot_path):
         raise Exception('Incorrect element type')
 
     errors = []
-    path = os.path.join(workspace, 'projects', project, folder,
+    path = os.path.join(session.testdir, 'projects', project, folder,
                         dot_path.replace('.', os.sep) + '.py')
     if not os.path.exists(path):
         errors.append('File {} does not exist'.format(dot_path))
@@ -189,13 +182,13 @@ def delete_element(workspace, project, element_type, dot_path):
 
     if element_type == 'test':
         # TODO deprecate data folder
-        data_path = os.path.join(workspace, 'projects', project, 'data',
+        data_path = os.path.join(session.testdir, 'projects', project, 'data',
                                  dot_path.replace('.', os.sep) + '.csv')
         try:
             os.remove(data_path)
         except:
             pass
-        data_path = os.path.join(workspace, 'projects', project, 'tests',
+        data_path = os.path.join(session.testdir, 'projects', project, 'tests',
                                  dot_path.replace('.', os.sep) + '.csv')
         try:
             os.remove(data_path)
@@ -205,8 +198,7 @@ def delete_element(workspace, project, element_type, dot_path):
     return errors
 
 
-def duplicate_element(workspace, project, element_type, original_file_dot_path,
-                      new_file_dot_path):
+def duplicate_element(project, element_type, original_file_dot_path, new_file_dot_path):
     errors = []
     if element_type == 'test':
         folder = 'tests'
@@ -225,7 +217,7 @@ def duplicate_element(workspace, project, element_type, original_file_dot_path,
                 break
 
     if not errors:
-        root_path = os.path.join(workspace, 'projects', project)
+        root_path = os.path.join(session.testdir, 'projects', project)
         original_file_rel_path = original_file_dot_path.replace('.', os.sep) + '.py'
         original_file_full_path = os.path.join(root_path, folder, original_file_rel_path)
         new_file_rel_path = new_file_dot_path.replace('.', os.sep) + '.py'

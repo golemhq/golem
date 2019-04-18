@@ -3,7 +3,7 @@ Suites are modules located inside the /suites/ directory
 """
 import os
 
-from golem.core import utils, file_manager
+from golem.core import utils, file_manager, session
 
 
 def _format_list_items(list_items):
@@ -18,12 +18,9 @@ def _format_list_items(list_items):
     return list_string
 
 
-def save_suite(root_path, project, suite_name, test_cases, processes,
-               browsers, environments, tags):
+def save_suite(project, suite_name, test_cases, processes, browsers, environments, tags):
     """Save suite content to file."""
-    suite_name, parents = utils.separate_file_from_parents(suite_name)
-    suite_path = os.path.join(root_path, 'projects', project, 'suites',
-                              os.sep.join(parents), '{}.py'.format(suite_name))
+    suite_path = suite_file_path(project, suite_name)
     with open(suite_path, 'w', encoding='utf-8') as suite_file:
         suite_file.write('\n\n')
         suite_file.write('browsers = {}\n'.format(_format_list_items(browsers)))
@@ -40,7 +37,7 @@ def save_suite(root_path, project, suite_name, test_cases, processes,
         suite_file.write('tests = {}\n'.format(_format_list_items(test_cases)))
 
 
-def new_suite(root_path, project, parents, suite_name):
+def new_suite(project, parents, suite_name):
     """Create a new empty suite."""
     suite_content = ('\n'
                      'browsers = []\n\n'
@@ -48,7 +45,7 @@ def new_suite(root_path, project, parents, suite_name):
                      'processes = 1\n\n'
                      'tests = []\n')
     errors = []
-    base_path = os.path.join(root_path, 'projects', project, 'suites')
+    base_path = os.path.join(session.testdir, 'projects', project, 'suites')
     full_path = os.path.join(base_path, os.sep.join(parents))
     filepath = os.path.join(full_path, '{}.py'.format(suite_name))
     if os.path.isfile(filepath):
@@ -65,39 +62,39 @@ def new_suite(root_path, project, parents, suite_name):
     return errors
 
 
-def get_suite_amount_of_processes(workspace, project, suite):
+def get_suite_amount_of_processes(project, suite):
     """Get the amount of processes defined in a suite.
     Default is 1 if suite does not have processes defined"""
     amount = 1
-    suite_module = get_suite_module(workspace, project, suite)
+    suite_module = get_suite_module(project, suite)
     if hasattr(suite_module, 'processes'):
         amount = suite_module.processes
     return amount
 
 
-def get_suite_environments(workspace, project, suite):
+def get_suite_environments(project, suite):
     """Get the environments defined in a suite."""
     environments = []
-    suite_module = get_suite_module(workspace, project, suite)
+    suite_module = get_suite_module(project, suite)
     if hasattr(suite_module, 'environments'):
         environments = suite_module.environments
 
     return environments
 
 
-def get_suite_test_cases(workspace, project, suite):
+def get_suite_test_cases(project, suite):
     """Return a list with all the test cases of a given suite"""
     # TODO should use glob
     tests = []
-    suite_module = get_suite_module(workspace, project, suite)
+    suite_module = get_suite_module(project, suite)
     if '*' in suite_module.tests:
-        path = os.path.join(workspace, 'projects', project, 'tests')
+        path = os.path.join(session.testdir, 'projects', project, 'tests')
         tests = file_manager.get_files_dot_path(path, extension='.py')
     else:
         for test in suite_module.tests:
             if test.endswith('.*'):
                 this_dir = test[:-2]
-                path = os.path.join(workspace, 'projects', project, 'tests',
+                path = os.path.join(session.testdir, 'projects', project, 'tests',
                                     os.sep.join(this_dir.split('.')))
                 this_dir_tests = file_manager.get_files_dot_path(path, extension='.py')
                 this_dir_tests = ['{}.{}'.format(this_dir, x) for x in this_dir_tests]
@@ -107,30 +104,28 @@ def get_suite_test_cases(workspace, project, suite):
     return tests
 
 
-def get_suite_browsers(workspace, project, suite):
+def get_suite_browsers(project, suite):
     """Get the list of browsers defined in a suite"""
     browsers = []
-    suite_module = get_suite_module(workspace, project, suite)
+    suite_module = get_suite_module(project, suite)
     if hasattr(suite_module, 'browsers'):
         browsers = suite_module.browsers
 
     return browsers
 
 
-def get_suite_module(workspace, project, suite_name):
+def get_suite_module(project, suite_name):
     """Get the module of a suite"""
-    suite_name, parents = utils.separate_file_from_parents(suite_name)
-    path = os.path.join(workspace, 'projects', project, 'suites',
-                        os.sep.join(parents), suite_name + '.py')
+    path = suite_file_path(project, suite_name)
     suite_module, _ = utils.import_module(path)
     return suite_module
 
 
-def suite_exists(workspace, project, full_suite_name):
+def suite_exists(project, full_suite_name):
     """suite exists.
     full_suite_name must be a relative dot path
     """
-    suite_folder = os.path.join(workspace, 'projects', project, 'suites')
+    suite_folder = os.path.join(session.testdir, 'projects', project, 'suites')
     suite, parents = utils.separate_file_from_parents(full_suite_name)
     path = os.path.join(suite_folder, os.sep.join(parents), '{}.py'.format(suite))
     if os.path.isfile(path):
@@ -139,18 +134,18 @@ def suite_exists(workspace, project, full_suite_name):
     return os.path.isfile(path)
 
 
-def generate_suite_path(root_path, project, suite_name):
+def suite_file_path(project, suite_name):
     """Generate full path to a python file of a suite."""
     suite_name, parents = utils.separate_file_from_parents(suite_name)
-    suite_path = os.path.join(root_path, 'projects', project, 'suites',
+    suite_path = os.path.join(session.testdir, 'projects', project, 'suites',
                               os.sep.join(parents), '{}.py'.format(suite_name))
     return suite_path
 
 
-def get_tags(root_path, project, suite):
+def get_tags(project, suite):
     """Get the list of tags defined in a suite"""
     tags = []
-    suite_module = get_suite_module(root_path, project, suite)
+    suite_module = get_suite_module(project, suite)
     if hasattr(suite_module, 'tags'):
         tags = suite_module.tags
     return tags

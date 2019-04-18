@@ -2,7 +2,7 @@
 import sys
 import os
 
-from golem.core import test_execution
+from golem.core import session
 from golem import gui
 
 from werkzeug import _reloader
@@ -17,7 +17,6 @@ def run_gui(host=None, port=5000, debug=False):
     # started from the Golem standalone (PyInstaller) in Linux
     # TODO
     patch_werkzeug_get_args_for_reloading_wrapper()
-    gui.root_path = test_execution.root_path
     gui.app.run(host=host, port=port, debug=debug)
 
 

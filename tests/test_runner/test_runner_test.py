@@ -89,8 +89,7 @@ class TestRunTest:
     # A2
     def test_run_test__success2(self, project_function_clean, caplog, test_utils):
         """Test runs successfully"""
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'some description'
@@ -106,10 +105,10 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
         # run test
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -143,8 +142,7 @@ def teardown(data):
     @pytest.mark.slow
     def test_run_test__success_with_data(self, project_function_clean, caplog, test_utils):
         """Test runs successfully with test data"""
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'some description'
@@ -161,12 +159,12 @@ def teardown(data):
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project,
                                                        test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_data = dict(username='username1', password='password1')
         secrets = dict(very='secret')
         # run test
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data=test_data, secrets=secrets, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -206,8 +204,7 @@ def teardown(data):
     def test_run_test__import_error_on_test(self, project_function_clean, caplog, test_utils):
         """The test fails with 'code error' when it has a syntax error
         Test result is code error"""
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'some description'
@@ -219,9 +216,9 @@ def test(data)
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project,
                                                        test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -251,8 +248,7 @@ def test(data)
     def test_run_test__import_error_page_object(self, project_function_clean,
                                                 caplog, test_utils):
         """The test fails with 'code error' when an imported page has a syntax error"""
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 pages = ['page1']
@@ -273,9 +269,9 @@ element2 = ('css', '.oh.no')
 """
         self._create_page(testdir, project, 'page1', page_content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -310,8 +306,7 @@ element2 = ('css', '.oh.no')
         Test is not run
         Teardown is run
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -327,9 +322,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -360,8 +355,7 @@ def teardown(data):
         Test is not run
         Teardown is run
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -378,9 +372,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -402,8 +396,7 @@ def teardown(data):
         Test ends with 'failure'
         test() is not run
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -420,9 +413,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -445,8 +438,7 @@ def teardown(data):
         Test ends with 'failure'
         test() is not run
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -463,9 +455,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -488,8 +480,7 @@ def teardown(data):
         Test ends with 'failure'
         test() is not run
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -505,9 +496,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -529,8 +520,7 @@ def teardown(data):
         test() is not run
         teardown() is run
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -546,9 +536,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -569,8 +559,7 @@ def teardown(data):
         test() is not run
         teardown() is run
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -587,9 +576,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -611,8 +600,7 @@ def teardown(data):
         Test ends with 'code error'
         test() is not run
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -628,9 +616,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -652,8 +640,7 @@ def teardown(data):
         Test ends with 'code error'
         test() is not run
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -669,9 +656,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -691,8 +678,7 @@ def teardown(data):
         test() is run
         teardown() is run
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -708,9 +694,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -730,8 +716,7 @@ def teardown(data):
         Teardown throws exception
         test() is run
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -747,9 +732,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -770,8 +755,7 @@ def teardown(data):
         Teardown throws AssertionError
         test() is run
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -787,9 +771,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -808,8 +792,7 @@ def teardown(data):
         """test() throws AssertionError
         teardown() is run
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -826,9 +809,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -847,8 +830,7 @@ def teardown(data):
         """test() has error and throws AssertionError
         teardown() is run
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -865,9 +847,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -887,8 +869,7 @@ def teardown(data):
         """test() throws AssertionError
         teardown() throws exception
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -904,9 +885,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -926,8 +907,7 @@ def teardown(data):
         """test() throws AssertionError
         teardown() throws AssertionError
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -943,9 +923,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -962,8 +942,7 @@ def teardown(data):
     # C8
     def test_run_test__exception_in_test(self, project_function_clean, caplog, test_utils):
         """test() throws exception"""
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -979,9 +958,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -1000,7 +979,7 @@ def teardown(data):
         """test() throws error and AssertionError
         teardown()
         """
-        testdir = project_function_clean.testdir
+        testdir, project = project_function_clean.activate()
         project = project_function_clean.name
         test_name = test_utils.random_numeric_string(10)
         content = """
@@ -1018,9 +997,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -1040,8 +1019,7 @@ def teardown(data):
         """test() throws exception
         teardown() throws AssertionError
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -1057,9 +1035,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs
@@ -1078,8 +1056,7 @@ def teardown(data):
                                                         caplog, test_utils):
         """setup(), test() and teardown() have errors
         """
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
+        testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)
         content = """
 description = 'desc'
@@ -1095,9 +1072,9 @@ def teardown(data):
 """
         self._create_test(testdir, project, test_name, content)
         report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(testdir, project)
+        settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(workspace=testdir, project=project, test_name=test_name,
+        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
                              test_data={}, secrets={}, browser=browser, settings=settings,
                              report_directory=report_directory)
         # verify console logs

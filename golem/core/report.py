@@ -3,23 +3,24 @@ import json
 import os
 import uuid
 
+from golem.core import session
 
-def create_execution_directory(workspace, project, timestamp,
-                               test_name=None, suite_name=None):
+
+def create_execution_directory(project, timestamp, test_name=None, suite_name=None):
     """Create directory to store report for suite or single test.
     
     If suite, directory will be:
-    <workspace>/projects/<project>/reports/<suite_name>/<timestamp>/
+    <testdir>/projects/<project>/reports/<suite_name>/<timestamp>/
     
     If test, directory will be:
-    <workspace>/projects/<project>/reports/single_tests/<test_name>/<timestamp>/
+    <testdir>/projects/<project>/reports/single_tests/<test_name>/<timestamp>/
     """
     if test_name:
-        execution_directory = os.path.join(workspace, 'projects', project,
+        execution_directory = os.path.join(session.testdir, 'projects', project,
                                            'reports', 'single_tests', test_name,
                                            timestamp)
     elif suite_name:
-        execution_directory = os.path.join(workspace, 'projects', project,
+        execution_directory = os.path.join(session.testdir, 'projects', project,
                                            'reports', suite_name, timestamp)
     else:
         # TODO
@@ -38,9 +39,9 @@ def create_report_directory(execution_directory, test_case_name, is_suite):
     """Create directory to store a single test report.
     
     execution_directory takes the following format for suites:
-      <workspace>/projects/<project>/reports/<suite_name>/<timestamp>/
+      <testdir>/projects/<project>/reports/<suite_name>/<timestamp>/
     and this format for single tests
-      <workspace>/projects/<project>/reports/<suite_name>/<timestamp>/
+      <testdir>/projects/<project>/reports/<suite_name>/<timestamp>/
     
     The result for suites is:
       <execution_directory>/<test_name>/<set_name>/

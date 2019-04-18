@@ -8,7 +8,7 @@ from subprocess import Popen, PIPE, STDOUT
 import pytest
 
 from golem.cli import commands
-from golem.core import test_execution, settings_manager, suite, test_case, utils
+from golem.core import settings_manager, suite, test_case, utils, session
 
 
 # FIXTURES
@@ -45,14 +45,14 @@ class TestDirectory:
         self.name = TestUtils.random_string(4, 'testdir_')
         self.path = os.path.join(self.basedir, self.name)
         self.settings = None
-        os.chdir(self.basedir)
+        session.testdir = self.path
         commands.createdirectory_command(self.name)
 
     def activate(self):
+        session.testdir = self.path
         if self.settings is None:
-            self.settings = settings_manager.get_global_settings(self.path)
-        test_execution.root_path = self.path
-        test_execution.settings = self.settings
+            self.settings = settings_manager.get_global_settings()
+        session.settings = self.settings
         return self.path
 
     def remove(self):
@@ -96,18 +96,17 @@ class Project:
         self.name = TestUtils.random_string(4, 'project_')
         self.path = os.path.join(testdir_fixture.path, 'projects', self.name)
         self.settings = None
-        os.chdir(self.testdir)
-        test_execution.root_path = self.testdir
+        session.testdir = self.testdir
         commands.createproject_command(self.name)
 
     def values(self):
         return self.testdir, self.name
 
     def activate(self):
+        session.testdir = self.testdir
         if self.settings is None:
-            self.settings = settings_manager.get_project_settings(self.testdir, self.name)
-        test_execution.root_path = self.testdir
-        test_execution.settings = self.settings
+            self.settings = settings_manager.get_project_settings(self.name)
+        session.settings = self.settings
         return self.values()
 
     def remove(self):
@@ -199,31 +198,30 @@ class TestUtils:
             f.write('{{"{}": "{}"\}}'.format(setting, setting_value))
 
     @staticmethod
-    def create_test(testdir, project, parents, name, content=None):
+    def create_test(project, parents, name, content=None):
         if content is None:
             content = ('def test(data):\n'
                        '    print("hello")\n')
-        test_case.new_test_case(testdir, project, parents, name)
-        path = os.path.join(testdir, 'projects', project, 'tests',
+        test_case.new_test_case(project, parents, name)
+        path = os.path.join(session.testdir, 'projects', project, 'tests',
                             os.sep.join(parents), name + '.py')
         with open(path, 'w+') as f:
             f.write(content)
         return path
 
     @staticmethod
-    def create_suite(testdir, project, name, content=None, tests=None,
+    def create_suite(project, name, content=None, tests=None,
                      processes=1, browsers=None, environments=None, tags=None):
         browsers = browsers or []
         environments = environments or []
         tags = tags or []
         suite_name, parents = utils.separate_file_from_parents(name)
         if content is None:
-            suite.new_suite(testdir, project, parents, suite_name)
-            suite.save_suite(testdir, project, name, tests, processes, browsers,
+            suite.new_suite(project, parents, suite_name)
+            suite.save_suite(project, name, tests, processes, browsers,
                              environments, tags)
         else:
-            path = os.path.join(testdir, 'projects', project, 'suites',
-                                os.sep.join(parents), name + '.py')
+            path = suite.suite_file_path(project, name)
             with open(path, 'w+') as f:
                 f.write(content)
 

@@ -8,7 +8,7 @@ import traceback
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
-from golem.core import test_execution, utils
+from golem.core import session, utils
 from golem.test_runner.conf import ResultsEnum
 
 
@@ -43,7 +43,7 @@ def get_date_time_from_timestamp(timestamp):
     return date_time_string
 
 
-def get_last_executions(root_path, projects=None, suite=None, limit=5):
+def get_last_executions(projects=None, suite=None, limit=5):
     """Get the last n executions.
     
     Get the executions of one suite or all the suites,
@@ -54,7 +54,7 @@ def get_last_executions(root_path, projects=None, suite=None, limit=5):
     limited by `limit`
     """
     last_execution_data = {}
-    path = os.path.join(root_path, 'projects')
+    path = os.path.join(session.testdir, 'projects')
     # if no projects provided, search every project
     if not projects:
         projects = os.walk(path).__next__()[1]
@@ -79,11 +79,11 @@ def get_last_executions(root_path, projects=None, suite=None, limit=5):
     return last_execution_data
 
 
-def _parse_execution_data(execution_directory=None, workspace=None, project=None,
+def _parse_execution_data(execution_directory=None, project=None,
                           suite=None, execution=None, finalize=False):
     execution_data = get_execution_report_default()
     if not execution_directory:
-        execution_directory = os.path.join(workspace, 'projects', project,
+        execution_directory = os.path.join(session.testdir, 'projects', project,
                                            'reports', suite, execution)
     test_cases = []
     if os.path.isdir(execution_directory):
@@ -163,8 +163,7 @@ def _parse_execution_data(execution_directory=None, workspace=None, project=None
     return execution_data
 
 
-def get_execution_data(execution_directory=None, workspace=None,
-                       project=None, suite=None, execution=None):
+def get_execution_data(execution_directory=None, project=None, suite=None, execution=None):
     """Retrieve the data of all the tests of a suite execution.
     
     From the report.json if it exists, otherwise it parses
@@ -175,7 +174,7 @@ def get_execution_data(execution_directory=None, workspace=None,
     """
     has_finished = False
     if execution_directory is None:
-        execution_directory = os.path.join(workspace, 'projects', project, 'reports',
+        execution_directory = os.path.join(session.testdir, 'projects', project, 'reports',
                                            suite, execution)
     if os.path.isfile(os.path.join(execution_directory, 'report.json')):
         with open(os.path.join(execution_directory, 'report.json')) as f:
@@ -188,15 +187,13 @@ def get_execution_data(execution_directory=None, workspace=None,
             data = json.load(f)
             has_finished = True
     else:
-        data = _parse_execution_data(execution_directory, workspace, project, suite,
-                                     execution)
+        data = _parse_execution_data(execution_directory, project, suite, execution)
     data['has_finished'] = has_finished
     return data
 
 
-def get_test_case_data(root_path, project, test, suite=None, execution=None,
-                       test_set=None, is_single=False, encode_screenshots=False,
-                       no_screenshots=False):
+def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
+                       is_single=False, encode_screenshots=False, no_screenshots=False):
     """Retrieves all the data of a single test case execution.
 
     :Args:
@@ -223,10 +220,10 @@ def get_test_case_data(root_path, project, test, suite=None, execution=None,
         'has_finished': False
     }
     if is_single:
-        test_case_dir = os.path.join(root_path, 'projects', project, 'reports',
+        test_case_dir = os.path.join(session.testdir, 'projects', project, 'reports',
                                      'single_tests', test, execution, test_set)
     else:
-        test_case_dir = os.path.join(root_path, 'projects', project, 'reports',
+        test_case_dir = os.path.join(session.testdir, 'projects', project, 'reports',
                                      suite, execution, test, test_set)
     report_json_path = os.path.join(test_case_dir, 'report.json')
     if os.path.isfile(report_json_path):
@@ -396,8 +393,8 @@ def get_or_generate_junit_report(project, suite, execution):
     <testdir>/projects/<project>/reports/<suite>/<execution>/report.html|report-no-images.html
     """
     report_filename = 'report'
-    report_directory = os.path.join(test_execution.root_path, 'projects', project,
-                                    'reports', suite, execution)
+    report_directory = os.path.join(session.testdir, 'projects', project, 'reports',
+                                    suite, execution)
     report_filepath = os.path.join(report_directory, report_filename + '.xml')
     if os.path.isfile(report_filepath):
         xml_string = open(report_filepath).read()

@@ -2,14 +2,14 @@
 import json
 import os
 
-from golem.core import test_execution
+from golem.core import session
 
 
 def get_user_data(username=None, id_=None):
     if not username and not id_:
         raise ValueError('either username or id is required')
     user_data = None
-    with open(os.path.join(test_execution.root_path, 'users.json')) as f:
+    with open(os.path.join(session.testdir, 'users.json')) as f:
         users_data = json.load(f)
         for user in users_data:
             if username and user['username'] == username:
@@ -24,7 +24,7 @@ def get_user_from_id(id_):
     user_ = None
     if user_data:
         user_ = User(user_data['id'], user_data['username'], user_data['is_admin'],
-                   user_data['gui_projects'], user_data['report_projects'])
+                     user_data['gui_projects'], user_data['report_projects'])
     return user_
 
 

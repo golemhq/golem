@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- golem.execution.workspace -> golem.execution.testdir
+
+
 ## [0.8.0] - 2019-04-10
 
 ### Changed

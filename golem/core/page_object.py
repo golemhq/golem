@@ -3,21 +3,18 @@ import sys
 import types
 import inspect
 
-from golem.core import utils, file_manager, test_execution
+from golem.core import utils, file_manager, session
 
 
-def page_exists(root_path, project, full_page_name):
+def page_exists(project, full_page_name):
     """Page object exists.
     full_page_name must be dot path from the /project/pages/ 
     directory
     Example: 
       testdir/projects/project1/pages/modulex/pagex.py
-      page_exists(root_path, 'project1', 'modulex.pagex') -> True
+      page_exists('project1', 'modulex.pagex') -> True
     """
-    page_rel_path = os.sep.join(full_page_name.split('.'))
-    path = os.path.join(root_path, 'projects', project, 'pages',
-                        page_rel_path + '.py')
-    return os.path.isfile(path)
+    return os.path.isfile(page_file_path(project, full_page_name))
 
 
 def get_page_object_content(project, full_page_name):
@@ -50,8 +47,7 @@ def get_page_object_content(project, full_page_name):
         'source_code': ''
     }
 
-    path = generate_page_path(test_execution.root_path, project, full_page_name)
-    po_module, _ = utils.import_module(path)
+    po_module, _ = utils.import_module(page_file_path(project, full_page_name))
 
     # get all the names of the module,
     # ignoring the ones starting with '_'
@@ -115,22 +111,17 @@ def get_page_object_code(path):
     return code
 
 
-def save_page_object(root_path, project, full_page_name, elements,
-                     functions, import_lines):
+def save_page_object(project, full_page_name, elements, functions, import_lines):
     """Save Page Object contents to file.
     full_page_name must be a dot path starting from /project/pages/
     directory, (i.e.: 'module.sub_module.page_name_01')
     """
     def format_element_string(name, selector, value, display_name):
-        formatted = ("\n\n{0} = ('{1}', \'{2}\', '{3}')"
-                     .format(element['name'], element['selector'],
-                             element['value'], element['display_name'])
-                    )
-        return formatted
+        with_format = ("\n\n{0} = ('{1}', \'{2}\', '{3}')"
+                       .format(name, selector, value, display_name))
+        return with_format
 
-    page_name, parents = utils.separate_file_from_parents(full_page_name)
-    page_object_path = os.path.join(root_path, 'projects', project, 'pages',
-                                    os.sep.join(parents), '{}.py'.format(page_name))
+    page_object_path = page_file_path(project, full_page_name)
     with open(page_object_path, 'w', encoding='utf-8') as po_file:
         for line in import_lines:
             po_file.write("{}\n".format(line))
@@ -142,65 +133,65 @@ def save_page_object(root_path, project, full_page_name, elements,
             element['value'] = element['value'].replace('"', '\\"').replace("'", "\\'")
             if not element['display_name']:
                 element['display_name'] = element['name']
-            formatted = format_element_string(element['name'],
-                                              element['selector'],
-                                              element['value'],
-                                              element['display_name'])
+            formatted = format_element_string(element['name'], element['selector'],
+                                              element['value'], element['display_name'])
             po_file.write(formatted)
         for func in functions:
             po_file.write('\n\n' + func)
 
 
-def save_page_object_code(root_path, project, full_page_name, content):
+def save_page_object_code(project, full_page_name, content):
     """Save a Page Object given it's full code as a string.
     full_page_name must be a dot path starting from /project/pages/
     directory.
     content must be the file content as string
     """
-    page_name, parents = utils.separate_file_from_parents(full_page_name)
-    page_path = os.path.join(root_path, 'projects', project, 'pages',
-                             os.sep.join(parents), '{}.py'.format(page_name))
+    page_path = page_file_path(project, full_page_name)
     with open(page_path, 'w', encoding='utf-8') as po_file:
         po_file.write(content)
 
 
-def new_page_object(root_path, project, parents, page_name):
+def new_page_object(project, parents, page_name):
     """Create a new page object.
     Parents is a list of directories and subdirectories where the
     page should be stored.
     If add_parents is True, the parent directories will be added
     if they do not exist."""
     errors = []
-    base_path = os.path.join(root_path, 'projects', project, 'pages')
-    full_path = os.path.join(base_path, os.sep.join(parents))
-    filepath = os.path.join(full_path, '{}.py'.format(page_name))
-    if os.path.isfile(filepath):
+    base_path = pages_base_dir(project)
+    if len(parents):
+        full_name = '.'.join(['.'.join(parents), page_name])
+    else:
+        full_name = page_name
+
+    page_path = page_file_path(project, full_name)
+
+    if os.path.isfile(page_path):
         errors.append('A page file with that name already exists')
     if not errors:
-        if not os.path.isdir(full_path):
+        if not os.path.isdir(page_path):
             for parent in parents:
                 base_path = os.path.join(base_path, parent)
-                file_manager.create_directory(path=base_path,
-                                              add_init=True)
-        with open(filepath, 'w') as po_file:
+                file_manager.create_directory(path=base_path, add_init=True)
+        with open(page_path, 'w') as po_file:
             po_file.write('')
     return errors
 
 
-def generate_page_path(root_path, project, full_page_name):
-    """Generates a path to a page object python file
+def page_file_path(project, full_page_name):
+    """Generates a path to a page file
     Example":
-      generate_page_path('user/testdir', 'project1, 'module1.page1')
+      page_file_path('user/testdir', 'project1, 'module1.page1')
       -> 'user/testdir/projects/project1/pages/module1/page1.py'
     """
     page_name, parents = utils.separate_file_from_parents(full_page_name)
-    page_path = os.path.join(root_path, 'projects', project, 'pages',
+    page_path = os.path.join(session.testdir, 'projects', project, 'pages',
                              os.sep.join(parents), '{}.py'.format(page_name))
     return page_path
 
 
-def pages_base_dir(root_path, project):
+def pages_base_dir(project):
     """Generate base dir for pages.
-    i.e.: <root_path>/projets/<project>/pages/
+    i.e.: <testdir>/projets/<project>/pages/
     """
-    return os.path.join(root_path, 'projects', project, 'pages')
+    return os.path.join(session.testdir, 'projects', project, 'pages')

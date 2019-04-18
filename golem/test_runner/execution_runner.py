@@ -6,7 +6,7 @@ import multiprocessing
 from types import SimpleNamespace
 from collections import OrderedDict
 
-from golem.core import (test_execution,
+from golem.core import (session,
                         utils,
                         report,
                         test_data,
@@ -131,12 +131,10 @@ class ExecutionRunner:
         """Generate the execution report directory"""
         if self.is_suite:
             execution_directory = report.create_execution_directory(
-                test_execution.root_path, self.project,
-                self.timestamp, suite_name=self.suite_name)
+                self.project, self.timestamp, suite_name=self.suite_name)
         else:
             execution_directory = report.create_execution_directory(
-                test_execution.root_path, self.project,
-                self.timestamp, test_name=self.test_name)
+                self.project, self.timestamp, test_name=self.test_name)
         return execution_directory
 
     def _define_execution_list(self):
@@ -151,12 +149,11 @@ class ExecutionRunner:
         """
         execution_list = []
         envs = self.execution.envs or ['']
-        testdir = test_execution.root_path
-        envs_data = environment_manager.get_environment_data(testdir, self.project)
-        secrets = secrets_manager.get_secrets(testdir, self.project)
+        envs_data = environment_manager.get_environment_data(self.project)
+        secrets = secrets_manager.get_secrets(self.project)
 
         for test in self.tests:
-            data_sets = test_data.get_test_data(testdir, self.project, test)
+            data_sets = test_data.get_test_data(self.project, test)
             for data_set in data_sets:
                 for env in envs:
                     data_set_env = dict(data_set)
@@ -183,8 +180,7 @@ class ExecutionRunner:
     def _filter_tests_by_tags(self):
         tests = []
         try:
-            tests = tags_manager.filter_tests_by_tags(test_execution.root_path,
-                                                      self.project, self.tests,
+            tests = tags_manager.filter_tests_by_tags(self.project, self.tests,
                                                       self.execution.tags)
         except tags_manager.InvalidTagExpression as e:
             print('{}: {}'.format(e.__class__.__name__, e))
@@ -242,19 +238,14 @@ class ExecutionRunner:
         if suite.endswith('.py'):
             filename, _ = os.path.splitext(suite)
             suite = '.'.join(os.path.normpath(filename).split(os.sep))
-        self.tests = suite_module.get_suite_test_cases(test_execution.root_path,
-                                                       self.project, suite)
+        self.tests = suite_module.get_suite_test_cases(self.project, suite)
         if len(self.tests) == 0:
             print('No tests found for suite {}'.format(suite))
-        suite_amount_processes = suite_module.get_suite_amount_of_processes(
-            test_execution.root_path, self.project, suite)
+        suite_amount_processes = suite_module.get_suite_amount_of_processes(self.project, suite)
         self.suite.processes = suite_amount_processes
-        self.suite.browsers = suite_module.get_suite_browsers(test_execution.root_path,
-                                                              self.project, suite)
-        self.suite.envs = suite_module.get_suite_environments(test_execution.root_path,
-                                                              self.project, suite)
-        suite_imported_module = suite_module.get_suite_module(test_execution.root_path,
-                                                              self.project, suite)
+        self.suite.browsers = suite_module.get_suite_browsers(self.project, suite)
+        self.suite.envs = suite_module.get_suite_environments(self.project, suite)
+        suite_imported_module = suite_module.get_suite_module(self.project, suite)
         self.suite.before = getattr(suite_imported_module, 'before', None)
         self.suite.after = getattr(suite_imported_module, 'after', None)
         self.suite.tags = getattr(suite_imported_module, 'tags', None)
@@ -267,8 +258,7 @@ class ExecutionRunner:
         `directory` has to be a relative path from the tests folder.
         To run every test in tests folder use: directory=''
         """
-        self.tests = utils.get_directory_tests(test_execution.root_path,
-                                               self.project, directory)
+        self.tests = utils.get_directory_tests(self.project, directory)
         if len(self.tests) == 0:
             print('No tests were found in {}'.format(os.path.join('tests', directory)))
         self.is_suite = True
@@ -319,7 +309,7 @@ class ExecutionRunner:
             self.selected_browsers = utils.choose_browser_by_precedence(
                 cli_browsers=self.cli_args.browsers,
                 suite_browsers=self.suite.browsers,
-                settings_default_browser=test_execution.settings['default_browser'])
+                settings_default_browser=session.settings['default_browser'])
 
             # Define the attributes for each browser.
             # A browser name can be predefined ('chrome, 'chrome-headless', 'firefox', etc)
@@ -331,7 +321,7 @@ class ExecutionRunner:
             # 'full_name': the remote_browser name defined by the user,
             # 'remote': is this a remote_browser or not
             # 'capabilities': full capabilities defined in the remote_browsers setting
-            remote_browsers = settings_manager.get_remote_browsers(test_execution.settings)
+            remote_browsers = settings_manager.get_remote_browsers(session.settings)
             default_browsers = gui_utils.get_supported_browsers_suggestions()
             self.execution.browsers = define_browsers(self.selected_browsers, remote_browsers,
                                                       default_browsers)
@@ -346,7 +336,7 @@ class ExecutionRunner:
             #
             # Note, in the case of 4, the test might fail if it tries
             # to use env variables
-            project_envs = environment_manager.get_envs(test_execution.root_path, self.project)
+            project_envs = environment_manager.get_envs(self.project)
             self.execution.envs = self._select_environments(project_envs)
             invalid_envs = [e for e in self.execution.envs if e not in project_envs]
             if invalid_envs:
@@ -397,9 +387,9 @@ class ExecutionRunner:
             if self.execution.processes == 1:
                 # run tests serially
                 for test in self.execution.tests:
-                    run_test(test_execution.root_path, self.project, test.name,
+                    run_test(session.testdir, self.project, test.name,
                              test.data_set, test.secrets, test.browser,
-                             test_execution.settings, test.reportdir,
+                             session.settings, test.reportdir,
                              self.execution.has_failed_tests, self.execution.tags)
             else:
                 # run tests using multiprocessing
@@ -427,7 +417,7 @@ class ExecutionRunner:
                                                               self.execution.processes,
                                                               self.execution.envs,
                                                               self.execution.tags,
-                                                              test_execution.settings['remote_url'])
+                                                              session.settings['remote_url'])
         if self.is_suite or len(self.execution.tests) > 1:
             self._print_results()
 

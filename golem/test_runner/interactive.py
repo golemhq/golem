@@ -1,5 +1,5 @@
 """Golem interactive mode."""
-from golem.core import utils, settings_manager, test_execution
+from golem.core import utils, settings_manager, session
 from golem import execution
 from golem import actions
 from golem.gui import gui_utils
@@ -13,7 +13,7 @@ def interactive(settings, cli_browsers):
         cli_browsers=cli_browsers, suite_browsers=[],
         settings_default_browser=settings['default_browser'])
     execution.browser_name = browsers[0]
-    remote_browsers = settings_manager.get_remote_browsers(test_execution.settings)
+    remote_browsers = settings_manager.get_remote_browsers(session.settings)
     default_browsers = gui_utils.get_supported_browsers_suggestions()
     browser_defs = define_browsers(browsers, remote_browsers, default_browsers)
     execution.browser_definition = browser_defs[0]

@@ -1,5 +1,7 @@
 import os
 
+from golem.core import session
+
 
 def _directory_element(elem_type, name, dot_path=None):
     """instantiate directory element dictionary"""
@@ -131,7 +133,7 @@ def rename_file(old_path, old_file, new_path, new_file):
     return error
 
 
-def new_directory_of_type(root_path, project, parents, dir_name, dir_type):
+def new_directory_of_type(project, parents, dir_name, dir_type):
     """Creates a new directory for suites, tests or pages.
     If the directory is inside other directories, these should already exist.
     parents is a list of parent directories.
@@ -141,8 +143,7 @@ def new_directory_of_type(root_path, project, parents, dir_name, dir_type):
         errors.append('{} is not a valid dir_type'.format(dir_type))
     else:
         parents = os.sep.join(parents)
-        path = os.path.join(root_path, 'projects', project,
-                            dir_type, parents, dir_name)
+        path = os.path.join(session.testdir, 'projects', project, dir_type, parents, dir_name)
         if os.path.exists(path):
             errors.append('A directory with that name already exists')
         else:

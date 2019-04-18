@@ -2,6 +2,8 @@ import json
 import os
 import traceback
 
+from golem.core import session
+
 
 SETTINGS_FILE_CONTENT = (
 """{
@@ -88,15 +90,14 @@ DEFAULTS = [
 
 def create_global_settings_file(testdir):
     """Create a new global settings file"""
-    settings_path = os.path.join(testdir, 'settings.json')
-    with open(settings_path, 'a') as settings_file:
+    path = os.path.join(testdir, 'settings.json')
+    with open(path, 'a') as settings_file:
         settings_file.write(SETTINGS_FILE_CONTENT)
 
 
-def create_project_settings_file(testdir, project):
+def create_project_settings_file(project):
     """Create a new project settings file"""
-    settings_path = os.path.join(testdir, 'projects', project, 'settings.json')
-    with open(settings_path, 'a') as settings_file:
+    with open(project_settings_path(project), 'a') as settings_file:
         settings_file.write(REDUCED_SETTINGS_FILE_CONTENT)
 
 
@@ -144,12 +145,12 @@ def _deprecated_implicit_wait_warning(settings):
     return settings
 
 
-def get_global_settings(workspace):
-    """Get global settings from workspace folder as a dictionary"""
-    settings_path = os.path.join(workspace, 'settings.json')
+def get_global_settings():
+    """Get global settings from test-directory folder as a dictionary"""
     settings = {}
-    if os.path.exists(settings_path):
-        settings = _read_json_with_comments(settings_path)
+    path = settings_path()
+    if os.path.isfile(path):
+        settings = _read_json_with_comments(path)
         # TODO implicit_wait setting is deprecated
         # remove once implicit_wait is fully deprecated
         settings = _deprecated_implicit_wait_warning(settings)
@@ -159,27 +160,26 @@ def get_global_settings(workspace):
     return settings
 
 
-def get_global_settings_as_string(workspace):
+def get_global_settings_as_string():
     """Get global settings as a string"""
-    settings_path = os.path.join(workspace, 'settings.json')
+    path = settings_path()
     settings = ''
-    if os.path.exists(settings_path):
-        with open(settings_path) as settings_file:
+    if os.path.isfile(path):
+        with open(path) as settings_file:
             settings = settings_file.read()
     return settings
 
 
-def get_project_settings(workspace, project):
+def get_project_settings(project):
     """Get project level settings from project directory,
     Merge global and project settings.
     Project settings override global settings
     """
-    global_settings = get_global_settings(workspace)
-    project_settings_path = os.path.join(workspace, 'projects',
-                                         project, 'settings.json')
+    global_settings = get_global_settings()
+    path = project_settings_path(project)
     project_settings = {}
-    if os.path.exists(project_settings_path):
-        project_settings = _read_json_with_comments(project_settings_path)
+    if os.path.isfile(path):
+        project_settings = _read_json_with_comments(path)
         # TODO implicit_wait setting is deprecated
         # remove once implicit_wait is fully deprecated
         project_settings = _deprecated_implicit_wait_warning(project_settings)
@@ -190,31 +190,30 @@ def get_project_settings(workspace, project):
     return global_settings
 
 
-def get_project_settings_as_string(workspace, project):
+def get_project_settings_as_string(project):
     """Get project settings as a string"""
-    project_settings_path = os.path.join(workspace, 'projects',
-                                         project, 'settings.json')
+    path = project_settings_path(project)
     settings = ''
-    if os.path.exists(project_settings_path):
-        with open(project_settings_path) as settings_file:
+    if os.path.isfile(path):
+        with open(path) as settings_file:
             settings = settings_file.read()
     return settings
 
 
-def save_global_settings(workspace, global_settings):
+def save_global_settings(global_settings):
     """Save global settings.
     input settings must be the string content of file."""
-    settings_path = os.path.join(workspace, 'settings.json')
+    path = settings_path()
     if global_settings is not None:
-        with open(settings_path, 'w') as global_settings_file:
+        with open(path, 'w') as global_settings_file:
             global_settings_file.write(global_settings)
 
 
-def save_project_settings(workspace, project, project_settings):
+def save_project_settings(project, project_settings):
     """Save project settings.
     input settings must be the string content of file."""
-    project_path = os.path.join(workspace, 'projects', project, 'settings.json')
-    with open(project_path, 'w') as project_settings_file:
+    path = project_settings_path(project)
+    with open(path, 'w') as project_settings_file:
         project_settings_file.write(project_settings)
 
 
@@ -230,3 +229,11 @@ def get_remote_browser_list(settings):
     """Return a list of the remote browsers defined in settings."""
     remote_browser_list = list(get_remote_browsers(settings).keys())
     return remote_browser_list
+
+
+def settings_path():
+    return os.path.join(session.testdir, 'settings.json')
+
+
+def project_settings_path(project):
+    return os.path.join(session.testdir, 'projects', project, 'settings.json')

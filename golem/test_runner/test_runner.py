@@ -4,7 +4,7 @@ import os
 import time
 import traceback
 
-from golem.core import report, utils, test_case, test_execution
+from golem.core import report, utils, test_case
 from golem.test_runner.test_runner_utils import import_page_into_test_module
 from golem.test_runner import execution_logger
 from golem.test_runner.conf import ResultsEnum
@@ -48,10 +48,10 @@ def _get_set_name(test_data):
     return set_name
 
 
-def run_test(workspace, project, test_name, test_data, secrets, browser,
+def run_test(testdir, project, test_name, test_data, secrets, browser,
              settings, report_directory, execution_has_failed_tests=None, tags=None):
     """Run a single test"""
-    runner = TestRunner(workspace, project, test_name, test_data, secrets, browser,
+    runner = TestRunner(testdir, project, test_name, test_data, secrets, browser,
                         settings, report_directory, execution_has_failed_tests, tags)
     runner.prepare()
 
@@ -59,7 +59,7 @@ def run_test(workspace, project, test_name, test_data, secrets, browser,
 class TestRunner:
     __test__ = False  # ignore this class from Pytest
 
-    def __init__(self, workspace, project, test_name, test_data, secrets, browser,
+    def __init__(self, testdir, project, test_name, test_data, secrets, browser,
                  settings, report_directory, execution_has_failed_tests=None, tags=None):
         self.result = {
             'result': '',
@@ -72,7 +72,7 @@ class TestRunner:
             'browser_full_name': '',
             'set_name': '',
         }
-        self.workspace = workspace
+        self.testdir = testdir
         self.project = project
         self.test_name = test_name
         self.test_data = test_data
@@ -95,7 +95,7 @@ class TestRunner:
                                              self.settings['log_all_events'])
         execution.logger = logger
         execution.project = self.project
-        execution.workspace = self.workspace
+        execution.testdir = self.testdir
         execution.browser_definition = self.browser
         execution.settings = self.settings
         execution.report_directory = self.report_directory
@@ -106,14 +106,13 @@ class TestRunner:
         # add the 'project' directory to python path
         # to enable relative imports from the test
         # TODO
-        sys.path.append(os.path.join(self.workspace, 'projects', self.project))
+        sys.path.append(os.path.join(self.testdir, 'projects', self.project))
         self.import_modules()
 
     def import_modules(self):
         if '/' in self.test_name:
             self.test_name = self.test_name.replace('/', '.')
-        path = test_case.generate_test_case_path(self.workspace, self.project,
-                                                 self.test_name)
+        path = test_case.test_file_path(self.project, self.test_name, testdir=self.testdir)
         test_module, error = utils.import_module(path)
         if error:
             actions._add_error(message=error.splitlines()[-1], description=error)
@@ -131,8 +130,7 @@ class TestRunner:
             try:
                 # import each page into the test_module
                 if hasattr(self.test_module, 'pages'):
-                    base_path = os.path.join(self.workspace, 'projects',
-                                             self.project, 'pages')
+                    base_path = os.path.join(self.testdir, 'projects', self.project, 'pages')
                     for page in self.test_module.pages:
                         self.test_module = import_page_into_test_module(base_path,
                                                                         self.test_module,

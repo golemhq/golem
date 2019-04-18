@@ -12,7 +12,7 @@ description = None
 errors = []
 settings = None
 project = None
-workspace = None
+testdir = None
 report_directory = None
 logger = None
 timers = {}
@@ -30,7 +30,7 @@ def _reset():
     global errors
     global settings
     global project
-    global workspace
+    global testdir
     global report_directory
     global logger
     global timers
@@ -43,7 +43,7 @@ def _reset():
     errors = []
     settings = None
     project = None
-    workspace = None
+    testdir = None
     report_directory = None
     logger = None
     timers = {}

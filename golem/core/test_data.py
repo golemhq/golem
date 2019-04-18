@@ -9,10 +9,10 @@ and this module still has support of this for backwards compatibility
 import csv
 import os
 
-from golem.core import utils
+from golem.core import utils, session
 
 
-def save_external_test_data_file(root_path, project, full_test_case_name,
+def save_external_test_data_file(project, full_test_case_name,
                                  test_data):
     """Save data to external file (csv).
 
@@ -26,10 +26,10 @@ def save_external_test_data_file(root_path, project, full_test_case_name,
     """
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
 
-    data_file_path_data_folder = os.path.join(root_path, 'projects', project,
+    data_file_path_data_folder = os.path.join(session.testdir, 'projects', project,
                                               'data', os.sep.join(parents),
                                               '{}.csv'.format(tc_name))
-    data_path_tests_folder = os.path.join(root_path, 'projects', project,
+    data_path_tests_folder = os.path.join(session.testdir, 'projects', project,
                                           'tests', os.sep.join(parents))
     data_file_path_tests_folder = os.path.join(data_path_tests_folder,
                                                '{}.csv'.format(tc_name))
@@ -68,14 +68,14 @@ def save_external_test_data_file(root_path, project, full_test_case_name,
                     data_file.write('')
 
 
-def get_external_test_data(workspace, project, full_test_case_name):
+def get_external_test_data(project, full_test_case_name):
     """Get data from file (csv)."""
     data_list = []
     test, parents = utils.separate_file_from_parents(full_test_case_name)
-    data_file_path_data_folder = os.path.join(workspace, 'projects', project,
+    data_file_path_data_folder = os.path.join(session.testdir, 'projects', project,
                                               'data', os.sep.join(parents),
                                               '{}.csv'.format(test))
-    data_file_path_test_folder = os.path.join(workspace, 'projects', project,
+    data_file_path_test_folder = os.path.join(session.testdir, 'projects', project,
                                               'tests', os.sep.join(parents),
                                               '{}.csv'.format(test))
     # check if csv file exists in /data/ folder
@@ -97,13 +97,12 @@ def get_external_test_data(workspace, project, full_test_case_name):
     return data_list
 
 
-def get_internal_test_data(workspace, project, full_test_case_name,
-                           repr_strings=False):
+def get_internal_test_data(project, full_test_case_name, repr_strings=False):
     """Get test data defined inside the test itself."""
     # check if test has data variable defined
     data_list = []
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    path = os.path.join(workspace, 'projects', project, 'tests',
+    path = os.path.join(session.testdir, 'projects', project, 'tests',
                         os.sep.join(parents), '{}.py'.format(tc_name))
     test_module, _ = utils.import_module(path)
 
@@ -135,7 +134,7 @@ def get_internal_test_data(workspace, project, full_test_case_name,
     return data_list
 
 
-def get_test_data(workspace, project, full_test_case_name, repr_strings=False):
+def get_test_data(project, full_test_case_name, repr_strings=False):
     """Get test data.
 
     The order of priority is:
@@ -146,11 +145,11 @@ def get_test_data(workspace, project, full_test_case_name, repr_strings=False):
 
     Returns a list of dictionaries"""
     data_list = []
-    external_data = get_external_test_data(workspace, project, full_test_case_name)
+    external_data = get_external_test_data(project, full_test_case_name)
     if external_data:
         data_list = external_data
     else:
-        internal_data = get_internal_test_data(workspace, project, full_test_case_name,
+        internal_data = get_internal_test_data(project, full_test_case_name,
                                                repr_strings=repr_strings)
         if internal_data:
             data_list = internal_data
@@ -159,13 +158,13 @@ def get_test_data(workspace, project, full_test_case_name, repr_strings=False):
     return data_list
 
 
-def remove_csv_if_exists(root_path, project, full_test_case_name):
+def remove_csv_if_exists(project, full_test_case_name):
     """Remove csv data file from /data/ folder and from /tests/ folder"""
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    data_file_path_data_folder = os.path.join(root_path, 'projects', project,
+    data_file_path_data_folder = os.path.join(session.testdir, 'projects', project,
                                               'data', os.sep.join(parents),
                                               '{}.csv'.format(tc_name))
-    data_file_path_tests_folder = os.path.join(root_path, 'projects', project,
+    data_file_path_tests_folder = os.path.join(session.testdir, 'projects', project,
                                                'tests', os.sep.join(parents),
                                                '{}.csv'.format(tc_name))
     if os.path.isfile(data_file_path_data_folder):

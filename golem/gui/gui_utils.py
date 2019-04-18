@@ -10,7 +10,7 @@ from flask import abort, render_template
 from flask_login import current_user
 
 import golem.actions
-from golem.core import utils, test_execution
+from golem.core import utils, session
 from golem.gui import report_parser
 
 
@@ -163,7 +163,7 @@ def project_exists(func):
     """
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if not utils.project_exists(test_execution.root_path, kwargs['project']):
+        if not utils.project_exists(kwargs['project']):
             abort(404, 'The project {} does not exist.'.format(kwargs['project']))
         return func(*args, **kwargs)
     return wrapper
@@ -209,7 +209,7 @@ def generate_html_report(project, suite, execution, report_directory=None,
     from golem import gui
     app = gui.app
     if not report_directory:
-        report_directory = os.path.join(test_execution.root_path, 'projects', project,
+        report_directory = os.path.join(session.testdir, 'projects', project,
                                         'reports', suite, execution)
     if not report_name:
         if no_images:
@@ -230,14 +230,11 @@ def generate_html_report(project, suite, execution, report_directory=None,
     js['bootstrap'] = open(os.path.join(app.static_folder, 'js', 'external', 'bootstrap.min.js')).read()
     js['main'] = open(os.path.join(app.static_folder, 'js', 'main.js')).read()
     js['report_execution'] = open(os.path.join(app.static_folder, 'js', 'report_execution.js')).read()
-    execution_data = report_parser.get_execution_data(workspace=test_execution.root_path,
-                                                      project=project, suite=suite,
-                                                      execution=execution)
+    execution_data = report_parser.get_execution_data(project=project, suite=suite, execution=execution)
     detail_test_data = {}
     for test in execution_data['tests']:
-        test_detail = report_parser.get_test_case_data(test_execution.root_path, project,
-                                                       test['full_name'], suite=suite,
-                                                       execution=execution,
+        test_detail = report_parser.get_test_case_data(project, test['full_name'],
+                                                       suite=suite, execution=execution,
                                                        test_set=test['test_set'],
                                                        is_single=False,
                                                        encode_screenshots=True,
@@ -279,7 +276,7 @@ def get_or_generate_html_report(project, suite, execution, no_images=False):
         report_filename = 'report-no-images'
     else:
         report_filename = 'report'
-    report_directory = os.path.join(test_execution.root_path, 'projects', project,
+    report_directory = os.path.join(session.testdir, 'projects', project,
                                     'reports', suite, execution)
     report_filepath = os.path.join(report_directory, report_filename + '.html')
     if os.path.isfile(report_filepath):

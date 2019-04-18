@@ -2,7 +2,7 @@ import os
 import sys
 
 from golem.core import (utils,
-                        test_execution,
+                        session,
                         suite as suite_module,
                         test_case,
                         settings_manager)
@@ -54,29 +54,25 @@ def display_help(help, command):
 def run_command(project='', test_query='', browsers=None, processes=1,
                 environments=None, interactive=False, timestamp=None,
                 reports=None, report_folder=None, report_name=None, tags=None):
-    execution_runner = ExecutionRunner(browsers, processes, environments, interactive,
-                                       timestamp, reports, report_folder, report_name, tags)
+    execution_runner = ExecutionRunner(browsers, processes, environments,
+                                       interactive, timestamp, reports, report_folder,
+                                       report_name, tags)
     if project:
-        existing_projects = utils.get_projects(test_execution.root_path)
-        if project in existing_projects:
+        if utils.project_exists(project):
             execution_runner.project = project
-            settings = settings_manager.get_project_settings(test_execution.root_path,
-                                                             project)
-            test_execution.settings = settings
+            session.settings = settings_manager.get_project_settings(project)
             # add --interactive value to settings to make
             # it available from inside a test
-            test_execution.settings['interactive'] = interactive
+            session.settings['interactive'] = interactive
             if test_query:
-                if suite_module.suite_exists(test_execution.root_path,
-                                             project, test_query):
+                if suite_module.suite_exists(project, test_query):
                     execution_runner.run_suite(test_query)
-                elif test_case.test_case_exists(test_execution.root_path,
-                                                project, test_query):
+                elif test_case.test_case_exists(project, test_query):
                     execution_runner.run_test(test_query)
                 else:
                     if test_query == '.':
                         test_query = ''
-                    path = os.path.join(test_execution.root_path, 'projects',
+                    path = os.path.join(session.testdir, 'projects',
                                         project, 'tests', test_query)
                     if os.path.isdir(path):
                         execution_runner.run_directory(test_query)
@@ -86,10 +82,10 @@ def run_command(project='', test_query='', browsers=None, processes=1,
                         sys.exit(msg)
             else:
                 print(messages.RUN_USAGE_MSG)
-                test_cases = utils.get_test_cases(test_execution.root_path, project)
+                test_cases = utils.get_test_cases(project)
                 print('Test Cases:')
                 utils.display_tree_structure_command_line(test_cases['sub_elements'])
-                test_suites = utils.get_suites(test_execution.root_path, project)
+                test_suites = utils.get_suites(project)
                 print('\nTest Suites:')
                 # TODO print suites in structure
                 for suite in test_suites['sub_elements']:
@@ -98,11 +94,11 @@ def run_command(project='', test_query='', browsers=None, processes=1,
             msg = ('golem run: error: the project {} does not exist'.format(project))
             sys.exit(msg)
     elif interactive:
-        interactive_module.interactive(test_execution.settings, browsers)
+        interactive_module.interactive(session.settings, browsers)
     else:
         print(messages.RUN_USAGE_MSG)
         print('Projects:')
-        for project in utils.get_projects(test_execution.root_path):
+        for project in utils.get_projects():
             print('  {}'.format(project))
 
 
@@ -111,46 +107,40 @@ def gui_command(host=None, port=5000, debug=False):
 
 
 def createproject_command(project):
-    root_path = test_execution.root_path
-
-    if project in utils.get_projects(root_path):
+    if utils.project_exists(project):
         msg = ('golem createproject: error: a project with name \'{}\' already exists'
                .format(project))
         sys.exit(msg)
     else:
-        utils.create_new_project(root_path, project)
+        utils.create_new_project(project)
 
 
 def createtest_command(project, test):
-    root_path = test_execution.root_path
-
-    if project not in utils.get_projects(root_path):
+    if not utils.project_exists(project):
         msg = ('golem createtest: error: a project with name {} '
                'does not exist'.format(project))
         sys.exit(msg)
     dot_path = test.split('.')
     test_name = dot_path.pop()
-    errors = test_case.new_test_case(root_path, project,
-                                     dot_path, test_name)
+    errors = test_case.new_test_case(project, dot_path, test_name)
     if errors:
         sys.exit('golem createtest: error: {}'.format(' '.join(errors)))
 
 
 def createsuite_command(project, suite_name):
-    if project not in utils.get_projects(test_execution.root_path):
+    if not utils.project_exists(project):
         msg = ('golem createsuite: error: a project with name {} '
                'does not exist'.format(project))
         sys.exit(msg)
-    errors = suite_module.new_suite(test_execution.root_path,
-                             project, [], suite_name)
+    errors = suite_module.new_suite(project, [], suite_name)
     if errors:
         sys.exit('golem createsuite: error: {}'.format(' '.join(errors)))
 
 
-def createuser_command(username, password, is_admin=False,
-                       projects=[], reports=[]):
-    errors = utils.create_user(test_execution.root_path, username,
-                               password, is_admin, projects, reports)
+def createuser_command(username, password, is_admin=False, projects=None, reports=None):
+    projects = projects or []
+    reports = reports or []
+    errors = utils.create_user(username, password, is_admin, projects, reports)
     if errors:
         sys.exit('golem createuser: error: {}'.format(' '.join(errors)))
     else:

@@ -87,9 +87,8 @@ class TestGolemAdmin:
         """A test directory can be created if the destination is not empty
         by confirming the operation
         """
-        basedir = dir_function.path
         name = 'testdir_test_005'
-        full_path = os.path.join(basedir, name)
+        full_path = os.path.join(dir_function.path, name)
         os.mkdir(full_path)
         open(os.path.join(full_path, 'text-file.txt'), 'w').close()
         cmd = 'golem-admin createdirectory {} -y'.format(name)

@@ -47,12 +47,14 @@ DEFAULT_PREDEFINED = {
     'screenshots': {}
 }
 
+
 class TestCreateGlobalSettingsFile:
 
     def test_create_global_settings_file(self, testdir_class):
-        settings_path = os.path.join(testdir_class.path, 'settings.json')
+        testdir = testdir_class.activate()
+        settings_path = os.path.join(testdir, 'settings.json')
         os.remove(settings_path)
-        settings_manager.create_global_settings_file(testdir_class.path)
+        settings_manager.create_global_settings_file(testdir)
         with open(settings_path) as settings_file:
             actual = settings_file.read()
             assert actual == settings_manager.SETTINGS_FILE_CONTENT
@@ -61,11 +63,10 @@ class TestCreateGlobalSettingsFile:
 class TestCreateProjectSettingsFile:
 
     def test_create_project_settings_file(self, project_class):
-        testdir = project_class.testdir
-        project = project_class.name
+        _, project = project_class.activate()
         settings_path = os.path.join(project_class.path, 'settings.json')
         os.remove(settings_path)
-        settings_manager.create_project_settings_file(testdir, project)
+        settings_manager.create_project_settings_file(project)
         with open(settings_path) as settings_file:
             actual = settings_file.read()
             assert actual == settings_manager.REDUCED_SETTINGS_FILE_CONTENT
@@ -74,6 +75,7 @@ class TestCreateProjectSettingsFile:
 class TestReadJsonWithComments:
 
     def test__read_json_with_comments(self, testdir_class):
+        testdir_class.activate()
         file_content = ('{\n'
                         '// a commented line\n'
                         '"search_timeout": 10,\n'
@@ -152,14 +154,16 @@ class TestAssignSettingsDefaultValues:
 class TestGetGlobalSettings:
 
     def test_get_global_settings_default(self, testdir_function):
-        global_settings = settings_manager.get_global_settings(testdir_function.path)
+        testdir_function.activate()
+        global_settings = settings_manager.get_global_settings()
         assert global_settings == DEFAULT_PREDEFINED
 
 
 class TestGetGlobalSettingsAsString:
 
     def test_get_global_settings_as_string(self, testdir_session):
-        global_settings = settings_manager.get_global_settings_as_string(testdir_session.path)
+        testdir_session.activate()
+        global_settings = settings_manager.get_global_settings_as_string()
         expected = settings_manager.SETTINGS_FILE_CONTENT
         assert global_settings == expected
 
@@ -167,9 +171,8 @@ class TestGetGlobalSettingsAsString:
 class TestGetProjectSettings:
 
     def test_get_project_settings_default(self, project_function_clean):
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
-        project_settings = settings_manager.get_project_settings(testdir, project)
+        _, project = project_function_clean.activate()
+        project_settings = settings_manager.get_project_settings(project)
         assert project_settings == DEFAULT_PREDEFINED
 
     # TODO: test project override global settings
@@ -178,8 +181,8 @@ class TestGetProjectSettings:
 class TestGetProjectSettingsAsString:
 
     def test_get_project_settings_as_string(self, project_session):
-        project_settings = settings_manager.get_project_settings_as_string(
-            project_session.testdir, project_session.name)
+        _, project = project_session.activate()
+        project_settings = settings_manager.get_project_settings_as_string(project)
         expected = settings_manager.REDUCED_SETTINGS_FILE_CONTENT
         assert project_settings == expected
 
@@ -187,26 +190,26 @@ class TestGetProjectSettingsAsString:
 class TestSaveGlobalSettings:
 
     def test_save_global_settings(self, testdir_class):
+        testdir_class.activate()
         input_settings = ('// test\n'
                           '{\n'
                           '"test": "test"\n'
                           '}')
-        settings_manager.save_global_settings(testdir_class.path, input_settings)
-        actual = settings_manager.get_global_settings_as_string(testdir_class.path)
+        settings_manager.save_global_settings(input_settings)
+        actual = settings_manager.get_global_settings_as_string()
         assert actual == input_settings
 
 
 class TestSaveProjectSettings:
 
     def test_save_project_settings(self, project_class):
-        testdir = project_class.testdir
-        project = project_class.name
+        _, project = project_class.activate()
         input_settings = ('// test\n'
                           '{\n'
                           '"test": "test"\n'
                           '}')
-        settings_manager.save_project_settings(testdir, project, input_settings)
-        actual = settings_manager.get_project_settings_as_string(testdir, project)
+        settings_manager.save_project_settings(project, input_settings)
+        actual = settings_manager.get_project_settings_as_string(project)
         assert actual == input_settings
 
 

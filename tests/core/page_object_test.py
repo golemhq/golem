@@ -6,28 +6,23 @@ from golem.core import page_object
 class TestPageExists:
 
     def test_page_exists(self, project_session):
-        testdir, project = project_session.values()
-        page_object.new_page_object(testdir, project, [], 'page_x001_exist')
-        exists = page_object.page_exists(testdir, project, 'page_x001_exist')
-        not_exists = page_object.page_exists(testdir, project, 'page_x001_not_exist')
-        assert exists
-        assert not not_exists
+        _, project = project_session.activate()
+        page_object.new_page_object(project, [], 'page_x001_exist')
+        assert page_object.page_exists(project, 'page_x001_exist')
+        assert not page_object.page_exists(project, 'page_x001_not_exist')
 
 
 class TestGetPageObjectContent:
 
     def test_get_page_object_content(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
+        _, project = project_session.activate()
         page_name = 'page_test_get_content_ab1412'
-        page_object.new_page_object(testdir, project, [], page_name)
+        page_object.new_page_object(project, [], page_name)
         page_path = os.path.join(project_session.path, 'pages', page_name + '.py')
         with open(page_path, 'w') as page_file:
             page_file.write('elem1 = (\'id\', \'someId\', \'Elem1\')\n')
             page_file.write('def func1(c, b, a):\n')
             page_file.write('    pass')
-        from golem.core import test_execution
-        test_execution.root_path = testdir
         content = page_object.get_page_object_content(project, page_name)
         expected = {
             'functions': [
@@ -60,11 +55,10 @@ class TestGetPageObjectContent:
 class TestGetPageObjectCode:
 
     def test_get_page_object_code(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
+        _, project = project_session.activate()
         page_name = 'page_test_get_code_ab8456'
 
-        page_object.new_page_object(testdir, project, [], page_name)
+        page_object.new_page_object(project, [], page_name)
         page_path = os.path.join(project_session.path, 'pages', page_name + '.py')
         file_content = 'test=("id", "xyz")\ntest2=("id", "abc")\n'
         with open(page_path, 'w') as page_file:
@@ -73,6 +67,7 @@ class TestGetPageObjectCode:
         assert code == file_content
 
     def test_get_page_object_code_file_not_exist(self, project_session):
+        project_session.activate()
         page_path = os.path.join(project_session.path, 'pages', 'does', 'not', 'exist54654.py')
         code = page_object.get_page_object_code(page_path)
         assert code == ''
@@ -81,10 +76,9 @@ class TestGetPageObjectCode:
 class TestSavePageObject:
 
     def test_save_page_object(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
+        _, project = project_session.activate()
         page_path = os.path.join(project_session.path, 'pages', 'testa', 'testb', 'page_test987.py')
-        page_object.new_page_object(testdir, project, ['testa', 'testb'], 'page_test987')
+        page_object.new_page_object(project, ['testa', 'testb'], 'page_test987')
         page_name = 'testa.testb.page_test987'
         elements = [
             {'name': 'a', 'selector': 'id', 'value': 'b', 'display_name': 'a'},
@@ -95,8 +89,7 @@ class TestSavePageObject:
             'import time',
             'from golem import browser'
         ]
-        page_object.save_page_object(testdir, project, page_name,
-                                     elements, functions, import_lines)
+        page_object.save_page_object(project, page_name, elements, functions, import_lines)
         expected_contents = ('import time\n'
                              'from golem import browser\n'
                              '\n'
@@ -115,18 +108,17 @@ class TestSavePageObject:
 class TestSavePageObjectCode:
 
     def test_save_page_object_code(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
+        _, project = project_session.activate()
         page_name = 'page_name_x1'
         parents = ['save', 'page', 'code']
-        page_object.new_page_object(testdir, project, parents, page_name)
+        page_object.new_page_object(project, parents, page_name)
 
         page_code = ("elem1 = ('id', 'x')\n"
                      "elem2 = ('id', 'y')\n"
                      "def func1():\n"
                      "   pass")
         full_page_name = '{}.{}'.format('.'.join(parents), page_name)
-        page_object.save_page_object_code(testdir, project, full_page_name, page_code)
+        page_object.save_page_object_code(project, full_page_name, page_code)
         full_path = os.path.join(project_session.path, 'pages',
                                  os.sep.join(parents), page_name + '.py')
         with open(full_path) as page_file:
@@ -137,50 +129,45 @@ class TestSavePageObjectCode:
 class TestNewPageObject:
 
     def test_new_page_object(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
+        _, project = project_session.activate()
         page_name = 'page_name_x2'
         parents = ['new', 'page', 'object']
-        page_object.new_page_object(testdir, project, parents, page_name)
+        page_object.new_page_object(project, parents, page_name)
         full_path = os.path.join(project_session.path, 'pages',
                                  os.sep.join(parents), page_name + '.py')
         assert os.path.isfile(full_path)
 
     def test_new_page_object_page_exists(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
+        _, project = project_session.activate()
         page_name = 'page_name_x3'
         parents = ['new', 'page', 'object']
-        page_object.new_page_object(testdir, project, parents, page_name)
-        error = page_object.new_page_object(testdir, project, parents, page_name)
+        page_object.new_page_object(project, parents, page_name)
+        error = page_object.new_page_object(project, parents, page_name)
         assert error == ['A page file with that name already exists']
 
     def test_new_page_object_into_subdirectory(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
+        _, project = project_session.activate()
         page_name = 'page_name_x3'
         parents = ['subdir']
-        page_object.new_page_object(testdir, project, parents, page_name)
+        page_object.new_page_object(project, parents, page_name)
         init_path = os.path.join(project_session.path, 'pages', 'subdir', '__init__.py')
         assert os.path.isfile(init_path)
 
 
-class TestGeneratePagePath:
+class TestPageFilePath:
 
-    def test_generate_page_path(self):
-        testdir = 'x'
-        project = 'y'
+    def test_page_file_path(self, project_session):
+        testdir, project = project_session.activate()
         full_page_name = 'a.b.c'
         expected = os.path.join(testdir, 'projects', project, 'pages', 'a', 'b', 'c.py')
-        actual = page_object.generate_page_path(testdir, project, full_page_name)
+        actual = page_object.page_file_path(project, full_page_name)
         assert actual == expected
 
 
 class TestPageBaseDir:
 
-    def test_pages_base_dir(self):
-        testdir = 'x'
-        project = 'y'
+    def test_pages_base_dir(self, project_session):
+        testdir, project = project_session.activate()
         expected = os.path.join(testdir, 'projects', project, 'pages')
-        actual = page_object.pages_base_dir(testdir, project)
+        actual = page_object.pages_base_dir(project)
         assert actual == expected

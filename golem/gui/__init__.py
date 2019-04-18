@@ -9,8 +9,8 @@ from flask_login import (current_user, login_user, login_required,
                          LoginManager, logout_user)
 
 import golem
-from golem.core import (environment_manager, file_manager, lock, page_object,
-                        settings_manager, test_case, test_execution, utils,
+from golem.core import (environment_manager, file_manager, page_object,
+                        settings_manager, test_case, session, utils,
                         tags_manager)
 from golem.core import test_data as test_data_module
 from golem.core import suite as suite_module
@@ -27,8 +27,6 @@ app.config['SESSION_TYPE'] = 'filesystem'
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-root_path = None
 
 app.config['GOLEM_VERSION'] = golem.__version__
 
@@ -80,7 +78,7 @@ def index():
     list to gui_permissions
     """
     if current_user.is_admin or '*' in current_user.gui_permissions:
-        projects = utils.get_projects(test_execution.root_path)
+        projects = utils.get_projects()
     else:
         projects = current_user.gui_permissions
     return render_template('index.html', projects=projects)
@@ -128,18 +126,11 @@ def project_pages(project):
 @project_exists
 @gui_permissions_required
 def test_case_view(project, test_case_name):
-    # check if the file is locked
-    # is_locked_by = lock.is_file_locked(root_path, project, test_case_name)
-    # print(is_locked_by, g.user.username)
-    # if is_locked_by and is_locked_by != g.user.username:
-    #     abort(404, 'This file is locked by someone else.')
-    # else:
-    test_exists = test_case.test_case_exists(test_execution.root_path, project,
-                                             test_case_name)
+    test_exists = test_case.test_case_exists(project, test_case_name)
     if not test_exists:
         abort(404, 'The test {} does not exist'.format(test_case_name))
     tc_name, parents = utils.separate_file_from_parents(test_case_name)
-    path = test_case.generate_test_case_path(root_path, project, test_case_name)
+    path = test_case.test_file_path(project, test_case_name)
     _, error = utils.import_module(path)
     if error:
         url = url_for('test_case_code_view', project=project, test_case_name=test_case_name)
@@ -151,9 +142,8 @@ def test_case_view(project, test_case_name):
         return render_template('common_element_error.html', project=project,
                                item_name=test_case_name, content=content)
     else:
-        test_case_contents = test_case.get_test_case_content(root_path, project,
-                                                             test_case_name)
-        test_data = test_data_module.get_test_data(root_path, project, test_case_name,
+        test_case_contents = test_case.get_test_case_content(project, test_case_name)
+        test_data = test_data_module.get_test_data(project, test_case_name,
                                                    repr_strings=True)
         return render_template('test_builder/test_case.html', project=project,
                                test_case_contents=test_case_contents,
@@ -168,18 +158,16 @@ def test_case_view(project, test_case_name):
 @project_exists
 @gui_permissions_required
 def test_case_code_view(project, test_case_name):
-    test_exists = test_case.test_case_exists(test_execution.root_path, project,
-                                             test_case_name)
+    test_exists = test_case.test_case_exists(project, test_case_name)
     if not test_exists:
         abort(404, 'The test {} does not exist'.format(test_case_name))
     tc_name, parents = utils.separate_file_from_parents(test_case_name)
-    path = os.path.join(test_execution.root_path, 'projects', project,
+    path = os.path.join(session.testdir, 'projects', project,
                         'tests', os.sep.join(parents), tc_name + '.py')
     test_case_contents = test_case.get_test_case_code(path)
     _, error = utils.import_module(path)
-    external_data = test_data_module.get_external_test_data(root_path, project,
-                                                            test_case_name)
-    test_data_setting = test_execution.settings['test_data']
+    external_data = test_data_module.get_external_test_data(project, test_case_name)
+    test_data_setting = session.settings['test_data']
     return render_template('test_builder/test_case_code.html', project=project, 
                            test_case_contents=test_case_contents, test_case_name=tc_name,
                            full_test_case_name=test_case_name, test_data=external_data,
@@ -192,9 +180,8 @@ def test_case_code_view(project, test_case_name):
 @project_exists
 @gui_permissions_required
 def page_view(project, full_page_name, no_sidebar=False):
-    path = page_object.generate_page_path(root_path, project, full_page_name)
-    page_exists_ = page_object.page_exists(test_execution.root_path, project,
-                                           full_page_name)
+    path = page_object.page_file_path(project, full_page_name)
+    page_exists_ = page_object.page_exists(project, full_page_name)
     if not page_exists_:
         abort(404, 'The page {} does not exist'.format(full_page_name))
     _, error = utils.import_module(path)
@@ -233,11 +220,10 @@ def page_view_no_sidebar(project, full_page_name):
 @project_exists
 @gui_permissions_required
 def page_code_view(project, full_page_name, no_sidebar=False):
-    page_exists_ = page_object.page_exists(test_execution.root_path, project,
-                                           full_page_name)
+    page_exists_ = page_object.page_exists(project, full_page_name)
     if not page_exists_:
         abort(404, 'The page {} does not exist'.format(full_page_name))
-    path = page_object.generate_page_path(root_path, project, full_page_name)
+    path = page_object.page_file_path(project, full_page_name)
     _, error = utils.import_module(path)
     page_object_code = page_object.get_page_object_code(path)
     return render_template('page_builder/page_object_code.html', project=project,
@@ -258,16 +244,15 @@ def page_code_view_no_sidebar(project, full_page_name):
 @project_exists
 @gui_permissions_required
 def suite_view(project, suite):
-    suite_exists = suite_module.suite_exists(test_execution.root_path, project, suite)
-    if not suite_exists:
+    if not suite_module.suite_exists(project, suite):
         abort(404, 'The suite {} does not exist'.format(suite))
-    all_test_cases = utils.get_test_cases(root_path, project)
-    selected_tests = suite_module.get_suite_test_cases(root_path, project, suite)
-    processes = suite_module.get_suite_amount_of_processes(root_path, project, suite)
-    browsers = suite_module.get_suite_browsers(root_path, project, suite)
-    default_browser = test_execution.settings['default_browser']
-    environments = suite_module.get_suite_environments(root_path, project, suite)
-    tags = suite_module.get_tags(root_path, project, suite)
+    all_test_cases = utils.get_test_cases(project)
+    selected_tests = suite_module.get_suite_test_cases(project, suite)
+    processes = suite_module.get_suite_amount_of_processes(project, suite)
+    browsers = suite_module.get_suite_browsers(project, suite)
+    default_browser = session.settings['default_browser']
+    environments = suite_module.get_suite_environments(project, suite)
+    tags = suite_module.get_tags(project, suite)
     return render_template('suite.html', project=project,
                            all_test_cases=all_test_cases['sub_elements'],
                            selected_tests=selected_tests, suite=suite,
@@ -280,7 +265,7 @@ def suite_view(project, suite):
 @app.route("/settings/")
 @login_required
 def global_settings():
-    settings = settings_manager.get_global_settings_as_string(root_path)
+    settings = settings_manager.get_global_settings_as_string()
     return render_template('settings.html', project=None, global_settings=settings,
                            settings=None)
 
@@ -291,8 +276,8 @@ def global_settings():
 @project_exists
 @gui_permissions_required
 def project_settings(project):
-    gsettings = settings_manager.get_global_settings_as_string(root_path)
-    psettings = settings_manager.get_project_settings_as_string(root_path, project)
+    gsettings = settings_manager.get_global_settings_as_string()
+    psettings = settings_manager.get_project_settings_as_string(project)
     return render_template('settings.html', project=project, global_settings=gsettings,
                            settings=psettings)
 
@@ -303,7 +288,7 @@ def project_settings(project):
 @project_exists
 @gui_permissions_required
 def environments_view(project):
-    data = environment_manager.get_environments_as_string(root_path, project)
+    data = environment_manager.get_environments_as_string(project)
     return render_template('environments.html', project=project, environment_data=data)
 
 
@@ -327,7 +312,7 @@ def report_dashboard():
     have access to every project report. Otherwise limit the project
     list to report_permissions"""
     if current_user.is_admin or '*' in current_user.report_permissions:
-        projects = utils.get_projects(test_execution.root_path)
+        projects = utils.get_projects()
     else:
         projects = current_user.report_permissions
     return render_template('report/report_dashboard.html', projects=projects,
@@ -437,8 +422,7 @@ def report_execution_junit_download(project, suite, execution):
 @project_exists
 @report_permissions_required
 def report_execution_json(project, suite, execution):
-    json_report = report_parser.get_execution_data(workspace=root_path, project=project,
-                                                   suite=suite, execution=execution)
+    json_report = report_parser.get_execution_data(project=project, suite=suite, execution=execution)
     return jsonify(json_report)
 
 
@@ -448,8 +432,7 @@ def report_execution_json(project, suite, execution):
 @project_exists
 @report_permissions_required
 def report_execution_json_download(project, suite, execution):
-    report_data = report_parser.get_execution_data(workspace=root_path, project=project,
-                                                   suite=suite, execution=execution)
+    report_data = report_parser.get_execution_data(project=project, suite=suite, execution=execution)
     json_report = json.dumps(report_data, indent=4)
     headers = {'Content-disposition': 'attachment; filename={}'.format('report.json')}
     return Response(json_report, mimetype='application/json', headers=headers)
@@ -461,8 +444,8 @@ def report_execution_json_download(project, suite, execution):
 @project_exists
 @report_permissions_required
 def report_test(project, suite, execution, test, test_set):
-    test_case_data = report_parser.get_test_case_data(root_path, project, test,
-                                                      suite=suite, execution=execution,
+    test_case_data = report_parser.get_test_case_data(project, test, suite=suite,
+                                                      execution=execution,
                                                       test_set=test_set, is_single=False)
     return render_template('report/report_test.html', project=project, suite=suite,
                            execution=execution, test_case=test, test_set=test_set,
@@ -475,8 +458,8 @@ def report_test(project, suite, execution, test, test_set):
 @project_exists
 @report_permissions_required
 def report_test_json(project, suite, execution, test, test_set):
-    test_case_data = report_parser.get_test_case_data(root_path, project, test,
-                                                      suite=suite, execution=execution,
+    test_case_data = report_parser.get_test_case_data(project, test, suite=suite,
+                                                      execution=execution,
                                                       test_set=test_set, is_single=False)
     return jsonify(test_case_data)
 
@@ -487,7 +470,7 @@ def report_test_json(project, suite, execution, test, test_set):
 @project_exists
 @report_permissions_required
 def screenshot_file(project, suite, execution, test, test_set, scr):
-    screenshot_path = os.path.join(test_execution.root_path, 'projects', project,
+    screenshot_path = os.path.join(session.testdir, 'projects', project,
                                    'reports', suite, execution, test, test_set)
     return send_from_directory(screenshot_path, scr)
 
@@ -495,7 +478,7 @@ def screenshot_file(project, suite, execution, test, test_set, scr):
 # TEST SCREENSHOT
 @app.route('/test/screenshot/<project>/<test>/<execution>/<test_set>/<scr>/')
 def screenshot_file2(project, test, execution, test_set, scr):
-    screenshot_path = os.path.join(test_execution.root_path, 'projects', project,
+    screenshot_path = os.path.join(session.testdir, 'projects', project,
                                    'reports', 'single_tests', test, execution, test_set)
     return send_from_directory(screenshot_path, scr)
 
@@ -515,7 +498,7 @@ def screenshot_file2(project, test, execution, test_set, scr):
 def get_tests():
     if request.method == 'POST':
         project = request.form['project']
-        tests = utils.get_test_cases(root_path, project)
+        tests = utils.get_test_cases(project)
         return json.dumps(tests)
 
 
@@ -524,7 +507,7 @@ def get_tests():
 def get_pages():
     if request.method == 'POST':
         project = request.form['project']
-        pages = utils.get_pages(root_path, project)
+        pages = utils.get_pages(project)
         return json.dumps(pages)
 
 
@@ -533,7 +516,7 @@ def get_pages():
 def get_suite():
     if request.method == 'POST':
         project = request.form['project']
-        suites = utils.get_suites(root_path, project)
+        suites = utils.get_suites(project)
         return json.dumps(suites)
 
 
@@ -544,7 +527,7 @@ def delete_element():
         project = request.form['project']
         elem_type = request.form['elemType']
         full_path = request.form['fullPath']
-        errors = utils.delete_element(root_path, project, elem_type, full_path)
+        errors = utils.delete_element(project, elem_type, full_path)
         return json.dumps(errors)
 
 
@@ -556,8 +539,7 @@ def duplicate_element():
         elem_type = request.form['elemType']
         full_path = request.form['fullPath']
         new_file_full_path = request.form['newFileFullPath']
-        errors = utils.duplicate_element(root_path, project, elem_type,
-                                         full_path, new_file_full_path)
+        errors = utils.duplicate_element(project, elem_type, full_path, new_file_full_path)
         return json.dumps(errors)
 
 
@@ -590,26 +572,26 @@ def rename_element():
             elif elem_type == 'suite':
                 dir_type_name = 'suites'
             
-            old_path = os.path.join(root_path, 'projects', project, dir_type_name,
+            old_path = os.path.join(session.testdir, 'projects', project, dir_type_name,
                                     os.sep.join(old_parents))
-            new_path = os.path.join(root_path, 'projects', project, dir_type_name,
+            new_path = os.path.join(session.testdir, 'projects', project, dir_type_name,
                                     os.sep.join(new_parents))
             error = file_manager.rename_file(old_path, old_filename+'.py',
                                              new_path, new_filename+'.py')
         if not error and elem_type == 'test':
             # try to rename data file in /data/ folder
             # TODO, data files in /data/ will be deprecated
-            old_path = os.path.join(root_path, 'projects', project, 'data',
+            old_path = os.path.join(session.testdir, 'projects', project, 'data',
                                     os.sep.join(old_parents))
-            new_path = os.path.join(root_path, 'projects', project, 'data',
+            new_path = os.path.join(session.testdir, 'projects', project, 'data',
                                     os.sep.join(new_parents))
             if os.path.isfile(os.path.join(old_path, old_filename+'.csv')):
                 error = file_manager.rename_file(old_path, old_filename+'.csv',
                                                  new_path, new_filename+'.csv')
             # try to rename data file in /tests/ folder
-            old_path = os.path.join(root_path, 'projects', project, 'tests',
+            old_path = os.path.join(session.testdir, 'projects', project, 'tests',
                                     os.sep.join(old_parents))
-            new_path = os.path.join(root_path, 'projects', project, 'tests',
+            new_path = os.path.join(session.testdir, 'projects', project, 'tests',
                                     os.sep.join(new_parents))
             if os.path.isfile(os.path.join(old_path, old_filename+'.csv')):
                 error = file_manager.rename_file(old_path, old_filename+'.csv',
@@ -622,7 +604,7 @@ def rename_element():
 def get_page_objects():
     if request.method == 'POST':
         project = request.form['project']
-        path = page_object.pages_base_dir(root_path, project)
+        path = page_object.pages_base_dir(project)
         page_objects = file_manager.get_files_dot_path(path, extension='.py')
         return json.dumps(page_objects)
 
@@ -636,7 +618,7 @@ def get_selected_page_object_elements():
             'error': '',
             'contents': []
         }
-        if not page_object.page_exists(root_path, project, page):
+        if not page_object.page_exists(project, page):
             result['error'] = 'page does not exist'
         else:
             result['content'] = page_object.get_page_object_content(project, page)
@@ -668,27 +650,22 @@ def new_tree_element():
         if not errors:
             if elem_type == 'test':
                 if is_dir:
-                    errors = file_manager.new_directory_of_type(root_path, project,
-                                                                parents, element_name,
+                    errors = file_manager.new_directory_of_type(project, parents, element_name,
                                                                 dir_type='tests')
                 else:
-                    errors = test_case.new_test_case(root_path, project,
-                                                     parents, element_name)
+                    errors = test_case.new_test_case(project, parents, element_name)
             elif elem_type == 'page':
                 if is_dir:
-                    errors = file_manager.new_directory_of_type(root_path, project,
-                                                                parents, element_name,
+                    errors = file_manager.new_directory_of_type(project, parents, element_name,
                                                                 dir_type='pages')
                 else:
-                    errors = page_object.new_page_object(root_path, project, parents,
-                                                         element_name)
+                    errors = page_object.new_page_object(project, parents, element_name)
             elif elem_type == 'suite':
                 if is_dir:
-                    errors = file_manager.new_directory_of_type(root_path, project,
-                                                                parents, element_name,
+                    errors = file_manager.new_directory_of_type(project, parents, element_name,
                                                                 dir_type='suites')
                 else:
-                    errors = suite_module.new_suite(root_path, project, parents, element_name)
+                    errors = suite_module.new_suite(project, parents, element_name)
         element = {
             'name': element_name,
             'full_path': dot_path,
@@ -710,10 +687,10 @@ def new_project():
             errors.append('Project name is too short')
         elif len(project_name) > 50:
             errors.append('Project name is too long')
-        elif project_name in utils.get_projects(root_path):
+        elif utils.project_exists(project_name):
             errors.append('A project with that name already exists')
         else:
-            utils.create_new_project(root_path, project_name)
+            utils.create_new_project(project_name)
         return json.dumps({'errors': errors, 'project_name': project_name})
 
 
@@ -725,9 +702,9 @@ def save_test_case_code():
         test_case_name = request.json['testCaseName']
         table_test_data = request.json['testData']
         content = request.json['content']
-        test_case.save_test_case_code(root_path, project, test_case_name,
-                                      content, table_test_data)
-        path = test_case.generate_test_case_path(root_path, project, test_case_name)
+        test_case.save_test_case_code(project, test_case_name, content,
+                                      table_test_data)
+        path = test_case.test_file_path(project, test_case_name)
         _, error = utils.import_module(path)
         return json.dumps({'error': error})
 
@@ -751,7 +728,7 @@ def save_page_object():
         elements = request.json['elements']
         functions = request.json['functions']
         import_lines = request.json['importLines']
-        page_object.save_page_object(root_path, project, page_object_name,
+        page_object.save_page_object(project, page_object_name,
                                      elements, functions, import_lines)
         return json.dumps('ok')
 
@@ -763,9 +740,8 @@ def save_page_object_code():
         project = request.json['project']
         page_object_name = request.json['pageObjectName']
         content = request.json['content']
-        path = page_object.generate_page_path(root_path, project, page_object_name)
-        page_object.save_page_object_code(root_path, project,
-                                          page_object_name, content)
+        path = page_object.page_file_path(project, page_object_name)
+        page_object.save_page_object_code(project, page_object_name, content)
         _, error = utils.import_module(path)
         return json.dumps({'error': error})
 
@@ -794,7 +770,7 @@ def save_test_case():
         test_data_content = request.json['testData']
         test_steps = request.json['testSteps']
         tags = request.json['tags']
-        test_case.save_test_case(root_path, project, test_name, description, page_objects,
+        test_case.save_test_case(project, test_name, description, page_objects,
                                  test_steps, test_data_content, tags)
         return json.dumps('ok')
 
@@ -806,7 +782,7 @@ def check_test_case_run_result():
         project = request.form['project']
         test_case_name = request.form['testCaseName']
         timestamp = request.form['timestamp']
-        path = os.path.join(test_execution.root_path, 'projects', project, 'reports',
+        path = os.path.join(session.testdir, 'projects', project, 'reports',
                             'single_tests', test_case_name, timestamp)
         sets = {}
         result = {
@@ -824,8 +800,7 @@ def check_test_case_run_result():
         for set_name in sets:
             report_path = os.path.join(path, set_name, 'report.json')
             if os.path.exists(report_path):
-                test_case_data = report_parser.get_test_case_data(root_path,
-                                                                  project,
+                test_case_data = report_parser.get_test_case_data(project,
                                                                   test_case_name,
                                                                   execution=timestamp,
                                                                   test_set=set_name,
@@ -848,7 +823,7 @@ def get_test_set_detail():
     test_full_name = request.args['testFullName']
     test_set = request.args['testSet']
 
-    test_detail = report_parser.get_test_case_data(root_path, project, test_full_name,
+    test_detail = report_parser.get_test_case_data(project, test_full_name,
                                                    suite=suite, execution=execution,
                                                    test_set=test_set, is_single=False,
                                                    encode_screenshots=True)
@@ -880,8 +855,8 @@ def save_suite():
         tags = request.json['tags']
         browsers = request.json['browsers']
         environments = request.json['environments']
-        suite_module.save_suite(root_path, project, suite_name, test_cases,
-                                processes, browsers, environments, tags)
+        suite_module.save_suite(project, suite_name, test_cases, processes, browsers,
+                                environments, tags)
         return json.dumps('ok')
 
 
@@ -896,12 +871,12 @@ def save_settings():
             'result': 'ok',
             'errors': []
         }
-        settings_manager.save_global_settings(root_path, global_settings)
-        test_execution.settings = settings_manager.get_global_settings(root_path)
+        settings_manager.save_global_settings(global_settings)
+        session.settings = settings_manager.get_global_settings()
         if project_settings:
-            settings_manager.save_project_settings(root_path, project, project_settings)
+            settings_manager.save_project_settings(project, project_settings)
             # re-read project settings
-            test_execution.settings = settings_manager.get_project_settings(root_path, project)
+            session.settings = settings_manager.get_project_settings(project)
         return json.dumps(result)
 
 
@@ -911,37 +886,15 @@ def save_environments():
     if request.method == 'POST':
         project = request.json['project']
         env_data = request.json['environmentData']
-        error = environment_manager.save_environments(root_path, project, env_data)
+        error = environment_manager.save_environments(project, env_data)
         return json.dumps(error)
-
-
-# @app.route("/lock_file/", methods=['POST'])
-# @login_required
-# def lock_file():
-#     if request.method == 'POST':
-#         project = request.form['project']
-#         user_name = request.form['userName']
-#         full_file_name = request.form['fullTestCaseName']
-#         lock.lock_file(root_path, project, full_file_name, user_name)
-#         return json.dumps('ok')
-#
-#
-# @app.route("/unlock_file/", methods=['POST'])
-# @login_required
-# def unlock_file():
-#     if request.method == 'POST':
-#         project = request.form['project']
-#         user_name = request.form['userName']
-#         full_file_name = request.form['fullTestCaseName']
-#         lock.unlock_file(root_path, project, full_file_name, user_name)
-#         return json.dumps('ok')
 
 
 @app.route("/get_supported_browsers/", methods=['GET'])
 @login_required
 def get_supported_browsers():
     project = request.args['project']
-    settings = settings_manager.get_project_settings(root_path, project)
+    settings = settings_manager.get_project_settings(project)
     remote_browsers = settings_manager.get_remote_browser_list(settings)
     default_browsers = gui_utils.get_supported_browsers_suggestions()
     return json.dumps(remote_browsers + default_browsers)
@@ -951,7 +904,7 @@ def get_supported_browsers():
 @login_required
 def get_environments():
     project = request.args['project']
-    return json.dumps(environment_manager.get_envs(root_path, project))
+    return json.dumps(environment_manager.get_envs(project))
 
 
 @app.route("/report/get_last_executions/", methods=['POST'])
@@ -961,7 +914,7 @@ def get_last_executions():
         projects = request.json['projects']
         suite = request.json['suite']
         limit = request.json['limit']
-        project_data = report_parser.get_last_executions(root_path, projects, suite, limit)
+        project_data = report_parser.get_last_executions(projects, suite, limit)
         return jsonify(projects=project_data)
 
 
@@ -972,8 +925,7 @@ def get_execution_data():
         project = request.args['project']
         suite = request.args['suite']
         execution = request.args['execution']
-        execution_data = report_parser.get_execution_data(workspace=root_path, project=project,
-                                                          suite=suite, execution=execution)
+        execution_data = report_parser.get_execution_data(project=project, suite=suite, execution=execution)
         response = jsonify(execution_data)
         if execution_data['has_finished']:
             response.cache_control.max_age = 60*60*24*5
@@ -986,12 +938,10 @@ def get_execution_data():
 def get_project_health_data():
     if request.method == 'POST':
         project = request.form['project']
-        project_data = report_parser.get_last_executions(root_path, projects=[project],
-                                                         suite=None, limit=1)
+        project_data = report_parser.get_last_executions(projects=[project], suite=None, limit=1)
         health_data = {}
         for suite, executions in project_data[project].items():
-            execution_data = report_parser.get_execution_data(workspace=root_path,
-                                                              project=project,
+            execution_data = report_parser.get_execution_data(project=project,
                                                               suite=suite,
                                                               execution=executions[0])
             health_data[suite] = {
@@ -1008,7 +958,7 @@ def page_exists():
     if request.method == 'POST':
         project = request.form['project']
         full_page_name = request.form['fullPageName']
-        page_exists = page_object.page_exists(root_path, project, full_page_name)
+        page_exists = page_object.page_exists(project, full_page_name)
         return jsonify(page_exists)
 
 
@@ -1016,7 +966,7 @@ def page_exists():
 @login_required
 def get_amount_of_tests():
     project = request.args['project']
-    tests = utils.get_directory_tests(test_execution.root_path, project, '')
+    tests = utils.get_directory_tests(project, '')
     amount = len(tests)
     response = jsonify(amount)
     if amount > 0:
@@ -1028,14 +978,14 @@ def get_amount_of_tests():
 @app.route("/get_default_browser/", methods=['GET'])
 @login_required
 def get_default_browser():
-    return jsonify(test_execution.settings['default_browser'])
+    return jsonify(session.settings['default_browser'])
 
 
 @app.route("/project/tests/tags/", methods=['POST'])
 @login_required
 def get_project_tests_tags():
     project = request.form['project']
-    tags = tags_manager.get_all_project_tests_tags(test_execution.root_path, project)
+    tags = tags_manager.get_all_project_tests_tags(project)
     return jsonify(tags)
 
 
@@ -1043,7 +993,7 @@ def get_project_tests_tags():
 @login_required
 def get_project_tags():
     project = request.form['project']
-    tags = tags_manager.get_project_unique_tags(test_execution.root_path, project)
+    tags = tags_manager.get_project_unique_tags(project)
     return jsonify(tags)
 
 
