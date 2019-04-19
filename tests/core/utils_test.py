@@ -197,11 +197,12 @@ class TestCreateTestDir:
         dirs = [name for name in listdir if os.path.isdir(os.path.join(testdir, name))]
         if '.DS_Store' in files:
             files.remove('.DS_Store')
-        assert len(files) == 3
+        assert len(files) == 4
         # verify files
         assert '__init__.py' in files
         assert 'settings.json' in files
         assert 'users.json' in files
+        assert '.golem' in files
         # verify directories
         assert len(dirs) == 2
         # verify the test dir contains the correct directories

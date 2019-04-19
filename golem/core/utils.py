@@ -8,8 +8,9 @@ import traceback
 import glob
 import re
 from datetime import datetime
-from distutils.version import StrictVersion
+from distutils.version import StrictVersion, LooseVersion
 
+import golem
 from golem.core import settings_manager, file_manager, session
 
 
@@ -117,6 +118,8 @@ def create_test_dir(testdir):
                                   add_init=False)
 
     settings_manager.create_global_settings_file(testdir)
+
+    create_testdir_golem_file(testdir)
 
     users_path = os.path.join(testdir, 'users.json')
     open(users_path, 'a').close()
@@ -377,3 +380,23 @@ class ImmutableKeysDict(dict):
             raise AttributeError("cannot add new keys to ImmutableKeysDict")
         dict.__setitem__(self, key, value)
 
+
+def is_valid_test_directory(testdir):
+    """Verify `testdir` is a valid test directory path.
+    It must contain a .golem file.
+    This will only be checked for versions >= 0.9.0
+    TODO
+    """
+    if LooseVersion(golem.__version__) >= LooseVersion('0.9.0'):
+        if not os.path.isfile(os.path.join(testdir, '.golem')):
+            return False
+    return True
+
+
+def create_testdir_golem_file(testdir):
+    """Create .golem file"""
+    golem_file = os.path.join(testdir, '.golem')
+    with open(golem_file, 'w') as f:
+        secret_key = os.urandom(24).hex()
+        f.write('[gui]\n')
+        f.write('secret_key = {}\n'.format(secret_key))

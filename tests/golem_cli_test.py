@@ -332,3 +332,15 @@ class TestGolemCreateUser:
         msg = 'User {} was created successfully'.format(username)
         assert result == msg
         assert user.get_user_data(username=username)
+
+
+class TestGolemFileValidation:
+
+    def test_golem_file_does_not_exist(self, testdir_class, test_utils):
+        testdir = testdir_class.activate()
+        os.chdir(testdir)
+        golem_file_path = os.path.join(testdir, '.golem')
+        os.remove(golem_file_path)
+        command = 'golem createproject project01'
+        result = test_utils.run_command(command)
+        assert result == 'Error: current drectory is not an existing Golem test directory; .golem file not found'

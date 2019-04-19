@@ -42,11 +42,11 @@ class TestDirectory:
 
     def __init__(self, basedir):
         self.basedir = basedir
-        self.name = TestUtils.random_string(4, 'testdir_')
+        self.name = TestUtils.random_numeric_string(6, 'testdir_')
         self.path = os.path.join(self.basedir, self.name)
         self.settings = None
         session.testdir = self.path
-        commands.createdirectory_command(self.name)
+        commands.createdirectory_command(self.path)
 
     def activate(self):
         session.testdir = self.path
@@ -93,7 +93,7 @@ class Project:
     def __init__(self, testdir_fixture):
         self.testdir_fixture = testdir_fixture
         self.testdir = testdir_fixture.path
-        self.name = TestUtils.random_string(4, 'project_')
+        self.name = TestUtils.random_numeric_string(6, 'project_')
         self.path = os.path.join(testdir_fixture.path, 'projects', self.name)
         self.settings = None
         session.testdir = self.testdir

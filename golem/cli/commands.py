@@ -161,4 +161,6 @@ def createdirectory_command(dir_name, no_confirm=False):
             msg = 'Directory {} is not empty, continue? [Y/n]'.format(dir_name)
             if not utils.prompt_yes_no(msg):
                 return
+        if os.path.isfile(os.path.join(abspath, '.golem')):
+            sys.exit('Error: target directory is already an existing Golem test directory')
     utils.create_test_dir(abspath)
