@@ -4,7 +4,7 @@ import pytest
 
 from golem.cli import messages
 from golem.gui import user
-from golem.core import utils
+from golem.core import utils, errors
 
 
 class TestGolemHelp:
@@ -343,4 +343,4 @@ class TestGolemFileValidation:
         os.remove(golem_file_path)
         command = 'golem createproject project01'
         result = test_utils.run_command(command)
-        assert result == 'Error: current drectory is not an existing Golem test directory; .golem file not found'
+        assert result == errors.invalid_test_directory.format(testdir)

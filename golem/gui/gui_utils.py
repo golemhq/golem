@@ -1,17 +1,29 @@
 """Helper functions to deal with Golem GUI module application."""
-import os
-import sys
+import configparser
 import errno
-import subprocess
 import inspect
+import os
+import subprocess
+import sys
 from functools import wraps
+from urllib.parse import urlparse, urljoin
 
-from flask import abort, render_template
+from flask import abort, render_template, request
 from flask_login import current_user
 
 import golem.actions
-from golem.core import utils, session
+from golem.core import utils, session, errors
 from golem.gui import report_parser
+from golem import gui
+
+
+DEFAULT_SECRET_KEY = 'd3dac3po6c994b5590bf7fr2d2db355c661cbb83dec6344408'
+
+
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 
 def run_test_case(project, test_case_name, browsers=None, environments=None, processes=1):
@@ -206,8 +218,6 @@ def generate_html_report(project, suite, execution, report_directory=None,
     By default it's generated in <testdir>/projects/<project>/reports/<suite>/<timestamp>
     Default name is 'report.html' and 'report-no-images.html'
     """
-    from golem import gui
-    app = gui.app
     if not report_directory:
         report_directory = os.path.join(session.testdir, 'projects', project,
                                         'reports', suite, execution)
@@ -218,18 +228,20 @@ def generate_html_report(project, suite, execution, report_directory=None,
             report_name = 'report'
 
     formatted_date = report_parser.get_date_time_from_timestamp(execution)
+    app = gui.create_app()
+    static_folder = app.static_folder
     css = {}
     js = {}
-    boostrap_path = os.path.join(app.static_folder, 'css', 'bootstrap', 'bootstrap.min.css')
-    datatables_js = os.path.join(app.static_folder, 'js', 'external', 'datatable', 'datatables.min.js')
+    boostrap_path = os.path.join(static_folder, 'css', 'bootstrap', 'bootstrap.min.css')
+    datatables_js = os.path.join(static_folder, 'js', 'external', 'datatable', 'datatables.min.js')
     css['bootstrap'] = open(boostrap_path).read()
-    css['main'] = open(os.path.join(app.static_folder, 'css', 'main.css')).read()
-    css['report'] = open(os.path.join(app.static_folder, 'css', 'report.css')).read()
-    js['jquery'] = open(os.path.join(app.static_folder, 'js', 'external', 'jquery.min.js')).read()
+    css['main'] = open(os.path.join(static_folder, 'css', 'main.css')).read()
+    css['report'] = open(os.path.join(static_folder, 'css', 'report.css')).read()
+    js['jquery'] = open(os.path.join(static_folder, 'js', 'external', 'jquery.min.js')).read()
     js['datatables'] = open(datatables_js).read()
-    js['bootstrap'] = open(os.path.join(app.static_folder, 'js', 'external', 'bootstrap.min.js')).read()
-    js['main'] = open(os.path.join(app.static_folder, 'js', 'main.js')).read()
-    js['report_execution'] = open(os.path.join(app.static_folder, 'js', 'report_execution.js')).read()
+    js['bootstrap'] = open(os.path.join(static_folder, 'js', 'external', 'bootstrap.min.js')).read()
+    js['main'] = open(os.path.join(static_folder, 'js', 'main.js')).read()
+    js['report_execution'] = open(os.path.join(static_folder, 'js', 'report_execution.js')).read()
     execution_data = report_parser.get_execution_data(project=project, suite=suite, execution=execution)
     detail_test_data = {}
     for test in execution_data['tests']:
@@ -287,3 +299,29 @@ def get_or_generate_html_report(project, suite, execution, no_images=False):
                                            report_name=report_filename,
                                            no_images=no_images)
     return html_string
+
+
+def get_secret_key():
+    """Try to get the secret key from the .golem file
+    located in the test directory.
+    A default secret key will be returned if the .golem file
+    does not have a secret key defined.
+
+    Example .golem file:
+    [gui]
+    secret_key = my_secret_key_string
+    """
+    golem_file = os.path.join(session.testdir, '.golem')
+    if not os.path.isfile(golem_file):
+        sys.exit(errors.invalid_test_directory.format(session.testdir))
+    config = configparser.ConfigParser()
+    config.read(golem_file)
+    if 'gui' not in config:
+        print('Warning: gui config section not found in .golem file. Using default secret key')
+        secret_key = DEFAULT_SECRET_KEY
+    elif 'secret_key' not in config['gui']:
+        print('Warning: secret_key not found in .golem file. Using default secret key')
+        secret_key = DEFAULT_SECRET_KEY
+    else:
+        secret_key = config['gui']['secret_key']
+    return secret_key

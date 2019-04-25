@@ -54,8 +54,9 @@ Contents
    report
    settings
    golem-test-framework
-   interactive-mode
+   gui
    command-line-interface
+   interactive-mode
    golem_public_api/index
    guides/index
 

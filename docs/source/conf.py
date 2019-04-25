@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 from recommonmark.parser import CommonMarkParser
 
 
@@ -43,10 +41,12 @@ html_sidebars = {
 }
 html_theme_options = {
     'description': 'test automation framework',
+    'page_width': '1050px',
     'github_user': 'golemhq',
     'github_repo': 'golem',
     'github_type': 'star',
-    'github_count': False
+    'github_count': 'true',
+    'analytics_id': 'UA-139149408-1'
 }
 
 # The version info for the project you're documenting, acts as replacement for

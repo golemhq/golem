@@ -1,0 +1,31 @@
+GUI - Web Module
+==================================================
+
+## Secret Key
+
+For security purposes, each test directory is generated with a unique **secret key** stored in the *.golem* file.
+
+**Example .golem file:**
+```
+[gui]
+secret_key = <your_super_secret_key_string>
+```
+
+If the secret key is not provided, a default key will be used (not recommended).
+
+
+## Using a Production Server
+
+The default server (Flask development server) is not suited for production.
+
+The Golem GUI web application can be run with a production WSGI server just like any other Flask application. 
+
+As an example, these are the steps to use Waitress:
+
+```
+pip install waitress
+
+waitress-serve --call "golem.gui:create_app"
+```
+ 
+There are a lot of different options. Here is a complete guide: <http://flask.pocoo.org/docs/latest/deploying/>
