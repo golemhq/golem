@@ -119,19 +119,19 @@ function savePageObject(){
     });
     if(errors){ return }
     $.ajax({
-        url: "/save_page_object/",
+        url: "/api/page/save",
         data: JSON.stringify({
                 "project": project,
-                "pageObjectName": pageObjectName,
+                "pageName": pageObjectName,
                 "elements": elements,
                 "functions": functions,
                 "importLines": importLines
             }),
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
-        type: 'POST',
+        type: 'PUT',
         success: function(data) {
-            Main.Utils.toast('success', "Page "+pageObjectName+" saved", 3000);
+            Main.Utils.toast('success', `Page ${pageObjectName} saved`, 3000);
             unsavedChanges = false;
         }
     });

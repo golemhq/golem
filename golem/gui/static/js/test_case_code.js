@@ -47,18 +47,18 @@ function saveTestCase(callback){
         'content': content,
         'testData': testData,
         'project': project,
-        'testCaseName': fullTestCaseName
+        'testName': fullTestCaseName
     }
     $.ajax({
-        url: "/save_test_case_code/",
+        url: "/api/test/code/save",
         data: JSON.stringify(data),
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
-        type: 'POST',
+        type: 'PUT',
         success: function(data) {
             unsavedChanges = false;
             codeEditor.markClean();
-            Main.Utils.toast('success', "Test "+testCaseName+" saved", 3000);
+            Main.Utils.toast('success', `Test ${testCaseName} saved`, 3000);
             if(data.error != null){
                 $(".error-container").show();
                 $(".error-container pre").html(data.error);

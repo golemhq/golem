@@ -9,12 +9,12 @@ const PageList = new function(){
 
     this.getPages = function(projectName){
         $.ajax({
-            url: "/project/get_pages/",
+            url: "/api/project/page-tree",
             data: {
                 "project": projectName
             },
             dataType: 'json',
-            type: 'POST',
+            type: 'GET',
             success: function(pages) {
                 let treeRoot = $("#treeRoot");
                 treeRoot.append(Project.newElementForm('.'));

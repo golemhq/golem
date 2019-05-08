@@ -5,12 +5,13 @@ $(document).ready(function() {
 	else if(suiteName == "") limit = 10
 	else limit = 50;
 	$.ajax({
-		url: "/report/get_last_executions/",
+		url: "/api/report/suite/last-executions",
 		data: JSON.stringify({
             "projects": projects,
             "suite": suiteName,
             "limit": limit
         }),
+        dataType: 'json',
         contentType: 'application/json; charset=utf-8',
         type: 'POST',
 		success: function( data ) {	
@@ -103,7 +104,7 @@ const ReportDashboardMain = new function(){
 
     this.loadChartAndBars = function(project, suite, execution, row){
          $.ajax({
-            url: "/report/get_execution_data/",
+            url: "/api/report/suite/execution",
             data: {
                 project: project,
                 suite: suite,
@@ -112,7 +113,6 @@ const ReportDashboardMain = new function(){
             dataType: 'json',
             type: 'GET',
             success: function( executionData ) {
-
                 let results = Object.keys(executionData.totals_by_result).sort()
                 let container = row.find('td.result>div.progress');
                 results.forEach(function(result){

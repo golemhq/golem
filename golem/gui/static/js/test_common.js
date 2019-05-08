@@ -118,18 +118,19 @@ var TestCommon = new function(){
                 Main.Utils.displayErrorModal(errors);
                 return
             }
+
             $.ajax({
-                url: "/rename_element/",
-                data: {
+                url: "/api/test/rename",
+                data: JSON.stringify({
                      "project": project,
-                     "elemType": 'test',
                      "fullFilename": Test.fullName,
                      "newFullFilename": newTestNameValue,
-                },
+                }),
+                contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 type: 'POST',
-                success: function(error) {
-                    if(error.length == 0){
+                success: function(result) {
+                    if(result.error.length == 0){
                         document.title = document.title.replace(Test.fullName, newTestNameValue);
                         Test.fullName = newTestNameValue;
                         $("#testNameInput input").val('');
@@ -140,7 +141,7 @@ var TestCommon = new function(){
                         Main.Utils.toast('success', 'File was renamed', 2000);
                     }
                     else{
-                        Main.Utils.toast('error', error, 2000);
+                        Main.Utils.toast('error', result.error, 2000);
                         $("#testNameInput").hide();
                         $("#testName").show();
                     }

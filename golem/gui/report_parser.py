@@ -57,20 +57,22 @@ def get_last_executions(projects=None, suite=None, limit=5):
     path = os.path.join(session.testdir, 'projects')
     # if no projects provided, search every project
     if not projects:
-        projects = os.walk(path).__next__()[1]
+        projects = next(os.walk(path))[1]
     for project in projects:
         last_execution_data[project] = {}
         report_path = os.path.join(path, project, 'reports')
+        executed_suites = []
         # use one suite or all the suites
         if suite:
-            executed_suites = [suite]
+            if os.path.isdir(os.path.join(report_path, suite)):
+                executed_suites = [suite]
         else:
-            executed_suites = os.walk(report_path).__next__()[1]
+            executed_suites = next(os.walk(report_path))[1]
             executed_suites = [x for x in executed_suites if x != 'single_tests']
         for exec_suite in executed_suites:
             last_execution_data[project][exec_suite] = []
             suite_path = os.path.join(report_path, exec_suite)
-            suite_executions = os.walk(suite_path).__next__()[1]
+            suite_executions = next(os.walk(suite_path))[1]
             last_executions = sorted(suite_executions)
             limit = int(limit)
             last_executions = last_executions[-limit:]

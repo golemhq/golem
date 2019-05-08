@@ -244,13 +244,13 @@ class TestRunner:
                 execution.logger.info('Environment: {}'
                                       .format(self.test_data['env']['name']))
         if self.test_data:
-            data_string = '\n'
+            data_string = ''
             for key, value in self.test_data.items():
                 if key == 'env':
                     if 'url' in value:
-                        data_string += '    {}: {}\n'.format('url', value['url'])
+                        data_string += '\n    {}: {}'.format('url', value['url'])
                 else:
-                    data_string += '    {}: {}\n'.format(key, value)
+                    data_string += '\n    {}: {}'.format(key, value)
             execution.logger.info('Using data:{}'.format(data_string))
 
     def _add_error(self, message, exception):

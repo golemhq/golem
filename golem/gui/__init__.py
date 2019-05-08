@@ -2,7 +2,7 @@
 import os
 import sys
 
-from flask import Flask, g, redirect, render_template, request
+from flask import Flask, g, render_template
 from flask_login import current_user, LoginManager
 
 import golem
@@ -32,6 +32,7 @@ def create_app():
     app.config['SESSION_TYPE'] = 'filesystem'
     app.config['GOLEM_VERSION'] = golem.__version__
     login_manager = LoginManager()
+    login_manager.login_view = 'webapp.login'
     login_manager.init_app(app)
     app.register_blueprint(webapp_bp)
     app.register_blueprint(report_bp)
@@ -41,9 +42,9 @@ def create_app():
     def load_user(user_id):
         return user.get_user_from_id(user_id)
 
-    @login_manager.unauthorized_handler
-    def unauthorized_callback():
-        return redirect('/login?next=' + request.path)
+    # @login_manager.unauthorized_handler
+    # def unauthorized_callback():
+    #     return redirect('/login/?next=' + request.path)
 
     @app.before_request
     def before_request():

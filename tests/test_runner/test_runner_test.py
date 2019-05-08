@@ -173,8 +173,8 @@ def teardown(data):
             test_name)
         assert records[1].message == 'Browser: chrome'
         # Python 3.4 results not in order TODO
-        value_a = 'Using data:\n    username: username1\n    password: password1\n'
-        value_b = 'Using data:\n    password: password1\n    username: username1\n'
+        value_a = 'Using data:\n    username: username1\n    password: password1'
+        value_b = 'Using data:\n    password: password1\n    username: username1'
         assert records[2].message in [value_a, value_b]
         assert records[3].message == 'setup step'
         assert records[4].message == 'test step'

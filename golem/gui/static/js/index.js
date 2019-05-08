@@ -32,11 +32,12 @@ function createProject(){
         return
     }
     $.ajax({
-        url: "/new_project/",
-        data: {
-            "projectName": projectName,
-        },
+        url: "/api/project",
+        data: JSON.stringify({
+            "project": projectName,
+        }),
         dataType: 'json',
+        contentType: 'application/json; charset=utf-8',
         type: 'POST',
         success: function(data) {
             if(data.errors.length == 0){
