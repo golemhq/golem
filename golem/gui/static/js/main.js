@@ -424,7 +424,7 @@ const Main = new function(){
             Main.Utils.toast('info', 'Running test ' + Main.TestRunner.testName, 3000);
 
             $.ajax({
-                url: "/run_test_case/",
+                url: "/api/test/run",
                 data: JSON.stringify({
                      "project": Main.TestRunner.project,
                      "testName": Main.TestRunner.testName,
@@ -457,14 +457,14 @@ const Main = new function(){
 
         this._checkAndRecheckStatus = function(checkDelay, timestamp){
             $.ajax({
-                url: "/check_test_case_run_result/",
+                url: "/api/report/test/status",
                 data: {
                      "project": Main.TestRunner.project,
-                     "testCaseName": Main.TestRunner.testName,
+                     "test": Main.TestRunner.testName,
                      "timestamp": timestamp
                 },
                 dataType: 'json',
-                type: 'POST',
+                type: 'GET',
                 success: function(result) {
                     for (const [setName, values] of Object.entries(result.sets)){
                         Main.TestRunner._updateSet(setName, values, timestamp)
@@ -484,7 +484,7 @@ const Main = new function(){
 
         this._getDefaultBrowser = async function(){
             if(Main.TestRunner.defaultBrowser == undefined){
-                await $.get('/get_default_browser/', function(defaultBrowser){
+                await $.get('/api/golem/default-browser', function(defaultBrowser){
                       Main.TestRunner.defaultBrowser = defaultBrowser;
                 });
             }
@@ -493,8 +493,8 @@ const Main = new function(){
 
         this._startBrowsersAutocomplete = async function(){
             if(Main.TestRunner.supportedBrowsers.length == 0){
-                await $.get('/get_supported_browsers/', {'project': Main.TestRunner.project}, function(supportedBrowsers){
-                      Main.TestRunner.supportedBrowsers = JSON.parse(supportedBrowsers);
+                await $.get('/api/project/supported-browsers', {'project': Main.TestRunner.project}, function(supportedBrowsers){
+                      Main.TestRunner.supportedBrowsers = supportedBrowsers;
                 });
             }
             $('#runTestBrowsers').autocomplete({
@@ -510,8 +510,8 @@ const Main = new function(){
 
         this._getProjectEnvironments = async function(){
             if(Main.TestRunner.projectEnvironments.length == 0){
-                await $.get('/get_environments/', {'project': Main.TestRunner.project}, function(environments){
-                      Main.TestRunner.projectEnvironments = JSON.parse(environments);
+                await $.get('/api/project/environments', {'project': Main.TestRunner.project}, function(environments){
+                      Main.TestRunner.projectEnvironments = environments//JSON.parse(environments);
                 });
             }
             return Main.TestRunner.projectEnvironments

@@ -42,7 +42,7 @@ const ExecutionReport = new function(){
 
 	this.getReportData = function(){
 		 $.ajax({
-            url: "/report/get_execution_data/",
+            url: "/api/report/suite/execution",
             data: {
                 project: global.project,
                 suite: global.suite,
@@ -394,12 +394,12 @@ const DetailTable = new function(){
 	    }
 	    else{
             $.ajax({
-                url: "/report/get_test_set_detail/",
+                url: "/api/report/test-set",
                 data: {
                     project: global.project,
                     suite: global.suite,
                     execution: global.execution,
-                    testFullName: testFullName,
+                    testName: testFullName,
                     testSet: testSet
                 },
                 dataType: 'json',

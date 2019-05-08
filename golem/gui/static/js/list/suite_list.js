@@ -10,12 +10,13 @@ const SuiteList = new function(){
 
     this.getSuites = function(projectName){
         $.ajax({
-            url: "/project/get_suites/",
+            url: "/api/project/suite-tree",
             data: {
                 "project": projectName
             },
             dataType: 'json',
-            type: 'POST',
+            contentType: 'application/json',
+            type: 'GET',
             success: function(suites) {
                 let treeRoot = $("#treeRoot");
                 treeRoot.append(Project.newElementForm('.'));
@@ -26,12 +27,12 @@ const SuiteList = new function(){
 
     this.generateHealthChart = function(projectName){
         $.ajax({
-            url: "/report/get_project_health_data/",
+            url: "/api/project/health",
             data: {
                 "project": projectName,
             },
             dataType: 'json',
-            type: 'POST',
+            type: 'GET',
             success: function( healthData ) {
                 if($.isEmptyObject(healthData)){
                     $("#healthContainer").html("<div class='text-center' style='padding-top: 0px; color: darkgrey'>no previous executions</div>");
@@ -122,14 +123,14 @@ const SuiteList = new function(){
 
     this.checkIfProjectHasNoTests = function(){
         $.ajax({
-            url: "/get_amount_of_tests/",
+            url: "/api/project/has-tests",
             data: {
                 "project": project,
             },
             dataType: 'json',
             type: 'GET',
-            success: function(amountOfTests) {
-                if(amountOfTests == 0){
+            success: function(projectHasTests) {
+                if(!projectHasTests){
                     let content = `This project has no tests. Create the first test <strong><a href="/project/${project}/tests/" class="alert-link">here</a>.</strong>`;
                     Main.Utils.infoBar($("#infoBarContainer"), content)
                 }

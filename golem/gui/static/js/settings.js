@@ -40,7 +40,7 @@ function saveSettings(){
     var globalSettings = globalSettingsEditor.getValue();
 
     $.ajax({
-        url: "/save_settings/",
+        url: "/api/settings/save",
         data: JSON.stringify({
             "project": project,
             "projectSettings": projectSettings,
@@ -48,17 +48,11 @@ function saveSettings(){
         }),
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
-        type: 'POST',
+        type: 'PUT',
         success: function(data) {
-            if(data.result === 'ok'){
-                Main.Utils.toast('success', "Settings saved", 2000);
-
-                if(projectSettingsEditor != null) projectSettingsEditor.markClean();
-                globalSettingsEditor.markClean();
-            }
-            else{
-                Main.Utils.toast('error', data, 3000);
-            }
+            Main.Utils.toast('success', "Settings saved", 2000);
+            if(projectSettingsEditor != null){ projectSettingsEditor.markClean() }
+            globalSettingsEditor.markClean();
         },
     });
 }

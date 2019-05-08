@@ -9,12 +9,12 @@ const TestList = new function(){
 
     this.getTests = function(projectName){
         $.ajax({
-            url: "/project/get_tests/",
+            url: "/api/project/test-tree",
             data: {
                 "project": projectName
             },
             dataType: 'json',
-            type: 'POST',
+            type: 'GET',
             success: function(tests) {
                 let treeRoot = $("#treeRoot");
                 treeRoot.append(Project.newElementForm('.'));
@@ -26,12 +26,12 @@ const TestList = new function(){
 
     this.getTestsTags = function(tests){
         $.ajax({
-            url: "/project/tests/tags/",
+            url: "/api/project/test-tags",
             data: {
                 "project": project
             },
             dataType: 'json',
-            type: 'POST',
+            type: 'GET',
             success: function(testsTags) {
                 TestList.displayTags(testsTags)
             },

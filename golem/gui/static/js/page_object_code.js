@@ -51,18 +51,18 @@ function savePageObject(){
     var content = codeEditor.getValue();
 
     $.ajax({
-        url: "/save_page_object_code/",
+        url: "/api/page/code/save",
         data: JSON.stringify({
                 "project": project,
-                "pageObjectName": pageObjectName,
+                "pageName": pageObjectName,
                 "content": content
             }),
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
-        type: 'POST',
+        type: 'PUT',
         success: function(data) {
             codeEditor.markClean();
-            Main.Utils.toast('success', "Page "+pageObjectName+" saved", 3000);
+            Main.Utils.toast('success', `Page ${pageObjectName} saved`, 3000);
             if(data.error != null){
                 $(".error-container").show();
                 $(".error-container pre").html(data.error);

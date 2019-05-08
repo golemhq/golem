@@ -52,7 +52,7 @@ const Suite = new function(){
         }
         else{
             $.ajax({
-                url: "/save_suite/",
+                url: "/api/suite/save",
                 data: JSON.stringify({
                         "project": project,
                         "suite": suite,
@@ -60,11 +60,11 @@ const Suite = new function(){
                         "environments": environments,
                         "tags": tags,
                         "processes": processes,
-                        "testCases": testCases
+                        "tests": testCases
                     }),
                 dataType: 'json',
                 contentType: 'application/json; charset=utf-8',
-                type: 'POST',
+                type: 'PUT',
                 success: function(data) {
                     Suite.unsavedChanges = false;
                     Main.Utils.toast('success', "Suite "+suite+" saved", 3000)
@@ -76,11 +76,12 @@ const Suite = new function(){
     this.run = function(){
         function _runSuite(){
             $.ajax({
-                url: "/run_suite/",
-                data: {
+                url: "/api/suite/run",
+                data: JSON.stringify({
                     "project": project,
                     "suite": suite,
-                },
+                }),
+                contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 type: 'POST',
                 success: function(timestamp) {
@@ -102,12 +103,12 @@ const Suite = new function(){
 
         this.getTestsTags = function(tests){
             $.ajax({
-                url: "/project/tests/tags/",
+                url: "/api/project/test-tags",
                 data: {
                     "project": Suite.project
                 },
                 dataType: 'json',
-                type: 'POST',
+                type: 'GET',
                 success: function(testsTags) {
                     let projectTags = Object.keys(testsTags).map( (key, index) => testsTags[key] ).flat();
                     let uniqueProjectTags = ([...new Set(projectTags)]);
@@ -133,7 +134,7 @@ const Suite = new function(){
 
         this.getSupportedBrowsers = function(){
             $.ajax({
-                url: "/get_supported_browsers/",
+                url: "/api/project/supported-browsers",
                 data: {
                     project: Suite.project
                 },
@@ -147,7 +148,7 @@ const Suite = new function(){
 
         this.getProjectEnvironments = function(){
             $.ajax({
-                url: "/get_environments/",
+                url: "/api/project/environments",
                 data: {
                     project: Suite.project
                 },

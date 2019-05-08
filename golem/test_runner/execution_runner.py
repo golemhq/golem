@@ -420,7 +420,6 @@ class ExecutionRunner:
                                                               session.settings['remote_url'])
         if self.is_suite or len(self.execution.tests) > 1:
             self._print_results()
-
         # generate requested reports
         if self.is_suite:
             report_name = self.report_name or 'report'

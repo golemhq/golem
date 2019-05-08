@@ -2,6 +2,9 @@
 import json
 import os
 
+from itsdangerous import (TimedJSONWebSignatureSerializer
+                          as Serializer, BadSignature, SignatureExpired)
+
 from golem.core import session
 
 
@@ -61,6 +64,25 @@ class User:
         return (project in self.report_permissions or
                 '*' in self.report_permissions or
                 self.is_admin)
+
+    def generate_auth_token(self, secret_key, expiration=600):
+        s = Serializer(secret_key, expires_in=expiration)
+        return s.dumps({'id': self.id})
+
+    @staticmethod
+    def verify_auth_token(secret_key, token):
+        """Verify token is valid.
+
+        :Returns:
+          The user
+
+        :Raises:
+         - itsdangerous.BadSignature: token is invalid
+         - itsdangerous.SignatureExpired: token has expired
+        """
+        s = Serializer(secret_key)
+        data = s.loads(token)
+        return get_user_from_id(data['id'])
 
     def __repr__(self):
         return '<User {}>'.format(self.username)

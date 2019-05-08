@@ -175,14 +175,22 @@ const Project = new function(){
             Main.Utils.displayErrorModal(errors);
             return
         }
+        let endpointURL;
+        if(elementType == 'test')
+            endpointURL = '/api/project/test'
+        else if(elementType == 'page')
+            endpointURL = '/api/project/page'
+        else
+            endpointURL = '/api/project/suite'
+
         $.ajax({
-            url: "/new_tree_element/",
-            data: {
+            url: endpointURL,
+            data: JSON.stringify({
                 "project": project,
-                "elementType": elementType,
                 "isDir": isDir,
                 "fullPath": fullPath
-            },
+            }),
+            contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             type: 'POST',
             success: function(data) {
@@ -236,15 +244,22 @@ const Project = new function(){
     }
 
     this.deleteElement = function(element, fullPath, elemType){
+        let endpointURL;
+        if(elemType == 'test')
+            endpointURL = '/api/test/delete'
+        else if(elemType == 'page')
+            endpointURL = '/api/page/delete'
+        else
+            endpointURL = '/api/suite/delete'
         $.ajax({
-            url: "/delete_element/",
-            data: {
+            url: endpointURL,
+            data: JSON.stringify({
                 "project": project,
-                "elemType": elemType,
                 "fullPath": fullPath
-            },
+            }),
+            contentType: 'application/json; charset=utf-8',
             dataType: 'json',
-            type: 'POST',
+            type: 'DELETE',
             success: function(errors) {
                 if(errors.length == 0){
                     element.remove();
@@ -283,15 +298,18 @@ const Project = new function(){
             Main.Utils.displayErrorModal(errors);
             return
         }
-
+        let endpointURL;
+        if(elemType == 'test') { endpointURL = '/api/test/duplicate' }
+        else if(elemType == 'page') { endpointURL = '/api/page/duplicate' }
+        else { endpointURL = '/api/suite/duplicate' }
         $.ajax({
-            url: "/duplicate_element/",
-            data: {
+            url: endpointURL,
+            data: JSON.stringify({
                 "project": project,
-                "elemType": elemType,
                 "fullPath": elemFullPath,
                 "newFileFullPath": newFileFullPath
-            },
+            }),
+            contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             type: 'POST',
             success: function(errors) {
@@ -340,19 +358,23 @@ const Project = new function(){
             Main.Utils.displayErrorModal(errors);
             return
         }
+        let endpointURL;
+        if(elemType == 'test') { endpointURL = '/api/test/rename' }
+        else if(elemType == 'page') { endpointURL = '/api/page/rename' }
+        else { endpointURL = '/api/suite/rename' }
 
         $.ajax({
-            url: "/rename_element/",
-            data: {
+            url: endpointURL,
+            data: JSON.stringify({
                 "project": project,
-                "elemType": elemType,
                 "fullFilename": fullFilename,
                 "newFullFilename": newFullFilename
-            },
+            }),
+            contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             type: 'POST',
-            success: function(error) {
-                if(error.length == 0){
+            success: function(result) {
+                if(result.error.length == 0){
                     originalElement.remove();
                     Project.addFileToTree(newFullFilename, elemType);
                     if(elemType == 'test'){
@@ -364,7 +386,7 @@ const Project = new function(){
                     Main.Utils.toast('success', 'File was renamed', 2000);
                 }
                 else{
-                    Main.Utils.displayErrorModal([error])
+                    Main.Utils.displayErrorModal([result.error])
                 }
             },
             error: function(){

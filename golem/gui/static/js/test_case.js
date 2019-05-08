@@ -36,7 +36,7 @@ var Test = new function(){
 
     this.getGolemActions = function(){
         $.ajax({
-            url: "/get_golem_actions/",
+            url: "/api/golem/actions",
             dataType: 'json',
             type: 'GET',
             success: function(golemActions) {
@@ -48,12 +48,12 @@ var Test = new function(){
 
     this.getAllProjectPages = function(){
         $.ajax({
-            url: "/get_page_objects/",
+            url: "/api/project/pages",
             data: {
                 "project": Test.project,
             },
             dataType: 'json',
-            type: 'POST',
+            type: 'GET',
             success: function(pages) {
                 Test.allPages = pages;
                 Test.refreshPagesAutocomplete();
@@ -63,7 +63,7 @@ var Test = new function(){
 
     this.getPageContents = function(pageName){
         $.ajax({
-            url: "/get_page_contents/",
+            url: "/api/page/elements",
             data: {
                  "project": Test.project,
                  "page": pageName,
@@ -241,25 +241,23 @@ var Test = new function(){
         }
         let data = {
             'description': description,
-            'pageObjects': pageObjects,
+            'pages': pageObjects,
             'testData': testData,
-            'testSteps': testSteps,
+            'steps': testSteps,
             'project': Test.project,
-            'testCaseName': Test.fullName,
+            'testName': Test.fullName,
             'tags': tags,
         }
         $.ajax({
-            url: "/save_test_case/",
+            url: "/api/test/save",
             data: JSON.stringify(data),
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',
-            type: 'POST',
+            type: 'PUT',
             success: function(data) {
                 Test.unsavedChanges = false;
-                Main.Utils.toast('success', "Test "+Test.fullName+" saved", 3000);
-                if(runAfter){
-                    Main.TestRunner.runTest(Test.project, Test.fullName);
-                }
+                Main.Utils.toast('success', `Test ${Test.fullName} saved`, 3000);
+                if(runAfter){ Main.TestRunner.runTest(Test.project, Test.fullName) }
             }
         });
     }
@@ -333,13 +331,13 @@ var Test = new function(){
             return
         }
         $.ajax({
-            url: "/new_tree_element/",
-            data: {
+            url: "/api/project/page",
+            data: JSON.stringify({
                 "project": Test.project,
-                "elementType": 'page',
                 "isDir": false,
                 "fullPath": newPageName
-            },
+            }),
+            contentType: 'application/json; charset=utf-8',
             dataType: 'json',
             type: 'POST',
             success: function(data) {
@@ -369,12 +367,12 @@ var Test = new function(){
 
     this.getUniqueTags = function(project){
         $.ajax({
-            url: "/project/tags/",
+            url: "/api/project/tags",
             data: {
                 "project": project
             },
             dataType: 'json',
-            type: 'POST',
+            type: 'GET',
             success: function(tags) {
                 Test.projectTags = tags;
                 Test.refreshTagInputAutocomplete();

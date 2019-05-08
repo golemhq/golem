@@ -21,24 +21,22 @@ function saveEnvironments(){
     var environments = environmentsEditor.getValue();
 
     $.ajax({
-        url: "/save_environments/",
+        url: "/api/project/environments/save",
         data: JSON.stringify({
                 "project": project,
                 "environmentData": environments
             }),
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
-        type: 'POST',
-        success: function(error) {
-            if(error.length == 0){
+        type: 'PUT',
+        success: function(result) {
+            if(result.error.length == 0){
                 Main.Utils.toast('success', "Environments saved", 2000);
                 environmentsEditor.markClean();
             }
             else{
-                Main.Utils.toast('error', error, 2000);
+                Main.Utils.toast('error', result.error, 2000);
             }
-        },
-        error: function() {
         }
     });
 }

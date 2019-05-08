@@ -1,7 +1,7 @@
 """Main point of entrance to the application"""
 import sys
 
-from .core import session, utils
+from .core import session, utils, errors
 from .core.settings_manager import get_global_settings
 from .cli import argument_parser, commands
 
@@ -12,10 +12,9 @@ def execute_from_command_line(testdir):
     sys.path.insert(0, '')
 
     if not utils.is_valid_test_directory(testdir):
-        sys.exit('Error: current drectory is not an existing Golem test '
-                 'directory; .golem file not found')
+        sys.exit(errors.invalid_test_directory.format(testdir))
 
-    # set global values
+    # set session values
     session.testdir = testdir
     session.settings = get_global_settings()
 
