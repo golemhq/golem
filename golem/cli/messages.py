@@ -8,7 +8,7 @@ Usage: golem
   golem createproject <project>
   golem createtest <project> <test>
   golem createsuite <project> <suite>
-  golem createuser <username> <password> [-a -p -r]
+  golem createsuperuser [-u -e -p -n]
 
 Usage: golem run
 
@@ -157,23 +157,19 @@ Usage: golem createsuite <project> <suite>
                         to create inside sub-folders.
 """
 
-CREATEUSER_USAGE_MSG = """
-Usage: golem createuser <username> <password> [-a|--admin]
-                        [-p|--projects] [-r|--reports]
+CREATESUPERUSER_USAGE_MSG = """
+Usage: golem createsuperuser [-u|--username -e|email -p|--password
+                              -n|--noinput]
   
-  Create a new user
-
-  positional arguments:
-    username            the username of the user
-    password            the password of the user
+  Create a new super user. Command is interactive unless --username,
+  --password and --noinput are provided. Email is optional.
 
   optional arguments:
-    -a, --admin         make the user admin. Admin users
-                        have access to all projects.
-    -p, --projects      a list of projects to give the user
-                        access
-    -r, --reports       a list of projects to give the user
-                        access to the reports
+    -u, --username      
+    -e, --email         Email address, optional.
+    -p, --password      
+    -n, --noinput       Do not prompt user. Username and password
+                        must be provided.
 """
 
 ADMIN_USAGE_MSG = """

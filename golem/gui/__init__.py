@@ -6,10 +6,10 @@ from flask import Flask, g, render_template
 from flask_login import current_user, LoginManager
 
 import golem
-from . import gui_utils, report_parser, user
+from . import gui_utils, report_parser, user_management
 from .gui_utils import (project_exists, gui_permissions_required,
                         report_permissions_required)
-from golem.core import session, settings_manager, utils, errors
+from golem.core import session, settings_manager, errors, test_directory
 from .api import api_bp
 from .web_app import webapp_bp
 from .report import report_bp
@@ -21,7 +21,7 @@ def create_app():
     should be a valid Golem test directory"""
     if not session.testdir:
         testdir = os.getcwd()
-        if not utils.is_valid_test_directory(testdir):
+        if not test_directory.is_valid_test_directory(testdir):
             sys.exit(errors.invalid_test_directory.format(testdir))
         else:
             session.testdir = testdir
@@ -40,11 +40,7 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        return user.get_user_from_id(user_id)
-
-    # @login_manager.unauthorized_handler
-    # def unauthorized_callback():
-    #     return redirect('/login/?next=' + request.path)
+        return user_management.Users.get_user_by_id(user_id)
 
     @app.before_request
     def before_request():

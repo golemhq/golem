@@ -3,7 +3,6 @@ import os
 import pytest
 
 from golem.cli import messages
-from golem.gui import user
 from golem.core import utils, errors
 
 
@@ -18,7 +17,7 @@ class TestGolemHelp:
         ('golem -h createproject', messages.CREATEPROJECT_USAGE_MSG),
         ('golem -h createtest', messages.CREATETEST_USAGE_MSG),
         ('golem -h createsuite', messages.CREATESUITE_USAGE_MSG),
-        ('golem -h createuser', messages.CREATEUSER_USAGE_MSG),
+        ('golem -h createsuperuser', messages.CREATESUPERUSER_USAGE_MSG),
         ('golem run -h', messages.RUN_USAGE_MSG),
         ('golem gui -h', messages.GUI_USAGE_MSG),
     ]
@@ -319,21 +318,6 @@ class TestGolemCreateTest:
         assert result == expected
 
 
-class TestGolemCreateUser:
-
-    @pytest.mark.slow
-    def test_golem_createuser(self, testdir_session, test_utils):
-        testdir_session.activate()
-        os.chdir(testdir_session.path)
-        username = 'user1'
-        password = '123456'
-        command = 'golem createuser {} {}'.format(username, password)
-        result = test_utils.run_command(command)
-        msg = 'User {} was created successfully'.format(username)
-        assert result == msg
-        assert user.get_user_data(username=username)
-
-
 class TestGolemFileValidation:
 
     def test_golem_file_does_not_exist(self, testdir_class, test_utils):
@@ -344,3 +328,26 @@ class TestGolemFileValidation:
         command = 'golem createproject project01'
         result = test_utils.run_command(command)
         assert result == errors.invalid_test_directory.format(testdir)
+
+
+class TestCreateSuperUserCommand:
+
+    def test_createsuperuser_command(self, testdir_class, test_utils):
+        testdir = testdir_class.activate()
+        os.chdir(testdir)
+        username = test_utils.random_string(10)
+        command = 'golem createsuperuser --username {} --password 123456 --noinput'.format(username)
+        result = test_utils.run_command(command)
+        assert result == 'Superuser {} was created successfully.'.format(username)
+
+    def test_createsuperuser_command_noinput_missing_args(self, testdir_class, test_utils):
+        """username and password are required for --noinput"""
+        testdir = testdir_class.activate()
+        os.chdir(testdir)
+        username = test_utils.random_string(10)
+        command = 'golem createsuperuser --username xxx --noinput'.format(username)
+        result = test_utils.run_command(command)
+        assert result == 'Error: --username and --password are required for --noinput.'
+        command = 'golem createsuperuser --password xxx --noinput'.format(username)
+        result = test_utils.run_command(command)
+        assert result == 'Error: --username and --password are required for --noinput.'

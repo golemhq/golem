@@ -1,16 +1,14 @@
 """Helper general purpose functions"""
+import glob
 import importlib
-import shutil
 import json
 import os
-import uuid
-import traceback
-import glob
 import re
+import shutil
+import traceback
 from datetime import datetime
-from distutils.version import StrictVersion, LooseVersion
+from distutils.version import StrictVersion
 
-import golem
 from golem.core import settings_manager, file_manager, session
 
 
@@ -108,55 +106,6 @@ def create_new_project(project):
             base_file.write('{}')
 
     print('Project {} created'.format(project))
-
-
-def create_test_dir(testdir):
-    file_manager.create_directory(path_list=[testdir], add_init=True)
-    file_manager.create_directory(path_list=[testdir, 'projects'],
-                                  add_init=True)
-    file_manager.create_directory(path_list=[testdir, 'drivers'],
-                                  add_init=False)
-
-    settings_manager.create_global_settings_file(testdir)
-
-    create_testdir_golem_file(testdir)
-
-    users_path = os.path.join(testdir, 'users.json')
-    open(users_path, 'a').close()
-    create_user('admin', 'admin', True, ["*"], ["*"], testdir=testdir)
-
-    print('New golem test directory created at {}'.format(testdir))
-    print('Use credentials to access the GUI module:')
-    print('user: admin')
-    print('password: admin')
-
-
-def create_user(username, password, is_admin, projects, reports, testdir=None):
-    errors = []
-    testdir = testdir or session.testdir
-    with open(os.path.join(testdir, 'users.json')) as users_file:
-        try:
-            user_data = json.load(users_file)
-        except:
-            user_data = []
-    for user in user_data:
-        if user['username'] == username:
-            errors.append('username {} already exists'.format(username))
-            break
-    if not errors:
-        new_user = {
-            'id': str(uuid.uuid4())[:8],
-            'username': username,
-            'password': password,
-            'is_admin': is_admin,
-            'gui_projects': projects,
-            'report_projects': reports
-        }
-        user_data.append(new_user)
-        with open(os.path.join(testdir, 'users.json'), 'w') as users_file:
-            json.dump(user_data, users_file, indent=4)
-
-    return errors
 
 
 def delete_element(project, element_type, dot_path):
@@ -381,22 +330,8 @@ class ImmutableKeysDict(dict):
         dict.__setitem__(self, key, value)
 
 
-def is_valid_test_directory(testdir):
-    """Verify `testdir` is a valid test directory path.
-    It must contain a .golem file.
-    This will only be checked for versions >= 0.9.0
-    TODO
-    """
-    if LooseVersion(golem.__version__) >= LooseVersion('0.9.0'):
-        if not os.path.isfile(os.path.join(testdir, '.golem')):
-            return False
-    return True
-
-
-def create_testdir_golem_file(testdir):
-    """Create .golem file"""
-    golem_file = os.path.join(testdir, '.golem')
-    with open(golem_file, 'w') as f:
-        secret_key = os.urandom(24).hex()
-        f.write('[gui]\n')
-        f.write('secret_key = {}\n'.format(secret_key))
+def validate_email(email):
+    """Validate email address"""
+    re_str = r'^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$'
+    match = re.match(re_str, email)
+    return match is not None

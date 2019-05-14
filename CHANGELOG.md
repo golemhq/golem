@@ -2,15 +2,27 @@
 
 ## [Unreleased]
 
+### Added
+
+- createsuperuser command
+
+### Removed
+
+- createuser command
+
 ### Changed
 
 - A file named **.golem** must exist in the test directory
     
-    Migrate from previous versions: Create a file named **.golem** in the test directory root with the following content:
+    Migrate steps: Create a file named **.golem** in the test directory root with the following content:
     ```
     [gui]
     secret_key = your_secret_key_string
     ```
+
+- Passwords are now hashed in the users.json file
+
+   Migrate steps: 
 
 - golem.execution.workspace -> golem.execution.testdir
 

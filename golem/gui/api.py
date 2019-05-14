@@ -10,7 +10,7 @@ from itsdangerous import BadSignature, SignatureExpired
 from golem.core import (environment_manager, file_manager, page_object, settings_manager,
                         test_case, session, utils, tags_manager)
 from golem.core import suite as suite_module
-from . import gui_utils, report_parser, user
+from . import gui_utils, report_parser, user_management
 
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -23,7 +23,7 @@ def auth_required(func):
             token = request.headers.get('token', None)
             if token:
                 try:
-                    user.User.verify_auth_token(current_app.secret_key, token)
+                    user_management.Users.verify_auth_token(current_app.secret_key, token)
                 except BadSignature:
                     abort(401, 'Token did not match')
                 except SignatureExpired:
@@ -40,16 +40,13 @@ def auth_required(func):
 def auth_token():
     username = request.json['username']
     password = request.json['password']
-    user_data = user.get_user_data(username=username)
-    if user_data is None:
+    user = user_management.Users.get_user_by_username(username=username)
+    if user is None:
         abort(401, 'User does not exist')
-    elif user_data['password'] != password:  # TODO
+    elif not user.verify_password(password):
         abort(401, 'Incorrect password')
     else:
-        usr = user.User(user_data['id'], user_data['username'],
-                        user_data['is_admin'], user_data['gui_projects'],
-                        user_data['report_projects'])
-        token = usr.generate_auth_token(current_app.secret_key)
+        token = user.generate_auth_token(current_app.secret_key)
         return jsonify(token.decode())
 
 

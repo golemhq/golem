@@ -4,6 +4,7 @@ import pytest
 
 from golem.cli import commands, messages
 from golem.core import file_manager
+from golem.gui.user_management import Users
 
 
 class TestRunCommand:
@@ -218,6 +219,41 @@ class TestCreateDirectoryCommand:
         assert os.path.isdir(testdir)
 
 
+class TestCreateSuperUserCommand:
+
+    def test_create_superuser_command(self, testdir_class, test_utils, capsys):
+        testdir_class.activate()
+        username = test_utils.random_string(5)
+        email = test_utils.random_email()
+        password = test_utils.random_string(5)
+        commands.createsuperuser_command(username, email, password, no_input=True)
+        out, err = capsys.readouterr()
+        msg = 'Superuser {} was created successfully.'.format(username)
+        assert msg in out
+        assert Users.user_exists(username)
+        user = Users.get_user_by_username(username)
+        assert user.email == email
+
+    def test_create_superuser_command_invalid_email(self, testdir_class, test_utils, capsys):
+        testdir_class.activate()
+        username = test_utils.random_string(5)
+        email = 'test@'
+        password = test_utils.random_string(5)
+        with pytest.raises(SystemExit) as wrapped_execution:
+            commands.createsuperuser_command(username, email, password, no_input=True)
+        assert wrapped_execution.value.code == 1
+        captured = capsys.readouterr()
+        assert 'Error: {} is not a valid email address'.format(email) in captured.out
+
+    def test_create_superuser_command_no_email(self, testdir_class, test_utils):
+        testdir_class.activate()
+        username = test_utils.random_string(5)
+        password = test_utils.random_string(5)
+        commands.createsuperuser_command(username, None, password, no_input=True)
+        user = Users.get_user_by_username(username)
+        assert user.email is None
+
+
 class TestExitStatuses:
     content = """
 description = 'A test which deliberately fails'
@@ -234,7 +270,8 @@ def teardown(data):
 """
 
     @pytest.mark.slow
-    def test_exit_code_one_on_test_failure_when_using_single_processing_capabilities(self, project_function, test_utils):
+    def test_exit_code_one_on_test_failure_when_using_single_processing_capabilities(
+            self, project_function, test_utils):
         _, project = project_function.activate()
         test_utils.create_test(project, [], 'test_one', content=self.content)
         test_utils.create_test(project, [], 'test_two')
@@ -245,7 +282,8 @@ def teardown(data):
         assert wrapped_execution.value.code == 1
 
     @pytest.mark.slow
-    def test_exit_code_one_on_test_failure_when_using_multi_processing_capabilities(self, project_function, test_utils):
+    def test_exit_code_one_on_test_failure_when_using_multi_processing_capabilities(
+            self, project_function, test_utils):
         _, project = project_function.activate()
         test_utils.create_test(project, [], 'test_one', content=self.content)
         test_utils.create_test(project, [], 'test_two')

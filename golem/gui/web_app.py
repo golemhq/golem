@@ -10,7 +10,7 @@ from golem.core import (environment_manager, page_object, settings_manager, test
 from golem.core import test_data as test_data_module
 from golem.core import suite as suite_module
 
-from . import gui_utils, user
+from . import gui_utils, user_management
 from .gui_utils import project_exists, gui_permissions_required
 
 
@@ -24,7 +24,6 @@ def login():
         return redirect(url_for('webapp.index'))
     if request.method == 'POST':
         errors = []
-        user_data = {}
         username = request.form['username']
         password = request.form['password']
         next_url = request.form['next']
@@ -32,19 +31,15 @@ def login():
             errors.append('Username is required')
         elif not password:
             errors.append('Password is required')
-        else:
-            user_data = user.get_user_data(username=username)
-            if user_data is None:
-                errors.append('Username does not exists')
-            elif user_data['password'] != password:
-                errors.append('Username and password do not match')
-        if len(errors):
+        elif not user_management.Users.user_exists(username):
+            errors.append('Username does not exists')
+        elif not user_management.Users.verify_password(username, password):
+            errors.append('Username and password do not match')
+
+        if errors:
             return render_template('login.html', next_url=next_url, errors=errors)
         else:
-            usr = user.User(user_data['id'], user_data['username'],
-                            user_data['is_admin'], user_data['gui_projects'],
-                            user_data['report_projects'])
-            login_user(usr)
+            login_user(user_management.Users.get_user_by_username(username))
             if not next_url or not gui_utils.is_safe_url(next_url):
                 next_url = '/'
             return redirect(next_url)
@@ -63,7 +58,7 @@ def index():
     have access to every project. Otherwise limit the project
     list to gui_permissions
     """
-    if current_user.is_admin or '*' in current_user.gui_permissions:
+    if current_user.is_superuser or '*' in current_user.gui_permissions:
         projects = utils.get_projects()
     else:
         projects = current_user.gui_permissions

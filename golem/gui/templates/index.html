@@ -20,7 +20,7 @@
             	<a href="/project/{{project}}/" class="list-group-item">{{ project }}</a>
             {% endfor %}
         </div>
-        {% if current_user.is_admin %}
+        {% if current_user.is_superuser %}
             <div id="projectCreationButton">
                 <button class="btn btn-default">Create Project</button>
             </div>

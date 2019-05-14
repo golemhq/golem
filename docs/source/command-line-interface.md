@@ -122,12 +122,17 @@ Creates a new suite inside the given project.
 
 ### createuser
 
+DEPRECATED. Use *createsuperuser* instead.
+
+### createsuperuser
+
 ```
-golem createuser <username> <password> [-a|--admin -p|--projects -r|--reports]
+golem createuser [-u|--username -e|email -p|--password -n|--noinput]
 ```
 
-Add a new user, projects is a list of projects that the user can access and reports determines which project reports the user can see.
-In both cases use '*' to give the user access to all projects
+Create a new super user.
+Command is interactive unless username and password are provided.
+Email is optional.
 
 ## webdriver-manager
 

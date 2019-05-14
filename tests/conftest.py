@@ -177,6 +177,12 @@ class TestUtils:
         return prefix + random_str
 
     @staticmethod
+    def random_email():
+        local = TestUtils.random_string(10)
+        domain = TestUtils.random_string(10)
+        return '{}@{}.com'.format(local, domain)
+
+    @staticmethod
     def random_numeric_string(length, prefix=''):
         random_str = ''.join(random.choice(string.digits) for _ in range(length))
         return prefix + random_str

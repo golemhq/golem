@@ -21,7 +21,7 @@ def report_dashboard():
     """If user is admin or has '*' in report permissions they will
     have access to every project report. Otherwise limit the project
     list to report_permissions"""
-    if current_user.is_admin or '*' in current_user.report_permissions:
+    if current_user.is_superuser or '*' in current_user.report_permissions:
         projects = utils.get_projects()
     else:
         projects = current_user.report_permissions
