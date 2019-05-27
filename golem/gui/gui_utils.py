@@ -14,6 +14,7 @@ from flask_login import current_user
 import golem.actions
 from golem.core import utils, session, errors
 from golem.gui import report_parser
+from golem.gui.user_management import Permissions
 from golem import gui
 
 
@@ -181,34 +182,28 @@ def project_exists(func):
     return wrapper
 
 
-def gui_permissions_required(func):
+def permission_required(permission):
     """A wrapper that checks if the current user
-    has GUI permissions to the project.
-      * The annotated function must have a `project` argument.
+    has the required permissions for a page
+      * The annotated function must have a `project` argument for project pages.
       * The current user must be available in `flask_login.current_user`
-      * The user object must have a `has_gui_permissions(project) method`
+      * The user object must have a `user_project_weight(project) method`
     """
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        if not current_user.has_gui_permissions(kwargs['project']):
-            return render_template('not_permission.html')
-        return func(*args, **kwargs)
-    return wrapper
-
-
-def report_permissions_required(func):
-    """A wrapper that checks if the current user
-    has project permissions to the project.
-      * The annotated function must have a `project` argument.
-      * The current user must be available in `flask_login.current_user`
-      * The user object must have a `has_report_permissions(project) method`
-    """
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        if not current_user.has_report_permissions(kwargs['project']):
-            return render_template('not_permission.html')
-        return func(*args, **kwargs)
-    return wrapper
+    def check_permissions(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if not current_user.is_superuser:
+                project = kwargs.get('project', None)
+                if project:
+                    user_weight = current_user.user_project_weight(project)
+                else:
+                    user_weight = 0
+                required_weight = Permissions.get_weight(permission)
+                if user_weight < required_weight:
+                    return render_template('not_permission.html')
+            return func(*args, **kwargs)
+        return wrapper
+    return check_permissions
 
 
 def generate_html_report(project, suite, execution, report_directory=None,

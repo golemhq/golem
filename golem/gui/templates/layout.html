@@ -84,6 +84,14 @@
                     </a>
                 </li>
                 {% endif %}
+                {% if g.user.is_superuser %}
+                <li>
+                    <a href="/users/">
+                        <i class="fa fa-users" aria-hidden="true"></i>
+                        Users
+                    </a>
+                </li>
+                {% endif %}
             </ul>
 
             <ul class="list-unstyled components">
@@ -94,6 +102,7 @@
                         {{ g.user.username }}
                     </a>
                     <ul class="collapse list-unstyled" id="pageSubmenu">
+                        <li><a href="/user/">Profile</a></li>
                         <li><a href="/logout/">Log out</a></li>
                     </ul>
                 </li>
@@ -285,7 +294,10 @@
 <script src="{{ url_for('static', filename='js/external/toastr.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
-  var username = "{{g.user.username}}";
+    const User = {
+        'username': '{{g.user.username}}',
+        'isSuperuser': '{{g.user.is_superuser}}',
+    }
 </script>
 {% block footer_declarations %}{% endblock %}
 </body>

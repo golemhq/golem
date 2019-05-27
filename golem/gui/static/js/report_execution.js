@@ -350,7 +350,7 @@ const DetailTable = new function(){
             let rightColumn = detailPanel.find('.detail-right-column');
             // add description
             let detailHasDescription = rightColumn.find('.detail-description').length > 0;
-            if(testDetail.description.length > 0 && !detailHasDescription){
+            if(testDetail.description && !detailHasDescription){
                 let descriptionBox = $(
                     `<div class="detail-description test-detail-box">
                         <div class="test-detail-box-title">Description</div>

@@ -3,6 +3,7 @@ import json
 import os
 import uuid
 
+from flask_login import current_user
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -53,7 +54,7 @@ class Users:
 
     @staticmethod
     def generate_user_dictionary(id_, username, password, email, is_superuser, projects):
-        new_user = {
+        user = {
             'id': id_,
             'username': username,
             'password': password,
@@ -61,7 +62,17 @@ class Users:
             'is_superuser': is_superuser,
             'projects': projects
         }
-        return new_user
+        return user
+
+    @staticmethod
+    def get_user_dictionary(username):
+        if Users.user_exists(username):
+            user = [u for u in Users.users() if u.get('username') == username][0]
+            return Users.generate_user_dictionary(user['id'], user['username'],
+                                                  user['password'], user['email'],
+                                                  user['is_superuser'], user['projects'])
+        else:
+            return None
 
     @staticmethod
     def create_super_user(username, password, email=None):
@@ -70,15 +81,16 @@ class Users:
     @staticmethod
     def create_user(username, password, email=None, is_superuser=False, projects=None):
         errors = []
+        projects = projects or {}
 
         if not Users.users_file_exists():
             Users.create_users_file()
 
         username = username.strip()
         if len(username) == 0:
-            errors.append('username cannot be blank')
+            errors.append('Username cannot be blank')
         elif Users.user_exists(username):
-            errors.append('username {} already exists'.format(username))
+            errors.append('Username {} already exists'.format(username))
 
         if email is not None:
             email = email.strip()
@@ -88,7 +100,7 @@ class Users:
                 errors.append('{} is not a valid email address'.format(email))
 
         if len(password) == 0:
-            errors.append('password cannot be blank')
+            errors.append('Password cannot be blank')
 
         if not errors:
             id_ = str(uuid.uuid4())[:8]
@@ -142,6 +154,92 @@ class Users:
         user = Users.get_user_by_username(username)
         return user.verify_password(password)
 
+    @staticmethod
+    def add_project_to_user(username, project, permission):
+        if Users.user_exists(username):
+            for user in Users.users():
+                if user['username'] == username:
+                    user['projects'][project] = permission
+                    Users.save()
+                    return
+
+    @staticmethod
+    def delete_user(username):
+        errors = []
+        if not Users.user_exists(username):
+            errors.append('Username {} does not exist'.format(username))
+        elif current_user and current_user.is_authenticated and username == current_user.username:
+            errors.append('Cannot delete current user')
+        else:
+            users = Users.users()
+            users[:] = [u for u in users if u.get('username') != username]
+            Users.set_users(users)
+            Users.save()
+        return errors
+
+    @staticmethod
+    def edit_user(username, new_username=None, new_email=False, new_is_superuser=None,
+                  new_projects=None):
+        errors = []
+        if not Users.user_exists(username):
+            errors.append('Username {} does not exist'.format(username))
+        else:
+            user = Users.get_user_dictionary(username)
+
+            # Cannot remove superuser permissions if there is only one superuser
+            superusers = [u for u in Users.users() if u['is_superuser']]
+            if user['is_superuser'] and not new_is_superuser and len(superusers) == 1:
+                errors.append('Cannot remove Superuser permission for this user')
+
+            if new_username is not None and new_username != username:
+                new_username = new_username.strip()
+                if len(new_username) == 0:
+                    errors.append('Username cannot be blank')
+                elif Users.user_exists(new_username):
+                    errors.append('Username {} already exists'.format(new_username))
+                else:
+                    user['username'] = new_username
+
+            if type(new_email) is str or new_email is None:
+                valid_email = False
+                if type(new_email) is str:
+                    new_email = new_email.strip()
+                    if len(new_email) == 0:
+                        new_email = None
+                    elif utils.validate_email(new_email):
+                        valid_email = True
+                    else:
+                        errors.append('{} is not a valid email address'.format(new_email))
+                if (new_email is None or valid_email) and new_email != user['email']:
+                    user['email'] = new_email
+
+            if new_is_superuser is not None and new_is_superuser != user['is_superuser']:
+                user['is_superuser'] = new_is_superuser
+
+            if new_projects is not None and new_projects != user['projects']:
+                user['projects'] = new_projects
+
+            if not errors:
+                users = Users.users()
+                users[:] = [u for u in users if u.get('username') != username]
+                Users.users().append(user)
+                Users.save()
+        return errors
+
+    @staticmethod
+    def reset_user_password(username, new_password):
+        errors = []
+        if not Users.user_exists(username):
+            errors.append('Username {} does not exist'.format(username))
+        else:
+            if len(new_password) == 0:
+                errors.append('Password cannot be blank')
+            else:
+                user = [u for u in Users.users() if u.get('username') == username][0]
+                user['password'] = generate_password_hash(new_password)
+                Users.save()
+        return errors
+
 
 class User:
 
@@ -171,6 +269,10 @@ class User:
     def verify_password(self, password):
         return check_password_hash(self.password, password)
 
+    @property
+    def project_list(self):
+        return self.projects.keys()
+
     def has_gui_permissions(self, project):
         # return (project in self.gui_permissions or
         #         '*' in self.gui_permissions or
@@ -183,9 +285,38 @@ class User:
         #         self.is_admin)
         return True
 
+    def user_project_weight(self, project):
+        for p, permission in self.projects.items():
+            if p == project:
+                return Permissions.get_weight(permission)
+        return 0
+
     def generate_auth_token(self, secret_key, expiration=600):
         s = Serializer(secret_key, expires_in=expiration)
         return s.dumps({'id': self.id})
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
+
+
+class Permissions:
+
+    SUPER_USER = 'super-user'
+    ADMIN = 'admin'
+    STANDARD = 'standard'
+    READ_ONLY = 'read-only'
+    REPORTS_ONLY = 'reports-only'
+
+    weights = {
+        SUPER_USER: 50,
+        ADMIN: 40,
+        STANDARD: 30,
+        READ_ONLY: 20,
+        REPORTS_ONLY: 10
+    }
+
+    project_permissions = [ADMIN, STANDARD, READ_ONLY, REPORTS_ONLY]
+
+    @staticmethod
+    def get_weight(permission):
+        return Permissions.weights[permission]

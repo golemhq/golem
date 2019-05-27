@@ -1,5 +1,6 @@
 """Golem GUI API blueprint"""
 import os
+from copy import deepcopy
 from functools import wraps
 
 from flask import jsonify, request, current_app, abort
@@ -10,7 +11,8 @@ from itsdangerous import BadSignature, SignatureExpired
 from golem.core import (environment_manager, file_manager, page_object, settings_manager,
                         test_case, session, utils, tags_manager)
 from golem.core import suite as suite_module
-from . import gui_utils, report_parser, user_management
+from golem.gui import gui_utils, report_parser
+from golem.gui.user_management import Users, Permissions
 
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
@@ -23,7 +25,7 @@ def auth_required(func):
             token = request.headers.get('token', None)
             if token:
                 try:
-                    user_management.Users.verify_auth_token(current_app.secret_key, token)
+                    Users.verify_auth_token(current_app.secret_key, token)
                 except BadSignature:
                     abort(401, 'Token did not match')
                 except SignatureExpired:
@@ -40,7 +42,7 @@ def auth_required(func):
 def auth_token():
     username = request.json['username']
     password = request.json['password']
-    user = user_management.Users.get_user_by_username(username=username)
+    user = Users.get_user_by_username(username=username)
     if user is None:
         abort(401, 'User does not exist')
     elif not user.verify_password(password):
@@ -133,6 +135,12 @@ def page_save():
     page_object.save_page_object(project, page_object_name, elements, functions,
                                  import_lines)
     return jsonify('page-saved')
+
+
+@api_bp.route('/permissions/project-permissions')
+@auth_required
+def permissions_project():
+    return jsonify(Permissions.project_permissions)
 
 
 @api_bp.route('/project', methods=['POST'])
@@ -297,6 +305,12 @@ def project_test_tags():
 def project_test_tree():
     project = request.args['project']
     return jsonify(utils.get_test_cases(project))
+
+
+@api_bp.route('/projects')
+@auth_required
+def projects():
+    return jsonify(utils.get_projects())
 
 
 @api_bp.route('/report/suite/execution')
@@ -517,6 +531,85 @@ def test_save():
     test_case.save_test_case(project, test_name, description, page_objects,
                              test_steps, test_data_content, tags)
     return jsonify('test-saved')
+
+
+@api_bp.route('/users')
+@auth_required
+def users_get():
+    users = deepcopy(Users.users())
+    for user in users:
+        del user['password']
+    return jsonify(users)
+
+
+@api_bp.route('/users/user')
+@auth_required
+def user_get():
+    username = request.args['username']
+    user = Users.get_user_dictionary(username)
+    if user:
+        del user['password']
+    return jsonify(user)
+
+
+@api_bp.route('/users/new', methods=['PUT'])
+@auth_required
+def users_new():
+    username = request.json['username']
+    email = request.json['email']
+    password = request.json['password']
+    is_superuser = request.json['isSuperuser']
+    project_permissions_raw = request.json['projectPermissions']
+    project_permissions = {}
+    for project_permission in project_permissions_raw:
+        project_permissions[project_permission['project']] = project_permission['permission']
+    errors = Users.create_user(username, password, email, is_superuser, project_permissions)
+    return jsonify(errors)
+
+
+@api_bp.route('/users/edit', methods=['POST'])
+@auth_required
+def users_edit():
+    old_username = request.json['oldUsername']
+    new_username = request.json['newUsername']
+    email = request.json['email']
+    is_superuser = request.json['isSuperuser']
+    project_permissions_raw = request.json['projectPermissions']
+    project_permissions = {}
+    if project_permissions_raw is not None:
+        for p in project_permissions_raw:
+            project_permissions[p['project']] = p['permission']
+    errors = Users.edit_user(old_username, new_username, email, is_superuser, project_permissions)
+    return jsonify(errors)
+
+
+@api_bp.route('/users/delete', methods=['DELETE'])
+@auth_required
+def users_delete():
+    username = request.json['username']
+    errors = Users.delete_user(username)
+    return jsonify({'errors': errors})
+
+
+@api_bp.route('/users/reset-password', methods=['POST'])
+@auth_required
+def users_reset_user_pasword():
+    username = request.json['username']
+    new_password = request.json['newPassword']
+    errors = Users.reset_user_password(username, new_password)
+    return jsonify({'errors': errors})
+
+
+@api_bp.route('/user/reset-password', methods=['POST'])
+@auth_required
+def user_reset_user_pasword():
+    username = request.json['username']
+    if username == current_user.username:
+        new_password = request.json['newPassword']
+        errors = Users.reset_user_password(username, new_password)
+    else:
+        errors = ['Cannot change current user password']
+    return jsonify({'errors': errors})
 
 
 def _rename_element(project, filename, new_filename, element_type):
