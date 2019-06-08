@@ -1,0 +1,28 @@
+{% extends "layout.html" %} 
+
+{% block title %}Golem : Settings{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/codemirror.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/json_code_editor.css') }}">
+{% endblock %} 
+
+{% block content %}
+<div class="col-lg-8 col-lg-offset-2">
+    <div class="col-sm-6 header-col">
+        <h3 id="settingsTitle">Global Settings</h3>
+    </div>
+    <div class="col-sm-6 text-right header-col" style="padding-top: 20px">
+        <button id="save" class="btn btn-default btn-sm" onclick="saveGlobalSettings()"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+    </div>
+    <div class="clearfix"></div>
+    <div class="codeEditorContainer" id="settingsContainer"></div>
+    <br>
+</div>
+<script src="{{ url_for('static', filename='js/external/code_mirror/codemirror.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/javascript.js') }}"></script>
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+<script>
+    let settingsJson = {{settings|tojson}};
+</script>
+{% endblock %}

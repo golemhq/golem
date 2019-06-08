@@ -69,9 +69,13 @@ def index():
 @webapp_bp.route("/project/<project>/")
 @login_required
 @project_exists
-@permission_required(Permissions.READ_ONLY)
+@permission_required(Permissions.REPORTS_ONLY)
 def project_view(project):
-    return redirect('/project/{}/suites/'.format(project))
+    user_weight = current_user.project_weight(project)
+    if user_weight == Permissions.weights[Permissions.REPORTS_ONLY]:
+        return redirect('/report/project/{}/'.format(project))
+    else:
+        return redirect('/project/{}/suites/'.format(project))
 
 
 # PROJECT TESTS VIEW
@@ -250,11 +254,10 @@ def suite_view(project, suite):
 # GLOBAL SETTINGS VIEW
 @webapp_bp.route("/settings/")
 @login_required
-@permission_required(Permissions.READ_ONLY)
+@permission_required(Permissions.SUPER_USER)
 def global_settings():
     settings = settings_manager.get_global_settings_as_string()
-    return render_template('settings.html', project=None, global_settings=settings,
-                           settings=None)
+    return render_template('settings/global_settings.html', settings=settings)
 
 
 # PROJECT SETTINGS VIEW
@@ -263,10 +266,8 @@ def global_settings():
 @project_exists
 @permission_required(Permissions.READ_ONLY)
 def project_settings(project):
-    gsettings = settings_manager.get_global_settings_as_string()
-    psettings = settings_manager.get_project_settings_as_string(project)
-    return render_template('settings.html', project=project, global_settings=gsettings,
-                           settings=psettings)
+    settings = settings_manager.get_project_settings_as_string(project)
+    return render_template('settings/project_settings.html', project=project, settings=settings)
 
 
 # ENVIRONMENTS VIEW

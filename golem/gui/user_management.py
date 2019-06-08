@@ -50,7 +50,7 @@ class Users:
 
     @staticmethod
     def user_exists(username):
-        return any(user['username'] == username for user in Users.users())
+        return Users.get_user_by_username(username) is not None
 
     @staticmethod
     def generate_user_dictionary(id_, username, password, email, is_superuser, projects):
@@ -121,18 +121,27 @@ class Users:
 
     @staticmethod
     def _get_user(id_=None, username=None):
+        """Get a User object by id or username.
+        Returns None if user is not found.
+        Returns None if users.json format is invalid
+        """
+        # TODO: catch error reading users.json file
         user = None
-        for u in Users.users():
-            if id_ and u['id'] == id_:
-                user = u
-            elif username and u['username'] == username:
-                user = u
-        if user:
-            user_obj = User(user['id'], user['username'], user['password'],
-                            user['is_superuser'], user['email'], user['projects'])
-            return user_obj
-        else:
-            return None
+        try:
+            for u in Users.users():
+                if id_ and u['id'] == id_:
+                    user = u
+                elif username and u['username'] == username:
+                    user = u
+            if user:
+                user_obj = User(user['id'], user['username'], user['password'],
+                                user['is_superuser'], user['email'], user['projects'])
+                return user_obj
+        except (KeyError, json.decoder.JSONDecodeError):
+            print('Error: there was an error reading users.json file')
+            import traceback
+            traceback.print_exc()
+        return None
 
     @staticmethod
     def verify_auth_token(secret_key, token):
@@ -222,7 +231,8 @@ class Users:
             if not errors:
                 users = Users.users()
                 users[:] = [u for u in users if u.get('username') != username]
-                Users.users().append(user)
+                users.append(user)
+                Users.set_users(users)
                 Users.save()
         return errors
 
@@ -271,23 +281,23 @@ class User:
 
     @property
     def project_list(self):
-        return self.projects.keys()
+        projects = list(self.projects.keys())
+        if self.is_superuser or '*' in projects:
+            projects = utils.get_projects()
+        return projects
 
-    def has_gui_permissions(self, project):
-        # return (project in self.gui_permissions or
-        #         '*' in self.gui_permissions or
-        #         self.is_admin)
-        return True
-
-    def has_report_permissions(self, project):
-        # return (project in self.report_permissions or
-        #         '*' in self.report_permissions or
-        #         self.is_admin)
-        return True
-
-    def user_project_weight(self, project):
+    def project_permission(self, project):
         for p, permission in self.projects.items():
             if p == project:
+                return permission
+        return None
+
+    def project_weight(self, project):
+        if self.is_superuser:
+            return Permissions.get_weight(Permissions.SUPER_USER)
+        else:
+            permission = self.project_permission(project)
+            if permission:
                 return Permissions.get_weight(permission)
         return 0
 

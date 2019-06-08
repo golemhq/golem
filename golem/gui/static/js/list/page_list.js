@@ -1,6 +1,6 @@
 
 $(document).ready(function() {
-    PageList.getPages(project);
+    PageList.getPages(Global.project);
     $('#treeRoot').treed();
 });
 
@@ -17,7 +17,6 @@ const PageList = new function(){
             type: 'GET',
             success: function(pages) {
                 let treeRoot = $("#treeRoot");
-                treeRoot.append(Project.newElementForm('.'));
                 Project.loadTreeElements(treeRoot, pages.sub_elements, 'page');
             },
         });

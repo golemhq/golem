@@ -661,4 +661,12 @@ const Main = new function(){
             color: '#868e96'
         }
     }
+
+    this.PermissionWeightsEnum = {
+        superuser: 50,
+        admin: 40,
+        standard: 30,
+        readOnly: 20,
+        reportsOnly: 10
+    }
 }

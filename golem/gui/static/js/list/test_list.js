@@ -1,6 +1,6 @@
 
 $(document).ready(function() {
-    TestList.getTests(project);
+    TestList.getTests(Global.project);
     $('#treeRoot').treed();
 });
 
@@ -17,7 +17,6 @@ const TestList = new function(){
             type: 'GET',
             success: function(tests) {
                 let treeRoot = $("#treeRoot");
-                treeRoot.append(Project.newElementForm('.'));
                 Project.loadTreeElements(treeRoot, tests.sub_elements, 'test');
                 TestList.getTestsTags(tests);
             },
@@ -28,7 +27,7 @@ const TestList = new function(){
         $.ajax({
             url: "/api/project/test-tags",
             data: {
-                "project": project
+                "project": Global.project
             },
             dataType: 'json',
             type: 'GET',

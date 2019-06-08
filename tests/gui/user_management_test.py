@@ -265,13 +265,13 @@ class TestUser:
         assert user.verify_password(password)
         assert not user.verify_password('invalid_password')
 
-    def test_user_project_weight(self, project_class, test_utils):
+    def test_project_weight(self, project_class, test_utils):
         testdir, project = project_class.activate()
         username = test_utils.random_string(5)
         Users.create_user(username, '123456')
         Users.add_project_to_user(username, project, Permissions.ADMIN)
         user = Users.get_user_by_username(username)
-        assert user.user_project_weight(project) == Permissions.weights[Permissions.ADMIN]
+        assert user.project_weight(project) == Permissions.weights[Permissions.ADMIN]
 
 
 class TestPermissions:

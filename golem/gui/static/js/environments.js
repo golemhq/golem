@@ -1,16 +1,20 @@
-var environmentsEditor = null;
+let environmentsEditor = null;
 
 
-$(document).ready(function() {      
-   environmentsEditor = CodeMirror($("#environmentsContainer")[0], {
-      value: environmentData,
-      mode: "application/ld+json",
-      lineNumbers: true,
-      styleActiveLine: true,
-      matchBrackets: true,
-      autoCloseBrackets: true,
-      lineWrapping: true
+$(document).ready(function() {
+    environmentsEditor = CodeMirror($("#environmentsContainer")[0], {
+        value: environmentData,
+        mode: "application/ld+json",
+        lineNumbers: true,
+        styleActiveLine: true,
+        matchBrackets: true,
+        autoCloseBrackets: true,
+        lineWrapping: true
     });
+
+    if(Global.user.projectWeight < Main.PermissionWeightsEnum.admin){
+        environmentsEditor.setOption('readOnly', 'nocursor')
+    }
 
     // set unsaved changes watcher
     watchForUnsavedChanges();
@@ -23,7 +27,7 @@ function saveEnvironments(){
     $.ajax({
         url: "/api/project/environments/save",
         data: JSON.stringify({
-                "project": project,
+                "project": Global.project,
                 "environmentData": environments
             }),
         dataType: 'json',

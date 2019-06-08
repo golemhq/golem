@@ -12,19 +12,30 @@
 
 ### Changed
 
-- A file named **.golem** must exist in the test directory
+- A file named **.golem** must exist in the test directory. Migrate steps: 
     
-    Migrate steps: Create a file named **.golem** in the test directory root with the following content:
+    1. Create a file named **.golem** in the test directory root with the following content:
+    
     ```
     [gui]
     secret_key = your_secret_key_string
     ```
 
-- Passwords are now hashed in the users.json file
+- Passwords are now hashed. Migrate steps:
+   
+   1. Delete old **users.json** file
+   2. Create a super user using the ```golem createsuperuser``` command
+   3. Non superusers must be created using the */users/* page
 
-   Migrate steps: 
+- *admin* user role changed to *superuser*
+    
+    User roles are: superuser, admin, standard, read-only, reports-only
 
 - golem.execution.workspace -> golem.execution.testdir
+
+### Added
+
+- User management page, user profile page
 
 
 ## [0.8.0] - 2019-04-10

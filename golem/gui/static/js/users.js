@@ -47,7 +47,7 @@ function getUsers(){
 
 
 function deleteUser(username){
-    if(username == User.username){
+    if(username == Global.user.username){
         Main.Utils.toast('error', 'Cannot delete current user', 3000)
         return
     }

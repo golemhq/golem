@@ -340,7 +340,9 @@ const DetailTable = new function(){
                         displayedLinesStrings.push($(this).html())
                     });
                     if(!displayedLinesStrings.includes(line)){
-                        logContainer.append(`<div class='log-line'>${line}</div>`);
+                        let logLine = $("<div class='log-line'></div>");
+                        logLine.text(line);
+                        logContainer.append(logLine);
                     }
                 });
             }
@@ -369,7 +371,8 @@ const DetailTable = new function(){
                 testDetail.steps.forEach(function(step){
                     let stepContent = $(`<li>${step.message}</li>`);
                     if(step.error){
-                        stepContent.append(' - ' + step.error.message)
+                        stepContent.append(' - ');
+                        stepContent.text(step.error.message)
                     }
                     if(step.screenshot){
                         let guid = Main.Utils.guid();
@@ -561,7 +564,7 @@ const DetailTable = new function(){
                 <td colspan="100%">
                     <div id="${id}" class="collapse row test-detail">
                         <div class="logs col-md-6 test-detail-box">
-                            <div class="test-detail-box-title" style="display: none">
+                            <div class="test-detail-box-title">
                                 Logs &nbsp;
                                 <a href="#${testSet}InfoLog" aria-controls="${testSet}InfoLog" class="active link-without-underline" role="tab"
                                     data-toggle="tab" onclick="${onclick}">info</a>

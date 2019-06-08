@@ -32,74 +32,33 @@
             <div class="sidebar-header">
                 <a href="/"><h3>Golem</h3><strong>G</strong></a>
             </div>
+            {% if g.user.is_authenticated %}
             <ul class="list-unstyled components">
-                {% if project%}
-                <li>
-                    <a href="/project/{{project}}/suites/">
-                        <i class="glyphicon glyphicon-tasks"></i>
-                        Suites
-                    </a>
-                </li>
-                <li>
-                    <a href="/project/{{project}}/tests/">
-                        <i class="fa fa-file-code-o" aria-hidden="true"></i>
-                        Tests
-                    </a>
-                </li>
-                <li>
-                    <a href="/project/{{project}}/pages/">
-                        <i class="fa fa-book" aria-hidden="true"></i>
-                        Pages
-                    </a>
-                </li>
-                <li>
-                    <a href="/report/project/{{project}}/">
-                        <i class="fa fa-bar-chart" aria-hidden="true"></i>
-                        Reports
-                    </a>
-                </li>
-                <li>
-                    <a href="/project/{{project}}/settings/">
-                        <i class="fa fa-cogs" aria-hidden="true"></i>
-                        Settings
-                    </a>
-                </li>
-                <li>
-                    <a href="/project/{{project}}/environments/">
-                        <i class="fa fa-sitemap" aria-hidden="true"></i>
-                        Environments
-                    </a>
-                </li>
+                {% if project %}
+                    {% if g.user.project_permission(project) != 'reports-only' %}
+                    <li><a href="/project/{{project}}/suites/"><i class="glyphicon glyphicon-tasks"></i>Suites</a></li>
+                    <li><a href="/project/{{project}}/tests/"><i class="fa fa-file-code-o" aria-hidden="true"></i>Tests</a></li>
+                    <li><a href="/project/{{project}}/pages/"><i class="fa fa-book" aria-hidden="true"></i>Pages</a></li>
+                    <li><a href="/project/{{project}}/settings/"><i class="fa fa-cogs" aria-hidden="true"></i>Settings</a></li>
+                    <li><a href="/project/{{project}}/environments/"><i class="fa fa-sitemap" aria-hidden="true"></i>Environments</a></li>
+                    {% endif %}
+                <li><a href="/report/project/{{project}}/"><i class="fa fa-bar-chart" aria-hidden="true"></i>Reports</a></li>
                 {% else %}
-                <li>
-                    <a href="/report/">
-                        <i class="fa fa-bar-chart" aria-hidden="true"></i>
-                        Reports
-                    </a>
-                </li>
-                <li>
-                    <a href="/settings/">
-                        <i class="fa fa-cogs" aria-hidden="true"></i>
-                        Settings
-                    </a>
-                </li>
-                {% endif %}
-                {% if g.user.is_superuser %}
-                <li>
-                    <a href="/users/">
-                        <i class="fa fa-users" aria-hidden="true"></i>
-                        Users
-                    </a>
-                </li>
+                <li><a href="/report/"><i class="fa fa-bar-chart" aria-hidden="true"></i>Reports</a></li>
                 {% endif %}
             </ul>
-
+            {% if g.user.is_superuser %}
+            <ul class="list-unstyled components">
+                <li><a href="/settings/"><i class="fa fa-cogs" aria-hidden="true"></i>Global Settings</a></li>
+                <li><a href="/users/"><i class="fa fa-users" aria-hidden="true"></i>Users</a></li>
+            </ul>
+            {% endif %}
+            {% endif %}
             <ul class="list-unstyled components">
                 {% if g.user.is_authenticated %}
                 <li>
                     <a href="#pageSubmenu" id="userMenu" data-toggle="collapse" aria-expanded="false">
-                        <i class="fa fa-user-circle-o" aria-hidden="true"></i>
-                        {{ g.user.username }}
+                        <i class="fa fa-user-circle-o" aria-hidden="true"></i>{{ g.user.username }}
                     </a>
                     <ul class="collapse list-unstyled" id="pageSubmenu">
                         <li><a href="/user/">Profile</a></li>
@@ -107,18 +66,11 @@
                     </ul>
                 </li>
                 {% else %}
-                <li>
-                    <a href="/login/">
-                        <i class="glyphicon glyphicon-send"></i>
-                        Log in
-                    </a>
-                </li>
+                <li><a href="/login/"><i class="glyphicon glyphicon-send"></i>Log in</a></li>
                 {% endif %}
             </ul>
             <ul class="list-unstyled">
-                <li>
-                    <a href="#" id="sidebarCollapse" class="collapse-sidebar"><i class="glyphicon" aria-hidden="true"></i></a>
-                </li>
+                <li><a href="#" id="sidebarCollapse" class="collapse-sidebar"><i class="glyphicon" aria-hidden="true"></i></a></li>
             </ul>
             <div id="sidebarVersion">
                 <span>{{config.GOLEM_VERSION}}</span>
@@ -294,9 +246,13 @@
 <script src="{{ url_for('static', filename='js/external/toastr.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
-    const User = {
-        'username': '{{g.user.username}}',
-        'isSuperuser': '{{g.user.is_superuser}}',
+    const Global = {
+        'project': '{{project}}',
+        'user': {
+            'username': '{{g.user.username}}',
+            'isSuperuser': '{{g.user.is_superuser}}',
+            'projectWeight': {% if g.user.is_authenticated %}{{g.user.project_weight(project)}}{%else%}0{%endif%}
+        }
     }
 </script>
 {% block footer_declarations %}{% endblock %}

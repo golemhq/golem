@@ -4,9 +4,9 @@ import os
 
 from flask import jsonify, render_template, Response, send_from_directory
 from flask.blueprints import Blueprint
-from flask_login import current_user, login_required
+from flask_login import login_required
 
-from golem.core import session, utils
+from golem.core import session
 from . import gui_utils, report_parser
 from .gui_utils import project_exists, permission_required
 from golem.gui.user_management import Permissions
@@ -19,15 +19,7 @@ report_bp = Blueprint('report', __name__)
 @report_bp.route("/report/")
 @login_required
 def report_dashboard():
-    """If user is admin or has '*' in report permissions they will
-    have access to every project report. Otherwise limit the project
-    list to report_permissions"""
-    if current_user.is_superuser or '*' in current_user.report_permissions:
-        projects = utils.get_projects()
-    else:
-        projects = current_user.report_permissions
-    return render_template('report/report_dashboard.html', projects=projects,
-                           project=None, suite='')
+    return render_template('report/report_dashboard.html', project=None, suite=None)
 
 
 # REPORT DASHBOARD PROJECT VIEW
@@ -36,8 +28,7 @@ def report_dashboard():
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_dashboard_project(project):
-    return render_template('report/report_dashboard.html', projects=[project],
-                           project=project, suite='')
+    return render_template('report/report_dashboard.html', project=project, suite=None)
 
 
 # REPORT DASHBOARD SUITE VIEW
@@ -46,8 +37,7 @@ def report_dashboard_project(project):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_dashboard_suite(project, suite):
-    return render_template('report/report_dashboard.html', projects=[project],
-                           project=project, suite=suite)
+    return render_template('report/report_dashboard.html', project=project, suite=suite)
 
 
 # REPORT EXECUTION VIEW

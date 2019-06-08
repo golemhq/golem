@@ -1,7 +1,7 @@
 
 $(document).ready(function() {
-    SuiteList.getSuites(project);
-    SuiteList.generateHealthChart(project);
+    SuiteList.getSuites(Global.project);
+    SuiteList.generateHealthChart(Global.project);
     SuiteList.checkIfProjectHasNoTests();
 });
 
@@ -19,7 +19,6 @@ const SuiteList = new function(){
             type: 'GET',
             success: function(suites) {
                 let treeRoot = $("#treeRoot");
-                treeRoot.append(Project.newElementForm('.'));
                 Project.loadTreeElements(treeRoot, suites.sub_elements, 'suite');
             },
         });
@@ -72,7 +71,7 @@ const SuiteList = new function(){
                     <td>${dateTime}</td>
                     <td class="result"><div class="progress"></div></td>
                 </tr>`);
-            newRow.attr('onclick', `document.location.href='/report/project/${project}/suite/${suite}/${suiteData.execution}/'`);
+            newRow.attr('onclick', `document.location.href='/report/project/${Global.project}/suite/${suite}/${suiteData.execution}/'`);
             $("#healthTable tbody").append(newRow);
             let results = Object.keys(suiteData.totals_by_result).sort()
             let container = newRow.find('td.result>div.progress');
@@ -125,13 +124,13 @@ const SuiteList = new function(){
         $.ajax({
             url: "/api/project/has-tests",
             data: {
-                "project": project,
+                "project": Global.project,
             },
             dataType: 'json',
             type: 'GET',
             success: function(projectHasTests) {
                 if(!projectHasTests){
-                    let content = `This project has no tests. Create the first test <strong><a href="/project/${project}/tests/" class="alert-link">here</a>.</strong>`;
+                    let content = `This project has no tests. Create the first test <strong><a href="/project/${Global.project}/tests/" class="alert-link">here</a>.</strong>`;
                     Main.Utils.infoBar($("#infoBarContainer"), content)
                 }
             }

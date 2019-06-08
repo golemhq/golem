@@ -22,7 +22,7 @@
 {% block content %}
 <div class="col-lg-8 col-lg-offset-2">
     <div class="header-col">
-        <h3>{{g.user.username}} profile</h3>
+        <h3>{{g.user.username}} - profile</h3>
     </div>
     <div class="clearfix"></div>
     <div>
@@ -68,7 +68,7 @@
         $.ajax({
             url: "/api/user/reset-password",
             data: JSON.stringify({
-                'username': User.username,
+                'username': Global.user.username,
                 'newPassword': newPassword
             }),
             dataType: 'json',

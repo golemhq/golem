@@ -187,7 +187,7 @@ def permission_required(permission):
     has the required permissions for a page
       * The annotated function must have a `project` argument for project pages.
       * The current user must be available in `flask_login.current_user`
-      * The user object must have a `user_project_weight(project) method`
+      * The user object must have a `project_weight(project) method`
     """
     def check_permissions(func):
         @wraps(func)
@@ -195,7 +195,7 @@ def permission_required(permission):
             if not current_user.is_superuser:
                 project = kwargs.get('project', None)
                 if project:
-                    user_weight = current_user.user_project_weight(project)
+                    user_weight = current_user.project_weight(project)
                 else:
                     user_weight = 0
                 required_weight = Permissions.get_weight(permission)

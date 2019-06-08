@@ -170,12 +170,8 @@ def get_global_settings_as_string():
     return settings
 
 
-def get_project_settings(project):
-    """Get project level settings from project directory,
-    Merge global and project settings.
-    Project settings override global settings
-    """
-    global_settings = get_global_settings()
+def get_project_settings_only(project):
+    """Get project settings only"""
     path = project_settings_path(project)
     project_settings = {}
     if os.path.isfile(path):
@@ -183,6 +179,16 @@ def get_project_settings(project):
         # TODO implicit_wait setting is deprecated
         # remove once implicit_wait is fully deprecated
         project_settings = _deprecated_implicit_wait_warning(project_settings)
+    return project_settings
+
+
+def get_project_settings(project):
+    """Get project level settings,
+    Merge global and project settings.
+    Project settings override global settings
+    """
+    global_settings = get_global_settings()
+    project_settings = get_project_settings_only(project)
     # merge and override global settings with project settings
     for setting in project_settings:
         global_settings[setting] = project_settings[setting]

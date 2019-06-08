@@ -25,7 +25,7 @@ function getProjects(){
 
 function getProjectPermissionsOptions(){
     $.ajax({
-        url: "/api/permissions/project-permissions",
+        url: "/api/golem/project-permissions",
         dataType: 'json',
         contentType: 'application/json',
         type: 'GET',

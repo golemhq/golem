@@ -17,12 +17,16 @@
             </h3>
         </div>
         <div class="header-col header-col-right">
+            {% if g.user.project_weight(project) >= 30 %}
             <div class="btn-group" role="group" aria-label="...">
               <button id="runTest" class="btn btn-default btn-sm" onclick="runTest()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Test</button>
-              <button id="openRunTestConfig" class="btn btn-default btn-sm" onclick="Main.TestRunner.openConfigModal(project, fullTestCaseName)" style="padding-left: 7px; padding-right: 7px;"><span class="caret"></span></button>
+              <button id="openRunTestConfig" class="btn btn-default btn-sm" onclick="Main.TestRunner.openConfigModal(Global.project, fullTestCaseName)" style="padding-left: 7px; padding-right: 7px;"><span class="caret"></span></button>
             </div>
+            {% endif %}
             <a id="loadGuiButton" class="btn btn-default btn-sm" href="/project/{{project}}/test/{{full_test_case_name}}/"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Preview</a>
+            {% if g.user.project_weight(project) >= 30 %}
             <button id="save" class="btn btn-default btn-sm" onclick="saveTestCase();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+            {% endif %}
         </div>
     </div>
     <div class="clearfix"></div>
@@ -129,10 +133,9 @@
 <script src="{{ url_for('static', filename='js/external/jquery.autocomplete.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/test_common.js') }}"></script>
 <script>
-    var project = "{{project}}";
-    var testCaseName = "{{test_case_name}}";
-    var fullTestCaseName = "{{full_test_case_name}}";
-    var testCaseCode = {{test_case_contents|tojson}};
-    var codeError = {{error|tojson}};
+    let testCaseName = "{{test_case_name}}";
+    let fullTestCaseName = "{{full_test_case_name}}";
+    let testCaseCode = {{test_case_contents|tojson}};
+    let codeError = {{error|tojson}};
 </script>
 {% endblock %}

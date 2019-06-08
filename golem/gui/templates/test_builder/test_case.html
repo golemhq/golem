@@ -21,12 +21,16 @@
             </h3>
         </div>
         <div class="header-col header-col-right">
+            {% if g.user.project_weight(project) >= 30 %}
             <div class="btn-group" role="group" aria-label="...">
               <button id="runTest" class="btn btn-default btn-sm" onclick="Test.runTest()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Test</button>
               <button id="openRunTestConfig" class="btn btn-default btn-sm" onclick="Main.TestRunner.openConfigModal(Test.project, Test.fullName)" style="padding-left: 7px; padding-right: 7px;"><span class="caret"></span></button>
             </div>
+            {% endif %}
             <a id="loadCodeButton" class="btn btn-default btn-sm" href="code/"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Code<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></a>
+            {% if g.user.project_weight(project) >= 30 %}
             <button id="save" class="btn btn-default btn-sm" onclick="Test.save({runAfter: false});"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+            {% endif %}
         </div>
     </div>
     <div class="clearfix"></div>
@@ -314,9 +318,8 @@
 <script src="{{ url_for('static', filename='js/test_case.js') }}"></script>
 <script src="{{ url_for('static', filename='js/test_common.js') }}"></script>
 <script>
-    var project = "{{project}}";
-    var testCaseName = "{{test_case_name}}";
-    var fullTestCaseName = "{{full_test_case_name}}";
-    var importedPages = {{test_case_contents.pages|tojson}};
+    let testCaseName = "{{test_case_name}}";
+    let fullTestCaseName = "{{full_test_case_name}}";
+    let importedPages = {{test_case_contents.pages|tojson}};
 </script>
 {% endblock %}
