@@ -14,7 +14,9 @@
         </div>
         <div class="header-col header-col-right">
             <button id="loadCodeButton" class="btn btn-default btn-sm" onclick="loadCodeView()"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Code<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></button>
+            {% if g.user.project_weight(project) >= 30 %}
             <button id="save" class="btn btn-default btn-sm" onclick="savePageObject();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+            {% endif %}
         </div>
         <div class="clearfix"></div>
         <h4>Elements</h4>
@@ -111,7 +113,6 @@
 <script src="{{ url_for('static', filename='js/page_object.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/jquery.autocomplete.min.js') }}"></script>
 <script>
-    var project = "{{project}}";
-    var pageObjectName = "{{page_name}}";
+    let pageObjectName = "{{page_name}}";
 </script>
 {% endblock %}

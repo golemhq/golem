@@ -1,0 +1,90 @@
+{% extends "layout.html" %} 
+
+{% block title %}Golem : User Profile{% endblock %}
+
+{% block head %}
+<style>
+    .project-permission-label {
+        display: inline-block;
+        margin-right: 3px;
+        margin-left: 0px;
+        margin-bottom: 2px;
+        font-size: 1em;
+        font-weight: 100
+    }
+    td {
+        border: 0px !important;
+        padding-left: 0px !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="col-lg-8 col-lg-offset-2">
+    <div class="header-col">
+        <h3>{{g.user.username}} - profile</h3>
+    </div>
+    <div class="clearfix"></div>
+    <div>
+        <table class="table">
+            <tbody>
+                <tr>
+                    <td>Superuser</td>
+                    <td>{% if g.user.is_superuser %}Yes{% else %}No{% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Projects</td>
+                    <td>
+                        {% for project in g.user.projects %}
+                        <span class="project-permission-label tag">{{project}} - {{g.user.projects[project]}}</span>
+                        {% endfor %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <div>
+            <button id="resetPassword" class="btn btn-default btn-sm" onclick="openResetPassword()">Reset Password</button>
+        </div>
+    </div>
+</div>
+
+{% include "users/reset_password.html" %}
+
+<script>
+    function openResetPassword(){
+        $("#resetPasswordInput").val('');
+        $("#resetPasswordModal").modal("show");
+        $('#resetPasswordModal').on('shown.bs.modal', function (){ $('#resetPasswordInput').focus() });
+    }
+
+
+    function resetPassword(){
+        let newPassword = $("#resetPasswordInput").val();
+        if(newPassword.length == 0){
+            return
+        }
+        $.ajax({
+            url: "/api/user/reset-password",
+            data: JSON.stringify({
+                'username': Global.user.username,
+                'newPassword': newPassword
+            }),
+            dataType: 'json',
+            contentType: 'application/json',
+            type: 'POST',
+            success: function(result) {
+                $("#resetPasswordModal").modal("hide");
+                if(result.errors.length > 0){
+                    result.errors.forEach(error => Main.Utils.toast('error', error, 4000))
+                }
+                else{
+                    Main.Utils.toast('success', 'Password reset', 2000);
+                }
+            }
+        })
+    }
+</script>
+
+{% endblock %}

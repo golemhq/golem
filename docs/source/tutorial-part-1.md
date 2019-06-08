@@ -64,7 +64,7 @@ golem gui
 
 The Web Module can be accessed at [http://localhost:5000/](http://localhost:5000/)
 
-By default, the following user is available: username: **admin** / password: **admin**
+By default, the following superuser is available: username: **admin** / password: **admin**
 
 
 

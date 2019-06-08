@@ -14,4 +14,6 @@ include golem/gui/templates/*
 include golem/gui/templates/page_builder/*
 include golem/gui/templates/list/*
 include golem/gui/templates/report/*
+include golem/gui/templates/settings/*
 include golem/gui/templates/test_builder/*
+include golem/gui/templates/users/*

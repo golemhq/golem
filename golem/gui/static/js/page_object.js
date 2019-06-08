@@ -121,7 +121,7 @@ function savePageObject(){
     $.ajax({
         url: "/api/page/save",
         data: JSON.stringify({
-                "project": project,
+                "project": Global.project,
                 "pageName": pageObjectName,
                 "elements": elements,
                 "functions": functions,

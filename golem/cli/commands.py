@@ -5,10 +5,12 @@ from golem.core import (utils,
                         session,
                         suite as suite_module,
                         test_case,
-                        settings_manager)
+                        settings_manager,
+                        test_directory)
 from golem.gui import gui_start
 from golem.test_runner.execution_runner import ExecutionRunner
 from golem.test_runner import interactive as interactive_module
+from golem.gui.user_management import Users
 from . import messages
 
 
@@ -28,8 +30,9 @@ def command_dispatcher(args):
     elif args.command == 'createsuite':
         createsuite_command(args.project, args.suite)
     elif args.command == 'createuser':
-        createuser_command(args.username, args.password, args.admin, args.projects,
-                           args.reports)
+        createuser_command()
+    elif args.command == 'createsuperuser':
+        createsuperuser_command(args.username, args.email, args.password, args.noinput)
     elif args.command is None:
         print(messages.USAGE_MSG)
 
@@ -45,8 +48,8 @@ def display_help(help, command):
         print(messages.CREATETEST_USAGE_MSG)
     elif help == 'createsuite' or command == 'createsuite':
         print(messages.CREATESUITE_USAGE_MSG)
-    elif help == 'createuser' or command == 'createuser':
-        print(messages.CREATEUSER_USAGE_MSG)
+    elif help == 'createsuperuser' or command == 'createsuperuser':
+        print(messages.CREATESUPERUSER_USAGE_MSG)
     else:
         print(messages.USAGE_MSG)
 
@@ -137,14 +140,45 @@ def createsuite_command(project, suite_name):
         sys.exit('golem createsuite: error: {}'.format(' '.join(errors)))
 
 
-def createuser_command(username, password, is_admin=False, projects=None, reports=None):
-    projects = projects or []
-    reports = reports or []
-    errors = utils.create_user(username, password, is_admin, projects, reports)
-    if errors:
-        sys.exit('golem createuser: error: {}'.format(' '.join(errors)))
+# TODO deprecated
+def createuser_command():
+    sys.exit('Error: createuser command is deprecated. Use createsuperuser instead.')
+
+
+def createsuperuser_command(username, email, password, no_input=False):
+    if no_input:
+        if username is None or password is None:
+            sys.exit('Error: --username and --password are required for --noinput.')
     else:
-        print('User {} was created successfully'.format(username))
+        try:
+            while True:
+                username = input('Username: ').strip()
+                if username:
+                    break
+            while True:
+                email = input('Email address (optional): ').strip()
+                if email and not utils.validate_email(email):
+                    print('Error: Enter a valid email address.')
+                else:
+                    break
+            while True:
+                password = input('Password: ')
+                repeat_password = input('Password (again): ')
+                if not len(password):
+                    print('Error: Blank passwords are not allowed.')
+                elif password != repeat_password:
+                    print('Error: The passwords did not match.')
+                else:
+                    break
+        except KeyboardInterrupt:
+            sys.exit('Cancelled.')
+    errors = Users.create_super_user(username, password, email)
+    if errors:
+        for error in errors:
+            print('Error: {}'.format(error))
+        exit(1)
+    else:
+        print('Superuser {} was created successfully.'.format(username))
 
 
 def createdirectory_command(dir_name, no_confirm=False):
@@ -163,4 +197,9 @@ def createdirectory_command(dir_name, no_confirm=False):
                 return
         if os.path.isfile(os.path.join(abspath, '.golem')):
             sys.exit('Error: target directory is already an existing Golem test directory')
-    utils.create_test_dir(abspath)
+    session.testdir = abspath
+    test_directory.create_test_directory(abspath)
+    print('New golem test directory created at {}'.format(abspath))
+    print('Use credentials to access the GUI module:')
+    print('user: admin')
+    print('password: admin')

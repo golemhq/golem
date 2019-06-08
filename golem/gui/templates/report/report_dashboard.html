@@ -14,8 +14,8 @@
 
 {% block footer_declarations %}
 <script>
-	var projects = {{projects|tojson}};
-	var suiteName = '{{suite}}'
+	let projectName = {{project|tojson}};
+	let suiteName = {{suite|tojson}}
 </script>
 <script src="{{ url_for('static', filename='js/external/chart.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/report_dashboard.js') }}"></script>

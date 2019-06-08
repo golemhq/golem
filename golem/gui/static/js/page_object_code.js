@@ -1,4 +1,4 @@
-var codeEditor;
+let codeEditor;
 
 
 $(document).ready(function() {
@@ -20,6 +20,10 @@ $(document).ready(function() {
             Tab: convertTabToSpaces
         }
     });
+
+    if(Global.user.projectWeight < Main.PermissionWeightsEnum.standard){
+        codeEditor.setOption('readOnly', 'nocursor')
+    }
 
     // set unsaved changes watcher
     watchForUnsavedChanges();
@@ -53,7 +57,7 @@ function savePageObject(){
     $.ajax({
         url: "/api/page/code/save",
         data: JSON.stringify({
-                "project": project,
+                "project": Global.project,
                 "pageName": pageObjectName,
                 "content": content
             }),

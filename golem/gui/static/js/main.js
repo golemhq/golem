@@ -70,10 +70,10 @@ const Main = new function(){
         this.displayConfirmModal = function(title, message, callback){
             $("#confirmModal .modal-title").html(title);
             $("#confirmModal .modal-body").html(message);
+            $("#confirmModal button.confirm").unbind('click');
             $("#confirmModal button.confirm").click(function(){
                 $("#confirmModal .modal-title").html('');
                 $("#confirmModal .modal-body").html('');
-                $("#confirmModal button.confirm").unbind('click');
                 $("#confirmModal").modal("hide");
                 callback();
             })
@@ -660,5 +660,13 @@ const Main = new function(){
             code: 'skipped',
             color: '#868e96'
         }
+    }
+
+    this.PermissionWeightsEnum = {
+        superuser: 50,
+        admin: 40,
+        standard: 30,
+        readOnly: 20,
+        reportsOnly: 10
     }
 }

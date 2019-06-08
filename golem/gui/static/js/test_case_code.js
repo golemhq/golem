@@ -24,6 +24,10 @@ $(document).ready(function() {
         }
     });
 
+    if(Global.user.projectWeight < Main.PermissionWeightsEnum.standard){
+        codeEditor.setOption('readOnly', 'nocursor')
+    }
+
     // set unsaved changes watcher
     watchForUnsavedChanges();
     
@@ -46,7 +50,7 @@ function saveTestCase(callback){
     var data = {
         'content': content,
         'testData': testData,
-        'project': project,
+        'project': Global.project,
         'testName': fullTestCaseName
     }
     $.ajax({
@@ -93,7 +97,7 @@ function watchForUnsavedChanges(){
 
 
 function runTest(){
-    let run = () => Main.TestRunner.runTest(project, fullTestCaseName);
+    let run = () => Main.TestRunner.runTest(Global.project, fullTestCaseName);
     if(hasUnsavedChanges())
         saveTestCase(run)
     else

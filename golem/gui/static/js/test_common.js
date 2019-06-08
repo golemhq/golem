@@ -122,7 +122,7 @@ var TestCommon = new function(){
             $.ajax({
                 url: "/api/test/rename",
                 data: JSON.stringify({
-                     "project": project,
+                     "project": Global.project,
                      "fullFilename": Test.fullName,
                      "newFullFilename": newTestNameValue,
                 }),
@@ -136,7 +136,7 @@ var TestCommon = new function(){
                         $("#testNameInput input").val('');
                         $("#testNameInput").hide();
                         $("#testName").html(newTestNameValue).show();
-                        let new_url = "/project/" + project + "/test/" + newTestNameValue + "/";
+                        let new_url = `/project/${Global.project}/test/${newTestNameValue}/`;
                         window.history.pushState("object or string", "", new_url);
                         Main.Utils.toast('success', 'File was renamed', 2000);
                     }

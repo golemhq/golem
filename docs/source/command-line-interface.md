@@ -10,7 +10,8 @@ golem-admin createdirectory <name>
 ```
 
 Used to generate a new test directory.
-Name must be a relative or absolute path for the new test directory. Use '.' to use CWD.
+Name must be a relative or absolute path for the new test directory.
+Use '.' to use the current directory.
 
 ## golem
 
@@ -89,9 +90,10 @@ golem gui [--host -p|--port -d|--debug]
 ```
 
 Start Golem Web Module (GUI).
-Default host is 127.0.0.1 (localhost). Use host=0.0.0.0 to make the GUI publicly accessible.
-Port indicates which port number to use, default is 5000.
-Debug runs the GUI app in debug mode, default is False.
+Default host is 127.0.0.1 (localhost).
+Use host 0.0.0.0 to make the GUI publicly accessible.
+Default port is 5000.
+Debug runs the application in debug mode, default is False.
 Do not run in debug mode on production machines.
 
 See [GUI - Web Module](gui.html) for more info.
@@ -122,12 +124,17 @@ Creates a new suite inside the given project.
 
 ### createuser
 
+DEPRECATED. Use *createsuperuser* instead.
+
+### createsuperuser
+
 ```
-golem createuser <username> <password> [-a|--admin -p|--projects -r|--reports]
+golem createuser [-u|--username -e|email -p|--password -n|--noinput]
 ```
 
-Add a new user, projects is a list of projects that the user can access and reports determines which project reports the user can see.
-In both cases use '*' to give the user access to all projects
+Create a new superuser.
+The command is interactive unless username and password are provided.
+Email is optional.
 
 ## webdriver-manager
 

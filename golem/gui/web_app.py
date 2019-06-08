@@ -10,8 +10,8 @@ from golem.core import (environment_manager, page_object, settings_manager, test
 from golem.core import test_data as test_data_module
 from golem.core import suite as suite_module
 
-from . import gui_utils, user
-from .gui_utils import project_exists, gui_permissions_required
+from golem.gui.user_management import Users, Permissions
+from golem.gui.gui_utils import project_exists, permission_required, is_safe_url
 
 
 webapp_bp = Blueprint('webapp', __name__)
@@ -24,7 +24,6 @@ def login():
         return redirect(url_for('webapp.index'))
     if request.method == 'POST':
         errors = []
-        user_data = {}
         username = request.form['username']
         password = request.form['password']
         next_url = request.form['next']
@@ -32,25 +31,21 @@ def login():
             errors.append('Username is required')
         elif not password:
             errors.append('Password is required')
-        else:
-            user_data = user.get_user_data(username=username)
-            if user_data is None:
-                errors.append('Username does not exists')
-            elif user_data['password'] != password:
-                errors.append('Username and password do not match')
-        if len(errors):
+        elif not Users.user_exists(username):
+            errors.append('Username does not exists')
+        elif not Users.verify_password(username, password):
+            errors.append('Username and password do not match')
+
+        if errors:
             return render_template('login.html', next_url=next_url, errors=errors)
         else:
-            usr = user.User(user_data['id'], user_data['username'],
-                            user_data['is_admin'], user_data['gui_projects'],
-                            user_data['report_projects'])
-            login_user(usr)
-            if not next_url or not gui_utils.is_safe_url(next_url):
+            login_user(Users.get_user_by_username(username))
+            if not next_url or not is_safe_url(next_url):
                 next_url = '/'
             return redirect(next_url)
     else:
         next_url = request.args.get('next')
-        if not next_url or not gui_utils.is_safe_url(next_url):
+        if not next_url or not is_safe_url(next_url):
             next_url = '/'
         return render_template('login.html', next_url=next_url, errors=[])
 
@@ -63,10 +58,10 @@ def index():
     have access to every project. Otherwise limit the project
     list to gui_permissions
     """
-    if current_user.is_admin or '*' in current_user.gui_permissions:
-        projects = utils.get_projects()
-    else:
-        projects = current_user.gui_permissions
+    projects = utils.get_projects()
+    if not current_user.is_superuser:
+        user_projects = current_user.project_list
+        projects = [p for p in user_projects if p in projects]
     return render_template('index.html', projects=projects)
 
 
@@ -74,16 +69,20 @@ def index():
 @webapp_bp.route("/project/<project>/")
 @login_required
 @project_exists
-@gui_permissions_required
+@permission_required(Permissions.REPORTS_ONLY)
 def project_view(project):
-    return redirect('/project/{}/suites/'.format(project))
+    user_weight = current_user.project_weight(project)
+    if user_weight == Permissions.weights[Permissions.REPORTS_ONLY]:
+        return redirect('/report/project/{}/'.format(project))
+    else:
+        return redirect('/project/{}/suites/'.format(project))
 
 
 # PROJECT TESTS VIEW
 @webapp_bp.route("/project/<project>/tests/")
 @login_required
 @project_exists
-@gui_permissions_required
+@permission_required(Permissions.READ_ONLY)
 def project_tests(project):
     return render_template('list/test_list.html', project=project)
 
@@ -92,7 +91,7 @@ def project_tests(project):
 @webapp_bp.route("/project/<project>/suites/")
 @login_required
 @project_exists
-@gui_permissions_required
+@permission_required(Permissions.READ_ONLY)
 def project_suites(project):
     return render_template('list/suite_list.html', project=project)
 
@@ -101,7 +100,7 @@ def project_suites(project):
 @webapp_bp.route("/project/<project>/pages/")
 @login_required
 @project_exists
-@gui_permissions_required
+@permission_required(Permissions.READ_ONLY)
 def project_pages(project):
     return render_template('list/page_list.html', project=project)
 
@@ -110,7 +109,7 @@ def project_pages(project):
 @webapp_bp.route("/project/<project>/test/<test_case_name>/")
 @login_required
 @project_exists
-@gui_permissions_required
+@permission_required(Permissions.READ_ONLY)
 def test_case_view(project, test_case_name):
     test_exists = test_case.test_case_exists(project, test_case_name)
     if not test_exists:
@@ -143,7 +142,7 @@ def test_case_view(project, test_case_name):
 @webapp_bp.route("/project/<project>/test/<test_case_name>/code/")
 @login_required
 @project_exists
-@gui_permissions_required
+@permission_required(Permissions.READ_ONLY)
 def test_case_code_view(project, test_case_name):
     test_exists = test_case.test_case_exists(project, test_case_name)
     if not test_exists:
@@ -165,7 +164,7 @@ def test_case_code_view(project, test_case_name):
 @webapp_bp.route("/project/<project>/page/<full_page_name>/")
 @login_required
 @project_exists
-@gui_permissions_required
+@permission_required(Permissions.READ_ONLY)
 def page_view(project, full_page_name, no_sidebar=False):
     path = page_object.page_file_path(project, full_page_name)
     page_exists_ = page_object.page_exists(project, full_page_name)
@@ -199,6 +198,7 @@ def page_view(project, full_page_name, no_sidebar=False):
 # PAGE OBJECT VIEW no sidebar
 @webapp_bp.route("/project/<project>/page/<full_page_name>/no_sidebar/")
 @login_required
+@permission_required(Permissions.READ_ONLY)
 def page_view_no_sidebar(project, full_page_name):
     return page_view(project=project, full_page_name=full_page_name, no_sidebar=True)
 
@@ -207,7 +207,7 @@ def page_view_no_sidebar(project, full_page_name):
 @webapp_bp.route("/project/<project>/page/<full_page_name>/code/")
 @login_required
 @project_exists
-@gui_permissions_required
+@permission_required(Permissions.READ_ONLY)
 def page_code_view(project, full_page_name, no_sidebar=False):
     page_exists_ = page_object.page_exists(project, full_page_name)
     if not page_exists_:
@@ -223,6 +223,7 @@ def page_code_view(project, full_page_name, no_sidebar=False):
 # PAGE OBJECT CODE VIEW no sidebar
 @webapp_bp.route("/project/<project>/page/<full_page_name>/no_sidebar/code/")
 @login_required
+@permission_required(Permissions.READ_ONLY)
 def page_code_view_no_sidebar(project, full_page_name):
     return page_code_view(project=project, full_page_name=full_page_name, no_sidebar=True)
 
@@ -231,7 +232,7 @@ def page_code_view_no_sidebar(project, full_page_name):
 @webapp_bp.route("/project/<project>/suite/<suite>/")
 @login_required
 @project_exists
-@gui_permissions_required
+@permission_required(Permissions.READ_ONLY)
 def suite_view(project, suite):
     if not suite_module.suite_exists(project, suite):
         abort(404, 'The suite {} does not exist'.format(suite))
@@ -253,32 +254,62 @@ def suite_view(project, suite):
 # GLOBAL SETTINGS VIEW
 @webapp_bp.route("/settings/")
 @login_required
+@permission_required(Permissions.SUPER_USER)
 def global_settings():
     settings = settings_manager.get_global_settings_as_string()
-    return render_template('settings.html', project=None, global_settings=settings,
-                           settings=None)
+    return render_template('settings/global_settings.html', settings=settings)
 
 
 # PROJECT SETTINGS VIEW
 @webapp_bp.route("/project/<project>/settings/")
 @login_required
 @project_exists
-@gui_permissions_required
+@permission_required(Permissions.READ_ONLY)
 def project_settings(project):
-    gsettings = settings_manager.get_global_settings_as_string()
-    psettings = settings_manager.get_project_settings_as_string(project)
-    return render_template('settings.html', project=project, global_settings=gsettings,
-                           settings=psettings)
+    settings = settings_manager.get_project_settings_as_string(project)
+    return render_template('settings/project_settings.html', project=project, settings=settings)
 
 
 # ENVIRONMENTS VIEW
 @webapp_bp.route("/project/<project>/environments/")
 @login_required
 @project_exists
-@gui_permissions_required
+@permission_required(Permissions.READ_ONLY)
 def environments_view(project):
     data = environment_manager.get_environments_as_string(project)
     return render_template('environments.html', project=project, environment_data=data)
+
+
+# USERS VIEW
+@webapp_bp.route("/users/")
+@login_required
+@permission_required(Permissions.SUPER_USER)
+def users_view():
+    return render_template('users/users.html')
+
+
+# NEW USER VIEW
+@webapp_bp.route("/users/new/")
+@login_required
+@permission_required(Permissions.SUPER_USER)
+def new_user_view():
+    return render_template('users/user_form.html', edition_mode=False, edit_user=None)
+
+
+# EDIT USER VIEW
+@webapp_bp.route("/users/edit/<username>/")
+@login_required
+@permission_required(Permissions.SUPER_USER)
+def edit_user_view(username):
+    user = Users.get_user_by_username(username)
+    return render_template('users/user_form.html', edition_mode=True, edit_user=user)
+
+
+# USER PROFILE VIEW
+@webapp_bp.route("/user/")
+@login_required
+def user_profile_view():
+    return render_template('users/user_profile.html')
 
 
 # LOGOUT VIEW

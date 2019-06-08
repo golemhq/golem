@@ -1,6 +1,6 @@
 
 $(document).ready(function() {
-    Suite.initialize(project, suite, selectedTests);
+    Suite.initialize(Global.project, suite, selectedTests);
 });
 
 
@@ -36,7 +36,7 @@ const Suite = new function(){
 
         environments.forEach(function(env){
             if(!Suite.projectEnvironments.includes(env)){
-                errors.push(`Environment <strong>${env}</strong> does not exist for project ${project}`)
+                errors.push(`Environment <strong>${env}</strong> does not exist for project ${Suite.project}`)
             }
         });
 
@@ -54,7 +54,7 @@ const Suite = new function(){
             $.ajax({
                 url: "/api/suite/save",
                 data: JSON.stringify({
-                        "project": project,
+                        "project": Global.project,
                         "suite": suite,
                         "browsers": browsers,
                         "environments": environments,
@@ -78,14 +78,14 @@ const Suite = new function(){
             $.ajax({
                 url: "/api/suite/run",
                 data: JSON.stringify({
-                    "project": project,
+                    "project": Global.project,
                     "suite": suite,
                 }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 type: 'POST',
                 success: function(timestamp) {
-                    let url = `/report/project/${project}/suite/${suite}/${timestamp}/`;
+                    let url = `/report/project/${Global.project}/suite/${suite}/${timestamp}/`;
                     let msg = `Running suite ${suite} - <a href="${url}"><strong>open</strong></a>`;
                     Main.Utils.toast('info', msg, 15000)
                 }

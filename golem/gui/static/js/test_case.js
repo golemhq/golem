@@ -1,6 +1,6 @@
 
 $(document).ready(function() {
-    Test.initialize(project, testCaseName, fullTestCaseName, importedPages);
+    Test.initialize(Global.project, testCaseName, fullTestCaseName, importedPages);
 });
 
 
@@ -73,7 +73,7 @@ var Test = new function(){
             success: function(result) {
                 if(result.error == 'page does not exist'){
                     // mark page as not existent
-                    $("input[value='"+thisPageName+"']").addClass('not-exist');
+                    $(`input[value='${pageName}']`).addClass('not-exist');
                 }
                 else{
                     Test.importedPages = Test.importedPages.filter(page => page.name !== pageName)

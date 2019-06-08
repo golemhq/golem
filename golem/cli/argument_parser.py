@@ -47,14 +47,16 @@ def get_parser():
     parser_createsuite.add_argument('suite')
     parser_createsuite.add_argument('-h', '--help', action='store_true')
 
-    # createuser
-    parser_createuser = subparsers.add_parser('createuser', add_help=False)
-    parser_createuser.add_argument('username')
-    parser_createuser.add_argument('password')
-    parser_createuser.add_argument('-a', '--admin', action='store_true', default=False)
-    parser_createuser.add_argument('-p', '--projects', nargs='+', default=[])
-    parser_createuser.add_argument('-r', '--reports', nargs='+', default=[])
-    parser_createuser.add_argument('-h', '--help', action='store_true')
+    # createsuperuser
+    subparsers.add_parser('createuser', add_help=False)
+
+    # createsuperuser
+    parser_createsuperuser = subparsers.add_parser('createsuperuser', add_help=False)
+    parser_createsuperuser.add_argument('-u', '--username')
+    parser_createsuperuser.add_argument('-e', '--email')
+    parser_createsuperuser.add_argument('-p', '--password')
+    parser_createsuperuser.add_argument('-n', '--noinput', action='store_true', default=False)
+    parser_createsuperuser.add_argument('-h', '--help', action='store_true')
 
     return parser
 

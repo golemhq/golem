@@ -1,7 +1,7 @@
 """Main point of entrance to the application"""
 import sys
 
-from .core import session, utils, errors
+from .core import session, errors, test_directory
 from .core.settings_manager import get_global_settings
 from .cli import argument_parser, commands
 
@@ -11,7 +11,7 @@ def execute_from_command_line(testdir):
     sys.dont_write_bytecode = True
     sys.path.insert(0, '')
 
-    if not utils.is_valid_test_directory(testdir):
+    if not test_directory.is_valid_test_directory(testdir):
         sys.exit(errors.invalid_test_directory.format(testdir))
 
     # set session values

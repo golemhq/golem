@@ -1,26 +1,66 @@
 
 $(document).ready(function() {
-	let limit;
-	if(projects == []) limit = 5;
-	else if(suiteName == "") limit = 10
-	else limit = 50;
-	$.ajax({
-		url: "/api/report/suite/last-executions",
-		data: JSON.stringify({
-            "projects": projects,
-            "suite": suiteName,
-            "limit": limit
-        }),
+    if(projectName === null){
+        getAllProjectsLastExecutions()
+    }
+    else{
+        if(suiteName === null){
+            getProjectLastExecutions(projectName)
+        }
+        else{
+            getSuiteLastExecutions(projectName, suiteName)
+        }
+    }
+})
+
+
+function getAllProjectsLastExecutions(){
+    $.ajax({
+        url: "/api/report/last-executions",
+        dataType: 'json',
+        type: 'GET',
+        success: function( data ) {
+            for(project in data.projects){
+                ReportDashboardMain.loadProject(project, data.projects[project]);
+            }
+        }
+    })
+}
+
+
+function getProjectLastExecutions(project){
+    $.ajax({
+        url: "/api/report/project/last-executions",
+        data: { "project": project },
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
-        type: 'POST',
-		success: function( data ) {	
-	  		for(project in data.projects){
-	  			ReportDashboardMain.loadProject(project, data.projects[project]);
-	  		}
-	  	}
-	});
-});
+        type: 'GET',
+        success: function( data ) {
+            for(project in data.projects){
+                ReportDashboardMain.loadProject(project, data.projects[project]);
+            }
+        }
+    })
+}
+
+
+function getSuiteLastExecutions(project, suite){
+    $.ajax({
+        url: "/api/report/suite/last-executions",
+        data: {
+            "project": project,
+            "suite": suite
+        },
+        dataType: 'json',
+        contentType: 'application/json; charset=utf-8',
+        type: 'GET',
+        success: function( data ) {
+            for(project in data.projects){
+                ReportDashboardMain.loadProject(project, data.projects[project]);
+            }
+        }
+    })
+}
 
 
 const ReportDashboardMain = new function(){
@@ -29,7 +69,7 @@ const ReportDashboardMain = new function(){
 
     this.loadProject = function(project, projectData){
         let projectContainer;
-        if(suiteName || projects.length == 1)
+        if(projectName !== null)
             projectContainer = ReportDashboard.generateProjectContainerSingleSuite(project);
         else
             projectContainer = ReportDashboard.generateProjectContainer(project);

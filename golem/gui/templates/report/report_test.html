@@ -96,10 +96,9 @@
 
 {% block footer_declarations %}
 <script type="text/javascript">
-	var project = '{{project}}';
-	var suite = '{{suite}}';
-	var execution = '{{execution}}';
-	var testCase = '{{test_case}}';
+	let suite = '{{suite}}';
+	let execution = '{{execution}}';
+	let testCase = '{{test_case}}';
 </script>
 <script src="{{ url_for('static', filename='js/report_test.js') }}"></script>
 {% endblock %}

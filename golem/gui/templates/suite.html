@@ -13,8 +13,10 @@
             <h3 id="suiteName" class="element-name"><span>{{suite}}</span></h3>
         </div>
         <div class="header-col header-col-right">
+            {% if g.user.project_weight(project) >= 30 %}
             <button id="runTest" class="btn btn-default btn-sm" onclick="Suite.run()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Suite</button>
             <button id="save" class="btn btn-default btn-sm" onclick="Suite.save();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+            {% endif %}
         </div>
         <div class="clearfix"></div>
         <h4>Settings</h4>
@@ -75,7 +77,6 @@
 <script src="{{ url_for('static', filename='js/external/treeview.js') }}"></script>
 <script src="{{ url_for('static', filename='js/suite.js') }}"></script>
 <script>
-    let project = "{{project}}";
     let suite = "{{suite}}";
     let selectedTests = {{selected_tests|tojson}};
 </script>

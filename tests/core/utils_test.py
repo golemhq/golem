@@ -185,31 +185,6 @@ class TestGetDirectoryTests:
         assert tests == expected
 
 
-class TestCreateTestDir:
-
-    def test_new_directory_contents(self, dir_function):
-        name = 'testdirectory_001'
-        os.chdir(dir_function.path)
-        utils.create_test_dir(name)
-        testdir = os.path.join(dir_function.path, name)
-        listdir = os.listdir(testdir)
-        files = [name for name in listdir if os.path.isfile(os.path.join(testdir, name))]
-        dirs = [name for name in listdir if os.path.isdir(os.path.join(testdir, name))]
-        if '.DS_Store' in files:
-            files.remove('.DS_Store')
-        assert len(files) == 4
-        # verify files
-        assert '__init__.py' in files
-        assert 'settings.json' in files
-        assert 'users.json' in files
-        assert '.golem' in files
-        # verify directories
-        assert len(dirs) == 2
-        # verify the test dir contains the correct directories
-        assert 'projects' in dirs
-        assert 'drivers' in dirs
-
-
 class TestDeleteElement:
 
     def test_delete_tests(self, project_function):
@@ -528,4 +503,4 @@ class TestGetValidFilename:
     @pytest.mark.parametrize('filename, expected', filenames)
     def test_get_valid_filename(self, filename, expected):
         result = utils.get_valid_filename(filename)
-        print(filename, result)
+        assert result == expected

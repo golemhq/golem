@@ -2,20 +2,29 @@
 const Project = new function(){
 
     this.generateNewElement = function(element){
-        let li = $(`<li class="tree-element"fullpath="${element.dotPath}" name="${element.name}" type="${element.type}">
-                        <a class="list-item-link" href="${element.url}">${element.name}</a>
+        let buttons = '';
+        if(Global.user.projectWeight >= Main.PermissionWeightsEnum.standard){
+            buttons += `<button class="rename-button" onclick="Project.renameFilePrompt(this)"><i class="glyphicon glyphicon-edit"></i></button>`;
+            buttons += ` <button class="duplicate-button" onclick="Project.duplicateElementPrompt(this)"><i class="glyphicon glyphicon-duplicate"></i></button>`;
+            if(Global.user.projectWeight >= Main.PermissionWeightsEnum.admin){
+                buttons += ` <button class="delete-button" onclick="Project.deleteElementConfirm(this)"><i class="glyphicon glyphicon-trash"></i></button>`
+            }
+        }
+
+        let li = $(`
+            <li class="tree-element" fullpath="${element.dotPath}" name="${element.name}" type="${element.type}">
+                <a class="list-item-link" href="${element.url}">${element.name}</a>
                 <span class="pull-right tree-element-buttons">
-                    <button class="rename-button" onclick="Project.renameFilePrompt(this)"><i class="glyphicon glyphicon-edit"></i></button>
-                    <button class="duplicate-button" onclick="Project.duplicateElementPrompt(this)"><i class="glyphicon glyphicon-duplicate"></i></button>
-                    <button class="delete-button" onclick="Project.deleteElementConfirm(this)"><i class="glyphicon glyphicon-trash"></i></button>
+                    ${buttons}
                 </span>
             </li>`);
+
         if(element.type == 'test' || element.type == 'page'){
             let codeIcon = '<i class="glyphicon glyphicon-chevron-left" style="-webkit-text-stroke: 0.5px white;"></i><i class="glyphicon glyphicon-chevron-right" style="margin-left: -8px; -webkit-text-stroke: 0.5px white;"></i>';
             let codeLink = `<a href="${element.url}code" class="code-button" style="margin-right: -2px;">${codeIcon}</a>`;
             li.find("span.tree-element-buttons").prepend(codeLink);
-            if(element.type == 'test'){
-                let runButton = `<button class="run-test-button" onclick="Main.TestRunner.openConfigModal(project, '${element.dotPath}')"><is class="glyphicon glyphicon-play-circle"></span></button>`;
+            if(element.type == 'test' && Global.user.projectWeight >= Main.PermissionWeightsEnum.standard){
+                let runButton = `<button class="run-test-button" onclick="Main.TestRunner.openConfigModal(Global.project, '${element.dotPath}')"><is class="glyphicon glyphicon-play-circle"></span></button>`;
                 li.find("span.tree-element-buttons").prepend(runButton);
             }
         }
@@ -25,14 +34,12 @@ const Project = new function(){
     this.generateNewBranch = function(branchName, dot_path){
         let openedClass = 'glyphicon-folder-open';
         let closedClass = 'glyphicon-folder-close';
-        let li = `
+        let branch = $(`
             <li class="tree-element branch" name="${branchName}" fullpath="${dot_path}">
                 <a href="#">${branchName}</a>
-                <span class="pull-right tree-element-buttons">
-                </span>
-                <ul>${this.newElementForm(dot_path)}</ul>
-            </li>`;
-        let branch = $(li);
+                <span class="pull-right tree-element-buttons"></span>
+                <ul></ul>
+            </li>`);
         branch.prepend(`<i class="indicator glyphicon ${closedClass}"></i>`);
         branch.on('click', function (e) {
             if (this == e.target) {
@@ -68,8 +75,16 @@ const Project = new function(){
         return branch
     };
 
+    this.generateNewEmptyBranch = function(branchName, dotPath){
+        let branch = Project.generateNewBranch(branchName, dotPath)
+        if(Global.user.projectWeight >= Main.PermissionWeightsEnum.standard){
+            branch.find('ul').append(Project.newElementForm(dotPath))
+        }
+        return branch
+    }
+
     this.newElementForm = function(dot_path){
-        let li = `
+        let li = $(`
             <li class="form-container" fullpath="${dot_path}">
             <span class="new-element-form" style="display: none;">
                 <input class="new-element-input new-test-case form-control" type="text"
@@ -82,15 +97,19 @@ const Project = new function(){
                 <a class="new-directory-link" href="javascript:void(0)" onclick="Project.displayNewElementForm(this, 'directory')">
                     <i class="glyphicon glyphicon-folder-close"><i style="left: 0px" class="fa fa-plus-circle fa-stack-1x awesomeEntity sub-icon"/></i>
                 </a>
-        </li>`;
+        </li>`);
         return li
     }
 
     this.loadTreeElements = function(rootElement, elements, elementType){
+        Project.loadBranch(rootElement, elements, elementType, '.')
+    }
+
+    this.loadBranch = function(rootElement, elements, elementType, dotPath){
         elements.forEach(function(element){
             let uiElement;
             if(element.type == 'file'){
-                let elementUrl = `/project/${project}/${elementType}/${element.dot_path}/`;
+                let elementUrl = `/project/${Global.project}/${elementType}/${element.dot_path}/`;
                 uiElement = Project.generateNewElement({
                     name: element.name,
                     url: elementUrl,
@@ -99,10 +118,13 @@ const Project = new function(){
             }
             else { // element.type == 'directory'
                 uiElement = Project.generateNewBranch(element.name, element.dot_path);
-                Project.loadTreeElements(uiElement.find('ul'), element.sub_elements, elementType);
+                Project.loadBranch(uiElement.find('ul'), element.sub_elements, elementType, element.dot_path);
             }
-            rootElement.children().last().before(uiElement);
+            rootElement.append(uiElement)
         });
+        if(Global.user.projectWeight >= Main.PermissionWeightsEnum.standard){
+            rootElement.append(Project.newElementForm(dotPath))
+        }
     }
 
     this.addFileToTree = function(fullPath, elementType){
@@ -118,7 +140,7 @@ const Project = new function(){
             let thisDirFullPath = loadedPath.join('.');
             let branch;
             if(!Project.dirExists(thisDirFullPath)){
-                branch= Project.generateNewBranch(dirName, thisDirFullPath);
+                branch = Project.generateNewEmptyBranch(dirName, thisDirFullPath);
                 rootElement.children().last().before(branch)
             }
             else{
@@ -129,7 +151,7 @@ const Project = new function(){
         // add file
         loadedPath.push(fileName);
         let testFullPath = loadedPath.join('.');
-        let elementUrl = `/project/${project}/${elementType}/${testFullPath}/`;
+        let elementUrl = `/project/${Global.project}/${elementType}/${testFullPath}/`;
         let uiElement = Project.generateNewElement({
             name: fileName,
             url: elementUrl,
@@ -186,7 +208,7 @@ const Project = new function(){
         $.ajax({
             url: endpointURL,
             data: JSON.stringify({
-                "project": project,
+                "project": Global.project,
                 "isDir": isDir,
                 "fullPath": fullPath
             }),
@@ -197,7 +219,7 @@ const Project = new function(){
                 if(data.errors.length == 0){
                     let parentUl = input.closest('ul');
                     if(data.element.is_directory){
-                        let branch = Project.generateNewBranch(data.element.name, data.element.full_path);
+                        let branch = Project.generateNewEmptyBranch(data.element.name, data.element.full_path);
                         parentUl.children().last().before(branch);
                     }
                     else{
@@ -254,7 +276,7 @@ const Project = new function(){
         $.ajax({
             url: endpointURL,
             data: JSON.stringify({
-                "project": project,
+                "project": Global.project,
                 "fullPath": fullPath
             }),
             contentType: 'application/json; charset=utf-8',
@@ -305,7 +327,7 @@ const Project = new function(){
         $.ajax({
             url: endpointURL,
             data: JSON.stringify({
-                "project": project,
+                "project": Global.project,
                 "fullPath": elemFullPath,
                 "newFileFullPath": newFileFullPath
             }),
@@ -366,7 +388,7 @@ const Project = new function(){
         $.ajax({
             url: endpointURL,
             data: JSON.stringify({
-                "project": project,
+                "project": Global.project,
                 "fullFilename": fullFilename,
                 "newFullFilename": newFullFilename
             }),
