@@ -12,7 +12,7 @@ from flask import abort, render_template, request
 from flask_login import current_user
 
 import golem.actions
-from golem.core import utils, session, errors
+from golem.core import utils, session, errors, test_directory
 from golem.gui import report_parser
 from golem.gui.user_management import Permissions
 from golem import gui
@@ -176,7 +176,7 @@ def project_exists(func):
     """
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if not utils.project_exists(kwargs['project']):
+        if not test_directory.project_exists(kwargs['project']):
             abort(404, 'The project {} does not exist.'.format(kwargs['project']))
         return func(*args, **kwargs)
     return wrapper

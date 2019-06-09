@@ -1,9 +1,10 @@
 import os
 
 from golem.core import test_directory
+from golem.core.project import create_project
 
 
-class TestCreateTestDir:
+class TestCreateTestDirectory:
 
     def test_new_directory_contents(self, dir_function, test_utils):
         name = test_utils.random_string(10)
@@ -26,3 +27,50 @@ class TestCreateTestDir:
         # verify the test dir contains the correct directories
         assert 'projects' in dirs
         assert 'drivers' in dirs
+
+
+class TestCreateTestdirGolemFile:
+
+    def test_create_testdir_golem_file(self, dir_function):
+        testdir = dir_function.path
+        test_directory.create_testdir_golem_file(testdir)
+        golem_file_path = os.path.join(testdir, '.golem')
+        assert os.path.isfile(golem_file_path)
+        with open(golem_file_path) as f:
+            lines = f.readlines()
+            assert lines[0] == '[gui]\n'
+            assert lines[1].startswith('secret_key = ')
+
+
+class TestGetProjects:
+
+    def test_get_projects(self, testdir_function):
+        testdir_function.activate()
+        create_project('project1')
+        create_project('project2')
+        projects = test_directory.get_projects()
+        assert projects.sort() == ['project1', 'project2'].sort()
+
+    def test_get_projects_no_project(self, testdir_function):
+        testdir_function.activate()
+        projects = test_directory.get_projects()
+        assert projects == []
+
+
+class TestProjectExists:
+
+    def test_project_exists(self, testdir_session, test_utils):
+        testdir_session.activate()
+        project = test_utils.random_string(10)
+        assert not test_directory.project_exists(project)
+        create_project(project)
+        assert test_directory.project_exists(project)
+
+
+class TestIsValidTestDirectory:
+
+    def test_is_valid_test_directory(self, dir_function):
+        path = dir_function.path
+        assert not test_directory.is_valid_test_directory(path)
+        test_directory.create_testdir_golem_file(path)
+        assert test_directory.is_valid_test_directory(path)

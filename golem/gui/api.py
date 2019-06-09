@@ -9,8 +9,9 @@ from flask_login import current_user
 from itsdangerous import BadSignature, SignatureExpired
 
 from golem.core import (environment_manager, file_manager, page_object, settings_manager,
-                        test_case, session, utils, tags_manager)
+                        test_case, session, utils, tags_manager, test_directory)
 from golem.core import suite as suite_module
+from golem.core.project import Project, create_project
 from golem.gui import gui_utils, report_parser
 from golem.gui.user_management import Users, Permissions
 
@@ -161,10 +162,10 @@ def project_create():
         errors.append('Project name is too short')
     elif len(project_name) > 50:
         errors.append('Project name is too long')
-    elif utils.project_exists(project_name):
+    elif test_directory.project_exists(project_name):
         errors.append('A project with that name already exists')
     else:
-        utils.create_new_project(project_name)
+        create_project(project_name)
     return jsonify({'errors': errors, 'project_name': project_name})
 
 
@@ -190,17 +191,16 @@ def project_environments_save():
 @auth_required
 def project_exists():
     project = request.json['project']
-    return jsonify(utils.project_exists(project))
+    return jsonify(test_directory.project_exists(project))
 
 
 @api_bp.route('/project/has-tests')
 @auth_required
 def project_has_tests():
     project = request.args['project']
-    tests = utils.get_directory_tests(project, '')
-    result = len(tests) != 0
-    response = jsonify(result)
-    if result:
+    has_tests = Project(project).has_tests
+    response = jsonify(has_tests)
+    if has_tests:
         response.cache_control.max_age = 604800
         response.cache_control.public = True
     return response
@@ -251,7 +251,7 @@ def project_page_exists():
 def project_page_tree():
     project = request.args['project']
     _verify_permissions(Permissions.READ_ONLY, project)
-    return jsonify(utils.get_pages(project))
+    return jsonify(Project(project).page_tree)
 
 
 @api_bp.route('/project/pages')
@@ -280,7 +280,7 @@ def project_suite_create():
 def project_suite_tree():
     project = request.args['project']
     _verify_permissions(Permissions.READ_ONLY, project)
-    return jsonify(utils.get_suites(project))
+    return jsonify(Project(project).suite_tree)
 
 
 @api_bp.route('/project/supported-browsers')
@@ -326,13 +326,13 @@ def project_test_tags():
 def project_test_tree():
     project = request.args['project']
     _verify_permissions(Permissions.READ_ONLY, project)
-    return jsonify(utils.get_test_cases(project))
+    return jsonify(Project(project).test_tree)
 
 
 @api_bp.route('/projects')
 @auth_required
 def projects():
-    return jsonify(utils.get_projects())
+    return jsonify(test_directory.get_projects())
 
 
 @api_bp.route('/report/suite/execution')
@@ -812,7 +812,5 @@ def _verify_permissions(permission, project=None):
         user_weight = Permissions.get_weight(Permissions.SUPER_USER)
     elif project:
         user_weight = user.project_weight(project)
-    else:
-        abort(500, 'project value is required')
     if required_permission_weight > user_weight:
         abort(401)

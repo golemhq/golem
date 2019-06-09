@@ -7,7 +7,7 @@ from flask_login import current_user
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from golem.core import session, utils
+from golem.core import session, utils, test_directory
 
 
 class Users:
@@ -283,7 +283,7 @@ class User:
     def project_list(self):
         projects = list(self.projects.keys())
         if self.is_superuser or '*' in projects:
-            projects = utils.get_projects()
+            projects = test_directory.get_projects()
         return projects
 
     def project_permission(self, project):

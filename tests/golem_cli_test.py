@@ -3,7 +3,7 @@ import os
 import pytest
 
 from golem.cli import messages
-from golem.core import utils, errors
+from golem.core import utils, errors, test_directory
 
 
 class TestGolemHelp:
@@ -63,8 +63,8 @@ class TestGolemRun:
         result = test_utils.run_command('golem run')
         expected = messages.RUN_USAGE_MSG
         expected += '\nProjects:'
-        for proj in utils.get_projects():
-            expected += '\n  {}'.format(proj)
+        for project in test_directory.get_projects():
+            expected += '\n  {}'.format(project)
         assert result == expected
 
     @pytest.mark.slow
@@ -197,7 +197,7 @@ class TestGolemCreateProject:
         cmd = 'golem createproject {}'.format(project)
         result = test_utils.run_command(cmd)
         assert result == 'Project {} created'.format(project)
-        projects = utils.get_projects()
+        projects = test_directory.get_projects()
         assert project in projects
 
     @pytest.mark.slow

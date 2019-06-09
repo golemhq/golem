@@ -6,9 +6,10 @@ from flask.blueprints import Blueprint
 from flask_login import current_user, login_user, login_required, logout_user
 
 from golem.core import (environment_manager, page_object, settings_manager, test_case,
-                        session, utils)
+                        session, utils, test_directory)
 from golem.core import test_data as test_data_module
 from golem.core import suite as suite_module
+from golem.core.project import Project
 
 from golem.gui.user_management import Users, Permissions
 from golem.gui.gui_utils import project_exists, permission_required, is_safe_url
@@ -58,7 +59,7 @@ def index():
     have access to every project. Otherwise limit the project
     list to gui_permissions
     """
-    projects = utils.get_projects()
+    projects = test_directory.get_projects()
     if not current_user.is_superuser:
         user_projects = current_user.project_list
         projects = [p for p in user_projects if p in projects]
@@ -236,7 +237,7 @@ def page_code_view_no_sidebar(project, full_page_name):
 def suite_view(project, suite):
     if not suite_module.suite_exists(project, suite):
         abort(404, 'The suite {} does not exist'.format(suite))
-    all_test_cases = utils.get_test_cases(project)
+    all_test_cases = Project(project).test_tree
     selected_tests = suite_module.get_suite_test_cases(project, suite)
     processes = suite_module.get_suite_amount_of_processes(project, suite)
     browsers = suite_module.get_suite_browsers(project, suite)

@@ -1,7 +1,5 @@
 import os
-from distutils.version import LooseVersion
 
-import golem
 from golem.core import file_manager, settings_manager, session
 from golem.gui.user_management import Users
 
@@ -25,13 +23,19 @@ def create_testdir_golem_file(testdir):
         f.write('secret_key = {}\n'.format(secret_key))
 
 
+def get_projects():
+    path = os.path.join(session.testdir, 'projects')
+    projects = next(os.walk(path))[1]
+    projects = [x for x in projects if x != '__pycache__']
+    return projects
+
+
+def project_exists(project):
+    return project in get_projects()
+
+
 def is_valid_test_directory(testdir):
     """Verify `testdir` is a valid test directory path.
     It must contain a .golem file.
-    This will only be checked for versions >= 0.9.0
-    TODO
     """
-    if LooseVersion(golem.__version__) >= LooseVersion('0.9.0'):
-        if not os.path.isfile(os.path.join(testdir, '.golem')):
-            return False
-    return True
+    return os.path.isfile(os.path.join(testdir, '.golem'))

@@ -7,6 +7,7 @@ from golem.core import (utils,
                         test_case,
                         settings_manager,
                         test_directory)
+from golem.core.project import Project, create_project
 from golem.gui import gui_start
 from golem.test_runner.execution_runner import ExecutionRunner
 from golem.test_runner import interactive as interactive_module
@@ -61,7 +62,7 @@ def run_command(project='', test_query='', browsers=None, processes=1,
                                        interactive, timestamp, reports, report_folder,
                                        report_name, tags)
     if project:
-        if utils.project_exists(project):
+        if test_directory.project_exists(project):
             execution_runner.project = project
             session.settings = settings_manager.get_project_settings(project)
             # add --interactive value to settings to make
@@ -85,13 +86,13 @@ def run_command(project='', test_query='', browsers=None, processes=1,
                         sys.exit(msg)
             else:
                 print(messages.RUN_USAGE_MSG)
-                test_cases = utils.get_test_cases(project)
+                tests = Project(project).test_tree
                 print('Test Cases:')
-                utils.display_tree_structure_command_line(test_cases['sub_elements'])
-                test_suites = utils.get_suites(project)
+                utils.display_tree_structure_command_line(tests['sub_elements'])
+                suites = Project(project).suite_tree
                 print('\nTest Suites:')
                 # TODO print suites in structure
-                for suite in test_suites['sub_elements']:
+                for suite in suites['sub_elements']:
                     print('  ' + suite['name'])
         else:
             msg = ('golem run: error: the project {} does not exist'.format(project))
@@ -101,7 +102,7 @@ def run_command(project='', test_query='', browsers=None, processes=1,
     else:
         print(messages.RUN_USAGE_MSG)
         print('Projects:')
-        for project in utils.get_projects():
+        for project in test_directory.get_projects():
             print('  {}'.format(project))
 
 
@@ -110,16 +111,16 @@ def gui_command(host=None, port=5000, debug=False):
 
 
 def createproject_command(project):
-    if utils.project_exists(project):
+    if test_directory.project_exists(project):
         msg = ('golem createproject: error: a project with name \'{}\' already exists'
                .format(project))
         sys.exit(msg)
     else:
-        utils.create_new_project(project)
+        create_project(project)
 
 
 def createtest_command(project, test):
-    if not utils.project_exists(project):
+    if not test_directory.project_exists(project):
         msg = ('golem createtest: error: a project with name {} '
                'does not exist'.format(project))
         sys.exit(msg)
@@ -131,7 +132,7 @@ def createtest_command(project, test):
 
 
 def createsuite_command(project, suite_name):
-    if not utils.project_exists(project):
+    if not test_directory.project_exists(project):
         msg = ('golem createsuite: error: a project with name {} '
                'does not exist'.format(project))
         sys.exit(msg)

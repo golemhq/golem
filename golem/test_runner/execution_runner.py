@@ -12,9 +12,10 @@ from golem.core import (session,
                         test_data,
                         environment_manager,
                         settings_manager,
-                        secrets_manager)
+                        secrets_manager,)
 from golem.core import suite as suite_module
 from golem.core import tags_manager
+from golem.core.project import Project
 from golem.gui import gui_utils, report_parser
 from golem.test_runner.multiprocess_executor import multiprocess_executor
 from golem.test_runner.test_runner import run_test
@@ -258,7 +259,7 @@ class ExecutionRunner:
         `directory` has to be a relative path from the tests folder.
         To run every test in tests folder use: directory=''
         """
-        self.tests = utils.get_directory_tests(self.project, directory)
+        self.tests = Project(self.project).tests(directory=directory)
         if len(self.tests) == 0:
             print('No tests were found in {}'.format(os.path.join('tests', directory)))
         self.is_suite = True

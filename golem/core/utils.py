@@ -9,46 +9,7 @@ import traceback
 from datetime import datetime
 from distutils.version import StrictVersion
 
-from golem.core import settings_manager, file_manager, session
-
-
-def get_test_cases(project):
-    path = os.path.join(session.testdir, 'projects', project, 'tests')
-    test_cases = file_manager.generate_file_structure_dict(path)
-    return test_cases
-
-
-def get_pages(project):
-    path = os.path.join(session.testdir, 'projects', project, 'pages')
-    pages = file_manager.generate_file_structure_dict(path)
-    return pages
-
-
-def get_suites(project):
-    path = os.path.join(session.testdir, 'projects', project, 'suites')
-    suites = file_manager.generate_file_structure_dict(path)
-    return suites
-
-
-def get_projects():
-    path = os.path.join(session.testdir, 'projects')
-    projects = next(os.walk(path))[1]
-    projects = [x for x in projects if x != '__pycache__']
-    return projects
-
-
-def project_exists(project):
-    return project in get_projects()
-
-
-def get_directory_tests(project, directory):
-    """Return a list with all the test cases of a given directory"""
-    path = os.path.join(session.testdir, 'projects', project, 'tests', directory)
-    tests = file_manager.get_files_dot_path(path, extension='.py')
-    if directory:
-        dotpath = '.'.join(os.path.normpath(directory).split(os.sep))
-        tests = ['.'.join([dotpath, x]) for x in tests]
-    return tests
+from golem.core import file_manager, session
 
 
 def get_timestamp():
@@ -82,30 +43,6 @@ def separate_file_from_parents(full_filename):
     file = splitted.pop()
     parents = splitted
     return file, parents
-
-
-def create_new_project(project):
-    testdir = session.testdir
-    file_manager.create_directory(path_list=[testdir, 'projects', project], add_init=True)
-    path_list = [testdir, 'projects', project, 'pages']
-    file_manager.create_directory(path_list=path_list, add_init=True)
-    path_list = [testdir, 'projects', project, 'reports']
-    file_manager.create_directory(path_list=path_list, add_init=False)
-    path_list = [testdir, 'projects', project, 'tests']
-    file_manager.create_directory(path_list=path_list, add_init=True)
-    path_list = [testdir, 'projects', project, 'suites']
-    file_manager.create_directory(path_list=path_list, add_init=True)
-    extend_path = os.path.join(testdir, 'projects', project, 'extend.py')
-    open(extend_path, 'a').close()
-
-    settings_manager.create_project_settings_file(project)
-
-    for project_base_file in ('environments.json', 'secrets.json'):
-        base_file_path = os.path.join(testdir, 'projects', project, project_base_file)
-        with open(base_file_path, 'a') as base_file:
-            base_file.write('{}')
-
-    print('Project {} created'.format(project))
 
 
 def delete_element(project, element_type, dot_path):
