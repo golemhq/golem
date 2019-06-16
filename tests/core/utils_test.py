@@ -200,10 +200,13 @@ class TestNormalizeQuery:
         ('suite.py', 'suite'),
         ('suite', 'suite'),
         ('folder.suite', 'folder.suite'),
-        ('folder/suite.py', 'folder.suite'),
-        ('folder\\suite.py', 'folder.suite')
+        ('folder/suite.py', 'folder.suite')
     ]
 
     @pytest.mark.parametrize('query, normalized', queries)
     def test_normalize_query(self, query, normalized):
         assert utils.normalize_query(query) == normalized
+
+    @pytest.mark.skipif("os.name != 'nt'")
+    def test_normalize_query_windows(self):
+        assert utils.normalize_query('folder\\suite.py') == 'folder.suite'
