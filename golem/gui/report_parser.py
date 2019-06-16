@@ -87,18 +87,18 @@ def _parse_execution_data(execution_directory=None, project=None,
     if not execution_directory:
         execution_directory = os.path.join(session.testdir, 'projects', project,
                                            'reports', suite, execution)
-    test_cases = []
+    tests = []
     if os.path.isdir(execution_directory):
-        test_cases = next(os.walk(execution_directory))[1]
+        tests = next(os.walk(execution_directory))[1]
 
-    for test_case in test_cases:
-        # each test case may have n >= 1 test sets
+    for test in tests:
+        # each test may have n >= 1 test sets
         # each test set is considered a different test
-        test_case_path = os.path.join(execution_directory, test_case)
-        test_sets = os.walk(test_case_path).__next__()[1]
+        test_path = os.path.join(execution_directory, test)
+        test_sets = os.walk(test_path).__next__()[1]
 
         for test_set in test_sets:
-            new_test_case = {
+            new_test = {
                 'test_set': '',
                 'module': '',
                 'sub_modules': '',
@@ -113,38 +113,38 @@ def _parse_execution_data(execution_directory=None, project=None,
                 'set_name': ''
             }
             execution_data['total_tests'] += 1
-            new_test_case['test_set'] = test_set
+            new_test['test_set'] = test_set
             module = ''
             sub_modules = []
-            test_case_split = test_case.split('.')
-            if len(test_case_split) > 1:
-                module = test_case_split[0]
-                if len(test_case_split) > 2:
-                    sub_modules = test_case_split[1:-1]
-            new_test_case['module'] = module
-            test_case_name = test_case_split[-1]
-            new_test_case['sub_modules'] = sub_modules
-            new_test_case['name'] = test_case_name
-            new_test_case['full_name'] = test_case
+            test_split = test.split('.')
+            if len(test_split) > 1:
+                module = test_split[0]
+                if len(test_split) > 2:
+                    sub_modules = test_split[1:-1]
+            new_test['module'] = module
+            test_name = test_split[-1]
+            new_test['sub_modules'] = sub_modules
+            new_test['name'] = test_name
+            new_test['full_name'] = test
 
-            test_set_path = os.path.join(test_case_path, test_set)
+            test_set_path = os.path.join(test_path, test_set)
             report_json_path = os.path.join(test_set_path, 'report.json')
             report_log_path = os.path.join(test_set_path, 'execution_info.log')
             try:
                 with open(report_json_path) as f:
                     report_data = json.load(f)
                     status = report_data['result']
-                    new_test_case['test_elapsed_time'] = report_data['test_elapsed_time']
+                    new_test['test_elapsed_time'] = report_data['test_elapsed_time']
                     start_date_time = get_date_time_from_timestamp(
                         report_data['test_timestamp'])
-                    new_test_case['start_date_time'] = start_date_time
-                    new_test_case['browser'] = report_data['browser']
-                    new_test_case['data'] = report_data['test_data']
-                    new_test_case['environment'] = report_data['environment']
+                    new_test['start_date_time'] = start_date_time
+                    new_test['browser'] = report_data['browser']
+                    new_test['data'] = report_data['test_data']
+                    new_test['environment'] = report_data['environment']
                     # TODO, previous versions won't have set_name
                     # remove the if when retro-compatibility is not required
                     if 'set_name' in report_data:
-                        new_test_case['set_name'] = report_data['set_name']
+                        new_test['set_name'] = report_data['set_name']
             except FileNotFoundError:
                 if os.path.isfile(report_log_path):
                     # test had been started
@@ -158,10 +158,10 @@ def _parse_execution_data(execution_directory=None, project=None,
             except Exception:
                 sys.exit('an error occurred generating JSON report\n{}'
                          .format(traceback.format_exc()))
-            new_test_case['result'] = status
+            new_test['result'] = status
             _status_total = execution_data['totals_by_result'].get(status, 0) + 1
             execution_data['totals_by_result'][status] = _status_total
-            execution_data['tests'].append(new_test_case)
+            execution_data['tests'].append(new_test)
     return execution_data
 
 
@@ -196,7 +196,7 @@ def get_execution_data(execution_directory=None, project=None, suite=None, execu
 
 def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
                        is_single=False, encode_screenshots=False, no_screenshots=False):
-    """Retrieves all the data of a single test case execution.
+    """Retrieves all the data of a single test execution.
 
     :Args:
       - encode_screenshots: return screenshot files encoded as a base64 string or
@@ -204,7 +204,7 @@ def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
       - no_screenshots: convert screenshot values to None
     """
     # TODO execution and test_set are not optional
-    test_case_data = {
+    test_data = {
         'module': '',
         'sub_modules': '',
         'name': '',
@@ -222,63 +222,63 @@ def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
         'has_finished': False
     }
     if is_single:
-        test_case_dir = os.path.join(session.testdir, 'projects', project, 'reports',
-                                     'single_tests', test, execution, test_set)
+        test_dir = os.path.join(session.testdir, 'projects', project, 'reports',
+                                'single_tests', test, execution, test_set)
     else:
-        test_case_dir = os.path.join(session.testdir, 'projects', project, 'reports',
-                                     suite, execution, test, test_set)
-    report_json_path = os.path.join(test_case_dir, 'report.json')
+        test_dir = os.path.join(session.testdir, 'projects', project, 'reports',
+                                suite, execution, test, test_set)
+    report_json_path = os.path.join(test_dir, 'report.json')
     if os.path.isfile(report_json_path):
-        test_case_data['has_finished'] = True
+        test_data['has_finished'] = True
         with open(report_json_path, 'r') as json_file:
             report_data = json.load(json_file)
             module = ''
             sub_modules = []
-            test_case_split = test.split('.')
-            if len(test_case_split) > 1:
-                module = test_case_split[0]
-                if len(test_case_split) > 2:
-                    sub_modules = test_case_split[1:-1]
-            test_case_data['module'] = module
-            test_case_name = test_case_split[-1]
-            test_case_data['sub_modules'] = sub_modules
-            test_case_data['name'] = test_case_name
-            test_case_data['full_name'] = test
-            test_case_data['description'] = report_data['description']
-            test_case_data['result'] = report_data['result']
-            test_case_data['test_elapsed_time'] = report_data['test_elapsed_time']
+            test_split = test.split('.')
+            if len(test_split) > 1:
+                module = test_split[0]
+                if len(test_split) > 2:
+                    sub_modules = test_split[1:-1]
+            test_data['module'] = module
+            test_name = test_split[-1]
+            test_data['sub_modules'] = sub_modules
+            test_data['name'] = test_name
+            test_data['full_name'] = test
+            test_data['description'] = report_data['description']
+            test_data['result'] = report_data['result']
+            test_data['test_elapsed_time'] = report_data['test_elapsed_time']
             start_date_time = get_date_time_from_timestamp(report_data['test_timestamp'])
-            test_case_data['start_date_time'] = start_date_time
-            test_case_data['errors'] = report_data['errors']
-            test_case_data['browser'] = report_data['browser']
-            test_case_data['environment'] = report_data['environment']
-            test_case_data['steps'] = report_data['steps']
+            test_data['start_date_time'] = start_date_time
+            test_data['errors'] = report_data['errors']
+            test_data['browser'] = report_data['browser']
+            test_data['environment'] = report_data['environment']
+            test_data['steps'] = report_data['steps']
             if no_screenshots:
-                for step in test_case_data['steps']:
+                for step in test_data['steps']:
                     step['screenshot'] = None
             elif encode_screenshots:
-                for step in test_case_data['steps']:
+                for step in test_data['steps']:
                     if step['screenshot'] is not None:
-                        image_filename = os.path.join(test_case_dir, step['screenshot'])
+                        image_filename = os.path.join(test_dir, step['screenshot'])
                         b64 = base64.b64encode(open(image_filename, "rb").read()).decode('utf-8')
                         step['screenshot'] = b64
-            test_case_data['test_set'] = test_set
-            test_case_data['execution'] = execution
-            test_case_data['data'] = report_data['test_data']
+            test_data['test_set'] = test_set
+            test_data['execution'] = execution
+            test_data['data'] = report_data['test_data']
             if 'set_name' in report_data:
-                test_case_data['set_name'] = report_data['set_name']
+                test_data['set_name'] = report_data['set_name']
 
-    debug_log_path = os.path.join(test_case_dir, 'execution_debug.log')
-    info_log_path = os.path.join(test_case_dir, 'execution_info.log')
+    debug_log_path = os.path.join(test_dir, 'execution_debug.log')
+    info_log_path = os.path.join(test_dir, 'execution_info.log')
     if os.path.isfile(debug_log_path):
         with open(debug_log_path) as log_file:
             log = log_file.readlines()
-            test_case_data['debug_log'] = log
+            test_data['debug_log'] = log
     if os.path.isfile(info_log_path):
         with open(info_log_path) as log_file:
             log = log_file.readlines()
-            test_case_data['info_log'] = log
-    return test_case_data
+            test_data['info_log'] = log
+    return test_data
 
 
 def is_execution_finished(path, sets):

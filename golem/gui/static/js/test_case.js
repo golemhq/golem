@@ -63,7 +63,7 @@ var Test = new function(){
 
     this.getPageContents = function(pageName){
         $.ajax({
-            url: "/api/page/elements",
+            url: "/api/page/components",
             data: {
                  "project": Test.project,
                  "page": pageName,
@@ -79,8 +79,8 @@ var Test = new function(){
                     Test.importedPages = Test.importedPages.filter(page => page.name !== pageName)
                     Test.importedPages.push({
                         'name': pageName,
-                        'elements': result.content.elements,
-                        'functions': result.content.functions
+                        'elements': result.components.elements,
+                        'functions': result.components.functions
                     });
                     Test.refreshPagesAutocomplete()
                     Test.refreshElementInputsAutocomplete();
@@ -97,7 +97,7 @@ var Test = new function(){
         })
         Test.importedPages.forEach(function(page){
             page.functions.forEach(function(func){
-                lookup.push({value: func.full_function_name, data: func.description})
+                lookup.push({value: func.full_name, data: func.description})
             })
         });
         autocomplete = $(".step-first-input").autocomplete({
@@ -135,7 +135,7 @@ var Test = new function(){
         let lookup = [];
         Test.importedPages.forEach(function(page){
             page.elements.forEach(function(element){
-                lookup.push(element.element_full_name)
+                lookup.push(element.full_name)
             })
         });
         $(".element-input").each(function(){
@@ -334,7 +334,6 @@ var Test = new function(){
             url: "/api/project/page",
             data: JSON.stringify({
                 "project": Test.project,
-                "isDir": false,
                 "fullPath": newPageName
             }),
             contentType: 'application/json; charset=utf-8',
@@ -342,8 +341,8 @@ var Test = new function(){
             type: 'POST',
             success: function(data) {
                 if(data.errors.length == 0){
-                    Test.allPages.push(data.element.full_path);
-                    Test.addPageToList(data.element.full_path)
+                    Test.allPages.push(data.element.full_name);
+                    Test.addPageToList(data.element.full_name)
                 }
                 else{
                     Main.Utils.displayErrorModal(data.errors);
@@ -410,7 +409,7 @@ var Test = new function(){
                 let page = Test.importedPages[i];
                 for(var j = 0; j < page.functions.length; j++) {
                     let func = page.functions[j];
-                    if(func.full_function_name == functionName){
+                    if(func.full_name == functionName){
                         return func.arguments.map(x => ({'name': x, 'type': 'both'}))
                     }
                 }

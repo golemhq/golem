@@ -239,17 +239,20 @@ class ExecutionRunner:
         if suite.endswith('.py'):
             filename, _ = os.path.splitext(suite)
             suite = '.'.join(os.path.normpath(filename).split(os.sep))
-        self.tests = suite_module.get_suite_test_cases(self.project, suite)
+
+        suite_obj = suite_module.Suite(self.project, suite)
+
+        self.tests = suite_obj.tests
         if len(self.tests) == 0:
             print('No tests found for suite {}'.format(suite))
-        suite_amount_processes = suite_module.get_suite_amount_of_processes(self.project, suite)
-        self.suite.processes = suite_amount_processes
-        self.suite.browsers = suite_module.get_suite_browsers(self.project, suite)
-        self.suite.envs = suite_module.get_suite_environments(self.project, suite)
-        suite_imported_module = suite_module.get_suite_module(self.project, suite)
-        self.suite.before = getattr(suite_imported_module, 'before', None)
-        self.suite.after = getattr(suite_imported_module, 'after', None)
-        self.suite.tags = getattr(suite_imported_module, 'tags', None)
+
+        self.suite.processes = suite_obj.processes
+        self.suite.browsers = suite_obj.browsers
+        self.suite.envs = suite_obj.environments
+        self.suite.tags = suite_obj.tags
+        module = suite_obj.get_module()
+        self.suite.before = getattr(module, 'before', None)
+        self.suite.after = getattr(module, 'after', None)
         self.suite_name = suite
         self.is_suite = True
         self._prepare()

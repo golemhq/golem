@@ -4,142 +4,7 @@ import inspect
 
 import pytest
 
-from golem.core import utils, page_object, test_case, suite
-
-
-class TestDeleteElement:
-
-    def test_delete_tests(self, project_function):
-        _, project = project_function.activate()
-        test_case.new_test_case(project, ['subdir1'], 'test1')
-        test_case.new_test_case(project, ['subdir1'], 'test2')
-        test_case.new_test_case(project, [], 'test3')
-        test_case.new_test_case(project, [], 'test4')
-        errors_one = utils.delete_element(project, 'test', 'subdir1.test1')
-        errors_two = utils.delete_element(project, 'test', 'test3')
-        assert errors_one == []
-        assert errors_two == []
-        path = os.path.join(project_function.path, 'tests', 'subdir1', 'test1.py')
-        assert not os.path.exists(path)
-        path = os.path.join(project_function.path, 'tests', 'test3.py')
-        assert not os.path.exists(path)
-        path = os.path.join(project_function.path, 'tests', 'subdir1', 'test2.py')
-        assert os.path.exists(path)
-        path = os.path.join(project_function.path, 'tests', 'test4.py')
-        assert os.path.exists(path)
-
-    def test_delete_pages(self, project_function):
-        _, project = project_function.activate()
-        page_object.new_page_object(project, [], 'page1')
-        page_object.new_page_object(project, [], 'page2')
-        errors = utils.delete_element(project, 'page', 'page1')
-        assert errors == []
-        path = os.path.join(project_function.path, 'pages', 'page1.py')
-        assert not os.path.exists(path)
-        path = os.path.join(project_function.path, 'pages', 'page2.py')
-        assert os.path.exists(path)
-
-    def test_delete_suites(self, project_function):
-        _, project = project_function.activate()
-        suite.new_suite(project, [], 'suite1')
-        suite.new_suite(project, [], 'suite2')
-        errors = utils.delete_element(project, 'suite', 'suite1')
-        assert errors == []
-        path = os.path.join(project_function.path, 'suites', 'suite1.py')
-        assert not os.path.exists(path)
-        path = os.path.join(project_function.path, 'suites', 'suite2.py')
-        assert os.path.exists(path)
-
-    def test_delete_element_does_not_exist(self, project_function):
-        _, project = project_function.activate()
-        errors = utils.delete_element(project, 'suite', 'suite1')
-        assert errors == ['File suite1 does not exist']
-
-    def test_delete_test_with_data(self, project_function):
-        """"test that when a test is deleted the data files
-        are deleted as well
-        """
-        _, project = project_function.activate()
-        test_case.new_test_case(project, [], 'test1')
-        data_path_data = os.path.join(project_function.path, 'data', 'test1.csv')
-        os.makedirs(os.path.dirname(data_path_data))
-        open(data_path_data, 'x').close()
-        data_path_tests = os.path.join(project_function.path, 'tests', 'test1.csv')
-        open(data_path_tests, 'x').close()
-        errors = utils.delete_element(project, 'test', 'test1')
-        assert errors == []
-        test_path = os.path.join(project_function.path, 'tests', 'test1.py')
-        assert not os.path.exists(test_path)
-        assert not os.path.exists(data_path_data)
-        assert not os.path.exists(data_path_tests)
-
-
-class TestDuplicateElement:
-
-    def test_duplicate_test(self, project_function):
-        _, project = project_function.activate()
-        test_case.new_test_case(project, [], 'test1')
-        data_path_data = os.path.join(project_function.path, 'data', 'test1.csv')
-        os.makedirs(os.path.dirname(data_path_data))
-        open(data_path_data, 'x').close()
-        data_path_tests = os.path.join(project_function.path, 'tests', 'test1.csv')
-        open(data_path_tests, 'x').close()
-        errors = utils.duplicate_element(project, 'test', 'test1', 'subdir.test2')
-        assert errors == []
-        path = os.path.join(project_function.path, 'tests', 'test1.py')
-        assert os.path.isfile(path)
-        path = os.path.join(project_function.path, 'tests', 'test1.csv')
-        assert os.path.isfile(path)
-        path = os.path.join(project_function.path, 'data', 'test1.csv')
-        assert os.path.isfile(path)
-        path = os.path.join(project_function.path, 'tests', 'subdir', 'test2.py')
-        assert os.path.isfile(path)
-        path = os.path.join(project_function.path, 'tests', 'subdir', 'test2.csv')
-        assert os.path.isfile(path)
-        path = os.path.join(project_function.path, 'data', 'subdir', 'test2.csv')
-        assert os.path.isfile(path)
-
-    def test_duplicate_page(self, project_function):
-        _, project = project_function.activate()
-        page_object.new_page_object(project, [], 'page1')
-        errors = utils.duplicate_element(project, 'page', 'page1', 'sub.page2')
-        assert errors == []
-        path = os.path.join(project_function.path, 'pages', 'page1.py')
-        assert os.path.isfile(path)
-        path = os.path.join(project_function.path, 'pages', 'sub', 'page2.py')
-        assert os.path.isfile(path)
-
-    def test_duplicate_page_to_same_folder(self, project_function):
-        _, project = project_function.activate()
-        page_object.new_page_object(project, [], 'page1')
-        errors = utils.duplicate_element(project, 'page', 'page1', 'page2')
-        assert errors == []
-        path = os.path.join(project_function.path, 'pages', 'page1.py')
-        assert os.path.isfile(path)
-        path = os.path.join(project_function.path, 'pages', 'page2.py')
-        assert os.path.isfile(path)
-
-    def test_duplicate_suite(self, project_function):
-        _, project = project_function.activate()
-        suite.new_suite(project, [], 'suite1')
-        errors = utils.duplicate_element(project, 'suite', 'suite1', 'sub.suite2')
-        assert errors == []
-        path = os.path.join(project_function.path, 'suites', 'suite1.py')
-        assert os.path.isfile(path)
-        path = os.path.join(project_function.path, 'suites', 'sub', 'suite2.py')
-        assert os.path.isfile(path)
-
-    def test_duplicate_same_file(self, project_function):
-        _, project = project_function.activate()
-        errors = utils.duplicate_element(project, 'suite', 'suite1', 'suite1')
-        assert errors == ['New file cannot be the same as the original']
-
-    def test_duplicate_destination_already_exists(self, project_function):
-        _, project = project_function.activate()
-        suite.new_suite(project, [], 'suite1')
-        suite.new_suite(project, [], 'suite2')
-        errors = utils.duplicate_element(project, 'suite', 'suite1', 'suite2')
-        assert errors == ['A file with that name already exists']
+from golem.core import utils
 
 
 class TestChooseBrowserByPrecedence:
@@ -326,3 +191,22 @@ class TestGetValidFilename:
     def test_get_valid_filename(self, filename, expected):
         result = utils.get_valid_filename(filename)
         assert result == expected
+
+
+class TestNormalizeQuery:
+
+    queries = [
+        ('test', 'test'),
+        ('suite.py', 'suite'),
+        ('suite', 'suite'),
+        ('folder.suite', 'folder.suite'),
+        ('folder/suite.py', 'folder.suite')
+    ]
+
+    @pytest.mark.parametrize('query, normalized', queries)
+    def test_normalize_query(self, query, normalized):
+        assert utils.normalize_query(query) == normalized
+
+    @pytest.mark.skipif("os.name != 'nt'")
+    def test_normalize_query_windows(self):
+        assert utils.normalize_query('folder\\suite.py') == 'folder.suite'

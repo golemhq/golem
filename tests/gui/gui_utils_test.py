@@ -86,7 +86,7 @@ class TestGolemActionParser:
     @pytest.mark.parametrize('actual,expected',
                              [(x['actual'], x['expected']) for x in DOCSTRINGS])
     def test__parse_docstring(self, actual, expected):
-        expected = gui_utils.Golem_action_parser()._parse_docstring(actual)
+        expected = gui_utils.GolemActionParser()._parse_docstring(actual)
         assert expected == expected
 
 

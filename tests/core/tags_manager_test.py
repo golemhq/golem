@@ -17,19 +17,19 @@ class TestFilterTestsByTags:
         tests = SimpleNamespace()
         tests.test_alfa_bravo = 'test_alfa_bravo'
         content = 'tags = ["alfa", "bravo"]'
-        test_utils.create_test(project, [], tests.test_alfa_bravo, content=content)
+        test_utils.create_test(project, tests.test_alfa_bravo, content=content)
         tests.test_bravo_charlie = 'test_bravo_charlie'
         content = 'tags = ["bravo", "charlie"]'
-        test_utils.create_test(project, [], tests.test_bravo_charlie, content=content)
+        test_utils.create_test(project, tests.test_bravo_charlie, content=content)
         tests.test_delta_echo_foxtrot = 'test_delta_echo_foxtrot'
         content = 'tags = ["delta", "echo", "fox trot"]'
-        test_utils.create_test(project, [], tests.test_delta_echo_foxtrot, content=content)
+        test_utils.create_test(project, tests.test_delta_echo_foxtrot, content=content)
         tests.test_empty_tags = 'test_empty_tags'
         content = 'tags = []'
-        test_utils.create_test(project, [], tests.test_empty_tags, content=content)
+        test_utils.create_test(project, tests.test_empty_tags, content=content)
         tests.test_no_tags = 'test_no_tags'
         content = 'def test(data):\n     pass'
-        test_utils.create_test(project, [], tests.test_no_tags, content=content)
+        test_utils.create_test(project, tests.test_no_tags, content=content)
         project_class.tests = list(tests.__dict__)
         project_class.t = tests
         return project_class
@@ -95,27 +95,29 @@ class TestFilterTestsByTags:
 
 class TestGetTestsTags:
 
-    def test_get_tests_tags(self, project_function, test_utils):
-        _, project = project_function.activate()
+    def test_get_tests_tags(self, project_session, test_utils):
+        _, project = project_session.activate()
         # empty test list
         tags = tags_manager.get_tests_tags(project, [])
         assert tags == {}
         content = 'tags = ["foo", "bar"]'
-        test_utils.create_test(project, parents=[], name='test_tags_001', content=content)
+        test_one = test_utils.random_string()
+        test_utils.create_test(project, name=test_one, content=content)
         # test tags for one test
-        tags = tags_manager.get_tests_tags(project, ['test_tags_001'])
-        assert tags == {'test_tags_001': ["foo", "bar"]}
+        tags = tags_manager.get_tests_tags(project, [test_one])
+        assert tags == {test_one: ['foo', 'bar']}
         # test without tags returns empty list
-        test_utils.create_test(project, parents=[], name='test_tags_002')
-        tags = tags_manager.get_tests_tags(project, ['test_tags_001', 'test_tags_002'])
-        assert tags['test_tags_002'] == []
+        test_two = test_utils.create_random_test(project)
+        tags = tags_manager.get_tests_tags(project, [test_one, test_two])
+        assert tags[test_one] == ['foo', 'bar']
+        assert tags[test_two] == []
 
+    @pytest.mark.slow
     def test_get_tests_tags_verify_cache(self, project_function, test_utils):
         testdir, project = project_function.activate()
         test_name = 'test_tags_003'
         content = 'tags = ["foo", "bar"]'
-        test_path = test_utils.create_test(project, parents=[], name=test_name,
-                                           content=content)
+        test_path = test_utils.create_test(project, test_name, content=content)
         # verify cache file does not exist and is created afterwards
         cache_path = os.path.join(testdir, 'projects', project, '.tags')
         assert not os.path.isfile(cache_path)
@@ -143,9 +145,9 @@ class TestGetAllProjectTestsTags:
         assert tags == {}
         # with tests
         content = 'tags = ["foo", "bar"]'
-        test_utils.create_test(project, parents=[], name='test001', content=content)
+        test_utils.create_test(project, 'test001', content=content)
         content = 'tags = ["001", "002"]'
-        test_utils.create_test(project, parents=[], name='test002', content=content)
+        test_utils.create_test(project, 'test002', content=content)
         tags = tags_manager.get_all_project_tests_tags(project)
         assert tags == {'test001': ['foo', 'bar'], 'test002': ['001', '002']}
 
@@ -155,8 +157,8 @@ class TestGetProjectUniqueTags:
     def test_get_project_unique_tags(self, project_function, test_utils):
         _, project = project_function.activate()
         content = 'tags = ["foo", "bar"]'
-        test_utils.create_test(project, parents=[], name='test001', content=content)
+        test_utils.create_test(project, name='test001', content=content)
         content = 'tags = ["bar", "baz"]'
-        test_utils.create_test(project, parents=[], name='test002', content=content)
+        test_utils.create_test(project, 'test002', content=content)
         tags = tags_manager.get_project_unique_tags(project)
         assert sorted(tags) == sorted(['foo', 'bar', 'baz'])

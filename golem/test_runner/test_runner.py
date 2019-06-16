@@ -4,7 +4,8 @@ import os
 import time
 import traceback
 
-from golem.core import report, utils, test_case
+from golem.core import report, utils, session
+from golem.core.test import Test
 from golem.test_runner.test_runner_utils import import_page_into_test_module
 from golem.test_runner import execution_logger
 from golem.test_runner.conf import ResultsEnum
@@ -51,6 +52,7 @@ def _get_set_name(test_data):
 def run_test(testdir, project, test_name, test_data, secrets, browser,
              settings, report_directory, execution_has_failed_tests=None, tags=None):
     """Run a single test"""
+    session.testdir = testdir
     runner = TestRunner(testdir, project, test_name, test_data, secrets, browser,
                         settings, report_directory, execution_has_failed_tests, tags)
     runner.prepare()
@@ -112,7 +114,7 @@ class TestRunner:
     def import_modules(self):
         if '/' in self.test_name:
             self.test_name = self.test_name.replace('/', '.')
-        path = test_case.test_file_path(self.project, self.test_name, testdir=self.testdir)
+        path = Test(self.project, self.test_name).path
         test_module, error = utils.import_module(path)
         if error:
             actions._add_error(message=error.splitlines()[-1], description=error)
