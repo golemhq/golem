@@ -130,7 +130,7 @@ var TestCommon = new function(){
                 dataType: 'json',
                 type: 'POST',
                 success: function(result) {
-                    if(result.error.length == 0){
+                    if(result.errors.length == 0){
                         document.title = document.title.replace(Test.fullName, newTestNameValue);
                         Test.fullName = newTestNameValue;
                         $("#testNameInput input").val('');
@@ -141,7 +141,9 @@ var TestCommon = new function(){
                         Main.Utils.toast('success', 'File was renamed', 2000);
                     }
                     else{
-                        Main.Utils.toast('error', result.error, 2000);
+                        result.errors.forEach(function(error){
+                            Main.Utils.toast('error', error, 3000);
+                        });
                         $("#testNameInput").hide();
                         $("#testName").show();
                     }

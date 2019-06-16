@@ -8,7 +8,7 @@ from subprocess import Popen, PIPE, STDOUT
 import pytest
 
 from golem.cli import commands
-from golem.core import settings_manager, suite, test_case, utils, session
+from golem.core import settings_manager, suite, test, session, page
 
 
 # FIXTURES
@@ -171,7 +171,7 @@ class TestUtils:
         open(filepath, 'w+').close()
 
     @staticmethod
-    def random_string(length, prefix=''):
+    def random_string(length=10, prefix=''):
         random_str = (''.join(random.choice(string.ascii_lowercase)
                       for _ in range(length)))
         return prefix + random_str
@@ -204,16 +204,19 @@ class TestUtils:
             f.write('{{"{}": "{}"\}}'.format(setting, setting_value))
 
     @staticmethod
-    def create_test(project, parents, name, content=None):
+    def create_test(project, name, content=None):
         if content is None:
             content = ('def test(data):\n'
                        '    print("hello")\n')
-        test_case.new_test_case(project, parents, name)
-        path = os.path.join(session.testdir, 'projects', project, 'tests',
-                            os.sep.join(parents), name + '.py')
-        with open(path, 'w+') as f:
-            f.write(content)
-        return path
+        test.create_test(project, name)
+        test.edit_test_code(project, name, content, table_test_data=[])
+        return test.Test(project, name).path
+
+    @staticmethod
+    def create_random_test(project):
+        test_name = TestUtils.random_string(10)
+        test.create_test(project, test_name)
+        return test_name
 
     @staticmethod
     def create_suite(project, name, content=None, tests=None,
@@ -221,15 +224,28 @@ class TestUtils:
         browsers = browsers or []
         environments = environments or []
         tags = tags or []
-        suite_name, parents = utils.separate_file_from_parents(name)
         if content is None:
-            suite.new_suite(project, parents, suite_name)
-            suite.save_suite(project, name, tests, processes, browsers,
-                             environments, tags)
+            suite.create_suite(project, name)
+            suite.edit_suite(project, name, tests, processes, browsers, environments, tags)
         else:
-            path = suite.suite_file_path(project, name)
-            with open(path, 'w+') as f:
+            with open(suite.Suite(project, name).path, 'w+') as f:
                 f.write(content)
+
+    @staticmethod
+    def create_page(project, page_name):
+        page.create_page(project, page_name)
+
+    @staticmethod
+    def create_random_suite(project):
+        suite_name = TestUtils.random_string()
+        suite.create_suite(project, suite_name)
+        return suite_name
+
+    @staticmethod
+    def create_random_page(project):
+        page_name = TestUtils.random_string(10)
+        page.create_page(project, page_name)
+        return page_name
 
 
 def pytest_addoption(parser):

@@ -150,12 +150,12 @@ def report_execution_json_download(project, suite, execution):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_test(project, suite, execution, test, test_set):
-    test_case_data = report_parser.get_test_case_data(project, test, suite=suite,
-                                                      execution=execution,
-                                                      test_set=test_set, is_single=False)
+    test_data = report_parser.get_test_case_data(project, test, suite=suite,
+                                                 execution=execution, test_set=test_set,
+                                                 is_single=False)
     return render_template('report/report_test.html', project=project, suite=suite,
                            execution=execution, test_case=test, test_set=test_set,
-                           test_case_data=test_case_data)
+                           test_case_data=test_data)
 
 
 # REPORT TEST JSON VIEW
@@ -164,10 +164,10 @@ def report_test(project, suite, execution, test, test_set):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_test_json(project, suite, execution, test, test_set):
-    test_case_data = report_parser.get_test_case_data(project, test, suite=suite,
-                                                      execution=execution,
-                                                      test_set=test_set, is_single=False)
-    return jsonify(test_case_data)
+    test_data = report_parser.get_test_case_data(project, test, suite=suite,
+                                                 execution=execution, test_set=test_set,
+                                                 is_single=False)
+    return jsonify(test_data)
 
 
 # TEST SCREENSHOT

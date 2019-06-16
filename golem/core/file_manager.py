@@ -115,22 +115,24 @@ def create_directory(path_list=None, path=None, add_init=False):
         open(init_path, 'a').close()
 
 
-def rename_file(old_path, old_file, new_path, new_file):
-    error = ''
-    os.makedirs(new_path, exist_ok=True)
-    old_fullpath = os.path.join(old_path, old_file)
-    new_fullpath = os.path.join(new_path, new_file)
-    if not os.path.isfile(old_fullpath):
-        error = 'File {} does not exist'.format(old_fullpath)
-    elif os.path.isfile(new_fullpath):
-        error = 'A file with that name already exists'
+def create_package(path_list=None, path=None):
+    create_directory(path_list, path, add_init=True)
+
+
+def rename_file(old_path, new_path):
+    errors = []
+    if not os.path.isfile(old_path):
+        errors.append('File {} does not exist'.format(old_path))
+    elif os.path.isfile(new_path):
+        errors.append('A file with that name already exists')
     else:
         try:
-            os.rename(old_fullpath, new_fullpath)
+            os.makedirs(os.path.dirname(new_path), exist_ok=True)
+            os.rename(old_path, new_path)
         except:
-            error = ('There was an error renaming \'{}\' to \'{}\''
-                     .format(old_fullpath, new_fullpath))
-    return error
+            errors.append('There was an error renaming \'{}\' to \'{}\''
+                          .format(old_path, new_path))
+    return errors
 
 
 def new_directory_of_type(project, parents, dir_name, dir_type):
@@ -149,3 +151,14 @@ def new_directory_of_type(project, parents, dir_name, dir_type):
         else:
             create_directory(path=path, add_init=True)
     return errors
+
+
+def create_package_directories(base_path, rel_path):
+    """Create nested Python packages if they don't
+    exist given a base path and a relative path
+    """
+    dirs = rel_path.split(os.sep)
+    for dir_ in dirs:
+        base_path = os.path.join(base_path, dir_)
+        if not os.path.isdir(base_path):
+            create_package(path=base_path)

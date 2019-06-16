@@ -27,11 +27,11 @@ def is_safe_url(target):
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 
-def run_test_case(project, test_case_name, browsers=None, environments=None, processes=1):
+def run_test(project, test_name, browsers=None, environments=None, processes=1):
     """Run a test case. This is used when running tests from the GUI"""
     script_name = sys.argv[0]
     timestamp = utils.get_timestamp()
-    param_list = [script_name, 'run', project, test_case_name, '--timestamp', timestamp]
+    param_list = [script_name, 'run', project, test_name, '--timestamp', timestamp]
 
     if browsers:
         param_list.append('--browsers')
@@ -57,7 +57,7 @@ def run_suite(project, suite_name):
     return timestamp
 
 
-class Golem_action_parser:
+class GolemActionParser:
     """Generates a list of golem actions by reading the functions docstrings
 
     This class is a singleton. The list of action definitions
@@ -94,9 +94,9 @@ class Golem_action_parser:
     actions = None
 
     def __new__(cls):
-        if Golem_action_parser.__instance is None:
-            Golem_action_parser.__instance = object.__new__(cls)
-        return Golem_action_parser.__instance
+        if GolemActionParser.__instance is None:
+            GolemActionParser.__instance = object.__new__(cls)
+        return GolemActionParser.__instance
 
     def _is_module_function(self, mod, func):
         return inspect.isfunction(func) and inspect.getmodule(func) == mod

@@ -131,17 +131,7 @@ def assign_settings_default_values(settings):
         if not default[0] in settings:
             settings[default[0]] = default[1]
         elif settings[default[0]] in ['', None]:
-                settings[default[0]] = default[1]
-    return settings
-
-
-def _deprecated_implicit_wait_warning(settings):
-    if 'implicit_wait' in settings:
-        print("INFO: 'implicit_wait' setting is deprecated, use 'search_timeout' instead")
-        if not 'search_timeout' in settings:
-            # if implicit_wait is defined and search_timeout is not,
-            # Use the value of the former for the latter
-            settings['search_timeout'] = settings['implicit_wait']
+            settings[default[0]] = default[1]
     return settings
 
 
@@ -151,9 +141,6 @@ def get_global_settings():
     path = settings_path()
     if os.path.isfile(path):
         settings = _read_json_with_comments(path)
-        # TODO implicit_wait setting is deprecated
-        # remove once implicit_wait is fully deprecated
-        settings = _deprecated_implicit_wait_warning(settings)
         settings = assign_settings_default_values(settings)
     else:
         print('Warning: settings file is not present')
@@ -176,9 +163,6 @@ def get_project_settings_only(project):
     project_settings = {}
     if os.path.isfile(path):
         project_settings = _read_json_with_comments(path)
-        # TODO implicit_wait setting is deprecated
-        # remove once implicit_wait is fully deprecated
-        project_settings = _deprecated_implicit_wait_warning(project_settings)
     return project_settings
 
 

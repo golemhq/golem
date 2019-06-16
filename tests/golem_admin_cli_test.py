@@ -2,6 +2,7 @@ import os
 
 import pytest
 
+from golem.core import test_directory
 from golem.cli import messages
 
 
@@ -107,9 +108,7 @@ class TestGolemAdmin:
         os.chdir(dir_function.path)
         name = 'testdir_test_006'
         full_path = os.path.join(dir_function.path, name)
-        # open(os.path.join(full_path, 'text-file.txt'), 'w').close()
-        cmd = 'golem-admin createdirectory {}'.format(full_path)
-        test_utils.run_command(cmd)
+        test_directory.create_test_directory(full_path)
         cmd = 'golem-admin createdirectory {} -y'.format(full_path)
         result = test_utils.run_command(cmd)
         expected = 'Error: target directory is already an existing Golem test directory'

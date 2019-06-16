@@ -31,113 +31,103 @@ class TestRunCommand:
         assert messages.RUN_USAGE_MSG in captured.out
 
     @pytest.mark.slow
-    def test_golem_run_suite(self, project_function, test_utils, caplog):
-        testdir, project = project_function.activate()
-        test_name = 'test_one'
-        test_utils.create_test(project, [], test_name)
-        test_utils.create_suite(project, 'suite_one', tests=[test_name])
-        commands.run_command(project=project, test_query='suite_one')
+    def test_golem_run_suite(self, project_session, test_utils, caplog):
+        _, project = project_session.activate()
+        test_name = test_utils.create_random_test(project)
+        suite_name = test_utils.random_string()
+        test_utils.create_suite(project, suite_name, tests=[test_name])
+        commands.run_command(project=project, test_query=suite_name)
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[4].message == 'Test Result: SUCCESS'
+        assert records[2].message == 'Test Result: SUCCESS'
         # the execution report is created for suite
-        path = os.path.join(project_function.path, 'reports', 'suite_one')
+        path = os.path.join(project_session.path, 'reports', suite_name)
         assert os.path.isdir(path)
         timestamp = os.listdir(path)[0]
         report = os.path.join(path, timestamp, 'report.json')
         assert os.path.isfile(report)
 
     @pytest.mark.slow
-    def test_golem_run_suite_in_folder(self, project_function, test_utils, caplog, capsys):
-        testdir, project = project_function.activate()
-        test_name = 'test_one'
-        test_utils.create_test(project, [], test_name)
-        test_utils.create_suite(project, 'folder.suite_one', tests=[test_name])
-        commands.run_command(project=project, test_query='folder.suite_one')
+    def test_golem_run_suite_in_folder(self, project_session, test_utils, caplog, capsys):
+        testdir, project = project_session.activate()
+        test_name = test_utils.create_random_test(project)
+        suite_name = '{}.{}'.format(test_utils.random_string(), test_utils.random_string())
+        test_utils.create_suite(project, suite_name, tests=[test_name])
+        commands.run_command(project=project, test_query=suite_name)
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[4].message == 'Test Result: SUCCESS'
+        assert records[2].message == 'Test Result: SUCCESS'
         out, err = capsys.readouterr()
         assert 'Tests found: 1' in out
 
     @pytest.mark.slow
-    def test_golem_run_suite_py(self, project_function, test_utils, caplog):
-        _, project = project_function.activate()
-        test_name = 'test_one'
-        test_utils.create_test(project, [], test_name)
-        test_utils.create_suite(project, 'suite_one', tests=[test_name])
-        commands.run_command(project=project, test_query='suite_one.py')
+    def test_golem_run_suite_py(self, project_session, test_utils, caplog):
+        _, project = project_session.activate()
+        test_name = test_utils.create_random_test(project)
+        suite_name = test_utils.random_string()
+        test_utils.create_suite(project, suite_name, tests=[test_name])
+        with_extension = suite_name + '.py'
+        commands.run_command(project=project, test_query=with_extension)
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[4].message == 'Test Result: SUCCESS'
+        assert records[2].message == 'Test Result: SUCCESS'
 
     @pytest.mark.slow
-    def test_golem_run_suite_py_in_folder(self, project_function, test_utils, caplog):
-        _, project = project_function.activate()
-        test_name = 'test_one'
-        test_utils.create_test(project, [], test_name)
-        test_utils.create_suite(project, 'folder.suite_one', tests=[test_name])
-        commands.run_command(project=project, test_query='folder/suite_one.py')
+    def test_golem_run_suite_py_in_folder(self, project_session, test_utils, caplog):
+        _, project = project_session.activate()
+        test_name = test_utils.create_random_test(project)
+        random_dir = test_utils.random_string()
+        suite_name = '{}.{}'.format(random_dir, 'suite_one')
+        suite_query = os.path.join(random_dir, 'suite_one.py')
+        test_utils.create_suite(project, suite_name, tests=[test_name])
+        commands.run_command(project=project, test_query=suite_query)
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[4].message == 'Test Result: SUCCESS'
+        assert records[2].message == 'Test Result: SUCCESS'
 
     @pytest.mark.slow
-    @pytest.mark.skipif("os.name != 'nt'")
-    def test_golem_run_suite_py_in_folder_windows_path(self, project_function, test_utils,
-                                                       caplog):
-        _, project = project_function.activate()
-        test_name = 'test_one'
-        test_utils.create_test(project, [], test_name)
-        test_utils.create_suite(project, 'folder.suite_one', tests=[test_name])
-        commands.run_command(project=project, test_query='folder\\suite_one.py')
+    def test_golem_run_test(self, project_session, test_utils, caplog):
+        _, project = project_session.activate()
+        test_name = test_utils.create_random_test(project)
+        commands.run_command(project=project, test_query=test_name)
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[4].message == 'Test Result: SUCCESS'
-
-    @pytest.mark.slow
-    def test_golem_run_test(self, project_function, test_utils, caplog):
-        _, project = project_function.activate()
-        test_name = 'test_one'
-        test_utils.create_test(project, [], test_name)
-        commands.run_command(project=project, test_query='test_one')
-        records = caplog.records
-        assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[4].message == 'Test Result: SUCCESS'
+        assert records[2].message == 'Test Result: SUCCESS'
         # the execution report is created for suite
-        path = os.path.join(project_function.path, 'reports', 'single_tests', 'test_one')
+        path = os.path.join(project_session.path, 'reports', 'single_tests', test_name)
         assert os.path.isdir(path)
         # only one timestamp
         assert len(os.listdir(path)) == 1
 
     @pytest.mark.slow
-    def test_golem_run_test_py(self, project_function, test_utils, caplog):
-        _, project = project_function.activate()
-        test_name = 'test_one'
-        test_utils.create_test(project, [], test_name)
-        commands.run_command(project=project, test_query='test_one.py')
+    def test_golem_run_test_py(self, project_session, test_utils, caplog):
+        _, project = project_session.activate()
+        test_name = test_utils.create_random_test(project)
+        test_query = '{}.py'.format(test_name)
+        commands.run_command(project=project, test_query=test_query)
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[4].message == 'Test Result: SUCCESS'
+        assert records[2].message == 'Test Result: SUCCESS'
         # the execution report is created for suite
-        path = os.path.join(project_function.path, 'reports', 'single_tests', 'test_one')
+        path = os.path.join(project_session.path, 'reports', 'single_tests', test_name)
         assert os.path.isdir(path)
         # only one timestamp
         assert len(os.listdir(path)) == 1
 
     @pytest.mark.slow
-    def test_golem_run_test_in_folder(self, project_function, test_utils, caplog):
-        _, project = project_function.activate()
-        test_utils.create_test(project, ['folder'], 'test_one')
-        commands.run_command(project=project, test_query='folder.test_one')
+    def test_golem_run_test_in_folder(self, project_session, test_utils, caplog):
+        _, project = project_session.activate()
+        test_name = '{}.test_one'.format(test_utils.random_string())
+        test_utils.create_test(project, test_name)
+        commands.run_command(project=project, test_query=test_name)
         records = caplog.records
-        assert records[0].message == 'Test execution started: folder.test_one'
+        assert records[0].message == 'Test execution started: {}'.format(test_name)
         assert records[4].message == 'Test Result: SUCCESS'
 
     @pytest.mark.slow
     def test_golem_run_test_py_in_folder(self, project_function, test_utils, caplog):
         _, project = project_function.activate()
-        test_utils.create_test(project, ['folder'], 'test_one')
+        test_utils.create_test(project, 'folder.test_one')
         commands.run_command(project=project, test_query='folder/test_one.py')
         records = caplog.records
         assert records[0].message == 'Test execution started: folder.test_one'
@@ -148,7 +138,7 @@ class TestRunCommand:
     def test_golem_run_test_py_in_folder_windows_path(self, project_function, test_utils,
                                                       caplog):
         _, project = project_function.activate()
-        test_utils.create_test(project, ['folder'], 'test_one')
+        test_utils.create_test(project, 'folder.test_one')
         commands.run_command(project=project, test_query='folder\\test_one.py')
         records = caplog.records
         assert records[0].message == 'Test execution started: folder.test_one'
@@ -157,10 +147,10 @@ class TestRunCommand:
     @pytest.mark.slow
     def test_golem_run_directory(self, project_function, test_utils):
         _, project = project_function.activate()
-        test_utils.create_test(project, [], 'test_one')
-        test_utils.create_test(project, ['foo'], 'test_two')
-        test_utils.create_test(project, ['foo'], 'test_three')
-        test_utils.create_test(project, ['foo', 'bar'], 'test_four')
+        test_utils.create_test(project, 'test_one')
+        test_utils.create_test(project, 'foo.test_two')
+        test_utils.create_test(project, 'foo.test_three')
+        test_utils.create_test(project, 'foo.bar.test_four')
         commands.run_command(project=project, test_query='foo')
         reportsdir = os.path.join(project_function.path, 'reports', 'foo')
         assert os.path.isdir(reportsdir)
@@ -177,9 +167,9 @@ class TestRunCommand:
     @pytest.mark.slow
     def test_golem_run_directory_all_tests(self, project_function, test_utils):
         _, project = project_function.activate()
-        test_utils.create_test(project, [], 'test_one')
-        test_utils.create_test(project, ['foo'], 'test_two')
-        test_utils.create_test(project, ['foo', 'bar'], 'test_three')
+        test_utils.create_test(project, 'test_one')
+        test_utils.create_test(project, 'foo.test_two')
+        test_utils.create_test(project, 'foo.bar.test_three')
         commands.run_command(project=project, test_query='.')
         reportsdir = os.path.join(project_function.path, 'reports', 'all')
         assert os.path.isdir(reportsdir)
@@ -273,8 +263,8 @@ def teardown(data):
     def test_exit_code_one_on_test_failure_when_using_single_processing_capabilities(
             self, project_function, test_utils):
         _, project = project_function.activate()
-        test_utils.create_test(project, [], 'test_one', content=self.content)
-        test_utils.create_test(project, [], 'test_two')
+        test_utils.create_test(project, 'test_one', content=self.content)
+        test_utils.create_test(project, 'test_two')
 
         with pytest.raises(SystemExit) as wrapped_execution:
             commands.run_command(project=project, test_query='.', processes=1)
@@ -285,8 +275,8 @@ def teardown(data):
     def test_exit_code_one_on_test_failure_when_using_multi_processing_capabilities(
             self, project_function, test_utils):
         _, project = project_function.activate()
-        test_utils.create_test(project, [], 'test_one', content=self.content)
-        test_utils.create_test(project, [], 'test_two')
+        test_utils.create_test(project, 'test_one', content=self.content)
+        test_utils.create_test(project, 'test_two')
 
         with pytest.raises(SystemExit) as wrapped_execution:
             commands.run_command(project=project, test_query='.', processes=2)

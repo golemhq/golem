@@ -1,12 +1,8 @@
 import os
 import sys
 
-from golem.core import (utils,
-                        session,
-                        suite as suite_module,
-                        test_case,
-                        settings_manager,
-                        test_directory)
+from golem.core import (utils, session, suite as suite_module, test,
+                        settings_manager, test_directory)
 from golem.core.project import Project, create_project
 from golem.gui import gui_start
 from golem.test_runner.execution_runner import ExecutionRunner
@@ -58,9 +54,8 @@ def display_help(help, command):
 def run_command(project='', test_query='', browsers=None, processes=1,
                 environments=None, interactive=False, timestamp=None,
                 reports=None, report_folder=None, report_name=None, tags=None):
-    execution_runner = ExecutionRunner(browsers, processes, environments,
-                                       interactive, timestamp, reports, report_folder,
-                                       report_name, tags)
+    execution_runner = ExecutionRunner(browsers, processes, environments, interactive,
+                                       timestamp, reports, report_folder, report_name, tags)
     if project:
         if test_directory.project_exists(project):
             execution_runner.project = project
@@ -69,10 +64,11 @@ def run_command(project='', test_query='', browsers=None, processes=1,
             # it available from inside a test
             session.settings['interactive'] = interactive
             if test_query:
-                if suite_module.suite_exists(project, test_query):
-                    execution_runner.run_suite(test_query)
-                elif test_case.test_case_exists(project, test_query):
-                    execution_runner.run_test(test_query)
+                norm_query = utils.normalize_query(test_query)
+                if suite_module.Suite(project, norm_query).exists:
+                    execution_runner.run_suite(norm_query)
+                elif test.Test(project, norm_query).exists:
+                    execution_runner.run_test(norm_query)
                 else:
                     if test_query == '.':
                         test_query = ''
@@ -87,7 +83,7 @@ def run_command(project='', test_query='', browsers=None, processes=1,
             else:
                 print(messages.RUN_USAGE_MSG)
                 tests = Project(project).test_tree
-                print('Test Cases:')
+                print('Tests:')
                 utils.display_tree_structure_command_line(tests['sub_elements'])
                 suites = Project(project).suite_tree
                 print('\nTest Suites:')
@@ -119,14 +115,13 @@ def createproject_command(project):
         create_project(project)
 
 
-def createtest_command(project, test):
+def createtest_command(project, test_name):
     if not test_directory.project_exists(project):
         msg = ('golem createtest: error: a project with name {} '
                'does not exist'.format(project))
         sys.exit(msg)
-    dot_path = test.split('.')
-    test_name = dot_path.pop()
-    errors = test_case.new_test_case(project, dot_path, test_name)
+    test_name = test_name.replace(os.sep, '.')
+    errors = test.create_test(project, test_name)
     if errors:
         sys.exit('golem createtest: error: {}'.format(' '.join(errors)))
 
@@ -136,7 +131,7 @@ def createsuite_command(project, suite_name):
         msg = ('golem createsuite: error: a project with name {} '
                'does not exist'.format(project))
         sys.exit(msg)
-    errors = suite_module.new_suite(project, [], suite_name)
+    errors = suite_module.create_suite(project, suite_name)
     if errors:
         sys.exit('golem createsuite: error: {}'.format(' '.join(errors)))
 

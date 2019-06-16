@@ -198,18 +198,26 @@ const Project = new function(){
             return
         }
         let endpointURL;
-        if(elementType == 'test')
-            endpointURL = '/api/project/test'
-        else if(elementType == 'page')
-            endpointURL = '/api/project/page'
-        else
-            endpointURL = '/api/project/suite'
-
+        if(isDir){
+            if(elementType == 'test')
+                endpointURL = '/api/project/test/directory'
+            else if(elementType == 'page')
+                endpointURL = '/api/project/page/directory'
+            else
+                endpointURL = '/api/project/suite/directory'
+        }
+        else{
+            if(elementType == 'test')
+                endpointURL = '/api/project/test'
+            else if(elementType == 'page')
+                endpointURL = '/api/project/page'
+            else
+                endpointURL = '/api/project/suite'
+        }
         $.ajax({
             url: endpointURL,
             data: JSON.stringify({
                 "project": Global.project,
-                "isDir": isDir,
                 "fullPath": fullPath
             }),
             contentType: 'application/json; charset=utf-8',
@@ -218,12 +226,12 @@ const Project = new function(){
             success: function(data) {
                 if(data.errors.length == 0){
                     let parentUl = input.closest('ul');
-                    if(data.element.is_directory){
-                        let branch = Project.generateNewEmptyBranch(data.element.name, data.element.full_path);
+                    if(isDir){
+                        let branch = Project.generateNewEmptyBranch(data.element.name, data.element.full_name);
                         parentUl.children().last().before(branch);
                     }
                     else{
-                        Project.addFileToTree(data.element.full_path, data.element.type);
+                        Project.addFileToTree(data.element.full_name, elementType);
                     }
                     // reset the form, hide the form and display the add new link
                     input.val("");
@@ -396,7 +404,7 @@ const Project = new function(){
             dataType: 'json',
             type: 'POST',
             success: function(result) {
-                if(result.error.length == 0){
+                if(result.errors.length == 0){
                     originalElement.remove();
                     Project.addFileToTree(newFullFilename, elemType);
                     if(elemType == 'test'){
@@ -408,7 +416,7 @@ const Project = new function(){
                     Main.Utils.toast('success', 'File was renamed', 2000);
                 }
                 else{
-                    Main.Utils.displayErrorModal([result.error])
+                    Main.Utils.displayErrorModal(result.errors)
                 }
             },
             error: function(){

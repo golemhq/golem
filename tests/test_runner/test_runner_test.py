@@ -245,8 +245,7 @@ def test(data)
         assert report['test_data'] == {}
 
     # A1
-    def test_run_test__import_error_page_object(self, project_function_clean,
-                                                caplog, test_utils):
+    def test_run_test__import_error_page(self, project_function_clean, caplog, test_utils):
         """The test fails with 'code error' when an imported page has a syntax error"""
         testdir, project = project_function_clean.activate()
         test_name = test_utils.random_numeric_string(10)

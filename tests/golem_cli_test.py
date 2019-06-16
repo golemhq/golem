@@ -37,8 +37,7 @@ class TestGolemRun:
         path, project = project_session.activate()
         os.chdir(path)
         test = 'test2'
-        command = 'golem createtest {} {}'.format(project, test)
-        test_utils.run_command(command)
+        test_utils.create_test(project, test)
         command = 'golem run {} {}'.format(project, test)
         result = test_utils.run_command(command)
         assert 'INFO Test execution started: {}'.format(test) in result
@@ -50,8 +49,7 @@ class TestGolemRun:
         path, project = project_session.activate()
         os.chdir(path)
         suite = 'suite2'
-        command = 'golem createsuite {} {}'.format(project, suite)
-        test_utils.run_command(command)
+        test_utils.create_suite(project, suite)
         command = 'golem run {} {}'.format(project, suite)
         result = test_utils.run_command(command)
         assert 'No tests found for suite suite2' in result
@@ -109,7 +107,7 @@ class TestGolemRun:
         """
         testdir, project = project_class.activate()
         suite_name = 'suite1'
-        test_utils.create_test(project, parents=[], name='test1')
+        test_utils.create_test(project, name='test1')
         test_utils.create_suite(project, name=suite_name, content=None, tests=['test1'])
         project_class.suite_name = suite_name
         return project_class
@@ -193,7 +191,7 @@ class TestGolemCreateProject:
     def test_golem_createproject(self, testdir_session, test_utils):
         testdir_session.activate()
         os.chdir(testdir_session.path)
-        project = 'testproject1'
+        project = test_utils.random_string()
         cmd = 'golem createproject {}'.format(project)
         result = test_utils.run_command(cmd)
         assert result == 'Project {} created'.format(project)
@@ -227,7 +225,7 @@ class TestGolemCreateSuite:
     def test_golem_createsuite(self, project_session, test_utils):
         testdir, project = project_session.activate()
         os.chdir(testdir)
-        suite = 'suite1'
+        suite = test_utils.random_string()
         command = 'golem createsuite {} {}'.format(project, suite)
         result = test_utils.run_command(command)
         msg = 'Suite {} created for project {}'.format(suite, project)
@@ -261,12 +259,11 @@ class TestGolemCreateSuite:
     def test_golem_createsuite_already_exists(self, project_session, test_utils):
         path, project = project_session.activate()
         os.chdir(path)
-        suite = 'suite_test_00003'
+        suite = test_utils.random_string()
         command = 'golem createsuite {} {}'.format(project, suite)
         test_utils.run_command(command)
         result = test_utils.run_command(command)
-        expected = ('golem createsuite: error: A suite '
-                    'with that name already exists')
+        expected = ('golem createsuite: error: A suite with that name already exists')
         assert result == expected
 
 
@@ -276,7 +273,7 @@ class TestGolemCreateTest:
     def test_golem_createtest(self, project_session, test_utils):
         testdir, project = project_session.activate()
         os.chdir(testdir)
-        test = 'test1'
+        test = test_utils.random_string()
         command = 'golem createtest {} {}'.format(project, test)
         result = test_utils.run_command(command)
         msg = 'Test {} created for project {}'.format(test, project)
@@ -310,7 +307,7 @@ class TestGolemCreateTest:
     def test_golem_createtest_already_exists(self, project_session, test_utils):
         path, project = project_session.activate()
         os.chdir(path)
-        test = 'test_0005'
+        test = test_utils.random_string()
         cmd = 'golem createtest {} {}'.format(project, test)
         test_utils.run_command(cmd)
         result = test_utils.run_command(cmd)
@@ -320,6 +317,7 @@ class TestGolemCreateTest:
 
 class TestGolemFileValidation:
 
+    @pytest.mark.slow
     def test_golem_file_does_not_exist(self, testdir_class, test_utils):
         testdir = testdir_class.activate()
         os.chdir(testdir)
@@ -332,6 +330,7 @@ class TestGolemFileValidation:
 
 class TestCreateSuperUserCommand:
 
+    @pytest.mark.slow
     def test_createsuperuser_command(self, testdir_class, test_utils):
         testdir = testdir_class.activate()
         os.chdir(testdir)
@@ -340,6 +339,7 @@ class TestCreateSuperUserCommand:
         result = test_utils.run_command(command)
         assert result == 'Superuser {} was created successfully.'.format(username)
 
+    @pytest.mark.slow
     def test_createsuperuser_command_noinput_missing_args(self, testdir_class, test_utils):
         """username and password are required for --noinput"""
         testdir = testdir_class.activate()

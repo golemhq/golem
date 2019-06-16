@@ -2,9 +2,6 @@
 
 Data files have csv extensions and are stored in the same
 directory as the test.
-
-DEPRECATED: Previously data files were stored in /data/ folder
-and this module still has support of this for backwards compatibility
 """
 import csv
 import os
@@ -12,31 +9,19 @@ import os
 from golem.core import utils, session
 
 
-def save_external_test_data_file(project, full_test_case_name,
-                                 test_data):
+def save_external_test_data_file(project, full_test_case_name, test_data):
     """Save data to external file (csv).
 
     full_test_case_name must be a relative dot path
     test_data must be a list of dictionaries
-
-    Temporarily this will save to /data/<test_name>.csv if this already
-    exists. Otherwise, the file will be stored in the same folder
-    as the test
-    # TODO 
     """
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-
-    data_file_path_data_folder = os.path.join(session.testdir, 'projects', project,
-                                              'data', os.sep.join(parents),
-                                              '{}.csv'.format(tc_name))
     data_path_tests_folder = os.path.join(session.testdir, 'projects', project,
                                           'tests', os.sep.join(parents))
-    data_file_path_tests_folder = os.path.join(data_path_tests_folder,
-                                               '{}.csv'.format(tc_name))
-    # if csv file exists in /data/ use this file
-    # remove csv file from /tests/ folder if it exists
-    if os.path.isfile(data_file_path_data_folder):
-        with open(data_file_path_data_folder, 'w') as data_file:
+    data_file_path = os.path.join(data_path_tests_folder, '{}.csv'.format(tc_name))
+    if os.path.isfile(data_file_path) or test_data:
+        # update data file only if it already exists or there's data
+        with open(data_file_path, 'w') as data_file:
             if test_data:
                 writer = csv.DictWriter(data_file, fieldnames=test_data[0].keys(),
                                         lineterminator='\n')
@@ -45,52 +30,16 @@ def save_external_test_data_file(project, full_test_case_name,
                     writer.writerow(row)
             else:
                 data_file.write('')
-        # remove csv from /tests/ folder if it exists
-        if os.path.isfile(data_file_path_tests_folder):
-            os.remove(data_file_path_tests_folder)
-        # TODO deprecate /data/ folder
-        print(('Warning: data files defined in the /data/ folder will soon '
-               'be deprecated. Test data files should be placed in the same folder '
-               'as the test file.'))
-    else:
-        # else, update or create a csv file in /tests/ folder
-        if os.path.isfile(data_file_path_tests_folder) or test_data:
-            # update data file only if it already exists or there's data
-            os.makedirs(data_path_tests_folder, exist_ok=True)
-            with open(data_file_path_tests_folder, 'w') as data_file:
-                if test_data:
-                    writer = csv.DictWriter(data_file, fieldnames=test_data[0].keys(),
-                                            lineterminator='\n')
-                    writer.writeheader()
-                    for row in test_data:
-                        writer.writerow(row)
-                else:
-                    data_file.write('')
 
 
 def get_external_test_data(project, full_test_case_name):
     """Get data from file (csv)."""
     data_list = []
     test, parents = utils.separate_file_from_parents(full_test_case_name)
-    data_file_path_data_folder = os.path.join(session.testdir, 'projects', project,
-                                              'data', os.sep.join(parents),
-                                              '{}.csv'.format(test))
-    data_file_path_test_folder = os.path.join(session.testdir, 'projects', project,
-                                              'tests', os.sep.join(parents),
-                                              '{}.csv'.format(test))
-    # check if csv file exists in /data/ folder
-    if os.path.isfile(data_file_path_data_folder):
-        with open(data_file_path_data_folder, 'r') as csv_file:
-            dict_reader = csv.DictReader(csv_file)
-            for data_set in dict_reader:
-                data_list.append(dict(data_set))
-        # TODO deprecate /data/ folder
-        print(('Warning: data files defined in the /data/ folder will soon '
-               'be deprecated. Test data files should be placed in the same folder '
-               'as the test file.'))               
-    # check if csv file exists in /tests/ folder
-    elif os.path.isfile(data_file_path_test_folder):
-        with open(data_file_path_test_folder, 'r', encoding='utf8') as csv_file:
+    data_file_path = os.path.join(session.testdir, 'projects', project, 'tests',
+                                  os.sep.join(parents), '{}.csv'.format(test))
+    if os.path.isfile(data_file_path):
+        with open(data_file_path, 'r', encoding='utf8') as csv_file:
             dict_reader = csv.DictReader(csv_file)
             for data_set in dict_reader:
                 data_list.append(dict(data_set))
@@ -138,10 +87,8 @@ def get_test_data(project, full_test_case_name, repr_strings=False):
     """Get test data.
 
     The order of priority is:
-    1. data defined in a csv file in /data/ folder,
-    same directory structure as the test. Soon to be deprecated. # TODO
-    2. data defined in a csv file in /tests/ folder, same folder as the test
-    3. data defined in the test itself
+    1. data defined in a csv file same name and folder as the test
+    2. data defined in the test itself as a list of dictionaries
 
     Returns a list of dictionaries"""
     data_list = []
@@ -159,15 +106,10 @@ def get_test_data(project, full_test_case_name, repr_strings=False):
 
 
 def remove_csv_if_exists(project, full_test_case_name):
-    """Remove csv data file from /data/ folder and from /tests/ folder"""
+    """Remove csv data file from tests/ folder"""
     tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    data_file_path_data_folder = os.path.join(session.testdir, 'projects', project,
-                                              'data', os.sep.join(parents),
-                                              '{}.csv'.format(tc_name))
     data_file_path_tests_folder = os.path.join(session.testdir, 'projects', project,
                                                'tests', os.sep.join(parents),
                                                '{}.csv'.format(tc_name))
-    if os.path.isfile(data_file_path_data_folder):
-        os.remove(data_file_path_data_folder)
     if os.path.isfile(data_file_path_tests_folder):
         os.remove(data_file_path_tests_folder)

@@ -1,5 +1,4 @@
 """Functions to interact with a webdriver browser object."""
-import platform
 import traceback
 from contextlib import contextmanager
 

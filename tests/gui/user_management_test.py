@@ -6,11 +6,12 @@ import pytest
 from itsdangerous import BadSignature, SignatureExpired
 
 from golem.gui import create_app
-from golem.gui.user_management import Users, User, Permissions
+from golem.gui.user_management import Users, Permissions
 
 
 class TestUsers:
 
+    @pytest.mark.slow
     def test_users(self, testdir_function, test_utils):
         testdir_function.activate()
         users = Users.users()
@@ -115,6 +116,7 @@ class TestUsers:
         with pytest.raises(BadSignature) as _:
             Users.verify_auth_token(app.secret_key, 'invalid_token')
 
+    @pytest.mark.slow
     def test_verify_auth_token_expired_token(self, testdir_class, test_utils):
         testdir_class.activate()
         username = test_utils.random_string(5)
@@ -127,6 +129,7 @@ class TestUsers:
         with pytest.raises(SignatureExpired):
             Users.verify_auth_token(app.secret_key, token)
 
+    @pytest.mark.slow
     def test_verify_password(self, testdir_class, test_utils):
         testdir_class.activate()
         username = test_utils.random_string(5)
@@ -229,6 +232,7 @@ class TestUsers:
         errors = Users.edit_user(username, new_email=new_email)
         assert errors == ['{} is not a valid email address'.format(new_email)]
 
+    @pytest.mark.slow
     def test_reset_user_password(self, testdir_class, test_utils):
         testdir_class.activate()
         username = test_utils.random_string(5)
@@ -255,6 +259,7 @@ class TestUsers:
 
 class TestUser:
 
+    @pytest.mark.slow
     def test_verify_password(self, testdir_class, test_utils):
         testdir_class.activate()
         username = test_utils.random_string(5)

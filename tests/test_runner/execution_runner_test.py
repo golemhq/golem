@@ -5,8 +5,7 @@ from types import SimpleNamespace
 import pytest
 
 from golem.test_runner import execution_runner as exc_runner
-from golem.core import (test_case, test_data, environment_manager,
-                        utils, settings_manager,
+from golem.core import (test, test_data, environment_manager, utils, settings_manager,
                         file_manager, session)
 from golem.gui import report_parser
 
@@ -86,7 +85,7 @@ class TestDefineBrowsers:
         drivers = ['chromex']
         drivers_defined = exc_runner.define_browsers(drivers, remote_drivers, default_drivers)
         assert len(drivers_defined) == 1
-        assert drivers_defined[0]['remote'] == True
+        assert drivers_defined[0]['remote'] is True
         assert drivers_defined[0]['capabilities']['version'] == '60.0'
 
 
@@ -182,8 +181,7 @@ class TestDefineExecutionList:
         """
         _, project = project_function_clean.activate()
         test_name = 'test_002'
-        parents = []
-        test_case.new_test_case(project, parents, test_name)
+        test.create_test(project, test_name)
         tdata = [
             {
                 'col1': 'a',
@@ -219,8 +217,7 @@ class TestDefineExecutionList:
         _, project = project_function_clean.activate()
         # create test one
         test_name_one = 'test_one_001'
-        parents = []
-        test_case.new_test_case(project, parents, test_name_one)
+        test.create_test(project, test_name_one)
         tdata = [
             {
                 'col1': 'a',
@@ -234,8 +231,7 @@ class TestDefineExecutionList:
         test_data.save_external_test_data_file(project, test_name_one, tdata)
         # create test two
         test_name_two = 'test_two_001'
-        parents = []
-        test_case.new_test_case(project, parents, test_name_two)
+        test.create_test(project, test_name_two)
         execution_runner = exc_runner.ExecutionRunner()
         execution_runner.tests = [test_name_one, test_name_two]
         execution_runner.execution.processes = 1
@@ -261,8 +257,7 @@ class TestDefineExecutionList:
         _, project = project_function_clean.activate()
         # create test one
         test_name_one = 'test_one_003'
-        parents = []
-        test_case.new_test_case(project, parents, test_name_one)
+        test.create_test(project, test_name_one)
         # create two environments in environments.json
         env_data = {
             "stage": {"url": "xxx"},
@@ -293,12 +288,10 @@ class TestDefineExecutionList:
         _, project = project_function_clean.activate()
         # create test one
         test_name_one = 'test_one_004'
-        parents = []
-        test_case.new_test_case(project, parents, test_name_one)
+        test.create_test(project, test_name_one)
         # create test two
         test_name_two = 'test_two_004'
-        parents = []
-        test_case.new_test_case(project, parents, test_name_two)
+        test.create_test(project, test_name_two)
         execution_runner = exc_runner.ExecutionRunner()
         execution_runner.tests = [test_name_one, test_name_two]
         execution_runner.execution.processes = 1
@@ -323,8 +316,7 @@ class TestDefineExecutionList:
         _, project = project_function_clean.activate()
         # create test one
         test_name_one = 'test_one_005'
-        parents = []
-        test_case.new_test_case(project, parents, test_name_one)
+        test.create_test(project, test_name_one)
         # test data for test one
         tdata = [
             {
@@ -338,8 +330,7 @@ class TestDefineExecutionList:
         test_data.save_external_test_data_file(project, test_name_one, tdata)
         # create test two
         test_name_two = 'test_two_005'
-        parents = []
-        test_case.new_test_case(project, parents, test_name_two)
+        test.create_test(project, test_name_two)
         # create two environments
         env_data = {
             "stage": {
@@ -437,12 +428,13 @@ class TestCreateExecutionDirectory:
 
 class TestRunSingleTest:
 
+    @pytest.mark.slow
     def test_run_single_test(self, project_class, test_utils):
         testdir, project = project_class.activate()
         test_name = 'foo001'
         timestamp = utils.get_timestamp()
         session.settings = settings_manager.get_project_settings(project)
-        test_utils.create_test(project, [], test_name)
+        test_utils.create_test(project, test_name)
         execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
         execution_runner.project = project
         execution_runner.run_test(test_name)
@@ -453,6 +445,7 @@ class TestRunSingleTest:
         # test set dir + report.json
         assert len(items) == 2
 
+    @pytest.mark.slow
     def test_run_single_test_with_two_sets(self, project_class, test_utils, capsys):
         """Run a single test with two data sets.
         It should display the number of tests and test sets found."""
@@ -463,7 +456,7 @@ class TestRunSingleTest:
         content = ('data = [{"foo": 1}, {"foo": 2}]\n'
                    'def test(data):\n'
                    '    pass\n')
-        test_utils.create_test(project, [], test_name, content=content)
+        test_utils.create_test(project, test_name, content=content)
         execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
         execution_runner.project = project
         execution_runner.run_test(test_name)
@@ -477,6 +470,7 @@ class TestRunSingleTest:
         # two test set dirs + report.json
         assert len(items) == 3
 
+    @pytest.mark.slow
     def test_run_single_test_filter_by_tags(self, project_class, test_utils):
         """Run a single test with filtering by tags"""
         testdir, project = project_class.activate()
@@ -486,7 +480,7 @@ class TestRunSingleTest:
         content = ('tags = ["alfa", "bravo"]\n'
                    'def test(data):\n'
                    '    pass\n')
-        test_utils.create_test(project, [], test_name, content=content)
+        test_utils.create_test(project, test_name, content=content)
         execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp,
                                                       tags=['alfa'])
         execution_runner.project = project
@@ -498,6 +492,7 @@ class TestRunSingleTest:
         # test set dir + report.json
         assert len(items) == 2
 
+    @pytest.mark.slow
     def test_run_single_test_with_invalid_tags(self, project_class, test_utils, capsys):
         testdir, project = project_class.activate()
         test_name = 'foo004'
@@ -505,7 +500,7 @@ class TestRunSingleTest:
         content = ('tags = ["alfa", "bravo"]\n'
                    'def test(data):\n'
                    '    pass\n')
-        test_utils.create_test(project, [], test_name, content=content)
+        test_utils.create_test(project, test_name, content=content)
         execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp,
                                                       tags=['charlie'])
         execution_runner.project = project
@@ -530,24 +525,21 @@ class TestRunSuite:
         base_content = 'def test(data):\n     pass\n'
         tests.test_alfa_bravo = 'test_alfa_bravo'
         content = 'tags = ["alfa", "bravo"]'
-        test_utils.create_test(project, [], tests.test_alfa_bravo,
-                               content=base_content+content)
+        test_utils.create_test(project, tests.test_alfa_bravo, content=base_content+content)
         tests.test_bravo_charlie = 'test_bravo_charlie'
         content = 'tags = ["bravo", "charlie"]'
-        test_utils.create_test(project, [], tests.test_bravo_charlie,
-                               content=base_content+content)
+        test_utils.create_test(project, tests.test_bravo_charlie, content=base_content+content)
         tests.test_empty_tags = 'test_empty_tags'
         content = 'tags = []'
-        test_utils.create_test(project, [], tests.test_empty_tags,
-                               content=base_content+content)
+        test_utils.create_test(project, tests.test_empty_tags, content=base_content+content)
         tests.test_no_tags = 'test_no_tags'
         content = 'def test(data):\n     pass'
-        test_utils.create_test(project, [], tests.test_no_tags,
-                               content=base_content+content)
+        test_utils.create_test(project, tests.test_no_tags, content=base_content+content)
         project_class.tests = list(tests.__dict__)
         project_class.t = tests
         return project_class
 
+    @pytest.mark.slow
     def test_run_suite(self, _project_with_tags, test_utils, capsys):
         _, project = _project_with_tags.activate()
         suite_name = test_utils.random_numeric_string(10, 'suite')
@@ -578,6 +570,7 @@ class TestRunSuite:
         assert data['has_finished'] is True
         assert data['total_tests'] == 0
 
+    @pytest.mark.slow
     def test_run_suite_filter_by_tags(self, _project_with_tags, test_utils, capsys):
         _, project = _project_with_tags.activate()
         suite_name = test_utils.random_numeric_string(10, 'suite')
@@ -596,6 +589,7 @@ class TestRunSuite:
         assert data['has_finished'] is True
         assert data['total_tests'] == 1
 
+    @pytest.mark.slow
     def test_run_suite_filter_by_invalid_tags(self, _project_with_tags, test_utils, capsys):
         _, project = _project_with_tags.activate()
         suite_name = test_utils.random_numeric_string(10, 'suite')
@@ -651,26 +645,25 @@ class TestRunDirectory:
         base_content = 'def test(data):\n     pass\n'
         tests.test_alfa_bravo = 'test_alfa_bravo'
         content = 'tags = ["alfa", "bravo"]'
-        test_utils.create_test(project, ['foo'], tests.test_alfa_bravo,
-                               content=base_content + content)
+        test_name = '{}.{}'.format('foo', tests.test_alfa_bravo)
+        test_utils.create_test(project, test_name, content=base_content + content)
         tests.test_bravo_charlie = 'test_bravo_charlie'
         content = 'tags = ["bravo", "charlie"]'
-        test_utils.create_test(project, ['foo'], tests.test_bravo_charlie,
-                               content=base_content + content)
+        test_name = '{}.{}'.format('foo', tests.test_bravo_charlie)
+        test_utils.create_test(project, test_name, content=base_content + content)
         tests.test_empty_tags = 'test_empty_tags'
         content = 'tags = []'
-        test_utils.create_test(project, [], tests.test_empty_tags,
-                               content=base_content + content)
+        test_utils.create_test(project, tests.test_empty_tags, content=base_content + content)
         tests.test_no_tags = 'test_no_tags'
         content = 'def test(data):\n     pass'
-        test_utils.create_test(project, [], tests.test_no_tags,
-                               content=base_content + content)
+        test_utils.create_test(project, tests.test_no_tags, content=base_content + content)
         path_list = [testdir, 'projects', project, 'tests', 'empty']
         file_manager.create_directory(path_list=path_list, add_init=True)
         project_class.tests = list(tests.__dict__)
         project_class.t = tests
         return project_class
 
+    @pytest.mark.slow
     def test_run_directory(self, _project_with_tags, capsys):
         _, project = _project_with_tags.activate()
         timestamp = utils.get_timestamp()
@@ -697,6 +690,7 @@ class TestRunDirectory:
         assert data['has_finished'] is True
         assert data['total_tests'] == 0
 
+    @pytest.mark.slow
     def test_run_directory_filter_by_tags(self, _project_with_tags, test_utils, capsys):
         _, project = _project_with_tags.activate()
         timestamp = utils.get_timestamp()
@@ -715,11 +709,12 @@ class TestRunDirectory:
 
 class TestRunWithEnvs:
 
+    @pytest.mark.slow
     def test_run_with_environments(self, project_function, test_utils, capsys):
         _, project = project_function.activate()
         environments = json.dumps({'test': {}, 'stage': {}})
         environment_manager.save_environments(project, environments)
-        test_utils.create_test(project, [], 'test01')
+        test_utils.create_test(project, 'test01')
         timestamp = utils.get_timestamp()
         execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'],
                                                       timestamp=timestamp,
@@ -737,7 +732,7 @@ class TestRunWithEnvs:
         It should throw an error and finish with status code 1
         """
         _, project = project_function.activate()
-        test_utils.create_test(project, [], 'test01')
+        test_utils.create_test(project, 'test01')
         timestamp = utils.get_timestamp()
         execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'],
                                                       timestamp=timestamp,
