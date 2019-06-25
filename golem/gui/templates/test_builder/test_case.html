@@ -3,6 +3,7 @@
 {% block title %}Golem : {{project|capitalize}} : {{full_test_case_name}}{% endblock %}
 
 {% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/codemirror.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/test_case.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_common.css') }}">
 {% endblock %} 
@@ -37,12 +38,12 @@
     <div id="descriptionPageObjectsContainer" style="display: table; width: 100%;">
         <div class="col-sm-6 same-heigth-col gray-1-background" id="descriptionContainer" style="border: 1px solid #e0e0e0;  border-top-left-radius: 3px; ">
             <h4>Description</h4>
-            <textarea id="description" class="form-control" rows="3">{{test_case_contents.description }}</textarea>
+            <textarea id="description" class="form-control" rows="3">{{test_components.description }}</textarea>
             <br>
             <div class="form-horizontal">
                 <div class="col-xs-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Tags</div>
                 <div class="col-xs-10" style="padding-right: 0px; padding-left: 0px;">
-                    <input type="text" class="form-control" id="tags" value="{{ ', '.join(test_case_contents.tags) + ', ' if test_case_contents.tags else '' }}">
+                    <input type="text" class="form-control" id="tags" value="{{ ', '.join(test_components.tags) + ', ' if test_components.tags else '' }}">
                 </div>
             </div>
         </div>
@@ -50,7 +51,7 @@
             <h4>Pages</h4>
             <div id="pageObjectsContainer">
                 <div id="pageObjects">
-                    {% for page in test_case_contents.pages %}  
+                    {% for page in test_components.pages %}
                     <div class="input-group page">
                         <input type="text" disabled class="form-control page-name" value="{{page}}">
                         <div class="input-group-btn">
@@ -73,91 +74,19 @@
     <div class="clearfix"></div>
     <div class="col-sm-12 gray-1-background" id="stepsContainerContainer" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
         <!-- setup -->
-        <div id="showSetupLink" class="col-sm-12 text-center" style="padding-top: 10px; {% if test_case_contents.steps.setup %}display: none{% endif %}">
+        <div id="showSetupLink" class="col-sm-12 text-center" style="padding-top: 10px; {% if test_components.steps.setup %}display: none{% endif %}">
             <a href="javascript:void(0)" class="text-muted link-without-underline" onclick="Test.Utils.showSetupSteps()">Setup</a>
         </div>
-        <div id="setupSteps" class="clearfix" {% if not test_case_contents.steps.setup %}style="display: none"{% endif %}>
+        <div id="setupSteps" class="clearfix" {% if not test_components.steps.setup %}style="display: none"{% endif %}>
             <div class="steps">
                 <a href="javascript:void(0)" onclick="Test.Utils.collapseSetup()" class="link-without-decoration"><h4>Setup</h4></a>
-                {% if test_case_contents.steps.setup %}
-                    {% for step in test_case_contents.steps.setup %}
-                        <div class="step">
-                            <div class="step-numbering">{{loop.index}}</div>
-                            <div class="step-input-container step-first-input-container">
-                                <input type="text" class="form-control step-first-input" placeholder="action" value="{{step.method_name}}">
-                            </div>
-                            <div class="params">
-                                {% for parameter in step.parameters %}
-                                    <div class="step-input-container parameter-container">
-                                        <input type="text" class="form-control parameter-input element-input value-input" value="{{parameter}}">
-                                    </div>
-                                {% endfor %}
-                            </div>
-                            <div class="step-remove-icon">
-                                <a href="javascript:void(0)" onclick="Test.Utils.deleteStep(this);">
-                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                                </a>
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="step">
-                        <div class="step-numbering">1</div>
-                        <div class="step-input-container step-first-input-container">
-                            <input type="text" class="form-control step-first-input" placeholder="action">
-                        </div>
-                        <div class="params"></div>
-                        <div class="step-remove-icon">
-                            <a href="javascript:void(0)" onclick="Test.Utils.deleteStep(this);">
-                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                            </a>
-                        </div>
-                    </div>
-                {% endif %}
             </div>
             <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="Test.addFirstStepInput('setup');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
         </div>
         <!-- test -->
         <h4>Test</h4>
         <div id="testSteps">
-            <div class="steps">
-            {% if test_case_contents.steps.test %}
-                {% for step in test_case_contents.steps.test %}
-                <div class="step">
-                    <div class="step-numbering">{{loop.index}}</div>
-                    <div class="step-input-container step-first-input-container">
-                        <input type="text" class="form-control step-first-input" placeholder="action" value="{{step.method_name}}">
-                    </div>
-                    <div class="params">
-                        {% for parameter in step.parameters %}
-                        <div class="step-input-container parameter-container">
-                            <input type="text" class="form-control parameter-input element-input value-input" value="{{parameter}}">
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <div class="step-remove-icon">
-                        <a href="javascript:void(0)" onclick="Test.Utils.deleteStep(this);">
-                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
-            {% else %}
-            <div class="step">
-                <div class="step-numbering">1</div>
-                <div class="step-input-container step-first-input-container">
-                    <input type="text" class="form-control step-first-input" placeholder="action">
-                </div>
-                <div class="params">
-                </div>
-                <div class="step-remove-icon">
-                    <a href="javascript:void(0)" onclick="Test.Utils.deleteStep(this);">
-                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                    </a>
-                </div>
-            </div>
-            {% endif %}
-            </div>
+            <div class="steps"></div>
             <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="Test.addFirstStepInput('test');">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step
             </button>
@@ -169,41 +98,6 @@
         <div id="teardownSteps" class="clearfix" style="display: none">
             <div class="steps">
                 <a href="javascript:void(0)" onclick="Test.Utils.collapseTeardown()" class="link-without-decoration"><h4>Teardown</h4></a>
-                {% if test_case_contents.steps.teardown %}
-                    {% for step in test_case_contents.steps.teardown %}
-                    <div class="step">
-                        <div class="step-numbering">{{loop.index}}</div>
-                        <div class="step-input-container step-first-input-container">
-                            <input type="text" class="form-control step-first-input" placeholder="action" value="{{step.method_name}}">
-                        </div>
-                        <div class="params">
-                            {% for parameter in step.parameters %}
-                            <div class="step-input-container parameter-container">
-                                <input type="text" class="form-control parameter-input element-input value-input" value="{{ parameter }}">
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <div class="step-remove-icon">
-                            <a href="javascript:void(0)" onclick="Test.Utils.deleteStep(this);">
-                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                            </a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="step">
-                        <div class="step-numbering">1</div>
-                        <div class="step-input-container step-first-input-container">
-                            <input type="text" class="form-control step-first-input" placeholder="action">
-                        </div>
-                        <div class="params"></div>
-                        <div class="step-remove-icon">
-                            <a href="javascript:void(0)" onclick="Test.Utils.deleteStep(this);">
-                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                            </a>
-                        </div>
-                    </div>
-                {% endif %}
             </div>
             <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="Test.addFirstStepInput('teardown');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
         </div>
@@ -312,7 +206,8 @@
     </div>
   </div>
 </div>
-
+<script src="{{ url_for('static', filename='js/external/code_mirror/codemirror.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/python.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/sortable.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/jquery.autocomplete.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/test_case.js') }}"></script>
@@ -320,6 +215,7 @@
 <script>
     let testCaseName = "{{test_case_name}}";
     let fullTestCaseName = "{{full_test_case_name}}";
-    let importedPages = {{test_case_contents.pages|tojson}};
+    let importedPages = {{test_components.pages|tojson}};
+    let steps = {{test_components.steps|tojson}}
 </script>
 {% endblock %}

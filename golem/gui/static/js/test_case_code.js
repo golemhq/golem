@@ -20,7 +20,7 @@ $(document).ready(function() {
         indentUnit: 4,
         indentWithTabs: false,
         extraKeys: {
-            Tab: convertTabToSpaces
+            Tab: TestCommon.Utils.convertTabToSpaces
         }
     });
 
@@ -33,15 +33,6 @@ $(document).ready(function() {
     
 });
 
-
-function convertTabToSpaces(cm) {
-  if (cm.somethingSelected()) {
-    cm.indentSelection("add");
-  } else {
-    cm.replaceSelection(cm.getOption("indentWithTabs")? "\t":
-      Array(cm.getOption("indentUnit") + 1).join(" "), "end", "+input");
-  }
-}
 
 function saveTestCase(callback){
     var content = codeEditor.getValue();

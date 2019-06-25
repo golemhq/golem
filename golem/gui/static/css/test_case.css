@@ -173,3 +173,26 @@ body.modal-open {
 .autocomplete-selected .action-description {
     display: block
 }
+
+.code-block {
+    border: 1px solid #ccc;
+    display: inline-block;
+    width: calc(100% - 50px);
+    border-radius: 3px;
+}
+
+.code-block .CodeMirror {
+    height: auto;
+    border-radius: 3px;
+}
+
+.CodeMirror-lines {
+  padding: 6px 0; /* Vertical padding around content */
+}
+.CodeMirror pre {
+  padding: 0 6px; /* Horizontal padding of content */
+}
+
+.step[step-type='code-block'] {
+	margin-bottom: 1px;
+}

@@ -145,6 +145,13 @@ class GolemActionParser:
                     action_def = self._parse_docstring(doc)
                     action_def['name'] = action.__name__
                     actions.append(action_def)
+
+            # add 'code_block' action
+            actions.append({
+                'description': 'Code block',
+                'parameters': [],
+                'name': 'code_block'
+            })
             self.actions = actions
         return self.actions
 

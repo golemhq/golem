@@ -1,11 +1,10 @@
 import os
-import re
-import inspect
 import shutil
 
 from golem.core import file_manager, settings_manager
 from golem.core import test_data as test_data_module
 from golem.core.project import Project, validate_project_element_name, BaseProjectElement
+from golem.core.step_parser import parse_function_steps
 
 
 def create_test(project_name, test_name):
@@ -13,11 +12,11 @@ def create_test(project_name, test_name):
         "\n"
         "description = ''\n\n"
         "tags = []\n\n"
-        "pages = []\n\n"
+        "pages = []\n\n\n"
         "def setup(data):\n"
-        "    pass\n\n"
+        "    pass\n\n\n"
         "def test(data):\n"
-        "    pass\n\n"
+        "    pass\n\n\n"
         "def teardown(data):\n"
         "    pass\n\n")
     errors = []
@@ -85,17 +84,70 @@ def duplicate_test(project, name, new_name):
     return errors
 
 
-def edit_test(project, test_name, description, pages, test_steps, test_data, tags):
+def edit_test(project, test_name, description, pages, steps, test_data, tags):
     """Save test contents to file"""
+
+    def _format_description(description):
+        """Format description string to store in test."""
+        description = description.replace('"', '\\"').replace("'", "\\'")
+        if '\n' in description:
+            desc_lines = description.split('\n')
+            formatted_description = 'description = \'\'\''
+            for line in desc_lines:
+                formatted_description = formatted_description + '\n' + line
+            formatted_description = formatted_description + '\'\'\'\n'
+        else:
+            formatted_description = 'description = \'{}\'\n'.format(description)
+        return formatted_description
+
+    def _format_tags_string(tags):
+        tags_string = ''
+        for tag in tags:
+            tags_string = tags_string + " '" + tag + "',"
+        tags_string = "[{}]".format(tags_string.strip()[:-1])
+        return tags_string
+
+    def _format_page_string(pages):
+        """Format page object string to store in test."""
+        po_string = ''
+        for page in pages:
+            po_string = po_string + " '" + page + "',\n" + " " * 8
+        po_string = "[{}]".format(po_string.strip()[:-1])
+        return po_string
+
+    def _format_data(test_data):
+        result = '[\n'
+        for data_set in test_data:
+            result += '    {\n'
+            for key, value in data_set.items():
+                if not value:
+                    value = "''"
+                result += '        \'{}\': {},\n'.format(key, value)
+            result += '    },\n'
+        result += ']\n\n'
+        return result
+
+    def _format_steps(steps):
+        step_str = ''
+        for step in steps:
+            if step['type'] == 'function-call':
+                step_action = step['action'].replace(' ', '_')
+                param_str = ', '.join(step['parameters'])
+                step_str += '    {0}({1})\n'.format(step_action, param_str)
+            else:
+                lines = step['code'].splitlines()
+                for line in lines:
+                    step_str += '    {}\n'.format(line)
+        return step_str
+
     path = Test(project, test_name).path
-    formatted_description = _format_description(description)
     with open(path, 'w', encoding='utf-8') as f:
         f.write('\n')
-        f.write(formatted_description)
+        f.write(_format_description(description))
         f.write('\n')
         f.write('tags = {}\n'.format(_format_tags_string(tags)))
         f.write('\n')
-        f.write('pages = {}\n'.format(_format_page_object_string(pages)))
+        f.write('pages = {}\n'.format(_format_page_string(pages)))
         f.write('\n')
         settings = settings_manager.get_project_settings(project)
         if settings['test_data'] == 'infile':
@@ -104,30 +156,22 @@ def edit_test(project, test_name, description, pages, test_steps, test_data, tag
                 test_data_module.remove_csv_if_exists(project, test_name)
         else:
             test_data_module.save_external_test_data_file(project, test_name, test_data)
+        f.write('\n')
         f.write('def setup(data):\n')
-        if test_steps['setup']:
-            for step in test_steps['setup']:
-                step_action = step['action'].replace(' ', '_')
-                param_str = ', '.join(step['parameters'])
-                f.write('    {0}({1})\n'.format(step_action, param_str))
+        if steps['setup']:
+            f.write(_format_steps(steps['setup']))
         else:
             f.write('    pass\n')
-        f.write('\n')
+        f.write('\n\n')
         f.write('def test(data):\n')
-        if test_steps['test']:
-            for step in test_steps['test']:
-                step_action = step['action'].replace(' ', '_')
-                param_str = ', '.join(step['parameters'])
-                f.write('    {0}({1})\n'.format(step_action, param_str))
+        if steps['test']:
+            f.write(_format_steps(steps['test']))
         else:
             f.write('    pass\n')
-        f.write('\n')
+        f.write('\n\n')
         f.write('def teardown(data):\n')
-        if test_steps['teardown']:
-            for step in test_steps['teardown']:
-                step_action = step['action'].replace(' ', '_')
-                param_str = ', '.join(step['parameters'])
-                f.write('    {0}({1})\n'.format(step_action, param_str))
+        if steps['teardown']:
+            f.write(_format_steps(steps['teardown']))
         else:
             f.write('    pass\n')
 
@@ -160,137 +204,6 @@ def delete_test(project, test_name):
         except:
             errors.append('There was an error removing file {}'.format(test_name))
     return errors
-
-
-def _parse_step(step):
-    """Parse a step string of a test function (setup, test or teardown)."""
-    method_name = step.split('(', 1)[0].strip()
-    # if not '.' in method_name:
-    #     method_name = method_name.replace('_', ' ')
-    # clean_param_list = []
-    param_list = []
-
-    params_re = re.compile('\((?P<args>.+)\)')
-    params_search = params_re.search(step)
-    if params_search:
-        params_string = params_search.group('args')
-        param_pairs = []
-        inside_param = False
-        inside_string = False
-        string_char = ''
-        current_start = 0
-        for i in range(len(params_string)):
-            is_last_char = i == len(params_string) -1
-            is_higher_level_comma = False
-
-            if params_string[i] == '\'':
-                if not inside_string:
-                    inside_string = True
-                    string_char = '\''
-                elif string_char == '\'':
-                    inside_string = False
-
-            if params_string[i] == '\"':
-                if not inside_string:
-                    inside_string = True
-                    string_char = '\"'
-                elif string_char == '\"':
-                    inside_string = False
-
-            if params_string[i] == ',' and not inside_param and not inside_string:
-                is_higher_level_comma = True
-
-            if params_string[i] in ['(', '{', '[']:
-                inside_param = True
-            elif inside_param and params_string[i] in [')', '}', ']']:
-                inside_param = False
-
-            if is_higher_level_comma:
-                param_pairs.append((current_start, i))
-                current_start = i + 1
-            elif is_last_char:
-                param_pairs.append((current_start, i+1))
-                current_start = i + 2
-
-        for pair in param_pairs:
-            param_list.append(params_string[pair[0]:pair[1]])
-
-        param_list = [x.strip() for x in param_list]
-        # for param in param_list:
-        #     # if 'data[' in param:
-        #     #     data_re = re.compile("[\'|\"](?P<data>.*)[\'|\"]")
-        #     #     g = data_re.search(param)
-        #     #     clean_param_list.append(g.group('data'))
-        #     if '(' in param and ')' in param:
-        #         clean_param_list.append(param)
-        #     else:
-        #         # clean_param_list.append(param.replace('\'', '').replace('"', ''))
-        #         clean_param_list.append(param)
-    step = {
-        'method_name': method_name,
-        'parameters': param_list
-    }
-    return step
-
-
-def _get_parsed_steps(function):
-    """Get a list of parsed steps provided the code of a
-    test function (setup, test or teardown)
-    """
-    steps = []
-    code_lines = inspect.getsourcelines(function)[0]
-    code_lines = [x.strip().replace('\n', '') for x in code_lines]
-    code_lines.pop(0)
-    for line in code_lines:
-        if line != 'pass' and len(line):
-            steps.append(_parse_step(line))
-    return steps
-
-
-def _format_page_object_string(pages):
-    """Format page object string to store in test."""
-    po_string = ''
-    for page in pages:
-        po_string = po_string + " '" + page + "',\n" + " " * 8
-    po_string = "[{}]".format(po_string.strip()[:-1])
-    return po_string
-
-
-def _format_tags_string(tags):
-    """Format tags string to store in test."""
-    tags_string = ''
-    for tag in tags:
-        tags_string = tags_string + " '" + tag + "',"
-    tags_string = "[{}]".format(tags_string.strip()[:-1])
-    return tags_string
-
-
-def _format_description(description):
-    """Format description string to store in test."""
-    description = description.replace('"', '\\"').replace("'", "\\'")
-    if '\n' in description:
-        desc_lines = description.split('\n')
-        formatted_description = 'description = \'\'\''
-        for line in desc_lines:
-            formatted_description = formatted_description + '\n' + line
-        formatted_description = formatted_description + '\'\'\'\n'
-    else:
-        formatted_description = 'description = \'{}\'\n'.format(description)
-    return formatted_description
-
-
-def _format_data(test_data):
-    """Format data string to store in test."""
-    result = '[\n'
-    for data_set in test_data:
-        result += '    {\n'
-        for key, value in data_set.items():
-            if not value:
-                value = "''"
-            result += '        \'{}\': {},\n'.format(key, value)
-        result += '    },\n'
-    result += ']\n\n'
-    return result
 
 
 class Test(BaseProjectElement):
@@ -328,19 +241,19 @@ class Test(BaseProjectElement):
 
         setup_function = getattr(self.get_module(), 'setup', None)
         if setup_function:
-            steps['setup'] = _get_parsed_steps(setup_function)
+            steps['setup'] = parse_function_steps(setup_function)
         else:
             steps['setup'] = []
 
         test_function = getattr(self.get_module(), 'test', None)
         if test_function:
-            steps['test'] = _get_parsed_steps(test_function)
+            steps['test'] = parse_function_steps(test_function)
         else:
             steps['test'] = []
 
         teardown_function = getattr(self.get_module(), 'teardown', None)
         if teardown_function:
-            steps['teardown'] = _get_parsed_steps(teardown_function)
+            steps['teardown'] = parse_function_steps(teardown_function)
         else:
             steps['teardown'] = []
         return steps
