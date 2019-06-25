@@ -31,6 +31,11 @@
     
     User roles are: superuser, admin, standard, read-only, reports-only
 
+- Improved test step parser [#168](https://github.com/golemhq/golem/issues/168)
+    
+    * Non function calls are shown as code blocks (using a code editor)
+    * Added **code_block** action to insert new code blocks
+
 - golem.execution.workspace -> golem.execution.testdir
 
 ### Added

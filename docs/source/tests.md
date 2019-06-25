@@ -62,9 +62,5 @@ Note: when saving a test using the Test Module, if the *test_data* setting is no
 
 ## The Test and Code
 
-Currently, the Web Module does not support parsing complex code structures (like *if*, *for* and *while*).
-It is encouraged to move any complex code outside of the test and into Page Objects.
-For better use of the Web Module, the test code should consist in calls to functions like Golem actions or page functions.
-
-The Web Module does not support **imports** either.
-So when saving a test from the Web Module import statements are dropped.
+The Web Module does not support **imports**.
+When saving a test from the Web Module import statements are dropped.

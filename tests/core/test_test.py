@@ -1,7 +1,5 @@
 import os
 
-import pytest
-
 from golem.core import test as test_module, settings_manager
 from golem.core.project import Project
 from golem.core.test import Test
@@ -36,11 +34,14 @@ tags = []
 
 pages = []
 
+
 def setup(data):
     pass
 
+
 def test(data):
     pass
+
 
 def teardown(data):
     pass
@@ -177,10 +178,10 @@ class TestEditTest:
         pages = ['page1', 'page2']
         test_steps = {
             'setup': [
-                {'action': 'click', 'parameters': ['elem1']}
+                {'type': 'function-call', 'action': 'click', 'parameters': ['elem1']}
             ],
             'test': [
-                {'action': 'send_keys', 'parameters': ['elem2', 'keys']}
+                {'type': 'function-call', 'action': 'send_keys', 'parameters': ['elem2', 'keys']}
             ],
             'teardown': []
         }
@@ -204,13 +205,13 @@ class TestEditTest:
             '        \'key\': \'value\',\n'
             '    },\n'
             ']\n'
-            '\n'
+            '\n\n'
             'def setup(data):\n'
             '    click(elem1)\n'
-            '\n'
+            '\n\n'
             'def test(data):\n'
             '    send_keys(elem2, keys)\n'
-            '\n'
+            '\n\n'
             'def teardown(data):\n'
             '    pass\n')
         with open(path) as f:
@@ -224,7 +225,7 @@ class TestEditTest:
         test_steps = {
             'setup': [],
             'test': [
-                {'action': 'send_keys', 'parameters': ['elem2', 'keys']}
+                {'type': 'function-call', 'action': 'send_keys', 'parameters': ['elem2', 'keys']}
             ],
             'teardown': []
         }
@@ -241,13 +242,13 @@ class TestEditTest:
             'tags = []\n'
             '\n'
             'pages = []\n'
-            '\n'
+            '\n\n'
             'def setup(data):\n'
             '    pass\n'
-            '\n'
+            '\n\n'
             'def test(data):\n'
             '    send_keys(elem2, keys)\n'
-            '\n'
+            '\n\n'
             'def teardown(data):\n'
             '    pass\n')
         with open(path) as f:
@@ -311,198 +312,6 @@ class TestDeleteTest:
         assert not os.path.isfile(data_path)
 
 
-class TestParseSteps:
-    
-    possible_steps = [
-        # action without parameters
-        (
-            'action()',
-            {'method_name': 'action', 'parameters': []}
-        ),
-        # string parameter
-        (
-            'action(\'value\')',
-            {'method_name': 'action', 'parameters': ["'value'"]}
-        ),
-        # double string parameter
-        (
-            'action(\"double_quotes\")',
-            {'method_name': 'action', 'parameters': ['"double_quotes"']}
-        ),
-        # string with spaces
-        (
-            'action(\'spaces spaces spaces\')',
-            {'method_name': 'action', 'parameters': ["'spaces spaces spaces'"]}
-        ),
-        # double quotes string with single quotes
-        (
-            'action(\"test \'test2\' test\")',
-            {'method_name': 'action', 'parameters': ["\"test \'test2\' test\""]}
-        ),
-        # single quotes string with double quotes
-        (
-            'action(\'test \"test2\" test\')',
-            {'method_name': 'action', 'parameters': ["\'test \"test2\" test\'"]}
-        ),
-        # multiple string parameters
-        (
-            'action(\'one\', \'two\', \'three\')',
-            {'method_name': 'action', 'parameters': ["'one'", "'two'", "'three'"]}
-        ),
-        # tuple parameter
-        (
-            'action((\'this\', \'is a\', \'tuple\'))',
-            {'method_name': 'action', 'parameters': ['(\'this\', \'is a\', \'tuple\')']}
-        ),
-        # tuple parameter with double quotes string
-        (
-            'action((\"this\", \"is a\", \"tuple\"))',
-            {'method_name': 'action', 'parameters': ['(\"this\", \"is a\", \"tuple\")']}
-        ),
-        # tuple parameter with ints
-        (
-            'action((1, 2, 3))',
-            {'method_name': 'action', 'parameters': ['(1, 2, 3)']}
-        ),
-        # tuple and a string parameter
-        (
-            'action((\'a\', \'b\', \'c\'), \'another\')',
-            {'method_name': 'action', 'parameters': ['(\'a\', \'b\', \'c\')', "'another'"]}
-        ),
-        # two tuple parameters
-        (
-            'action((\'two\', \'tuples\'), (\'a\', \'b\'))',
-            {'method_name': 'action', 'parameters': ['(\'two\', \'tuples\')', '(\'a\', \'b\')']}
-        ),
-        # dict parameter
-        (
-            'action({\'test\': \'test\'})',
-            {'method_name': 'action', 'parameters': ['{\'test\': \'test\'}']}
-        ),
-        # dict parameter with double quotes
-        (
-            'action({\"test\": \"test\"})',
-            {'method_name': 'action', 'parameters': ['{\"test\": \"test\"}']}
-        ),
-        # dict parameter with int values
-        (
-            'action({\"test\": 2})',
-            {'method_name': 'action', 'parameters': ['{\"test\": 2}']}
-        ),
-        # dict parameter with boolean values
-        (
-            'action({\"test\": True})',
-            {'method_name': 'action', 'parameters': ['{\"test\": True}']}
-        ),
-        # dict parameter with None values
-        (
-            'action({\"test\": None})',
-            {'method_name': 'action', 'parameters': ['{\"test\": None}']}
-        ),
-        # dict parameter with multiple keys
-        (
-            'action({\'test\': \'test\', \'test2\': \'test2\'})',
-            {'method_name': 'action', 'parameters': ['{\'test\': \'test\', \'test2\': \'test2\'}']}
-        ),
-        # dict parameter with multiple double quote keys
-        (
-            'action({\"test\": \"test\", \"test2\": \"test2\"})',
-            {'method_name': 'action', 'parameters': ['{\"test\": \"test\", \"test2\": \"test2\"}']}
-        ),
-        # list parameter
-        (
-            'action([\'a\', \'b\'])',
-            {'method_name': 'action', 'parameters': ['[\'a\', \'b\']']}
-        ),
-        # list parameter with double quote strings
-        (
-            'action([\"a\", \"b\"])',
-            {'method_name': 'action', 'parameters': ['[\"a\", \"b\"]']}
-        ),
-        # list parameter with ints
-        (
-            'action([1, 2])',
-            {'method_name': 'action', 'parameters': ['[1, 2]']}
-        ),
-        # int parameter
-        (
-            'action(123)',
-            {'method_name': 'action', 'parameters': ['123']}
-        ),
-        # float parameter
-        (
-            'action(123.4)',
-            {'method_name': 'action', 'parameters': ['123.4']}
-        ),
-        # boolean parameter
-        (
-            'action(True)',
-            {'method_name': 'action', 'parameters': ['True']}
-        ),
-        # None parameter
-        (
-            'action(None)',
-            {'method_name': 'action', 'parameters': ['None']}
-        ),
-        # object attribute
-        (
-            'action(page.element)',
-            {'method_name': 'action', 'parameters': ['page.element']}
-        ),
-        # object attribute and a string
-        (
-            'action(page.element, \'test\')',
-            {'method_name': 'action', 'parameters': ['page.element', '\'test\'']}
-        ),
-        # string with commas
-        (
-            'action(\'string, with, commas\')',
-            {'method_name': 'action', 'parameters': ["'string, with, commas'"]}
-        ),
-        # page object method without parameters
-        (
-            'some_page.some_action()',
-            {'method_name': 'some_page.some_action', 'parameters': []}
-        )
-    ]
-
-    @pytest.mark.parametrize('step, expected', possible_steps)
-    def test_parse_step(self, step, expected):
-        parsed = test_module._parse_step(step)
-        assert parsed == expected
-
-
-class TestGetParsedSteps:
-
-    def test__get_parsed_steps(self):
-        def func1():
-            min(2, 3)
-            max(2, 3)
-        result = test_module._get_parsed_steps(func1)
-        expected = [
-            {'method_name': 'min', 'parameters': ['2', '3']},
-            {'method_name': 'max', 'parameters': ['2', '3']}
-        ]
-        assert result == expected
-
-    def test__get_parsed_steps_empty_lines(self):
-        def func1():
-            min(2, 3)
-            max(2, 3)
-        result = test_module._get_parsed_steps(func1)
-        expected = [
-            {'method_name': 'min', 'parameters': ['2', '3']},
-            {'method_name': 'max', 'parameters': ['2', '3']}
-        ]
-        assert result == expected
-
-    def test__get_parsed_steps_pass(self):
-        def func1():
-            pass
-        result = test_module._get_parsed_steps(func1)
-        assert result == []
-
-
 class TestTestExists:
 
     def test_test_exists(self, project_session, test_utils):
@@ -531,14 +340,23 @@ class TestTestComponents:
         test = Test(project, test_name)
         with open(test.path, 'w') as f:
             f.write(SAMPLE_TEST_CONTENT)
-        test_content = test.components
-        assert test_content['description'] == 'some description'
-        assert test_content['pages'] == ['page1', 'page2']
-        assert test_content['steps']['setup'] == [{'method_name': 'page1.func1', 'parameters': []}]
-        expected_test_steps = [{'method_name': 'page2.func2', 'parameters': ["'a'", "'b'"]},
-                               {'method_name': 'click', 'parameters': ['page2.elem1']}]
-        assert test_content['steps']['test'] == expected_test_steps
-        assert test_content['steps']['teardown'] == []
+        components = test.components
+        assert components['description'] == 'some description'
+        assert components['pages'] == ['page1', 'page2']
+        assert components['steps']['setup'] == [{'code': 'page1.func1()',
+                                                 'function_name': 'page1.func1',
+                                                 'parameters': [],
+                                                 'type': 'function-call'}]
+        expected_test_steps = [{'code': "page2.func2('a', 'b')",
+                                'function_name': 'page2.func2',
+                                'parameters': ["'a'", "'b'"],
+                                'type': 'function-call'},
+                               {'code': 'click(page2.elem1)',
+                                'function_name': 'click',
+                                'parameters': ['page2.elem1'],
+                                'type': 'function-call'}]
+        assert components['steps']['test'] == expected_test_steps
+        assert components['steps']['teardown'] == []
 
     def test_test_components_empty_test(self, project_session, test_utils):
         _, project = project_session.activate()

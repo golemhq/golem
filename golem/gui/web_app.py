@@ -132,7 +132,7 @@ def test_case_view(project, test_name):
         test_data = test_data_module.get_test_data(project, test_name,
                                                    repr_strings=True)
         return render_template('test_builder/test_case.html', project=project,
-                               test_case_contents=test.components,
+                               test_components=test.components,
                                test_case_name=tc_name,
                                full_test_case_name=test_name,
                                test_data=test_data)

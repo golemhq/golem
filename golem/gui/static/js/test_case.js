@@ -1,6 +1,6 @@
 
 $(document).ready(function() {
-    Test.initialize(Global.project, testCaseName, fullTestCaseName, importedPages);
+    Test.initialize(Global.project, testCaseName, fullTestCaseName, importedPages, steps);
 });
 
 
@@ -14,7 +14,7 @@ var Test = new function(){
     this.importedPages = [];
     this.unsavedChanges = false;
 
-    this.initialize = function(project, testCaseName, fullTestCaseName, importedPages){
+    this.initialize = function(project, testCaseName, fullTestCaseName, importedPages, steps){
         Test.getUniqueTags(project);
         Test.project = project;
         Test.fullName = fullTestCaseName;
@@ -23,6 +23,7 @@ var Test = new function(){
         });
         Test.getAllProjectPages();
         Test.getGolemActions();
+        Test.renderSteps(steps);
         Test.refreshActionInputsAutocomplete();
         Test.refreshValueInputsAutocomplete();
         $('#pageModal').on('hidden.bs.modal', function(){
@@ -44,6 +45,60 @@ var Test = new function(){
                 Test.refreshActionInputsAutocomplete();
             }
         });
+    }
+
+    this.renderSteps = function(steps){
+        Test.renderSectionSteps(steps.setup, 'setup');
+        Test.renderSectionSteps(steps.test, 'test');
+        Test.renderSectionSteps(steps.teardown, 'teardown');
+    }
+
+    this.renderSectionSteps = function(steps, sectionName){
+        if(steps.length == 0){
+            Test.addFirstStepInput(sectionName)
+        }
+        else{
+            steps.forEach(function(step){
+                let section = Test.Utils.stepSection(sectionName);
+                if(step.type == 'function-call'){
+                    section.append(Test.functionCallStepTemplate(step.function_name, step.parameters))
+                }
+                else if(step.type == 'code-block'){
+                    Test.addCodeBlockStep(section, step.code)
+                }
+            })
+        }
+    }
+
+    this.addCodeBlockStep = function(section, code){
+        let step = Test.codeBlockStepTemplate();
+        section.append(step);
+        Test.initializeCodeBlock(step, code)
+    }
+
+    this.addEmptyCodeBlockStep = function(step){
+        let codeBlockStep = Test.codeBlockStepTemplate();
+        step.replaceWith(codeBlockStep);
+        let editor = Test.initializeCodeBlock(codeBlockStep, '');
+        editor.focus()
+    }
+
+    this.initializeCodeBlock = function(step, code){
+        code = code || '';
+        let editor = CodeMirror(step.find('.code-block')[0], {
+            value: code,
+            mode:  "python",
+            lineNumbers: false,
+            styleActiveLine: false,
+            matchBrackets: true,
+            indentUnit: 4,
+            indentWithTabs: false,
+            extraKeys: {
+                Tab: TestCommon.Utils.convertTabToSpaces
+            }
+        });
+        editor.on('change', editor => Test.unsavedChanges = true);
+        return editor
     }
 
     this.getAllProjectPages = function(){
@@ -171,6 +226,12 @@ var Test = new function(){
         if(hasParameters){
             step.find('.parameter-container').remove();
         }
+
+        if(elemValue == 'code_block'){
+            Test.addEmptyCodeBlockStep(step)
+            return
+        }
+
         let actionParameters;
         if(Test.Utils.isGolemAction(elemValue)){
             actionParameters = Test.golemActions.filter(x => x.name == elemValue)[0].parameters;
@@ -208,29 +269,7 @@ var Test = new function(){
         let description = $("#description").val();
         let pageObjects = Test.importedPages.map(x => x.name);
         let testData = TestCommon.DataTable.getData();
-        let testSteps = {
-            'setup': [],
-            'test': [],
-            'teardown': []
-        };
-        $("#setupSteps .step").each(function(){
-            let thisStep = Test.Utils.getStepValues(this);
-            if(thisStep.action.length > 0){
-                testSteps.setup.push(thisStep);
-            }
-        });
-        $("#testSteps .step").each(function(){
-            let thisStep = Test.Utils.getStepValues(this);
-            if(thisStep.action.length > 0){
-                testSteps.test.push(thisStep);
-            }
-        });
-        $("#teardownSteps .step").each(function(){
-            let thisStep = Test.Utils.getStepValues(this);
-            if(thisStep.action.length > 0){
-                testSteps.teardown.push(thisStep);
-            }
-        });
+        let testSteps = Test.Utils.getSteps();
         let tags = [];
         if($("#tags").val().length > 0){
             $($("#tags").val().split(',')).each(function(){
@@ -263,42 +302,26 @@ var Test = new function(){
     }
 
     this.generatePageInput = function(pageName){
-        let pageInput = "\
-            <div class='input-group page'> \
-                <input type='text' disabled class='form-control page-name' value='"+pageName+"'> \
-                <div class='input-group-btn'> \
-                    <button class='btn btn-default' type='button' onclick='Test.loadPageInModal(this)'>\
-                        <span class='glyphicon glyphicon-edit' aria-hidden='true'></span></button>\
-                    <button class='btn btn-default' type='button' onclick='Test.Utils.openPageInNewWindow(this)'> \
-                        <span class='glyphicon glyphicon-new-window' aria-hidden='true'></span>\
-                    </button> \
-                    <button class='btn btn-default' type='button' onclick='Test.deletePageObject(this)'> \
-                        <span class='glyphicon glyphicon-remove' aria-hidden='true'></span> \
-                    </button> \
-                </div> \
-            </div>";
+        let pageInput = `
+            <div class="input-group page">
+                <input type="text" disabled class="form-control page-name" value="${pageName}">
+                <div class="input-group-btn">
+                    <button class="btn btn-default" type="button" onclick="Test.loadPageInModal(this)">
+                        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span></button>
+                    <button class="btn btn-default" type="button" onclick="Test.Utils.openPageInNewWindow(this)">
+                        <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>
+                    </button>
+                    <button class="btn btn-default" type="button" onclick="Test.deletePageObject(this)">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </div>`;
         return pageInput
     }
 
     this.addFirstStepInput = function(targetSection){
-        let section;
-        if(targetSection == 'setup'){ section = $("#setupSteps .steps") }
-        else if(targetSection == 'test'){ section = $("#testSteps .steps") }
-        else if(targetSection == 'teardown'){ section = $("#teardownSteps .steps") }
-        section.append(
-            "<div class='step'> \
-                <div class='step-numbering'></div> \
-                <div class='col-sm-3 step-input-container step-first-input-container'> \
-                        <input type='text' class='form-control step-first-input' placeholder='action'> \
-                </div> \
-                <div class='params'> \
-                </div> \
-                <div class='step-remove-icon'> \
-                    <a href='javascript:void(0)' onclick='Test.Utils.deleteStep(this);'> \
-                        <span class='glyphicon glyphicon-remove' aria-hidden='true'></span> \
-                    </a> \
-                </div> \
-            </div>");
+        let section = Test.Utils.stepSection(targetSection);
+        section.append(Test.functionCallStepTemplate())
         // give focus to the last step action input
         section.find(".step-first-input").last().focus();
         Test.Utils.fillStepNumbering();
@@ -390,6 +413,46 @@ var Test = new function(){
             }
         });
     }
+
+    this.functionCallStepTemplate = function(functionName, parameters){
+        functionName = functionName || '';
+        parameters = parameters || [];
+        let paramString = '';
+        parameters.forEach(function(parameter){
+            parameter = parameter.replace(/"/g,'&quot;');
+            paramString = paramString.concat(`<div class="step-input-container parameter-container">
+                <input type="text" class="form-control parameter-input element-input value-input" value="${parameter}">
+            </div>`);
+        });
+
+        let step = `<div class="step" step-type="function-call">
+            <div class="step-numbering"></div>
+            <div class="col-sm-3 step-input-container step-first-input-container">
+                <input type="text" class="form-control step-first-input" placeholder="action" value="${functionName}">
+            </div>
+            <div class="params">${paramString}</div>
+            <div class="step-remove-icon">
+                <a href="javascript:void(0)" onclick="Test.Utils.deleteStep(this)">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </a>
+            </div>
+        </div>`;
+        return step
+    }
+
+    this.codeBlockStepTemplate = function(){
+        let template = $(`<div class="step" step-type="code-block">
+            <div class="step-numbering"></div>
+            <div class="code-block"></div>
+            <div class="step-remove-icon">
+                <a href="javascript:void(0)" onclick="Test.Utils.deleteStep(this)">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </a>
+            </div>
+        </div>`);
+        return template
+    }
+
 
     this.Utils = new function(){
 
@@ -505,6 +568,7 @@ var Test = new function(){
             $("#dataTable").on("change keyup paste", function(){
                 Test.unsavedChanges = true;
             });
+
             window.addEventListener("beforeunload", function (e) {
                 if(Test.unsavedChanges){
                     let confirmationMessage = 'There are unsaved changes';
@@ -519,8 +583,36 @@ var Test = new function(){
             Test.unsavedChanges = true;
         }
 
-        this.getStepValues = function(elem){
+        this.getSteps = function(){
+            return {
+                'setup': Test.Utils.parseSteps($("#setupSteps .step")),
+                'test': Test.Utils.parseSteps($("#testSteps .step")),
+                'teardown': Test.Utils.parseSteps($("#teardownSteps .step"))
+            }
+        }
+
+        this.parseSteps = function(steps){
+            let parsedSteps = [];
+            steps.each(function(){
+                if(this.getAttribute('step-type') == 'function-call'){
+                    let thisStep = Test.Utils.getFunctionCallStepValues(this);
+                    if(thisStep.action.length > 0){
+                        parsedSteps.push(thisStep);
+                    }
+                }
+                else{
+                    let thisStep = Test.Utils.getCodeBlockStepValues(this);
+                    if(thisStep.code.trim()){
+                        parsedSteps.push(thisStep)
+                    }
+                }
+            })
+            return parsedSteps
+        }
+
+        this.getFunctionCallStepValues = function(elem){
             let thisStep = {
+                'type': 'function-call',
                 'action': '',
                 'parameters': []
             }
@@ -533,6 +625,20 @@ var Test = new function(){
                 });
             }
             return thisStep
+        }
+
+        this.getCodeBlockStepValues = function(elem){
+            let editor = $(elem).find('.CodeMirror').get(0).CodeMirror;
+            return {
+                'type': 'code-block',
+                'code': editor.getValue()
+            }
+        }
+
+        this.stepSection = function(section){
+            if(section == 'setup') return $("#setupSteps .steps")
+            if(section == 'test') return $("#testSteps .steps")
+            if(section == 'teardown') return $("#teardownSteps .steps")
         }
     }
 }
