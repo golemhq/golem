@@ -208,6 +208,7 @@ class TestPageComponents:
                 {
                     'name': 'func1',
                     'full_name': '{}.func1'.format(page_name),
+                    'partial_name': '{}.func1'.format(page_name),
                     'description': None,
                     'arguments': ['c', 'b', 'a'],
                     'code': 'def func1(c, b, a):\n    pass\n'
@@ -219,6 +220,7 @@ class TestPageComponents:
                     'selector': 'id',
                     'value': 'someId',
                     'display_name': 'Elem1',
+                    'partial_name': '{}.elem1'.format(page_name),
                     'full_name': '{}.elem1'.format(page_name)
                 }
             ],

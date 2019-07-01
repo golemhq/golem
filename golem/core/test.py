@@ -4,7 +4,7 @@ import shutil
 from golem.core import file_manager, settings_manager
 from golem.core import test_data as test_data_module
 from golem.core.project import Project, validate_project_element_name, BaseProjectElement
-from golem.core.step_parser import parse_function_steps
+from golem.core import test_parser
 
 
 def create_test(project_name, test_name):
@@ -141,15 +141,26 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags):
         return step_str
 
     path = Test(project, test_name).path
+    settings = settings_manager.get_project_settings(project)
     with open(path, 'w', encoding='utf-8') as f:
+        if not settings['implicit_actions_import']:
+            f.write('from golem import actions\n\n')
+        if not settings['implicit_page_import']:
+            for page in pages:
+                split = page.split('.')
+                top = split.pop()
+                parents = '.'.join(split)
+                parents = '.{}'.format(parents) if parents else ''
+                f.write('from projects.{}.pages{} import {}\n'.format(project, parents, top))
+            f.write('\n')
         f.write('\n')
         f.write(_format_description(description))
         f.write('\n')
         f.write('tags = {}\n'.format(_format_tags_string(tags)))
         f.write('\n')
-        f.write('pages = {}\n'.format(_format_page_string(pages)))
-        f.write('\n')
-        settings = settings_manager.get_project_settings(project)
+        if settings['implicit_page_import']:
+            f.write('pages = {}\n'.format(_format_page_string(pages)))
+            f.write('\n')
         if settings['test_data'] == 'infile':
             if test_data:
                 f.write('data = {}'.format(_format_data(test_data)))
@@ -215,7 +226,7 @@ class Test(BaseProjectElement):
     _module = None
 
     def get_module(self):
-        if not self._module:
+        if self._module is None:
             self._module = self.module
         return self._module
 
@@ -229,7 +240,9 @@ class Test(BaseProjectElement):
 
     @property
     def pages(self):
-        return getattr(self.get_module(), 'pages', [])
+        page_list = getattr(self.get_module(), 'pages', [])
+        imported_pages = test_parser.parse_imported_pages(self.code)
+        return page_list + imported_pages
 
     @property
     def steps(self):
@@ -241,19 +254,19 @@ class Test(BaseProjectElement):
 
         setup_function = getattr(self.get_module(), 'setup', None)
         if setup_function:
-            steps['setup'] = parse_function_steps(setup_function)
+            steps['setup'] = test_parser.parse_function_steps(setup_function)
         else:
             steps['setup'] = []
 
         test_function = getattr(self.get_module(), 'test', None)
         if test_function:
-            steps['test'] = parse_function_steps(test_function)
+            steps['test'] = test_parser.parse_function_steps(test_function)
         else:
             steps['test'] = []
 
         teardown_function = getattr(self.get_module(), 'teardown', None)
         if teardown_function:
-            steps['teardown'] = parse_function_steps(teardown_function)
+            steps['teardown'] = test_parser.parse_function_steps(teardown_function)
         else:
             steps['teardown'] = []
         return steps

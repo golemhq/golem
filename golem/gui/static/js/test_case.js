@@ -38,6 +38,9 @@ var Test = new function(){
     this.getGolemActions = function(){
         $.ajax({
             url: "/api/golem/actions",
+            data: {
+                "project": Test.project,
+            },
             dataType: 'json',
             type: 'GET',
             success: function(golemActions) {
@@ -152,7 +155,7 @@ var Test = new function(){
         })
         Test.importedPages.forEach(function(page){
             page.functions.forEach(function(func){
-                lookup.push({value: func.full_name, data: func.description})
+                lookup.push({value: func.partial_name, data: func.description})
             })
         });
         autocomplete = $(".step-first-input").autocomplete({
@@ -190,7 +193,7 @@ var Test = new function(){
         let lookup = [];
         Test.importedPages.forEach(function(page){
             page.elements.forEach(function(element){
-                lookup.push(element.full_name)
+                lookup.push(element.partial_name)
             })
         });
         $(".element-input").each(function(){

@@ -2,48 +2,39 @@ import os
 import pytest
 
 from golem.gui import gui_utils
-from golem.core import errors
+from golem.core import errors, settings_manager
 
 
 DOCSTRINGS = [
-    {
-        'actual': """some description
+    (
+        """some description
 
         Parameters:
         param1 : value
         """,
-        'expected': {
-            'description': 'some description',
-            'parameters': [{'name': 'param1', 'type': 'value'}]
-        }
-    },
-    {
-        'actual': """some description with
+        ('some description', [{'name': 'param1', 'type': 'value'}])
+    ),
+    (
+        """some description with
         multiline
 
         Parameters:
         param1 : value
         """,
-        'expected': {
-            'description': 'some description with multiline',
-            'parameters': [{'name': 'param1', 'type': 'value'}]
-        }
-    },
-    {
-        'actual': """some description with
+        ('some description with multiline', [{'name': 'param1', 'type': 'value'}])
+    ),
+    (
+        """some description with
         
         blank lines
 
         Parameters:
         param1 : value
         """,
-        'expected': {
-            'description': 'some description with blank lines',
-            'parameters': [{'name': 'param1', 'type': 'value'}]
-        }
-    },
-    {
-        'actual': """multiple parameters
+        ('some description with blank lines', [{'name': 'param1', 'type': 'value'}])
+    ),
+    (
+        """multiple parameters
 
         Parameters:
         param1 : value
@@ -51,43 +42,49 @@ DOCSTRINGS = [
         param3 : value
         param4 : element
         """,
-        'expected': {
-            'description': 'multiple parameters',
-            'parameters': [{'name': 'param1', 'type': 'value'},
-                           {'name': 'param2 (with desc and spaces etc)', 'type': 'element'},
-                           {'name': 'param3', 'type': 'value'},
-                           {'name': 'param4', 'type': 'element'}]
-        }
-    },
-    {
-        'actual': """
+        ('multiple parameters',
+         [{'name': 'param1', 'type': 'value'},
+          {'name': 'param2 (with desc and spaces etc)', 'type': 'element'},
+          {'name': 'param3', 'type': 'value'},
+          {'name': 'param4', 'type': 'element'}])
+    ),
+    (
+        """
         Parameters:
         no description : value
         """,
-        'expected': {
-            'description': '',
-            'parameters': [{'name': 'no description', 'type': 'value'}]
-        }
-    },
-    {
-        'actual': """no parameters
+        ('', [{'name': 'no description', 'type': 'value'}])
+    ),
+    (
+        """no parameters
         
         """,
-        'expected': {
-            'description': 'no parameters',
-            'parameters': []
-        }
-    }
+        ('no parameters', [])
+    )
 ]
 
 
 class TestGolemActionParser:
 
-    @pytest.mark.parametrize('actual,expected',
-                             [(x['actual'], x['expected']) for x in DOCSTRINGS])
-    def test__parse_docstring(self, actual, expected):
-        expected = gui_utils.GolemActionParser()._parse_docstring(actual)
-        assert expected == expected
+    @pytest.mark.parametrize('docstring, expected', DOCSTRINGS)
+    def test__parse_docstring(self, docstring, expected):
+        description, parameters = gui_utils.GolemActionParser()._parse_docstring(docstring)
+        assert description == expected[0]
+        assert parameters == expected[1]
+
+    def test_get_actions(self, project_function):
+        _, project = project_function.activate()
+        # no project, default global setting is true
+        actions = gui_utils.GolemActionParser().get_actions()
+        assert any(action['name'] == 'click' for action in actions)
+        # implicit_actions_import = false - project level
+        settings_manager.save_project_settings(project, '{"implicit_actions_import": false}')
+        actions = gui_utils.GolemActionParser().get_actions(project)
+        assert any(action['name'] == 'actions.click' for action in actions)
+        # implicit_actions_import = true - project level
+        settings_manager.save_project_settings(project, '{"implicit_actions_import": true}')
+        actions = gui_utils.GolemActionParser().get_actions()
+        assert any(action['name'] == 'click' for action in actions)
 
 
 class TestGetSecretKey:
@@ -125,4 +122,3 @@ class TestGetSecretKey:
         out, _ = capsys.readouterr()
         assert 'Warning: secret_key not found in .golem file. Using default secret key' in out
         assert secret_key == gui_utils.DEFAULT_SECRET_KEY
-
