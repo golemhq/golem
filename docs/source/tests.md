@@ -60,7 +60,39 @@ def test(data):
 Note: when saving a test using the Test Module, if the *test_data* setting is not 'infile', any data stored in the test will be moved to a CSV file.
 
 
-## The Test and Code
+## Implicit vs Explicit Imports
 
-The Web Module does not support **imports**.
-When saving a test from the Web Module import statements are dropped.
+By default the test runner imports the golem.actions module and any page module implicitly during the execution.
+Pages are saved as a list of strings.
+The GUI test builder complies with this format and generates code as the following:
+
+```python
+pages = ['page1']
+
+
+def test(data):
+    navigate('https://...')
+    page1.custom_funtion()
+```
+
+This behaviour can be turned off by setting [implicit_actions_import](settings.html#implicit-actions-import) and [implicit_page_import](settings.html#implicit-page-import) to false.
+
+Then, the test structure will be:
+
+```python
+from golem import actions
+
+from projects.<project_name>.pages import page1
+
+
+def test(data):
+    actions.navigate('https://...')
+    page1.custom_funtion()
+```
+
+
+### GUI Test Builder and Imports Statements
+
+The GUI test builder only supports import statements for the **golem.actions** module and any Python module
+inside the **pages** folder; and only when the implicit modes are turned off.
+Any other import statements will be discarded when saving a test from the GUI test builder.

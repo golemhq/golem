@@ -2,7 +2,7 @@ import re
 
 import pytest
 
-from golem.core import step_parser
+from golem.core import test_parser
 
 
 class TestFunctionBodyCode:
@@ -10,7 +10,7 @@ class TestFunctionBodyCode:
     def test_function_body_code(self):
         def function1():
             pass
-        code = step_parser.function_body_code(function1)
+        code = test_parser.function_body_code(function1)
         assert code == '            pass\n'
 
         def function2(param1,
@@ -18,14 +18,14 @@ class TestFunctionBodyCode:
             while param2:
                 print('test')
 
-        code = step_parser.function_body_code(function2)
+        code = test_parser.function_body_code(function2)
         expected = "            while param2:\n                print('test')\n"
         assert code == expected
 
         def function3():
             # comment
             pass
-        code = step_parser.function_body_code(function3)
+        code = test_parser.function_body_code(function3)
         assert code == '            # comment\n            pass\n'
 
 
@@ -33,32 +33,32 @@ class TestReplaceSubstrings:
 
     def test_replace_substrings(self):
         # no parentheses
-        code, replacements = step_parser._replace_substrings('no parentheses',
+        code, replacements = test_parser._replace_substrings('no parentheses',
                                                              '(', ')')
         assert code == 'no parentheses'
         assert replacements == []
         # one parenthesis
-        code, replacements = step_parser._replace_substrings('this is a (test) string',
+        code, replacements = test_parser._replace_substrings('this is a (test) string',
                                                              '(', ')')
         assert len(replacements) == 1
         assert replacements[0][1] == '(test)'
         assert code == 'this is a {} string'.format(replacements[0][0])
         # two parentheses
-        code, replacements = step_parser._replace_substrings('this is (a) (test) string',
+        code, replacements = test_parser._replace_substrings('this is (a) (test) string',
                                                              '(', ')')
         assert len(replacements) == 2
         assert code == 'this is {} {} string'.format(replacements[0][0], replacements[1][0])
         # nested parentheses
-        code, replacements = step_parser._replace_substrings('this is (a (nested) ) test',
+        code, replacements = test_parser._replace_substrings('this is (a (nested) ) test',
                                                              '(', ')')
         assert len(replacements) == 1
         assert code == 'this is {} test'.format(replacements[0][0])
         # new lines inside parentheses
-        code, replacements = step_parser._replace_substrings('this is (a \ntest) string',
+        code, replacements = test_parser._replace_substrings('this is (a \ntest) string',
                                                              '(', ')')
         assert len(replacements) == 1
         assert code == 'this is {} string'.format(replacements[0][0])
-        code, replacements = step_parser._replace_substrings('this is (\na test\n) string',
+        code, replacements = test_parser._replace_substrings('this is (\na test\n) string',
                                                              '(', ')')
         assert len(replacements) == 1
         assert code == 'this is {} string'.format(replacements[0][0])
@@ -69,12 +69,12 @@ class TestReplaceRePattern:
     def test_replace_re_pattern(self):
         pattern = re.compile(r'(\"\"\".+?\"\"\")', re.S)
         original_code = 'this is a """test""" string'
-        code, replacements = step_parser._replace_re_pattern(original_code, pattern)
+        code, replacements = test_parser._replace_re_pattern(original_code, pattern)
         assert replacements[0][1] == '"""test"""'
         assert code.replace(replacements[0][0], replacements[0][1]) == original_code
 
         original_code = 'this is """a""" """test""" string'
-        code, replacements = step_parser._replace_re_pattern(original_code, pattern)
+        code, replacements = test_parser._replace_re_pattern(original_code, pattern)
         assert replacements[0][1] == '"""a"""'
         assert replacements[1][1] == '"""test"""'
 
@@ -86,7 +86,7 @@ class TestSplitCodeIntoBlocks:
                 '# comment\n'
                 'if foo:\n'
                 '    print("bar")\n')
-        blocks = step_parser._split_code_into_blocks(code)
+        blocks = test_parser._split_code_into_blocks(code)
         assert len(blocks) == 3
         assert blocks[0] == 'block_one()'
         assert blocks[1] == '# comment'
@@ -96,7 +96,7 @@ class TestSplitCodeIntoBlocks:
                 "\n"
                 "\n"
                 "bar = 1 + 1\n")
-        blocks = step_parser._split_code_into_blocks(code)
+        blocks = test_parser._split_code_into_blocks(code)
         assert len(blocks) == 2
         assert blocks[0] == "print('foo')"
         assert blocks[1] == "bar = 1 + 1"
@@ -104,7 +104,7 @@ class TestSplitCodeIntoBlocks:
         code = ("\n"
                 "\n"
                 "bar = 1 + 1\n")
-        blocks = step_parser._split_code_into_blocks(code)
+        blocks = test_parser._split_code_into_blocks(code)
         assert len(blocks) == 1
         assert blocks[0] == "bar = 1 + 1"
 
@@ -127,7 +127,7 @@ class TestCodeBlockIsFunctionCall:
 
     @pytest.mark.parametrize('test_string', function_calls)
     def test_code_block_is_function_call(self, test_string):
-        assert step_parser._code_block_is_function_call(test_string)
+        assert test_parser._code_block_is_function_call(test_string)
 
     not_function_calls = [
         'foo().bar()',
@@ -142,7 +142,7 @@ class TestCodeBlockIsFunctionCall:
 
     @pytest.mark.parametrize('test_string', not_function_calls)
     def test_code_block_is_function_call_false(self, test_string):
-        assert not step_parser._code_block_is_function_call(test_string)
+        assert not test_parser._code_block_is_function_call(test_string)
 
 
 class TestParseFunctionCall:
@@ -322,7 +322,7 @@ class TestParseFunctionCall:
 
     @pytest.mark.parametrize('call, expected', function_calls)
     def test_parse_function_call(self, call, expected):
-        parsed = step_parser._parse_function_call(call)
+        parsed = test_parser._parse_function_call(call)
         assert parsed == expected
 
 
@@ -337,7 +337,7 @@ class TestParseFunctionSteps:
             # comment
             str('test').replace('s', 'x')
 
-        steps = step_parser.parse_function_steps(function)
+        steps = test_parser.parse_function_steps(function)
         expected_steps = [
             {'type': 'function-call', 'code': "print('foo')", 'function_name': 'print', 'parameters': ["'foo'"]},
             {'type': 'code-block', 'code': 'bar = False'},
@@ -351,19 +351,19 @@ class TestParseFunctionSteps:
         """Functions with only `pass` in the body return no steps"""
         def function1():
             pass
-        steps = step_parser.parse_function_steps(function1)
+        steps = test_parser.parse_function_steps(function1)
         assert steps == []
 
         def function2():
 
             pass
-        steps = step_parser.parse_function_steps(function2)
+        steps = test_parser.parse_function_steps(function2)
         assert steps == []
 
         def function3():
             print('foo')
             pass
-        steps = step_parser.parse_function_steps(function3)
+        steps = test_parser.parse_function_steps(function3)
         assert len(steps) == 2
         assert steps[0]['function_name'] == 'print'
         assert steps[1]['code'] == 'pass'
@@ -378,7 +378,7 @@ class TestParseFunctionSteps:
                 [False, True],
                 0)
 
-        steps = step_parser.parse_function_steps(function1)
+        steps = test_parser.parse_function_steps(function1)
         expected_steps = [
             {
                 'type': 'function-call',
@@ -392,3 +392,38 @@ class TestParseFunctionSteps:
             }
         ]
         assert steps == expected_steps
+
+
+class TestParseImportedPages:
+
+    def test_parse_imported_pages(self):
+        code = ('from projects.project_name.pages import page1\n'
+                'from projects.project_name.pages import page2, page3\n'
+                'from projects.project_name.pages.module import page4\n'
+                'from projects.project_name.pages.module import page5, page6\n'
+                'from projects.project_name.pages.module.sub_module import page7\n'
+                '\n'
+                'def test(data):\n'
+                '    pass')
+        pages = test_parser.parse_imported_pages(code)
+        assert pages == ['page1', 'page2', 'page3', 'module.page4', 'module.page5',
+                         'module.page6', 'module.sub_module.page7']
+        # new line between imports
+        code = ('from projects.project_name.pages import page1\n'
+                '\n'
+                'from projects.project_name.pages import page2\n'
+                '\n'
+                'def test(data):\n'
+                '    pass')
+        pages = test_parser.parse_imported_pages(code)
+        assert pages == ['page1', 'page2']
+        # invalid import format
+        code = ('from project_name.pages import page1\n'
+                'from projects.project_name import page2\n'
+                'from project_name.pages import *\n'
+                'from project_name.pages.page1 import *\n'
+                '\n'
+                'def test(data):\n'
+                '    pass')
+        pages = test_parser.parse_imported_pages(code)
+        assert pages == []

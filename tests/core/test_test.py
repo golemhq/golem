@@ -1,4 +1,5 @@
 import os
+import sys
 
 from golem.core import test as test_module, settings_manager
 from golem.core.project import Project
@@ -260,6 +261,54 @@ class TestEditTest:
         with open(data_path) as f:
             assert f.read() == expected
 
+    def test_edit_test_explicit_page_import(self, project_session, test_utils):
+        _, project = project_session.activate()
+        test_name = test_utils.create_random_test(project)
+        pages = ['page1', 'module.page2']
+        steps = {'setup': [], 'test': [], 'teardown': []}
+        settings_manager.save_project_settings(project, '{"implicit_page_import": false}')
+        test_module.edit_test(project, test_name, description='', pages=pages,
+                              steps=steps, test_data=[], tags=[])
+        path = test_module.Test(project, test_name).path
+        expected = ('from projects.{}.pages import page1\n'
+                    'from projects.{}.pages.module import page2\n'
+                    '\n\n'
+                    'description = \'\'\n'
+                    '\n'
+                    'tags = []\n'
+                    '\n\n'
+                    'def setup(data):\n'
+                    '    pass\n'
+                    '\n\n'
+                    'def test(data):\n'
+                    '    pass\n'
+                    '\n\n'
+                    'def teardown(data):\n'
+                    '    pass\n'.format(project, project))
+        with open(path) as f:
+            assert f.read() == expected
+
+    def test_edit_test_explicit_action_import(self, project_session, test_utils):
+        _, project = project_session.activate()
+        test_name = test_utils.create_random_test(project)
+        steps = {'setup': [], 'test': [], 'teardown': []}
+        settings_manager.save_project_settings(project, '{"implicit_actions_import": false}')
+        test_module.edit_test(project, test_name, description='', pages=[],
+                              steps=steps, test_data=[], tags=[])
+        path = test_module.Test(project, test_name).path
+        expected = ('from golem import actions\n\n\n'
+                    'description = \'\'\n\n'
+                    'tags = []\n\n'
+                    'pages = []\n\n\n'
+                    'def setup(data):\n'
+                    '    pass\n\n\n'
+                    'def test(data):\n'
+                    '    pass\n\n\n'
+                    'def teardown(data):\n'
+                    '    pass\n')
+        with open(path) as f:
+            assert f.read() == expected
+
 
 class TestEditTestCode:
 
@@ -367,3 +416,26 @@ class TestTestComponents:
         assert test_content['steps']['setup'] == []
         assert test_content['steps']['test'] == []
         assert test_content['steps']['teardown'] == []
+
+    def test_test_components_pages(self, project_session, test_utils):
+        """components['pages'] contains the imported pages and the pages
+        defined in the list
+        """
+        testdir, project = project_session.activate()
+        test_name = test_utils.create_random_test(project)
+        test_utils.create_page(project, 'page1')
+        test_utils.create_page(project, 'page2')
+        test_utils.create_page(project, 'module.page3')
+        sys.path.append(testdir)
+        with open(Test(project, test_name).path, 'w') as f:
+            test_content = ('from projects.{}.pages import page1, page2\n'
+                            'from projects.{}.pages.module import page3\n'
+                            '\n'
+                            'pages = ["page4", "module2.page5"]\n'
+                            '\n'
+                            'def test(data):\n'
+                            '    pass\n'.format(project, project))
+            f.write(test_content)
+        components = Test(project, test_name).components
+        expected = ['page1', 'page2', 'module.page3', 'page4', 'module2.page5']
+        assert components['pages'].sort() == expected.sort()

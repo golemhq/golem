@@ -98,6 +98,17 @@ Example: settings.json
 }
 ```
 
+
+### implicit_actions_import
+Import golem.actions module implicitly to the tests.
+Modifies test saving behavior when using the GUI test builder.
+Default is true.
+
+### implicit_page_import
+Import pages implicitly to the test from a list of strings.
+When true, imported pages are saved as a list of strings. When false, import statements are used instead.
+Default is true.
+
 ### screenshots
 
 Modify screenshot format, size, and quality before saving to disk.

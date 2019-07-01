@@ -59,7 +59,8 @@ def auth_token():
 @api_bp.route('/golem/actions')
 @auth_required
 def golem_actions():
-    response = jsonify(gui_utils.GolemActionParser().get_actions())
+    project = request.args.get('project', None)
+    response = jsonify(gui_utils.GolemActionParser().get_actions(project))
     response.cache_control.max_age = 604800
     response.cache_control.public = True
     return response

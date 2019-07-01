@@ -6,6 +6,18 @@
 
 - createsuperuser command
 
+- User management page, user profile page
+
+- Implicit/explicit actions import [#136](https://github.com/golemhq/golem/issues/136)
+     
+     * Actions can now be imported explicitly.
+     * New setting key: *implicit_actions_import*, default is true.
+
+- Implicit/explicit page import [#137](https://github.com/golemhq/golem/issues/137)
+     
+     * Pages can now be imported explicitly.
+     * New setting key: *implicit_page_import*, default is true.
+
 ### Removed
 
 - createuser command
@@ -37,11 +49,6 @@
     * Added **code_block** action to insert new code blocks
 
 - golem.execution.workspace -> golem.execution.testdir
-
-### Added
-
-- User management page, user profile page
-
 
 ## [0.8.0] - 2019-04-10
 

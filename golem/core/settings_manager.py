@@ -10,7 +10,7 @@ SETTINGS_FILE_CONTENT = (
 // Default timeout in seconds to wait until an element is present
 "search_timeout": 20,
 
-// Wait for elements to be present and be displayed
+// Wait for elements to be present and displayed
 "wait_displayed": false,
 
 // Take a screenshot on error
@@ -28,7 +28,7 @@ SETTINGS_FILE_CONTENT = (
 // Custom wait method to use before each step, must be defined inside extend.py
 "wait_hook": null,
 
-// Define the driver to use, unless overriden by the -d/--driver flag
+// Define the driver to use, unless overriden by the -b/--browser flag
 "default_browser": "chrome",
 
 // Path to the chrome driver executable.
@@ -46,9 +46,17 @@ SETTINGS_FILE_CONTENT = (
 // Path to the Opera driver executable.
 "operadriver_path": "./drivers/operadriver*",
 
-// URLRemote URL : the URL to use when connecting to a remote webdriver
+// Remote URL : the URL to use when connecting to a remote webdriver
 // for example, using selenium grid
 "remote_url": "http://localhost:4444/wd/hub",
+
+// Import golem.actions implicitly to the tests.
+// Modifies test saving behavior when using the UI test builder.
+"implicit_actions_import": true,
+
+// Import pages at runtime implicitly from a list of strings.
+// Modifies test saving behavior when using the UI test builder.
+"implicit_page_import": true,
 
 // Log level to console. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.
 // Default option is INFO
@@ -81,6 +89,8 @@ DEFAULTS = [
     ('operadriver_path', None),
     ('remote_url', None),
     ('remote_browsers', {}),
+    ('implicit_actions_import', True),
+    ('implicit_page_import', True),
     ('console_log_level', 'INFO'),
     ('log_all_events', True),
     ('start_maximized', True),

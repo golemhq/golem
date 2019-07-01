@@ -196,3 +196,23 @@ def _parse_function_call(step):
                 parameters.append(params_string[start:i+1])
         parameters = [x.strip() for x in parameters]
     return method_name, parameters
+
+
+def parse_imported_pages(code):
+    """Extract imported pages from test code.
+    The import statements must have the following format:
+      `from projects.<project_name>.pages[.parents] import page1[, page2]`
+    """
+    page_list = []
+    pattern = re.compile(r'from projects.*pages\.?(.* import +[^*\n]+)\n')
+    groups = re.findall(pattern, code)
+    for group in groups:
+        parents = group.split('import')[0]
+        pages = group.split('import')[1]
+        pages = pages.split(',')
+        for page in pages:
+            if parents.strip():
+                page_list.append('.'.join([parents.strip(), page.strip()]))
+            else:
+                page_list.append(page.strip())
+    return page_list

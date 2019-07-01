@@ -1,5 +1,6 @@
 """Helper functions to deal with Golem GUI module application."""
 import configparser
+import copy
 import errno
 import inspect
 import os
@@ -12,7 +13,7 @@ from flask import abort, render_template, request
 from flask_login import current_user
 
 import golem.actions
-from golem.core import utils, session, errors, test_directory
+from golem.core import utils, session, errors, test_directory, settings_manager
 from golem.gui import report_parser
 from golem.gui.user_management import Permissions
 from golem import gui
@@ -92,24 +93,24 @@ class GolemActionParser:
     """
     __instance = None
     actions = None
+    explicit_actions = None
 
     def __new__(cls):
         if GolemActionParser.__instance is None:
             GolemActionParser.__instance = object.__new__(cls)
         return GolemActionParser.__instance
 
-    def _is_module_function(self, mod, func):
+    @staticmethod
+    def _is_module_function(mod, func):
         return inspect.isfunction(func) and inspect.getmodule(func) == mod
 
-    def _parse_docstring(self, docstring):
-        docstring_def = {
-            'description': '',
-            'parameters': []
-        }
+    @staticmethod
+    def _parse_docstring(docstring):
+        description = ''
+        parameters = []
         split = docstring.split('Parameters:')
         desc_lines = [x.strip() for x in split[0].splitlines() if len(x.strip())]
         description = ' '.join(desc_lines)
-        docstring_def['description'] = description
         if len(split) == 2:
             param_lines = [x.strip() for x in split[1].splitlines() if len(x.strip())]
             for param_line in param_lines:
@@ -118,42 +119,70 @@ class GolemActionParser:
                     'name': param_parts[0].strip(),
                     'type': param_parts[1].strip()
                 }
-                docstring_def['parameters'].append(param)
-        return docstring_def
+                parameters.append(param)
+        return description, parameters
 
-    def get_actions(self):
-        if not self.actions:
-            actions = []
-            module = golem.actions
+    def _get_actions(self):
+        actions = []
+        actions_module = golem.actions
 
-            def is_valid_function(function, module):
-                if self._is_module_function(module, function):
-                    if not function.__name__.startswith('_'):
-                        return True
-                return False
+        def is_valid_function(function, module):
+            """A valid action function must be defined
+            in the actions module and must not start
+            with underscore
+            """
+            if self._is_module_function(module, function):
+                if not function.__name__.startswith('_'):
+                    return True
+            return False
 
-            action_func_list = [function for function in module.__dict__.values()
-                                if is_valid_function(function, module)]
-            for action in action_func_list:
-                doc = action.__doc__
-                if doc is None:
-                    print('Warning: action {} does not have docstring defined'
-                          .format(action.__name__))
-                elif 'DEPRECATED' in doc:
-                    pass
-                else:
-                    action_def = self._parse_docstring(doc)
-                    action_def['name'] = action.__name__
-                    actions.append(action_def)
+        action_func_list = [function for function in actions_module.__dict__.values()
+                            if is_valid_function(function, actions_module)]
+        for action in action_func_list:
+            doc = action.__doc__
+            if doc is None:
+                print('Warning: action {} does not have docstring defined'
+                      .format(action.__name__))
+            elif 'DEPRECATED' in doc:
+                pass
+            else:
+                description, parameters = self._parse_docstring(doc)
+                action_def = {
+                    'name': action.__name__,
+                    'description': description,
+                    'parameters': parameters
+                }
+                actions.append(action_def)
 
-            # add 'code_block' action
-            actions.append({
-                'description': 'Code block',
-                'parameters': [],
-                'name': 'code_block'
-            })
-            self.actions = actions
-        return self.actions
+        explicit_actions = copy.deepcopy(actions)
+        for action in explicit_actions:
+            action['name'] = 'actions.{}'.format(action['name'])
+
+        # add 'code_block' action
+        code_block_action = {
+            'description': 'Insert code block',
+            'parameters': [],
+            'name': 'code_block'
+        }
+        actions.append(code_block_action)
+        explicit_actions.append(code_block_action)
+
+        self.actions = actions
+        self.explicit_actions = explicit_actions
+
+    def get_actions(self, project_name=None):
+        if self.actions is None:
+            self._get_actions()
+
+        if project_name:
+            settings = settings_manager.get_project_settings(project_name)
+        else:
+            settings = settings_manager.get_global_settings()
+
+        if settings['implicit_actions_import']:
+            return self.actions
+        else:
+            return self.explicit_actions
 
 
 def get_supported_browsers_suggestions():

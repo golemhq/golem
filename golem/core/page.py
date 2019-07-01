@@ -154,9 +154,11 @@ class Page(BaseProjectElement):
             variable = getattr(module, var_name)
             if isinstance(variable, types.FunctionType):
                 # function
+                partial_name = '{}.{}'.format(self.name.split('.')[-1], var_name)
                 function = {
                     'name': var_name,
-                    'full_name': ''.join([self.name, '.', var_name]),
+                    'partial_name': partial_name,
+                    'full_name': '{}.{}'.format(self.name, var_name),
                     'description': inspect.getdoc(variable),
                     'arguments': list(inspect.signature(variable).parameters),
                     'code': inspect.getsource(variable)
@@ -168,11 +170,13 @@ class Page(BaseProjectElement):
                     display_name = ''
                     if len(variable) >= 3:
                         display_name = variable[2]
+                    partial_name = '{}.{}'.format(self.name.split('.')[-1], var_name)
                     element = {
                         'name': var_name,
                         'selector': variable[0],
                         'value': variable[1],
                         'display_name': display_name,
+                        'partial_name': partial_name,
                         'full_name': ''.join([self.name, '.', var_name])
                     }
                     components['elements'].append(element)

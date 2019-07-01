@@ -6,7 +6,7 @@ import traceback
 
 from golem.core import report, utils, session
 from golem.core.test import Test
-from golem.test_runner.test_runner_utils import import_page_into_test_module
+from golem.test_runner.test_runner_utils import import_page_into_test
 from golem.test_runner import execution_logger
 from golem.test_runner.conf import ResultsEnum
 from golem import actions, execution
@@ -121,22 +121,25 @@ class TestRunner:
             self.result['result'] = ResultsEnum.CODE_ERROR
         else:
             self.test_module = test_module
-            # import logger into the test module
+            # import logger
             setattr(self.test_module, 'logger', execution.logger)
-            # import actions into the test module
-            for action in dir(actions):
-                setattr(self.test_module, action, getattr(actions, action))
+
+            # import actions module
+            if self.settings['implicit_actions_import']:
+                for action in dir(actions):
+                    setattr(self.test_module, action, getattr(actions, action))
+
             # store test description
             if hasattr(self.test_module, 'description'):
                 execution.description = self.test_module.description
+
+            # import pages
             try:
-                # import each page into the test_module
-                if hasattr(self.test_module, 'pages'):
+                if hasattr(self.test_module, 'pages') and self.settings['implicit_page_import']:
                     base_path = os.path.join(self.testdir, 'projects', self.project, 'pages')
                     for page in self.test_module.pages:
-                        self.test_module = import_page_into_test_module(base_path,
-                                                                        self.test_module,
-                                                                        page.split('.'))
+                        self.test_module = import_page_into_test(base_path, self.test_module,
+                                                                 page.split('.'))
             except Exception as e:
                 message = '{}: {}'.format(e.__class__.__name__, e)
                 trcbk = traceback.format_exc()

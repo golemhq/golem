@@ -1,5 +1,11 @@
 from recommonmark.parser import CommonMarkParser
 
+import os
+import sys
+
+# insert Golem path into the system
+sys.path.insert(0, os.path.abspath(".."))
+
 import golem
 
 
