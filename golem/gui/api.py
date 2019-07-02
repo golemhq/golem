@@ -367,6 +367,17 @@ def projects():
     return jsonify(test_directory.get_projects())
 
 
+@api_bp.route('/report/execution', methods=['DELETE'])
+@auth_required
+def report_delete_execution():
+    project = request.json['project']
+    suite = request.json['suite']
+    execution = request.json['execution']
+    _verify_permissions(Permissions.ADMIN, project)
+    errors = report_parser.delete_execution(project, suite, execution)
+    return jsonify(errors)
+
+
 @api_bp.route('/report/suite/execution')
 @auth_required
 def report_suite_execution():

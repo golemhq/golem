@@ -88,9 +88,13 @@ Permission access is documented in the table below.
             <td>✓</td><td></td><td></td><td></td><td></td>
         </tr>
         <tr>
-            <td class="align-left">Reports</td>
+            <td rowspan="2" class="align-left">Reports</td>
             <td class="align-left">view</td>
             <td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td>
+        </tr>
+        <tr>
+            <td class="align-left">delete</td>
+            <td>✓</td><td>✓</td><td></td><td></td><td></td>
         </tr>
     </tbody>
 </table>

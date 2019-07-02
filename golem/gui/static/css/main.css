@@ -72,7 +72,7 @@ body .container-fluid {
 }
 
 #wrapper.sidebar-collapsed #sidebar ul li a {
-    padding: 7px;
+    padding: 4px;
     text-align: center;
     font-size: 0.85em;
 }
@@ -81,7 +81,7 @@ body .container-fluid {
     margin-right: 0;
     display: block;
     font-size: 1.8em;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
 }
 
 #wrapper.sidebar-collapsed #sidebar ul ul a {
@@ -99,7 +99,7 @@ body .container-fluid {
 }
 
 #sidebar .sidebar-header {
-    padding: 15px;
+    padding: 10px;
     background: #6d7fcc;
 }
 
@@ -113,10 +113,18 @@ body .container-fluid {
     margin: 0px;
 }
 
+#wrapper.sidebar-collapsed #sidebar .sidebar-header {
+    padding: 5px;
+}
+
 #sidebar ul.components {
     padding: 10px 0;
     border-bottom: 1px solid #47748b;
     margin-bottom: 0px;
+}
+
+#wrapper.sidebar-collapsed #sidebar ul.components {
+    padding: 5px 0;
 }
 
 #sidebar ul li a {
@@ -257,8 +265,16 @@ body .container-fluid {
         display: block;
     }
 
+    #sidebar .sidebar-header {
+        padding: 5px;
+    }
+
+    #sidebar ul.components {
+        padding: 5px 0;
+    }
+
     #sidebar ul li a {
-        padding: 7px;
+        padding: 4px;
         text-align: center;
         font-size: 0.85em;
     }
@@ -270,7 +286,7 @@ body .container-fluid {
         margin-right:  0;
         display: block;
         font-size: 1.80em;
-        margin-bottom: 5px;
+        margin-bottom: 3px;
     }
 
     #sidebar ul ul a {
@@ -283,6 +299,10 @@ body .container-fluid {
 
     #sidebarCollapse span {
         display: none;
+    }
+
+    #sidebar #sidebarVersion {
+        display: none
     }
 }
 
@@ -409,7 +429,6 @@ ul.no-bullets {
     -webkit-border-radius: 0;
     -moz-border-radius: 0;
     -ms-border-radius: 0;
-    -o-border-radius: 0;
     border-radius: 0; 
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
@@ -428,20 +447,15 @@ ul.no-bullets {
 .progress .progress-bar {
     -webkit-transition-property: width;
     -moz-transition-property: width;
-    -o-transition-property: width;
     transition-property: width;
-    -webkit-transition-duration: 1s;
-    -moz-transition-duration: 1s;
-    -o-transition-duration: 1s;
-    transition-duration: 1s;
     -webkit-transition-timing-function: ease;
     -moz-transition-timing-function: ease;
-    -o-transition-timing-function: ease;
     transition-timing-function: ease;
     background-image: none;
     display:inline-block;
     overflow: hidden;
     line-height: 20px;
+    transition-duration: 0.5s;
 }
 
 .progress-bar {

@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Remove executions from report dashboard
+
+
 ## [0.9.0] - 2019-06-30
 
 ### Added

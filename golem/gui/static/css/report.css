@@ -135,7 +135,7 @@
 .spinner-container {
     width: 18px;
     padding-left: 0px !important;
-    padding-right: 4px !important;
+    padding-right: 0px !important;
 }
 
 #detailTable tr.test-detail-row td{

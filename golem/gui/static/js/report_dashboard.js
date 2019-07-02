@@ -134,7 +134,8 @@ const ReportDashboardMain = new function(){
                              }
                         }
                     },
-                    maintainAspectRatio: false,
+                    animation: { duration: 500 },
+                    maintainAspectRatio: false
                 }
             });
             ReportDashboardMain.charts[project+suite] = chart;
@@ -173,6 +174,9 @@ const ReportDashboardMain = new function(){
                 });
                 if(executionData.has_finished){
                     row.find('.spinner').hide();
+                    if(Global.user.projectWeight >= Main.PermissionWeightsEnum.admin){
+                        row.find('.glyphicon-trash').show()
+                    }
                 }
                 else{
                     row.find('.spinner').show();
@@ -220,102 +224,143 @@ const ReportDashboardMain = new function(){
         };
         chart.update();
     }
+
+
+    this.deleteExecutionConfirm = function(elem){
+        let row = $(elem).closest('tr');
+        let suite = row.attr('suite-name');
+        let execution = row.attr('execution');
+        let project = $(elem).closest('.project-container').attr('id');
+        let message = `<span style="word-break: break-all">Are you sure you want to delete this execution? This action cannot be undone.</span>`;
+        let callback = function(){
+            ReportDashboardMain.deleteExecution(row, project, suite, execution,);
+        }
+        Main.Utils.displayConfirmModal('Delete', message, callback);
+    }
+
+
+    this.deleteExecution = function(elem){
+        let row = $(elem).closest('tr');
+        let suite = row.attr('suite-name');
+        let execution = row.attr('execution');
+        let project = $(elem).closest('.project-container').attr('id');
+        $.ajax({
+            url: "/api/report/execution",
+            data: JSON.stringify({
+                "project": project,
+                "suite": suite,
+                "execution": execution
+            }),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            type: 'DELETE',
+            success: function( errors ) {
+                if(errors.length == 0){
+                    row.remove();
+                    Main.Utils.toast('info', 'Execution deleted', 2000)
+                }
+            }
+        });
+        return false
+    }
 }
 
 
 const ReportDashboard = new function(){
 
     this.generateProjectContainer = function(projectName){
-        let projectContainer = " \
-            <div class='col-md-12 project-container' id='"+projectName+"'> \
-                <h3 class='no-margin-top'> \
-                    <a href='/report/project/"+projectName+"/' class='link-without-decoration'>"+projectName.replace('_',' ')+"</a> \
-                </h3> \
-            </div>";
+        let projectContainer = `
+            <div class="col-md-12 project-container" id="${projectName}">
+                <h3 class="no-margin-top">
+                    <a href="/report/project/${projectName}/" class="link-without-decoration">${projectName.replace('_',' ')}</a>
+                </h3>
+            </div>`;
         return $(projectContainer)
     };
 
     this.generateProjectContainerSingleSuite = function(projectName){
-        let projectContainer = " \
-            <div class='col-md-12 project-container' id='"+projectName.replace('_',' ')+"'></div>";
+        let projectContainer = `<div class="col-md-12 project-container" id="${projectName.replace('_',' ')}"></div>`;
         return $(projectContainer)
     };
 
     this.generateExecutionsContainer = function(projectName, suiteName){
-        let executionsContainer = "\
-            <div class='suite-container' id='"+suiteName+"'> \
-                <div class='widget widget-table'> \
-                    <div class='widget-header'> \
-                        <h3><i class='fa fa-table'></i><span class='suite-name'> \
-                            <a href='/report/project/"+projectName+"/suite/"+suiteName+"/' \
-                                class='link-without-decoration'><strong>"+suiteName+"</strong></a> \
-                        </span></h3> \
-                    </div> \
-                    <div class='flex-row'>\
-                        <div class='widget-content table-content col-sm-7'> \
-                            <div class='table-responsive last-execution-table'> \
-                                <table class='table no-margin-bottom'> \
-                                    <thead> \
-                                        <tr> \
-                                            <th>#</th> \
-                                            <th>Date & Time</th> \
-                                            <th>Environment</th> \
-                                            <th>Result &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</th> \
-                                            <th></th> \
-                                        </tr> \
-                                    </thead> \
-                                    <tbody></tbody> \
-                                </table> \
-                            </div> \
-                        </div> \
-                        <div class='col-sm-5 table-content chart-container'> \
-                            <div class='chart-inner-container'>\
-                                <canvas></canvas>\
-                            </div>\
-                        </div> \
-                    </div>\
-                </div> \
-            </div>";
+        let executionsContainer = `
+            <div class="suite-container" id="${suiteName}">
+                <div class="widget widget-table">
+                    <div class="widget-header">
+                        <h3>
+                            <i class="fa fa-table"></i><span class="suite-name">
+                                <a href="/report/project/${projectName}/suite/${suiteName}/" class="link-without-decoration">
+                                    <strong>${suiteName}</strong>
+                                </a>
+                            </span>
+                        </h3>
+                    </div>
+                    <div class="flex-row">
+                        <div class="widget-content table-content col-sm-7">
+                            <div class="table-responsive last-execution-table">
+                                <table class="table no-margin-bottom">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Date & Time</th>
+                                            <th>Environment</th>
+                                            <th>Result &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-sm-5 table-content chart-container">
+                            <div class="chart-inner-container"><canvas></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
         return $(executionsContainer)
     };
 
     this.generateExecutionsContainerSingleSuite = function(projectName, suiteName){
-        let executionsContainer = "\
-            <div class='suite-container' id='"+suiteName+"'> \
-                <div class='widget widget-table'> \
-                    <div style='height: 218px; padding: 10px'> \
-                        <canvas></canvas>\
-                    </div> \
-                    <div class='widget-content table-content'> \
-                        <div class='table-responsive last-execution-table'> \
-                            <table class='table no-margin-bottom'> \
-                                <thead> \
-                                    <tr> \
-                                        <th>#</th> \
-                                        <th>Date & Time</th> \
-                                        <th>Environment</th> \
-                                        <th>Result &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</th> \
-                                        <th></th> \
-                                    </tr> \
-                                </thead> \
-                                <tbody></tbody> \
-                            </table> \
-                        </div> \
-                    </div> \
-                </div> \
-            </div>";
+        let executionsContainer = `
+            <div class="suite-container" id="${suiteName}">
+                <div class="widget widget-table">
+                    <div style="height: 218px; padding: 10px"><canvas></canvas></div>
+                    <div class="widget-content table-content">
+                        <div class="table-responsive last-execution-table">
+                            <table class="table no-margin-bottom">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Date & Time</th>
+                                        <th>Environment</th>
+                                        <th>Result &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
         return $(executionsContainer)
     };
 
     this.generateExecutionsTableRow = function(data){
         let suiteReportUrl = `document.location.href='/report/project/${data.project}/suite/${data.suite}/${data.execution}'`;
         let row = `
-            <tr class="cursor-pointer" onclick="${suiteReportUrl}">
+            <tr class="cursor-pointer" suite-name="${data.suite}" execution="${data.execution}" onclick="${suiteReportUrl}">
                 <td class="index">${data.index}</td>
                 <td class="date">${data.dateTime}</td>
                 <td class="environment">${data.environment}</td>
                 <td class="result"><div class="progress"></div></td>
-                <td class="spinner-container"><i class="fa fa-cog fa-spin spinner" style="display: none"></td>
+                <td class="spinner-container">
+                    <i class="glyphicon glyphicon-trash" style="display: none; color: #b3b3b3"
+                        onclick="event.stopPropagation(); ReportDashboardMain.deleteExecutionConfirm(this)"></i>
+                    <i class="fa fa-cog fa-spin spinner" style="display: none;"></i>
+                </td>
             </tr>`;
         return $(row);
     };

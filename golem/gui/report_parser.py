@@ -3,6 +3,7 @@ import base64
 import errno
 import json
 import os
+import shutil
 import sys
 import traceback
 import xml.etree.ElementTree as ET
@@ -10,6 +11,7 @@ from xml.dom import minidom
 
 from golem.core import session, utils
 from golem.test_runner.conf import ResultsEnum
+from golem.core.project import Project
 
 
 def get_execution_report_default():
@@ -69,15 +71,14 @@ def get_last_executions(projects=None, suite=None, limit=5):
         else:
             executed_suites = next(os.walk(report_path))[1]
             executed_suites = [x for x in executed_suites if x != 'single_tests']
-        for exec_suite in executed_suites:
-            last_execution_data[project][exec_suite] = []
-            suite_path = os.path.join(report_path, exec_suite)
+        for suite in executed_suites:
+            suite_path = os.path.join(report_path, suite)
             suite_executions = next(os.walk(suite_path))[1]
             last_executions = sorted(suite_executions)
             limit = int(limit)
             last_executions = last_executions[-limit:]
-            for execution in last_executions:
-                last_execution_data[project][exec_suite].append(execution)
+            if len(last_executions):
+                last_execution_data[project][suite] = last_executions
     return last_execution_data
 
 
@@ -403,3 +404,18 @@ def get_or_generate_junit_report(project, suite, execution):
     else:
         xml_string = generate_junit_report(report_directory, suite, execution)
     return xml_string
+
+
+def delete_execution(project, suite, execution):
+    errors = []
+    path = suite_execution_path(project, suite, execution)
+    if os.path.isdir(path):
+        try:
+            shutil.rmtree(path)
+        except:
+            pass
+    return errors
+
+
+def suite_execution_path(project, suite, execution):
+    return os.path.join(Project(project).report_directory_path, suite, execution)
