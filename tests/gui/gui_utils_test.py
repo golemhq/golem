@@ -2,7 +2,7 @@ import os
 import pytest
 
 from golem.gui import gui_utils
-from golem.core import errors, settings_manager
+from golem.core import errors, settings_manager, project
 
 
 DOCSTRINGS = [
@@ -122,3 +122,20 @@ class TestGetSecretKey:
         out, _ = capsys.readouterr()
         assert 'Warning: secret_key not found in .golem file. Using default secret key' in out
         assert secret_key == gui_utils.DEFAULT_SECRET_KEY
+
+
+class TestProjectsCache:
+
+    def test_projects_cache(self, testdir_function, test_utils):
+        _ = testdir_function.activate()
+        gui_utils.ProjectsCache._projects = None
+        assert gui_utils.ProjectsCache.get() == []
+        project_name = test_utils.random_string()
+        project.create_project(project_name)
+        gui_utils.ProjectsCache._projects = None
+        assert gui_utils.ProjectsCache.get() == [project_name]
+        project_name_two = test_utils.random_string()
+        gui_utils.ProjectsCache.add(project_name_two)
+        assert gui_utils.ProjectsCache.get() == [project_name, project_name_two]
+        gui_utils.ProjectsCache.remove(project_name_two)
+        assert gui_utils.ProjectsCache.get() == [project_name]

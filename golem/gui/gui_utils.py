@@ -356,3 +356,32 @@ def get_secret_key():
     else:
         secret_key = config['gui']['secret_key']
     return secret_key
+
+
+class ProjectsCache:
+    """A cache of projects.
+    The cache should be updated when projects are added or removed.
+    """
+
+    _projects = None
+
+    @staticmethod
+    def get():
+        if ProjectsCache._projects is None:
+            ProjectsCache._projects = test_directory.get_projects()
+        return ProjectsCache._projects
+
+    @staticmethod
+    def get_user_projects():
+        return [p for p in ProjectsCache.get() if p in current_user.project_list ]
+
+    @staticmethod
+    def add(project_name):
+        ProjectsCache.get()
+        ProjectsCache._projects.append(project_name)
+
+    @staticmethod
+    def remove(project_name):
+        ProjectsCache.get()
+        if project_name in ProjectsCache._projects:
+            ProjectsCache._projects.remove(project_name)

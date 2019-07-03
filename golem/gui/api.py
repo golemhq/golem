@@ -169,6 +169,8 @@ def project_create():
         errors.append('A project with that name already exists')
     else:
         create_project(project_name)
+        # update projects cache
+        gui_utils.ProjectsCache.add(project_name)
     return jsonify({'errors': errors, 'project_name': project_name})
 
 

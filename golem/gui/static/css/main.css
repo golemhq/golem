@@ -225,6 +225,39 @@ body .container-fluid {
     display: none
 }
 
+#sidebar .project-dropdown {
+}
+
+#sidebar .project-dropdown button {
+    background-color: inherit;
+    border: 0px;
+    color: white;
+    width: 100%;
+    text-align: left;
+    font-size: 1.2em;
+    overflow: hidden;
+    text-overflow: ellipsis
+}
+
+#sidebar .project-dropdown button:active {
+    /*box-shadow: none*/
+}
+
+#sidebar .project-dropdown button:active:focus {
+    outline: none
+}
+
+#sidebar .project-dropdown .dropdown-menu{
+    padding: 0px;
+    font-size: 1.2em;
+    top: 0px;
+    left: 100%
+}
+
+#sidebar .project-dropdown .dropdown-menu li a{
+    padding: 10px !important;
+}
+
 /* ---------------------------------------------------
     Sidebar Mediaqueries
 ----------------------------------------------------- */

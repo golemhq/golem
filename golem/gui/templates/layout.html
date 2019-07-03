@@ -34,6 +34,18 @@
             </div>
             {% if g.user.is_authenticated %}
             <ul class="list-unstyled components">
+                <div class="dropdown project-dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="projectSelectDropdown" data-toggle="dropdown"
+                          aria-haspopup="true" aria-expanded="true">{% if project %}{{project}}{% else %}Project{% endif %}<span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="projectSelectDropdown">
+                        {% for p in get_user_projects() %}
+                        <li><a href="/project/{{p}}/">{{p}}</a></li>
+                        {% endfor %}
+                  </ul>
+                </div>
+            </ul>
+            <ul class="list-unstyled components">
                 {% if project %}
                     {% if g.user.project_permission(project) != 'reports-only' %}
                     <li><a href="/project/{{project}}/suites/"><i class="glyphicon glyphicon-tasks"></i>Suites</a></li>
