@@ -6,6 +6,9 @@
 
 - Remove executions from report dashboard
 
+### Fixed
+
+- [#169](https://github.com/golemhq/golem/issues/169)
 
 ## [0.9.0] - 2019-06-30
 

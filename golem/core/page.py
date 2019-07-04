@@ -1,7 +1,8 @@
-import os
-import types
 import inspect
+import os
+import re
 import shutil
+import types
 
 from golem.core import file_manager
 from golem.core.project import Project, validate_project_element_name, BaseProjectElement
@@ -147,9 +148,18 @@ class Page(BaseProjectElement):
         variable_list = [i for i in dir(module) if not i.startswith("_")]
         components['source_code'] = self.code
         components['code_lines'] = components['source_code'].split('\n')
-        for line in components['code_lines']:
-            if 'import' in line:
-                components['import_lines'].append(line)
+        # parse import lines
+        patterns = (
+            re.compile(r'(from .*? import [^\n(]*)\n'),
+            re.compile(r'^(import [^\n]*)\n', flags=re.MULTILINE),
+            re.compile(r'(from [^\n]+ import \(.*?\))', re.DOTALL)
+        )
+        if len(components['source_code']):
+            for pattern in patterns:
+                result = re.search(pattern, components['source_code'])
+                if result:
+                    components['import_lines'] += list(result.groups())
+
         for var_name in variable_list:
             variable = getattr(module, var_name)
             if isinstance(variable, types.FunctionType):

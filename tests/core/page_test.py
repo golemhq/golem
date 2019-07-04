@@ -233,3 +233,22 @@ class TestPageComponents:
                             "    pass\n")
         }
         assert components == expected
+
+    def test_page_components_import_lines(self, project_session, test_utils):
+        _, project = project_session.activate()
+        page_name = test_utils.create_random_page(project)
+        code = ('import foo\n'
+                'from bar import baz\n'
+                'from module import (func1,\n'
+                '                    func2)\n'
+                'element_one = ("id", "idX, "Element One")\n'
+                'element_one = ("id", "idX .import, "Element One")\n'
+                'element_one = ("id", "idX .from .import, "Element One")\n')
+        page.edit_page_code(project, page_name, code)
+        components = Page(project, page_name).components
+        expected = [
+            'import foo',
+            'from bar import baz',
+            'from module import (func1,\n                    func2)'
+        ]
+        assert components['import_lines'].sort() == expected.sort()
