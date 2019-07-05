@@ -1,4 +1,5 @@
 import os
+import sys
 
 from golem.core import page
 from golem.core.page import Page
@@ -238,17 +239,100 @@ class TestPageComponents:
         _, project = project_session.activate()
         page_name = test_utils.create_random_page(project)
         code = ('import foo\n'
+                'import bar\n'
                 'from bar import baz\n'
+                'from golem.browser import InvalidBrowserIdError, open_browser\n'
                 'from module import (func1,\n'
                 '                    func2)\n'
-                'element_one = ("id", "idX, "Element One")\n'
-                'element_one = ("id", "idX .import, "Element One")\n'
-                'element_one = ("id", "idX .from .import, "Element One")\n')
+                '\n'
+                'element_one = ("id", "idX", "Element One")\n'
+                'element_two = ("id", "idX .import", "Element Two")\n'
+                'element_three = ("id", "idX .from .import", "Element Three")\n')
         page.edit_page_code(project, page_name, code)
         components = Page(project, page_name).components
         expected = [
             'import foo',
+            'import bar',
             'from bar import baz',
+            'from golem.browser import InvalidBrowserIdError, open_browser',
             'from module import (func1,\n                    func2)'
         ]
-        assert components['import_lines'].sort() == expected.sort()
+        assert sorted(components['import_lines']) == sorted(expected)
+
+    def test_page_components_imported_names(self, project_session, test_utils):
+        """Elements and functions from imported modules are not returned
+        as components of a page
+        """
+        testdir, project = project_session.activate()
+        sys.path.append(testdir)
+        page_one = test_utils.create_random_page(project)
+        code = ('elem1 = ("id", "test")\n'
+                '\n'
+                'def func1():\n'
+                '    pass\n')
+        page.edit_page_code(project, page_one, code)
+
+        # page_two imports page_one
+        page_two = test_utils.create_random_page(project)
+        code = ('from projects.{}.pages import {}\n'
+                '\n'
+                'elem2 = ("id", "test")\n'
+                '\n'
+                'def func2():\n'
+                '    pass\n'.format(project, page_one))
+        page.edit_page_code(project, page_two, code)
+        components = Page(project, page_two).components
+        assert len(components['elements']) == 1
+        assert components['elements'][0]['name'] == 'elem2'
+        assert len(components['functions']) == 1
+        assert components['functions'][0]['name'] == 'func2'
+
+        # import *
+        code = ('from projects.{}.pages.{} import *\n'
+                '\n'
+                'elem3 = ("id", "test")\n'
+                '\n'
+                'def func3():\n'
+                '    pass\n'.format(project, page_one))
+        page.edit_page_code(project, page_two, code)
+        components = Page(project, page_two).components
+        assert len(components['elements']) == 1
+        assert components['elements'][0]['name'] == 'elem3'
+        assert len(components['functions']) == 1
+        assert components['functions'][0]['name'] == 'func3'
+
+    def test_page_components_nested_import(self, project_session, test_utils):
+        """Elements and functions from imported modules are not returned
+        as components of a page
+        """
+        testdir, project = project_session.activate()
+        sys.path.append(testdir)
+        page_one = test_utils.create_random_page(project)
+        code = 'elem1 = ("id", "test")\n'
+        page.edit_page_code(project, page_one, code)
+
+        # page_two imports page_one
+        page_two = test_utils.create_random_page(project)
+        code = ('from projects.{}.pages import {}\n'
+                '\n'
+                'elem2 = ("id", "test")\n'.format(project, page_one))
+        page.edit_page_code(project, page_two, code)
+
+        # page_three imports page_two
+        page_three = test_utils.create_random_page(project)
+        code = ('from projects.{}.pages import {}\n'
+                '\n'
+                'elem3 = ("id", "test")\n'.format(project, page_two))
+        page.edit_page_code(project, page_three, code)
+        components = Page(project, page_three).components
+        assert len(components['elements']) == 1
+        assert components['elements'][0]['name'] == 'elem3'
+
+        # import *
+        code = ('from projects.{}.pages.{} import *\n'
+                '\n'
+                'elem3 = ("id", "test")\n'.format(project, page_two))
+        page.edit_page_code(project, page_three, code)
+        components = Page(project, page_three).components
+        assert len(components['elements']) == 1
+        assert components['elements'][0]['name'] == 'elem3'

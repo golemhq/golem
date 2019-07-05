@@ -1,3 +1,4 @@
+import ast
 import inspect
 import os
 import re
@@ -143,11 +144,9 @@ class Page(BaseProjectElement):
             'source_code': ''
         }
         module = self.module
-        # get all the names of the module,
-        # ignoring the ones starting with '_'
-        variable_list = [i for i in dir(module) if not i.startswith("_")]
         components['source_code'] = self.code
         components['code_lines'] = components['source_code'].split('\n')
+
         # parse import lines
         patterns = (
             re.compile(r'(from .*? import [^\n(]*)\n'),
@@ -156,13 +155,36 @@ class Page(BaseProjectElement):
         )
         if len(components['source_code']):
             for pattern in patterns:
-                result = re.search(pattern, components['source_code'])
+                result = re.findall(pattern, components['source_code'])
                 if result:
-                    components['import_lines'] += list(result.groups())
+                    components['import_lines'] += result
+
+        def top_level_functions(body):
+            return [f.name for f in body if isinstance(f, ast.FunctionDef)]
+
+        def top_level_tuples(body):
+            variables = []
+            for v in body:
+                if type(v) == ast.Assign:
+                    if len(v.targets) == 1:
+                        variables.append(v.targets[0].id)
+            return variables
+
+        def parse_ast(filename):
+            with open(filename, "rt") as file:
+                return ast.parse(file.read(), filename=filename)
+
+        tree = parse_ast(self.path)
+        local_functions = top_level_functions(tree.body)
+        local_variables = top_level_tuples(tree.body)
+
+        # get all the names of the module,
+        # ignoring the ones starting with '_'
+        variable_list = [i for i in dir(module) if not i.startswith("_")]
 
         for var_name in variable_list:
             variable = getattr(module, var_name)
-            if isinstance(variable, types.FunctionType):
+            if isinstance(variable, types.FunctionType) and var_name in local_functions:
                 # function
                 partial_name = '{}.{}'.format(self.name.split('.')[-1], var_name)
                 function = {
@@ -174,7 +196,7 @@ class Page(BaseProjectElement):
                     'code': inspect.getsource(variable)
                 }
                 components['functions'].append(function)
-            elif isinstance(variable, tuple):
+            elif isinstance(variable, tuple) and var_name in local_variables:
                 # web element tuple
                 if len(variable) >= 2:
                     display_name = ''

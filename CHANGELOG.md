@@ -10,6 +10,8 @@
 
 - [#169](https://github.com/golemhq/golem/issues/169)
 
+- [#112](https://github.com/golemhq/golem/issues/112)
+
 ## [0.9.0] - 2019-06-30
 
 ### Added
