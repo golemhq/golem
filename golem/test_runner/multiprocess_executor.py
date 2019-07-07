@@ -9,7 +9,7 @@ from golem.test_runner.test_runner import run_test
 
 
 def multiprocess_executor(project, execution_list, has_failed_tests, processes=1,
-                          tags=None):
+                          tags=None, is_suite=False):
     """Runs a list of tests in parallel using multiprocessing"""
     pool = Pool(processes=processes, maxtasksperchild=1)
     results = []
@@ -23,7 +23,8 @@ def multiprocess_executor(project, execution_list, has_failed_tests, processes=1
                 session.settings,
                 test.reportdir,
                 has_failed_tests,
-                tags)
+                tags,
+                is_suite)
         apply_async = pool.apply_async(run_test, args=args)
         results.append(apply_async)
     map(ApplyResult.wait, results)

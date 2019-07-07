@@ -281,6 +281,14 @@ var Test = new function(){
                 }
             });
         }
+        let skip = ($("#skipCheckbox").prop('checked'));
+        if(skip){
+            let reason = $("#skipReason").val().trim()
+            if(reason.length){
+                skip = reason
+            }
+        }
+
         let data = {
             'description': description,
             'pages': pageObjects,
@@ -289,7 +297,9 @@ var Test = new function(){
             'project': Test.project,
             'testName': Test.fullName,
             'tags': tags,
+            'skip': skip
         }
+
         $.ajax({
             url: "/api/test/save",
             data: JSON.stringify(data),
@@ -642,6 +652,14 @@ var Test = new function(){
             if(section == 'setup') return $("#setupSteps .steps")
             if(section == 'test') return $("#testSteps .steps")
             if(section == 'teardown') return $("#teardownSteps .steps")
+        }
+
+        this.onSkipCheckboxChange = function(){
+            if($("#skipCheckbox").prop('checked')) {
+                $("#skipReason").show();
+            } else {
+                $("#skipReason").hide();
+            }
         }
     }
 }

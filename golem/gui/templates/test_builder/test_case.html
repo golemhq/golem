@@ -39,13 +39,27 @@
         <div class="col-sm-6 same-heigth-col gray-1-background" id="descriptionContainer" style="border: 1px solid #e0e0e0;  border-top-left-radius: 3px; ">
             <h4>Description</h4>
             <textarea id="description" class="form-control" rows="3">{{test_components.description }}</textarea>
-            <br>
+            <div class="clearfix" style="margin-bottom: 5px"></div>
             <div class="form-horizontal">
                 <div class="col-xs-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Tags</div>
                 <div class="col-xs-10" style="padding-right: 0px; padding-left: 0px;">
                     <input type="text" class="form-control" id="tags" value="{{ ', '.join(test_components.tags) + ', ' if test_components.tags else '' }}">
                 </div>
             </div>
+            <div class="clearfix" style="margin-bottom: 5px"></div>
+            <div class="form-horizontal" style="height: 34px">
+                <div class="col-xs-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Skip</div>
+                <div class="col-xs-1" style="padding-right: 0px; padding-left: 0px;">
+                    <div class="checkbox">
+                        <input type="checkbox" id="skipCheckbox" style="margin-left: 0px" onchange="Test.Utils.onSkipCheckboxChange()" {% if test_components.skip %}checked{% endif %}>
+                    </div>
+                </div>
+                <div class="col-xs-9" style="padding-right: 0px; padding-left: 0px;">
+                    <input type="text" class="form-control" id="skipReason" {% if not test_components.skip %}style="display: none"{% endif %}
+                           value="{% if test_components.skip is string %}{{test_components.skip}}{% endif %}" placeholder="Skip message (optional)">
+                </div>
+            </div>
+
         </div>
         <div class="col-sm-6 same-heigth-col gray-1-background" id="pageObjectsContainerContainer" style="border-top: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; border-top-right-radius: 3px;">
             <h4>Pages</h4>

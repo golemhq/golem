@@ -242,9 +242,11 @@ class TestUtils:
         return suite_name
 
     @staticmethod
-    def create_random_page(project):
+    def create_random_page(project, code=None):
         page_name = TestUtils.random_string(10)
         page.create_page(project, page_name)
+        if code is not None:
+            page.edit_page_code(project, page_name, code)
         return page_name
 
 

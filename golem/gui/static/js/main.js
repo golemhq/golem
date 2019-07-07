@@ -655,10 +655,6 @@ const Main = new function(){
         'skipped': {
             code: 'skipped',
             color: '#ced4da'
-        },
-        'not run': {
-            code: 'skipped',
-            color: '#868e96'
         }
     }
 

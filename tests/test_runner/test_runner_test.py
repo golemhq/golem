@@ -1,11 +1,21 @@
 import os
 import json
+from types import SimpleNamespace
 
 import pytest
 
 from golem.test_runner import test_runner, execution_runner
+from golem.test_runner.conf import ResultsEnum
 from golem.gui import gui_utils
 from golem.core import settings_manager
+from golem.core import test as test_module
+
+
+SUCCESS_MESSAGE = 'Test Result: SUCCESS'
+CODE_ERROR_MESSAGE = 'Test Result: CODE ERROR'
+FAILURE_MESSAGE = 'Test Result: FAILURE'
+ERROR_MESSAGE = 'Test Result: ERROR'
+SKIPPED_MESSAGE = 'Test Result: SKIPPED'
 
 
 def _define_browsers_mock(selected_browsers):
@@ -65,16 +75,6 @@ class TestGetSetName:
 
 class TestRunTest:
 
-    def _create_test(self, testdir, project, name, content):
-        path = os.path.join(testdir, 'projects', project, 'tests', name + '.py')
-        with open(path, 'w+') as f:
-            f.write(content)
-
-    def _create_page(self, testdir, project, name, content):
-        path = os.path.join(testdir, 'projects', project, 'pages', name + '.py')
-        with open(path, 'w+') as f:
-            f.write(content)
-
     def _mock_report_directory(self, testdir, project, test_name):
         path = os.path.join(testdir, 'projects', project, 'reports', 'single_tests',
                             test_name, '00001')
@@ -86,12 +86,116 @@ class TestRunTest:
         with open(report_path) as f:
             return json.load(f)
 
+    @pytest.fixture(scope="function")
+    def runfix(self, project_class, test_utils):
+        """A fixture that
+          Uses a project fix with class scope,
+          Creates a random test
+          Creates a report directory for a future execution
+          Gets the settings and browser values required to run test
+          Can run the test provided the test code
+          Can read the json report
+        """
+        testdir, project = project_class.activate()
+        test_name = test_utils.create_random_test(project)
+        report_directory = self._mock_report_directory(testdir, project, test_name)
+        settings = settings_manager.get_project_settings(project)
+        browser = _define_browsers_mock(['chrome'])[0]
+
+        def run_test(code, test_data={}, secrets={}, from_suite=False):
+            test_module.edit_test_code(project, test_name, code, [])
+            test_runner.run_test(testdir, project, test_name, test_data, secrets,
+                                 browser, settings, report_directory, from_suite=from_suite)
+
+        def read_report():
+            return self._read_report_json(report_directory)
+
+        fix = SimpleNamespace(testdir=testdir, project=project, test_name=test_name,
+                              report_directory=report_directory, settings=settings,
+                              browser=browser, run_test=run_test, read_report=read_report)
+        return fix
+
+    # A0
+    def test_run_test__import_error_on_test(self, runfix, caplog):
+        """The test fails with 'code error' when it has a syntax error
+        Test result is code error"""
+        code = """
+description = 'some description'
+
+# missing colon
+def test(data)
+step('this step wont be run')
+"""
+        runfix.run_test(code)
+        # verify console logs
+        records = caplog.records
+        assert records[0].message == 'Test execution started: {}'.format(runfix.test_name)
+        assert records[1].message == 'Browser: chrome'
+        assert records[2].levelname == 'ERROR'
+        error_contains = 'def test(data)\n                 ^\nSyntaxError: invalid syntax'
+        assert error_contains in records[2].message
+        assert records[3].message == CODE_ERROR_MESSAGE
+        # verify report.json
+        report = runfix.read_report()
+        assert report['browser'] == 'chrome'
+        assert report['description'] is None  # description could not be read
+        assert report['environment'] == ''
+        assert len(report['errors']) == 1
+        assert report['errors'][0]['message'] == 'SyntaxError: invalid syntax'
+        assert error_contains in report['errors'][0]['description']
+        assert report['result'] == ResultsEnum.CODE_ERROR
+        assert report['set_name'] == ''
+        assert report['steps'] == []
+        assert report['test_case'] == runfix.test_name
+        assert report['test_data'] == {}
+
+    # A1
+    def test_run_test__import_error_page(self, runfix, caplog, test_utils):
+        """The test fails with 'code error' when an imported page has a syntax error"""
+        page_code = """
+element1 = ('id', 'someId'
+element2 = ('css', '.oh.no')
+"""
+        page_name = test_utils.create_random_page(runfix.project, code=page_code)
+        code = """
+pages = ['{}']
+def setup(data):
+    step('this step wont be run')
+def test(data):
+    step('this step wont be run')
+def teardown(data):
+    step('this step wont be run')
+""".format(page_name)
+        runfix.run_test(code)
+        # verify console logs
+        records = caplog.records
+        assert records[0].message == 'Test execution started: {}'.format(runfix.test_name)
+        assert records[1].message == 'Browser: chrome'
+        assert records[2].levelname == 'ERROR'
+        error_contains = "element2 = ('css', '.oh.no')\n           ^\nSyntaxError: invalid syntax"
+        assert error_contains in records[2].message
+        assert records[3].message == CODE_ERROR_MESSAGE
+        # verify report.json
+        report = runfix.read_report()
+        assert report['browser'] == 'chrome'
+        assert report['description'] is None  # description could not be read
+        assert report['environment'] == ''
+        assert len(report['errors']) == 1
+        assert 'SyntaxError: invalid syntax' in report['errors'][0]['message']
+        assert error_contains in report['errors'][0]['description']
+        assert report['result'] == ResultsEnum.CODE_ERROR
+        assert report['set_name'] == ''
+        assert report['steps'] == []
+        assert report['test_case'] == runfix.test_name
+        assert report['test_data'] == {}
+        assert 'test_elapsed_time' in report
+        assert 'test_timestamp' in report
+        assert len(report.keys()) == 11
+
     # A2
-    def test_run_test__success2(self, project_function_clean, caplog, test_utils):
+    def test_run_test__success(self, runfix, caplog):
         """Test runs successfully"""
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'some description'
 
 def setup(data):
@@ -103,36 +207,29 @@ def test(data):
 def teardown(data):
     step('teardown step')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        # run test
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[0].message == 'Test execution started: {}'.format(test_name)
+        assert records[0].message == 'Test execution started: {}'.format(runfix.test_name)
         assert records[1].message == 'Browser: chrome'
         assert records[2].message == 'setup step'
         assert records[3].message == 'test step'
         assert records[4].message == 'teardown step'
-        assert records[5].message == 'Test Result: SUCCESS'
+        assert records[5].message == SUCCESS_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
+        report = runfix.read_report()
         assert report['browser'] == 'chrome'
         assert report['description'] == 'some description'
         assert report['environment'] == ''
         assert report['errors'] == []
-        assert report['result'] == 'success'
+        assert report['result'] == ResultsEnum.SUCCESS
         assert report['set_name'] == ''
         assert report['steps'] == [
             {'message': 'setup step', 'screenshot': None, 'error': None},
             {'message': 'test step', 'screenshot': None, 'error': None},
             {'message': 'teardown step', 'screenshot': None, 'error': None},
         ]
-        assert report['test_case'] == test_name
+        assert report['test_case'] == runfix.test_name
         assert report['test_data'] == {}
         assert 'test_elapsed_time' in report
         assert 'test_timestamp' in report
@@ -140,11 +237,9 @@ def teardown(data):
 
     # A2
     @pytest.mark.slow
-    def test_run_test__success_with_data(self, project_function_clean, caplog, test_utils):
+    def test_run_test__success_with_data(self, runfix, caplog):
         """Test runs successfully with test data"""
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'some description'
     
 def setup(data):
@@ -156,21 +251,12 @@ def test(data):
 def teardown(data):
     step('teardown step')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project,
-                                                       test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
         test_data = dict(username='username1', password='password1')
         secrets = dict(very='secret')
-        # run test
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data=test_data, secrets=secrets, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code, test_data=test_data, secrets=secrets)
         # verify console logs
         records = caplog.records
-        assert records[0].message == 'Test execution started: {}'.format(
-            test_name)
+        assert records[0].message == 'Test execution started: {}'.format(runfix.test_name)
         assert records[1].message == 'Browser: chrome'
         # Python 3.4 results not in order TODO
         value_a = 'Using data:\n    username: username1\n    password: password1'
@@ -179,14 +265,14 @@ def teardown(data):
         assert records[3].message == 'setup step'
         assert records[4].message == 'test step'
         assert records[5].message == 'teardown step'
-        assert records[6].message == 'Test Result: SUCCESS'
+        assert records[6].message == SUCCESS_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
+        report = runfix.read_report()
         assert report['browser'] == 'chrome'
         assert report['description'] == 'some description'
         assert report['environment'] == ''
         assert report['errors'] == []
-        assert report['result'] == 'success'
+        assert report['result'] == ResultsEnum.SUCCESS
         # Python 3.4 TODO
         assert report['set_name'] in ['username1', 'password1']
         assert report['steps'] == [
@@ -194,120 +280,19 @@ def teardown(data):
             {'message': 'test step', 'screenshot': None, 'error': None},
             {'message': 'teardown step', 'screenshot': None, 'error': None},
         ]
-        assert report['test_case'] == test_name
+        assert report['test_case'] == runfix.test_name
         assert report['test_data'] == {'username': "'username1'", 'password': "'password1'"}
         assert 'test_elapsed_time' in report
         assert 'test_timestamp' in report
         assert len(report.keys()) == 11
 
-    # A0
-    def test_run_test__import_error_on_test(self, project_function_clean, caplog, test_utils):
-        """The test fails with 'code error' when it has a syntax error
-        Test result is code error"""
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
-description = 'some description'
-
-# missing colon
-def test(data)
-    step('this step wont be run')
-"""
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project,
-                                                       test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
-        # verify console logs
-        records = caplog.records
-        assert records[0].message == 'Test execution started: {}'.format(
-            test_name)
-        assert records[1].message == 'Browser: chrome'
-        assert records[2].levelname == 'ERROR'
-        error_contains = 'def test(data)\n                 ^\nSyntaxError: invalid syntax'
-        assert error_contains in records[2].message
-        assert records[3].message == 'Test Result: CODE ERROR'
-        # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['browser'] == 'chrome'
-        assert report['description'] is None  # description could not be read
-        assert report['environment'] == ''
-        assert len(report['errors']) == 1
-        assert report['errors'][0]['message'] == 'SyntaxError: invalid syntax'
-        assert error_contains in report['errors'][0]['description']
-        assert report['result'] == 'code error'
-        assert report['set_name'] == ''
-        assert report['steps'] == []
-        assert report['test_case'] == test_name
-        assert report['test_data'] == {}
-
-    # A1
-    def test_run_test__import_error_page(self, project_function_clean, caplog, test_utils):
-        """The test fails with 'code error' when an imported page has a syntax error"""
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
-pages = ['page1']
-
-def setup(data):
-    step('this step wont be run')
-
-def test(data):
-    step('this step wont be run')
-
-def teardown(data):
-    step('this step wont be run')
-"""
-        self._create_test(testdir, project, test_name, content)
-        page_content = """
-element1 = ('id', 'someId'
-element2 = ('css', '.oh.no')
-"""
-        self._create_page(testdir, project, 'page1', page_content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
-        # verify console logs
-        records = caplog.records
-        assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[1].message == 'Browser: chrome'
-        assert records[2].levelname == 'ERROR'
-        error_contains = "element2 = ('css', '.oh.no')\n           ^\nSyntaxError: invalid syntax"
-        assert error_contains in records[2].message
-        assert records[3].message == 'Test Result: CODE ERROR'
-        # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['browser'] == 'chrome'
-        assert report['description'] is None  # description could not be read
-        assert report['environment'] == ''
-        assert len(report['errors']) == 1
-        assert 'SyntaxError: invalid syntax' in report['errors'][0]['message']
-        assert error_contains in report['errors'][0]['description']
-        assert report['result'] == 'code error'
-        assert report['set_name'] == ''
-        assert report['steps'] == []
-        assert report['test_case'] == test_name
-        assert report['test_data'] == {}
-        assert 'test_elapsed_time' in report
-        assert 'test_timestamp' in report
-        assert len(report.keys()) == 11
-
     # A3
-    def test_run_test__AssertionError_in_setup(self, project_function_clean,
-                                               caplog, test_utils):
+    def test_run_test__AssertionError_in_setup(self, runfix, caplog):
         """The test ends with 'failure' when the setup function throws AssertionError.
         Test is not run
         Teardown is run
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -319,44 +304,35 @@ def test(data):
 def teardown(data):
     step('teardown step')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[0].message == 'Test execution started: {}'.format(test_name)
+        assert records[0].message == 'Test execution started: {}'.format(runfix.test_name)
         assert records[1].message == 'Browser: chrome'
         assert records[2].levelname == 'ERROR'
         assert 'setup step fail' in records[2].message
         assert 'AssertionError: setup step fail' in records[2].message
         assert records[3].message == 'teardown step'
-        assert records[4].message == 'Test Result: FAILURE'
+        assert records[4].message == FAILURE_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
+        report = runfix.read_report()
         assert report['description'] == 'desc'
         assert len(report['errors']) == 1
         assert 'setup step fail' in report['errors'][0]['message']
-        assert report['result'] == 'failure'
+        assert report['result'] == ResultsEnum.FAILURE
         assert report['steps'][0]['message'] == 'Failure'
         assert 'AssertionError: setup step fail' in report['steps'][0]['error']['description']
         assert report['steps'][1]['message'] == 'teardown step'
 
     # A4
     @pytest.mark.slow
-    def test_run_test__failure_and_error_in_setup(self, project_function_clean,
-                                                  caplog, test_utils):
+    def test_run_test__failure_and_error_in_setup(self, runfix, caplog):
         """The test ends with 'failure' when the setup function throws AssertionError,
         even when there's an error in setup
         Test is not run
         Teardown is run
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -369,35 +345,26 @@ def test(data):
 def teardown(data):
     step('teardown step')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[5].message == 'Test Result: FAILURE'
+        assert records[5].message == FAILURE_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
+        report = runfix.read_report()
         assert len(report['errors']) == 2
-        assert report['result'] == 'failure'
+        assert report['result'] == ResultsEnum.FAILURE
         assert len(report['steps']) == 3
         assert report['errors'][0]['message'] == 'error in setup'
         assert report['errors'][1]['message'] == 'AssertionError: setup step fail'
 
     # A5
-    def test_run_test__failure_in_setup_error_in_teardown(self, project_function_clean,
-                                                          caplog, test_utils):
+    def test_run_test__failure_in_setup_error_in_teardown(self, runfix, caplog):
         """Setup throws AssertionError
         Teardown throws error
         Test ends with 'failure'
         test() is not run
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -410,36 +377,27 @@ def teardown(data):
     step('teardown step')
     error('error in teardown')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[5].message == 'Test Result: FAILURE'
+        assert records[5].message == FAILURE_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
+        report = runfix.read_report()
         assert len(report['errors']) == 2
-        assert report['result'] == 'failure'
+        assert report['result'] == ResultsEnum.FAILURE
         assert len(report['steps']) == 3
         assert report['errors'][0]['message'] == 'AssertionError: setup step fail'
         assert report['errors'][1]['message'] == 'error in teardown'
 
     # A6
     @pytest.mark.slow
-    def test_run_test__failure_in_setup_exception_in_teardown(self, project_function_clean,
-                                                              caplog, test_utils):
+    def test_run_test__failure_in_setup_exception_in_teardown(self, runfix, caplog):
         """Setup throws AssertionError
         Teardown throws AssertionError
         Test ends with 'failure'
         test() is not run
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -452,36 +410,27 @@ def teardown(data):
     step('teardown step')
     foo = bar
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[5].message == 'Test Result: FAILURE'
+        assert records[5].message == FAILURE_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
+        report = runfix.read_report()
         assert len(report['errors']) == 2
-        assert report['result'] == 'failure'
+        assert report['result'] == ResultsEnum.FAILURE
         assert len(report['steps']) == 3
         assert report['errors'][0]['message'] == 'AssertionError: setup step fail'
         assert report['errors'][1]['message'] == "NameError: name 'bar' is not defined"
 
     # A8
     @pytest.mark.slow
-    def test_run_test__failure_in_setup_failure_in_teardown(self, project_function_clean,
-                                                            caplog, test_utils):
+    def test_run_test__failure_in_setup_failure_in_teardown(self, runfix, caplog):
         """Setup throws AssertionError
         Teardown throws exception
         Test ends with 'failure'
         test() is not run
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -493,35 +442,26 @@ def test(data):
 def teardown(data):
     fail('failure in teardown')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[4].message == 'Test Result: FAILURE'
+        assert records[4].message == FAILURE_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
+        report = runfix.read_report()
         assert len(report['errors']) == 2
-        assert report['result'] == 'failure'
+        assert report['result'] == ResultsEnum.FAILURE
         assert len(report['steps']) == 2
         assert report['errors'][0]['message'] == 'AssertionError: setup step fail'
         assert report['errors'][1]['message'] == 'AssertionError: failure in teardown'
 
     # B0
-    def test_run_test__exception_in_setup(self, project_function_clean,
-                                          caplog, test_utils):
+    def test_run_test__exception_in_setup(self, runfix, caplog):
         """Setup throws exception
         Test ends with 'code error'
         test() is not run
         teardown() is run
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -533,34 +473,25 @@ def test(data):
 def teardown(data):
     step('teardown step')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[4].message == 'Test Result: CODE ERROR'
+        assert records[4].message == CODE_ERROR_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
+        report = runfix.read_report()
         assert len(report['errors']) == 1
-        assert report['result'] == 'code error'
+        assert report['result'] == ResultsEnum.CODE_ERROR
         assert len(report['steps']) == 2
         assert report['errors'][0]['message'] == "NameError: name 'bar' is not defined"
 
     # B1
-    def test_run_test__exception_and_error_in_setup(self, project_function_clean,
-                                                    caplog, test_utils):
+    def test_run_test__exception_and_error_in_setup(self, runfix, caplog):
         """Setup has error and throws exception
         Test ends with 'code error'
         test() is not run
         teardown() is run
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -573,35 +504,26 @@ def test(data):
 def teardown(data):
     step('teardown step')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[5].message == 'Test Result: CODE ERROR'
+        assert records[5].message == CODE_ERROR_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['result'] == 'code error'
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.CODE_ERROR
         assert len(report['steps']) == 3
         assert len(report['errors']) == 2
         assert report['errors'][0]['message'] == 'setup error'
         assert report['errors'][1]['message'] == "NameError: name 'bar' is not defined"
 
     # B3
-    def test_run_test__exception_in_setup_exception_in_teardown(self, project_function_clean,
-                                                                caplog, test_utils):
+    def test_run_test__exception_in_setup_exception_in_teardown(self, runfix, caplog):
         """Setup throws exception
         Teardown throws exception
         Test ends with 'code error'
         test() is not run
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -613,35 +535,26 @@ def test(data):
 def teardown(data):
     foo = baz
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[4].message == 'Test Result: CODE ERROR'
+        assert records[4].message == CODE_ERROR_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['result'] == 'code error'
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.CODE_ERROR
         assert len(report['steps']) == 2
         assert len(report['errors']) == 2
         assert report['errors'][0]['message'] == "NameError: name 'bar' is not defined"
         assert report['errors'][1]['message'] == "NameError: name 'baz' is not defined"
 
     # B5
-    def test_run_test__exception_in_setup_failure_in_teardown(self, project_function_clean,
-                                                              caplog, test_utils):
+    def test_run_test__exception_in_setup_failure_in_teardown(self, runfix, caplog):
         """Setup throws exception
         Teardown throws AssertionError
         Test ends with 'code error'
         test() is not run
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -653,33 +566,25 @@ def test(data):
 def teardown(data):
     fail('teardown failure')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[4].message == 'Test Result: CODE ERROR'
+        assert records[4].message == CODE_ERROR_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['result'] == 'code error'
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.CODE_ERROR
         assert len(report['steps']) == 2
         assert len(report['errors']) == 2
         assert report['errors'][0]['message'] == "NameError: name 'bar' is not defined"
         assert report['errors'][1]['message'] == 'AssertionError: teardown failure'
 
     # B7
-    def test_run_test__error_in_setup(self, project_function_clean, caplog, test_utils):
+    def test_run_test__error_in_setup(self, runfix, caplog):
         """Setup has error
         test() is run
         teardown() is run
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -691,33 +596,24 @@ def test(data):
 def teardown(data):
     step('teardown step')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[5].message == 'Test Result: ERROR'
+        assert records[5].message == ERROR_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['result'] == 'error'
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.ERROR
         assert len(report['steps']) == 3
         assert len(report['errors']) == 1
         assert report['errors'][0]['message'] == "setup error"
 
     # B9
-    def test_run_test__error_in_setup_exception_in_teardown(self, project_function_clean,
-                                                            caplog, test_utils):
+    def test_run_test__error_in_setup_exception_in_teardown(self, runfix, caplog):
         """Setup has error
         Teardown throws exception
         test() is run
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -729,34 +625,25 @@ def test(data):
 def teardown(data):
     foo = bar
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[5].message == 'Test Result: CODE ERROR'
+        assert records[5].message == CODE_ERROR_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['result'] == 'code error'
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.CODE_ERROR
         assert len(report['steps']) == 3
         assert len(report['errors']) == 2
         assert report['errors'][0]['message'] == 'setup error'
         assert report['errors'][1]['message'] == "NameError: name 'bar' is not defined"
 
     # C0
-    def test_run_test__error_in_setup_failure_in_teardown(self, project_function_clean,
-                                                          caplog, test_utils):
+    def test_run_test__error_in_setup_failure_in_teardown(self, runfix, caplog):
         """Setup has error
         Teardown throws AssertionError
         test() is run
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -768,32 +655,24 @@ def test(data):
 def teardown(data):
     fail('teardown fail')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[5].message == 'Test Result: FAILURE'
+        assert records[5].message == FAILURE_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['result'] == 'failure'
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.FAILURE
         assert len(report['steps']) == 3
         assert len(report['errors']) == 2
         assert report['errors'][0]['message'] == 'setup error'
         assert report['errors'][1]['message'] == 'AssertionError: teardown fail'
 
     # C1
-    def test_run_test__failure_in_test(self, project_function_clean, caplog, test_utils):
+    def test_run_test__failure_in_test(self, runfix, caplog):
         """test() throws AssertionError
         teardown() is run
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -806,32 +685,23 @@ def test(data):
 def teardown(data):
     step('teardown step')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[6].message == 'Test Result: FAILURE'
+        assert records[6].message == FAILURE_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['result'] == 'failure'
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.FAILURE
         assert len(report['steps']) == 4
         assert len(report['errors']) == 1
         assert report['errors'][0]['message'] == 'AssertionError: test fail'
 
     # C2
-    def test_run_test__failure_and_error_in_test(self, project_function_clean,
-                                                 caplog, test_utils):
+    def test_run_test__failure_and_error_in_test(self, runfix, caplog):
         """test() has error and throws AssertionError
         teardown() is run
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -844,33 +714,24 @@ def test(data):
 def teardown(data):
     step('teardown step')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[6].message == 'Test Result: FAILURE'
+        assert records[6].message == FAILURE_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['result'] == 'failure'
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.FAILURE
         assert len(report['steps']) == 4
         assert len(report['errors']) == 2
         assert report['errors'][0]['message'] == 'test error'
         assert report['errors'][1]['message'] == 'AssertionError: test fail'
 
     # C5
-    def test_run_test__failure_in_test_exception_in_teardown(self, project_function_clean,
-                                                             caplog, test_utils):
+    def test_run_test__failure_in_test_exception_in_teardown(self, runfix, caplog):
         """test() throws AssertionError
         teardown() throws exception
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -882,33 +743,24 @@ def test(data):
 def teardown(data):
     foo = bar
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[5].message == 'Test Result: FAILURE'
+        assert records[5].message == FAILURE_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['result'] == 'failure'
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.FAILURE
         assert len(report['steps']) == 3
         assert len(report['errors']) == 2
         assert report['errors'][0]['message'] == 'AssertionError: test fail'
         assert report['errors'][1]['message'] == "NameError: name 'bar' is not defined"
 
     # C7
-    def test_run_test__failure_in_test_failure_in_teardown(self, project_function_clean,
-                                                           caplog, test_utils):
+    def test_run_test__failure_in_test_failure_in_teardown(self, runfix, caplog):
         """test() throws AssertionError
         teardown() throws AssertionError
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -920,30 +772,22 @@ def test(data):
 def teardown(data):
     fail('teardown fail')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[5].message == 'Test Result: FAILURE'
+        assert records[5].message == FAILURE_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['result'] == 'failure'
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.FAILURE
         assert len(report['steps']) == 3
         assert len(report['errors']) == 2
         assert report['errors'][0]['message'] == 'AssertionError: test fail'
         assert report['errors'][1]['message'] == 'AssertionError: teardown fail'
 
     # C8
-    def test_run_test__exception_in_test(self, project_function_clean, caplog, test_utils):
+    def test_run_test__exception_in_test(self, runfix, caplog):
         """test() throws exception"""
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -955,33 +799,23 @@ def test(data):
 def teardown(data):
     step('teardown step')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[5].message == 'Test Result: CODE ERROR'
+        assert records[5].message == CODE_ERROR_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['result'] == 'code error'
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.CODE_ERROR
         assert len(report['steps']) == 3
         assert len(report['errors']) == 1
         assert report['errors'][0]['message'] == "NameError: name 'bar' is not defined"
 
     # C9
-    def test_run_test__error_and_exception_in_test(self, project_function_clean,
-                                                   caplog, test_utils):
+    def test_run_test__error_and_exception_in_test(self, runfix, caplog):
         """test() throws error and AssertionError
         teardown()
         """
-        testdir, project = project_function_clean.activate()
-        project = project_function_clean.name
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -994,33 +828,24 @@ def test(data):
 def teardown(data):
     step('teardown step')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[6].message == 'Test Result: CODE ERROR'
+        assert records[6].message == CODE_ERROR_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['result'] == 'code error'
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.CODE_ERROR
         assert len(report['steps']) == 4
         assert len(report['errors']) == 2
         assert report['errors'][0]['message'] == 'error in test'
         assert report['errors'][1]['message'] == "NameError: name 'bar' is not defined"
 
     # D4
-    def test_run_test__exception_in_test_failure_in_teardown(self, project_function_clean,
-                                                             caplog, test_utils):
+    def test_run_test__exception_in_test_failure_in_teardown(self, runfix, caplog):
         """test() throws exception
         teardown() throws AssertionError
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -1032,32 +857,23 @@ def test(data):
 def teardown(data):
     fail('teardown fail')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[5].message == 'Test Result: CODE ERROR'
+        assert records[5].message == CODE_ERROR_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['result'] == 'code error'
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.CODE_ERROR
         assert len(report['steps']) == 3
         assert len(report['errors']) == 2
         assert report['errors'][0]['message'] == "NameError: name 'bar' is not defined"
         assert report['errors'][1]['message'] == 'AssertionError: teardown fail'
 
     # D7
-    def test_run_test__error_in_setup_test_and_teardown(self, project_function_clean,
-                                                        caplog, test_utils):
+    def test_run_test__error_in_setup_test_and_teardown(self, runfix, caplog):
         """setup(), test() and teardown() have errors
         """
-        testdir, project = project_function_clean.activate()
-        test_name = test_utils.random_numeric_string(10)
-        content = """
+        code = """
 description = 'desc'
 
 def setup(data):
@@ -1069,21 +885,90 @@ def test(data):
 def teardown(data):
     error('teardown error')
 """
-        self._create_test(testdir, project, test_name, content)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-        test_runner.run_test(testdir=testdir, project=project, test_name=test_name,
-                             test_data={}, secrets={}, browser=browser, settings=settings,
-                             report_directory=report_directory)
+        runfix.run_test(code)
         # verify console logs
         records = caplog.records
-        assert records[5].message == 'Test Result: ERROR'
+        assert records[5].message == ERROR_MESSAGE
         # verify report.json
-        report = self._read_report_json(report_directory)
-        assert report['result'] == 'error'
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.ERROR
         assert len(report['steps']) == 3
         assert len(report['errors']) == 3
         assert report['errors'][0]['message'] == 'setup error'
         assert report['errors'][1]['message'] == 'test error'
         assert report['errors'][2]['message'] == 'teardown error'
+
+    # TestRunner decision table: Skip is True
+    #
+    # CE : code error
+    # S  : success
+    # F  : failure
+    # SK : skip
+    #
+    #                        S0  S1  S2
+    # Skip is True           Y   Y   Y
+    # Import error test      N   N   Y
+    # Import error page      N   N   .
+    # Run from suite         N   Y   .
+    #
+    # result                 S   SK  CE
+    # setup is run           Y   N   N
+    # test is run            Y   N   N
+    # teardown is run        Y   N   N
+
+    # S0
+    def test_run_test__skip_true__not_from_suite(self, runfix, caplog):
+        code = ('skip = True\n'
+                'def setup(data):\n'
+                '    step("setup")\n'
+                'def test(data):\n'
+                '    step("test")\n'
+                'def teardown(data):\n'
+                '    step("teardown")')
+        runfix.run_test(code, from_suite=False)
+        # verify console logs
+        records = caplog.records
+        assert records[2].message == 'setup'
+        assert records[3].message == 'test'
+        assert records[4].message == 'teardown'
+        assert records[5].message == SUCCESS_MESSAGE
+        # verify report.json
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.SUCCESS
+
+    # S1
+    def test_run_test__skip_true__from_suite(self, runfix, caplog):
+        code = ('skip = True\n'
+                'def setup(data):\n'
+                '    step("setup")\n'
+                'def test(data):\n'
+                '    step("test")\n'
+                'def teardown(data):\n'
+                '    step("teardown")')
+        runfix.run_test(code, from_suite=True)
+        # verify console logs
+        records = caplog.records
+        assert records[2].message == 'Skip'
+        assert records[3].message == SKIPPED_MESSAGE
+        # verify report.json
+        report = runfix.read_report()
+        assert report['result'] == ResultsEnum.SKIPPED
+
+    # S1
+    def test_run_test__skip_true__syntax_error(self, runfix, caplog):
+        """when test with skip=True has an error on import the test
+        ends with code error
+        """
+        code = ('skip = True\n'
+                'def test(data)\n'
+                '    step("test")\n')
+        runfix.run_test(code, from_suite=True)
+        # verify console logs
+        records = caplog.records
+        assert records[2].levelname == 'ERROR'
+        assert records[3].message == CODE_ERROR_MESSAGE
+        # verify report.json
+        report = runfix.read_report()
+        assert len(report['errors']) == 1
+        assert report['errors'][0]['message'] == 'SyntaxError: invalid syntax'
+        assert report['result'] == ResultsEnum.CODE_ERROR

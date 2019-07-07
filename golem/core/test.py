@@ -84,7 +84,7 @@ def duplicate_test(project, name, new_name):
     return errors
 
 
-def edit_test(project, test_name, description, pages, steps, test_data, tags):
+def edit_test(project, test_name, description, pages, steps, test_data, tags, skip=False):
     """Save test contents to file"""
 
     def _format_description(description):
@@ -167,6 +167,10 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags):
                 test_data_module.remove_csv_if_exists(project, test_name)
         else:
             test_data_module.save_external_test_data_file(project, test_name, test_data)
+        if skip:
+            if type(skip) is str:
+                skip = "'{}'".format(skip)
+            f.write('skip = {}\n\n'.format(skip))
         f.write('\n')
         f.write('def setup(data):\n')
         if steps['setup']:
@@ -272,6 +276,10 @@ class Test(BaseProjectElement):
         return steps
 
     @property
+    def skip(self):
+        return getattr(self.get_module(), 'skip', False)
+
+    @property
     def components(self):
         """Parse and return the components of a Test in
         the following structure:
@@ -287,6 +295,7 @@ class Test(BaseProjectElement):
             'description': self.description,
             'pages': self.pages,
             'tags': self.tags,
-            'steps': self.steps
+            'steps': self.steps,
+            'skip': self.skip
         }
         return components

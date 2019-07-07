@@ -21,21 +21,34 @@ tags = []
 
 pages = []
 
+skip = False
+
+
 def setup(data):
     pass
+
 
 def test(data):
     pass
 
+
 def teardown(data):
     pass
-
 ```
 
-A test must implement at least a 'test' function that receives a data object as argument.
+A test must implement at least a **test** function that receives a data object as argument.
 
 
-## Infile Test Data
+## Test Data
+
+Test data can be defined inside the file or in a separate CSV file.
+For detailed info about see: [Test Data](test-data.html) 
+
+### CSV Data
+
+It should be defined in a CSV file with the same name and in the same folder as the test.
+
+### Infile Test Data
 
 A test can have data defined as a list of dictionaries.
 
@@ -59,12 +72,23 @@ def test(data):
 
 Note: when saving a test using the Test Module, if the *test_data* setting is not 'infile', any data stored in the test will be moved to a CSV file.
 
+## Skip flag
+
+A flag variable to indicate that this test should be skipped.
+It should be a boolean or a string to use as skip message.
+Note: tests will only be skipped when running from a suite.
+
+## Tags
+
+A list of tags (strings).
+Tags can be used to filter tests when running a suite.
+See [Filter Tests by Tags](running-tests.html#filter-tests-by-tags).
 
 ## Implicit vs Explicit Imports
 
 By default the test runner imports the golem.actions module and any page module implicitly during the execution.
 Pages are saved as a list of strings.
-The GUI test builder complies with this format and generates code as the following:
+The GUI test builder complies with this format and generates code like the following:
 
 ```python
 pages = ['page1']

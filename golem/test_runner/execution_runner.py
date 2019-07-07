@@ -394,12 +394,14 @@ class ExecutionRunner:
                     run_test(session.testdir, self.project, test.name,
                              test.data_set, test.secrets, test.browser,
                              session.settings, test.reportdir,
-                             self.execution.has_failed_tests, self.execution.tags)
+                             self.execution.has_failed_tests,
+                             self.execution.tags, self.is_suite)
             else:
                 # run tests using multiprocessing
                 multiprocess_executor(self.project, self.execution.tests,
                                       self.execution.has_failed_tests,
-                                      self.execution.processes, self.execution.tags)
+                                      self.execution.processes, self.execution.tags,
+                                      self.is_suite)
 
         # run suite `after` function
         if self.suite.after:

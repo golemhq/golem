@@ -50,21 +50,25 @@ def _get_set_name(test_data):
 
 
 def run_test(testdir, project, test_name, test_data, secrets, browser,
-             settings, report_directory, execution_has_failed_tests=None, tags=None):
+             settings, report_directory, execution_has_failed_tests=None,
+             tags=None, from_suite=False):
     """Run a single test"""
     session.testdir = testdir
     runner = TestRunner(testdir, project, test_name, test_data, secrets, browser,
-                        settings, report_directory, execution_has_failed_tests, tags)
+                        settings, report_directory, execution_has_failed_tests,
+                        tags, from_suite)
     runner.prepare()
 
 
 class TestRunner:
+
     __test__ = False  # ignore this class from Pytest
 
     def __init__(self, testdir, project, test_name, test_data, secrets, browser,
-                 settings, report_directory, execution_has_failed_tests=None, tags=None):
+                 settings, report_directory, execution_has_failed_tests=None,
+                 tags=None, from_suite=False):
         self.result = {
-            'result': '',
+            'result': None,
             'errors': [],
             'description': '',
             'steps': [],
@@ -88,6 +92,7 @@ class TestRunner:
         self.logger = None
         self.execution_has_failed_tests = execution_has_failed_tests
         self.execution_tags = tags or []
+        self.from_suite = from_suite
 
     def prepare(self):
         self.result['set_name'] = _get_set_name(self.test_data)
@@ -145,7 +150,18 @@ class TestRunner:
                 trcbk = traceback.format_exc()
                 actions._add_error(message=message, description=trcbk)
                 self.result['result'] = ResultsEnum.CODE_ERROR
-        if self.result['result'] == ResultsEnum.CODE_ERROR:
+
+            # check for skip flag
+            # test is skipped only when run from a suite
+            skip = getattr(self.test_module, 'skip', False)
+            if skip and self.from_suite:
+                self.result['result'] = ResultsEnum.SKIPPED
+                msg = 'Skip: {}'.format(skip) if type(skip) is str else 'Skip'
+                execution.logger.info(msg)
+
+
+
+        if self.result['result'] in [ResultsEnum.CODE_ERROR, ResultsEnum.SKIPPED]:
             self.finalize()
         else:
             self.run_setup()
@@ -222,8 +238,9 @@ class TestRunner:
         if self.result['result'] not in [ResultsEnum.CODE_ERROR, ResultsEnum.FAILURE]:
             if execution.errors:
                 self.result['result'] = ResultsEnum.ERROR
-            else:
-                self.result['result'] = ResultsEnum.SUCCESS
+
+        if self.result['result'] is None:
+            self.result['result'] = ResultsEnum.SUCCESS
         execution.logger.info('Test Result: {}'.format(self.result['result'].upper()))
 
         self.result['description'] = execution.description

@@ -644,9 +644,10 @@ def test_save():
     test_data_content = request.json['testData']
     test_steps = request.json['steps']
     tags = request.json['tags']
+    skip = request.json['skip']
     _verify_permissions(Permissions.STANDARD, project)
     test_module.edit_test(project, test_name, description, pages, test_steps,
-                          test_data_content, tags)
+                          test_data_content, tags, skip)
     return jsonify('test-saved')
 
 

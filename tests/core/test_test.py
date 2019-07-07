@@ -50,6 +50,8 @@ def teardown(data):
 """
 
 
+EMPTY_STEPS = {'setup': [], 'test': [], 'teardown': []}
+
 class TestCreateTest:
 
     def test_create_test(self, project_session, test_utils):
@@ -172,8 +174,8 @@ class TestDuplicateTest:
 
 class TestEditTest:
 
-    def test_edit_test_data_infile(self, project_session, test_utils):
-        _, project = project_session.activate()
+    def test_edit_test_data_infile(self, project_function, test_utils):
+        _, project = project_function.activate()
         test_name = test_utils.create_random_test(project)
         description = 'description'
         pages = ['page1', 'page2']
@@ -191,7 +193,6 @@ class TestEditTest:
         }]
         settings_manager.save_project_settings(project, '{"test_data": "infile"}')
         test_module.edit_test(project, test_name, description, pages, test_steps, data, [])
-        path = test_module.Test(project, test_name).path
         expected = (
             '\n'
             'description = \'description\'\n'
@@ -215,11 +216,11 @@ class TestEditTest:
             '\n\n'
             'def teardown(data):\n'
             '    pass\n')
-        with open(path) as f:
+        with open(Test(project, test_name).path) as f:
             assert f.read() == expected
 
-    def test_edit_test_data_csv(self, project_session, test_utils):
-        _, project = project_session.activate()
+    def test_edit_test_data_csv(self, project_function, test_utils):
+        _, project = project_function.activate()
         test_name = test_utils.create_random_test(project)
         description = 'description'
         pages = []
@@ -235,7 +236,6 @@ class TestEditTest:
         }]
         settings_manager.save_project_settings(project, '{"test_data": "csv"}')
         test_module.edit_test(project, test_name, description, pages, test_steps, data, [])
-        path = test_module.Test(project, test_name).path
         expected = (
             '\n'
             'description = \'description\'\n'
@@ -252,7 +252,7 @@ class TestEditTest:
             '\n\n'
             'def teardown(data):\n'
             '    pass\n')
-        with open(path) as f:
+        with open(Test(project, test_name).path) as f:
             assert f.read() == expected
         data_path = os.path.join(Project(project).test_directory_path,
                                  '{}.csv'.format(test_name))
@@ -261,15 +261,13 @@ class TestEditTest:
         with open(data_path) as f:
             assert f.read() == expected
 
-    def test_edit_test_explicit_page_import(self, project_session, test_utils):
-        _, project = project_session.activate()
+    def test_edit_test_explicit_page_import(self, project_function, test_utils):
+        _, project = project_function.activate()
         test_name = test_utils.create_random_test(project)
         pages = ['page1', 'module.page2']
-        steps = {'setup': [], 'test': [], 'teardown': []}
         settings_manager.save_project_settings(project, '{"implicit_page_import": false}')
         test_module.edit_test(project, test_name, description='', pages=pages,
-                              steps=steps, test_data=[], tags=[])
-        path = test_module.Test(project, test_name).path
+                              steps=EMPTY_STEPS, test_data=[], tags=[])
         expected = ('from projects.{}.pages import page1\n'
                     'from projects.{}.pages.module import page2\n'
                     '\n\n'
@@ -285,21 +283,57 @@ class TestEditTest:
                     '\n\n'
                     'def teardown(data):\n'
                     '    pass\n'.format(project, project))
-        with open(path) as f:
+        with open(Test(project, test_name).path) as f:
             assert f.read() == expected
 
-    def test_edit_test_explicit_action_import(self, project_session, test_utils):
-        _, project = project_session.activate()
+    def test_edit_test_explicit_action_import(self, project_function, test_utils):
+        _, project = project_function.activate()
         test_name = test_utils.create_random_test(project)
-        steps = {'setup': [], 'test': [], 'teardown': []}
         settings_manager.save_project_settings(project, '{"implicit_actions_import": false}')
         test_module.edit_test(project, test_name, description='', pages=[],
-                              steps=steps, test_data=[], tags=[])
-        path = test_module.Test(project, test_name).path
+                              steps=EMPTY_STEPS, test_data=[], tags=[])
         expected = ('from golem import actions\n\n\n'
                     'description = \'\'\n\n'
                     'tags = []\n\n'
                     'pages = []\n\n\n'
+                    'def setup(data):\n'
+                    '    pass\n\n\n'
+                    'def test(data):\n'
+                    '    pass\n\n\n'
+                    'def teardown(data):\n'
+                    '    pass\n')
+        with open(Test(project, test_name).path) as f:
+            assert f.read() == expected
+
+    def test_edit_test_skip(self, project_session, test_utils):
+        _, project = project_session.activate()
+        test_name = test_utils.create_random_test(project)
+        test_module.edit_test(project, test_name, description='', pages=[],
+                              steps=EMPTY_STEPS, test_data=[], tags=[], skip=True)
+        path = Test(project, test_name).path
+        expected = ('\n'
+                    'description = \'\'\n\n'
+                    'tags = []\n\n'
+                    'pages = []\n\n'
+                    'skip = True\n\n\n'
+                    'def setup(data):\n'
+                    '    pass\n\n\n'
+                    'def test(data):\n'
+                    '    pass\n\n\n'
+                    'def teardown(data):\n'
+                    '    pass\n')
+        with open(path) as f:
+            assert f.read() == expected
+        # skip is string
+        test_module.edit_test(project, test_name, description='', pages=[],
+                              steps=EMPTY_STEPS, test_data=[], tags=[],
+                              skip='please skip this')
+        path = Test(project, test_name).path
+        expected = ('\n'
+                    'description = \'\'\n\n'
+                    'tags = []\n\n'
+                    'pages = []\n\n'
+                    'skip = \'please skip this\'\n\n\n'
                     'def setup(data):\n'
                     '    pass\n\n\n'
                     'def test(data):\n'
@@ -392,6 +426,8 @@ class TestTestComponents:
         components = test.components
         assert components['description'] == 'some description'
         assert components['pages'] == ['page1', 'page2']
+        assert components['tags'] == []
+        assert components['skip'] is False
         assert components['steps']['setup'] == [{'code': 'page1.func1()',
                                                  'function_name': 'page1.func1',
                                                  'parameters': [],
@@ -439,3 +475,17 @@ class TestTestComponents:
         components = Test(project, test_name).components
         expected = ['page1', 'page2', 'module.page3', 'page4', 'module2.page5']
         assert components['pages'].sort() == expected.sort()
+
+    def test_test_components_skip(self, project_session, test_utils):
+        _, project = project_session.activate()
+        test_name = test_utils.create_random_test(project)
+        # default / empty skip is False
+        assert Test(project, test_name).components['skip'] is False
+        # skip is True
+        test_module.edit_test(project, test_name, description='', pages=[],
+                              steps=EMPTY_STEPS, test_data=[], tags=[], skip=True)
+        assert Test(project, test_name).components['skip'] is True
+        # skip is string
+        test_module.edit_test(project, test_name, description='', pages=[],
+                              steps=EMPTY_STEPS, test_data=[], tags=[], skip='please skip')
+        assert Test(project, test_name).components['skip'] == 'please skip'

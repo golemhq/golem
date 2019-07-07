@@ -9,3 +9,4 @@ class ResultsEnum:
     SUCCESS = 'success'
     STOPPED = 'stopped'
     NOT_RUN = 'not run'
+    SKIPPED = 'skipped'
