@@ -1,6 +1,8 @@
 import os
 import sys
 
+import pytest
+
 from golem.core import page
 from golem.core.page import Page
 from golem.core.project import Project
@@ -121,6 +123,24 @@ class TestEditPage:
                              '    print(a, b)\n')
         with open(Page(project, page_name).path) as f:
             assert f.read() == expected_contents
+
+    element_values = [
+        ("'abc'", "abc"),
+        ('"abc"', 'abc'),
+        ('"""abc"""', 'abc')
+    ]
+
+    @pytest.mark.parametrize('value,expected_value', element_values)
+    def test_edit_page_selector_value_format(self, value, expected_value,
+                                             project_session, test_utils):
+        _, project = project_session.activate()
+        page_name = test_utils.create_random_page(project)
+        elements = [
+            {'name': 'foo', 'selector': 'id', 'value': value, 'display_name': 'foo'},
+        ]
+        page.edit_page(project, page_name, elements, [], [])
+        elements = Page(project, page_name).components['elements']
+        assert elements[0]['value'] == expected_value
 
 
 class TestEditPageCode:
