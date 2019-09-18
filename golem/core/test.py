@@ -27,7 +27,7 @@ def create_test(project_name, test_name):
     else:
         errors = validate_project_element_name(test_name)
     if not errors:
-        project.create_packages_for_element(test_name, 'test')
+        project.create_packages_for_element(test_name, project.file_types.TEST)
         path = Test(project_name, test_name).path
         with open(path, 'w') as f:
             f.write(test_content)
@@ -46,7 +46,7 @@ def rename_test(project_name, test_name, new_test_name):
     if not errors:
         old_path = Test(project_name, test_name).path
         new_path = Test(project_name, new_test_name).path
-        project.create_packages_for_element(new_test_name, 'test')
+        project.create_packages_for_element(new_test_name, project.file_types.TEST)
         errors = file_manager.rename_file(old_path, new_path)
         # try to rename data file in /tests/ folder
         old_data_path = os.path.splitext(old_path)[0] + '.csv'
@@ -71,7 +71,7 @@ def duplicate_test(project, name, new_name):
         errors = validate_project_element_name(new_name)
     if not errors:
         try:
-            Project(project).create_packages_for_element(new_name, 'test')
+            Project(project).create_packages_for_element(new_name, Project.file_types.TEST)
             file_manager.create_directory(path=os.path.dirname(new_path), add_init=True)
             shutil.copyfile(old_path, new_path)
             # duplicate data file if present

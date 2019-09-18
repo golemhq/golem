@@ -18,7 +18,7 @@ def create_page(project_name, page_name):
     else:
         errors = validate_project_element_name(page_name)
     if not errors:
-        project.create_packages_for_element(page_name, 'page')
+        project.create_packages_for_element(page_name, project.file_types.PAGE)
         with open(Page(project_name, page_name).path, 'w') as f:
             f.write('')
     return errors
@@ -35,7 +35,7 @@ def rename_page(project_name, page_name, new_page_name):
     if not errors:
         old_path = Page(project_name, page_name).path
         new_path = Page(project_name, new_page_name).path
-        project.create_packages_for_element(new_page_name, 'page')
+        project.create_packages_for_element(new_page_name, project.file_types.PAGE)
         errors = file_manager.rename_file(old_path, new_path)
     return errors
 
@@ -55,7 +55,7 @@ def duplicate_page(project, name, new_name):
         errors = validate_project_element_name(new_name)
     if not errors:
         try:
-            Project(project).create_packages_for_element(new_name, 'page')
+            Project(project).create_packages_for_element(new_name, Project.file_types.PAGE)
             shutil.copyfile(old_path, new_path)
         except:
             errors.append('There was an error creating the new page')

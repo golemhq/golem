@@ -67,19 +67,27 @@ const Main = new function(){
         // var callback = function(){
         //     myCustomFunction(param1, param2);
         // }
-        this.displayConfirmModal = function(title, message, callback){
+        this.displayConfirmModal = function(title, message, callback, asyncEnableButton){
+            asyncEnableButton = asyncEnableButton || false;
             $("#confirmModal .modal-title").html(title);
             $("#confirmModal .modal-body").html(message);
-            $("#confirmModal button.confirm").unbind('click');
-            $("#confirmModal button.confirm").click(function(){
+            let btn = $("#confirmModal #confirmModalConfirmButton");
+            btn.unbind('click');
+            btn.click(function(){
                 $("#confirmModal .modal-title").html('');
                 $("#confirmModal .modal-body").html('');
                 $("#confirmModal").modal("hide");
                 callback();
             })
+
+            if(asyncEnableButton){
+                btn.button('loading');
+                setTimeout(function(){ btn.button('reset') }, 2000, btn)
+            }
+
             $("#confirmModal").modal("show");
             $('#confirmModal').on('shown.bs.modal', function () {
-                $("#confirmModal button.confirm").focus();
+                btn.focus();
             });
         }
 
@@ -110,7 +118,9 @@ const Main = new function(){
                 $("#prompSaveButton").unbind('click');
             }
 
-            $("#promptModal button.confirm").click(function(){
+            let btn = $("#promptModal button.confirm");
+            btn.unbind('click');
+            btn.click(function(){
                 sendValue();
             })
         }
@@ -149,7 +159,9 @@ const Main = new function(){
                 $("#selectPromptSelect").unbind('change');
                 $("#selectPromptModal button.confirm").unbind('click');
             }
-            $("#selectPromptModal button.confirm").click(function(){
+            let btn = $("#selectPromptModal button.confirm");
+            btn.unbind('click');
+            btn.click(function(){
                 confirm();
             })
         }

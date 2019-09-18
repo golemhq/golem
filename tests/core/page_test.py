@@ -49,18 +49,26 @@ class TestRenamePage:
         assert page_name not in pages
         assert new_page_name in pages
 
-    def test_rename_to_new_directory(self, project_session, test_utils):
+    def test_rename_page_to_new_directory(self, project_session, test_utils):
         _, project = project_session.activate()
         page_name = test_utils.create_random_page(project)
         random_dirname = test_utils.random_string()
         new_page_name = '{}.{}'.format(random_dirname, test_utils.random_string())
-        page.rename_page(project, page_name, new_page_name)
+        errors = page.rename_page(project, page_name, new_page_name)
+        assert errors == []
         pages = Project(project).pages()
         assert page_name not in pages
         assert new_page_name in pages
         init_file_path = os.path.join(Project(project).page_directory_path,
                                       random_dirname, '__init__.py')
         assert os.path.isfile(init_file_path)
+
+    def test_rename_page_invalid_name(self, project_session, test_utils):
+        _, project = project_session.activate()
+        page_name = test_utils.create_random_page(project)
+        new_page = 'invalid-page-name'
+        errors = page.rename_page(project, page_name, new_page)
+        assert errors == ['Only letters, numbers and underscores are allowed']
 
 
 class TestDuplicatePage:
@@ -88,7 +96,7 @@ class TestDuplicatePage:
         errors = page.duplicate_page(project, page_name, page_name_two)
         assert errors == ['A page with that name already exists']
 
-    def test_duplicate_page_error(self, project_session, test_utils):
+    def test_duplicate_page_invalid_name(self, project_session, test_utils):
         _, project = project_session.activate()
         page_name = test_utils.create_random_page(project)
         new_page_name = 'new-name'

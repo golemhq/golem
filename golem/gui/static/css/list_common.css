@@ -1,0 +1,158 @@
+.box-container{
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 3px
+}
+
+.folder-content {
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none
+}
+
+#breadcrumb {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+#breadcrumb a {
+    text-decoration: none;
+    color: #369;
+}
+
+.folder-content .folder-content {
+    margin-left: 1em;
+    position: relative
+}
+
+.folder-content .folder-content:before {
+    content: "";
+    display: block;
+    width: 0;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    border-left: 1px solid;
+    z-index: 10
+}
+
+.folder-content>.tree-element {
+    padding: 0 1em;
+    line-height: 2em;
+    color: #369;
+    font-weight: 700;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.folder-content .folder-content .tree-element:before {
+    content:"";
+    display: block;
+    width: 10px;
+    height: 0;
+    border-top: 1px solid;
+    margin-top: -1px;
+    position: absolute;
+    top: 1em;
+    left: 0
+}
+
+.folder-content .folder-content .tree-element:last-child:before {
+    background: #fff;
+    height: auto;
+    top: 1em;
+    bottom: 0;
+    z-index: 11
+}
+
+.folder-content .folder-content .tree-element.file:last-child:hover:before {
+    background: #fafafa;
+    border-left: 1px solid #fff
+}
+
+.folder-icon {
+    margin-right:5px;
+}
+
+.tree-element a, #bottomMenu a {
+    text-decoration: none;
+    color: #369;
+}
+
+.tree-element a.file-link {
+    max-width: calc(100% - 90px);
+    overflow: hidden;
+    float: left;
+    text-overflow: ellipsis;
+}
+
+.folder-content li[type="test"] a.list-item-link {
+    max-width: calc(100% - 105px);
+}
+
+.folder-content li button {
+    text-decoration: none;
+    color: #369;
+    border: none;
+    background: transparent;
+    margin: 0px;
+    padding: 0px;
+    outline: 0;
+}
+
+.tree-element:not(.folder):hover {
+    background-color: #fafafa;
+}
+
+.tree-element:not(.folder):hover > a.file-link {
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.new-element-input {
+    max-width: 500px;
+    font-size: 16px;
+    padding-left: 2px
+}
+
+#rootFolderContent {
+    min-height: 5px
+}
+
+.folder-menu-button-toggle:hover, .folder-menu-button-toggle:active, .folder-menu-button-toggle:focus {
+    background-color: inherit !important;
+    box-shadow: unset;
+    outline: unset !important
+}
+
+.folder-menu.active {
+    display: none
+}
+
+.folder-menu.active {
+    display: block
+}
+
+#bottomMenu {
+    padding-left: 1em
+}
+
+.file-menu {
+    display: none;
+    background-color: #fafafa;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    padding-left:5px;
+}
+
+li.tree-element:hover > .file-menu {
+    display: block;
+}
+
+.file-menu .file-menu-button {
+    padding-left: 5px
+}

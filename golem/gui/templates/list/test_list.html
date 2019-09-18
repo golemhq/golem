@@ -3,7 +3,7 @@
 {% block title %}Golem : {{project|capitalize}} : Tests{% endblock %}
 
 {% block head %}
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/project_dashboard.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/list_common.css') }}">
 {% endblock %} 
 
 {% block content %}
@@ -11,12 +11,13 @@
 	<div class="col-md-10 col-md-offset-1">
 		<h3>{{project|capitalize|replace("_", " ")}} - Tests</h3>
         <br>
-		<div id="testsContainer" class="col-md-12 box-container gray-border-3">
-			<ul id="treeRoot" class='test-tree'></ul>
+		<div id="fileExporerContainer" class="col-md-12 box-container gray-border-3">
+			<div id="breadcrumb"></div>
+			<ul id="rootFolderContent" class="tree folder-content"></ul>
+			<div id="bottomMenu"></div>
 		</div>
 	</div>
 </div>
-<script src="{{ url_for('static', filename='js/external/treeview.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/jquery.autocomplete.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/list/list_common.js') }}"></script>
 <script src="{{ url_for('static', filename='js/list/test_list.js') }}"></script>

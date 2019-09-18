@@ -37,11 +37,16 @@ class TestCreateSuite:
         init_path = os.path.join(Project(project).suite_directory_path, parents[0], parents[1], '__init__.py')
         assert os.path.isfile(init_path)
 
-    def test_new_suite_already_exists(self, project_session, test_utils):
+    def test_create_suite_already_exists(self, project_session, test_utils):
         _, project = project_session.activate()
         suite_name = test_utils.create_random_suite(project)
         errors = suite.create_suite(project, suite_name)
         assert errors == ['A suite with that name already exists']
+
+    def test_create_suite_invalid_name(self, project_session):
+        _, project = project_session.activate()
+        errors = suite.create_suite(project, 'invalid-suite-name')
+        assert errors == ['Only letters, numbers and underscores are allowed']
 
 
 class TestRenameSuite:
@@ -93,7 +98,7 @@ class TestDuplicateSuite:
         errors = suite.duplicate_suite(project, suite_name, suite_name_two)
         assert errors == ['A suite with that name already exists']
 
-    def test_duplicate_suite_error(self, project_session, test_utils):
+    def test_duplicate_suite_invalid_name(self, project_session, test_utils):
         _, project = project_session.activate()
         suite_name = test_utils.create_random_suite(project)
         new_suite_name = 'new-name'

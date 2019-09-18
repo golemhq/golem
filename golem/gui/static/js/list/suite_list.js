@@ -18,8 +18,7 @@ const SuiteList = new function(){
             contentType: 'application/json',
             type: 'GET',
             success: function(suites) {
-                let treeRoot = $("#treeRoot");
-                Project.loadTreeElements(treeRoot, suites.sub_elements, 'suite');
+                FileExplorer.initialize(suites, 'suite');
             },
         });
     }

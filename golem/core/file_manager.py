@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from golem.core import session
 
@@ -44,8 +45,9 @@ def generate_file_structure_dict(full_path, original_path=None):
     root_dir_name = os.path.basename(os.path.normpath(full_path))
     if not original_path:
         original_path = full_path
-    _ = os.path.relpath(full_path, original_path).replace(os.sep, '.')
-    element = _directory_element('directory', root_dir_name, _)
+    rel_path = os.path.relpath(full_path, original_path).replace(os.sep, '.')
+    rel_dot_path = '' if rel_path == '.' else rel_path.replace(os.sep, '.')
+    element = _directory_element('directory', root_dir_name, rel_dot_path)
 
     all_sub_elements = os.listdir(full_path)
     files = []
@@ -130,8 +132,7 @@ def rename_file(old_path, new_path):
             os.makedirs(os.path.dirname(new_path), exist_ok=True)
             os.rename(old_path, new_path)
         except:
-            errors.append('There was an error renaming \'{}\' to \'{}\''
-                          .format(old_path, new_path))
+            errors.append('There was an error renaming file')
     return errors
 
 
@@ -162,3 +163,62 @@ def create_package_directories(base_path, rel_path):
         base_path = os.path.join(base_path, dir_)
         if not os.path.isdir(base_path):
             create_package(path=base_path)
+
+
+def rename_directory(basepath, src, dst):
+    """Rename a directory folder.
+    src and dst must be relative paths to basepath.
+    src must exists and be a directory.
+    dst must not exist.
+    """
+    errors = []
+    srcpath = os.path.join(basepath, src)
+    dstpath = os.path.join(basepath, dst)
+    if not os.path.exists(srcpath):
+        errors.append('Directory {} does not exist'.format(src))
+    elif not os.path.isdir(srcpath):
+        errors.append('Path {} is not a directory'.format(src))
+    elif os.path.exists(dstpath):
+        errors.append('Path {} already exists'.format(dst))
+    else:
+        try:
+            dirname = os.path.dirname(dst)
+            if dirname:
+                create_package_directories(basepath, dirname)
+            os.rename(srcpath, dstpath)
+        except PermissionError:
+            errors.append('Error: PermissionError')
+        except Exception as e:
+            print(e)
+            errors.append('An error occurred while renaming folder')
+    return errors
+
+
+def delete_directory(dirpath):
+    """Delete a directory"""
+    errors = []
+    if not os.path.isdir(dirpath):
+        errors.append('Directory does not exist')
+    else:
+        try:
+            shutil.rmtree(dirpath, ignore_errors=False)
+        except PermissionError:
+            errors.append('Error: PermissionError')
+        except Exception:
+            errors.append('An error occurred while renaming folder')
+    return errors
+
+
+def path_is_parent_of_path(path, second_path):
+    """Return whether the first path is a parent of the
+    second path.
+    """
+    os_sep_path = path.split(os.sep)
+    os_sep_second_path = second_path.split(os.sep)
+    if len(os_sep_path) >= len(os_sep_second_path):
+        return False
+    else:
+        for i, x in enumerate(os_sep_path):
+            if x != os_sep_second_path[i]:
+                return False
+        return True

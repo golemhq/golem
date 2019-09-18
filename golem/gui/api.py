@@ -8,12 +8,12 @@ from flask.blueprints import Blueprint
 from flask_login import current_user
 from itsdangerous import BadSignature, SignatureExpired
 
-from golem.core import (environment_manager, settings_manager, test as test_module,
-                        session, utils, tags_manager, test_directory)
+from golem.core import (environment_manager, settings_manager,
+                        test as test_module, page as page_module,
+                        suite as suite_module, session, utils, tags_manager,
+                        test_directory)
 from golem.core.page import Page
-from golem.core import page as page_module
-from golem.core import suite as suite_module
-from golem.core.project import Project, create_project
+from golem.core.project import Project, create_project, delete_project
 from golem.gui import gui_utils, report_parser
 from golem.gui.user_management import Users, Permissions
 
@@ -141,6 +141,18 @@ def page_rename():
     return jsonify({'errors': errors})
 
 
+@api_bp.route('/page/directory/rename', methods=['POST'])
+@auth_required
+def page_directory_rename():
+    return _rename_directory(request, Project.file_types.PAGE)
+
+
+@api_bp.route('/page/directory/delete', methods=['DELETE'])
+@auth_required
+def page_directory_delete():
+    return _delete_directory(request, Project.file_types.PAGE)
+
+
 @api_bp.route('/page/save', methods=['PUT'])
 @auth_required
 def page_save():
@@ -172,6 +184,21 @@ def project_create():
         # update projects cache
         gui_utils.ProjectsCache.add(project_name)
     return jsonify({'errors': errors, 'project_name': project_name})
+
+
+@api_bp.route('/project/delete', methods=['DELETE'])
+@auth_required
+def project_delete():
+    project_name = request.json['project']
+    _verify_permissions(Permissions.SUPER_USER)
+    errors = []
+    if not test_directory.project_exists(project_name):
+        errors.append('Project {} does not exist'.format(project_name))
+    else:
+        delete_project(project_name)
+        # update projects cache
+        gui_utils.ProjectsCache.remove(project_name)
+    return jsonify({'errors': errors})
 
 
 @api_bp.route('/project/environments')
@@ -237,7 +264,7 @@ def project_page_create():
     project = request.json['project']
     page_name = request.json['fullPath']
     _verify_permissions(Permissions.STANDARD, project)
-    element, errors = _create_project_element(project, page_name, 'page')
+    element, errors = _create_project_element(project, page_name, Project.file_types.PAGE)
     return jsonify({'errors': errors, 'element': element})
 
 
@@ -247,7 +274,7 @@ def project_page_directory_create():
     project = request.json['project']
     dir_name = request.json['fullPath']
     _verify_permissions(Permissions.STANDARD, project)
-    errors = Project(project).create_directories(dir_name, 'page')
+    errors = Project(project).create_directories(dir_name, Project.file_types.PAGE)
     element = {'name': dir_name.split('.')[-1], 'full_name': dir_name}
     return jsonify({'errors': errors, 'element': element})
 
@@ -259,6 +286,24 @@ def project_page_exists():
     page_name = request.args['page']
     _verify_permissions(Permissions.READ_ONLY, project)
     return jsonify(Page(project, page_name).exists)
+
+
+@api_bp.route('/project/test-exists')
+@auth_required
+def project_test_exists():
+    project = request.args['project']
+    test_name = request.args['test']
+    _verify_permissions(Permissions.READ_ONLY, project)
+    return jsonify(test_module.Test(project, test_name).exists)
+
+
+@api_bp.route('/project/suite-exists')
+@auth_required
+def project_suite_exists():
+    project = request.args['project']
+    suite_name = request.args['suite']
+    _verify_permissions(Permissions.READ_ONLY, project)
+    return jsonify(suite_module.Suite(project, suite_name).exists)
 
 
 @api_bp.route('/project/page-tree')
@@ -284,7 +329,7 @@ def project_suite_create():
     project = request.json['project']
     suite_name = request.json['fullPath']
     _verify_permissions(Permissions.STANDARD, project)
-    element, errors = _create_project_element(project, suite_name, 'suite')
+    element, errors = _create_project_element(project, suite_name, Project.file_types.SUITE)
     return jsonify({'errors': errors, 'element': element})
 
 
@@ -294,7 +339,7 @@ def project_suite_directory_create():
     project = request.json['project']
     dir_name = request.json['fullPath']
     _verify_permissions(Permissions.STANDARD, project)
-    errors = Project(project).create_directories(dir_name, 'suite')
+    errors = Project(project).create_directories(dir_name, Project.file_types.SUITE)
     element = {'name': dir_name.split('.')[-1], 'full_name': dir_name}
     return jsonify({'errors': errors, 'element': element})
 
@@ -332,7 +377,7 @@ def project_test_create():
     project = request.json['project']
     test_name = request.json['fullPath']
     _verify_permissions(Permissions.STANDARD, project)
-    element, errors = _create_project_element(project, test_name, 'test')
+    element, errors = _create_project_element(project, test_name, Project.file_types.TEST)
     return jsonify({'errors': errors, 'element': element})
 
 
@@ -342,7 +387,7 @@ def project_test_directory_create():
     project = request.json['project']
     dir_name = request.json['fullPath']
     _verify_permissions(Permissions.STANDARD, project)
-    errors = Project(project).create_directories(dir_name, 'test')
+    errors = Project(project).create_directories(dir_name, Project.file_types.TEST)
     element = {'name': dir_name.split('.')[-1], 'full_name': dir_name}
     return jsonify({'errors': errors, 'element': element})
 
@@ -549,6 +594,18 @@ def suite_rename():
     return jsonify({'errors': errors})
 
 
+@api_bp.route('/suite/directory/rename', methods=['POST'])
+@auth_required
+def suite_directory_rename():
+    return _rename_directory(request, Project.file_types.SUITE)
+
+
+@api_bp.route('/suite/directory/delete', methods=['DELETE'])
+@auth_required
+def suite_directory_delete():
+    return _delete_directory(request, Project.file_types.SUITE)
+
+
 @api_bp.route('/suite/run', methods=['POST'])
 @auth_required
 def suite_run():
@@ -619,6 +676,18 @@ def test_rename():
     _verify_permissions(Permissions.STANDARD, project)
     errors = test_module.rename_test(project, test_name, new_test_name)
     return jsonify({'errors': errors})
+
+
+@api_bp.route('/test/directory/rename', methods=['POST'])
+@auth_required
+def test_directory_rename():
+    return _rename_directory(request, Project.file_types.TEST)
+
+
+@api_bp.route('/test/directory/delete', methods=['DELETE'])
+@auth_required
+def test_directory_delete():
+    return _delete_directory(request, Project.file_types.TEST)
 
 
 @api_bp.route('/test/run', methods=['POST'])
@@ -736,14 +805,15 @@ def user_reset_user_password():
     return jsonify({'errors': errors})
 
 
-def _create_project_element(project, element_name, element_type):
+def _create_project_element(project_name, element_name, element_type):
     errors = []
-    if element_type == 'test':
-        errors = test_module.create_test(project, element_name)
-    elif element_type == 'page':
-        errors = page_module.create_page(project, element_name)
-    elif element_type == 'suite':
-        errors = suite_module.create_suite(project, element_name)
+    element_name = element_name.strip().replace(' ', '_')
+    if element_type == Project.file_types.TEST:
+        errors = test_module.create_test(project_name, element_name)
+    elif element_type == Project.file_types.PAGE:
+        errors = page_module.create_page(project_name, element_name)
+    elif element_type == Project.file_types.SUITE:
+        errors = suite_module.create_suite(project_name, element_name)
     else:
         errors.append('Invalid element type {}'.format(element_type))
     element = {
@@ -751,6 +821,23 @@ def _create_project_element(project, element_name, element_type):
         'full_name': element_name
     }
     return element, errors
+
+
+def _rename_directory(_request, dir_type):
+    project = _request.json['project']
+    dir_name = _request.json['fullDirname']
+    new_dir_name = _request.json['newFullDirname']
+    _verify_permissions(Permissions.STANDARD, project)
+    errors = Project(project).rename_directory(dir_name, new_dir_name, dir_type)
+    return jsonify({'errors': errors})
+
+
+def _delete_directory(_request, dir_type):
+    project = _request.json['project']
+    dir_name = _request.json['fullDirname']
+    _verify_permissions(Permissions.STANDARD, project)
+    errors = Project(project).delete_directory(dir_name, dir_type)
+    return jsonify({'errors': errors})
 
 
 def _get_user_api_or_session():
