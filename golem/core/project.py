@@ -131,7 +131,7 @@ class Project:
             file_manager.create_package_directories(base_path, relpath)
 
     def create_directories(self, dir_name, file_type):
-        errors = validate_project_element_name(dir_name)
+        errors = validate_project_element_name(dir_name, isdir=True)
         if not errors:
             base_path = self.element_directory_path(file_type)
             relpath = os.sep.join(dir_name.split('.'))
@@ -170,8 +170,8 @@ class Project:
         return self.name
 
 
-def validate_project_element_name(name):
-    """"Validate name for a test, page or suite.
+def validate_project_element_name(name, isdir=False):
+    """"Validate name for a test, page or suite (or folders).
     `name` must be a relative dot path from the base element folder.
     """
     errors = []
@@ -181,8 +181,16 @@ def validate_project_element_name(name):
         if len(part) == 0:
             errors.append('Directory name cannot be empty')
             break
+        elif len(part) > 150:
+            errors.append('Maximum name length is 150 characters')
+            break
     if len(last_part) == 0:
-        errors.append('File name cannot be empty')
+        if isdir:
+            errors.append('Folder name cannot be empty')
+        else:
+            errors.append('File name cannot be empty')
+    elif len(last_part) > 150:
+        errors.append('Maximum name length is 150 characters')
     for c in name:
         if not c.isalnum() and c not in ['_', '.']:
             errors.append('Only letters, numbers and underscores are allowed')

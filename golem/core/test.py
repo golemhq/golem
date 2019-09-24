@@ -21,7 +21,6 @@ def create_test(project_name, test_name):
         "    pass\n\n")
     errors = []
     project = Project(project_name)
-    test_name = test_name.strip().replace(' ', '_')
     if test_name in project.tests():
         errors.append('A test with that name already exists')
     else:
@@ -38,7 +37,6 @@ def create_test(project_name, test_name):
 def rename_test(project_name, test_name, new_test_name):
     errors = []
     project = Project(project_name)
-    new_test_name = new_test_name.strip().replace(' ', '_')
     if test_name not in project.tests():
         errors.append('Test {} does not exist'.format(test_name))
     else:
@@ -60,7 +58,6 @@ def duplicate_test(project, name, new_name):
     errors = []
     old_path = Test(project, name).path
     new_path = Test(project, new_name).path
-    new_name = new_name.strip().replace(' ', '_')
     if name == new_name:
         errors.append('New test name cannot be the same as the original')
     elif not os.path.isfile(old_path):

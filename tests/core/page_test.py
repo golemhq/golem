@@ -36,6 +36,10 @@ class TestCreatePage:
         _, project = project_session.activate()
         errors = page.create_page(project, 'invalid-name')
         assert errors == ['Only letters, numbers and underscores are allowed']
+        errors = page.create_page(project, 'test.')
+        assert errors == ['File name cannot be empty']
+        errors = page.create_page(project, '.test')
+        assert errors == ['Directory name cannot be empty']
 
 
 class TestRenamePage:
@@ -66,9 +70,12 @@ class TestRenamePage:
     def test_rename_page_invalid_name(self, project_session, test_utils):
         _, project = project_session.activate()
         page_name = test_utils.create_random_page(project)
-        new_page = 'invalid-page-name'
-        errors = page.rename_page(project, page_name, new_page)
+        errors = page.rename_page(project, page_name, 'invalid-name')
         assert errors == ['Only letters, numbers and underscores are allowed']
+        errors = page.rename_page(project, page_name, 'page.')
+        assert errors == ['File name cannot be empty']
+        errors = page.rename_page(project, page_name, '.page')
+        assert errors == ['Directory name cannot be empty']
 
 
 class TestDuplicatePage:
@@ -99,9 +106,12 @@ class TestDuplicatePage:
     def test_duplicate_page_invalid_name(self, project_session, test_utils):
         _, project = project_session.activate()
         page_name = test_utils.create_random_page(project)
-        new_page_name = 'new-name'
-        errors = page.duplicate_page(project, page_name, new_page_name)
+        errors = page.duplicate_page(project, page_name, 'new-name')
         assert errors == ['Only letters, numbers and underscores are allowed']
+        errors = page.duplicate_page(project, page_name, 'page.')
+        assert errors == ['File name cannot be empty']
+        errors = page.duplicate_page(project, page_name, '.page')
+        assert errors == ['Directory name cannot be empty']
 
 
 class TestEditPage:

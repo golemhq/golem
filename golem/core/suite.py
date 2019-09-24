@@ -34,7 +34,6 @@ def rename_suite(project, suite_name, new_suite_name):
     if suite_name not in project_obj.suites():
         errors.append('Suite {} does not exist'.format(suite_name))
     else:
-        new_suite_name = new_suite_name.strip().replace(' ', '_')
         errors = validate_project_element_name(new_suite_name)
     if not errors:
         old_path = Suite(project, suite_name).path

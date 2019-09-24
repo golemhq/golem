@@ -52,6 +52,7 @@ def teardown(data):
 
 EMPTY_STEPS = {'setup': [], 'test': [], 'teardown': []}
 
+
 class TestCreateTest:
 
     def test_create_test(self, project_session, test_utils):
@@ -73,9 +74,32 @@ class TestCreateTest:
 
     def test_create_test_invalid_name(self, project_session):
         _, project = project_session.activate()
-        test_name = 'this-is-a-test'
-        errors = test_module.create_test(project, test_name)
-        assert errors == ['Only letters, numbers and underscores are allowed']
+        # invalid chars
+        invalid_names = [
+            'te-st',
+            'te st',
+            'te?st',
+            'test. .test'
+        ]
+        for name in invalid_names:
+            errors = test_module.create_test(project, name)
+            assert errors == ['Only letters, numbers and underscores are allowed']
+        # empty directory
+        invalid_names = [
+            '.test',
+            'test..test',
+        ]
+        for name in invalid_names:
+            errors = test_module.create_test(project, name)
+            assert errors == ['Directory name cannot be empty']
+        # empty file name
+        invalid_names = [
+            '',
+            'test.',
+        ]
+        for name in invalid_names:
+            errors = test_module.create_test(project, name)
+            assert errors == ['File name cannot be empty']
 
     def test_create_test_into_folder(self, project_session, test_utils):
         _, project = project_session.activate()
@@ -145,9 +169,24 @@ class TestRenameTest:
     def test_rename_test_invalid_name(self, project_session, test_utils):
         _, project = project_session.activate()
         test_name = test_utils.create_random_test(project)
+        # invalid chars
         new_test_name = 'new-name'
         errors = test_module.rename_test(project, test_name, new_test_name)
         assert errors == ['Only letters, numbers and underscores are allowed']
+        tests = Project(project).tests()
+        assert test_name in tests
+        assert new_test_name not in tests
+        # empty filename
+        new_test_name = 'test.'
+        errors = test_module.rename_test(project, test_name, new_test_name)
+        assert errors == ['File name cannot be empty']
+        tests = Project(project).tests()
+        assert test_name in tests
+        assert new_test_name not in tests
+        # empty directory
+        new_test_name = 'test..test'
+        errors = test_module.rename_test(project, test_name, new_test_name)
+        assert errors == ['Directory name cannot be empty']
         tests = Project(project).tests()
         assert test_name in tests
         assert new_test_name not in tests
@@ -251,9 +290,18 @@ class TestDuplicateTest:
     def test_duplicate_test_invalid_name(self, project_session, test_utils):
         _, project = project_session.activate()
         test_name = test_utils.create_random_test(project)
+        # invalid name
         new_test_name = 'new-name'
         errors = test_module.duplicate_test(project, test_name, new_test_name)
         assert errors == ['Only letters, numbers and underscores are allowed']
+        # empty name
+        new_test_name = 'test.'
+        errors = test_module.duplicate_test(project, test_name, new_test_name)
+        assert errors == ['File name cannot be empty']
+        # empty directory
+        new_test_name = 'test.'
+        errors = test_module.duplicate_test(project, test_name, new_test_name)
+        assert errors == ['File name cannot be empty']
 
     def test_duplicate_test_with_data_file(self, project_session, test_utils):
         """Assert when a test has a data file the data file is duplicated as well"""

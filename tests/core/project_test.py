@@ -361,7 +361,9 @@ class TestValidateProjectElementName:
         'file_name',
         'file_name123',
         'a.valid.filename',
-        'this.is.a_valid.file_name'
+        'this.is.a_valid.file_name',
+        'a'*150,
+        '{}.{}'.format('a'*150, 'b'*150)
     ]
 
     empty_dirs = [
@@ -386,7 +388,17 @@ class TestValidateProjectElementName:
         '/test',
         'test/',
         '\\test',
-        'te-st.test'
+        ' test',
+        'test ',
+        'te-st.test',
+        ' test.test',
+        'test.test '
+    ]
+
+    max_names = [
+        'a'*151,
+        '{}.{}'.format('a'*150, 'b'*151),
+        '{}.{}'.format('a'*151, 'b'*150)
     ]
 
     @pytest.mark.parametrize('name', names)
@@ -400,11 +412,21 @@ class TestValidateProjectElementName:
         assert errors == ['Directory name cannot be empty']
 
     @pytest.mark.parametrize('name', empty_names)
-    def test_validate_project_element_name_empty_name(self, name):
+    def test_validate_project_element_name_empty(self, name):
         errors = validate_project_element_name(name)
         assert errors == ['File name cannot be empty']
+
+    @pytest.mark.parametrize('name', empty_names)
+    def test_validate_project_folder_name_empty(self, name):
+        errors = validate_project_element_name(name, isdir=True)
+        assert errors == ['Folder name cannot be empty']
 
     @pytest.mark.parametrize('name', invalid_chars)
     def test_validate_project_element_name_invalid_chars(self, name):
         errors = validate_project_element_name(name)
         assert errors == ['Only letters, numbers and underscores are allowed']
+
+    @pytest.mark.parametrize('name', max_names)
+    def test_validate_project_element_name_max_length(self, name):
+        errors = validate_project_element_name(name)
+        assert errors == ['Maximum name length is 150 characters']

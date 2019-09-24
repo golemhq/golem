@@ -377,8 +377,8 @@ var Test = new function(){
             type: 'POST',
             success: function(data) {
                 if(data.errors.length == 0){
-                    Test.allPages.push(data.element.full_name);
-                    Test.addPageToList(data.element.full_name)
+                    Test.allPages.push(newPageName);
+                    Test.addPageToList(newPageName)
                 }
                 else{
                     Main.Utils.displayErrorModal(data.errors);

@@ -103,7 +103,7 @@ const FileExplorer = new function(){
                 type: 'POST',
                 success: function(data) {
                     if(data.errors.length == 0)
-                        FileExplorer.rootFolder.addFile(data.element.full_name)
+                        FileExplorer.rootFolder.addFile(filename)
                     else
                         Main.Utils.displayErrorModal(data.errors)
                 },

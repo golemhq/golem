@@ -133,12 +133,7 @@ def page_components():
 @api_bp.route('/page/rename', methods=['POST'])
 @auth_required
 def page_rename():
-    project = request.json['project']
-    page_name = request.json['fullFilename']
-    new_page_name = request.json['newFullFilename']
-    _verify_permissions(Permissions.STANDARD, project)
-    errors = page_module.rename_page(project, page_name, new_page_name)
-    return jsonify({'errors': errors})
+    return _rename_project_element(Project.file_types.PAGE)
 
 
 @api_bp.route('/page/directory/rename', methods=['POST'])
@@ -263,9 +258,7 @@ def project_health():
 def project_page_create():
     project = request.json['project']
     page_name = request.json['fullPath']
-    _verify_permissions(Permissions.STANDARD, project)
-    element, errors = _create_project_element(project, page_name, Project.file_types.PAGE)
-    return jsonify({'errors': errors, 'element': element})
+    return _create_project_element(project, page_name, Project.file_types.PAGE)
 
 
 @api_bp.route('/project/page/directory', methods=['POST'])
@@ -275,8 +268,7 @@ def project_page_directory_create():
     dir_name = request.json['fullPath']
     _verify_permissions(Permissions.STANDARD, project)
     errors = Project(project).create_directories(dir_name, Project.file_types.PAGE)
-    element = {'name': dir_name.split('.')[-1], 'full_name': dir_name}
-    return jsonify({'errors': errors, 'element': element})
+    return jsonify({'errors': errors})
 
 
 @api_bp.route('/project/page-exists')
@@ -328,9 +320,7 @@ def project_pages():
 def project_suite_create():
     project = request.json['project']
     suite_name = request.json['fullPath']
-    _verify_permissions(Permissions.STANDARD, project)
-    element, errors = _create_project_element(project, suite_name, Project.file_types.SUITE)
-    return jsonify({'errors': errors, 'element': element})
+    return _create_project_element(project, suite_name, Project.file_types.SUITE)
 
 
 @api_bp.route('/project/suite/directory', methods=['POST'])
@@ -340,8 +330,7 @@ def project_suite_directory_create():
     dir_name = request.json['fullPath']
     _verify_permissions(Permissions.STANDARD, project)
     errors = Project(project).create_directories(dir_name, Project.file_types.SUITE)
-    element = {'name': dir_name.split('.')[-1], 'full_name': dir_name}
-    return jsonify({'errors': errors, 'element': element})
+    return jsonify({'errors': errors})
 
 
 @api_bp.route('/project/suite-tree')
@@ -376,9 +365,7 @@ def project_tags():
 def project_test_create():
     project = request.json['project']
     test_name = request.json['fullPath']
-    _verify_permissions(Permissions.STANDARD, project)
-    element, errors = _create_project_element(project, test_name, Project.file_types.TEST)
-    return jsonify({'errors': errors, 'element': element})
+    return _create_project_element(project, test_name, Project.file_types.TEST)
 
 
 @api_bp.route('/project/test/directory', methods=['POST'])
@@ -388,8 +375,7 @@ def project_test_directory_create():
     dir_name = request.json['fullPath']
     _verify_permissions(Permissions.STANDARD, project)
     errors = Project(project).create_directories(dir_name, Project.file_types.TEST)
-    element = {'name': dir_name.split('.')[-1], 'full_name': dir_name}
-    return jsonify({'errors': errors, 'element': element})
+    return jsonify({'errors': errors})
 
 
 @api_bp.route('/project/test-tags')
@@ -586,12 +572,7 @@ def suite_duplicate():
 @api_bp.route('/suite/rename', methods=['POST'])
 @auth_required
 def suite_rename():
-    project = request.json['project']
-    page_name = request.json['fullFilename']
-    new_page_name = request.json['newFullFilename']
-    _verify_permissions(Permissions.STANDARD, project)
-    errors = suite_module.rename_suite(project, page_name, new_page_name)
-    return jsonify({'errors': errors})
+    return _rename_project_element(Project.file_types.SUITE)
 
 
 @api_bp.route('/suite/directory/rename', methods=['POST'])
@@ -670,12 +651,7 @@ def test_duplicate():
 @api_bp.route('/test/rename', methods=['POST'])
 @auth_required
 def test_rename():
-    project = request.json['project']
-    test_name = request.json['fullFilename']
-    new_test_name = request.json['newFullFilename']
-    _verify_permissions(Permissions.STANDARD, project)
-    errors = test_module.rename_test(project, test_name, new_test_name)
-    return jsonify({'errors': errors})
+    return _rename_project_element(Project.file_types.TEST)
 
 
 @api_bp.route('/test/directory/rename', methods=['POST'])
@@ -807,7 +783,7 @@ def user_reset_user_password():
 
 def _create_project_element(project_name, element_name, element_type):
     errors = []
-    element_name = element_name.strip().replace(' ', '_')
+    _verify_permissions(Permissions.STANDARD, project_name)
     if element_type == Project.file_types.TEST:
         errors = test_module.create_test(project_name, element_name)
     elif element_type == Project.file_types.PAGE:
@@ -816,11 +792,24 @@ def _create_project_element(project_name, element_name, element_type):
         errors = suite_module.create_suite(project_name, element_name)
     else:
         errors.append('Invalid element type {}'.format(element_type))
-    element = {
-        'name': element_name.split('.')[-1],
-        'full_name': element_name
-    }
-    return element, errors
+    return jsonify({'errors': errors})
+
+
+def _rename_project_element(element_type):
+    project = request.json['project']
+    name = request.json['fullFilename']
+    new_name = request.json['newFullFilename']
+    errors = []
+    _verify_permissions(Permissions.STANDARD, project)
+    if element_type == Project.file_types.TEST:
+        errors = test_module.rename_test(project, name, new_name)
+    elif element_type == Project.file_types.PAGE:
+        errors = page_module.rename_page(project, name, new_name)
+    elif element_type == Project.file_types.SUITE:
+        errors = suite_module.rename_suite(project, name, new_name)
+    else:
+        errors.append('Invalid element type {}'.format(element_type))
+    return jsonify({'errors': errors})
 
 
 def _rename_directory(_request, dir_type):

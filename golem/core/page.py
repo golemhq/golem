@@ -11,7 +11,6 @@ from golem.core.project import Project, validate_project_element_name, BaseProje
 
 def create_page(project_name, page_name):
     errors = []
-    page_name = page_name.strip().replace(' ', '_')
     project = Project(project_name)
     if page_name in project.pages():
         errors.append('A page with that name already exists')
@@ -27,7 +26,6 @@ def create_page(project_name, page_name):
 def rename_page(project_name, page_name, new_page_name):
     errors = []
     project = Project(project_name)
-    new_page_name = new_page_name.strip().replace(' ', '_')
     if page_name not in project.pages():
         errors.append('Page {} does not exist'.format(page_name))
     else:
@@ -44,7 +42,6 @@ def duplicate_page(project, name, new_name):
     errors = []
     old_path = Page(project, name).path
     new_path = Page(project, new_name).path
-    new_name = new_name.strip().replace(' ', '_')
     if name == new_name:
         errors.append('New page name cannot be the same as the original')
     elif not os.path.isfile(old_path):

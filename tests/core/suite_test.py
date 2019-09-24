@@ -45,8 +45,12 @@ class TestCreateSuite:
 
     def test_create_suite_invalid_name(self, project_session):
         _, project = project_session.activate()
-        errors = suite.create_suite(project, 'invalid-suite-name')
+        errors = suite.create_suite(project, 'invalid-name')
         assert errors == ['Only letters, numbers and underscores are allowed']
+        errors = suite.create_suite(project, 'suite.')
+        assert errors == ['File name cannot be empty']
+        errors = suite.create_suite(project, '.suite')
+        assert errors == ['Directory name cannot be empty']
 
 
 class TestRenameSuite:
