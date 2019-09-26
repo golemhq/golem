@@ -1,6 +1,8 @@
 import os
 import sys
 
+import pytest
+
 from golem.core import test as test_module, settings_manager
 from golem.core.project import Project
 from golem.core.test import Test
@@ -228,6 +230,7 @@ class TestRenameTest:
         errors = test_module.rename_test(project, test_one, test_one)
         assert errors == ['A file with that name already exists']
 
+    @pytest.mark.skipif("os.name != 'nt'")
     def test_rename_test_test_is_open(self, project_session, test_utils):
         """Try to rename a test while it is open"""
         _, project = project_session.activate()

@@ -65,7 +65,7 @@ def generate_file_structure_dict(full_path, original_path=None):
         sub_element = generate_file_structure_dict(os.path.join(full_path, directory),
                                                    original_path)
         element['sub_elements'].append(sub_element)
-    for filename in files:
+    for filename in sorted(files):
         full_file_path = os.path.join(full_path, filename)
 
         rel_file_path = os.path.relpath(full_file_path, original_path)
@@ -189,7 +189,6 @@ def rename_directory(basepath, src, dst):
         except PermissionError:
             errors.append('Error: PermissionError')
         except Exception as e:
-            print(e)
             errors.append('An error occurred while renaming folder')
     return errors
 

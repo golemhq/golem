@@ -325,7 +325,10 @@ class TestRenameDirectory:
         file_manager.create_package_directories(basepath, src)
         test_utils.create_empty_file(os.path.join(basepath, src), 'foo.txt')
         errors = file_manager.rename_directory(basepath, src, dst)
-        assert errors == ['Error: PermissionError']
+        if os.name == 'nt':
+            assert errors == ['Error: PermissionError']
+        else:
+            assert errors == ['An error occurred while renaming folder']
         assert os.path.isdir(os.path.join(basepath, src))
         assert not os.path.isdir(os.path.join(basepath, dst))
         assert os.path.isfile(os.path.join(basepath, src, '__init__.py'))
@@ -347,6 +350,7 @@ class TestRenameDirectory:
         assert os.path.isfile(os.path.join(basepath, src, '__init__.py'))
         assert os.path.isfile(os.path.join(basepath, src, 'foo.txt'))
 
+    @pytest.mark.skipif("os.name != 'nt'")
     def test_rename_directory_a_file_is_open(self, dir_function, test_utils):
         """A directory cannot be renamed if a child file is currently
         opened by another process.
@@ -395,6 +399,7 @@ class TestDeleteDirectory:
         assert errors == []
         assert not os.path.isdir(path)
 
+    @pytest.mark.skipif("os.name != 'nt'")
     def test_delete_directory_a_child_file_is_open(self, dir_function, test_utils):
         basepath = dir_function.path
         directory = 'a'
