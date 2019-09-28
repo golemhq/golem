@@ -23,7 +23,14 @@ def create_project(project_name):
     print('Project {} created'.format(project_name))
 
 
-class ProjectElementTypes:
+def delete_project(project_name):
+    """Delete an entire project.
+    DANGER
+    """
+    return file_manager.delete_directory(Project(project_name).path)
+
+
+class ProjectFileTypes:
     TEST = 'test'
     PAGE = 'page'
     SUITE = 'suite'
@@ -31,7 +38,7 @@ class ProjectElementTypes:
 
 class Project:
 
-    element_types = ProjectElementTypes
+    file_types = ProjectFileTypes
 
     def __init__(self, project_name):
         self.name = project_name
@@ -40,26 +47,27 @@ class Project:
     def path(self):
         return os.path.join(session.testdir, 'projects', self.name)
 
+    def _file_tree(self, file_type):
+        path = self.element_directory_path(file_type)
+        return file_manager.generate_file_structure_dict(path)
+
     @property
     def test_tree(self):
-        path = os.path.join(self.path, 'tests')
-        return file_manager.generate_file_structure_dict(path)
+        return self._file_tree(self.file_types.TEST)
 
     @property
     def page_tree(self):
-        path = os.path.join(self.path, 'pages')
-        return file_manager.generate_file_structure_dict(path)
+        return self._file_tree(self.file_types.PAGE)
 
     @property
     def suite_tree(self):
-        path = os.path.join(self.path, 'suites')
-        return file_manager.generate_file_structure_dict(path)
+        return self._file_tree(self.file_types.SUITE)
 
-    def _element_list(self, element_type, directory=''):
-        """List of elements of `element_type`.
+    def _file_list(self, file_type, directory=''):
+        """List of files of `file_type`.
         Directory must be a relative path from the project element base folder
         """
-        base_path = self.element_directory_path(element_type)
+        base_path = self.element_directory_path(file_type)
         path = os.path.join(base_path, directory)
         elements = file_manager.get_files_dot_path(path, extension='.py')
         if directory:
@@ -69,15 +77,15 @@ class Project:
 
     def tests(self, directory=''):
         """List all tests in project or all tests in a subdirectory"""
-        return self._element_list('test', directory)
+        return self._file_list(self.file_types.TEST, directory)
 
     def pages(self, directory=''):
         """List all pages in project or all tests in a subdirectory"""
-        return self._element_list('page', directory)
+        return self._file_list(self.file_types.PAGE, directory)
 
     def suites(self, directory=''):
         """List all suites in project or all tests in a subdirectory"""
-        return self._element_list('suite', directory)
+        return self._file_list(self.file_types.SUITE, directory)
 
     @property
     def has_tests(self):
@@ -99,39 +107,60 @@ class Project:
     def report_directory_path(self):
         return os.path.join(self.path, 'reports')
 
-    def element_directory_path(self, element_type):
-        if element_type == self.element_types.TEST:
+    def element_directory_path(self, file_type):
+        if file_type == self.file_types.TEST:
             return self.test_directory_path
-        elif element_type == self.element_types.PAGE:
+        elif file_type == self.file_types.PAGE:
             return self.page_directory_path
-        elif element_type == self.element_types.SUITE:
+        elif file_type == self.file_types.SUITE:
             return self.suite_directory_path
         else:
             raise ValueError()
 
-    def create_packages_for_element(self, element_name, element_type):
-        """Given an element name, creates its parent directories
+    def create_packages_for_element(self, element_name, file_type):
+        """Given an file name, creates its parent directories
         if they don't exist.
 
         For example:
-          given element_name=my.folder.test_name,
+          given file_name=my.folder.test_name,
           create packages: `my/` and `my/folder/`
         """
-        base_path = self.element_directory_path(element_type)
+        base_path = self.element_directory_path(file_type)
         relpath = os.sep.join(element_name.split('.')[:-1])
         if relpath:
             file_manager.create_package_directories(base_path, relpath)
 
-    def create_directories(self, dir_name, dir_type):
-        errors = validate_project_element_name(dir_name)
+    def create_directories(self, dir_name, file_type):
+        errors = validate_project_element_name(dir_name, isdir=True)
         if not errors:
-            base_path = self.element_directory_path(dir_type)
+            base_path = self.element_directory_path(file_type)
             relpath = os.sep.join(dir_name.split('.'))
             fullpath = os.path.join(base_path, relpath)
             if os.path.isdir(fullpath):
                 errors.append('A directory with that name already exists')
             else:
                 file_manager.create_package_directories(base_path, relpath)
+        return errors
+
+    def rename_directory(self, dir_name, new_dir_name, file_type):
+        """Rename a directory inside tests, pages, or suites folder."""
+        errors = validate_project_element_name(new_dir_name)
+        if not errors:
+            base_path = self.element_directory_path(file_type)
+            src = os.sep.join(dir_name.split('.'))
+            dst = os.sep.join(new_dir_name.split('.'))
+            errors = file_manager.rename_directory(base_path, src, dst)
+        return errors
+
+    def delete_directory(self, dir_name, file_type):
+        errors = []
+        base_path = self.element_directory_path(file_type)
+        relpath = os.sep.join(dir_name.split('.'))
+        fullpath = os.path.join(base_path, relpath)
+        if not os.path.isdir(fullpath):
+            errors.append('Directory {} does not exist'.format(relpath))
+        else:
+            errors = file_manager.delete_directory(fullpath)
         return errors
 
     def __repr__(self):
@@ -141,8 +170,8 @@ class Project:
         return self.name
 
 
-def validate_project_element_name(name):
-    """"Validate name for a test, page or suite.
+def validate_project_element_name(name, isdir=False):
+    """"Validate name for a test, page or suite (or folders).
     `name` must be a relative dot path from the base element folder.
     """
     errors = []
@@ -152,8 +181,16 @@ def validate_project_element_name(name):
         if len(part) == 0:
             errors.append('Directory name cannot be empty')
             break
+        elif len(part) > 150:
+            errors.append('Maximum name length is 150 characters')
+            break
     if len(last_part) == 0:
-        errors.append('File name cannot be empty')
+        if isdir:
+            errors.append('Folder name cannot be empty')
+        else:
+            errors.append('File name cannot be empty')
+    elif len(last_part) > 150:
+        errors.append('Maximum name length is 150 characters')
     for c in name:
         if not c.isalnum() and c not in ['_', '.']:
             errors.append('Only letters, numbers and underscores are allowed')

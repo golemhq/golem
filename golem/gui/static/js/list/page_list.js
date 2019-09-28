@@ -1,7 +1,6 @@
 
 $(document).ready(function() {
-    PageList.getPages(Global.project);
-    $('#treeRoot').treed();
+    PageList.getPages(Global.project)
 });
 
 
@@ -16,8 +15,7 @@ const PageList = new function(){
             dataType: 'json',
             type: 'GET',
             success: function(pages) {
-                let treeRoot = $("#treeRoot");
-                Project.loadTreeElements(treeRoot, pages.sub_elements, 'page');
+                FileExplorer.initialize(pages, 'page');
             },
         });
     }

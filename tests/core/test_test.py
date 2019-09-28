@@ -1,6 +1,8 @@
 import os
 import sys
 
+import pytest
+
 from golem.core import test as test_module, settings_manager
 from golem.core.project import Project
 from golem.core.test import Test
@@ -52,6 +54,7 @@ def teardown(data):
 
 EMPTY_STEPS = {'setup': [], 'test': [], 'teardown': []}
 
+
 class TestCreateTest:
 
     def test_create_test(self, project_session, test_utils):
@@ -73,13 +76,37 @@ class TestCreateTest:
 
     def test_create_test_invalid_name(self, project_session):
         _, project = project_session.activate()
-        test_name = 'this-is-a-test'
-        errors = test_module.create_test(project, test_name)
-        assert errors == ['Only letters, numbers and underscores are allowed']
+        # invalid chars
+        invalid_names = [
+            'te-st',
+            'te st',
+            'te?st',
+            'test. .test'
+        ]
+        for name in invalid_names:
+            errors = test_module.create_test(project, name)
+            assert errors == ['Only letters, numbers and underscores are allowed']
+        # empty directory
+        invalid_names = [
+            '.test',
+            'test..test',
+        ]
+        for name in invalid_names:
+            errors = test_module.create_test(project, name)
+            assert errors == ['Directory name cannot be empty']
+        # empty file name
+        invalid_names = [
+            '',
+            'test.',
+        ]
+        for name in invalid_names:
+            errors = test_module.create_test(project, name)
+            assert errors == ['File name cannot be empty']
 
-    def test_create_test_with_parents(self, project_session, test_utils):
+    def test_create_test_into_folder(self, project_session, test_utils):
         _, project = project_session.activate()
         random_dir = test_utils.random_string()
+        # to folder
         test_name = '{}.test001'.format(random_dir)
         errors = test_module.create_test(project, test_name)
         assert errors == []
@@ -87,6 +114,20 @@ class TestCreateTest:
         init_path = os.path.join(Project(project).test_directory_path,
                                  random_dir, '__init__.py')
         assert test_name in Project(project).tests()
+        assert os.path.isfile(init_path)
+        # to sub-folder
+        random_dir = test_utils.random_string()
+        random_subdir = test_utils.random_string()
+        test_name = '{}.{}.test001'.format(random_dir, random_subdir)
+        errors = test_module.create_test(project, test_name)
+        assert errors == []
+        assert test_name in Project(project).tests()
+        # verify that each parent dir has __init__.py file
+        init_path = os.path.join(Project(project).test_directory_path,
+                                 random_dir, '__init__.py')
+        assert os.path.isfile(init_path)
+        init_path = os.path.join(Project(project).test_directory_path,
+                                 random_dir, random_subdir, '__init__.py')
         assert os.path.isfile(init_path)
 
 
@@ -102,15 +143,63 @@ class TestRenameTest:
         assert test_name not in tests
         assert new_test_name in tests
 
-    def test_rename_test_error(self, project_session, test_utils):
+    def test_rename_test_in_folder(self, project_session, test_utils):
+        _, project = project_session.activate()
+        dir = test_utils.random_string()
+        name = test_utils.random_string()
+        test_name = '{}.{}'.format(dir, name)
+        test_utils.create_test(project, test_name)
+        # rename within same folder
+        new_name = test_utils.random_string()
+        new_test_name = '{}.{}'.format(dir, new_name)
+        errors = test_module.rename_test(project, test_name, new_test_name)
+        assert errors == []
+        tests = Project(project).tests()
+        assert test_name not in tests
+        assert new_test_name in tests
+        # rename to another non existent folder
+        test_name = new_test_name
+        name = new_name
+        new_dir = test_utils.random_string()
+        new_test_name = '{}.{}'.format(new_dir, name)
+        errors = test_module.rename_test(project, test_name, new_test_name)
+        assert errors == []
+        tests = Project(project).tests()
+        assert test_name not in tests
+        assert new_test_name in tests
+
+    def test_rename_test_invalid_name(self, project_session, test_utils):
         _, project = project_session.activate()
         test_name = test_utils.create_random_test(project)
+        # invalid chars
         new_test_name = 'new-name'
         errors = test_module.rename_test(project, test_name, new_test_name)
         assert errors == ['Only letters, numbers and underscores are allowed']
         tests = Project(project).tests()
         assert test_name in tests
         assert new_test_name not in tests
+        # empty filename
+        new_test_name = 'test.'
+        errors = test_module.rename_test(project, test_name, new_test_name)
+        assert errors == ['File name cannot be empty']
+        tests = Project(project).tests()
+        assert test_name in tests
+        assert new_test_name not in tests
+        # empty directory
+        new_test_name = 'test..test'
+        errors = test_module.rename_test(project, test_name, new_test_name)
+        assert errors == ['Directory name cannot be empty']
+        tests = Project(project).tests()
+        assert test_name in tests
+        assert new_test_name not in tests
+
+    def test_rename_test_src_does_not_exist(self, project_session, test_utils):
+        _, project = project_session.activate()
+        test_name = test_utils.random_string()
+        new_test_name = test_utils.random_string()
+        errors = test_module.rename_test(project, test_name, new_test_name)
+        assert errors == ['Test {} does not exist'.format(test_name)]
+        assert new_test_name not in Project(project).tests()
 
     def test_rename_test_with_data_file(self, project_session, test_utils):
         """Assert when a test has a data file the data file is renamed as well"""
@@ -125,13 +214,52 @@ class TestRenameTest:
         assert not os.path.isfile(data_path)
         assert os.path.isfile(new_data_path)
 
+    def test_rename_dest_exists(self, project_session, test_utils):
+        _, project = project_session.activate()
+        dir = test_utils.random_string()
+        name_one = test_utils.random_string()
+        test_one = '{}.{}'.format(dir, name_one)
+        name_two = test_utils.random_string()
+        test_two = '{}.{}'.format(dir, name_two)
+        test_utils.create_test(project, test_one)
+        test_utils.create_test(project, test_two)
+        # rename test to existing test name
+        errors = test_module.rename_test(project, test_one, test_two)
+        assert errors == ['A file with that name already exists']
+        # rename test to same name
+        errors = test_module.rename_test(project, test_one, test_one)
+        assert errors == ['A file with that name already exists']
+
+    @pytest.mark.skipif("os.name != 'nt'")
+    def test_rename_test_test_is_open(self, project_session, test_utils):
+        """Try to rename a test while it is open"""
+        _, project = project_session.activate()
+        test_name = test_utils.create_random_test(project)
+        new_test_name = test_utils.random_string()
+        with open(Test(project, test_name).path) as f:
+            errors = test_module.rename_test(project, test_name, new_test_name)
+            assert errors == ['There was an error renaming file']
+
 
 class TestDuplicateTest:
 
     def test_duplicate_test(self, project_session, test_utils):
         _, project = project_session.activate()
+        # in root folder
         test_name = test_utils.create_random_test(project)
         new_test_name = test_utils.random_string()
+        errors = test_module.duplicate_test(project, test_name, new_test_name)
+        assert errors == []
+        tests = Project(project).tests()
+        assert test_name in tests
+        assert new_test_name in tests
+        # in folder
+        dir = test_utils.random_string()
+        name = test_utils.random_string()
+        test_name = '{}.{}'.format(dir, name)
+        test_utils.create_test(project, test_name)
+        new_name = test_utils.random_string()
+        new_test_name = '{}.{}'.format(dir, new_name)
         errors = test_module.duplicate_test(project, test_name, new_test_name)
         assert errors == []
         tests = Project(project).tests()
@@ -144,19 +272,39 @@ class TestDuplicateTest:
         errors = test_module.duplicate_test(project, test_name, test_name)
         assert errors == ['New test name cannot be the same as the original']
 
-    def test_duplicate_test_name_already_exists(self, project_session, test_utils):
+    def test_duplicate_test_dest_exists(self, project_session, test_utils):
         _, project = project_session.activate()
-        test_name = test_utils.create_random_test(project)
-        test_name_two = test_utils.create_random_test(project)
-        errors = test_module.duplicate_test(project, test_name, test_name_two)
+        test_one = test_utils.create_random_test(project)
+        test_two = test_utils.create_random_test(project)
+        errors = test_module.duplicate_test(project, test_one, test_two)
         assert errors == ['A test with that name already exists']
+        # to another folder
+        test_one = test_utils.create_random_test(project)
+        test_two = '{}.{}'.format(test_utils.random_string(), test_utils.random_string())
+        test_utils.create_test(project, test_two)
+        errors = test_module.duplicate_test(project, test_one, test_two)
+        assert errors == ['A test with that name already exists']
+        # to same name
+        test_one = test_utils.create_random_test(project)
+        test_utils.create_test(project, test_two)
+        errors = test_module.duplicate_test(project, test_one, test_one)
+        assert errors == ['New test name cannot be the same as the original']
 
-    def test_duplicate_test_error(self, project_session, test_utils):
+    def test_duplicate_test_invalid_name(self, project_session, test_utils):
         _, project = project_session.activate()
         test_name = test_utils.create_random_test(project)
+        # invalid name
         new_test_name = 'new-name'
         errors = test_module.duplicate_test(project, test_name, new_test_name)
         assert errors == ['Only letters, numbers and underscores are allowed']
+        # empty name
+        new_test_name = 'test.'
+        errors = test_module.duplicate_test(project, test_name, new_test_name)
+        assert errors == ['File name cannot be empty']
+        # empty directory
+        new_test_name = 'test.'
+        errors = test_module.duplicate_test(project, test_name, new_test_name)
+        assert errors == ['File name cannot be empty']
 
     def test_duplicate_test_with_data_file(self, project_session, test_utils):
         """Assert when a test has a data file the data file is duplicated as well"""

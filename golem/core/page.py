@@ -11,14 +11,13 @@ from golem.core.project import Project, validate_project_element_name, BaseProje
 
 def create_page(project_name, page_name):
     errors = []
-    page_name = page_name.strip().replace(' ', '_')
     project = Project(project_name)
     if page_name in project.pages():
         errors.append('A page with that name already exists')
     else:
         errors = validate_project_element_name(page_name)
     if not errors:
-        project.create_packages_for_element(page_name, 'page')
+        project.create_packages_for_element(page_name, project.file_types.PAGE)
         with open(Page(project_name, page_name).path, 'w') as f:
             f.write('')
     return errors
@@ -27,7 +26,6 @@ def create_page(project_name, page_name):
 def rename_page(project_name, page_name, new_page_name):
     errors = []
     project = Project(project_name)
-    new_page_name = new_page_name.strip().replace(' ', '_')
     if page_name not in project.pages():
         errors.append('Page {} does not exist'.format(page_name))
     else:
@@ -35,7 +33,7 @@ def rename_page(project_name, page_name, new_page_name):
     if not errors:
         old_path = Page(project_name, page_name).path
         new_path = Page(project_name, new_page_name).path
-        project.create_packages_for_element(new_page_name, 'page')
+        project.create_packages_for_element(new_page_name, project.file_types.PAGE)
         errors = file_manager.rename_file(old_path, new_path)
     return errors
 
@@ -44,7 +42,6 @@ def duplicate_page(project, name, new_name):
     errors = []
     old_path = Page(project, name).path
     new_path = Page(project, new_name).path
-    new_name = new_name.strip().replace(' ', '_')
     if name == new_name:
         errors.append('New page name cannot be the same as the original')
     elif not os.path.isfile(old_path):
@@ -55,7 +52,7 @@ def duplicate_page(project, name, new_name):
         errors = validate_project_element_name(new_name)
     if not errors:
         try:
-            Project(project).create_packages_for_element(new_name, 'page')
+            Project(project).create_packages_for_element(new_name, Project.file_types.PAGE)
             shutil.copyfile(old_path, new_path)
         except:
             errors.append('There was an error creating the new page')
@@ -75,8 +72,20 @@ def edit_page(project, page_name, elements, functions, import_lines):
         for element in elements:
             # replace the spaces in web element names with underscores
             element['name'] = element['name'].replace(' ', '_')
+
+            if element['value'][0] == '\'' and element['value'][-1] == '\'':
+                # remove first and last single quotes if present
+                element['value'] = element['value'][1:-1]
+            elif element['value'].startswith('"""') and element['value'].endswith('"""')\
+                    and len(element['value']) >= 6:
+                # remove first and last triple double quotes if present
+                element['value'] = element['value'][3:-3]
+            elif element['value'][0] == '"' and element['value'][-1] == '"':
+                # remove first and last double quotes if present
+                element['value'] = element['value'][1:-1]
             # escape quote characters
             element['value'] = element['value'].replace('"', '\\"').replace("'", "\\'")
+
             if not element['display_name']:
                 element['display_name'] = element['name']
             formatted = format_element_string(element['name'], element['selector'],

@@ -169,6 +169,7 @@ class TestUtils:
         filepath = os.path.join(path, filename)
         os.makedirs(path, exist_ok=True)
         open(filepath, 'w+').close()
+        return filepath
 
     @staticmethod
     def random_string(length=10, prefix=''):
@@ -201,7 +202,7 @@ class TestUtils:
     def set_project_setting(testdir, setting, setting_value):
         setting_path = os.path.join(testdir, 'settings.json')
         with open(setting_path, 'w') as f:
-            f.write('{{"{}": "{}"\}}'.format(setting, setting_value))
+            f.write('{{"{}": "{}"}}'.format(setting, setting_value))
 
     @staticmethod
     def create_test(project, name, content=None):

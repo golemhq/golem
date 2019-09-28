@@ -21,7 +21,7 @@ def create_suite(project_name, suite_name):
     else:
         errors = validate_project_element_name(suite_name)
     if not errors:
-        project.create_packages_for_element(suite_name, 'suite')
+        project.create_packages_for_element(suite_name, project.file_types.SUITE)
         with open(Suite(project_name, suite_name).path, 'w') as f:
             f.write(suite_content)
         print('Suite {} created for project {}'.format(suite_name, project_name))
@@ -34,12 +34,11 @@ def rename_suite(project, suite_name, new_suite_name):
     if suite_name not in project_obj.suites():
         errors.append('Suite {} does not exist'.format(suite_name))
     else:
-        new_suite_name = new_suite_name.strip().replace(' ', '_')
         errors = validate_project_element_name(new_suite_name)
     if not errors:
         old_path = Suite(project, suite_name).path
         new_path = Suite(project, new_suite_name).path
-        project_obj.create_packages_for_element(new_suite_name, 'suite')
+        project_obj.create_packages_for_element(new_suite_name, Project.file_types.SUITE)
         errors = file_manager.rename_file(old_path, new_path)
     return errors
 
@@ -58,7 +57,7 @@ def duplicate_suite(project, name, new_name):
         errors = validate_project_element_name(new_name)
     if not errors:
         try:
-            Project(project).create_packages_for_element(new_name, 'suite')
+            Project(project).create_packages_for_element(new_name, Project.file_types.SUITE)
             shutil.copyfile(old_path, new_path)
         except:
             errors.append('There was an error creating the new suite')

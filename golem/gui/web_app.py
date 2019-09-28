@@ -82,29 +82,32 @@ def project_view(project):
 
 
 # PROJECT TESTS VIEW
-@webapp_bp.route("/project/<project>/tests/")
+@webapp_bp.route('/project/<project>/tests/', defaults={'path': ''})
+@webapp_bp.route("/project/<project>/tests/<path:path>/")
 @login_required
 @project_exists
 @permission_required(Permissions.READ_ONLY)
-def project_tests(project):
+def project_tests(project, path):
     return render_template('list/test_list.html', project=project)
 
 
 # PROJECT SUITES VIEW
-@webapp_bp.route("/project/<project>/suites/")
+@webapp_bp.route('/project/<project>/suites/', defaults={'path': ''})
+@webapp_bp.route("/project/<project>/suites/<path:path>/")
 @login_required
 @project_exists
 @permission_required(Permissions.READ_ONLY)
-def project_suites(project):
+def project_suites(project, path):
     return render_template('list/suite_list.html', project=project)
 
 
 # PROJECT PAGES VIEW
-@webapp_bp.route("/project/<project>/pages/")
+@webapp_bp.route('/project/<project>/pages/', defaults={'path': ''})
+@webapp_bp.route("/project/<project>/pages/<path:path>/")
 @login_required
 @project_exists
 @permission_required(Permissions.READ_ONLY)
-def project_pages(project):
+def project_pages(project, path):
     return render_template('list/page_list.html', project=project)
 
 

@@ -2,8 +2,9 @@ import os
 
 import pytest
 
-from golem.core import test, page, suite
-from golem.core.project import Project, create_project, validate_project_element_name
+from golem.core import test, page, suite, test_directory
+from golem.core.project import (Project, create_project, validate_project_element_name,
+                                delete_project)
 
 
 class TestCreateProject:
@@ -34,6 +35,15 @@ class TestCreateProject:
         assert 'suites' in dirs
 
 
+class TestDeleteProject:
+
+    def test_delete_project(self, project_function):
+        _, project_name = project_function.activate()
+        errors = delete_project(project_name)
+        assert errors == []
+        assert not test_directory.project_exists(project_name)
+
+
 class TestTestTree:
 
     def test_test_tree(self, project_function):
@@ -45,7 +55,7 @@ class TestTestTree:
         expected = {
             'type': 'directory',
             'name': 'tests',
-            'dot_path': '.',
+            'dot_path': '',
             'sub_elements': [
                 {
                     'type': 'directory',
@@ -85,7 +95,7 @@ class TestTestTree:
     def test_test_tree_no_tests(self, project_function):
         _, project = project_function.activate()
         tests = Project(project).test_tree
-        expected = {'type': 'directory', 'name': 'tests', 'dot_path': '.', 'sub_elements': []}
+        expected = {'type': 'directory', 'name': 'tests', 'dot_path': '', 'sub_elements': []}
         assert tests == expected
 
 
@@ -100,7 +110,7 @@ class TestPageTree:
         expected = {
             'type': 'directory',
             'name': 'pages',
-            'dot_path': '.',
+            'dot_path': '',
             'sub_elements': [
                 {
                     'type': 'directory',
@@ -141,7 +151,7 @@ class TestPageTree:
     def test_page_tree_no_pages(self, project_function):
         _, project = project_function.activate()
         pages = Project(project).page_tree
-        expected = {'type': 'directory', 'name': 'pages', 'dot_path': '.', 'sub_elements': []}
+        expected = {'type': 'directory', 'name': 'pages', 'dot_path': '', 'sub_elements': []}
         assert pages == expected
 
 
@@ -155,7 +165,7 @@ class TestSuiteTree:
         expected_result = {
             'type': 'directory',
             'name': 'suites',
-            'dot_path': '.',
+            'dot_path': '',
             'sub_elements': [
                 {
                     'type': 'file',
@@ -176,7 +186,7 @@ class TestSuiteTree:
     def test_suite_tree_no_suites(self, project_function):
         _, project = project_function.activate()
         suites = Project(project).suite_tree
-        expected = {'type': 'directory', 'name': 'suites', 'dot_path': '.', 'sub_elements': []}
+        expected = {'type': 'directory', 'name': 'suites', 'dot_path': '', 'sub_elements': []}
         assert suites == expected
 
 
@@ -218,20 +228,20 @@ class TestCreatePackagesForElement:
         project_obj = Project(project)
         random_dir = test_utils.random_string()
         elem_name = '{}.{}'.format(random_dir, test_utils.random_string())
-        project_obj.create_packages_for_element(elem_name, 'test')
+        project_obj.create_packages_for_element(elem_name, project_obj.file_types.TEST)
         dir_path = os.path.join(project_obj.test_directory_path, random_dir)
         assert os.path.isdir(dir_path)
         init_path = os.path.join(dir_path, '__init__.py')
         assert os.path.isfile(init_path)
         # element without parent subdirectories
         elem_name = test_utils.random_string()
-        project_obj.create_packages_for_element(elem_name, 'test')
+        project_obj.create_packages_for_element(elem_name, project_obj.file_types.TEST)
         dir_path = os.path.join(project_obj.test_directory_path, elem_name)
         assert not os.path.isdir(dir_path)
         # page
         random_dir = test_utils.random_string()
         elem_name = '{}.{}'.format(random_dir, test_utils.random_string())
-        project_obj.create_packages_for_element(elem_name, 'page')
+        project_obj.create_packages_for_element(elem_name, project_obj.file_types.PAGE)
         dir_path = os.path.join(project_obj.page_directory_path, random_dir)
         assert os.path.isdir(dir_path)
         init_path = os.path.join(dir_path, '__init__.py')
@@ -239,7 +249,7 @@ class TestCreatePackagesForElement:
         # suite
         random_dir = test_utils.random_string()
         elem_name = '{}.{}'.format(random_dir, test_utils.random_string())
-        project_obj.create_packages_for_element(elem_name, 'suite')
+        project_obj.create_packages_for_element(elem_name, project_obj.file_types.SUITE)
         dir_path = os.path.join(project_obj.suite_directory_path, random_dir)
         assert os.path.isdir(dir_path)
         init_path = os.path.join(dir_path, '__init__.py')
@@ -292,6 +302,58 @@ class TestCreateDirectories:
         assert errors == ['Only letters, numbers and underscores are allowed']
 
 
+class TestRenameDirectory:
+
+    def test_rename_directory(self, project_session, test_utils):
+        testdir, project_name = project_session.activate()
+        src = test_utils.random_string()
+        test_utils.create_test(project_name, '{}.foo'.format(src))
+        dst = test_utils.random_string()
+        project = Project(project_name)
+        errors = project.rename_directory(src, dst, 'test')
+        assert errors == []
+        srcpath = os.path.join(project.test_directory_path, src)
+        dstpath = os.path.join(project.test_directory_path, dst)
+        assert not os.path.isdir(srcpath)
+        assert os.path.isdir(dstpath)
+        assert not test.Test(project_name, '{}.foo'.format(src)).exists
+        assert test.Test(project_name, '{}.foo'.format(dst)).exists
+
+    def test_rename_directories_dest_exists(self, project_session, test_utils):
+        testdir, project_name = project_session.activate()
+        src = test_utils.random_string()
+        dst = test_utils.random_string()
+        test_utils.create_test(project_name, '{}.foo'.format(src))
+        test_utils.create_test(project_name, '{}.bar'.format(dst))
+        project = Project(project_name)
+        errors = project.rename_directory(src, dst, 'test')
+        assert errors == ['Path {} already exists'.format(dst)]
+
+    def test_rename_directory_invalid_name(self, project_session, test_utils):
+        testdir, project_name = project_session.activate()
+        src = test_utils.random_string()
+        test_utils.create_test(project_name, '{}.foo'.format(src))
+        project = Project(project_name)
+        errors = project.rename_directory(src, '', 'test')
+        assert errors == ['File name cannot be empty']
+        dst = 'test-{}'.format(test_utils.random_string())
+        errors = project.rename_directory(src, dst, 'test')
+        assert errors == ['Only letters, numbers and underscores are allowed']
+
+
+class TestDeleteDirectory:
+
+    def test_delete_directory(self, project_session, test_utils):
+        testdir, project_name = project_session.activate()
+        src = test_utils.random_string()
+        test_utils.create_test(project_name, '{}.foo'.format(src))
+        project = Project(project_name)
+        errors = project.delete_directory(src, 'test')
+        assert errors == []
+        path = os.path.join(project.test_directory_path, src)
+        assert not os.path.isdir(path)
+
+
 class TestValidateProjectElementName:
 
     names = [
@@ -299,7 +361,9 @@ class TestValidateProjectElementName:
         'file_name',
         'file_name123',
         'a.valid.filename',
-        'this.is.a_valid.file_name'
+        'this.is.a_valid.file_name',
+        'a'*150,
+        '{}.{}'.format('a'*150, 'b'*150)
     ]
 
     empty_dirs = [
@@ -324,7 +388,17 @@ class TestValidateProjectElementName:
         '/test',
         'test/',
         '\\test',
-        'te-st.test'
+        ' test',
+        'test ',
+        'te-st.test',
+        ' test.test',
+        'test.test '
+    ]
+
+    max_names = [
+        'a'*151,
+        '{}.{}'.format('a'*150, 'b'*151),
+        '{}.{}'.format('a'*151, 'b'*150)
     ]
 
     @pytest.mark.parametrize('name', names)
@@ -338,11 +412,21 @@ class TestValidateProjectElementName:
         assert errors == ['Directory name cannot be empty']
 
     @pytest.mark.parametrize('name', empty_names)
-    def test_validate_project_element_name_empty_name(self, name):
+    def test_validate_project_element_name_empty(self, name):
         errors = validate_project_element_name(name)
         assert errors == ['File name cannot be empty']
+
+    @pytest.mark.parametrize('name', empty_names)
+    def test_validate_project_folder_name_empty(self, name):
+        errors = validate_project_element_name(name, isdir=True)
+        assert errors == ['Folder name cannot be empty']
 
     @pytest.mark.parametrize('name', invalid_chars)
     def test_validate_project_element_name_invalid_chars(self, name):
         errors = validate_project_element_name(name)
         assert errors == ['Only letters, numbers and underscores are allowed']
+
+    @pytest.mark.parametrize('name', max_names)
+    def test_validate_project_element_name_max_length(self, name):
+        errors = validate_project_element_name(name)
+        assert errors == ['Maximum name length is 150 characters']

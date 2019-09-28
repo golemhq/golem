@@ -1,6 +1,8 @@
 import os
 import sys
 
+import pytest
+
 from golem.core import page
 from golem.core.page import Page
 from golem.core.project import Project
@@ -34,6 +36,10 @@ class TestCreatePage:
         _, project = project_session.activate()
         errors = page.create_page(project, 'invalid-name')
         assert errors == ['Only letters, numbers and underscores are allowed']
+        errors = page.create_page(project, 'test.')
+        assert errors == ['File name cannot be empty']
+        errors = page.create_page(project, '.test')
+        assert errors == ['Directory name cannot be empty']
 
 
 class TestRenamePage:
@@ -47,18 +53,29 @@ class TestRenamePage:
         assert page_name not in pages
         assert new_page_name in pages
 
-    def test_rename_to_new_directory(self, project_session, test_utils):
+    def test_rename_page_to_new_directory(self, project_session, test_utils):
         _, project = project_session.activate()
         page_name = test_utils.create_random_page(project)
         random_dirname = test_utils.random_string()
         new_page_name = '{}.{}'.format(random_dirname, test_utils.random_string())
-        page.rename_page(project, page_name, new_page_name)
+        errors = page.rename_page(project, page_name, new_page_name)
+        assert errors == []
         pages = Project(project).pages()
         assert page_name not in pages
         assert new_page_name in pages
         init_file_path = os.path.join(Project(project).page_directory_path,
                                       random_dirname, '__init__.py')
         assert os.path.isfile(init_file_path)
+
+    def test_rename_page_invalid_name(self, project_session, test_utils):
+        _, project = project_session.activate()
+        page_name = test_utils.create_random_page(project)
+        errors = page.rename_page(project, page_name, 'invalid-name')
+        assert errors == ['Only letters, numbers and underscores are allowed']
+        errors = page.rename_page(project, page_name, 'page.')
+        assert errors == ['File name cannot be empty']
+        errors = page.rename_page(project, page_name, '.page')
+        assert errors == ['Directory name cannot be empty']
 
 
 class TestDuplicatePage:
@@ -86,12 +103,15 @@ class TestDuplicatePage:
         errors = page.duplicate_page(project, page_name, page_name_two)
         assert errors == ['A page with that name already exists']
 
-    def test_duplicate_page_error(self, project_session, test_utils):
+    def test_duplicate_page_invalid_name(self, project_session, test_utils):
         _, project = project_session.activate()
         page_name = test_utils.create_random_page(project)
-        new_page_name = 'new-name'
-        errors = page.duplicate_page(project, page_name, new_page_name)
+        errors = page.duplicate_page(project, page_name, 'new-name')
         assert errors == ['Only letters, numbers and underscores are allowed']
+        errors = page.duplicate_page(project, page_name, 'page.')
+        assert errors == ['File name cannot be empty']
+        errors = page.duplicate_page(project, page_name, '.page')
+        assert errors == ['Directory name cannot be empty']
 
 
 class TestEditPage:
@@ -121,6 +141,24 @@ class TestEditPage:
                              '    print(a, b)\n')
         with open(Page(project, page_name).path) as f:
             assert f.read() == expected_contents
+
+    element_values = [
+        ("'abc'", "abc"),
+        ('"abc"', 'abc'),
+        ('"""abc"""', 'abc')
+    ]
+
+    @pytest.mark.parametrize('value,expected_value', element_values)
+    def test_edit_page_selector_value_format(self, value, expected_value,
+                                             project_session, test_utils):
+        _, project = project_session.activate()
+        page_name = test_utils.create_random_page(project)
+        elements = [
+            {'name': 'foo', 'selector': 'id', 'value': value, 'display_name': 'foo'},
+        ]
+        page.edit_page(project, page_name, elements, [], [])
+        elements = Page(project, page_name).components['elements']
+        assert elements[0]['value'] == expected_value
 
 
 class TestEditPageCode:

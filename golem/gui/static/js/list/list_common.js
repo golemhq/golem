@@ -1,439 +1,748 @@
 
-const Project = new function(){
+const FileExplorer = new function(){
 
-    this.generateNewElement = function(element){
-        let buttons = '';
-        if(Global.user.projectWeight >= Main.PermissionWeightsEnum.standard){
-            buttons += `<button class="rename-button" onclick="Project.renameFilePrompt(this)"><i class="glyphicon glyphicon-edit"></i></button>`;
-            buttons += ` <button class="duplicate-button" onclick="Project.duplicateElementPrompt(this)"><i class="glyphicon glyphicon-duplicate"></i></button>`;
-            if(Global.user.projectWeight >= Main.PermissionWeightsEnum.admin){
-                buttons += ` <button class="delete-button" onclick="Project.deleteElementConfirm(this)"><i class="glyphicon glyphicon-trash"></i></button>`
-            }
+    this.rootFolder;
+    this.currentFolder;
+    this.fileType;
+    this.renderFinished = false;
+
+    this.initialize = function(folder, fileType) {
+        this.fileType = fileType;
+        this.rootFolder = new Folder(folder, null);
+        this.navigateFromURL()
+        // Hide bottom menu if user is read-only
+        if(Global.user.projectWeight <= Main.PermissionWeightsEnum.readOnly){
+            $("#bottomMenu").hide()
         }
-
-        let li = $(`
-            <li class="tree-element" fullpath="${element.dotPath}" name="${element.name}" type="${element.type}">
-                <a class="list-item-link" href="${element.url}">${element.name}</a>
-                <span class="pull-right tree-element-buttons">
-                    ${buttons}
-                </span>
-            </li>`);
-
-        if(element.type == 'test' || element.type == 'page'){
-            let codeIcon = '<i class="glyphicon glyphicon-chevron-left" style="-webkit-text-stroke: 0.5px white;"></i><i class="glyphicon glyphicon-chevron-right" style="margin-left: -8px; -webkit-text-stroke: 0.5px white;"></i>';
-            let codeLink = `<a href="${element.url}code" class="code-button" style="margin-right: -2px;">${codeIcon}</a>`;
-            li.find("span.tree-element-buttons").prepend(codeLink);
-            if(element.type == 'test' && Global.user.projectWeight >= Main.PermissionWeightsEnum.standard){
-                let runButton = `<button class="run-test-button" onclick="Main.TestRunner.openConfigModal(Global.project, '${element.dotPath}')"><is class="glyphicon glyphicon-play-circle"></span></button>`;
-                li.find("span.tree-element-buttons").prepend(runButton);
-            }
-        }
-        return li
+        // Hide folder menus
+        $('html').click(() => FileExplorer.hideAllFolderMenus())
     }
 
-    this.generateNewBranch = function(branchName, dot_path){
-        let openedClass = 'glyphicon-folder-open';
-        let closedClass = 'glyphicon-folder-close';
-        let branch = $(`
-            <li class="tree-element branch" name="${branchName}" fullpath="${dot_path}">
-                <a href="#">${branchName}</a>
-                <span class="pull-right tree-element-buttons"></span>
-                <ul></ul>
-            </li>`);
-        branch.prepend(`<i class="indicator glyphicon ${closedClass}"></i>`);
-        branch.on('click', function (e) {
-            if (this == e.target) {
-                let icon = $(this).children('i:first');
-                icon.toggleClass(openedClass + " " + closedClass);
-                $(this).children('ul').toggle();
-                $(this).children('span.new-element-form').toggle();
-            }
-        })
-        branch.children('ul').hide();
-        branch.children('span.new-element-form').hide();
+    this.navigateFromURL = function(){
+        let pathname = window.location.pathname.split('/');
+        if(pathname[0] == '') pathname.shift()
+        if(pathname[pathname.length -1] == '') pathname.pop()
+        pathname = pathname.slice(3);
 
-        //fire event from the dynamically added icon
-        branch.find('.indicator').each(function(){
-           $( this).on('click', function () {
-                $(this).closest('li').click();
-            });
-        });
-        //fire event to open branch if the li contains an anchor instead of text
-        branch.find('a').each(function () {
-            $(this).on('click', function (e) {
-                $(this).closest('li').click();
-                e.preventDefault();
-            });
-        });
-        //fire event to open branch if the li contains a button instead of text
-        branch.find('button').each(function () {
-            $(this).on('click', function (e) {
-                $(this).closest('li').click();
-                e.preventDefault();
-            });
-        });
-        return branch
-    };
-
-    this.generateNewEmptyBranch = function(branchName, dotPath){
-        let branch = Project.generateNewBranch(branchName, dotPath)
-        if(Global.user.projectWeight >= Main.PermissionWeightsEnum.standard){
-            branch.find('ul').append(Project.newElementForm(dotPath))
+        this.currentFolder = this.rootFolder;
+        if(pathname.length){
+            let _currentFolder = this.getFolder(pathname.join('.'));
+            if(_currentFolder != null){ this.currentFolder = _currentFolder }
         }
-        return branch
+        this.renderFolder(this.currentFolder);
     }
 
-    this.newElementForm = function(dot_path){
-        let li = $(`
-            <li class="form-container" fullpath="${dot_path}">
-            <span class="new-element-form" style="display: none;">
-                <input class="new-element-input new-test-case form-control" type="text"
-                    onblur="Project.addElement(event);" onkeyup="if(event.keyCode==13){Project.addElement(event)}">
-            </span>
-            <span class="display-new-element-link">
-                <a class="new-element-link" href="javascript:void(0)" onclick="Project.displayNewElementForm(this, 'file')">
-                    <i class="glyphicon glyphicon-file"><i style="left: -3px" class="fa fa-plus-circle fa-stack-1x awesomeEntity sub-icon"/></i>
-                </a>
-                <a class="new-directory-link" href="javascript:void(0)" onclick="Project.displayNewElementForm(this, 'directory')">
-                    <i class="glyphicon glyphicon-folder-close"><i style="left: 0px" class="fa fa-plus-circle fa-stack-1x awesomeEntity sub-icon"/></i>
-                </a>
-        </li>`);
-        return li
+    this.navigateToFolder = function(folder){
+        this.updateURL(folder);
+        this.currentFolder = folder;
+        this.renderFolder(folder)
     }
 
-    this.loadTreeElements = function(rootElement, elements, elementType){
-        Project.loadBranch(rootElement, elements, elementType, '.')
+    this.renderFolder = function(folder){
+        this.renderFinished = false;
+        folder.render();
+        this.renderFinished = true
     }
 
-    this.loadBranch = function(rootElement, elements, elementType, dotPath){
-        elements.forEach(function(element){
-            let uiElement;
-            if(element.type == 'file'){
-                let elementUrl = `/project/${Global.project}/${elementType}/${element.dot_path}/`;
-                uiElement = Project.generateNewElement({
-                    name: element.name,
-                    url: elementUrl,
-                    dotPath: element.dot_path, 
-                    type: elementType});
-            }
-            else { // element.type == 'directory'
-                uiElement = Project.generateNewBranch(element.name, element.dot_path);
-                Project.loadBranch(uiElement.find('ul'), element.sub_elements, elementType, element.dot_path);
-            }
-            rootElement.append(uiElement)
-        });
-        if(Global.user.projectWeight >= Main.PermissionWeightsEnum.standard){
-            rootElement.append(Project.newElementForm(dotPath))
-        }
+    this.updateURL = function(folder){
+        let relpath = folder.folderpath().split('.').join('/');
+        relpath = relpath.length ? `${relpath}/` : '';
+        let pathName = `${this.baseURL()}${relpath}`;
+        window.history.pushState({}, '', window.location.origin + pathName);
+        window.onpopstate = () => { this.navigateFromURL() }
     }
 
-    this.addFileToTree = function(fullPath, elementType){
-        let rootElement = $("#treeRoot")
-        let pathList = fullPath.split('.')
-        let fileName = pathList.pop();
-        let loadedPath = []
-        // add directories if they don't exist already
-        let length_ = pathList.length;
-        for(let i=0; i <= length_-1; i++){
-            let dirName = pathList.shift();
-            loadedPath.push(dirName);
-            let thisDirFullPath = loadedPath.join('.');
-            let branch;
-            if(!Project.dirExists(thisDirFullPath)){
-                branch = Project.generateNewEmptyBranch(dirName, thisDirFullPath);
-                rootElement.children().last().before(branch)
-            }
-            else{
-                branch = Project.getDirElement(thisDirFullPath)
-            }
-            rootElement = branch.find('>ul');
-        }
-        // add file
-        loadedPath.push(fileName);
-        let testFullPath = loadedPath.join('.');
-        let elementUrl = `/project/${Global.project}/${elementType}/${testFullPath}/`;
-        let uiElement = Project.generateNewElement({
-            name: fileName,
-            url: elementUrl,
-            dotPath: testFullPath,
-            type: elementType});
-        rootElement.children().last().before(uiElement);
+    this.baseURL = function(){
+        return `/project/${Global.project}/${this.fileType}s/`
     }
 
-    this.displayNewElementForm = function(elem, elemType){
-        let parent = $(elem).parent().parent();
-        parent.find(".new-element-form").show().find("input").attr('elem-type', elemType).focus();
-        parent.find(".display-new-element-link").hide();
-    }
-
-    this.addElement = function(event){
-        event.preventDefault();
-        let input = $(event.target);
-        let elementType = '';
-        let urlPrefixForElementType = '';
-        let isDir = input.attr('elem-type') == 'directory';
-        let closestTree = input.closest('.tree')
-        if(closestTree.hasClass('test-tree')){
-            elementType = 'test';
+    this.getFolder = function(folderName, folder){
+        folder = folder || this.rootFolder
+        if(folderName == ''){
+            return folder
         }
-        else if(closestTree.hasClass('page-tree')){
-            elementType = 'page';
-        }
-        else if(closestTree.hasClass('suite-tree')){
-            elementType = 'suite';
-        }
-        let elementName = input.val().trim().replace(/\s/g, '_');
-        let fullPath = Project.getElementFullPath(input, elementName)
-
-        if(elementName.length == 0){
-            input.val('');
-            input.parent().hide();
-            input.parent().parent().find(".display-new-element-link").show();
-            return
-        }
-
-        let errors = Main.Utils.validateFilename(elementName, isDir);
-        if(errors.length > 0){
-            Main.Utils.displayErrorModal(errors);
-            return
-        }
-        let endpointURL;
-        if(isDir){
-            if(elementType == 'test')
-                endpointURL = '/api/project/test/directory'
-            else if(elementType == 'page')
-                endpointURL = '/api/project/page/directory'
+        let folderNameSplit = folderName.split('.');
+        thisFolderName = folderNameSplit.shift();
+        folderName = folderNameSplit.join('.')
+        let childFolder = folder.getFolder(thisFolderName, folder);
+        if(childFolder){
+            if(folderName)
+                return this.getFolder(folderName, childFolder)
             else
-                endpointURL = '/api/project/suite/directory'
+                return childFolder
         }
         else{
-            if(elementType == 'test')
-                endpointURL = '/api/project/test'
-            else if(elementType == 'page')
-                endpointURL = '/api/project/page'
-            else
-                endpointURL = '/api/project/suite'
+            return null
         }
-        $.ajax({
-            url: endpointURL,
-            data: JSON.stringify({
-                "project": Global.project,
-                "fullPath": fullPath
-            }),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            type: 'POST',
-            success: function(data) {
-                if(data.errors.length == 0){
-                    let parentUl = input.closest('ul');
-                    if(isDir){
-                        let branch = Project.generateNewEmptyBranch(data.element.name, data.element.full_name);
-                        parentUl.children().last().before(branch);
+    }
+
+    this.getFile = function(filename){
+        let filenameSplit = filename.split('.');
+        filename = filenameSplit.pop();
+        let folderName = filenameSplit.join('.');
+        let folder = this.getFolder(folderName);
+        if(folder)
+            return folder.getFile(filename)
+        else
+            return null
+    }
+
+    this.addFile = function(folder){
+
+        let callback = function(filename){
+            if(filename.trim().length == 0) return
+            if(folder.folderpath().length) filename = `${folder.folderpath()}.${filename}`
+            $.ajax({
+                url: Endpoints.createFile[FileExplorer.fileType],
+                data: JSON.stringify({
+                    "project": Global.project,
+                    "fullPath": filename
+                }),
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                type: 'POST',
+                success: function(data) {
+                    if(data.errors.length == 0)
+                        FileExplorer.rootFolder.addFile(filename)
+                    else
+                        Main.Utils.displayErrorModal(data.errors)
+                },
+                error: function(){
+                    Main.Utils.toast('error', 'There was an error adding file', 4000)
+                }
+            })
+        }
+        Main.Utils.displayPromptModal('Add File', '', '', 'filename', callback)
+    }
+
+    this.renameFile = function(file){
+
+        let callback = function(newFilepath){
+            if(file.filepath() === newFilepath || newFilepath.trim().length == 0) return
+
+            $.ajax({
+                url: Endpoints.renameFile[FileExplorer.fileType],
+                data: JSON.stringify({
+                    "project": Global.project,
+                    "fullFilename": file.filepath(),
+                    "newFullFilename": newFilepath
+                }),
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                type: 'POST',
+                success: function(result) {
+                    if(result.errors.length == 0){
+                        file.rename(newFilepath)
+                        Main.Utils.toast('success', 'File was renamed', 2000);
                     }
                     else{
-                        Project.addFileToTree(data.element.full_name, elementType);
+                        Main.Utils.displayErrorModal(result.errors)
                     }
-                    // reset the form, hide the form and display the add new link
-                    input.val("");
-                    input.parent().hide();
-                    input.parent().parent().find(".display-new-element-link").show();
+                },
+                error: function(){
+                    Main.Utils.toast('error', 'There was an error renaming file', 4000)
                 }
-                else{
-                    Main.Utils.displayErrorModal(data.errors);
-                }
-            },
-            error: function() {}
-        });
-    }
-
-    this.getElementFullPath = function(elem, elementName){
-        let dotted_branches = '';
-        elem.parents('.branch').each(function(){
-            if(dotted_branches.length == 0){
-                dotted_branches = $(this).find('a').html();    
-            }
-            else {
-                dotted_branches = $(this).find('a').html() + '.' + dotted_branches;
-            }
-        });
-        if(dotted_branches.length == 0)
-            return elementName
-        else
-            return dotted_branches + '.' + elementName
-    }
-
-    this.deleteElementConfirm = function(elementDeleteButton){
-        let element =  $(elementDeleteButton).parent().parent();
-        let elemFullPath = element.attr('fullpath');
-        let elemType = element.attr('type');
-        let message = `<span style="word-break: break-all">Are you sure you want to delete <strong>${elemFullPath}</strong>?</span>`;
-        let callback = function(){
-            Project.deleteElement(element, elemFullPath, elemType);
+            })
         }
+        Main.Utils.displayPromptModal('Rename file', 'Enter a new name for this file...',
+            file.filepath(), 'new filename', callback)
+    }
+
+    this.duplicateFile = function(file){
+
+        let callback = function(newFilepath){
+            if(file.filepath() === newFilepath || newFilepath.trim().length == 0) return
+
+            $.ajax({
+                url: Endpoints.duplicateFile[FileExplorer.fileType],
+                data: JSON.stringify({
+                    "project": Global.project,
+                    "fullPath": file.filepath(),
+                    "newFileFullPath": newFilepath
+                }),
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                type: 'POST',
+                success: function(errors) {
+                    if(errors.length == 0){
+                        FileExplorer.rootFolder.addFile(newFilepath)
+                        if(FileExplorer.fileType == 'test'){
+                            FileExplorer.getFile(newFilepath).addTags(file.tags)
+                        }
+                        Main.Utils.toast('success', 'File was copied', 2000);
+                    }
+                    else{
+                        Main.Utils.displayErrorModal(errors)
+                    }
+                },
+                error: function(){
+                    Main.Utils.toast('error', 'There was an error duplicating file', 4000)
+                }
+            });
+        }
+        Main.Utils.displayPromptModal('Copy file', 'Enter a new file path...', file.filepath(), 'new filename', callback)
+    }
+
+
+    this.deleteFile = function(file){
+
+        let callback = function(){
+            $.ajax({
+                url: Endpoints.deleteFile[FileExplorer.fileType],
+                data: JSON.stringify({
+                    "project": Global.project,
+                    "fullPath": file.filepath()
+                }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                type: 'DELETE',
+                success: function(errors) {
+                    if(errors.length == 0){
+                        file.parent.removeFile(file.name);
+                        Main.Utils.toast('success', `File ${file.filepath()} was removed`, 2000)
+                    }
+                    else{
+                        Main.Utils.toast('error', 'There was an error removing file', 4000)
+                    }
+                }
+            })
+        }
+        let message = `<span style="word-break: break-all">Are you sure you want to delete <strong>${file.filepath()}</strong>?</span>`;
         Main.Utils.displayConfirmModal('Delete', message, callback);
     }
 
-    this.deleteElement = function(element, fullPath, elemType){
-        let endpointURL;
-        if(elemType == 'test')
-            endpointURL = '/api/test/delete'
-        else if(elemType == 'page')
-            endpointURL = '/api/page/delete'
-        else
-            endpointURL = '/api/suite/delete'
-        $.ajax({
-            url: endpointURL,
-            data: JSON.stringify({
-                "project": Global.project,
-                "fullPath": fullPath
-            }),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            type: 'DELETE',
-            success: function(errors) {
-                if(errors.length == 0){
-                    element.remove();
-                    Main.Utils.toast('success', `File ${fullPath} was removed`, 2000)
-                }
-                else{
-                    Main.Utils.toast('error', 'There was an error removing file', 2000)
-                }
-            },
-        });
-    }
 
-    this.duplicateElementPrompt = function(elementDuplicateButton){
-        let element =  $(elementDuplicateButton).parent().parent();
-        let elemFullPath = element.attr('fullpath');
-        let elemType = element.attr('type');
-        let title = 'Copy file';
-        let message = `<span style="word-break: break-all">Create a copy of <i>${elemFullPath}</i>. Enter a name for the new file...</span>`;
-        let inputValue = elemFullPath;
-        let placeholderValue = '';
-        let callback = function(newFileFullPath){
-            Project.duplicateFile(elemFullPath, elemType, element, newFileFullPath);
-        }
-        Main.Utils.displayPromptModal(title, message, inputValue, placeholderValue, callback)
-    }
+    this.addFolder = function(folder){
 
-    this.duplicateFile = function(elemFullPath, elemType, originalElement, newFileFullPath){
-        if(newFileFullPath === elemFullPath){
-            // new file name is the same as original
-            // don't show error message, do nothing
-            return
-        }
+        let callback = function(folderName){
+            if(folderName.trim().length == 0) return
+            let fullpath = folderName;
+            if(folder.folderpath().length) fullpath = `${folder.folderpath()}.${folderName}`
 
-        let errors = Main.Utils.validateFilename(newFileFullPath);
-        if(errors.length > 0){
-            Main.Utils.displayErrorModal(errors);
-            return
-        }
-        let endpointURL;
-        if(elemType == 'test') { endpointURL = '/api/test/duplicate' }
-        else if(elemType == 'page') { endpointURL = '/api/page/duplicate' }
-        else { endpointURL = '/api/suite/duplicate' }
-        $.ajax({
-            url: endpointURL,
-            data: JSON.stringify({
-                "project": Global.project,
-                "fullPath": elemFullPath,
-                "newFileFullPath": newFileFullPath
-            }),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            type: 'POST',
-            success: function(errors) {
-                if(errors.length == 0){
-                    Project.addFileToTree(newFileFullPath, elemType);
-                    if(elemType == 'test'){
-                        let tags = TestList.getDisplayedTestTags(elemFullPath);
-                        TestList.displayTestTags(newFileFullPath, tags)
+            $.ajax({
+                url: Endpoints.createFolder[FileExplorer.fileType],
+                data: JSON.stringify({
+                    "project": Global.project,
+                    "fullPath": fullpath
+                }),
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                type: 'POST',
+                success: function(data) {
+                    if(data.errors.length == 0){
+                        folder.addFolder(folderName)
                     }
-                    Main.Utils.toast('success', 'File was copied', 2000)
-                }
-                else{
-                    Main.Utils.displayErrorModal(errors);
-                }
-            },
-            error: function(){
-                Main.Utils.toast('error', 'There was an error duplicating the file', 3000)
-            }
-        });
-    }
-
-    this.renameFilePrompt = function(elementDuplicateButton){
-        let element =  $(elementDuplicateButton).parent().parent();
-        let elemFullPath = element.attr('fullpath');
-        let elemType = element.attr('type');
-        let title = 'Rename file';
-        let message = 'Enter a new name for this file...';
-        let inputValue = elemFullPath;
-        let placeholderValue = '';
-        let callback = function(newFileFullPath){
-            Project.renameFile(elemFullPath, elemType, element, newFileFullPath);
-        }
-        Main.Utils.displayPromptModal(title, message, inputValue, placeholderValue, callback)
-    }
-
-    this.renameFile = function(fullFilename, elemType, originalElement, newFullFilename){
-        if(newFullFilename === fullFilename){
-            // new file name is the same as original
-            // don't show error message, do nothing
-            return
-        }
-
-        newFullFilename =  newFullFilename.trim().replace(' ', '_');
-        let errors = Main.Utils.validateFilename(newFullFilename);
-        if(errors.length > 0){
-            Main.Utils.displayErrorModal(errors);
-            return
-        }
-        let endpointURL;
-        if(elemType == 'test') { endpointURL = '/api/test/rename' }
-        else if(elemType == 'page') { endpointURL = '/api/page/rename' }
-        else { endpointURL = '/api/suite/rename' }
-
-        $.ajax({
-            url: endpointURL,
-            data: JSON.stringify({
-                "project": Global.project,
-                "fullFilename": fullFilename,
-                "newFullFilename": newFullFilename
-            }),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            type: 'POST',
-            success: function(result) {
-                if(result.errors.length == 0){
-                    originalElement.remove();
-                    Project.addFileToTree(newFullFilename, elemType);
-                    if(elemType == 'test'){
-                        let tagContainer = originalElement.find('.tag-container');
-                        if(tagContainer.length > 0){
-                            Project.getFileElement(newFullFilename).append(tagContainer);
-                        }
+                    else{
+                        Main.Utils.displayErrorModal(data.errors)
                     }
-                    Main.Utils.toast('success', 'File was renamed', 2000);
+                },
+                error: function() {
+                    Main.Utils.toast('error', 'There was an error adding folder', 4000)
                 }
-                else{
-                    Main.Utils.displayErrorModal(result.errors)
+            })
+        }
+        Main.Utils.displayPromptModal('Add Folder', '', '', 'folder name', callback)
+    }
+
+    this.renameFolder = function(folder){
+
+        let callback = function(newFolderName){
+            if(newFolderName.trim().length == 0) return
+            $.ajax({
+                url: Endpoints.renameFolder[FileExplorer.fileType],
+                data: JSON.stringify({
+                    "project": Global.project,
+                    "fullDirname": folder.folderpath(),
+                    "newFullDirname": newFolderName
+                }),
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                type: 'POST',
+                success: function(data) {
+                    if(data.errors.length == 0){
+                        folder.rename(newFolderName)
+                    }
+                    else{
+                        Main.Utils.displayErrorModal(data.errors);
+                    }
+                },
+                error: function() {
+                    Main.Utils.toast('error', 'There was an error renaming folder', 4000)
                 }
-            },
-            error: function(){
-                Main.Utils.toast('error', 'There was an error duplicating the file', 4000)
+            });
+        }
+        Main.Utils.displayPromptModal('Rename Folder', 'Enter a new name for this folder...', folder.folderpath(), '', callback)
+    }
+
+    this.deleteFolder = function(folder){
+
+        let callback = function(){
+            $.ajax({
+                url: Endpoints.deleteFolder[FileExplorer.fileType],
+                data: JSON.stringify({
+                    "project": Global.project,
+                    "fullDirname": folder.folderpath(),
+                }),
+                contentType: 'application/json;charset=utf-8',
+                dataType: 'json',
+                type: 'DELETE',
+                success: function(data) {
+                    if(data.errors.length == 0){
+                        FileExplorer.renderFinished = false;
+                        folder.parent.removeFolder(folder.name);
+                        FileExplorer.renderFinished = true;
+                    }
+                    else{
+                        Main.Utils.displayErrorModal(data.errors);
+                    }
+                },
+                error: function() {
+                    Main.Utils.toast('error', 'There was an error deleting folder', 4000)
+                }
+            });
+        }
+        let message = `<span style="">
+            Are you sure you want to delete folder <strong>${folder.folderpath()}</strong> and all its contents?.
+            <strong>This cannot be undone.</strong></span>`;
+        Main.Utils.displayConfirmModal('Delete Folder', message, callback, true);
+    }
+
+    this.getBreadCrumb = function(folder, breadcrumb){
+        if(breadcrumb === undefined){
+            breadcrumb = $(`<div><span>${folder.name}</span> /</div>`)
+        }
+        else{
+            let anchor = $(`<a href="javascript:void(0);">${folder.name}</a>`);
+            anchor.on('click', () => this.navigateToFolder(folder) );
+            breadcrumb.prepend(anchor, ' / ');
+        }
+        if(folder.parent != null){
+            breadcrumb = this.getBreadCrumb(folder.parent, breadcrumb)
+        }
+        return breadcrumb
+    }
+
+    this.hideAllFolderMenus = function(){
+        $(".folder-menu").removeClass('active')
+    }
+}
+
+
+class Folder {
+
+    constructor(folder, parent) {
+        this.name = folder.name;
+        this.parent = parent;
+        this.folders = [];
+        this.files = [];
+        this.dom = null;
+        this.container = null;
+
+        let folders = folder.sub_elements.filter(element => element.type == 'directory');
+        let files = folder.sub_elements.filter(element => element.type == 'file');
+        for(let folder of folders){
+            this.folders.push(new Folder(folder, this))
+        }
+        for(let file of files){
+            this.files.push(new File(file, this))
+        }
+    }
+
+    path(){
+        return this.parent == null ? '' : this.parent.folderpath()
+    }
+
+    folderpath(){
+        if(this.parent == null)
+            return ''
+        if(this.parent.parent == null)
+            return this.name
+        return `${this.path()}.${this.name}`
+    }
+
+    generateDOM(){
+        let thisFolder = this;
+        let ul = $("<ul class='folder-content'>");
+        this.folders.forEach(folder => ul.append(folder.template()))
+        this.files.forEach(file => ul.append(file.template()))
+        this.dom = ul
+    }
+
+    template(){
+        let thisFolder = this;
+        let openedClass = 'glyphicon-folder-open';
+        let closedClass = 'glyphicon-folder-close';
+        let folderLi = $(`
+            <li class="tree-element folder" name="${thisFolder.name}">
+                <i class="folder-icon glyphicon ${closedClass}"></i>
+                <a href="#">${thisFolder.name}</a>
+                <span class="dropdown-container"></span>
+                <ul class='folder-content'></ul>
+            </li>`);
+        let dropdownToggle = thisFolder.folderMenuTemplate();
+        folderLi.find(".dropdown-container").append(dropdownToggle);
+        // Expand/collapse folder icon
+        folderLi.find('.folder-icon')[0].addEventListener('click', function(){
+            let ul = folderLi.find("ul.folder-content:first");
+            if(this.classList.contains('glyphicon-folder-close')){
+                this.classList.remove('glyphicon-folder-close');
+                this.classList.add('glyphicon-folder-open');
+                thisFolder.generateDOM();
+                thisFolder.container = ul;
+                ul.html(thisFolder.dom.children());
+                ul.show()
             }
+            else{
+                this.classList.add('glyphicon-folder-close');
+                this.classList.remove('glyphicon-folder-open');
+                ul.hide()
+            }
+        })
+        // Navigate to folder link
+        folderLi.find('>a').each(function () {
+            $(this).on('click', function (e) {
+                FileExplorer.navigateToFolder(thisFolder)
+                e.preventDefault();
+            })
+        })
+        return folderLi
+    }
+
+    folderMenuTemplate(){
+        let folder = this;
+        let userWeight = Global.user.projectWeight;
+        let weights = Main.PermissionWeightsEnum;
+        let dropdownMenu;
+        if(userWeight >= weights.standard){
+            dropdownMenu = $(`<ul class="dropdown-menu folder-menu"></ul>`);
+            // New File menu
+            let newFileMenu = $(`<a href="javascript:void(0);">Add New File</a>`);
+            newFileMenu.on('click', () => FileExplorer.addFile(folder))
+            dropdownMenu.append($(`<li></li>`).append(newFileMenu));
+            // New Folder menu
+            let newFolderMenu = $(`<a href="javascript:void(0);">Add New Folder</a>`);
+            newFolderMenu.on('click', () => FileExplorer.addFolder(folder))
+            dropdownMenu.append($(`<li></li>`).append(newFolderMenu));
+            // Rename Folder menu
+            let renameFolderMenu = $(`<a href="javascript:void(0);">Rename Folder</a>`);
+            renameFolderMenu.on('click', () => FileExplorer.renameFolder(folder))
+            dropdownMenu.append($(`<li></li>`).append(renameFolderMenu));
+            if(userWeight >= weights.admin){
+                // Delete Folder menu
+                let deleteFolderMenu = $(`<a href="javascript:void(0);">Delete Folder</a>`);
+                deleteFolderMenu.on('click', () => FileExplorer.deleteFolder(folder))
+                dropdownMenu.append($(`<li></li>`).append(deleteFolderMenu));
+            }
+        }
+        else{
+            dropdownMenu = '';
+        }
+        $("body").append(dropdownMenu);
+
+        let dropdownToggle = $(`<button class="btn btn-default dropdown-toggle folder-menu-button-toggle" type="button"><span class="caret"></span></button>`);
+        dropdownToggle.on('click', function(e){
+            let isActive = dropdownMenu.hasClass('active');
+            FileExplorer.hideAllFolderMenus();
+            dropdownMenu.css('top', dropdownToggle.offset().top + 17);
+            dropdownMenu.css('left', dropdownToggle.offset().left)
+            if(!isActive){ dropdownMenu.addClass('active') }
+            return false
         });
+        return dropdownToggle
     }
 
-    this.getDirElement = function(dirPath){
-        return $(`li.branch[fullpath="${dirPath}"]`)
+    render(){
+        // Update breadcrumb
+        let breadCrumb = FileExplorer.getBreadCrumb(this);
+        $("#breadcrumb").html(breadCrumb);
+        // Update root folder content
+        this.generateDOM()
+        this.container = $("#rootFolderContent");
+        this.container.html(this.dom.children());
+        // Update bottom menu
+        $("#bottomMenu").html(this.bottomNewElementButtons())
     }
 
-    this.dirExists = function(dirPath){
-        return Project.getDirElement(dirPath).length > 0
+    getFile(fileName){
+        for (let file of this.files) {
+          if(file.name == fileName) return file
+        }
+        return null
     }
 
-    this.getFileElement = function(filePath){
-        return $(`li.tree-element[fullpath="${filePath}"]`)
+    getFolder(folderName){
+        for (let _folder of this.folders) {
+            if(_folder.name == folderName) return _folder
+        }
+        return null
+    }
+
+    addFolder(folderName, folderObj){
+        let folderNameArray = folderName.split('.');
+        if(folderNameArray.length > 1){
+            let childFolderName = folderNameArray.shift();
+            let childFolder = this.getFolder(childFolderName, folderObj);
+            if(childFolder){
+                return childFolder.addFolder(folderNameArray.join('.'), folderObj)
+            }
+            else{
+                return this.addFolder(childFolderName).addFolder(folderNameArray.join('.'), folderObj)
+            }
+        }
+        else{
+            if(folderObj === undefined){
+                let tempFolder = {
+                    "dot_path": "",
+                    "name": folderName,
+                    "sub_elements": [],
+                    "type": "directory"
+                }
+                folderObj = new Folder(tempFolder, this);
+            }
+            else if(folderObj.parent === null){
+                folderObj.parent = this
+            }
+            this.folders.push(folderObj);
+            this._addFolderToUI(folderObj)
+            return folderObj
+        }
+    }
+
+    _addFolderToUI(newFolder){
+        if(this.container != null){
+            let folderLi = this.container.find('>li.folder')
+            if(folderLi.length > 0){
+                folderLi.last().after(newFolder.template())
+            }
+            else{
+                this.container.prepend(newFolder.template())
+            }
+        }
+    }
+
+    removeFolder(folderName){
+        if(this.getFolder(folderName)){
+            this.folders = this.folders.filter((value, index, arr) => value.name != folderName);
+            let folderLi = this.container.find(`>li.folder[name="${folderName}"]`);
+            if(folderLi.length > 0){ folderLi.remove() }
+        }
+    }
+
+    rename(newFolderpath){
+        let newFolderpathArray = newFolderpath.split('.');
+        let newFoldername = newFolderpathArray.pop();
+        let newPath = newFolderpathArray.join('.');
+
+        if(this.path() == newPath){
+            this.parent.renameFolder(this, newFoldername)
+        }
+        else{
+            this.parent.removeFolder(this.name)
+            this.name = newFoldername;
+            this.parent = null;
+            FileExplorer.rootFolder.addFolder(newFolderpath, this)
+        }
+
+    }
+
+    renameFolder(childFolder, newName){
+        let childFolderLi = this.container.find(`>li.folder[name='${childFolder.name}']`);
+        childFolder.name = newName;
+        childFolderLi.attr('name', newName);
+        childFolderLi.find('>a').html(newName)
+    }
+
+    addFile(filename, fileObj){
+        let filenameArray = filename.split('.');
+        if(filenameArray.length > 1){
+            let childFolderName = filenameArray.shift();
+            let childFolder = this.getFolder(childFolderName);
+            if(childFolder){
+                childFolder.addFile(filenameArray.join('.'))
+            }
+            else{
+                this.addFolder(childFolderName).addFile(filenameArray.join('.'), fileObj)
+            }
+        }
+        else{
+            if(fileObj === undefined){
+                let tempFile = {
+                    "dot_path": "",
+                    "name": filename,
+                    "sub_elements": [],
+                    "type": "file"
+                }
+                fileObj = new File(tempFile, this);
+            }
+            this.files.push(fileObj);
+            this._addFileToUI(fileObj)
+        }
+    }
+
+    _addFileToUI(file){
+        if(this.container != null){
+            this.container.append(file.template())
+        }
+    }
+
+    removeFile(filename){
+        if(this.getFile(filename)){
+            this.files = this.files.filter((value, index, arr) => value.name != filename);
+            let fileLi = this.container.find(">li.file")
+                .filter(function(i){ return $(this).find('a.file-link').text() === filename });
+            if(fileLi.length > 0){ fileLi.remove() }
+        }
+    }
+
+    bottomNewElementButtons(){
+        let folder = this;
+        let newFileButton = $(`<a class="new-file-link" href="javascript:void(0)">
+                <i class="glyphicon glyphicon-file"><i style="left: -3px" class="fa fa-plus-circle fa-stack-1x awesomeEntity sub-icon"/></i>
+            </a>`);
+        newFileButton.on('click', function(){
+            FileExplorer.addFile(folder)
+        })
+        let newFolderButton = $(`<a class="new-directory-link" href="javascript:void(0)">
+                <i class="glyphicon glyphicon-folder-close"><i style="left: 0px" class="fa fa-plus-circle fa-stack-1x awesomeEntity sub-icon"/></i>
+            </a>`);
+        newFolderButton.on('click', function(){
+            FileExplorer.addFolder(folder)
+        })
+        return $().add(newFileButton).add(newFolderButton)
+    }
+}
+
+
+class File {
+
+    constructor(file, parent) {
+        this.name = file.name;
+        this.parent = parent;
+        this.tags = [];
+        this.dom = null
+    }
+
+    path(){ return this.parent.folderpath()}
+
+    filepath(){
+        return this.path().length > 0 ? `${this.path()}.${this.name}` : this.name
+    }
+
+    template(){
+        let thisFile = this;
+        let buttonsSpan = $('<span class="file-menu pull-right"></span');
+
+        let userWeight = Global.user.projectWeight;
+        let weights = Main.PermissionWeightsEnum;
+
+        if(userWeight >= weights.standard){
+            // Rename button
+            let renameButton = $(`<button class="file-menu-button rename-button"><i class="glyphicon glyphicon-edit"></i></button>`);
+            renameButton.on('click', e => FileExplorer.renameFile(thisFile))
+            buttonsSpan.append(renameButton);
+            // Duplicate button
+            let duplicateButton = $(`<button class="file-menu-button duplicate-button"><i class="glyphicon glyphicon-duplicate"></i></button>`);
+            duplicateButton.on('click', e => FileExplorer.duplicateFile(thisFile));
+            buttonsSpan.append(duplicateButton);
+            if(userWeight >= weights.admin){
+                // Delete button
+                let deleteButton = $(`<button class="file-menu-button delete-button"><i class="glyphicon glyphicon-trash"></i></button>`);
+                deleteButton.on('click', e => FileExplorer.deleteFile(thisFile));
+                buttonsSpan.append(deleteButton);
+            }
+        }
+        if(FileExplorer.fileType == 'test' || FileExplorer.fileType == 'page'){
+            // Code View button
+            let codeIcon = `<i class="glyphicon glyphicon-chevron-left" style="-webkit-text-stroke: 0.5px white;"></i><i class="glyphicon glyphicon-chevron-right" style="margin-left: -8px; -webkit-text-stroke: 0.5px white;"></i>`;
+            let codeLink = $(`<a href="${this.url()}code" class="file-menu-button code-button" style="margin-right: -3px; margin-left:-3px">${codeIcon}</a>`);
+            buttonsSpan.prepend(codeLink);
+            if(userWeight >= weights.standard && FileExplorer.fileType == 'test'){
+                // Run test button
+                let runButton = $(`<button class="file-menu-button run-test-button"><i class="glyphicon glyphicon-play-circle"></i></button>`);
+                runButton.on('click', e => Main.TestRunner.openConfigModal(Global.project, thisFile.filepath()));
+                buttonsSpan.prepend(runButton);
+            }
+        }
+        let li = $(`
+            <li class="tree-element file">
+                <a class="file-link" href="${this.url()}">${this.name}</a>
+                <div class="tag-container"></div>
+            </li>`);
+        li.append(buttonsSpan);
+
+        this.dom = li;
+        this.displayTags();
+        return li
+    }
+
+    rename(newFilepath){
+        let newFilepathArray = newFilepath.split('.');
+        let newFilename = newFilepathArray.pop();
+        if(this.path() == newFilepathArray.join('.')){
+            this.name = newFilename;
+            this.dom.find('>a').html(newFilename)
+        }
+        else{
+            this.parent.removeFile(this.name);
+            FileExplorer.rootFolder.addFile(newFilepath, this)
+        }
+    }
+
+    url(){
+        return `/project/${Global.project}/${FileExplorer.fileType}/${this.filepath()}/`
+    }
+
+    addTags(tags){
+        this.tags = tags;
+        this.displayTags()
+    }
+
+    displayTags(){
+        if(this.dom){
+            let tagContainer = this.dom.find(".tag-container");
+            this.tags.forEach(function(tag){
+                let tagElement = $(`<span class="tag">${tag}</span>`);
+                tagContainer.append(tagElement)
+            })
+        }
+    }
+}
+
+
+const Endpoints = {
+    createFile: {
+        test: '/api/project/test',
+        page: '/api/project/page',
+        suite: '/api/project/suite'
+    },
+    renameFile: {
+        test: '/api/test/rename',
+        page: '/api/page/rename',
+        suite: '/api/suite/rename'
+    },
+    duplicateFile: {
+        test: '/api/test/duplicate',
+        page: '/api/page/duplicate',
+        suite: '/api/suite/duplicate'
+    },
+    deleteFile: {
+        test: '/api/test/delete',
+        page: '/api/page/delete',
+        suite: '/api/suite/delete'
+    },
+    createFolder: {
+        test: '/api/project/test/directory',
+        page: '/api/project/page/directory',
+        suite: '/api/project/suite/directory'
+    },
+    renameFolder: {
+        test: '/api/test/directory/rename',
+        page: '/api/page/directory/rename',
+        suite: '/api/suite/directory/rename'
+    },
+    deleteFolder: {
+        test: '/api/test/directory/delete',
+        page: '/api/page/directory/delete',
+        suite: '/api/suite/directory/delete'
     }
 }
