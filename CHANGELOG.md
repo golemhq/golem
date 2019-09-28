@@ -4,6 +4,8 @@
 
 ### Added
 
+- Rename/Delete folders; improved file list navigation [#179](https://github.com/golemhq/golem/issues/179)
+
 - Remove executions from report dashboard
 
 - Skip flag to test [#146](https://github.com/golemhq/golem/issues/146)

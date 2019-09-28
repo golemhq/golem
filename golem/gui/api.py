@@ -824,7 +824,7 @@ def _rename_directory(_request, dir_type):
 def _delete_directory(_request, dir_type):
     project = _request.json['project']
     dir_name = _request.json['fullDirname']
-    _verify_permissions(Permissions.STANDARD, project)
+    _verify_permissions(Permissions.ADMIN, project)
     errors = Project(project).delete_directory(dir_name, dir_type)
     return jsonify({'errors': errors})
 
