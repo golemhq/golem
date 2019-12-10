@@ -47,7 +47,8 @@ def open_browser(browser_id=None):
     def validate_exec_path(browser_name, exec_path_setting, settings):
         executable_path = settings[exec_path_setting]
         if executable_path:
-            matched_executable_path = utils.match_latest_executable_path(executable_path)
+            matched_executable_path = utils.match_latest_executable_path(executable_path,
+                                                                         execution.testdir)
             if matched_executable_path:
                 try:
                     yield matched_executable_path

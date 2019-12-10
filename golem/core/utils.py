@@ -115,15 +115,17 @@ def extract_version_from_webdriver_filename(filename):
     return version
 
 
-def match_latest_executable_path(glob_path):
+def match_latest_executable_path(glob_path, testdir):
     """Returns the absolute path to the webdriver executable
     with the highest version given a path with glob pattern.
     """
     found_files = []
-    absolute_glob_path = os.path.abspath(glob_path)
+    glob_path = os.path.normpath(glob_path)
+    if not os.path.isabs(glob_path):
+        glob_path = os.path.join(testdir, glob_path)
     # Note: recursive=True arg is not supported
     # in Python 3.4, so '**' wildcard is not supported
-    matched_files = glob.glob(absolute_glob_path)
+    matched_files = [x for x in glob.glob(glob_path) if os.path.isfile(x)]
     for matched_file in matched_files:
         found_files.append((matched_file, extract_version_from_webdriver_filename(matched_file)))
     if found_files:

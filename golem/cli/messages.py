@@ -1,58 +1,20 @@
 
 USAGE_MSG = """
-Usage: golem
+Usage: golem [--golem-dir] [-h] <command> [options]
 
-  golem run <project> <test|suite|directory> [-b -p -e -t -i -r]
-            [--report-folder] [--report-name] [--timestamp]
-  golem gui [--host -p -d]
-  golem createproject <project>
-  golem createtest <project> <test>
-  golem createsuite <project> <suite>
-  golem createsuperuser [-u -e -p -n]
+Commands:
+  run                    Run tests, suites or directories
+  gui                    Start the Golem GUI module
+  createproject          Create a new project
+  createtest             Create a new test in a project
+  createsuite            Create a new suite in a project
+  createsuperuser        Create a new super user.
 
-Usage: golem run
+General Options:
+  --golem-dir                 Path to Golem root directory
+  -h, --help                  Show help.
 
-  Run tests, suites or directories 
-  
-  Examples:
-    golem run project_name test_name
-    golem run project_name suite_name
-    golem run project_name suite_name --tags "first tag" "second tag"
-    golem run project_name folder/
-    golem run project_name .
-
-  positional arguments:
-    projects             name of the project
-    test|suite|dir       name of a single test, a suite or a
-                         directory of tests.
-
-  optional arguments:
-    -b, --browsers       a list of browsers
-    -p, --processes      number of processes (parallel run), default is 1
-    -e, --environments   a list of environments
-    -t, --tags           a list of tags to filter the tests.
-                         A tag expression with 'and', 'or', and 'not' operators
-                         can be used, enclosed in double quotes.
-    -i, --interactive    run in interactive mode
-    -r, --report         select reports to generate. Options are:
-                         'junit', 'html', 'html-no-images', and 'json'
-    --report-folder      absolute path of location to save report
-    --report-name        filename for generated report without path or extension.
-    --timestamp          used by the execution. Default is auto-generated
-
-
-Usage: golem gui
-  
-  Start the Golem GUI module
-
-  optional arguments:
-    --host              Default host is 127.0.0.1 (localhost). Use
-                        0.0.0.0 to make the GUI publicly accessible.  
-    -p, --port          which port to use, default is 5000
-    -d, --debug         Run the GUI in debug mode, default is False    
-
-Type: golem -h <command> for more help
-"""
+Type: golem -h <command> for more help"""
 
 RUN_USAGE_MSG = """
 Usage: golem run <project> <test|suite|directory> [-b|--browsers]
@@ -111,8 +73,7 @@ Usage: golem run <project> <test|suite|directory> [-b|--browsers]
                          Default is 'report'.
     --timestamp          used by the execution. Default is 
                          auto-generated with the format:
-                         'year.month.day.hour.minutes.seconds.milliseconds'
-"""
+                         'year.month.day.hour.minutes.seconds.milliseconds'"""
 
 GUI_USAGE_MSG = """
 Usage: golem gui [-p|--port]
@@ -123,8 +84,7 @@ Usage: golem gui [-p|--port]
     --host              Default host is 127.0.0.1 (localhost). Use
                         0.0.0.0 to make the GUI publicly accessible.  
     -p, --port          which port to use, default is 5000
-    -d, --debug         Run the GUI in debug mode, default is False  
-"""
+    -d, --debug         Run the GUI in debug mode, default is False"""
 
 CREATEPROJECT_USAGE_MSG = """
 Usage: golem createproject <project>
@@ -132,8 +92,7 @@ Usage: golem createproject <project>
   Create a new project
 
   positional arguments:
-    project             project name
-"""
+    project             project name"""
 
 CREATETEST_USAGE_MSG = """
 Usage: golem createtest <project> <test>
@@ -143,8 +102,7 @@ Usage: golem createtest <project> <test>
   positional arguments:
     project             an existing project name
     test                the name of the new test. Use dots
-                        to create inside sub-folders.
-"""
+                        to create inside sub-folders."""
 
 CREATESUITE_USAGE_MSG = """
 Usage: golem createsuite <project> <suite>
@@ -154,8 +112,7 @@ Usage: golem createsuite <project> <suite>
   positional arguments:
     project             an existing project name
     suite               the name of the new suite. Use dots
-                        to create inside sub-folders.
-"""
+                        to create inside sub-folders."""
 
 CREATESUPERUSER_USAGE_MSG = """
 Usage: golem createsuperuser [-u|--username -e|email -p|--password
@@ -185,8 +142,7 @@ Usage: golem-admin
                         new test directory. Use '.' to use cwd.
   
   optional arguments:
-    -y, --yes           Do not ask for confirmation
-"""
+    -y, --yes           Do not ask for confirmation"""
 
 
 STANDALONE_USAGE = """
@@ -202,5 +158,4 @@ Golem Standalone
   Type the following for more help:
     golem golem-admin -h
     golem webdriver-manager -h
-    golem -h
-"""
+    golem -h"""

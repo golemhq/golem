@@ -121,7 +121,7 @@ class TestMatchLatestExecutablePath:
         test_utils.create_empty_file(basedir, 'chromedriver_2.4')
         test_utils.create_empty_file(basedir, 'chromedriver_2.3')
         test_utils.create_empty_file(basedir, 'geckodriver_5.6.7')
-        result = utils.match_latest_executable_path('chromedriver*')
+        result = utils.match_latest_executable_path('chromedriver*', basedir)
         assert result == os.path.join(basedir, 'chromedriver_2.4')
 
     def test_match_latest_executable_path__compare_versions_not_strings(self, dir_function,
@@ -133,7 +133,7 @@ class TestMatchLatestExecutablePath:
         basedir = dir_function.path
         test_utils.create_empty_file(basedir, 'chromedriver_2.9')
         test_utils.create_empty_file(basedir, 'chromedriver_2.12')
-        result = utils.match_latest_executable_path('chromedriver*')
+        result = utils.match_latest_executable_path('chromedriver*', basedir)
         assert result == os.path.join(basedir, 'chromedriver_2.12')
 
     def test_match_latest_executable_path_exe(self, dir_function, test_utils):
@@ -142,7 +142,7 @@ class TestMatchLatestExecutablePath:
         test_utils.create_empty_file(basedir, 'chromedriver_2.4.exe')
         test_utils.create_empty_file(basedir, 'chromedriver_2.3.exe')
         test_utils.create_empty_file(basedir, 'geckodriver_5.6.7.exe')
-        result = utils.match_latest_executable_path('chromedriver*')
+        result = utils.match_latest_executable_path('chromedriver*', basedir)
         assert result == os.path.join(basedir, 'chromedriver_2.4.exe')
 
     def test_match_latest_executable_path_subdir(self, dir_function, test_utils):
@@ -155,7 +155,7 @@ class TestMatchLatestExecutablePath:
         test_utils.create_empty_file(path, 'chromedriver_2.4')
         test_utils.create_empty_file(path, 'chromedriver_2.3')
         test_utils.create_empty_file(path, 'geckodriver_5.6.7')
-        result = utils.match_latest_executable_path('./drivers/chromedriver*')
+        result = utils.match_latest_executable_path('./drivers/chromedriver*', basedir)
         assert result == os.path.join(path, 'chromedriver_2.4')
 
     def test_no_asterisk(self, dir_function, test_utils):
@@ -166,7 +166,7 @@ class TestMatchLatestExecutablePath:
         path = os.path.join(basedir, 'drivers')
         test_utils.create_empty_file(path, 'chromedriver_2.2')
         test_utils.create_empty_file(path, 'chromedriver_2.4')
-        result = utils.match_latest_executable_path('./drivers/chromedriver_2.2')
+        result = utils.match_latest_executable_path('./drivers/chromedriver_2.2', basedir)
         assert result == os.path.join(path, 'chromedriver_2.2')
 
     def test_asterisk_subdir(self, dir_function, test_utils):
@@ -175,8 +175,21 @@ class TestMatchLatestExecutablePath:
         path = os.path.join(basedir, 'drivers')
         test_utils.create_empty_file(path, 'chromedriver_2.2')
         test_utils.create_empty_file(path, 'chromedriver_2.4')
-        result = utils.match_latest_executable_path('./*/chromedriver*')
+        result = utils.match_latest_executable_path('./*/chromedriver*', basedir)
         assert result == os.path.join(path, 'chromedriver_2.4')
+
+    def test_match_latest_executable_path__absolute_path(self, dir_function, test_utils):
+        """an absolute path can be passed"""
+        basedir = dir_function.path
+        test_utils.create_empty_file(basedir, 'chromedriver_2.2')
+        test_utils.create_empty_file(basedir, 'chromedriver_2.3')
+        abspath = os.path.join(os.path.abspath(basedir), 'chromedriver_2.3')
+        result = utils.match_latest_executable_path(abspath, basedir)
+        assert result == os.path.join(basedir, 'chromedriver_2.3')
+
+    def test_match_latest_executable_path__no_match(self, dir_function):
+        result = utils.match_latest_executable_path(dir_function.path, dir_function.path)
+        assert result is None
 
 
 class TestGetValidFilename:
