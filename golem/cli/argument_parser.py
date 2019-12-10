@@ -4,6 +4,7 @@ import argparse
 def get_parser():
     parser = argparse.ArgumentParser(prog='golem', add_help=False)
     parser.add_argument('-h', '--help', nargs='?', const=True, default=False)
+    parser.add_argument('--golem-dir', type=str)
     subparsers = parser.add_subparsers(dest='command')
 
     # run

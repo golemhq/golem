@@ -2,8 +2,8 @@ import os
 
 import pytest
 
-from golem.cli import messages
-from golem.core import utils, errors, test_directory
+from golem.cli import messages, commands
+from golem.core import errors, test_directory
 
 
 class TestGolemHelp:
@@ -28,6 +28,55 @@ class TestGolemHelp:
         os.chdir(testdir_session.path)
         result = test_utils.run_command(command)
         assert result == expected
+
+
+class TestGolemDirArg:
+
+    @pytest.mark.slow
+    def test_specify_golem_test_directory_path(self, dir_function, test_utils):
+        """The path to the Golem test directory can be specified
+        using the golem-dir argument
+        """
+        os.chdir(dir_function.path)
+        golem_dir_name = 'golem_dir'
+        golem_directory = os.path.join(dir_function.path, golem_dir_name)
+        commands.createdirectory_command(golem_directory)
+
+        # createproject command in a non golem directory
+        # without golem-dir argument
+        command = 'golem createproject project_one'
+        result = test_utils.run_command(command)
+        msg = ('Error: {} is not an valid Golem test directory; '
+               '.golem file not found'.format(dir_function.path))
+        assert msg in result
+
+        # specify golem-dir with absolute path
+        command = 'golem --golem-dir {} createproject project_two'.format(golem_directory)
+        result = test_utils.run_command(command)
+        assert 'Project project_two created' in result
+
+        # specify golem-dir with relative path
+        command = 'golem --golem-dir {} createproject project_three'.format(golem_dir_name)
+        result = test_utils.run_command(command)
+        assert 'Project project_three created' in result
+
+    @pytest.mark.slow
+    def test_golem_dir_arg_does_not_point_to_test_directory(self, dir_function, test_utils):
+        """Passing an invalid golem-dir argument value"""
+        os.chdir(dir_function.path)
+        dir_name = 'dir_one'
+        dir_path = os.path.join(dir_function.path, dir_name)
+
+        error_msg = 'Error: {} is not an valid Golem test directory; .golem file not found'
+        command = 'golem --golem-dir {} createproject project_two'
+
+        # invalid golem-dir with relative path
+        result = test_utils.run_command(command.format(dir_name))
+        assert error_msg.format(dir_path) in result
+
+        # invalid golem-dir with absolute path
+        result = test_utils.run_command(command.format(dir_path))
+        assert error_msg.format(dir_path) in result
 
 
 class TestGolemRun:
