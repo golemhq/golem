@@ -986,6 +986,10 @@ Starts an interactive console at this point of the test.
 The test should be run with the '-i' flag, otherwise this action will be ignored.
 See [Interactive Mode](interactive-mode.html) for more details.
 
+### log(message, level='INFO')
+
+Log a message. Valid log levels are: DEBUG, INFO, WARNING, ERROR and CRITICAL.
+
 ### random(args)
 
 Generate a random string. Options:

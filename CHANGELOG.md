@@ -10,6 +10,8 @@
 
 - Skip flag to test [#146](https://github.com/golemhq/golem/issues/146)
 
+- Actions: log
+
 ### Fixed
 
 - [#169](https://github.com/golemhq/golem/issues/169)

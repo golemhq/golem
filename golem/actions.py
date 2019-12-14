@@ -27,14 +27,8 @@ def _add_error(message, description='', log_level='ERROR'):
         'description': description
     }
     execution.errors.append(error)
-    if log_level in execution_logger.VALID_LOG_LEVELS:
-        log_level_int = getattr(logging, log_level)
-        output = message
-        if description:
-            output = '{}\n{}'.format(message, description)
-        execution.logger.log(log_level_int, output)
-    else:
-        raise Exception('log level {} is invalid'.format(log_level))
+    message = '{}\n{}'.format(message, description) if description else message
+    _log(message, log_level)
 
 
 def _add_step(message, log_level='INFO', log_step=True):
@@ -46,11 +40,7 @@ def _add_step(message, log_level='INFO', log_step=True):
     }
     execution.steps.append(step)
     if log_step:
-        if log_level in execution_logger.VALID_LOG_LEVELS:
-            log_level_int = getattr(logging, log_level)
-            execution.logger.log(log_level_int, message)
-        else:
-            raise Exception('log level {} is invalid'.format(log_level))
+        _log(message, log_level)
 
 
 def _append_error(message, description=''):
@@ -125,6 +115,16 @@ def _generate_screenshot_name(message):
     sanitized_filename = utils.get_valid_filename(message)
     random_id = str(uuid.uuid4())[:5]
     return '{}_{}'.format(sanitized_filename, random_id)
+
+
+def _log(message, log_level="INFO"):
+    """Log a message"""
+    log_level = log_level.upper()
+    if log_level in execution_logger.VALID_LOG_LEVELS:
+        log_level_int = getattr(logging, log_level)
+        execution.logger.log(log_level_int, message)
+    else:
+        raise Exception('log level {} is invalid'.format(log_level))
 
 
 def _run_wait_hook():
@@ -1435,6 +1435,17 @@ def javascript_click(element):
     element = get_browser().find(element)
     with _step('Javascript click element {}'.format(element.name)):
         element.javascript_click()
+
+
+def log(message, level="INFO"):
+    """Log a message.
+    Valid log levels are: DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+    Parameters:
+    message : value
+    level (optional, 'INFO') : value
+    """
+    _log(message, level)
 
 
 def maximize_window():
