@@ -1241,7 +1241,7 @@ def get_element_attribute(element, attribute):
     """Get the attribute value of element.
     If the attribute is not present in element, None is returned.
 
-    Parameters
+    Parameters:
     element : element
     attribute : value
     """
@@ -1253,7 +1253,7 @@ def get_element_attribute(element, attribute):
 def get_element_text(element):
     """Get the element text
 
-    Parameters
+    Parameters:
     element : element
     """
     element = get_browser().find(element)
@@ -1264,7 +1264,7 @@ def get_element_text(element):
 def get_element_value(element):
     """Get the element value attribute
 
-    Parameters
+    Parameters:
     element : element
     """
     element = get_browser().find(element)
@@ -1663,7 +1663,7 @@ def set_browser_capability(capability_key, capability_value):
 def set_search_timeout(timeout):
     """Set the search timeout value
 
-    Paramters:
+    Parameters:
     timeout : value
     """
     execution.logger.debug('Set search_timeout to: {}'.format(timeout))
