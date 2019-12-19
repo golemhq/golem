@@ -60,7 +60,7 @@ SETTINGS_FILE_CONTENT = (
 
 // Log level to console. Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL.
 // Default option is INFO
-"console_log_level": "INFO",
+"cli_log_level": "INFO",
 
 // Log all events, instead of just Golem events. Default is true
 "log_all_events": true
@@ -91,7 +91,7 @@ DEFAULTS = [
     ('remote_browsers', {}),
     ('implicit_actions_import', True),
     ('implicit_page_import', True),
-    ('console_log_level', 'INFO'),
+    ('cli_log_level', 'INFO'),
     ('log_all_events', True),
     ('start_maximized', True),
     ('screenshots', {})
@@ -145,12 +145,19 @@ def assign_settings_default_values(settings):
     return settings
 
 
+def _deprecate_settings(settings):
+    if 'console_log_level' in settings and 'cli_log_level' not in settings:
+        settings['cli_log_level'] = settings['console_log_level']
+    return settings
+
+
 def get_global_settings():
     """Get global settings from test-directory folder as a dictionary"""
     settings = {}
     path = settings_path()
     if os.path.isfile(path):
         settings = _read_json_with_comments(path)
+        settings = _deprecate_settings(settings)
         settings = assign_settings_default_values(settings)
     else:
         print('Warning: settings file is not present')
@@ -173,6 +180,7 @@ def get_project_settings_only(project):
     project_settings = {}
     if os.path.isfile(path):
         project_settings = _read_json_with_comments(path)
+    project_settings = _deprecate_settings(project_settings)
     return project_settings
 
 

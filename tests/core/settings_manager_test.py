@@ -21,14 +21,14 @@ DEFAULT_EMPTY = {
     'remote_browsers': {},
     'implicit_actions_import': True,
     'implicit_page_import':  True,
-    'console_log_level': 'INFO',
+    'cli_log_level': 'INFO',
     'log_all_events': True,
     'start_maximized': True,
     'screenshots': {}
 }
 
 DEFAULT_PREDEFINED = {
-    'console_log_level': 'INFO',
+    'cli_log_level': 'INFO',
     'default_browser': 'chrome',
     'chromedriver_path': './drivers/chromedriver*',
     'edgedriver_path': './drivers/edgedriver*',
@@ -56,24 +56,20 @@ class TestCreateGlobalSettingsFile:
 
     def test_create_global_settings_file(self, testdir_class):
         testdir = testdir_class.activate()
-        settings_path = os.path.join(testdir, 'settings.json')
-        os.remove(settings_path)
+        os.remove(settings_manager.settings_path())
         settings_manager.create_global_settings_file(testdir)
-        with open(settings_path) as settings_file:
-            actual = settings_file.read()
-            assert actual == settings_manager.SETTINGS_FILE_CONTENT
+        with open(settings_manager.settings_path()) as f:
+            assert f.read() == settings_manager.SETTINGS_FILE_CONTENT
     
 
 class TestCreateProjectSettingsFile:
 
     def test_create_project_settings_file(self, project_class):
         _, project = project_class.activate()
-        settings_path = os.path.join(project_class.path, 'settings.json')
-        os.remove(settings_path)
+        os.remove(settings_manager.project_settings_path(project))
         settings_manager.create_project_settings_file(project)
-        with open(settings_path) as settings_file:
-            actual = settings_file.read()
-            assert actual == settings_manager.REDUCED_SETTINGS_FILE_CONTENT
+        with open(settings_manager.project_settings_path(project)) as f:
+            assert f.read() == settings_manager.REDUCED_SETTINGS_FILE_CONTENT
 
 
 class TestReadJsonWithComments:
@@ -121,7 +117,7 @@ class TestAssignSettingsDefaultValues:
             'operadriver_path': None,
             'remote_url': None,
             'remote_browsers': None,
-            'console_log_level': None,
+            'cli_log_level': None,
             'log_all_events': None,
             'start_maximized': None,
             'screenshots': None
@@ -146,7 +142,7 @@ class TestAssignSettingsDefaultValues:
             'operadriver_path': '',
             'remote_url': '',
             'remote_browsers': '',
-            'console_log_level': '',
+            'cli_log_level': '',
             'log_all_events': '',
             'start_maximized': '',
             'screenshots': ''

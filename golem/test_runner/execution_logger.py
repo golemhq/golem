@@ -13,8 +13,7 @@ file_handler_info = None
 VALID_LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
 
 
-def get_logger(log_directory=None, console_log_level='INFO',
-               log_all_events=True):
+def get_logger(log_directory=None, cli_log_level='INFO', log_all_events=True):
     """instantiate the logger for the test execution.
     log_directory:     where the file logs will be stored
     console_log_level: the log level used for the console output
@@ -36,7 +35,10 @@ def get_logger(log_directory=None, console_log_level='INFO',
     logger.setLevel(logging.DEBUG)
     # add stream handler
     stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(_get_log_level(console_log_level))
+    if cli_log_level in VALID_LOG_LEVELS:
+        stream_handler.setLevel(_get_log_level(cli_log_level))
+    else:
+        stream_handler.setLevel(logging.INFO)
     stream_format_string = '%(asctime)s %(levelname)s %(message)s'
     stream_formatter = logging.Formatter(stream_format_string, "%H:%M:%S")
     stream_handler.setFormatter(stream_formatter)

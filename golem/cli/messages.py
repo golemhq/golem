@@ -20,7 +20,7 @@ RUN_USAGE_MSG = """
 Usage: golem run <project> <test|suite|directory> [-b|--browsers]
                  [-p|--processes] [-e|--environments] [-t|--tags]
                  [-i|--interactive] [-r|--report] [--report-folder]
-                 [--report-name] [--timestamp] 
+                 [--report-name] [-l|--cli-log-level] [--timestamp]
 
   Run tests, suites or directories
   
@@ -71,6 +71,7 @@ Usage: golem run <project> <test|suite|directory> [-b|--browsers]
                          <testdir>/projects/<project>/reports/<suite>/<timestamp>
     --report-name        filename for output report without path or extension.
                          Default is 'report'.
+    -l, --cli-log-level  command line log level. Default is INFO
     --timestamp          used by the execution. Default is 
                          auto-generated with the format:
                          'year.month.day.hour.minutes.seconds.milliseconds'"""

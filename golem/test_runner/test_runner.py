@@ -98,7 +98,7 @@ class TestRunner:
         self.result['set_name'] = _get_set_name(self.test_data)
         # initialize logger
         logger = execution_logger.get_logger(self.report_directory,
-                                             self.settings['console_log_level'],
+                                             self.settings['cli_log_level'],
                                              self.settings['log_all_events'])
         execution.logger = logger
         execution.project = self.project

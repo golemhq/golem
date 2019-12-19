@@ -233,6 +233,21 @@ class TestGolemRun:
         assert os.path.isfile(os.path.join(reportdir, 'foo.xml'))
         assert os.path.isfile(os.path.join(reportdir, 'foo.json'))
 
+    @pytest.mark.slow
+    def test_golem_run__cli_log_level_arg(self, project_session, test_utils):
+        """Set cli-log-level arg, overrides default level (INFO)"""
+        path, project = project_session.activate()
+        os.chdir(path)
+        test_name = test_utils.random_string()
+        test_content = ('def test(data):\n'
+                        '  log("info msg", "INFO")\n'
+                        '  log("warning msg", "WARNING")\n')
+        test_utils.create_test(project, test_name, test_content)
+        command = 'golem run {} {} --cli-log-level WARNING'.format(project, test_name)
+        result = test_utils.run_command(command)
+        assert 'INFO info msg' not in result
+        assert 'WARNING warning msg' in result
+
 
 class TestGolemCreateProject:
 

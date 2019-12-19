@@ -136,7 +136,12 @@ Example:
 
 ### console_log_level
 
-Default is 'INFO'
+Deprecated, use *cli_log_level*.
+
+### cli_log_level
+
+command line log level.
+Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL. Default is INFO.
 
 ### log_all_events
 

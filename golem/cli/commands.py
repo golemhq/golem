@@ -17,7 +17,7 @@ def command_dispatcher(args):
     elif args.command == 'run':
         run_command(args.project, args.test_query, args.browsers, args.processes,
                     args.environments, args.interactive, args.timestamp, args.report,
-                    args.report_folder, args.report_name, args.tags)
+                    args.report_folder, args.report_name, args.tags, args.cli_log_level)
     elif args.command == 'gui':
         gui_command(args.host, args.port, args.debug)
     elif args.command == 'createproject':
@@ -53,7 +53,8 @@ def display_help(help, command):
 
 def run_command(project='', test_query='', browsers=None, processes=1,
                 environments=None, interactive=False, timestamp=None,
-                reports=None, report_folder=None, report_name=None, tags=None):
+                reports=None, report_folder=None, report_name=None,
+                tags=None, cli_log_level=None):
     execution_runner = ExecutionRunner(browsers, processes, environments, interactive,
                                        timestamp, reports, report_folder, report_name, tags)
     if project:
@@ -63,6 +64,9 @@ def run_command(project='', test_query='', browsers=None, processes=1,
             # add --interactive value to settings to make
             # it available from inside a test
             session.settings['interactive'] = interactive
+            # override cli_log_level setting if provided by the CLI
+            if cli_log_level:
+                session.settings['cli_log_level'] = cli_log_level.upper()
             if test_query:
                 norm_query = utils.normalize_query(test_query)
                 if suite_module.Suite(project, norm_query).exists:

@@ -23,7 +23,7 @@ The command to run tests or suites from the command line:
 golem run <project> <test|suite|directory> [-b|--browsers]
           [-p|--processes] [-e|--environments] [-t|--tags]
           [-i|--interactive] [-r|--report] [--report-folder]
-          [--report-name] [--timestamp] 
+          [--report-name] [-l|--cli-log-level][--timestamp] 
 ```
 
 #### -b, \-\-browsers
@@ -77,6 +77,11 @@ The default is ```/<testdir>/projects/<project>/resports/<suite>/<timestamp>```
 #### \-\-report-name
 
 Name of the generated reports. The default is 'report'
+
+#### \-l, \-\-cli-log-level
+
+command line log level.
+Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL. Default is INFO.
 
 #### \-\-timestamp
 

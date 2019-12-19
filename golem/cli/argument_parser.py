@@ -22,6 +22,7 @@ def get_parser():
     parser_run.add_argument('--report-folder', nargs='?', type=str)
     parser_run.add_argument('--report-name', nargs='?', type=str)
     parser_run.add_argument('--timestamp', nargs='?', type=str)
+    parser_run.add_argument('-l', '--cli-log-level')
     parser_run.add_argument('-h', '--help', action='store_true')
 
     # gui

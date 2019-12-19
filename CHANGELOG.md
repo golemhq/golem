@@ -12,11 +12,17 @@
 
 - Actions: log
 
+- *--cli-log-level* arg to golem run command
+
 ### Fixed
 
 - [#169](https://github.com/golemhq/golem/issues/169)
 
 - [#112](https://github.com/golemhq/golem/issues/112)
+
+### Deprecated
+
+- console_log_level option, renamed to: cli_log_level
 
 ## [0.9.0] - 2019-06-30
 
