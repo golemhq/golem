@@ -1,6 +1,7 @@
 import os
 import sys
 
+import golem
 from golem.core import (utils, session, suite as suite_module, test,
                         settings_manager, test_directory)
 from golem.core.project import Project, create_project
@@ -31,7 +32,10 @@ def command_dispatcher(args):
     elif args.command == 'createsuperuser':
         createsuperuser_command(args.username, args.email, args.password, args.noinput)
     elif args.command is None:
-        print(messages.USAGE_MSG)
+        if args.version:
+            display_version()
+        else:
+            print(messages.USAGE_MSG)
 
 
 def display_help(help, command):
@@ -203,3 +207,7 @@ def createdirectory_command(dir_name, no_confirm=False):
     print('Use credentials to access the GUI module:')
     print('user: admin')
     print('password: admin')
+
+
+def display_version():
+    print('Golem version {}'.format(golem.__version__))

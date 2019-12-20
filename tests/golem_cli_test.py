@@ -2,6 +2,7 @@ import os
 
 import pytest
 
+import golem
 from golem.cli import messages, commands
 from golem.core import errors, test_directory
 
@@ -415,3 +416,14 @@ class TestCreateSuperUserCommand:
         command = 'golem createsuperuser --password xxx --noinput'.format(username)
         result = test_utils.run_command(command)
         assert result == 'Error: --username and --password are required for --noinput.'
+
+
+class TestGolemVersion:
+
+    @pytest.mark.slow
+    def test_golem_version(self, testdir_session, test_utils):
+        testdir = testdir_session.activate()
+        os.chdir(testdir)
+        command = 'golem --version'
+        result = test_utils.run_command(command)
+        assert result == 'Golem version {}'.format(golem.__version__)
