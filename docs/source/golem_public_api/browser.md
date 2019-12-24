@@ -2,7 +2,8 @@ Browser Module
 ==================================================
 
 Functions to manipulate WebDriver Browser instances.
-Located at *golem.browser*.
+
+Location: golem.**browser**
 
 
 ## **open_browser**(browser_id=None)

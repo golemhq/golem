@@ -4,6 +4,8 @@ Golem Actions
 Golem comes with a list of predefined actions that cover most of the scenarios for tests.
 They are self-documenting, meaning, they store the steps, logs and screenshots in the execution report.
 
+Location: golem.**actions**
+
 **A note on assertions and verifications:**
 
 Actions that start with 'assert_' are hard assertions.

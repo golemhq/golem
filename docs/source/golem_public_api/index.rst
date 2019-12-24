@@ -5,10 +5,12 @@ API Reference
    :maxdepth: 1
    :glob:
 
+   browser
+   /golem-actions
+   execution
    webdriver-class
    webelement-class
    golem-expected-conditions
-   browser
 
 
 .. Indices and tables
