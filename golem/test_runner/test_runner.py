@@ -6,6 +6,7 @@ import traceback
 
 from golem.core import report, utils, session
 from golem.core.test import Test
+from golem.core.project import Project
 from golem.test_runner.test_runner_utils import import_page_into_test
 from golem.test_runner import execution_logger
 from golem.test_runner.conf import ResultsEnum
@@ -79,8 +80,8 @@ class TestRunner:
             'set_name': '',
         }
         self.testdir = testdir
-        self.project = project
-        self.test_name = test_name
+        self.project = Project(project)
+        self.test = Test(project, test_name)
         self.test_data = test_data
         self.secrets = secrets
         self.browser = browser
@@ -97,30 +98,20 @@ class TestRunner:
     def prepare(self):
         self.result['set_name'] = _get_set_name(self.test_data)
         # initialize logger
-        logger = execution_logger.get_logger(self.report_directory,
-                                             self.settings['cli_log_level'],
-                                             self.settings['log_all_events'])
-        execution.logger = logger
-        execution.project = self.project
-        execution.testdir = self.testdir
-        execution.browser_definition = self.browser
-        execution.settings = self.settings
-        execution.report_directory = self.report_directory
-        execution.data = Data(self.test_data)
-        execution.secrets = Secrets(self.secrets)
-        execution.tags = self.execution_tags
+        self.logger = execution_logger.get_logger(self.report_directory,
+                                                  self.settings['cli_log_level'],
+                                                  self.settings['log_all_events'])
+        # set execution module values
+        self._set_execution_module_values()
         self._print_test_info()
         # add the 'project' directory to python path
         # to enable relative imports from the test
         # TODO
-        sys.path.append(os.path.join(self.testdir, 'projects', self.project))
+        sys.path.append(os.path.join(self.testdir, 'projects', self.project.path))
         self.import_modules()
 
     def import_modules(self):
-        if '/' in self.test_name:
-            self.test_name = self.test_name.replace('/', '.')
-        path = Test(self.project, self.test_name).path
-        test_module, error = utils.import_module(path)
+        test_module, error = utils.import_module(self.test.path)
         if error:
             actions._add_error(message=error.splitlines()[-1], description=error)
             self.result['result'] = ResultsEnum.CODE_ERROR
@@ -141,7 +132,7 @@ class TestRunner:
             # import pages
             try:
                 if hasattr(self.test_module, 'pages') and self.settings['implicit_page_import']:
-                    base_path = os.path.join(self.testdir, 'projects', self.project, 'pages')
+                    base_path = self.project.page_directory_path
                     for page in self.test_module.pages:
                         self.test_module = import_page_into_test(base_path, self.test_module,
                                                                  page.split('.'))
@@ -158,8 +149,6 @@ class TestRunner:
                 self.result['result'] = ResultsEnum.SKIPPED
                 msg = 'Skip: {}'.format(skip) if type(skip) is str else 'Skip'
                 execution.logger.info(msg)
-
-
 
         if self.result['result'] in [ResultsEnum.CODE_ERROR, ResultsEnum.SKIPPED]:
             self.finalize()
@@ -191,7 +180,7 @@ class TestRunner:
                 if self.settings['screenshot_on_end'] and execution.browser:
                     actions.take_screenshot('Test end')
             else:
-                error_msg = 'test {} does not have a test function'.format(self.test_name)
+                error_msg = 'test {} does not have a test function'.format(self.test.name)
                 actions._add_error(error_msg)
                 self.result['result'] = ResultsEnum.CODE_ERROR
         except AssertionError as e:
@@ -254,12 +243,32 @@ class TestRunner:
         _error_codes = [ResultsEnum.CODE_ERROR, ResultsEnum.ERROR, ResultsEnum.FAILURE]
         if self.execution_has_failed_tests is not None and self.result['result'] in _error_codes:
             self.execution_has_failed_tests.value = True
-        report.generate_report(self.report_directory, self.test_name, execution.data, self.result)
+        report.generate_report(self.report_directory, self.test.name, execution.data, self.result)
         execution_logger.reset_logger(execution.logger)
-        execution._reset()
+        # execution._reset()
+
+    def _set_execution_module_values(self):
+        execution.browser = None
+        execution.browser_definition = self.browser
+        execution.browsers = {}
+        execution.steps = []
+        execution.data = Data(self.test_data)
+        execution.secrets = Secrets(self.secrets)
+        execution.description = None
+        execution.errors = []
+        execution.settings = self.settings
+        execution.test_name = self.test.name
+        execution.test_dirname = self.test.dirname
+        execution.test_path = self.test.path
+        execution.project_name = self.project.name
+        execution.project_path = self.project.path
+        execution.testdir = self.testdir
+        execution.report_directory = self.report_directory
+        execution.logger = self.logger
+        execution.tags = self.execution_tags
 
     def _print_test_info(self):
-        execution.logger.info('Test execution started: {}'.format(self.test_name))
+        execution.logger.info('Test execution started: {}'.format(self.test.name))
         execution.logger.info('Browser: {}'.format(self.browser['name']))
         if 'env' in self.test_data:
             if 'name' in self.test_data['env']:

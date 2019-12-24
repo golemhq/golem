@@ -20,6 +20,6 @@ def interactive(settings, cli_browsers):
     execution.settings = settings
     execution.settings['interactive'] = True
     execution.logger = execution_logger.get_logger(
-        console_log_level=execution.settings['console_log_level'],
+        cli_log_level=execution.settings['cli_log_level'],
         log_all_events=execution.settings['log_all_events'])
     actions.interactive_mode()

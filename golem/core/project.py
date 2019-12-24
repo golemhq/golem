@@ -204,13 +204,20 @@ class BaseProjectElement:
     element_type = None
 
     def __init__(self, project, name):
-        self.project = project
+        self.project = Project(project)
         self.name = name
+        self.stem_name = name.split('.')[-1]
+        self.filename = '{}.py'.format(self.stem_name)
+        self.relpath = '{}.py'.format(self.name.replace('.', os.sep))
 
     @property
     def path(self):
-        base_path = Project(self.project).element_directory_path(self.element_type)
-        return os.path.join(base_path, self.name.replace('.', os.sep) + '.py')
+        base_path = self.project.element_directory_path(self.element_type)
+        return os.path.join(base_path, self.relpath)
+
+    @property
+    def dirname(self):
+        return os.path.dirname(self.path)
 
     @property
     def exists(self):
@@ -218,14 +225,17 @@ class BaseProjectElement:
 
     @property
     def module(self):
-        module_, _ = utils.import_module(self.path)
-        return module_
+        if self.exists:
+            module_, _ = utils.import_module(self.path)
+            return module_
+        else:
+            return None
 
     @property
     def code(self):
         """Code of the element as a string"""
-        code = ''
-        if os.path.isfile(self.path):
+        code = None
+        if self.exists:
             with open(self.path) as f:
                 code = f.read()
         return code

@@ -61,11 +61,10 @@ class TestCreateTest:
         _, project = project_session.activate()
         test_name = test_utils.random_string()
         errors = test_module.create_test(project, test_name)
-        path = Test(project, test_name).path
-        assert os.path.isfile(path)
+        test = Test(project, test_name)
+        assert test.exists
         assert errors == []
-        test_code = Test(project, test_name).code
-        assert test_code == NEW_TEST_CONTENT
+        assert test.code == NEW_TEST_CONTENT
 
     def test_create_test_name_exists(self, project_session, test_utils):
         _, project = project_session.activate()

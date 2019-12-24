@@ -120,7 +120,6 @@ def test_case_view(project, test_name):
     test = Test(project, test_name)
     if not test.exists:
         abort(404, 'The test {} does not exist'.format(test_name))
-    tc_name, parents = utils.separate_file_from_parents(test_name)
     _, error = utils.import_module(test.path)
     if error:
         url = url_for('webapp.test_case_code_view', project=project, test_name=test_name)
@@ -136,7 +135,7 @@ def test_case_view(project, test_name):
                                                    repr_strings=True)
         return render_template('test_builder/test_case.html', project=project,
                                test_components=test.components,
-                               test_case_name=tc_name,
+                               test_case_name=test.stem_name,
                                full_test_case_name=test_name,
                                test_data=test_data)
 
@@ -150,14 +149,11 @@ def test_case_code_view(project, test_name):
     test = Test(project, test_name)
     if not test.exists:
         abort(404, 'The test {} does not exist'.format(test_name))
-    tc_name, parents = utils.separate_file_from_parents(test_name)
-    path = os.path.join(session.testdir, 'projects', project,
-                        'tests', os.sep.join(parents), tc_name + '.py')
-    _, error = utils.import_module(path)
+    _, error = utils.import_module(test.path)
     external_data = test_data_module.get_external_test_data(project, test_name)
     test_data_setting = session.settings['test_data']
     return render_template('test_builder/test_case_code.html', project=project,
-                           test_case_contents=test.code, test_case_name=tc_name,
+                           test_case_contents=test.code, test_case_name=test.stem_name,
                            full_test_case_name=test_name, test_data=external_data,
                            test_data_setting=test_data_setting, error=error)
 

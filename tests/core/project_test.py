@@ -4,7 +4,7 @@ import pytest
 
 from golem.core import test, page, suite, test_directory
 from golem.core.project import (Project, create_project, validate_project_element_name,
-                                delete_project)
+                                delete_project, BaseProjectElement, ProjectFileTypes)
 
 
 class TestCreateProject:
@@ -430,3 +430,49 @@ class TestValidateProjectElementName:
     def test_validate_project_element_name_max_length(self, name):
         errors = validate_project_element_name(name)
         assert errors == ['Maximum name length is 150 characters']
+
+
+class TestBaseProjectElement:
+
+    def test_base_project_element(self, project_function, test_utils):
+        testdir, project = project_function.activate()
+        name = 'test_name'
+        base_element = BaseProjectElement(project, name)
+        assert base_element.element_type is None
+        assert base_element.project.name == project
+        assert base_element.name == name
+        assert base_element.stem_name == name
+        filename = '{}.py'.format(name)
+        assert base_element.filename == filename
+        assert base_element.relpath == filename
+        with pytest.raises(ValueError):
+            _ = base_element.path
+        with pytest.raises(ValueError):
+            _ = base_element.exists
+        with pytest.raises(ValueError):
+            _ = base_element.module
+        with pytest.raises(ValueError):
+            _ = base_element.module
+        # set element_type
+        base_element.element_type = ProjectFileTypes.TEST
+        dirname = os.path.join(base_element.project.path, 'tests')
+        path = os.path.join(dirname, name+'.py')
+        assert base_element.path == path
+        assert base_element.dirname == dirname
+        assert not base_element.exists
+        assert base_element.module is None
+        assert base_element.code is None
+        # element exists
+        code = 'foo = "bar"'
+        test_utils.create_test(project, name, code)
+        assert base_element.exists
+        assert base_element.module.foo == 'bar'
+        assert base_element.code == code
+        # element with dot
+        name = 'foo.bar'
+        base_element = BaseProjectElement(project, name)
+        assert base_element.name == name
+        assert base_element.stem_name == 'bar'
+        filename = '{}.py'.format('bar')
+        assert base_element.filename == filename
+        assert base_element.relpath == '{}.py'.format(name.replace('.', os.sep))

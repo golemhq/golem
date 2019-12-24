@@ -1889,7 +1889,7 @@ def timer_start(timer_name=''):
     """
     current_time = None
     if timer_name in execution.timers:
-        execution.logger.debug('timer "{}" is already been started'.format(timer_name))
+        execution.logger.debug('timer "{}" has already been started'.format(timer_name))
     else:
         execution.timers[timer_name] = time.time()
     return current_time

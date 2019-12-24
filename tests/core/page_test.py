@@ -228,7 +228,7 @@ class TestPageCode:
 
     def test_get_page_code_file_not_exist(self, project_session):
         _, project = project_session.activate()
-        assert Page(project, 'does-not-exist').code == ''
+        assert Page(project, 'does-not-exist').code is None
 
 
 class TestPageComponents:

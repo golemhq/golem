@@ -23,6 +23,49 @@ def _define_browsers_mock(selected_browsers):
     return execution_runner.define_browsers(selected_browsers, [], default_browsers)
 
 
+def _mock_report_directory(testdir, project, test_name):
+    path = os.path.join(testdir, 'projects', project, 'reports', 'single_tests',
+                        test_name, '00001')
+    os.makedirs(path)
+    return path
+
+
+def _read_report_json(report_directory):
+    report_path = os.path.join(report_directory, 'report.json')
+    with open(report_path) as f:
+        return json.load(f)
+
+
+@pytest.fixture(scope="function")
+def runfix(project_class, test_utils):
+    """A fixture that
+      Uses a project fix with class scope,
+      Creates a random test
+      Creates a report directory for a future execution
+      Gets the settings and browser values required to run test
+      Can run the test provided the test code
+      Can read the json report
+    """
+    testdir, project = project_class.activate()
+    test_name = test_utils.create_random_test(project)
+    report_directory = _mock_report_directory(testdir, project, test_name)
+    settings = settings_manager.get_project_settings(project)
+    browser = _define_browsers_mock(['chrome'])[0]
+
+    def run_test(code, test_data={}, secrets={}, from_suite=False):
+        test_module.edit_test_code(project, test_name, code, [])
+        test_runner.run_test(testdir, project, test_name, test_data, secrets,
+                             browser, settings, report_directory, from_suite=from_suite)
+
+    def read_report():
+        return _read_report_json(report_directory)
+
+    fix = SimpleNamespace(testdir=testdir, project=project, test_name=test_name,
+                          report_directory=report_directory, settings=settings,
+                          browser=browser, run_test=run_test, read_report=read_report)
+    return fix
+
+
 class TestGetSetName:
 
     def test___get_set_name(self):
@@ -75,45 +118,7 @@ class TestGetSetName:
 
 class TestRunTest:
 
-    def _mock_report_directory(self, testdir, project, test_name):
-        path = os.path.join(testdir, 'projects', project, 'reports', 'single_tests',
-                            test_name, '00001')
-        os.makedirs(path)
-        return path
 
-    def _read_report_json(self, report_directory):
-        report_path = os.path.join(report_directory, 'report.json')
-        with open(report_path) as f:
-            return json.load(f)
-
-    @pytest.fixture(scope="function")
-    def runfix(self, project_class, test_utils):
-        """A fixture that
-          Uses a project fix with class scope,
-          Creates a random test
-          Creates a report directory for a future execution
-          Gets the settings and browser values required to run test
-          Can run the test provided the test code
-          Can read the json report
-        """
-        testdir, project = project_class.activate()
-        test_name = test_utils.create_random_test(project)
-        report_directory = self._mock_report_directory(testdir, project, test_name)
-        settings = settings_manager.get_project_settings(project)
-        browser = _define_browsers_mock(['chrome'])[0]
-
-        def run_test(code, test_data={}, secrets={}, from_suite=False):
-            test_module.edit_test_code(project, test_name, code, [])
-            test_runner.run_test(testdir, project, test_name, test_data, secrets,
-                                 browser, settings, report_directory, from_suite=from_suite)
-
-        def read_report():
-            return self._read_report_json(report_directory)
-
-        fix = SimpleNamespace(testdir=testdir, project=project, test_name=test_name,
-                              report_directory=report_directory, settings=settings,
-                              browser=browser, run_test=run_test, read_report=read_report)
-        return fix
 
     # A0
     def test_run_test__import_error_on_test(self, runfix, caplog):
@@ -972,3 +977,41 @@ def teardown(data):
         assert len(report['errors']) == 1
         assert report['errors'][0]['message'] == 'SyntaxError: invalid syntax'
         assert report['result'] == ResultsEnum.CODE_ERROR
+
+
+class TestTestRunnerSetExecutionModuleValues:
+
+    def test_set_execution_module_runner_values(self, project_class, test_utils):
+        testdir, project = project_class.activate()
+        test_name = test_utils.create_random_test(project)
+        test = test_module.Test(project, test_name)
+        report_directory = _mock_report_directory(testdir, project, test_name)
+        settings = settings_manager.get_project_settings(project)
+        browser = _define_browsers_mock(['chrome'])[0]
+        test_data = {}
+        secrets = {}
+        runner = test_runner.TestRunner(testdir, project, test_name, test_data, secrets,
+                                        browser, settings, report_directory)
+        runner._set_execution_module_values()
+        from golem import execution
+        attrs = [x for x in dir(execution) if not x.startswith('_')]
+        assert len(attrs) == 19
+        assert execution.browser is None
+        assert execution.browser_definition == browser
+        assert execution.browsers == {}
+        assert execution.steps == []
+        assert execution.data == {}
+        assert execution.secrets == {}
+        assert execution.description is None
+        assert execution.errors == []
+        assert execution.settings == settings
+        assert execution.test_name == test_name
+        assert execution.test_dirname == test.dirname
+        assert execution.test_path == test.path
+        assert execution.project_name == project
+        assert execution.project_path == test.project.path
+        assert execution.testdir == testdir
+        assert execution.report_directory == report_directory
+        assert execution.logger is None
+        assert execution.timers == {}
+        assert execution.tags == []

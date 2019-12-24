@@ -143,14 +143,13 @@ class Suite(BaseProjectElement):
         if not hasattr(module, 'tests'):
             return tests
 
-        project = Project(self.project)
         if '*' in module.tests:
-            tests = project.tests()
+            tests = self.project.tests()
         else:
             for test in module.tests:
                 if test.endswith('.*'):
                     this_dir = test[:-2]
-                    path = os.path.join(project.test_directory_path,
+                    path = os.path.join(self.project.test_directory_path,
                                         os.sep.join(this_dir.split('.')))
                     this_dir_tests = file_manager.get_files_dot_path(path, extension='.py')
                     this_dir_tests = ['{}.{}'.format(this_dir, x) for x in this_dir_tests]
