@@ -50,12 +50,12 @@ def _get_set_name(test_data):
     return set_name
 
 
-def run_test(testdir, project, test_name, test_data, secrets, browser,
+def run_test(testdir, project, test_name, test_data, secrets, browser, env_name,
              settings, report_directory, execution_has_failed_tests=None,
              tags=None, from_suite=False):
     """Run a single test"""
     session.testdir = testdir
-    runner = TestRunner(testdir, project, test_name, test_data, secrets, browser,
+    runner = TestRunner(testdir, project, test_name, test_data, secrets, browser, env_name,
                         settings, report_directory, execution_has_failed_tests,
                         tags, from_suite)
     runner.prepare()
@@ -65,7 +65,7 @@ class TestRunner:
 
     __test__ = False  # ignore this class from Pytest
 
-    def __init__(self, testdir, project, test_name, test_data, secrets, browser,
+    def __init__(self, testdir, project, test_name, test_data, secrets, browser, env_name,
                  settings, report_directory, execution_has_failed_tests=None,
                  tags=None, from_suite=False):
         self.result = {
@@ -85,6 +85,7 @@ class TestRunner:
         self.test_data = test_data
         self.secrets = secrets
         self.browser = browser
+        self.env_name = env_name
         self.settings = settings
         self.report_directory = report_directory
         self.test_module = None
@@ -266,6 +267,7 @@ class TestRunner:
         execution.report_directory = self.report_directory
         execution.logger = self.logger
         execution.tags = self.execution_tags
+        execution.environment = self.env_name
 
     def _print_test_info(self):
         execution.logger.info('Test execution started: {}'.format(self.test.name))

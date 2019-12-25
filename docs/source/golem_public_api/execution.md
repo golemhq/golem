@@ -50,6 +50,11 @@ Full path to the test file.
 
 The settings passed to this test.
 
+## environment
+
+Name of the environment passed to the test.
+None is no environment was selected.
+
 ## tags
 
 The list of tags passed to the execution.

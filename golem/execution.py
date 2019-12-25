@@ -19,3 +19,4 @@ report_directory = None
 logger = None
 timers = {}
 tags = []
+environment = None

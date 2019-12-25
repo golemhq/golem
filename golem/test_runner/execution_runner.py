@@ -149,7 +149,7 @@ class ExecutionRunner:
           - browsers
         """
         execution_list = []
-        envs = self.execution.envs or ['']
+        envs = self.execution.envs or [None]
         envs_data = environment_manager.get_environment_data(self.project)
         secrets = secrets_manager.get_secrets(self.project)
 
@@ -164,7 +164,7 @@ class ExecutionRunner:
                         data_set_env['env']['name'] = env
                     for browser in self.execution.browsers:
                         testdef = SimpleNamespace(name=test, data_set=data_set_env, secrets=secrets,
-                                                  browser=browser, reportdir=None)
+                                                  browser=browser, reportdir=None, env=env)
                         execution_list.append(testdef)
         return execution_list
 
@@ -391,10 +391,9 @@ class ExecutionRunner:
             if self.execution.processes == 1:
                 # run tests serially
                 for test in self.execution.tests:
-                    run_test(session.testdir, self.project, test.name,
-                             test.data_set, test.secrets, test.browser,
-                             session.settings, test.reportdir,
-                             self.execution.has_failed_tests,
+                    run_test(session.testdir, self.project, test.name, test.data_set,
+                             test.secrets, test.browser, test.env, session.settings,
+                             test.reportdir, self.execution.has_failed_tests,
                              self.execution.tags, self.is_suite)
             else:
                 # run tests using multiprocessing

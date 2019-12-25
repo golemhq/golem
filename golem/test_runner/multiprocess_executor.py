@@ -20,6 +20,7 @@ def multiprocess_executor(project, execution_list, has_failed_tests, processes=1
                 test.data_set,
                 test.secrets,
                 test.browser,
+                test.env,
                 session.settings,
                 test.reportdir,
                 has_failed_tests,

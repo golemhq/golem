@@ -14,6 +14,8 @@
 
 - *--cli-log-level* arg to golem run command
 
+- Document golem.execution module
+
 ### Fixed
 
 - [#169](https://github.com/golemhq/golem/issues/169)
@@ -22,7 +24,7 @@
 
 ### Deprecated
 
-- console_log_level option, renamed to: cli_log_level
+- console_log_level setting, renamed to: cli_log_level
 
 ## [0.9.0] - 2019-06-30
 

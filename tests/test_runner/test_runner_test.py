@@ -51,11 +51,12 @@ def runfix(project_class, test_utils):
     report_directory = _mock_report_directory(testdir, project, test_name)
     settings = settings_manager.get_project_settings(project)
     browser = _define_browsers_mock(['chrome'])[0]
+    env_name = None
 
     def run_test(code, test_data={}, secrets={}, from_suite=False):
         test_module.edit_test_code(project, test_name, code, [])
-        test_runner.run_test(testdir, project, test_name, test_data, secrets,
-                             browser, settings, report_directory, from_suite=from_suite)
+        test_runner.run_test(testdir, project, test_name, test_data, secrets, browser,
+                             env_name, settings, report_directory, from_suite=from_suite)
 
     def read_report():
         return _read_report_json(report_directory)
@@ -117,8 +118,6 @@ class TestGetSetName:
 
 
 class TestRunTest:
-
-
 
     # A0
     def test_run_test__import_error_on_test(self, runfix, caplog):
@@ -990,12 +989,13 @@ class TestTestRunnerSetExecutionModuleValues:
         browser = _define_browsers_mock(['chrome'])[0]
         test_data = {}
         secrets = {}
+        env_name = 'foo'
         runner = test_runner.TestRunner(testdir, project, test_name, test_data, secrets,
-                                        browser, settings, report_directory)
+                                        browser, env_name, settings, report_directory)
         runner._set_execution_module_values()
         from golem import execution
         attrs = [x for x in dir(execution) if not x.startswith('_')]
-        assert len(attrs) == 19
+        assert len(attrs) == 20
         assert execution.browser is None
         assert execution.browser_definition == browser
         assert execution.browsers == {}
@@ -1015,3 +1015,4 @@ class TestTestRunnerSetExecutionModuleValues:
         assert execution.logger is None
         assert execution.timers == {}
         assert execution.tags == []
+        assert execution.environment == env_name
