@@ -5,6 +5,7 @@ import json
 import os
 import re
 import traceback
+import types
 from datetime import datetime
 from distutils.version import StrictVersion
 
@@ -93,6 +94,21 @@ def import_module(path):
     except:
         error = traceback.format_exc(limit=0)
     return mod, error
+
+
+def module_local_public_functions(module):
+    """Get a list of function names defined in a module.
+    Ignores functions that start with `_` and functions
+    imported from other modules.
+    """
+    local_functions = []
+    module_name = module.__name__
+    for name in dir(module):
+        if not name.startswith('_'):
+            attr = getattr(module, name)
+            if isinstance(attr, types.FunctionType) and attr.__module__ == module_name:
+                local_functions.append(name)
+    return local_functions
 
 
 def extract_version_from_webdriver_filename(filename):

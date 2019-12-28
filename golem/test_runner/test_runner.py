@@ -123,7 +123,7 @@ class TestRunner:
 
             # import actions module
             if self.settings['implicit_actions_import']:
-                for action in dir(actions):
+                for action in utils.module_local_public_functions(actions):
                     setattr(self.test_module, action, getattr(actions, action))
 
             # store test description

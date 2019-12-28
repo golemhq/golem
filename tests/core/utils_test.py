@@ -5,6 +5,7 @@ import inspect
 import pytest
 
 from golem.core import utils
+from golem.core.page import Page
 
 
 class TestChooseBrowserByPrecedence:
@@ -90,6 +91,45 @@ class TestImportModule:
             f.write(filecontent)
         _, error = utils.import_module(filepath)
         assert expected in error
+
+
+class TestModuleLocalFunctions:
+
+    def test_module_local_functions(self):
+        """module imported using import statement"""
+        from golem import actions
+        functions = utils.module_local_public_functions(actions)
+        dir_actions = dir(actions)
+        # not in functions
+        assert 'contextmanager' in dir_actions and 'contextmanager' not in functions
+        assert 'code' in dir_actions and 'code' not in functions
+        assert '_add_error' in dir_actions and '_add_error' not in functions
+        # in functions
+        assert 'accept_alert' in dir_actions and 'accept_alert' in functions
+        assert 'wait_for_window_present_by_url' in dir_actions and 'wait_for_window_present_by_url' in functions
+
+    def test_module_local_functions_programatically(self, project_session, test_utils):
+        """module imported from path"""
+        _, project = project_session.activate()
+        page_code = ('import sys\n'
+                     'from os import walk\n'
+                     'foo = 1\n'
+                     'def bar():\n'
+                     '  pass\n'
+                     'def _baz():\n'
+                     '  pass\n'
+                     'class Traz:\n'
+                     '  pass')
+        page_name = test_utils.create_random_page(project, page_code)
+        module, _ = utils.import_module(Page(project, page_name).path)
+        functions = utils.module_local_public_functions(module)
+        assert len(functions) == 1
+        assert 'sys' not in functions
+        assert 'walk' not in functions
+        assert 'foo' not in functions
+        assert '_baz' not in functions
+        assert 'Traz' not in functions
+        assert 'bar' in functions
 
 
 class TestExtractVersionFromWebDriverFilename:
