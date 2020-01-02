@@ -365,6 +365,15 @@ def generate_junit_report(execution_directory, suite_name, timestamp,
         }
         testcase = ET.SubElement(testsuite, 'testcase', test_attrs)
 
+        if test['result'] in (ResultsEnum.CODE_ERROR, ResultsEnum.FAILURE, ResultsEnum.ERROR):
+            # JUnit has only two types of errors so we map 'code error' to error and 'failure' and 'error' to failure.
+            error_type = 'error' if test['result'] == ResultsEnum.ERROR else 'failure'
+            error_data = {
+                'type': test['result'],
+                'message': str(test['data'])
+            }
+            error_message = ET.SubElement(testcase, error_type, error_data)
+
     xmlstring = ET.tostring(testsuites)
     doc = minidom.parseString(xmlstring).toprettyxml(indent=' ' * 4, encoding='UTF-8')
     if not report_folder:
