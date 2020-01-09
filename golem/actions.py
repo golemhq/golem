@@ -14,7 +14,7 @@ from contextlib import contextmanager
 
 import requests
 
-from golem import browser, execution
+from golem import browser, execution, helpers
 from golem.core import utils
 from golem.test_runner import execution_logger
 from golem.report import utils as report_utils
@@ -1512,8 +1512,9 @@ def press_key(element, key):
 
 
 def random(value):
-    """Generate a random string value.
-    TODO
+    """DEPRECATED - use random_str, random_int or random_float
+    Generate a random string value.
+
     Parameters:
     value : value
     """
@@ -1526,6 +1527,46 @@ def random(value):
         else:
             random_string += char
     execution.logger.info('Random value generated: {}'.format(random_string))
+    return random_string
+
+
+def random_float(min=1.0, max=100.0, decimals=None):
+    """Generate a random float between min and max.
+
+    `decimals` is the maximum amount of decimal places
+    the generated float should have.
+    """
+    randfloat = helpers.random_float(min, max, decimals)
+    execution.logger.debug('Random float generated: {}'.format(randfloat))
+    return randfloat
+
+
+def random_int(min=1, max=100):
+    """Generate a random integer between min and max"""
+    randint = helpers.random_int(min, max)
+    execution.logger.debug('Random int generated: {}'.format(randint))
+    return randint
+
+
+def random_str(length=10, sample=None, prefix='', suffix=''):
+    """Generate a random string
+
+    Sample should be a string or a list of strings/characters to
+    choose from. The default sample is lowercase ascii letters.
+    A few presets can be used:
+     - 'LOWERCASE': lower case ascii letters
+     - 'UPPERCASE': uppercase ascii letters
+     - 'DIGITS': digit characters
+     - 'SPECIAL': Special characters
+    Example:
+     random_str(sample=['LOWERCASE', '!@#$%'])
+
+    prefix: A string to be prepended to the generated string
+
+    suffix: A string to be appended to the generated string
+    """
+    random_string = helpers.random_str(length, sample, prefix, suffix)
+    execution.logger.debug('Random string generated: {}'.format(random_string))
     return random_string
 
 

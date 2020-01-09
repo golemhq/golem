@@ -10,7 +10,7 @@
 
 - Skip flag to test [#146](https://github.com/golemhq/golem/issues/146)
 
-- Actions: log
+- Actions: log, random_str, random_int, random_float
 
 - *--cli-log-level* arg to golem run command
 

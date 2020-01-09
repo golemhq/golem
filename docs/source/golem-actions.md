@@ -994,12 +994,43 @@ Log a message. Valid log levels are: DEBUG, INFO, WARNING, ERROR and CRITICAL.
 
 ### random(args)
 
+DEPRECATED, use random_str, random_int or random_float. 
+
 Generate a random string. Options:
 
 * 'c' generate a random lowercase letter
 * 'd' generate a random digit
 
 For example: random('cccddd') => 'aeg147'
+
+
+### random_float(min=1.0, max=100.0, decimals=None)
+
+Generate a random float between min and max.
+*Decimals* is the maximum amount of decimal places the generated float should have.
+
+### random_int(min=1, max=100)
+
+Generate a random integer between min and max
+
+### random_str(length=10, sample=None, prefix='', suffix='')
+
+Generate a random string.
+*Sample* should be a string or a list of strings/characters to
+choose from. The default sample is lowercase ascii letters.
+A few presets can be used:
+ - 'LOWERCASE': lower case ascii letters
+ - 'UPPERCASE': uppercase ascii letters
+ - 'DIGITS': digit characters
+ - 'SPECIAL': Special characters
+
+Example:
+
+```random_str(sample=['LOWERCASE', '!@#$%']) -> 'am$y%eg$ug'```
+
+prefix: A string to be prepended to the generated string
+
+suffix: A string to be appended to the generated string
 
 ### set_browser_capability(capability_key, capability_value)
 
