@@ -16,7 +16,7 @@ When *"test_data"* setting is set to "csv" the data will be saved in a separate 
 
 When using *"test_data": "infile"* in settings different Python variable types can be used. **Strings must be defined in quotes in the Web Module data table**.
 
-![data table infile](_static/img/data-table-infile.png "Test With Data Table")
+![data table infile](_static/img/data-infile.png "Test With Data Table")
 
 The test code looks like this:
 
