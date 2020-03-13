@@ -131,7 +131,7 @@ def _split_code_into_blocks(code):
     for line in code_lines:
         if block is None:
             block = line + '\n'
-        elif len(line) - len(line.lstrip()) > 0:
+        elif len(line) - len(line.lstrip()) > 0 or re.match(r'^else:', line.lstrip()):
             block += line + '\n'
         elif len(line) - len(line.lstrip()) == 0:
             blocks.append(block)
