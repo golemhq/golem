@@ -30,10 +30,10 @@ def auth_required(func):
                 try:
                     user = Users.verify_auth_token(current_app.secret_key, token)
                     request.api_user = user
-                except BadSignature:
-                    abort(401, 'Token did not match')
                 except SignatureExpired:
                     abort(401, 'Signature Expired')
+                except BadSignature:
+                    abort(401, 'Token did not match')
                 except Exception:
                     abort(401, 'Unknown error')
             else:
@@ -52,7 +52,7 @@ def auth_token():
     elif not user.verify_password(password):
         abort(401, 'Incorrect password')
     else:
-        token = user.generate_auth_token(current_app.secret_key)
+        token = user.generate_auth_token(current_app.secret_key, expiration=3600)
         return jsonify(token.decode())
 
 
