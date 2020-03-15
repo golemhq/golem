@@ -15,7 +15,7 @@ const PageList = new function(){
             dataType: 'json',
             type: 'GET',
             success: function(pages) {
-                FileExplorer.initialize(pages, 'page');
+                FileExplorer.initialize(pages, 'page', $('#fileExporerContainer')[0]);
             },
         });
     }

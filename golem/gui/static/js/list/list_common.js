@@ -6,7 +6,10 @@ const FileExplorer = new function(){
     this.fileType;
     this.renderFinished = false;
 
-    this.initialize = function(folder, fileType) {
+    this.initialize = function(folder, fileType, container) {
+        // bind this to the container element
+        container.FileExplorer = this;
+
         this.fileType = fileType;
         this.rootFolder = new Folder(folder, null);
         this.navigateFromURL()

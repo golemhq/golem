@@ -18,7 +18,7 @@ const SuiteList = new function(){
             contentType: 'application/json',
             type: 'GET',
             success: function(suites) {
-                FileExplorer.initialize(suites, 'suite');
+                FileExplorer.initialize(suites, 'suite', $('#fileExporerContainer')[0]);
             },
         });
     }

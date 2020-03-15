@@ -15,7 +15,7 @@ const TestList = new function(){
             dataType: 'json',
             type: 'GET',
             success: function(tests) {
-                FileExplorer.initialize(tests, 'test');
+                FileExplorer.initialize(tests, 'test', $('#fileExporerContainer')[0]);
                 TestList.getTestsTags(tests);
             }
         })

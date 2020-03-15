@@ -1,5 +1,8 @@
 
 $(document).ready(function(){
+
+    $('.report-container')[0].ExecutionReport = ExecutionReport;
+
     if(global.executionData == null){
         ExecutionReport.getReportData();
     }
