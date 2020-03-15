@@ -91,7 +91,7 @@ class TestSplitCodeIntoBlocks:
         assert blocks[0] == 'block_one()'
         assert blocks[1] == '# comment'
         assert blocks[2] == 'if foo:\n    print("bar")'
-
+        # empty lines
         code = ("print('foo')\n"
                 "\n"
                 "\n"
@@ -100,13 +100,48 @@ class TestSplitCodeIntoBlocks:
         assert len(blocks) == 2
         assert blocks[0] == "print('foo')"
         assert blocks[1] == "bar = 1 + 1"
-
+        # empty lines
         code = ("\n"
                 "\n"
                 "bar = 1 + 1\n")
         blocks = test_parser._split_code_into_blocks(code)
         assert len(blocks) == 1
         assert blocks[0] == "bar = 1 + 1"
+        # if-else
+        code = ('if foo:\n'
+                '    print("bar")\n'
+                'else:'
+                '    pass')
+        blocks = test_parser._split_code_into_blocks(code)
+        assert len(blocks) == 1
+        # nested if
+        code = ('if foo:\n'
+                '    if 2 = 2:\n'
+                '        print("hello")\n'
+                '    else:\n'
+                '        print("bye")\n'
+                'else:\n'
+                '    pass')
+        blocks = test_parser._split_code_into_blocks(code)
+        assert len(blocks) == 1
+        # if-elif-else
+        code = ('if foo:\n'
+                '    print("bar")\n'
+                'elif bar:\n'
+                '    pass\n'
+                'else:\n'
+                '    pass')
+        blocks = test_parser._split_code_into_blocks(code)
+        assert len(blocks) == 1
+        # for-in loop
+        code = ('for x in y:\n'
+                '    print("bar")\n'
+                '    if x == "test":\n'
+                '        print("test")\n'
+                '    else:\n'
+                '        print("else")\n')
+        blocks = test_parser._split_code_into_blocks(code)
+        assert len(blocks) == 1
 
 
 class TestCodeBlockIsFunctionCall:
