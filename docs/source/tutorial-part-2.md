@@ -159,7 +159,7 @@ Using this data file, Golem will run the same test 4 times, using each time a di
 
 When using *"test_data": "infile"* in settings.json different Python variable types can be used. **Strings must be defined in quotes in the Web Module data table**.
 
-![data table infile](_static/img/data-table-infile.png "Test With Data Table")
+![data table infile](_static/img/data-infile.png "Test With Data Table")
 
 The test code looks like this:
 
