@@ -239,6 +239,14 @@ body .container-fluid {
     text-overflow: ellipsis
 }
 
+#sidebar .project-dropdown button#projectSelectDropdown:hover {
+    overflow: visible;
+    text-overflow: unset;
+    width: fit-content;
+    min-width: 100%;
+    background: #7386D5;
+}
+
 #sidebar .project-dropdown button:active {
     /*box-shadow: none*/
 }
