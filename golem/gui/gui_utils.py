@@ -39,7 +39,7 @@ def run_test(project, test_name, browsers=None, environments=None, processes=1):
         'run',
         project,
         test_name,
-        '--timestamp', 
+        '--timestamp',
         timestamp]
 
     if browsers:
@@ -53,7 +53,7 @@ def run_test(project, test_name, browsers=None, environments=None, processes=1):
     if processes:
         param_list.append('--processes')
         param_list.append(str(processes))
-    
+
     subprocess.Popen(param_list)
     return timestamp
 
