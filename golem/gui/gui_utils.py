@@ -28,11 +28,19 @@ def is_safe_url(target):
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 
-def run_test(project, test_name, browsers=None, environments=None, processes=1):
+def run_test(project, test_name, browsers=None, environments=None, processes=1, sets=None):
     """Run a test case. This is used when running tests from the GUI"""
     script_name = sys.argv[0]
     timestamp = utils.get_timestamp()
-    param_list = [script_name, 'run', project, test_name, '--timestamp', timestamp]
+    param_list = [
+        script_name,
+        '--golem-dir',
+        session.testdir,
+        'run',
+        project,
+        test_name,
+        '--timestamp',
+        timestamp]
 
     if browsers:
         param_list.append('--browsers')
@@ -45,6 +53,9 @@ def run_test(project, test_name, browsers=None, environments=None, processes=1):
     if processes:
         param_list.append('--processes')
         param_list.append(str(processes))
+    if sets:
+        param_list.append('-s')
+        param_list.append(str(sets))
 
     subprocess.Popen(param_list)
     return timestamp

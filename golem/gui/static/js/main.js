@@ -380,9 +380,10 @@ const Main = new function(){
             $("#runTestConfigModal").modal("show");
         }
 
-        this.runTest = async function(project, testName){
+        this.runTest = async function(project, testName, sets){
             Main.TestRunner.project = project;
             Main.TestRunner.testName = testName;
+            Main.TestRunner.sets = sets;
             let projectEnvironments = await Main.TestRunner._getProjectEnvironments();
             if(projectEnvironments.length > 1 && Main.TestRunner.environments.length == 0){
                  Main.TestRunner.openConfigModal(project, testName);
@@ -442,7 +443,8 @@ const Main = new function(){
                      "testName": Main.TestRunner.testName,
                      "browsers": Main.TestRunner.browsers,
                      "environments": Main.TestRunner.environments,
-                     "processes": Main.TestRunner.processes
+                     "processes": Main.TestRunner.processes,
+                     "sets": Main.TestRunner.sets,
                  }),
                 dataType: 'json',
                 contentType: 'application/json; charset=utf-8',

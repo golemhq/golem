@@ -260,11 +260,11 @@ var Test = new function(){
         return false
     }
 
-    this.runTest = function(){
+    this.runTest = function(sets){
         if(Test.unsavedChanges)
             Test.save({runAfter: true})
         else
-            Main.TestRunner.runTest(Test.project, Test.fullName);
+            Main.TestRunner.runTest(Test.project, Test.fullName, sets);
     }
 
     this.save = function(config){

@@ -124,6 +124,7 @@
                 {% if test_data[0] %}
                 <thead>
                     <tr>
+                        <th class="">Run</th>
                         <th class="index">#</th>
                         {% for key, val in test_data[0].items() %}
                         <th>
@@ -142,6 +143,7 @@
                 <tbody>
                     {% for row in test_data %}
                     <tr>
+                        <th scope="row" class="index"><button onclick="Test.runTest({{loop.index}})">Run</button></th>
                         <th scope="row" class="index">{{loop.index}}</th>
                         {% for key, value in row.items() %}
                         <td>

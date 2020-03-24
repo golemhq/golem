@@ -68,7 +68,8 @@ class ExecutionRunner:
     """
 
     def __init__(self, browsers=None, processes=1, environments=None, interactive=False,
-                 timestamp=None, reports=None, report_folder=None, report_name=None, tags=None):
+                 timestamp=None, reports=None, report_folder=None, report_name=None, tags=None,
+                 sets=None):
         if reports is None:
             reports = []
         if tags is None:
@@ -81,6 +82,7 @@ class ExecutionRunner:
         self.reports = reports
         self.report_folder = report_folder
         self.report_name = report_name
+        self.sets = sets
         self.report = {}
         self.tests = []
         self.is_suite = False
@@ -153,9 +155,25 @@ class ExecutionRunner:
         envs_data = environment_manager.get_environment_data(self.project)
         secrets = secrets_manager.get_secrets(self.project)
 
+        if self.sets:
+            try: 
+                self.sets = [int(self.sets)]
+            except Exception:
+                self.sets = self.sets.split(',')
+                self.sets = [int(x) for x in self.sets]
+        else: 
+            self.sets = []
+
+        index = 1
+        
         for test in self.tests:
             data_sets = test_data.get_test_data(self.project, test)
             for data_set in data_sets:
+                
+                if index not in self.sets:
+                    index+=1
+                    continue
+                
                 for env in envs:
                     data_set_env = dict(data_set)
                     if env in envs_data:
@@ -166,6 +184,9 @@ class ExecutionRunner:
                         testdef = SimpleNamespace(name=test, data_set=data_set_env, secrets=secrets,
                                                   browser=browser, reportdir=None, env=env)
                         execution_list.append(testdef)
+                
+                index +=1
+                
         return execution_list
 
     def _print_number_of_tests_found(self):

@@ -674,8 +674,9 @@ def test_run():
     browsers = request.json['browsers']
     environments = request.json['environments']
     processes = request.json['processes']
+    sets = request.json['sets']
     _verify_permissions(Permissions.STANDARD, project)
-    timestamp = gui_utils.run_test(project, test_name, browsers, environments, processes)
+    timestamp = gui_utils.run_test(project, test_name, browsers, environments, processes, sets)
     return jsonify(timestamp)
 
 

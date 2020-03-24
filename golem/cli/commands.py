@@ -18,7 +18,8 @@ def command_dispatcher(args):
     elif args.command == 'run':
         run_command(args.project, args.test_query, args.browsers, args.processes,
                     args.environments, args.interactive, args.timestamp, args.report,
-                    args.report_folder, args.report_name, args.tags, args.cli_log_level)
+                    args.report_folder, args.report_name, args.tags, args.cli_log_level,
+                    args.sets)
     elif args.command == 'gui':
         gui_command(args.host, args.port, args.debug)
     elif args.command == 'createproject':
@@ -58,9 +59,10 @@ def display_help(help, command):
 def run_command(project='', test_query='', browsers=None, processes=1,
                 environments=None, interactive=False, timestamp=None,
                 reports=None, report_folder=None, report_name=None,
-                tags=None, cli_log_level=None):
+                tags=None, cli_log_level=None, sets=None):
     execution_runner = ExecutionRunner(browsers, processes, environments, interactive,
-                                       timestamp, reports, report_folder, report_name, tags)
+                                       timestamp, reports, report_folder, report_name, tags,
+                                       sets)
     if project:
         if test_directory.project_exists(project):
             execution_runner.project = project
