@@ -4,7 +4,7 @@ var TestCommon = new function(){
     this.DataTable = new function(){
 
         this.addRow = function(){
-            let amountOfColumns = $("#dataTable thead tr th").length -1;
+            let amountOfColumns = $("#dataTable thead tr th").length - 2;
             let amountOfRows = $("#dataTable tbody tr").length;
             let newCells = "";
             for(var i = 0; i < amountOfColumns; i++){
@@ -17,6 +17,7 @@ var TestCommon = new function(){
 
             $("#dataTable tbody").append(
                 "<tr> \
+                    <th class='index'></th> \
                     <th scope='row' class='index'>"+(amountOfRows+1)+"</th> \
                     " + newCells + " \
                 </tr>");
