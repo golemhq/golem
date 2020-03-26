@@ -365,6 +365,7 @@ const Main = new function(){
         this.browsers = '';
         this.environments = [];
         this.processes = 1;
+        this.sets = '';
 
         this.openConfigModal = async function(project, testName){
             Main.TestRunner._clearInfoBars();
@@ -380,7 +381,7 @@ const Main = new function(){
             $("#runTestConfigModal").modal("show");
         }
 
-        this.runTest = async function(project, testName, sets){
+        this.runTest = async function(project, testName, sets = null){
             Main.TestRunner.project = project;
             Main.TestRunner.testName = testName;
             Main.TestRunner.sets = sets;

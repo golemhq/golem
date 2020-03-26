@@ -124,7 +124,7 @@
                 {% if test_data[0] %}
                 <thead>
                     <tr>
-                        <th class="">Run</th>
+                        <th></th>
                         <th class="index">#</th>
                         {% for key, val in test_data[0].items() %}
                         <th>
@@ -143,7 +143,9 @@
                 <tbody>
                     {% for row in test_data %}
                     <tr>
-                        <th scope="row" class="index"><button onclick="Test.runTest({{loop.index}})">Run</button></th>
+                        <th class="index">
+                            <button class="btn btn-default btn-sm" onclick="Test.runTest({{loop.index}})">Run</button>
+                        </th>
                         <th scope="row" class="index">{{loop.index}}</th>
                         {% for key, value in row.items() %}
                         <td>
@@ -157,6 +159,7 @@
                     </tr>
                     {% endfor %}
                     <tr>
+                        <th class="index"></th>
                         <th scope="row" class="index">{{test_data|length + 1}}</th>
                         {% for item in test_data[0].items() %}
                         <td><div class="input-group"><input class="form-control" type="text"></div>

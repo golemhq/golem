@@ -155,6 +155,7 @@ class ExecutionRunner:
         envs_data = environment_manager.get_environment_data(self.project)
         secrets = secrets_manager.get_secrets(self.project)
 
+        #import pdb; pdb.set_trace()
         if self.sets:
             try: 
                 self.sets = [int(self.sets)]
@@ -170,7 +171,7 @@ class ExecutionRunner:
             data_sets = test_data.get_test_data(self.project, test)
             for data_set in data_sets:
                 
-                if index not in self.sets:
+                if self.sets and index not in self.sets:
                     index+=1
                     continue
                 

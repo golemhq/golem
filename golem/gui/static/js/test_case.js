@@ -260,7 +260,7 @@ var Test = new function(){
         return false
     }
 
-    this.runTest = function(sets){
+    this.runTest = function(sets=''){
         if(Test.unsavedChanges)
             Test.save({runAfter: true})
         else
