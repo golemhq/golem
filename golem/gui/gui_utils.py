@@ -32,7 +32,15 @@ def run_test(project, test_name, browsers=None, environments=None, processes=1):
     """Run a test case. This is used when running tests from the GUI"""
     script_name = sys.argv[0]
     timestamp = utils.get_timestamp()
-    param_list = [script_name, 'run', project, test_name, '--timestamp', timestamp]
+    param_list = [
+        script_name,
+        '--golem-dir',
+        session.testdir,
+        'run',
+        project,
+        test_name,
+        '--timestamp',
+        timestamp]
 
     if browsers:
         param_list.append('--browsers')
