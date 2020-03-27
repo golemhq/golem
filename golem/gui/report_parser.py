@@ -357,13 +357,24 @@ def generate_junit_report(execution_directory, suite_name, timestamp,
     testsuite = ET.SubElement(testsuites, 'testsuite', testsuites_attrs)
 
     for test in data['tests']:
+        # If the sets have names use them, otherwise use the generated name.
+        set_name = test['set_name'] if test['set_name'] is not "" else test['test_set']
         test_attrs = {
             'name': test['full_name'],
-            'classname': '{}.{}'.format(test['full_name'], test['test_set']),
+            'classname': '{}.{}'.format(test['full_name'], set_name),
             'status': test['result'],
             'time': str(test['test_elapsed_time'])
         }
         testcase = ET.SubElement(testsuite, 'testcase', test_attrs)
+
+        if test['result'] in (ResultsEnum.CODE_ERROR, ResultsEnum.FAILURE, ResultsEnum.ERROR):
+            # JUnit has only two types of errors so we map 'code error' to error and 'failure' and 'error' to failure.
+            error_type = 'error' if test['result'] == ResultsEnum.ERROR else 'failure'
+            error_data = {
+                'type': test['result'],
+                'message': str(test['data'])
+            }
+            error_message = ET.SubElement(testcase, error_type, error_data)
 
     xmlstring = ET.tostring(testsuites)
     doc = minidom.parseString(xmlstring).toprettyxml(indent=' ' * 4, encoding='UTF-8')
