@@ -142,6 +142,19 @@ class TestSplitCodeIntoBlocks:
                 '        print("else")\n')
         blocks = test_parser._split_code_into_blocks(code)
         assert len(blocks) == 1
+        # try-except-else-finally block
+        code = ('try:\n'
+                '    int("bar")\n'
+                'except ValueError:\n'
+                '    pass\n'
+                'except Exception as e:\n'
+                '    pass\n'
+                'else:\n'
+                '    pass\n'
+                'finally:\n'
+                '    pass')
+        blocks = test_parser._split_code_into_blocks(code)
+        assert len(blocks) == 1
 
 
 class TestCodeBlockIsFunctionCall:
