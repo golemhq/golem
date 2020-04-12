@@ -1,17 +1,15 @@
 import json
 import os
 
-import pytest
-
-from golem.core import report, utils
+from golem.core import utils
+from golem.core.report import create_execution_directory, create_report_directory, generate_report
 from golem.test_runner import test_runner
-from golem.gui.report_parser import (get_last_executions, _parse_execution_data,
-                                     suite_execution_path, get_execution_data,
-                                     get_test_case_data, save_execution_json_report,
-                                     delete_execution, generate_execution_report,
+from golem.gui.report_parser import (save_execution_json_report, generate_execution_report,
                                      generate_junit_report)
 from golem.test_runner.execution_runner import define_browsers
 from golem.gui.gui_utils import generate_html_report
+
+from golem.report import report
 
 
 def execute_random_suite(project, test_utils):
@@ -31,8 +29,8 @@ def execute_suite(project, suite, test_utils):
     """
     """
     timestamp = test_utils.run_suite(project, suite)
-    exec_data = get_execution_data(project=project, suite=suite, execution=timestamp)
-    exec_dir = suite_execution_path(project, suite, timestamp)
+    exec_data = report.get_execution_data(project=project, suite=suite, execution=timestamp)
+    exec_dir = report.suite_execution_path(project, suite, timestamp)
     return {
         'exec_dir': exec_dir,
         'report_path': os.path.join(exec_dir, 'report.json'),
@@ -48,7 +46,7 @@ class TestGetLastExecution:
         _, project = project_function.activate()
 
         # suite does not exist
-        last_exec = get_last_executions([project], 'suite_does_not_exist')
+        last_exec = report.get_last_executions([project], 'suite_does_not_exist')
         assert last_exec[project] == {}
 
         # suite with no executions
@@ -60,14 +58,14 @@ class TestGetLastExecution:
 
         # suite with one execution
         timestamp = test_utils.run_suite(project, suite_name)
-        last_exec = get_last_executions([project], suite_name)
+        last_exec = report.get_last_executions([project], suite_name)
         assert last_exec[project] == {suite_name: [timestamp]}
 
         # multiple executions
         timestamps = [timestamp]
         timestamps.append(test_utils.run_suite(project, suite_name))
         timestamps.append(test_utils.run_suite(project, suite_name))
-        last_exec = get_last_executions([project], suite_name, limit=2)
+        last_exec = report.get_last_executions([project], suite_name, limit=2)
         assert len(last_exec[project][suite_name]) == 2
         assert last_exec[project][suite_name][0] == timestamps[1]
         assert last_exec[project][suite_name][1] == timestamps[2]
@@ -82,7 +80,7 @@ class TestParseExecutionData:
         test_utils.create_suite(project, name=suite_name, tests=['test1'])
         timestamp = test_utils.run_suite(project, suite_name)
 
-        exec_data = _parse_execution_data(project=project, suite=suite_name, execution=timestamp)
+        exec_data = report._parse_execution_data(project=project, suite=suite_name, execution=timestamp)
 
         assert len(exec_data['tests']) == 1
         assert exec_data['tests'][0]['name'] == 'test1'
@@ -101,9 +99,9 @@ class TestParseExecutionData:
         test_utils.create_test(project, name='test1')
         test_utils.create_suite(project, name=suite_name, tests=['test1'])
         timestamp = test_utils.run_suite(project, suite_name)
-        exec_dir = suite_execution_path(project, suite_name, timestamp)
+        exec_dir = report.suite_execution_path(project, suite_name, timestamp)
 
-        exec_data = _parse_execution_data(execution_directory=exec_dir)
+        exec_data = report._parse_execution_data(execution_directory=exec_dir)
 
         assert len(exec_data['tests']) == 1
         assert exec_data['tests'][0]['name'] == 'test1'
@@ -119,7 +117,7 @@ class TestGetExecutionData:
         test_utils.create_suite(project, name=suite_name, tests=['test1'])
         timestamp = test_utils.run_suite(project, suite_name)
 
-        exec_data = get_execution_data(project=project, suite=suite_name, execution=timestamp)
+        exec_data = report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
 
         assert len(exec_data['tests']) == 1
         assert exec_data['tests'][0]['name'] == 'test1'
@@ -132,11 +130,11 @@ class TestGetExecutionData:
         test_utils.create_test(project, name='test1')
         test_utils.create_suite(project, name=suite_name, tests=['test1'])
         timestamp = test_utils.run_suite(project, suite_name)
-        exec_dir = suite_execution_path(project, suite_name, timestamp)
+        exec_dir = report.suite_execution_path(project, suite_name, timestamp)
         report_path = os.path.join(exec_dir, 'report.json')
         os.remove(report_path)
 
-        exec_data = get_execution_data(project=project, suite=suite_name, execution=timestamp)
+        exec_data = report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
 
         assert len(exec_data['tests']) == 1
         assert exec_data['tests'][0]['name'] == 'test1'
@@ -152,8 +150,8 @@ class TestGetTestCaseData:
         test_name = exec['exec_data']['tests'][0]['name']
         test_set = exec['exec_data']['tests'][0]['test_set']
 
-        test_data = get_test_case_data(project, test_name, exec['suite_name'],
-                                       exec['timestamp'], test_set)
+        test_data = report.get_test_case_data(project, test_name, exec['suite_name'],
+                                              exec['timestamp'], test_set)
 
         assert test_data['name'] == exec['tests'][0]
         assert isinstance(test_data['debug_log'], list) and len(test_data['debug_log'])
@@ -193,7 +191,7 @@ class TestDeleteExecution:
         execution = execute_random_suite(project, test_utils)
         assert os.path.isdir(execution['exec_dir'])
 
-        errors = delete_execution(project, execution['suite_name'], execution['timestamp'])
+        errors = report.delete_execution(project, execution['suite_name'], execution['timestamp'])
 
         assert errors == []
         assert not os.path.isdir(execution['exec_dir'])
@@ -258,7 +256,7 @@ class TestCreateExecutionDirectoryTest:
         testdir, project = project_session.activate()
         timestamp = utils.get_timestamp()
         test_name = 'test_execution_directory'
-        directory = report.create_execution_directory(project, timestamp, test_name=test_name)
+        directory = create_execution_directory(project, timestamp, test_name=test_name)
         path = os.path.join(project_session.path, 'reports', 'single_tests', test_name, timestamp)
         assert os.path.isdir(path)
         assert directory == path
@@ -267,7 +265,7 @@ class TestCreateExecutionDirectoryTest:
         testdir, project = project_session.activate()
         timestamp = utils.get_timestamp()
         test_name = 'a.b.test_execution_directory'
-        directory = report.create_execution_directory(project, timestamp, test_name=test_name)
+        directory = create_execution_directory(project, timestamp, test_name=test_name)
         path = os.path.join(project_session.path, 'reports', 'single_tests', test_name, timestamp)
         assert os.path.isdir(path)
         assert directory == path
@@ -276,7 +274,7 @@ class TestCreateExecutionDirectoryTest:
         testdir, project = project_session.activate()
         timestamp = utils.get_timestamp()
         suite_name = 'suite_execution_directory'
-        directory = report.create_execution_directory(project, timestamp, suite_name=suite_name)
+        directory = create_execution_directory(project, timestamp, suite_name=suite_name)
         path = os.path.join(project_session.path, 'reports', suite_name, timestamp)
         assert os.path.isdir(path)
         assert directory == path
@@ -285,7 +283,7 @@ class TestCreateExecutionDirectoryTest:
         testdir, project = project_session.activate()
         timestamp = utils.get_timestamp()
         suite_name = 'a.b.suite_execution_directory'
-        directory = report.create_execution_directory(project, timestamp, suite_name=suite_name)
+        directory = create_execution_directory(project, timestamp, suite_name=suite_name)
         path = os.path.join(project_session.path, 'reports', suite_name, timestamp)
         assert os.path.isdir(path)
         assert directory == path
@@ -297,16 +295,16 @@ class TestCreateReportDirectory:
         testdir, project = project_session.activate()
         timestamp = utils.get_timestamp()
         test_name = 'testing_report_001'
-        exec_dir = report.create_execution_directory(project, timestamp, test_name=test_name)
-        directory = report.create_report_directory(exec_dir, test_name, is_suite=False)
+        exec_dir = create_execution_directory(project, timestamp, test_name=test_name)
+        directory = create_report_directory(exec_dir, test_name, is_suite=False)
         assert os.path.isdir(directory)
 
     def test_create_report_directory_suite(self, project_session):
         testdir, project = project_session.activate()
         timestamp = utils.get_timestamp()
         test_name = 'testing_report_002'
-        exec_dir = report.create_execution_directory(project, timestamp, test_name=test_name)
-        directory = report.create_report_directory(exec_dir, test_name, is_suite=True)
+        exec_dir = create_execution_directory(project, timestamp, test_name=test_name)
+        directory = create_report_directory(exec_dir, test_name, is_suite=True)
         assert os.path.isdir(directory)
 
 
@@ -316,8 +314,8 @@ class TestGenerateReport:
         _, project = project_session.activate()
         timestamp = utils.get_timestamp()
         test_name = 'testing_report_003'
-        exec_dir = report.create_execution_directory(project, timestamp, test_name=test_name)
-        report_dir = report.create_report_directory(exec_dir, test_name, is_suite=True)
+        exec_dir = create_execution_directory(project, timestamp, test_name=test_name)
+        report_dir = create_report_directory(exec_dir, test_name, is_suite=True)
         test_data = {
             'env': {
                 'name': 'env01',
@@ -340,7 +338,7 @@ class TestGenerateReport:
             'browser_full_name': '',
             'set_name': 'set_001',
         }
-        report.generate_report(report_dir, test_name, test_data, result)
+        generate_report(report_dir, test_name, test_data, result)
         path = os.path.join(report_dir, 'report.json')
         with open(path) as report_file:
             actual = json.load(report_file)

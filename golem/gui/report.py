@@ -10,7 +10,7 @@ from golem.core import session
 from . import gui_utils, report_parser
 from .gui_utils import project_exists, permission_required
 from golem.gui.user_management import Permissions
-
+from golem.report import report
 
 report_bp = Blueprint('report', __name__)
 
@@ -126,8 +126,7 @@ def report_execution_junit_download(project, suite, execution):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_execution_json(project, suite, execution):
-    json_report = report_parser.get_execution_data(project=project, suite=suite,
-                                                   execution=execution)
+    json_report = report.get_execution_data(project=project, suite=suite, execution=execution)
     return jsonify(json_report)
 
 
@@ -137,8 +136,8 @@ def report_execution_json(project, suite, execution):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_execution_json_download(project, suite, execution):
-    report_data = report_parser.get_execution_data(project=project, suite=suite,
-                                                   execution=execution)
+    report_data = report.get_execution_data(project=project, suite=suite,
+                                            execution=execution)
     json_report = json.dumps(report_data, indent=4)
     headers = {'Content-disposition': 'attachment; filename={}'.format('report.json')}
     return Response(json_report, mimetype='application/json', headers=headers)
@@ -150,9 +149,8 @@ def report_execution_json_download(project, suite, execution):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_test(project, suite, execution, test, test_set):
-    test_data = report_parser.get_test_case_data(project, test, suite=suite,
-                                                 execution=execution, test_set=test_set,
-                                                 is_single=False)
+    test_data = report.get_test_case_data(project, test, suite=suite, execution=execution,
+                                          test_set=test_set, is_single=False)
     return render_template('report/report_test.html', project=project, suite=suite,
                            execution=execution, test_case=test, test_set=test_set,
                            test_case_data=test_data)
@@ -164,9 +162,8 @@ def report_test(project, suite, execution, test, test_set):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_test_json(project, suite, execution, test, test_set):
-    test_data = report_parser.get_test_case_data(project, test, suite=suite,
-                                                 execution=execution, test_set=test_set,
-                                                 is_single=False)
+    test_data = report.get_test_case_data(project, test, suite=suite, execution=execution,
+                                          test_set=test_set, is_single=False)
     return jsonify(test_data)
 
 

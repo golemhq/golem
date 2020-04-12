@@ -17,6 +17,7 @@ from golem.core import utils, session, errors, test_directory, settings_manager
 from golem.gui import report_parser
 from golem.gui.user_management import Permissions
 from golem import gui
+from golem.report import report
 
 
 DEFAULT_SECRET_KEY = 'd3dac3po6c994b5590bf7fr2d2db355c661cbb83dec6344408'
@@ -281,15 +282,13 @@ def generate_html_report(project, suite, execution, report_directory=None,
     js['bootstrap'] = open(os.path.join(static_folder, 'js', 'external', 'bootstrap.min.js')).read()
     js['main'] = open(os.path.join(static_folder, 'js', 'main.js')).read()
     js['report_execution'] = open(os.path.join(static_folder, 'js', 'report_execution.js')).read()
-    execution_data = report_parser.get_execution_data(project=project, suite=suite, execution=execution)
+    execution_data = report.get_execution_data(project=project, suite=suite, execution=execution)
     detail_test_data = {}
     for test in execution_data['tests']:
-        test_detail = report_parser.get_test_case_data(project, test['full_name'],
-                                                       suite=suite, execution=execution,
-                                                       test_set=test['test_set'],
-                                                       is_single=False,
-                                                       encode_screenshots=True,
-                                                       no_screenshots=no_images)
+        test_detail = report.get_test_case_data(project, test['full_name'], suite=suite,
+                                                execution=execution, test_set=test['test_set'],
+                                                is_single=False, encode_screenshots=True,
+                                                no_screenshots=no_images)
         detail_test_data[test['test_set']] = test_detail
     with app.app_context():
         html_string = render_template('report/report_execution_static.html', project=project,
