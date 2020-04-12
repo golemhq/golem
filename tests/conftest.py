@@ -8,7 +8,7 @@ from subprocess import Popen, PIPE, STDOUT
 import pytest
 
 from golem.cli import commands
-from golem.core import settings_manager, suite, test, session, page
+from golem.core import settings_manager, suite, test, session, page, utils
 
 
 # FIXTURES
@@ -249,6 +249,13 @@ class TestUtils:
         if code is not None:
             page.edit_page_code(project, page_name, code)
         return page_name
+
+    @staticmethod
+    def run_suite(project_name, suite_name, timestamp=None):
+        if not timestamp:
+            timestamp = utils.get_timestamp()
+        commands.run_command(project_name, suite_name, timestamp=timestamp)
+        return timestamp
 
 
 def pytest_addoption(parser):
