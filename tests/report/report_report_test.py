@@ -2,14 +2,14 @@ import json
 import os
 
 from golem.core import utils
-from golem.core.report import create_execution_directory, create_report_directory, generate_report
+from golem.core.report import create_report_directory, generate_report
 from golem.test_runner import test_runner
-from golem.gui.report_parser import (save_execution_json_report, generate_execution_report,
-                                     generate_junit_report)
+from golem.gui.report_parser import generate_junit_report
 from golem.test_runner.execution_runner import define_browsers
 from golem.gui.gui_utils import generate_html_report
 
 from golem.report import report
+from golem.report.execution_report import generate_execution_report, get_execution_data, _parse_execution_data, save_execution_json_report, create_execution_directory
 
 
 def execute_random_suite(project, test_utils):
@@ -29,7 +29,7 @@ def execute_suite(project, suite, test_utils):
     """
     """
     timestamp = test_utils.run_suite(project, suite)
-    exec_data = report.get_execution_data(project=project, suite=suite, execution=timestamp)
+    exec_data = get_execution_data(project=project, suite=suite, execution=timestamp)
     exec_dir = report.suite_execution_path(project, suite, timestamp)
     return {
         'exec_dir': exec_dir,
@@ -80,7 +80,7 @@ class TestParseExecutionData:
         test_utils.create_suite(project, name=suite_name, tests=['test1'])
         timestamp = test_utils.run_suite(project, suite_name)
 
-        exec_data = report._parse_execution_data(project=project, suite=suite_name, execution=timestamp)
+        exec_data = _parse_execution_data(project=project, suite=suite_name, execution=timestamp)
 
         assert len(exec_data['tests']) == 1
         assert exec_data['tests'][0]['name'] == 'test1'
@@ -101,7 +101,7 @@ class TestParseExecutionData:
         timestamp = test_utils.run_suite(project, suite_name)
         exec_dir = report.suite_execution_path(project, suite_name, timestamp)
 
-        exec_data = report._parse_execution_data(execution_directory=exec_dir)
+        exec_data = _parse_execution_data(execution_directory=exec_dir)
 
         assert len(exec_data['tests']) == 1
         assert exec_data['tests'][0]['name'] == 'test1'
@@ -117,7 +117,7 @@ class TestGetExecutionData:
         test_utils.create_suite(project, name=suite_name, tests=['test1'])
         timestamp = test_utils.run_suite(project, suite_name)
 
-        exec_data = report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
+        exec_data = get_execution_data(project=project, suite=suite_name, execution=timestamp)
 
         assert len(exec_data['tests']) == 1
         assert exec_data['tests'][0]['name'] == 'test1'
@@ -134,7 +134,7 @@ class TestGetExecutionData:
         report_path = os.path.join(exec_dir, 'report.json')
         os.remove(report_path)
 
-        exec_data = report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
+        exec_data = get_execution_data(project=project, suite=suite_name, execution=timestamp)
 
         assert len(exec_data['tests']) == 1
         assert exec_data['tests'][0]['name'] == 'test1'
@@ -210,8 +210,8 @@ class TestGenerateExecutionReport:
         tags = ['foo', 'bar']
         remote_url = 'https://foo.bar'
 
-        report = generate_execution_report(execution['exec_dir'], elapsed_time, browsers,
-                                           processes, envs, tags, remote_url)
+        reprt = generate_execution_report(execution['exec_dir'], elapsed_time,
+                                          browsers, processes, envs, tags, remote_url)
 
         expected_params = {
             'browsers': [{'name': 'chrome', 'full_name': None, 'remote': False, 'capabilities': {}}],
@@ -220,7 +220,7 @@ class TestGenerateExecutionReport:
             'tags': ['foo', 'bar'],
             'remote_url': ''
         }
-        assert report['params'] == expected_params
+        assert reprt['params'] == expected_params
         assert os.path.isfile(execution['report_path'])
 
 

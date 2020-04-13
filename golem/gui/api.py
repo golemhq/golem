@@ -15,6 +15,7 @@ from golem.core import (environment_manager, settings_manager,
 from golem.core.page import Page
 from golem.core.project import Project, create_project, delete_project
 from golem.report import report
+from golem.report import execution_report as exec_report
 from golem.gui import gui_utils
 from golem.gui.user_management import Users, Permissions
 
@@ -242,8 +243,8 @@ def project_health():
     project_data = report.get_last_executions(projects=[project], suite=None, limit=1)
     health_data = {}
     for suite, executions in project_data[project].items():
-        execution_data = report.get_execution_data(project=project, suite=suite,
-                                                   execution=executions[0])
+        execution_data = exec_report.get_execution_data(project=project, suite=suite,
+                                                        execution=executions[0])
         health_data[suite] = {
             'execution': executions[0],
             'total': execution_data['total_tests'],
@@ -417,7 +418,7 @@ def report_suite_execution():
     suite = request.args['suite']
     execution = request.args['execution']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    execution_data = report.get_execution_data(project=project, suite=suite, execution=execution)
+    execution_data = exec_report.get_execution_data(project=project, suite=suite, execution=execution)
     response = jsonify(execution_data)
     if execution_data['has_finished']:
         response.cache_control.max_age = 60 * 60 * 24 * 7

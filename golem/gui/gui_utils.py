@@ -14,10 +14,10 @@ from flask_login import current_user
 
 import golem.actions
 from golem.core import utils, session, errors, test_directory, settings_manager
-from golem.gui import report_parser
 from golem.gui.user_management import Permissions
 from golem import gui
 from golem.report import report
+from golem.report import execution_report as exec_report
 
 
 DEFAULT_SECRET_KEY = 'd3dac3po6c994b5590bf7fr2d2db355c661cbb83dec6344408'
@@ -267,7 +267,7 @@ def generate_html_report(project, suite, execution, report_directory=None,
         else:
             report_name = 'report'
 
-    formatted_date = report_parser.get_date_time_from_timestamp(execution)
+    formatted_date = utils.get_date_time_from_timestamp(execution)
     app = gui.create_app()
     static_folder = app.static_folder
     css = {}
@@ -282,7 +282,7 @@ def generate_html_report(project, suite, execution, report_directory=None,
     js['bootstrap'] = open(os.path.join(static_folder, 'js', 'external', 'bootstrap.min.js')).read()
     js['main'] = open(os.path.join(static_folder, 'js', 'main.js')).read()
     js['report_execution'] = open(os.path.join(static_folder, 'js', 'report_execution.js')).read()
-    execution_data = report.get_execution_data(project=project, suite=suite, execution=execution)
+    execution_data = exec_report.get_execution_data(project=project, suite=suite, execution=execution)
     detail_test_data = {}
     for test in execution_data['tests']:
         test_detail = report.get_test_case_data(project, test['full_name'], suite=suite,

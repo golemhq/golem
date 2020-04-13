@@ -7,7 +7,7 @@ import pytest
 from golem.test_runner import execution_runner as exc_runner
 from golem.core import (test, test_data, environment_manager, utils, settings_manager,
                         file_manager, session)
-from golem.report import report
+from golem.report import execution_report as exec_report
 
 
 class TestDefineBrowsers:
@@ -556,7 +556,7 @@ class TestRunSuite:
         execution_runner.run_suite(suite_name)
         out, err = capsys.readouterr()
         assert 'Tests found: 2' in out
-        data = report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
+        data = exec_report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
         assert data['has_finished'] is True
         assert data['total_tests'] == 2
 
@@ -570,7 +570,7 @@ class TestRunSuite:
         execution_runner.run_suite(suite_name)
         out, err = capsys.readouterr()
         assert 'No tests found for suite {}'.format(suite_name) in out
-        data = report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
+        data = exec_report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
         assert data['has_finished'] is True
         assert data['total_tests'] == 0
 
@@ -589,7 +589,7 @@ class TestRunSuite:
         execution_runner.run_suite(suite_name)
         out, err = capsys.readouterr()
         assert 'Tests found: 1' in out
-        data = report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
+        data = exec_report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
         assert data['has_finished'] is True
         assert data['total_tests'] == 1
 
@@ -608,7 +608,7 @@ class TestRunSuite:
         execution_runner.run_suite(suite_name)
         out, err = capsys.readouterr()
         assert 'No tests found with tag(s): sierra, tango' in out
-        data = report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
+        data = exec_report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
         assert data['has_finished'] is True
         assert data['total_tests'] == 0
 
@@ -634,7 +634,7 @@ class TestRunSuite:
         expected = ("InvalidTagExpression: unknown expression <class '_ast.Assign'>, the "
                     "only valid operators for tag expressions are: 'and', 'or' & 'not'")
         assert expected in out
-        data = report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
+        data = exec_report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
         assert data['has_finished'] is True
         assert data['total_tests'] == 0
 
@@ -676,7 +676,7 @@ class TestRunDirectory:
         execution_runner.run_directory('foo')
         out, err = capsys.readouterr()
         assert 'Tests found: 2' in out
-        data = report.get_execution_data(project=project, suite='foo', execution=timestamp)
+        data = exec_report.get_execution_data(project=project, suite='foo', execution=timestamp)
         assert data['has_finished'] is True
         assert data['total_tests'] == 2
 
@@ -690,7 +690,7 @@ class TestRunDirectory:
         out, err = capsys.readouterr()
         expected = 'No tests were found in {}'.format(os.path.join('tests', dirname))
         assert expected in out
-        data = report.get_execution_data(project=project, suite=dirname, execution=timestamp)
+        data = exec_report.get_execution_data(project=project, suite=dirname, execution=timestamp)
         assert data['has_finished'] is True
         assert data['total_tests'] == 0
 
@@ -706,7 +706,7 @@ class TestRunDirectory:
         execution_runner.run_directory(dirname)
         out, err = capsys.readouterr()
         assert 'Tests found: 1' in out
-        data = report.get_execution_data(project=project, suite=dirname, execution=timestamp)
+        data = exec_report.get_execution_data(project=project, suite=dirname, execution=timestamp)
         assert data['has_finished'] is True
         assert data['total_tests'] == 1
 
@@ -727,7 +727,7 @@ class TestRunWithEnvs:
         execution_runner.run_directory('')
         out, err = capsys.readouterr()
         assert 'Tests found: 1 (2 sets)' in out
-        data = report.get_execution_data(project=project, suite='all', execution=timestamp)
+        data = exec_report.get_execution_data(project=project, suite='all', execution=timestamp)
         assert data['has_finished'] is True
         assert data['total_tests'] == 2
 
@@ -750,6 +750,6 @@ class TestRunWithEnvs:
         msg = ('ERROR: the following environments do not exist for project {}: '
                'not_existing'.format(project))
         assert msg in out
-        data = report.get_execution_data(project=project, suite='all', execution=timestamp)
+        data = exec_report.get_execution_data(project=project, suite='all', execution=timestamp)
         assert data['has_finished'] is True
         assert data['total_tests'] == 0

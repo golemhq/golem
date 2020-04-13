@@ -19,6 +19,7 @@ from golem.core.project import Project
 from golem.gui import gui_utils, report_parser
 from golem.test_runner.multiprocess_executor import multiprocess_executor
 from golem.test_runner.test_runner import run_test
+from golem.report import execution_report as exec_report
 
 
 def define_browsers(browsers, remote_browsers, default_browsers):
@@ -131,10 +132,10 @@ class ExecutionRunner:
     def _create_execution_directory(self):
         """Generate the execution report directory"""
         if self.is_suite:
-            execution_directory = report.create_execution_directory(
+            execution_directory = exec_report.create_execution_directory(
                 self.project, self.timestamp, suite_name=self.suite_name)
         else:
-            execution_directory = report.create_execution_directory(
+            execution_directory = exec_report.create_execution_directory(
                 self.project, self.timestamp, test_name=self.test_name)
         return execution_directory
 
@@ -416,13 +417,13 @@ class ExecutionRunner:
         elapsed_time = self._get_elapsed_time(self.start_time)
 
         # generate report.json
-        self.report = report_parser.generate_execution_report(self.execution.reportdir,
-                                                              elapsed_time,
-                                                              self.execution.browsers,
-                                                              self.execution.processes,
-                                                              self.execution.envs,
-                                                              self.execution.tags,
-                                                              session.settings['remote_url'])
+        self.report = exec_report.generate_execution_report(self.execution.reportdir,
+                                                            elapsed_time,
+                                                            self.execution.browsers,
+                                                            self.execution.processes,
+                                                            self.execution.envs,
+                                                            self.execution.tags,
+                                                            session.settings['remote_url'])
         if self.is_suite or len(self.execution.tests) > 1:
             self._print_results()
         # generate requested reports
@@ -434,7 +435,7 @@ class ExecutionRunner:
                                                     self.suite_name, self.timestamp,
                                                     self.report_folder, report_name)
             if 'json' in self.reports and (self.report_folder or self.report_name):
-                report_parser.save_execution_json_report(self.report, report_folder, report_name)
+                exec_report.save_execution_json_report(self.report, report_folder, report_name)
             if 'html' in self.reports:
                 gui_utils.generate_html_report(self.project, self.suite_name,
                                                self.timestamp, self.report_folder,

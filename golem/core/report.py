@@ -3,37 +3,6 @@ import json
 import os
 import uuid
 
-from golem.core import session
-
-
-def create_execution_directory(project, timestamp, test_name=None, suite_name=None):
-    """Create directory to store report for suite or single test.
-    
-    If suite, directory will be:
-    <testdir>/projects/<project>/reports/<suite_name>/<timestamp>/
-    
-    If test, directory will be:
-    <testdir>/projects/<project>/reports/single_tests/<test_name>/<timestamp>/
-    """
-    if test_name:
-        execution_directory = os.path.join(session.testdir, 'projects', project,
-                                           'reports', 'single_tests', test_name,
-                                           timestamp)
-    elif suite_name:
-        execution_directory = os.path.join(session.testdir, 'projects', project,
-                                           'reports', suite_name, timestamp)
-    else:
-        # TODO
-        import sys
-        sys.exit('Invalid params for create_test_execution_directory')
-
-    if not os.path.isdir(execution_directory):
-        try:
-            os.makedirs(execution_directory)
-        except:
-            pass
-    return execution_directory
-
 
 def create_report_directory(execution_directory, test_case_name, is_suite):
     """Create directory to store a single test report.

@@ -6,11 +6,12 @@ from flask import jsonify, render_template, Response, send_from_directory
 from flask.blueprints import Blueprint
 from flask_login import login_required
 
-from golem.core import session
+from golem.core import session, utils
 from . import gui_utils, report_parser
 from .gui_utils import project_exists, permission_required
 from golem.gui.user_management import Permissions
 from golem.report import report
+from golem.report import execution_report as exec_report
 
 report_bp = Blueprint('report', __name__)
 
@@ -46,7 +47,7 @@ def report_dashboard_suite(project, suite):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_execution(project, suite, execution):
-    formatted_date = report_parser.get_date_time_from_timestamp(execution)
+    formatted_date = utils.get_date_time_from_timestamp(execution)
     return render_template('report/report_execution.html', project=project, suite=suite,
                            execution=execution, execution_data=None,
                            formatted_date=formatted_date, static=False)
@@ -126,7 +127,7 @@ def report_execution_junit_download(project, suite, execution):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_execution_json(project, suite, execution):
-    json_report = report.get_execution_data(project=project, suite=suite, execution=execution)
+    json_report = exec_report.get_execution_data(project=project, suite=suite, execution=execution)
     return jsonify(json_report)
 
 
@@ -136,8 +137,8 @@ def report_execution_json(project, suite, execution):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_execution_json_download(project, suite, execution):
-    report_data = report.get_execution_data(project=project, suite=suite,
-                                            execution=execution)
+    report_data = exec_report.get_execution_data(project=project, suite=suite,
+                                                 execution=execution)
     json_report = json.dumps(report_data, indent=4)
     headers = {'Content-disposition': 'attachment; filename={}'.format('report.json')}
     return Response(json_report, mimetype='application/json', headers=headers)
