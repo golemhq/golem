@@ -16,6 +16,7 @@ from golem.core.page import Page
 from golem.core.project import Project, create_project, delete_project
 from golem.report import report
 from golem.report import execution_report as exec_report
+from golem.report import test_report
 from golem.gui import gui_utils
 from golem.gui.user_management import Users, Permissions
 
@@ -463,9 +464,9 @@ def report_test_set():
     test_full_name = request.args['testName']
     test_set = request.args['testSet']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    test_detail = report.get_test_case_data(project, test_full_name, suite=suite,
-                                            execution=execution, test_set=test_set,
-                                            is_single=False, encode_screenshots=True)
+    test_detail = test_report.get_test_case_data(project, test_full_name, suite=suite,
+                                                 execution=execution, test_set=test_set,
+                                                 is_single=False, encode_screenshots=True)
     response = jsonify(test_detail)
     if test_detail['has_finished']:
         response.cache_control.max_age = 604800
@@ -498,8 +499,8 @@ def report_test_status():
     for set_name in sets:
         report_path = os.path.join(path, set_name, 'report.json')
         if os.path.exists(report_path):
-            test_data = report.get_test_case_data(project, test_name, execution=timestamp,
-                                                  test_set=set_name, is_single=True)
+            test_data = test_report.get_test_case_data(project, test_name, execution=timestamp,
+                                                       test_set=set_name, is_single=True)
             sets[set_name]['report'] = test_data
         log_path = os.path.join(path, set_name, 'execution_info.log')
         if os.path.exists(log_path):

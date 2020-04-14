@@ -9,6 +9,8 @@ import pytest
 
 from golem.cli import commands
 from golem.core import settings_manager, suite, test, session, page, utils
+from golem.report.execution_report import get_execution_data
+from golem.report import report
 
 
 # FIXTURES
@@ -256,6 +258,34 @@ class TestUtils:
             timestamp = utils.get_timestamp()
         commands.run_command(project_name, suite_name, timestamp=timestamp)
         return timestamp
+
+    @staticmethod
+    def execute_random_suite(project):
+        """Create a random suite for project with one test.
+        Execute the suite and return the execution data
+        """
+        test_name = TestUtils.random_string()
+        tests = [test_name]
+        for t in tests:
+            TestUtils.create_test(project, name=t)
+        suite_name = TestUtils.random_string()
+        TestUtils.create_suite(project, name=suite_name, tests=tests)
+        execution = TestUtils.execute_suite(project, suite_name)
+        execution['tests'] = tests
+        return execution
+
+    @staticmethod
+    def execute_suite(project, suite_name):
+        timestamp = TestUtils.run_suite(project, suite_name)
+        exec_data = get_execution_data(project=project, suite=suite_name, execution=timestamp)
+        exec_dir = report.suite_execution_path(project, suite_name, timestamp)
+        return {
+            'exec_dir': exec_dir,
+            'report_path': os.path.join(exec_dir, 'report.json'),
+            'suite_name': suite_name,
+            'timestamp': timestamp,
+            'exec_data': exec_data
+        }
 
 
 def pytest_addoption(parser):

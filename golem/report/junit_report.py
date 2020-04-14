@@ -1,17 +1,15 @@
-"""Functions to parse Golem report files."""
-import errno
 import os
+import errno
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
 from golem.core import session
 from golem.test_runner.conf import ResultsEnum
+from golem.report.execution_report import get_execution_data
 
 
-def generate_junit_report(execution_directory, suite_name, timestamp,
-                          report_folder=None, report_name=None):
-    #DELETE
-    from golem.report.execution_report import get_execution_data
+def generate_junit_report(execution_directory, suite_name, timestamp, report_folder=None,
+                          report_name=None):
     data = get_execution_data(execution_directory=execution_directory)
 
     totals_by_result = data['totals_by_result']

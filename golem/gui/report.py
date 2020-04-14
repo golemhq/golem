@@ -7,11 +7,13 @@ from flask.blueprints import Blueprint
 from flask_login import login_required
 
 from golem.core import session, utils
-from . import gui_utils, report_parser
 from .gui_utils import project_exists, permission_required
 from golem.gui.user_management import Permissions
-from golem.report import report
 from golem.report import execution_report as exec_report
+from golem.report import test_report
+from golem.report import junit_report
+from golem.report import html_report
+
 
 report_bp = Blueprint('report', __name__)
 
@@ -59,7 +61,7 @@ def report_execution(project, suite, execution):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_execution_static_html(project, suite, execution):
-    html_report_string = gui_utils.get_or_generate_html_report(project, suite, execution)
+    html_report_string = html_report.get_or_generate_html_report(project, suite, execution)
     return html_report_string
 
 
@@ -69,7 +71,7 @@ def report_execution_static_html(project, suite, execution):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_execution_static_html_download(project, suite, execution):
-    html_report_string = gui_utils.get_or_generate_html_report(project, suite, execution)
+    html_report_string = html_report.get_or_generate_html_report(project, suite, execution)
     headers = {'Content-disposition': 'attachment; filename={}'.format('report.html')}
     return Response(html_report_string, mimetype='text/html', headers=headers)
 
@@ -80,7 +82,7 @@ def report_execution_static_html_download(project, suite, execution):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_execution_static_html_no_images(project, suite, execution):
-    html_report_string = gui_utils.get_or_generate_html_report(project, suite, execution,
+    html_report_string = html_report.get_or_generate_html_report(project, suite, execution,
                                                                no_images=True)
     return html_report_string
 
@@ -91,8 +93,8 @@ def report_execution_static_html_no_images(project, suite, execution):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_execution_static_html_no_images_download(project, suite, execution):
-    html_report_string = gui_utils.get_or_generate_html_report(project, suite, execution,
-                                                               no_images=True)
+    html_report_string = html_report.get_or_generate_html_report(project, suite, execution,
+                                                                 no_images=True)
     headers = {
         'Content-disposition': 'attachment; filename={}'.format('report-no-images.html')}
     return Response(html_report_string, mimetype='text/html', headers=headers)
@@ -104,8 +106,8 @@ def report_execution_static_html_no_images_download(project, suite, execution):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_execution_junit(project, suite, execution):
-    junit_report_string = report_parser.get_or_generate_junit_report(project, suite,
-                                                                     execution)
+    junit_report_string = junit_report.get_or_generate_junit_report(project, suite,
+                                                                    execution)
     return Response(junit_report_string, mimetype='text/xml')
 
 
@@ -115,8 +117,8 @@ def report_execution_junit(project, suite, execution):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_execution_junit_download(project, suite, execution):
-    junit_report_string = report_parser.get_or_generate_junit_report(project, suite,
-                                                                     execution)
+    junit_report_string = junit_report.get_or_generate_junit_report(project, suite,
+                                                                    execution)
     headers = {'Content-disposition': 'attachment; filename={}'.format('report.xml')}
     return Response(junit_report_string, mimetype='text/xml', headers=headers)
 
@@ -150,8 +152,8 @@ def report_execution_json_download(project, suite, execution):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_test(project, suite, execution, test, test_set):
-    test_data = report.get_test_case_data(project, test, suite=suite, execution=execution,
-                                          test_set=test_set, is_single=False)
+    test_data = test_report.get_test_case_data(project, test, suite=suite, execution=execution,
+                                               test_set=test_set, is_single=False)
     return render_template('report/report_test.html', project=project, suite=suite,
                            execution=execution, test_case=test, test_set=test_set,
                            test_case_data=test_data)
@@ -163,8 +165,8 @@ def report_test(project, suite, execution, test, test_set):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_test_json(project, suite, execution, test, test_set):
-    test_data = report.get_test_case_data(project, test, suite=suite, execution=execution,
-                                          test_set=test_set, is_single=False)
+    test_data = test_report.get_test_case_data(project, test, suite=suite, execution=execution,
+                                               test_set=test_set, is_single=False)
     return jsonify(test_data)
 
 
