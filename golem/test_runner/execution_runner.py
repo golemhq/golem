@@ -8,7 +8,6 @@ from collections import OrderedDict
 
 from golem.core import (session,
                         utils,
-                        report,
                         test_data,
                         environment_manager,
                         settings_manager,
@@ -16,9 +15,13 @@ from golem.core import (session,
 from golem.core import suite as suite_module
 from golem.core import tags_manager
 from golem.core.project import Project
-from golem.gui import gui_utils, report_parser
+from golem.gui import gui_utils
 from golem.test_runner.multiprocess_executor import multiprocess_executor
 from golem.test_runner.test_runner import run_test
+from golem.report import execution_report as exec_report
+from golem.report import test_report
+from golem.report import junit_report
+from golem.report import html_report
 
 
 def define_browsers(browsers, remote_browsers, default_browsers):
@@ -131,10 +134,10 @@ class ExecutionRunner:
     def _create_execution_directory(self):
         """Generate the execution report directory"""
         if self.is_suite:
-            execution_directory = report.create_execution_directory(
+            execution_directory = exec_report.create_execution_directory(
                 self.project, self.timestamp, suite_name=self.suite_name)
         else:
-            execution_directory = report.create_execution_directory(
+            execution_directory = exec_report.create_execution_directory(
                 self.project, self.timestamp, test_name=self.test_name)
         return execution_directory
 
@@ -364,8 +367,8 @@ class ExecutionRunner:
             # for example, in a suite 'suite1' with a 'test1':
             # reports/suite1/2017.07.02.19.22.20.001/test1/set_00001/
             for test in self.execution.tests:
-                test.reportdir = report.create_report_directory(self.execution.reportdir,
-                                                                test.name, self.is_suite)
+                test.reportdir = test_report.create_report_directory(self.execution.reportdir,
+                                                                     test.name, self.is_suite)
             try:
                 self._execute()
             except KeyboardInterrupt:
@@ -416,13 +419,13 @@ class ExecutionRunner:
         elapsed_time = self._get_elapsed_time(self.start_time)
 
         # generate report.json
-        self.report = report_parser.generate_execution_report(self.execution.reportdir,
-                                                              elapsed_time,
-                                                              self.execution.browsers,
-                                                              self.execution.processes,
-                                                              self.execution.envs,
-                                                              self.execution.tags,
-                                                              session.settings['remote_url'])
+        self.report = exec_report.generate_execution_report(self.execution.reportdir,
+                                                            elapsed_time,
+                                                            self.execution.browsers,
+                                                            self.execution.processes,
+                                                            self.execution.envs,
+                                                            self.execution.tags,
+                                                            session.settings['remote_url'])
         if self.is_suite or len(self.execution.tests) > 1:
             self._print_results()
         # generate requested reports
@@ -430,21 +433,21 @@ class ExecutionRunner:
             report_name = self.report_name or 'report'
             report_folder = self.report_folder or self.execution.reportdir
             if 'junit' in self.reports:
-                report_parser.generate_junit_report(self.execution.reportdir,
-                                                    self.suite_name, self.timestamp,
-                                                    self.report_folder, report_name)
+                junit_report.generate_junit_report(self.execution.reportdir,
+                                                   self.suite_name, self.timestamp,
+                                                   self.report_folder, report_name)
             if 'json' in self.reports and (self.report_folder or self.report_name):
-                report_parser.save_execution_json_report(self.report, report_folder, report_name)
+                exec_report.save_execution_json_report(self.report, report_folder, report_name)
             if 'html' in self.reports:
-                gui_utils.generate_html_report(self.project, self.suite_name,
-                                               self.timestamp, self.report_folder,
-                                               report_name)
+                html_report.generate_html_report(self.project, self.suite_name,
+                                                 self.timestamp, self.report_folder,
+                                                 report_name)
             if 'html-no-images' in self.reports:
                 if 'html' in self.reports:
                     report_name = report_name + '-no-images'
-                gui_utils.generate_html_report(self.project, self.suite_name, self.timestamp,
-                                               self.report_folder, report_name,
-                                               no_images=True)
+                html_report.generate_html_report(self.project, self.suite_name, self.timestamp,
+                                                 self.report_folder, report_name,
+                                                 no_images=True)
 
         # exit to the console with exit status code 1 in case a test fails
         if self.execution.has_failed_tests.value:

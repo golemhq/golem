@@ -6,7 +6,7 @@ from flask import Flask, g, render_template
 from flask_login import current_user, LoginManager
 
 import golem
-from . import gui_utils, report_parser, user_management
+from . import gui_utils, user_management
 from golem.core import session, settings_manager, errors, test_directory
 from .api import api_bp
 from .web_app import webapp_bp

@@ -4,13 +4,14 @@ import os
 import time
 import traceback
 
-from golem.core import report, utils, session
+from golem.core import utils, session
 from golem.core.test import Test
 from golem.core.project import Project
 from golem.test_runner.test_runner_utils import import_page_into_test
 from golem.test_runner import execution_logger
 from golem.test_runner.conf import ResultsEnum
 from golem import actions, execution
+from golem.report import test_report
 
 
 class Data(dict):
@@ -244,7 +245,7 @@ class TestRunner:
         _error_codes = [ResultsEnum.CODE_ERROR, ResultsEnum.ERROR, ResultsEnum.FAILURE]
         if self.execution_has_failed_tests is not None and self.result['result'] in _error_codes:
             self.execution_has_failed_tests.value = True
-        report.generate_report(self.report_directory, self.test.name, execution.data, self.result)
+        test_report.generate_report(self.report_directory, self.test.name, execution.data, self.result)
         execution_logger.reset_logger(execution.logger)
         # execution._reset()
 

@@ -23,6 +23,21 @@ def get_date_from_timestamp(timestamp):
     return date
 
 
+def get_date_time_from_timestamp(timestamp):
+    """Get the date time from a timestamp.
+
+    The timestamp must have the following format:
+    'year.month.day.hour.minutes'
+    Example:
+    '2017.12.20.10.31' -> '2017/12/20 10:31'
+    """
+    date_time_string = timestamp
+    sp = timestamp.split('.')
+    if len(sp) >= 5:
+        date_time_string = '{0}/{1}/{2} {3}:{4}'.format(sp[0], sp[1], sp[2], sp[3], sp[4])
+    return date_time_string
+
+
 def display_tree_structure_command_line(structure, lvl=0):
     """Displays a directory tree structure to the command line"""
     for element in structure:
