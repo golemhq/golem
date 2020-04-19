@@ -9,8 +9,7 @@ import pytest
 
 from golem.cli import commands
 from golem.core import settings_manager, suite, test, session, page, utils
-from golem.report.execution_report import get_execution_data
-from golem.report import report
+from golem.report.execution_report import get_execution_data, suite_execution_path
 
 
 # FIXTURES
@@ -278,7 +277,7 @@ class TestUtils:
     def execute_suite(project, suite_name):
         timestamp = TestUtils.run_suite(project, suite_name)
         exec_data = get_execution_data(project=project, suite=suite_name, execution=timestamp)
-        exec_dir = report.suite_execution_path(project, suite_name, timestamp)
+        exec_dir = suite_execution_path(project, suite_name, timestamp)
         return {
             'exec_dir': exec_dir,
             'report_path': os.path.join(exec_dir, 'report.json'),

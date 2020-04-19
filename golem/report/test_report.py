@@ -8,7 +8,7 @@ from golem.core import session, utils
 
 def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
                        is_single=False, encode_screenshots=False, no_screenshots=False):
-    """Retrieves all the data of a single test execution.
+    """Retrieves all the data of a test set.
 
     :Args:
       - encode_screenshots: return screenshot files encoded as a base64 string or
@@ -94,7 +94,7 @@ def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
 
 
 def create_report_directory(execution_directory, test_case_name, is_suite):
-    """Create directory to store a single test report.
+    """Create directory to store a test set report.
 
     execution_directory takes the following format for suites:
       <testdir>/projects/<project>/reports/<suite_name>/<timestamp>/
@@ -121,7 +121,7 @@ def create_report_directory(execution_directory, test_case_name, is_suite):
 
 
 def generate_report(report_directory, test_case_name, test_data, result):
-    """Generate the json report for a single test execution."""
+    """Generate the json report for a test set."""
     json_report_path = os.path.join(report_directory, 'report.json')
     # short_error = ''
     # if result['error']:

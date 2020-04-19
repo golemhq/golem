@@ -481,8 +481,7 @@ def report_test_status():
     test_name = request.args['test']
     timestamp = request.args['timestamp']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    path = os.path.join(session.testdir, 'projects', project, 'reports',
-                        'single_tests', test_name, timestamp)
+    path = exec_report.single_test_execution_path(project, test_name, timestamp)
     result = {
         'sets': {},
         'is_finished': False

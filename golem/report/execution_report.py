@@ -5,10 +5,11 @@ import traceback
 import errno
 
 from golem.core import session, utils
+from golem.core.project import Project
 from golem.test_runner.conf import ResultsEnum
 
 
-def get_execution_report_default():
+def execution_report_default():
     params = utils.ImmutableKeysDict(browsers=[],
                                      processes=None,
                                      environments=[],
@@ -26,7 +27,7 @@ def get_execution_report_default():
 
 def _parse_execution_data(execution_directory=None, project=None,
                           suite=None, execution=None, finalize=False):
-    execution_data = get_execution_report_default()
+    execution_data = execution_report_default()
     if not execution_directory:
         execution_directory = os.path.join(session.testdir, 'projects', project,
                                            'reports', suite, execution)
@@ -175,29 +176,40 @@ def save_execution_json_report(report_data, reportdir, report_name='report'):
             print('ERROR: There was an error writing to {}'.format(report_path))
 
 
-def create_execution_directory(project, timestamp, test_name=None, suite_name=None):
-    """Create directory to store report for suite or single test.
+def suite_execution_path(project, suite_name, timestamp):
+    return os.path.join(Project(project).report_directory_path, suite_name, timestamp)
 
-    If suite, directory will be:
+
+def single_test_execution_path(project, test_name, timestamp):
+    reports_path = Project(project).report_directory_path
+    return os.path.join(reports_path, 'single_tests', test_name, timestamp)
+
+
+def create_execution_directory(project, suite_name, timestamp):
+    """Create report directory for a suite execution.
+
+    Directory should have the following path:
     <testdir>/projects/<project>/reports/<suite_name>/<timestamp>/
-
-    If test, directory will be:
-    <testdir>/projects/<project>/reports/single_tests/<test_name>/<timestamp>/
     """
-    if test_name:
-        execution_directory = os.path.join(session.testdir, 'projects', project, 'reports',
-                                           'single_tests', test_name, timestamp)
-    elif suite_name:
-        execution_directory = os.path.join(session.testdir, 'projects', project, 'reports',
-                                           suite_name, timestamp)
-    else:
-        # TODO
-        import sys
-        sys.exit('Invalid params for create_test_execution_directory')
-
-    if not os.path.isdir(execution_directory):
+    directory = suite_execution_path(project, suite_name, timestamp)
+    if not os.path.isdir(directory):
         try:
-            os.makedirs(execution_directory)
+            os.makedirs(directory)
         except:
             pass
-    return execution_directory
+    return directory
+
+
+def create_execution_dir_single_test(project, test_name, timestamp):
+    """Create report directory for a single test execution.
+
+    Directory should have the following path:
+    <testdir>/projects/<project>/reports/single_tests/<test_name>/<timestamp>/
+    """
+    directory = single_test_execution_path(project, test_name, timestamp)
+    if not os.path.isdir(directory):
+        try:
+            os.makedirs(directory)
+        except:
+            pass
+    return directory

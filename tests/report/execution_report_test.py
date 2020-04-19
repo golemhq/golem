@@ -3,9 +3,13 @@ import os
 
 from golem.core import utils
 from golem.test_runner.execution_runner import define_browsers
-
-from golem.report import report
-from golem.report.execution_report import generate_execution_report, get_execution_data, _parse_execution_data, save_execution_json_report, create_execution_directory
+from golem.report.execution_report import generate_execution_report
+from golem.report.execution_report import get_execution_data
+from golem.report.execution_report import _parse_execution_data
+from golem.report.execution_report import save_execution_json_report
+from golem.report.execution_report import create_execution_directory
+from golem.report.execution_report import create_execution_dir_single_test
+from golem.report.execution_report import suite_execution_path
 
 
 class TestParseExecutionData:
@@ -36,7 +40,7 @@ class TestParseExecutionData:
         test_utils.create_test(project, name='test1')
         test_utils.create_suite(project, name=suite_name, tests=['test1'])
         timestamp = test_utils.run_suite(project, suite_name)
-        exec_dir = report.suite_execution_path(project, suite_name, timestamp)
+        exec_dir = suite_execution_path(project, suite_name, timestamp)
 
         exec_data = _parse_execution_data(execution_directory=exec_dir)
 
@@ -67,7 +71,7 @@ class TestGetExecutionData:
         test_utils.create_test(project, name='test1')
         test_utils.create_suite(project, name=suite_name, tests=['test1'])
         timestamp = test_utils.run_suite(project, suite_name)
-        exec_dir = report.suite_execution_path(project, suite_name, timestamp)
+        exec_dir = suite_execution_path(project, suite_name, timestamp)
         report_path = os.path.join(exec_dir, 'report.json')
         os.remove(report_path)
 
@@ -133,29 +137,11 @@ class TestSaveExecutionJsonReport:
 
 class TestCreateExecutionDirectoryTest:
 
-    def test_create_execution_directory_test(self, project_session):
-        testdir, project = project_session.activate()
-        timestamp = utils.get_timestamp()
-        test_name = 'test_execution_directory'
-        directory = create_execution_directory(project, timestamp, test_name=test_name)
-        path = os.path.join(project_session.path, 'reports', 'single_tests', test_name, timestamp)
-        assert os.path.isdir(path)
-        assert directory == path
-
-    def test_create_execution_directory_test_parents(self, project_session):
-        testdir, project = project_session.activate()
-        timestamp = utils.get_timestamp()
-        test_name = 'a.b.test_execution_directory'
-        directory = create_execution_directory(project, timestamp, test_name=test_name)
-        path = os.path.join(project_session.path, 'reports', 'single_tests', test_name, timestamp)
-        assert os.path.isdir(path)
-        assert directory == path
-
     def test_create_execution_directory_suite(self, project_session):
         testdir, project = project_session.activate()
         timestamp = utils.get_timestamp()
         suite_name = 'suite_execution_directory'
-        directory = create_execution_directory(project, timestamp, suite_name=suite_name)
+        directory = create_execution_directory(project, suite_name, timestamp)
         path = os.path.join(project_session.path, 'reports', suite_name, timestamp)
         assert os.path.isdir(path)
         assert directory == path
@@ -164,7 +150,28 @@ class TestCreateExecutionDirectoryTest:
         testdir, project = project_session.activate()
         timestamp = utils.get_timestamp()
         suite_name = 'a.b.suite_execution_directory'
-        directory = create_execution_directory(project, timestamp, suite_name=suite_name)
+        directory = create_execution_directory(project, suite_name, timestamp)
         path = os.path.join(project_session.path, 'reports', suite_name, timestamp)
+        assert os.path.isdir(path)
+        assert directory == path
+
+
+class TestCreateExecutionDirectorySingleTest:
+
+    def test_create_execution_dir_single_test(self, project_session, test_utils):
+        _, project = project_session.activate()
+        timestamp = utils.get_timestamp()
+        test_name = test_utils.random_string()
+        directory = create_execution_dir_single_test(project, test_name, timestamp)
+        path = os.path.join(project_session.path, 'reports', 'single_tests', test_name, timestamp)
+        assert os.path.isdir(path)
+        assert directory == path
+
+    def test_create_execution_dir_single_test_parents(self, project_session, test_utils):
+        _, project = project_session.activate()
+        timestamp = utils.get_timestamp()
+        test_name = 'foo.bar.{}'.format(test_utils.random_string())
+        directory = create_execution_dir_single_test(project, test_name, timestamp)
+        path = os.path.join(project_session.path, 'reports', 'single_tests', test_name, timestamp)
         assert os.path.isdir(path)
         assert directory == path

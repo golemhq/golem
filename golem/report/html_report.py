@@ -5,7 +5,6 @@ from flask import render_template
 
 from golem.core import session, utils
 from golem import gui
-from golem.report import report
 from golem.report import execution_report as exec_report
 from golem.report import test_report
 

@@ -5,7 +5,10 @@ from golem.core import utils
 from golem.test_runner import test_runner
 
 from golem.report.execution_report import create_execution_directory
-from golem.report.test_report import get_test_case_data, create_report_directory, generate_report
+from golem.report.execution_report import create_execution_dir_single_test
+from golem.report.test_report import get_test_case_data
+from golem.report.test_report import create_report_directory
+from golem.report.test_report import generate_report
 
 
 class TestGetTestCaseData:
@@ -31,15 +34,16 @@ class TestCreateReportDirectory:
         testdir, project = project_session.activate()
         timestamp = utils.get_timestamp()
         test_name = 'testing_report_001'
-        exec_dir = create_execution_directory(project, timestamp, test_name=test_name)
+        exec_dir = create_execution_dir_single_test(project, test_name, timestamp)
         directory = create_report_directory(exec_dir, test_name, is_suite=False)
         assert os.path.isdir(directory)
 
     def test_create_report_directory_suite(self, project_session):
         testdir, project = project_session.activate()
         timestamp = utils.get_timestamp()
+        suite_name = 'suite_foo_002'
         test_name = 'testing_report_002'
-        exec_dir = create_execution_directory(project, timestamp, test_name=test_name)
+        exec_dir = create_execution_directory(project, suite_name, timestamp)
         directory = create_report_directory(exec_dir, test_name, is_suite=True)
         assert os.path.isdir(directory)
 
@@ -50,7 +54,8 @@ class TestGenerateReport:
         _, project = project_session.activate()
         timestamp = utils.get_timestamp()
         test_name = 'testing_report_003'
-        exec_dir = create_execution_directory(project, timestamp, test_name=test_name)
+        suite_name = 'suite_foo_003'
+        exec_dir = create_execution_directory(project, suite_name, timestamp)
         report_dir = create_report_directory(exec_dir, test_name, is_suite=True)
         test_data = {
             'env': {

@@ -1,30 +1,30 @@
 import os
 import shutil
 
-from golem.core import session
+from golem.core import test_directory
 from golem.core.project import Project
+from golem.report.execution_report import suite_execution_path
 
 
 def get_last_executions(projects=None, suite=None, limit=5):
-    """Get the last n executions.
+    """Get the last n executions from all the suites of
+    a list of projects.
 
-    Get the executions of one suite or all the suites,
-    one project or all the projects.
-
+    If projects is not provided, all projects will be selected.
+    If suite is provided, projects should be a list of one.
     Returns a list of executions (timestamps strings)
-    ordered in descendant order by execution time and
-    limited by `limit`
+    in descending order for each suite with executions
+    for each selected project.
     """
-    last_execution_data = {}
-    path = os.path.join(session.testdir, 'projects')
-    # if no projects provided, search every project
+    last_executions = {}
+    # if no projects provided, select every project
     if not projects:
-        projects = next(os.walk(path))[1]
+        projects = test_directory.get_projects()
     for project in projects:
-        last_execution_data[project] = {}
-        report_path = os.path.join(path, project, 'reports')
+        last_executions[project] = {}
+        report_path = Project(project).report_directory_path
         executed_suites = []
-        # use one suite or all the suites
+        # if suite is not provided, select all suites with executions
         if suite:
             if os.path.isdir(os.path.join(report_path, suite)):
                 executed_suites = [suite]
@@ -34,12 +34,14 @@ def get_last_executions(projects=None, suite=None, limit=5):
         for s in executed_suites:
             suite_path = os.path.join(report_path, s)
             suite_executions = next(os.walk(suite_path))[1]
-            last_executions = sorted(suite_executions)
+            suite_executions = sorted(suite_executions)
             limit = int(limit)
-            last_executions = last_executions[-limit:]
-            if len(last_executions):
-                last_execution_data[project][s] = last_executions
-    return last_execution_data
+            suite_executions = suite_executions[-limit:]
+            if len(suite_executions):
+                last_executions[project][s] = suite_executions
+            else:
+                last_executions[project][s] = []
+    return last_executions
 
 
 def is_execution_finished(path, sets):
@@ -70,7 +72,3 @@ def delete_execution(project, suite, execution):
     else:
         errors.append('Execution for {} {} {} does not exist'.format(project, suite, execution))
     return errors
-
-
-def suite_execution_path(project, suite, execution):
-    return os.path.join(Project(project).report_directory_path, suite, execution)

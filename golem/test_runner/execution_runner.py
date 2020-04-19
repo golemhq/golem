@@ -134,12 +134,12 @@ class ExecutionRunner:
     def _create_execution_directory(self):
         """Generate the execution report directory"""
         if self.is_suite:
-            execution_directory = exec_report.create_execution_directory(
-                self.project, self.timestamp, suite_name=self.suite_name)
+            directory = exec_report.create_execution_directory(
+                self.project, self.suite_name, self.timestamp)
         else:
-            execution_directory = exec_report.create_execution_directory(
-                self.project, self.timestamp, test_name=self.test_name)
-        return execution_directory
+            directory = exec_report.create_execution_dir_single_test(
+                self.project, self.test_name, self.timestamp)
+        return directory
 
     def _define_execution_list(self):
         """Generate the execution list
