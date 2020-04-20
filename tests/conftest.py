@@ -215,14 +215,40 @@ class TestUtils:
         return test.Test(project, name).path
 
     @staticmethod
+    def create_failure_test(project, name):
+        content = ('def test(data):\n'
+                   '    assert False\n')
+        return TestUtils.create_test(project, name, content)
+
+    @staticmethod
+    def create_error_test(project, name):
+        content = ('from golem import actions\n'
+                   'def test(data):\n'
+                   '    actions.error("error message")\n')
+        return TestUtils.create_test(project, name, content)
+
+    @staticmethod
+    def create_code_error_test(project, name):
+        content = ('def test(data):\n'
+                   '    print("oops"\n')
+        return TestUtils.create_test(project, name, content)
+
+    @staticmethod
+    def create_skip_test(project, name):
+        content = ('skip = True\n' 
+                   'def test(data):\n'
+                   '    print("hello")\n')
+        return TestUtils.create_test(project, name, content)
+
+    @staticmethod
     def create_random_test(project):
         test_name = TestUtils.random_string(10)
         test.create_test(project, test_name)
         return test_name
 
     @staticmethod
-    def create_suite(project, name, content=None, tests=None,
-                     processes=1, browsers=None, environments=None, tags=None):
+    def create_suite(project, name, content=None, tests=None, processes=1, browsers=None,
+                     environments=None, tags=None):
         browsers = browsers or []
         environments = environments or []
         tags = tags or []
@@ -274,8 +300,14 @@ class TestUtils:
         return execution
 
     @staticmethod
-    def execute_suite(project, suite_name):
-        timestamp = TestUtils.run_suite(project, suite_name)
+    def execute_suite(project, suite_name, timestamp=None, ignore_sys_exit=False):
+        if not timestamp:
+            timestamp = utils.get_timestamp()
+        try:
+            timestamp = TestUtils.run_suite(project, suite_name, timestamp)
+        except SystemExit as e:
+            if not ignore_sys_exit:
+                raise e
         exec_data = get_execution_data(project=project, suite=suite_name, execution=timestamp)
         exec_dir = suite_execution_path(project, suite_name, timestamp)
         return {
