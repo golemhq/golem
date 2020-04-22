@@ -39,8 +39,8 @@ def generate_junit_report(execution_directory, suite_name, timestamp, report_fol
         # If the sets have names use them, otherwise use the generated name.
         set_name = test['set_name'] if test['set_name'] is not "" else test['test_set']
         test_attrs = {
-            'name': test['full_name'],
-            'classname': '{}.{}'.format(test['full_name'], set_name),
+            'name': set_name,
+            'classname': test['full_name'],
             'time': str(test['test_elapsed_time'])
         }
         testcase = ET.SubElement(testsuite, 'testcase', test_attrs)
