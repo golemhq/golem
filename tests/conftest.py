@@ -278,11 +278,19 @@ class TestUtils:
         return page_name
 
     @staticmethod
-    def run_suite(project_name, suite_name, timestamp=None):
+    def _run_command(project_name, suite_name, timestamp=None):
         if not timestamp:
             timestamp = utils.get_timestamp()
         commands.run_command(project_name, suite_name, timestamp=timestamp)
         return timestamp
+
+    @staticmethod
+    def run_test(project_name, test_name, timestamp=None):
+        return TestUtils._run_command(project_name, test_name, timestamp)
+
+    @staticmethod
+    def run_suite(project_name, suite_name, timestamp=None):
+        return TestUtils._run_command(project_name, suite_name, timestamp)
 
     @staticmethod
     def execute_random_suite(project):

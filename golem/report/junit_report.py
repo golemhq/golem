@@ -1,21 +1,24 @@
-import os
 import errno
+import os
+import re
+import sys
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
 from golem.test_runner.conf import ResultsEnum as Results
 from golem.report.execution_report import get_execution_data
 from golem.report.execution_report import suite_execution_path
+from golem.report.test_report import get_test_debug_log
 
 
-def generate_junit_report(execution_directory, suite_name, timestamp, report_folder=None,
+def generate_junit_report(project_name, suite_name, timestamp, report_folder=None,
                           report_name=None):
     """Generate a report in JUnit XML format.
 
     Output conforms to https://github.com/jenkinsci/xunit-plugin/blob/master/
     src/main/resources/org/jenkinsci/plugins/xunit/types/model/xsd/junit-10.xsd
     """
-    data = get_execution_data(execution_directory=execution_directory)
+    data = get_execution_data(project=project_name, suite=suite_name, execution=timestamp)
 
     totals = data['totals_by_result']
     errors = totals.get(Results.CODE_ERROR, 0)
@@ -66,19 +69,25 @@ def generate_junit_report(execution_directory, suite_name, timestamp, report_fol
             }
             error_message = ET.SubElement(testcase, error_type, error_data)
 
+        # add debug log to /test/system-out node
+        log_text = get_test_debug_log(project_name, timestamp, test['full_name'],
+                                      test['test_set'], suite_name)
+        system_out = ET.SubElement(testcase, 'system-out')
+        system_out.text = _clean_illegal_xml_chars(log_text)
+
     xmlstring = ET.tostring(testsuites)
     doc = minidom.parseString(xmlstring).toprettyxml(indent=' ' * 4, encoding='UTF-8')
+
     if not report_folder:
-        report_folder = execution_directory
+        report_folder = suite_execution_path(project_name, suite_name, timestamp)
     if not report_name:
         report_name = 'report'
-
     report_path = os.path.join(report_folder, report_name + '.xml')
     if not os.path.exists(os.path.dirname(report_path)):
         os.makedirs(os.path.dirname(report_path), exist_ok=True)
 
     try:
-        with open(report_path, 'w') as f:
+        with open(report_path, 'w', encoding='utf-8') as f:
             f.write(doc.decode('UTF-8'))
     except IOError as e:
         if e.errno == errno.EACCES:
@@ -103,5 +112,42 @@ def get_or_generate_junit_report(project, suite, timestamp):
     if os.path.isfile(report_filepath):
         xml_string = open(report_filepath).read()
     else:
-        xml_string = generate_junit_report(report_directory, suite, timestamp)
+        xml_string = generate_junit_report(project, suite, timestamp)
     return xml_string
+
+
+def _clean_illegal_xml_chars(string_to_clean):
+    """Removes any illegal unicode characters from the given XML string.
+    see: http://stackoverflow.com/questions/1707890/fast-way-to-filter-illegal-xml-unicode-chars-in-python
+    Taken from https://github.com/kyrus/python-junit-xml/blob/master/junit_xml/__init__.py
+    """
+    illegal_unichrs = [
+        (0x00, 0x08),
+        (0x0B, 0x1F),
+        (0x7F, 0x84),
+        (0x86, 0x9F),
+        (0xD800, 0xDFFF),
+        (0xFDD0, 0xFDDF),
+        (0xFFFE, 0xFFFF),
+        (0x1FFFE, 0x1FFFF),
+        (0x2FFFE, 0x2FFFF),
+        (0x3FFFE, 0x3FFFF),
+        (0x4FFFE, 0x4FFFF),
+        (0x5FFFE, 0x5FFFF),
+        (0x6FFFE, 0x6FFFF),
+        (0x7FFFE, 0x7FFFF),
+        (0x8FFFE, 0x8FFFF),
+        (0x9FFFE, 0x9FFFF),
+        (0xAFFFE, 0xAFFFF),
+        (0xBFFFE, 0xBFFFF),
+        (0xCFFFE, 0xCFFFF),
+        (0xDFFFE, 0xDFFFF),
+        (0xEFFFE, 0xEFFFF),
+        (0xFFFFE, 0xFFFFF),
+        (0x10FFFE, 0x10FFFF),
+    ]
+
+    illegal_ranges = ["%s-%s" % (chr(low), chr(high)) for (low, high) in illegal_unichrs if low < sys.maxunicode]
+
+    illegal_xml_re = re.compile("[%s]" % "".join(illegal_ranges))
+    return illegal_xml_re.sub("", string_to_clean)

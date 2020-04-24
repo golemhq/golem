@@ -4,6 +4,10 @@ import os
 import uuid
 
 from golem.core import session, utils
+from golem.report import execution_report
+
+
+__test__ = False
 
 
 def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
@@ -91,6 +95,45 @@ def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
             log = log_file.readlines()
             test_data['info_log'] = log
     return test_data
+
+
+def test_report_directory(project, suite, timestamp, test, test_set):
+    execdir = execution_report.suite_execution_path(project, suite, timestamp)
+    return os.path.join(execdir, test, test_set)
+
+
+def test_report_directory_single_test(project, test, timestamp, test_set):
+    execdir = execution_report.single_test_execution_path(project, test, timestamp)
+    return os.path.join(execdir, test_set)
+
+
+def _get_test_log(project, timestamp, test, test_set, suite=None, level='DEBUG'):
+    if suite is None:
+        test_execdir = test_report_directory_single_test(project, test, timestamp, test_set)
+    else:
+        test_execdir = test_report_directory(project, suite, timestamp, test, test_set)
+
+    if level == 'DEBUG':
+        logpath = os.path.join(test_execdir, 'execution_debug.log')
+    elif level == 'INFO':
+        logpath = os.path.join(test_execdir, 'execution_debug.log')
+    else:
+        raise ValueError
+
+    if os.path.isfile(logpath):
+        with open(logpath) as log_file:
+            return log_file.read()
+    else:
+        print('Log file {} not found'.format(logpath))
+        return None
+
+
+def get_test_debug_log(project, timestamp, test, test_set, suite=None):
+    return _get_test_log(project, timestamp, test, test_set, suite=suite, level='DEBUG')
+
+
+def get_test_info_log(project, timestamp, test, test_set, suite=None):
+    return _get_test_log(project, timestamp, test, test_set, suite=suite, level='INFO')
 
 
 def create_report_directory(execution_directory, test_case_name, is_suite):

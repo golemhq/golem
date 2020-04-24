@@ -22,7 +22,7 @@ class TestGenerateJunitReport:
                                 tests=[success_test, failure_test, error_test, code_error_test, skip_test])
         execution = test_utils.execute_suite(project, 'suite_one', ignore_sys_exit=True)
 
-        xml = generate_junit_report(execution['exec_dir'], execution['suite_name'], execution['timestamp'])
+        xml = generate_junit_report(project, execution['suite_name'], execution['timestamp'])
 
         tests = execution['exec_data']['tests']
         code_error_exec = next(t for t in tests if t['full_name'] == code_error_test)
@@ -61,14 +61,18 @@ class TestGenerateJunitReport:
             'name': code_error_exec['test_set'],
             'time': str(code_error_exec['test_elapsed_time'])
         }
-        assert len(test) == 1
+        assert len(test) == 2
         # testsuites/testsuite/code_error_test/error
-        error = test[0]
+        error = next(node for node in test if node.tag == 'error')
         assert error.tag == 'error'
         assert error.attrib == {
             'type': 'code error',
             'message': '{}'
         }
+        # testsuites/testsuite/code_error_test/system-out
+        system_out = next(node for node in test if node.tag == 'system-out')
+        assert 'INFO Browser: chrome' in system_out.text
+        assert 'INFO Test Result: CODE ERROR' in system_out.text
         # testsuites/testsuite/error_test
         test = next(test for test in testsuite if test.attrib['classname'] == error_test)
         assert test.attrib == {
@@ -76,9 +80,9 @@ class TestGenerateJunitReport:
             'name': error_exec['test_set'],
             'time': str(error_exec['test_elapsed_time'])
         }
-        assert len(test) == 1
+        assert len(test) == 2
         # testsuites/testsuite/error_test/failure
-        failure = test[0]
+        failure = next(node for node in test if node.tag == 'failure')
         assert failure.tag == 'failure'
         assert failure.attrib == {
             'type': 'error',
@@ -91,9 +95,9 @@ class TestGenerateJunitReport:
             'name': failure_exec['test_set'],
             'time': str(failure_exec['test_elapsed_time'])
         }
-        assert len(test) == 1
+        assert len(test) == 2
         # testsuites/testsuite/failure_test/failure
-        failure = test[0]
+        failure = next(node for node in test if node.tag == 'failure')
         assert failure.tag == 'failure'
         assert failure.attrib == {
             'type': 'failure',
@@ -106,9 +110,9 @@ class TestGenerateJunitReport:
             'name': skip_exec['test_set'],
             'time': str(skip_exec['test_elapsed_time'])
         }
-        assert len(test) == 1
+        assert len(test) == 2
         # testsuites/testsuite/skipped_test/skipped
-        skipped = test[0]
+        skipped = next(node for node in test if node.tag == 'skipped')
         assert skipped.tag == 'skipped'
         assert skipped.attrib == {
             'type': 'skipped',
@@ -121,7 +125,11 @@ class TestGenerateJunitReport:
             'name': success_exec['test_set'],
             'time': str(success_exec['test_elapsed_time'])
         }
-        assert len(test) == 0
+        assert len(test) == 1
+        # testsuites/testsuite/success_test/system-out
+        system_out = next(node for node in test if node.tag == 'system-out')
+        assert 'INFO Browser: chrome' in system_out.text
+        assert 'INFO Test Result: SUCCESS' in system_out.text
 
         xml_path = os.path.join(execution['exec_dir'], 'report.xml')
         assert os.path.isfile(xml_path)

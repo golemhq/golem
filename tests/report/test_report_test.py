@@ -6,7 +6,9 @@ from golem.test_runner import test_runner
 
 from golem.report.execution_report import create_execution_directory
 from golem.report.execution_report import create_execution_dir_single_test
+from golem.report import test_report
 from golem.report.test_report import get_test_case_data
+from golem.report.test_report import get_test_debug_log
 from golem.report.test_report import create_report_directory
 from golem.report.test_report import generate_report
 
@@ -26,6 +28,57 @@ class TestGetTestCaseData:
         assert isinstance(test_data['debug_log'], list) and len(test_data['debug_log'])
         assert isinstance(test_data['info_log'], list) and len(test_data['info_log'])
         assert test_data['has_finished'] is True
+
+
+class TestTestReportDirectory:
+
+    def test_test_report_directory(self, project_session):
+        testdir, project = project_session.activate()
+        suite = 'suite1'
+        timestamp = '1.2.3.4'
+        test = 'test1'
+        test_set = 'test_set1'
+        path = test_report.test_report_directory(project, suite, timestamp, test, test_set)
+        expected = os.path.join(testdir, 'projects', project, 'reports', suite, timestamp,
+                                test, test_set)
+        assert path == expected
+
+
+class TestTestReportDirectorySingleTest:
+
+    def test_test_report_directory_single_test(self, project_session):
+        testdir, project = project_session.activate()
+        timestamp = '1.2.3.4'
+        test = 'test1'
+        test_set = 'test_set1'
+        path = test_report.test_report_directory_single_test(project, test, timestamp, test_set)
+        expected = os.path.join(testdir, 'projects', project, 'reports', 'single_tests',
+                                test, timestamp, test_set)
+        assert path == expected
+
+
+class TestGetTestLog:
+
+    def test_get_test_x_log(self, project_class, test_utils):
+        _, project = project_class.activate()
+        exc = test_utils.execute_random_suite(project)
+        test_name = exc['exec_data']['tests'][0]['name']
+        test_set = exc['exec_data']['tests'][0]['test_set']
+
+        log = get_test_debug_log(project, exc['timestamp'], test_name, test_set,
+                                 suite=exc['suite_name'])
+
+        assert 'root DEBUG test does not have setup function' in log
+
+        # inexistent test set
+        log = get_test_debug_log(project, exc['timestamp'], test_name,
+                                 'inexistent_test_set', suite=exc['suite_name'])
+        assert log is None
+
+        # inexistent test
+        log = get_test_debug_log(project, exc['timestamp'], 'inexistent_test_name',
+                                 test_set, suite=exc['suite_name'])
+        assert log is None
 
 
 class TestCreateReportDirectory:

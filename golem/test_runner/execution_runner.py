@@ -433,9 +433,9 @@ class ExecutionRunner:
             report_name = self.report_name or 'report'
             report_folder = self.report_folder or self.execution.reportdir
             if 'junit' in self.reports:
-                junit_report.generate_junit_report(self.execution.reportdir,
-                                                   self.suite_name, self.timestamp,
-                                                   self.report_folder, report_name)
+                junit_report.generate_junit_report(self.project, self.suite_name,
+                                                   self.timestamp, self.report_folder,
+                                                   report_name)
             if 'json' in self.reports and (self.report_folder or self.report_name):
                 exec_report.save_execution_json_report(self.report, report_folder, report_name)
             if 'html' in self.reports:
