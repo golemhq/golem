@@ -59,7 +59,17 @@ def run_suite(project, suite_name):
     """Run a suite. This is used when running suites from the GUI"""
     script_name = sys.argv[0]
     timestamp = utils.get_timestamp()
-    subprocess.Popen([script_name, 'run', project, suite_name, '--timestamp', timestamp])
+    param_list = [
+        script_name,
+        '--golem-dir',
+        session.testdir,
+        'run',
+        project,
+        suite_name,
+        '--timestamp',
+        timestamp
+    ]
+    subprocess.Popen(param_list)
     return timestamp
 
 
