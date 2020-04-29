@@ -22,7 +22,7 @@ def create_suite(project_name, suite_name):
         errors = validate_project_element_name(suite_name)
     if not errors:
         project.create_packages_for_element(suite_name, project.file_types.SUITE)
-        with open(Suite(project_name, suite_name).path, 'w') as f:
+        with open(Suite(project_name, suite_name).path, 'w', encoding='utf-8') as f:
             f.write(suite_content)
         print('Suite {} created for project {}'.format(suite_name, project_name))
     return errors

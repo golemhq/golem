@@ -13,5 +13,5 @@ class TestGenerateHTMLReport:
 
         html_path = os.path.join(execution['exec_dir'], 'report.html')
         assert os.path.isfile(html_path)
-        with open(html_path) as f:
+        with open(html_path, encoding='utf-8') as f:
             assert f.read() == html

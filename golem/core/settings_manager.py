@@ -101,13 +101,13 @@ DEFAULTS = [
 def create_global_settings_file(testdir):
     """Create a new global settings file"""
     path = os.path.join(testdir, 'settings.json')
-    with open(path, 'a') as settings_file:
+    with open(path, 'a', encoding='utf-8') as settings_file:
         settings_file.write(SETTINGS_FILE_CONTENT)
 
 
 def create_project_settings_file(project):
     """Create a new project settings file"""
-    with open(project_settings_path(project), 'a') as settings_file:
+    with open(project_settings_path(project), 'a', encoding='utf-8') as settings_file:
         settings_file.write(REDUCED_SETTINGS_FILE_CONTENT)
 
 
@@ -117,7 +117,7 @@ def _read_json_with_comments(json_path):
     a json loads of the result.
     """
     file_lines = []
-    with open(json_path) as json_file:
+    with open(json_path, encoding='utf-8') as json_file:
         file_lines = json_file.readlines()
     lines_without_comments = []
     for line in file_lines:
@@ -169,7 +169,7 @@ def get_global_settings_as_string():
     path = settings_path()
     settings = ''
     if os.path.isfile(path):
-        with open(path) as settings_file:
+        with open(path, encoding='utf-8') as settings_file:
             settings = settings_file.read()
     return settings
 
@@ -203,7 +203,7 @@ def get_project_settings_as_string(project):
     path = project_settings_path(project)
     settings = ''
     if os.path.isfile(path):
-        with open(path) as settings_file:
+        with open(path, encoding='utf-8') as settings_file:
             settings = settings_file.read()
     return settings
 
@@ -213,7 +213,7 @@ def save_global_settings(global_settings):
     input settings must be the string content of file."""
     path = settings_path()
     if global_settings is not None:
-        with open(path, 'w') as global_settings_file:
+        with open(path, 'w', encoding='utf-8') as global_settings_file:
             global_settings_file.write(global_settings)
 
 
@@ -221,7 +221,7 @@ def save_project_settings(project, project_settings):
     """Save project settings.
     input settings must be the string content of file."""
     path = project_settings_path(project)
-    with open(path, 'w') as project_settings_file:
+    with open(path, 'w', encoding='utf-8') as project_settings_file:
         project_settings_file.write(project_settings)
 
 

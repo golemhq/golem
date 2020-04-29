@@ -47,7 +47,7 @@ def get_logger(log_directory=None, cli_log_level='INFO', log_all_events=True):
     if log_directory:
         # debug file log
         log_file = os.path.join(log_directory, DEBUG_LOG_FILENAME)
-        file_handler_debug = logging.FileHandler(log_file)
+        file_handler_debug = logging.FileHandler(log_file, encoding='utf-8')
         file_handler_debug.setLevel(logging.DEBUG)
         file_format_string = '%(asctime)s %(name)s %(levelname)s %(message)s'
         file_formatter = logging.Formatter(file_format_string)
@@ -55,7 +55,7 @@ def get_logger(log_directory=None, cli_log_level='INFO', log_all_events=True):
         logger.addHandler(file_handler_debug)
         # info file log
         log_file = os.path.join(log_directory, INFO_LOG_FILENAME)
-        file_handler_info = logging.FileHandler(log_file)
+        file_handler_info = logging.FileHandler(log_file, encoding='utf-8')
         file_handler_info.setLevel(logging.INFO)
         file_format_string = '%(asctime)s.%(msecs)03d %(levelname)s %(message)s'
         file_formatter = logging.Formatter(file_format_string, "%H:%M:%S")

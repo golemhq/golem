@@ -28,18 +28,32 @@ def generate_html_report(project, suite, execution, report_directory=None,
     formatted_date = utils.get_date_time_from_timestamp(execution)
     app = gui.create_app()
     static_folder = app.static_folder
-    css = {}
-    js = {}
-    boostrap_path = os.path.join(static_folder, 'css', 'bootstrap', 'bootstrap.min.css')
-    datatables_js = os.path.join(static_folder, 'js', 'external', 'datatable', 'datatables.min.js')
-    css['bootstrap'] = open(boostrap_path).read()
-    css['main'] = open(os.path.join(static_folder, 'css', 'main.css')).read()
-    css['report'] = open(os.path.join(static_folder, 'css', 'report.css')).read()
-    js['jquery'] = open(os.path.join(static_folder, 'js', 'external', 'jquery.min.js')).read()
-    js['datatables'] = open(datatables_js).read()
-    js['bootstrap'] = open(os.path.join(static_folder, 'js', 'external', 'bootstrap.min.js')).read()
-    js['main'] = open(os.path.join(static_folder, 'js', 'main.js')).read()
-    js['report_execution'] = open(os.path.join(static_folder, 'js', 'report_execution.js')).read()
+    # css paths
+    css_folder = os.path.join(static_folder, 'css')
+    boostrap_css = os.path.join(css_folder, 'bootstrap', 'bootstrap.min.css')
+    main_css = os.path.join(css_folder, 'main.css')
+    report_css = os.path.join(css_folder, 'report.css')
+    # js paths
+    js_folder = os.path.join(static_folder, 'js')
+    main_js = os.path.join(js_folder, 'main.js')
+    jquery_js = os.path.join(js_folder, 'external', 'jquery.min.js')
+    datatables_js = os.path.join(js_folder, 'external', 'datatable', 'datatables.min.js')
+    bootstrap_js = os.path.join(js_folder, 'external', 'bootstrap.min.js')
+    report_execution_js = os.path.join(js_folder, 'report_execution.js')
+
+    css = {
+        'bootstrap': open(boostrap_css, encoding='utf-8').read(),
+        'main': open(main_css, encoding='utf-8').read(),
+        'report': open(report_css, encoding='utf-8').read()
+    }
+    js = {
+        'jquery': open(jquery_js, encoding='utf-8').read(),
+        'datatables': open(datatables_js, encoding='utf-8').read(),
+        'bootstrap': open(bootstrap_js, encoding='utf-8').read(),
+        'main': open(main_js, encoding='utf-8').read(),
+        'report_execution': open(report_execution_js).read()
+    }
+
     execution_data = exec_report.get_execution_data(project=project, suite=suite, execution=execution)
     detail_test_data = {}
     for test in execution_data['tests']:
@@ -62,7 +76,7 @@ def generate_html_report(project, suite, execution, report_directory=None,
         os.makedirs(os.path.dirname(destination), exist_ok=True)
 
     try:
-        with open(destination, 'w') as f:
+        with open(destination, 'w', encoding='utf-8') as f:
             f.write(html_string)
     except IOError as e:
         if e.errno == errno.EACCES:
@@ -88,7 +102,7 @@ def get_or_generate_html_report(project, suite, execution, no_images=False):
                                     'reports', suite, execution)
     report_filepath = os.path.join(report_directory, report_filename + '.html')
     if os.path.isfile(report_filepath):
-        html_string = open(report_filepath).read()
+        html_string = open(report_filepath, encoding='utf-8').read()
     else:
         html_string = generate_html_report(project, suite, execution,
                                            report_directory=report_directory,

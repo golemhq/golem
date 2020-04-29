@@ -17,7 +17,7 @@ def create_project(project_name):
 
     for project_base_file in ('environments.json', 'secrets.json'):
         base_file_path = os.path.join(project.path, project_base_file)
-        with open(base_file_path, 'a') as base_file:
+        with open(base_file_path, 'a', encoding='utf-8') as base_file:
             base_file.write('{}')
 
     print('Project {} created'.format(project_name))
@@ -236,6 +236,6 @@ class BaseProjectElement:
         """Code of the element as a string"""
         code = None
         if self.exists:
-            with open(self.path) as f:
+            with open(self.path, encoding='utf-8') as f:
                 code = f.read()
         return code

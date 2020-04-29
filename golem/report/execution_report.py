@@ -75,7 +75,7 @@ def _parse_execution_data(execution_directory=None, project=None,
             report_json_path = os.path.join(test_set_path, 'report.json')
             report_log_path = os.path.join(test_set_path, 'execution_info.log')
             try:
-                with open(report_json_path) as f:
+                with open(report_json_path, encoding='utf-8') as f:
                     report_data = json.load(f)
                     status = report_data['result']
                     new_test['test_elapsed_time'] = report_data['test_elapsed_time']
@@ -124,13 +124,13 @@ def get_execution_data(execution_directory=None, project=None, suite=None,
         execution_directory = os.path.join(session.testdir, 'projects', project,
                                            'reports', suite, execution)
     if os.path.isfile(os.path.join(execution_directory, 'report.json')):
-        with open(os.path.join(execution_directory, 'report.json')) as f:
+        with open(os.path.join(execution_directory, 'report.json'), encoding='utf-8') as f:
             data = json.load(f)
             has_finished = True
     elif os.path.isfile(os.path.join(execution_directory, 'execution_report.json')):
         # backward compatibility
         # TODO remove
-        with open(os.path.join(execution_directory, 'execution_report.json')) as f:
+        with open(os.path.join(execution_directory, 'execution_report.json'), encoding='utf-8') as f:
             data = json.load(f)
             has_finished = True
     else:
@@ -156,7 +156,7 @@ def generate_execution_report(execution_directory, elapsed_time, browsers, proce
     data['params']['tags'] = tags
     report_path = os.path.join(execution_directory, 'report.json')
     with open(report_path, 'w', encoding='utf-8') as json_file:
-        json.dump(data, json_file, indent=4)
+        json.dump(data, json_file, indent=4, ensure_ascii=False)
     return data
 
 
@@ -166,8 +166,8 @@ def save_execution_json_report(report_data, reportdir, report_name='report'):
     if not os.path.exists(os.path.dirname(report_path)):
         os.makedirs(os.path.dirname(report_path), exist_ok=True)
     try:
-        with open(report_path, 'w') as f:
-            json.dump(report_data, f, indent=4)
+        with open(report_path, 'w', encoding='utf-8') as f:
+            json.dump(report_data, f, indent=4, ensure_ascii=False)
     except IOError as e:
         if e.errno == errno.EACCES:
             print('ERROR: cannot write to {}, PermissionError (Errno 13)'

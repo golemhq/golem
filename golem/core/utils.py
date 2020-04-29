@@ -81,7 +81,7 @@ def choose_browser_by_precedence(cli_browsers=None, suite_browsers=None,
 # TODO
 def load_json_from_file(filepath, ignore_failure=False, default=None):
     json_data = default
-    with open(filepath) as json_file:
+    with open(filepath, encoding='utf-8') as json_file:
         try:
             contents = json_file.read()
             if len(contents.strip()):

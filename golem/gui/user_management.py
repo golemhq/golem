@@ -30,13 +30,13 @@ class Users:
 
     @staticmethod
     def refresh_users():
-        with open(Users.file_path()) as f:
+        with open(Users.file_path(), encoding='utf-8') as f:
             Users.set_users(json.load(f))
 
     @staticmethod
     def save():
-        with open(Users.file_path(), 'w+') as f:
-            json.dump(Users.users(), f, indent=4)
+        with open(Users.file_path(), 'w+', encoding='utf-8') as f:
+            json.dump(Users.users(), f, indent=4, ensure_ascii=False)
 
     @staticmethod
     def users_file_exists():
@@ -44,7 +44,7 @@ class Users:
 
     @staticmethod
     def create_users_file():
-        with open(Users.file_path(), 'w') as f:
+        with open(Users.file_path(), 'w', encoding='utf-8') as f:
             json.dump([], f)
         Users.refresh_users()
 
@@ -125,7 +125,6 @@ class Users:
         Returns None if user is not found.
         Returns None if users.json format is invalid
         """
-        # TODO: catch error reading users.json file
         user = None
         try:
             for u in Users.users():

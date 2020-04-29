@@ -28,7 +28,7 @@ def create_test(project_name, test_name):
     if not errors:
         project.create_packages_for_element(test_name, project.file_types.TEST)
         path = Test(project_name, test_name).path
-        with open(path, 'w') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             f.write(test_content)
         print('Test {} created for project {}'.format(test_name, project_name))
     return errors
@@ -190,7 +190,7 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
 
 def edit_test_code(project, test_name, content, table_test_data):
     path = Test(project, test_name).path
-    with open(path, 'w') as f:
+    with open(path, 'w', encoding='utf-8') as f:
         f.write(content)
     # save test data
     settings = settings_manager.get_project_settings(project)
