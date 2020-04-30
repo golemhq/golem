@@ -29,7 +29,7 @@ def get_environments_as_string(project):
     env_data = ''
     env_path = environments_file_path(project)
     if os.path.isfile(env_path):
-        with open(env_path) as f:
+        with open(env_path, encoding='utf-8') as f:
             env_data = f.read()
     return env_data
 
@@ -46,7 +46,7 @@ def save_environments(project, env_data):
             error = 'must be valid JSON'
     if not error:
         env_path = environments_file_path(project)
-        with open(env_path, 'w') as f:
+        with open(env_path, 'w', encoding='utf-8') as f:
             f.write(env_data)
     return error
 

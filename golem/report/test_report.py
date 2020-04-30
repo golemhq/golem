@@ -46,7 +46,7 @@ def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
     report_json_path = os.path.join(test_dir, 'report.json')
     if os.path.isfile(report_json_path):
         test_data['has_finished'] = True
-        with open(report_json_path, 'r') as json_file:
+        with open(report_json_path, 'r', encoding='utf-8') as json_file:
             report_data = json.load(json_file)
             module = ''
             sub_modules = []
@@ -87,11 +87,11 @@ def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
     debug_log_path = os.path.join(test_dir, 'execution_debug.log')
     info_log_path = os.path.join(test_dir, 'execution_info.log')
     if os.path.isfile(debug_log_path):
-        with open(debug_log_path) as log_file:
+        with open(debug_log_path, encoding='utf-8') as log_file:
             log = log_file.readlines()
             test_data['debug_log'] = log
     if os.path.isfile(info_log_path):
-        with open(info_log_path) as log_file:
+        with open(info_log_path, encoding='utf-8') as log_file:
             log = log_file.readlines()
             test_data['info_log'] = log
     return test_data
@@ -121,7 +121,7 @@ def _get_test_log(project, timestamp, test, test_set, suite=None, level='DEBUG')
         raise ValueError
 
     if os.path.isfile(logpath):
-        with open(logpath) as log_file:
+        with open(logpath, encoding='utf-8') as log_file:
             return log_file.read()
     else:
         print('Log file {} not found'.format(logpath))
@@ -211,4 +211,4 @@ def generate_report(report_directory, test_case_name, test_data, result):
         'test_timestamp': result['test_timestamp']
     }
     with open(json_report_path, 'w', encoding='utf-8') as json_file:
-        json.dump(report, json_file, indent=4)
+        json.dump(report, json_file, indent=4, ensure_ascii=False)

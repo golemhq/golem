@@ -21,7 +21,7 @@ def save_external_test_data_file(project, full_test_case_name, test_data):
     data_file_path = os.path.join(data_path_tests_folder, '{}.csv'.format(tc_name))
     if os.path.isfile(data_file_path) or test_data:
         # update data file only if it already exists or there's data
-        with open(data_file_path, 'w') as data_file:
+        with open(data_file_path, 'w', encoding='utf-8') as data_file:
             if test_data:
                 writer = csv.DictWriter(data_file, fieldnames=test_data[0].keys(),
                                         lineterminator='\n')
@@ -39,7 +39,7 @@ def get_external_test_data(project, full_test_case_name):
     data_file_path = os.path.join(session.testdir, 'projects', project, 'tests',
                                   os.sep.join(parents), '{}.csv'.format(test))
     if os.path.isfile(data_file_path):
-        with open(data_file_path, 'r', encoding='utf8') as csv_file:
+        with open(data_file_path, 'r', encoding='utf-8') as csv_file:
             dict_reader = csv.DictReader(csv_file)
             for data_set in dict_reader:
                 data_list.append(dict(data_set))

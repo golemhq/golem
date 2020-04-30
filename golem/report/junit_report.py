@@ -110,7 +110,7 @@ def get_or_generate_junit_report(project, suite, timestamp):
     report_directory = suite_execution_path(project, suite, timestamp)
     report_filepath = os.path.join(report_directory, report_filename + '.xml')
     if os.path.isfile(report_filepath):
-        xml_string = open(report_filepath).read()
+        xml_string = open(report_filepath, encoding='utf-8').read()
     else:
         xml_string = generate_junit_report(project, suite, timestamp)
     return xml_string

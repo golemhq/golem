@@ -503,7 +503,7 @@ def report_test_status():
             sets[set_name]['report'] = test_data
         log_path = os.path.join(path, set_name, 'execution_info.log')
         if os.path.exists(log_path):
-            with open(log_path) as log_file:
+            with open(log_path, encoding='utf-8') as log_file:
                 sets[set_name]['log'] = log_file.readlines()
     result['sets'] = sets
     return jsonify(result)

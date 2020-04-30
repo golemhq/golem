@@ -118,7 +118,7 @@ def get_tests_tags(project, tests):
     cache_file_path = os.path.join(session.testdir, 'projects', project, '.tags')
     cache_tags = {}
     if os.path.isfile(cache_file_path):
-        with open(cache_file_path) as f:
+        with open(cache_file_path, encoding='utf-8') as f:
             cache_tags_file_content = f.read()
         try:
             cache_tags = json.loads(cache_tags_file_content)
@@ -146,8 +146,8 @@ def get_tests_tags(project, tests):
                 'tags': get_test_tags(project, test),
                 'timestamp': last_modified_time
             }
-    with open(cache_file_path, 'w') as f:
-        json.dump(cache_tags, f, indent=2)
+    with open(cache_file_path, 'w', encoding='utf-8') as f:
+        json.dump(cache_tags, f, indent=2, ensure_ascii=False)
     tags = {test: cache_tags[test]['tags'] for test in cache_tags}
     return tags
 

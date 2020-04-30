@@ -18,7 +18,7 @@ def create_page(project_name, page_name):
         errors = validate_project_element_name(page_name)
     if not errors:
         project.create_packages_for_element(page_name, project.file_types.PAGE)
-        with open(Page(project_name, page_name).path, 'w') as f:
+        with open(Page(project_name, page_name).path, 'w', encoding='utf-8') as f:
             f.write('')
     return errors
 
@@ -66,7 +66,7 @@ def edit_page(project, page_name, elements, functions, import_lines):
         return with_format
 
     path = Page(project, page_name).path
-    with open(path, 'w') as f:
+    with open(path, 'w', encoding='utf-8') as f:
         for line in import_lines:
             f.write("{}\n".format(line))
         for element in elements:
@@ -99,7 +99,7 @@ def edit_page_code(project, page_name, content):
     """Edit Page code.
     content must be the file content as string
     """
-    with open(Page(project, page_name).path, 'w') as f:
+    with open(Page(project, page_name).path, 'w', encoding='utf-8') as f:
         f.write(content)
 
 
@@ -180,7 +180,7 @@ class Page(BaseProjectElement):
             return variables
 
         def parse_ast(filename):
-            with open(filename, "rt") as file:
+            with open(filename, "rt", encoding='utf-8') as file:
                 return ast.parse(file.read(), filename=filename)
 
         tree = parse_ast(self.path)
