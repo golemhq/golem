@@ -176,8 +176,12 @@ def teardown(data):
         assert records[0].message == 'Test execution started: {}'.format(runfix.test_name)
         assert records[1].message == 'Browser: chrome'
         assert records[2].levelname == 'ERROR'
-        error_contains = "element2 = ('css', '.oh.no')\n           ^\nSyntaxError: invalid syntax"
-        assert error_contains in records[2].message
+        error_contains_one = "element2 = ('css', '.oh.no')\n           ^\n" \
+                             "SyntaxError: invalid syntax"
+        error_contains_two = "element2 = ('css', '.oh.no')\n    ^\n" \
+                             "SyntaxError: invalid syntax"  # Python 3.8 version
+        assert error_contains_one in records[2].message or \
+               error_contains_two in records[2].message
         assert records[3].message == CODE_ERROR_MESSAGE
         # verify report.json
         report = runfix.read_report()
@@ -186,7 +190,8 @@ def teardown(data):
         assert report['environment'] == ''
         assert len(report['errors']) == 1
         assert 'SyntaxError: invalid syntax' in report['errors'][0]['message']
-        assert error_contains in report['errors'][0]['description']
+        assert error_contains_one in report['errors'][0]['description'] or \
+               error_contains_two in report['errors'][0]['description']
         assert report['result'] == ResultsEnum.CODE_ERROR
         assert report['set_name'] == ''
         assert report['steps'] == []
