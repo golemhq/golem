@@ -1,73 +1,55 @@
-Golem - Test Automation 
-==================================================
+# Golem - Test Automation
+
 [![Build Status](https://travis-ci.com/golemhq/golem.svg?branch=master)](https://travis-ci.com/golemhq/golem)
 [![Documentation Status](https://readthedocs.org/projects/golem-framework/badge/?version=latest)](https://golem-framework.readthedocs.io/en/latest/?badge=latest)
 [![Join the chat at https://gitter.im/golem-framework/golem](https://badges.gitter.im/golem-framework/golem.svg)](https://gitter.im/golem-framework/golem?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Intro
---------------------------------------
+Golem is a test framework and a complete tool for browser automation.
+Tests can be written with code in Python, codeless using the web IDE, or both.
 
-Golem is a complete test automation tool for web browser testing.
-It creates powerful, robust and maintainable test suites, it's easy to learn even without a lot of programming knowledge.
-It is based on Selenium Webdriver and it can be extended using Python.
-
-**It can:**
-* Use the Page Object pattern
-* Write tests with multi data sets (data-driven)
-* Run tests in parallel.
-* Test APIs
-* Run tests remotely (Selenium Grid or a cloud testing provider)
-* It can be executed from Jenkins or any other CI tool 
-
-**It has:**
-* A complete GUI module (a web application) to write and execute tests
-* A reporting engine and a web reports module
-* An interactive console
-
-**Please note**: Golem is still in beta. Read the changelog before upgrading.
-
-***
-
-## Contents
-
-* [Screen Captures](#screen-captures)
-* [Installation](#installation)
-* [Quick Start](#quick-start)
-* [Documentation](#documentation)
-* [Questions](#questions)
-* [Contributing](#contributing)
-* [License](#license)
-
-Screen Captures
---------------------------------------
-
-**Test Builder**
+**Tests can be written with the web app**
 <p align="center">
-    <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/test-case.png" />
+    <img width="600" src="./images/test-case.png" />
 </p>
 
-**Test are Python Code**
+**But, they are still Python code**
 <p align="center">
-    <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/example-test-code.png" />
+    <img width="600" src="./images/example-test-code.png" />
 </p>
+
+## Batteries Included
+
+* Multi-user web IDE
+* Extended classes for [WebDriver](https://golem-framework.readthedocs.io/en/latest/golem_public_api/webdriver-class.html) and [WebElement](https://golem-framework.readthedocs.io/en/latest/golem_public_api/webelement-class.html)
+* More than 200 self documenting [Actions](https://golem-framework.readthedocs.io/en/latest/golem-actions.html)
+* [Webdriver-manager](https://github.com/golemhq/webdriver-manager) utility
+* Built in parallel test support
+* Reporting engine
+
+<br>
+
+**Golem is still in beta!**. Read the changelog before upgrading.
+
+<br>
+
+## Screen Captures
 
 **Report Dashboard**
 <p align="center">
-    <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/report-dashboard.png" />
+    <img width="500" src="./images/report-dashboard.png" />
 </p>
 
 **Execution Report**
 <p align="center">
-    <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/execution-report.png" />
+    <img width="500" src="./images/execution-report.png" />
 </p>
 
 **Test Execution Detail**
 <p align="center">
-    <img width="700" style="border: 1px solid #d3d3d3; padding: 5px" src="./images/test-execution-detail.png" />
+    <img width="500" src="./images/test-execution-detail.png" />
 </p>
 
-Installation
---------------------------------------
+## Installation
 
 Golem works with Python 3.5+
 
@@ -77,8 +59,7 @@ pip install golem-framework
 
 Read the full installation guide here: [https://golem-framework.readthedocs.io/en/latest/installation.html](https://golem-framework.readthedocs.io/en/latest/installation.html)
 
-Quick Start
---------------------------------------
+## Quick Start
 
 **Create a test directory anywhere in your machine**
 
@@ -119,27 +100,22 @@ Args:
 * -e | --environments: a list of environments, the default is none
 * -t | --tags: filter tests by tags
 
-Documentation
---------------------------------------
+## Documentation
 
 [https://golem-framework.readthedocs.io/](https://golem-framework.readthedocs.io/)
 
-Questions
---------------------------------------
+## Questions
 
 If you have any question please use the [Gitter channel](https://gitter.im/golem-framework/golem).
 
-Contributing
---------------------------------------
+## Contributing
 
 If you found a bug or want to contribute code please read the [contributing guide](https://github.com/golemhq/golem/blob/master/CONTRIBUTING.md).
 
-License
---------------------------------------
+## License
 
 [MIT](https://tldrlegal.com/license/mit-license)
 
-Credits
---------------------------------------
+## Credits
 
 Logo based on ["to believe"](https://www.toicon.com/icons/feather_believe) by Shannon E Thomas, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
