@@ -6,6 +6,7 @@
 .eggs/
 .tox
 .idea
+.vscode
 *.pytest_cache/
 build/
 dist/

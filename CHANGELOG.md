@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.9.1] - 2020-08-03
 
 ### Added
 
@@ -18,9 +18,11 @@
 
 ### Fixed
 
-- [#169](https://github.com/golemhq/golem/issues/169)
-
 - [#112](https://github.com/golemhq/golem/issues/112)
+
+- [#186](https://github.com/golemhq/golem/issues/186) :: ignaciocabeza
+
+- [#169](https://github.com/golemhq/golem/issues/169)
 
 ### Deprecated
 
