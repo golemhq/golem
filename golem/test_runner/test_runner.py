@@ -8,7 +8,7 @@ from golem.core import utils, session
 from golem.core.test import Test
 from golem.core.project import Project
 from golem.test_runner.test_runner_utils import import_page_into_test
-from golem.test_runner import execution_logger
+from golem.test_runner import test_logger
 from golem.test_runner.conf import ResultsEnum
 from golem import actions, execution
 from golem.report import test_report
@@ -100,9 +100,9 @@ class TestRunner:
     def prepare(self):
         self.result['set_name'] = _get_set_name(self.test_data)
         # initialize logger
-        self.logger = execution_logger.get_logger(self.report_directory,
-                                                  self.settings['cli_log_level'],
-                                                  self.settings['log_all_events'])
+        self.logger = test_logger.get_logger(self.report_directory,
+                                             self.settings['cli_log_level'],
+                                             self.settings['log_all_events'])
         # set execution module values
         self._set_execution_module_values()
         self._print_test_info()
@@ -246,7 +246,7 @@ class TestRunner:
         if self.execution_has_failed_tests is not None and self.result['result'] in _error_codes:
             self.execution_has_failed_tests.value = True
         test_report.generate_report(self.report_directory, self.test.name, execution.data, self.result)
-        execution_logger.reset_logger(execution.logger)
+        test_logger.reset_logger(execution.logger)
         # execution._reset()
 
     def _set_execution_module_values(self):

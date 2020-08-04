@@ -2,12 +2,16 @@ import os
 import sys
 
 import golem
-from golem.core import (utils, session, suite as suite_module, test,
-                        settings_manager, test_directory)
+from golem.core import utils
+from golem.core import session
+from golem.core import suite as suite_module
+from golem.core import test
+from golem.core import settings_manager
+from golem.core import test_directory
 from golem.core.project import Project, create_project
 from golem.gui import gui_start
-from golem.test_runner.execution_runner import ExecutionRunner
-from golem.test_runner import interactive as interactive_module
+from golem.execution_runner.execution_runner import ExecutionRunner
+from golem.execution_runner import interactive as interactive_module
 from golem.gui.user_management import Users
 from . import messages
 

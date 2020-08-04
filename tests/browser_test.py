@@ -3,14 +3,15 @@ import pytest
 from golem.gui import gui_utils
 from golem import browser, execution
 from golem.core import settings_manager
-from golem.test_runner import execution_runner, execution_logger
+from golem.execution_runner import execution_runner
+from golem.test_runner import test_logger
 
 
 class TestGetBrowser:
 
     def test_driver_path_is_not_defined(self):
         execution.settings = settings_manager.assign_settings_default_values({})
-        execution.logger = execution_logger.get_logger()
+        execution.logger = test_logger.get_logger()
         default_browsers = gui_utils.get_supported_browsers_suggestions()
         drivers = [
             ('chromedriver_path', 'chrome'),
@@ -30,7 +31,7 @@ class TestGetBrowser:
 
     def test_executable_not_present(self):
         execution.settings = settings_manager.assign_settings_default_values({})
-        execution.logger = execution_logger.get_logger()
+        execution.logger = test_logger.get_logger()
         default_browsers = gui_utils.get_supported_browsers_suggestions()
         drivers = [
             ('chromedriver_path', './drivers/chromedriver*', 'chrome'),

@@ -2,7 +2,7 @@ import json
 import os
 
 from golem.core import utils
-from golem.test_runner.execution_runner import define_browsers
+from golem.execution_runner.execution_runner import define_browsers
 from golem.report.execution_report import generate_execution_report
 from golem.report.execution_report import get_execution_data
 from golem.report.execution_report import _parse_execution_data
