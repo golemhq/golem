@@ -16,7 +16,7 @@ import requests
 
 from golem import browser, execution, helpers
 from golem.core import utils
-from golem.test_runner import execution_logger
+from golem.test_runner import test_logger
 from golem.report import utils as report_utils
 
 
@@ -120,7 +120,7 @@ def _generate_screenshot_name(message):
 def _log(message, log_level="INFO"):
     """Log a message"""
     log_level = log_level.upper()
-    if log_level in execution_logger.VALID_LOG_LEVELS:
+    if log_level in test_logger.VALID_LOG_LEVELS:
         log_level_int = getattr(logging, log_level)
         execution.logger.log(log_level_int, message)
     else:

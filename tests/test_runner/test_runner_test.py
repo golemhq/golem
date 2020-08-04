@@ -4,8 +4,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from golem.test_runner import test_runner, execution_runner
+from golem.test_runner import test_runner
 from golem.test_runner.conf import ResultsEnum
+from golem.execution_runner import execution_runner
 from golem.gui import gui_utils
 from golem.core import settings_manager
 from golem.core import test as test_module

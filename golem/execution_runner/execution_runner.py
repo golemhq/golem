@@ -6,17 +6,18 @@ import multiprocessing
 from types import SimpleNamespace
 from collections import OrderedDict
 
-from golem.core import (session,
-                        utils,
-                        test_data,
-                        environment_manager,
-                        settings_manager,
-                        secrets_manager,)
+from golem.core import session
+from golem.core import utils
+from golem.core import test_data
+from golem.core import environment_manager
+from golem.core import settings_manager
+from golem.core import secrets_manager
 from golem.core import suite as suite_module
 from golem.core import tags_manager
 from golem.core.project import Project
 from golem.gui import gui_utils
-from golem.test_runner.multiprocess_executor import multiprocess_executor
+from golem.execution_runner.multiprocess_executor import multiprocess_executor
+
 from golem.test_runner.test_runner import run_test
 from golem.report import execution_report as exec_report
 from golem.report import test_report

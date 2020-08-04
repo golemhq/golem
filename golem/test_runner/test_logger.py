@@ -1,4 +1,4 @@
-"""Create the logger object"""
+"""Test logger"""
 import logging
 import os
 

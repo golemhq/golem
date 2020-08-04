@@ -4,9 +4,14 @@ from types import SimpleNamespace
 
 import pytest
 
-from golem.test_runner import execution_runner as exc_runner
-from golem.core import (test, test_data, environment_manager, utils, settings_manager,
-                        file_manager, session)
+from golem.execution_runner import execution_runner as exc_runner
+from golem.core import test
+from golem.core import test_data
+from golem.core import environment_manager
+from golem.core import utils
+from golem.core import settings_manager
+from golem.core import file_manager
+from golem.core import session
 from golem.report import execution_report as exec_report
 
 
