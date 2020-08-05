@@ -19,6 +19,9 @@ class TestRandomFloat:
         randfloat = helpers.random_float(min=1, max=2, decimals=3)
         assert len(str(randfloat)) <= 5
 
+        randfloat = helpers.random_float(min=1, max=2, decimals=0)
+        assert len(str(randfloat)) == 3  # either '1.0' or '2.0'
+
 
 class TestRandomInt:
 

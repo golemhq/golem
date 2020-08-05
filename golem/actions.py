@@ -1535,6 +1535,11 @@ def random_float(min=1.0, max=100.0, decimals=None):
 
     `decimals` is the maximum amount of decimal places
     the generated float should have.
+
+    Parameters:
+    min (optional, 1.0) : value
+    max (optional, 100.0) : value
+    decimals (optional, None) : value
     """
     randfloat = helpers.random_float(min, max, decimals)
     execution.logger.debug('Random float generated: {}'.format(randfloat))
@@ -1542,7 +1547,12 @@ def random_float(min=1.0, max=100.0, decimals=None):
 
 
 def random_int(min=1, max=100):
-    """Generate a random integer between min and max"""
+    """Generate a random integer between min and max
+
+    Parameters:
+    min (optional, 1) : value
+    max (optional, 100) : value
+    """
     randint = helpers.random_int(min, max)
     execution.logger.debug('Random int generated: {}'.format(randint))
     return randint
@@ -1564,6 +1574,12 @@ def random_str(length=10, sample=None, prefix='', suffix=''):
     prefix: A string to be prepended to the generated string
 
     suffix: A string to be appended to the generated string
+
+    Parameters:
+    length (optional, 10) : value
+    sample (optional, None) : value
+    prefix (optional, '') : value
+    suffix (optional, '') : value
     """
     random_string = helpers.random_str(length, sample, prefix, suffix)
     execution.logger.debug('Random string generated: {}'.format(random_string))
