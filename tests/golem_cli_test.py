@@ -30,8 +30,18 @@ class TestGolemHelp:
         result = test_utils.run_command(command)
         assert result == expected
 
+    @pytest.mark.slow
+    def test_golem_help_from_non_golem_dir(self, dir_function, test_utils):
+        # current directory is not a Golem directory
+        assert dir_function.path == os.getcwd()
+        result = test_utils.run_command('golem -h')
+        assert result == messages.USAGE_MSG
+
 
 class TestGolemDirArg:
+    """Test the --golem-dir arg.
+    This enables Golem to be called from any directory.
+    """
 
     @pytest.mark.slow
     def test_specify_golem_test_directory_path(self, dir_function, test_utils):
@@ -328,7 +338,7 @@ class TestGolemCreateSuite:
         command = 'golem createsuite {} {}'.format(project, suite)
         test_utils.run_command(command)
         result = test_utils.run_command(command)
-        expected = ('golem createsuite: error: A suite with that name already exists')
+        expected = 'golem createsuite: error: A suite with that name already exists'
         assert result == expected
 
 
@@ -376,7 +386,7 @@ class TestGolemCreateTest:
         cmd = 'golem createtest {} {}'.format(project, test)
         test_utils.run_command(cmd)
         result = test_utils.run_command(cmd)
-        expected = ('golem createtest: error: A test with that name already exists')
+        expected = 'golem createtest: error: A test with that name already exists'
         assert result == expected
 
 
@@ -424,6 +434,11 @@ class TestGolemVersion:
     def test_golem_version(self, testdir_session, test_utils):
         testdir = testdir_session.activate()
         os.chdir(testdir)
-        command = 'golem --version'
-        result = test_utils.run_command(command)
+        result = test_utils.run_command('golem --version')
+        assert result == 'Golem version {}'.format(golem.__version__)
+
+    @pytest.mark.slow
+    def test_golem_version_from_non_golem_dir(self, dir_function, test_utils):
+        assert dir_function.path == os.getcwd()
+        result = test_utils.run_command('golem -v')
         assert result == 'Golem version {}'.format(golem.__version__)

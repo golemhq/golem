@@ -2,44 +2,57 @@ import os
 import sys
 
 import golem
-from golem.core import utils
+from golem.core import errors
 from golem.core import session
+from golem.core import settings_manager
 from golem.core import suite as suite_module
 from golem.core import test
-from golem.core import settings_manager
 from golem.core import test_directory
+from golem.core import utils
 from golem.core.project import Project, create_project
-from golem.gui import gui_start
-from golem.execution_runner.execution_runner import ExecutionRunner
+from golem.core.settings_manager import get_global_settings
 from golem.execution_runner import interactive as interactive_module
+from golem.execution_runner.execution_runner import ExecutionRunner
 from golem.gui.user_management import Users
+from golem.gui import gui_start
 from . import messages
 
 
-def command_dispatcher(args):
+def command_dispatcher(args, testdir):
+    # Use --golem-dir arg if set
+    if args.golem_dir is not None:
+        testdir = os.path.abspath(args.golem_dir)
+    session.testdir = testdir
+
     if args.help:
         display_help(args.help, args.command)
-    elif args.command == 'run':
-        run_command(args.project, args.test_query, args.browsers, args.processes,
-                    args.environments, args.interactive, args.timestamp, args.report,
-                    args.report_folder, args.report_name, args.tags, args.cli_log_level)
-    elif args.command == 'gui':
-        gui_command(args.host, args.port, args.debug)
-    elif args.command == 'createproject':
-        createproject_command(args.project)
-    elif args.command == 'createtest':
-        createtest_command(args.project, args.test)
-    elif args.command == 'createsuite':
-        createsuite_command(args.project, args.suite)
-    elif args.command == 'createuser':
-        createuser_command()
-    elif args.command == 'createsuperuser':
-        createsuperuser_command(args.username, args.email, args.password, args.noinput)
     elif args.command is None:
         if args.version:
             display_version()
         else:
             print(messages.USAGE_MSG)
+    else:
+        # It needs a valid Golem test directory from now on
+        if not test_directory.is_valid_test_directory(testdir):
+            sys.exit(errors.invalid_test_directory.format(testdir))
+        # Read global settings
+        session.settings = get_global_settings()
+        if args.command == 'run':
+            run_command(args.project, args.test_query, args.browsers, args.processes,
+                        args.environments, args.interactive, args.timestamp, args.report,
+                        args.report_folder, args.report_name, args.tags, args.cli_log_level)
+        elif args.command == 'gui':
+            gui_command(args.host, args.port, args.debug)
+        elif args.command == 'createproject':
+            createproject_command(args.project)
+        elif args.command == 'createtest':
+            createtest_command(args.project, args.test)
+        elif args.command == 'createsuite':
+            createsuite_command(args.project, args.suite)
+        elif args.command == 'createuser':
+            createuser_command()
+        elif args.command == 'createsuperuser':
+            createsuperuser_command(args.username, args.email, args.password, args.noinput)
 
 
 def display_help(help, command):
