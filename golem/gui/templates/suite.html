@@ -9,12 +9,15 @@
 {% block content %}
 <div>
     <div class="col-md-8 col-md-offset-2" id="dataContainerContainer">
-        <div class="header-col" style="width: calc(100% - 170px)">
+        <div class="header-col" style="width: calc(100% - 270px)">
             <h3 id="suiteName" class="element-name"><span>{{suite}}</span></h3>
         </div>
         <div class="header-col header-col-right">
             {% if g.user.project_weight(project) >= 30 %}
             <button id="runTest" class="btn btn-default btn-sm" onclick="Suite.run()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Suite</button>
+            {% endif %}
+            <a id="loadCodeButton" class="btn btn-default btn-sm" href="code/"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Code<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></a>
+            {% if g.user.project_weight(project) >= 30 %}
             <button id="save" class="btn btn-default btn-sm" onclick="Suite.save();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
             {% endif %}
         </div>

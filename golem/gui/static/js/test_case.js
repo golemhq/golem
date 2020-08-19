@@ -36,18 +36,12 @@ var Test = new function(){
     }
 
     this.getGolemActions = function(){
-        $.ajax({
-            url: "/api/golem/actions",
-            data: {
-                "project": Test.project,
-            },
-            dataType: 'json',
-            type: 'GET',
-            success: function(golemActions) {
-                Test.golemActions = golemActions;
-                Test.refreshActionInputsAutocomplete();
-            }
-        });
+        xhr.get('/api/golem/actions', {
+            project: Test.project
+        }, golemActions => {
+            Test.golemActions = golemActions;
+            Test.refreshActionInputsAutocomplete();
+        })
     }
 
     this.renderSteps = function(steps){

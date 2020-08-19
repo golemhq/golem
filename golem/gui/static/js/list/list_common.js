@@ -654,17 +654,15 @@ class File {
                 buttonsSpan.append(deleteButton);
             }
         }
-        if(FileExplorer.fileType == 'test' || FileExplorer.fileType == 'page'){
-            // Code View button
-            let codeIcon = `<i class="glyphicon glyphicon-chevron-left" style="-webkit-text-stroke: 0.5px white;"></i><i class="glyphicon glyphicon-chevron-right" style="margin-left: -8px; -webkit-text-stroke: 0.5px white;"></i>`;
-            let codeLink = $(`<a href="${this.url()}code" class="file-menu-button code-button" style="margin-right: -3px; margin-left:-3px">${codeIcon}</a>`);
-            buttonsSpan.prepend(codeLink);
-            if(userWeight >= weights.standard && FileExplorer.fileType == 'test'){
-                // Run test button
-                let runButton = $(`<button class="file-menu-button run-test-button"><i class="glyphicon glyphicon-play-circle"></i></button>`);
-                runButton.on('click', e => Main.TestRunner.openConfigModal(Global.project, thisFile.filepath()));
-                buttonsSpan.prepend(runButton);
-            }
+        // Code View button
+        let codeIcon = `<i class="glyphicon glyphicon-chevron-left" style="-webkit-text-stroke: 0.5px white;"></i><i class="glyphicon glyphicon-chevron-right" style="margin-left: -8px; -webkit-text-stroke: 0.5px white;"></i>`;
+        let codeLink = $(`<a href="${this.url()}code" class="file-menu-button code-button" style="margin-right: -3px; margin-left:-3px">${codeIcon}</a>`);
+        buttonsSpan.prepend(codeLink);
+        if(userWeight >= weights.standard && FileExplorer.fileType == 'test'){
+            // Run test button
+            let runButton = $(`<button class="file-menu-button run-test-button"><i class="glyphicon glyphicon-play-circle"></i></button>`);
+            runButton.on('click', e => Main.TestRunner.openConfigModal(Global.project, thisFile.filepath()));
+            buttonsSpan.prepend(runButton);
         }
         let li = $(`
             <li class="tree-element file">

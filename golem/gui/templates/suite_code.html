@@ -1,6 +1,6 @@
 {% extends "layout.html" %} 
 
-{% block title %}Golem : {{project|capitalize}} : {{page_name}}{% endblock %}
+{% block title %}Golem : {{project|capitalize}} : {{suite_name}}{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/codemirror.css') }}">
@@ -10,12 +10,12 @@
 {% block content %}
 <div class="col-lg-10 col-lg-offset-1 col-md-12">
     <div class="header-col" style="width: calc(100% - 160px)">
-        <h3 id="pageObjectName" class="element-name"><span>{{page_name}}</span></h3>
+        <h3 id="suiteName" class="element-name"><span>{{suite_name}}</span></h3>
     </div>
         <div class="header-col header-col-right">
             <button id="loadGuiButton" class="btn btn-default btn-sm" onclick="loadGuiView()"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Preview</button>
             {% if g.user.project_weight(project) >= 30 %}
-            <button id="save" class="btn btn-default btn-sm" onclick="savePageObject();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+            <button id="save" class="btn btn-default btn-sm" onclick="saveSuite();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
             {% endif %}
         </div>
     <div class="clearfix"></div>
@@ -29,10 +29,10 @@
 
 <script src="{{ url_for('static', filename='js/external/code_mirror/codemirror.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/code_mirror/python.js') }}"></script>
-<script src="{{ url_for('static', filename='js/page_object_code.js') }}"></script>
+<script src="{{ url_for('static', filename='js/suite_code.js') }}"></script>
 <script>
-    let pageObjectName = "{{page_name}}";
-    let pageObjectCode = {{page_object_code|tojson}};
+    let suiteName = "{{suite_name}}";
+    let suiteCode = {{code|tojson}};
     let codeError = {{error|tojson}};
 </script>
 {% endblock %}

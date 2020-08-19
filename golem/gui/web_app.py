@@ -240,6 +240,20 @@ def suite_view(project, suite):
                            environments=suite_obj.environments, tags=suite_obj.tags)
 
 
+# SUITE CODE VIEW
+@webapp_bp.route("/project/<project>/suite/<suite>/code/")
+@login_required
+@project_exists
+@permission_required(Permissions.READ_ONLY)
+def suite_code_view(project, suite):
+    suite_obj = suite_module.Suite(project, suite)
+    if not suite_obj.exists:
+        abort(404, 'The suite {} does not exist'.format(suite))
+    _, error = utils.import_module(suite_obj.path)
+    return render_template('suite_code.html', project=project, suite_name=suite,
+                           code=suite_obj.code, error=error)
+
+
 # GLOBAL SETTINGS VIEW
 @webapp_bp.route("/settings/")
 @login_required
