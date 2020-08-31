@@ -2,11 +2,12 @@
 
 class File {
 
-    constructor(type, project, name, fullName) {
+    constructor(type, project, name, fullName, isCodeView) {
         this.type = type;
         this.project = project;
         this.name = name;
-        this.fullName = fullName
+        this.fullName = fullName;
+        this.isCodeView = isCodeView || false;
     }
 
     startInlineNameEdition() {
@@ -21,8 +22,8 @@ class File {
     };
 
     saveInlineNameEdition() {
-        let newTestNameValue = $("#filenameInput input").val().trim();
-        if(newTestNameValue == this.fullName){
+        let newNameValue = $("#filenameInput input").val().trim();
+        if(newNameValue == this.fullName){
             $("#filenameInput").hide();
             $("#fileName").show();
             return
@@ -31,16 +32,15 @@ class File {
         xhr.post(renameUrl, {
             project: this.project,
             fullFilename: this.fullName,
-            newFullFilename: newTestNameValue,
+            newFullFilename: newNameValue,
         }, (result) => {
             if(result.errors.length == 0){
-                document.title = document.title.replace(Test.fullName, newTestNameValue);
-                this.fullName = newTestNameValue;
+                document.title = document.title.replace(this.fullName, newNameValue);
+                this.fullName = newNameValue;
                 $("#filenameInput input").val('');
                 $("#filenameInput").hide();
-                $("#fileName").html(newTestNameValue).show();
-                let new_url = `/project/${Global.project}/test/${newTestNameValue}/`;
-                window.history.pushState("object or string", "", new_url);
+                $("#fileName").html(newNameValue).show();
+                window.history.pushState("object or string", "", this.fileUrl());
                 Main.Utils.toast('success', 'File was renamed', 2000);
             }
             else{
@@ -60,5 +60,15 @@ class File {
             return '/api/suite/rename'
         else if(fileType == Main.FILE_TYPES.page)
             return '/api/page/rename'
+    }
+
+    fileUrl(fileType, project, fullName) {
+        let url = '';
+        if(this.type == Main.FILE_TYPES.test)
+            url = `/project/${this.project}/test/${this.fullName}/`
+
+        if(this.isCodeView)
+            url += 'code/'
+        return url
     }
 }

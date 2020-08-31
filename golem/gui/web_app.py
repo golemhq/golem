@@ -133,7 +133,7 @@ def test_case_view(project, test_name):
     else:
         test_data = test_data_module.get_test_data(project, test_name,
                                                    repr_strings=True)
-        return render_template('test_builder/test_case.html', project=project,
+        return render_template('test_builder/test.html', project=project,
                                test_components=test.components,
                                test_case_name=test.stem_name,
                                full_test_case_name=test_name,
@@ -152,7 +152,7 @@ def test_case_code_view(project, test_name):
     _, error = utils.import_module(test.path)
     external_data = test_data_module.get_external_test_data(project, test_name)
     test_data_setting = session.settings['test_data']
-    return render_template('test_builder/test_case_code.html', project=project,
+    return render_template('test_builder/test_code.html', project=project,
                            test_case_contents=test.code, test_case_name=test.stem_name,
                            full_test_case_name=test_name, test_data=external_data,
                            test_data_setting=test_data_setting, error=error)
