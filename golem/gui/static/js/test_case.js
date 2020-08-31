@@ -1,23 +1,18 @@
 
-$(document).ready(function() {
-    Test.initialize(Global.project, testCaseName, fullTestCaseName, importedPages, steps);
-});
-
 
 var Test = new function(){
 
-    this.project = '';
-    this.name = '';
-    this.fullName = '';
+    this.file;
     this.golemActions = [];
     this.allPages = [];
     this.importedPages = [];
     this.unsavedChanges = false;
 
-    this.initialize = function(project, testCaseName, fullTestCaseName, importedPages, steps){
-        Test.getUniqueTags(project);
-        Test.project = project;
-        Test.fullName = fullTestCaseName;
+    this.initialize = function(file, importedPages, steps){
+
+        this.file = file;
+
+        Test.getUniqueTags();
         importedPages.forEach(function(page){
             Test.getPageContents(page)
         });
@@ -37,7 +32,7 @@ var Test = new function(){
 
     this.getGolemActions = function(){
         xhr.get('/api/golem/actions', {
-            project: Test.project
+            project: this.file.project
         }, golemActions => {
             Test.golemActions = golemActions;
             Test.refreshActionInputsAutocomplete();
@@ -99,47 +94,35 @@ var Test = new function(){
     }
 
     this.getAllProjectPages = function(){
-        $.ajax({
-            url: "/api/project/pages",
-            data: {
-                "project": Test.project,
-            },
-            dataType: 'json',
-            type: 'GET',
-            success: function(pages) {
-                Test.allPages = pages;
-                Test.refreshPagesAutocomplete();
-            }
-        });
+        xhr.get('/api/project/pages', {
+            project: this.file.project
+        }, pages => {
+            Test.allPages = pages;
+            Test.refreshPagesAutocomplete();
+        })
     }
 
     this.getPageContents = function(pageName){
-        $.ajax({
-            url: "/api/page/components",
-            data: {
-                 "project": Test.project,
-                 "page": pageName,
-            },
-            dataType: 'json',
-            type: 'GET',
-            success: function(result) {
-                if(result.error == 'page does not exist'){
-                    // mark page as not existent
-                    $(`input[value='${pageName}']`).addClass('not-exist');
-                }
-                else{
-                    Test.importedPages = Test.importedPages.filter(page => page.name !== pageName)
-                    Test.importedPages.push({
-                        'name': pageName,
-                        'elements': result.components.elements,
-                        'functions': result.components.functions
-                    });
-                    Test.refreshPagesAutocomplete()
-                    Test.refreshElementInputsAutocomplete();
-                    Test.refreshActionInputsAutocomplete();
-                }
+        xhr.get('/api/page/components', {
+            project: this.file.project,
+            page: pageName
+        }, result => {
+            if(result.error == 'page does not exist'){
+                // mark page as not existent
+                $(`input[value='${pageName}']`).addClass('not-exist');
             }
-        });
+            else{
+                Test.importedPages = Test.importedPages.filter(page => page.name !== pageName)
+                Test.importedPages.push({
+                    'name': pageName,
+                    'elements': result.components.elements,
+                    'functions': result.components.functions
+                });
+                Test.refreshPagesAutocomplete()
+                Test.refreshElementInputsAutocomplete();
+                Test.refreshActionInputsAutocomplete();
+            }
+        })
     }
 
     this.refreshActionInputsAutocomplete = function(){
@@ -258,7 +241,7 @@ var Test = new function(){
         if(Test.unsavedChanges)
             Test.save({runAfter: true})
         else
-            Main.TestRunner.runTest(Test.project, Test.fullName);
+            Main.TestRunner.runTest(this.file.project, Test.file.fullName);
     }
 
     this.save = function(config){
@@ -288,24 +271,17 @@ var Test = new function(){
             'pages': pageObjects,
             'testData': testData,
             'steps': testSteps,
-            'project': Test.project,
-            'testName': Test.fullName,
+            'project': this.file.project,
+            'testName': Test.file.fullName,
             'tags': tags,
             'skip': skip
         }
 
-        $.ajax({
-            url: "/api/test/save",
-            data: JSON.stringify(data),
-            dataType: 'json',
-            contentType: 'application/json; charset=utf-8',
-            type: 'PUT',
-            success: function(data) {
-                Test.unsavedChanges = false;
-                Main.Utils.toast('success', `Test ${Test.fullName} saved`, 3000);
-                if(runAfter){ Main.TestRunner.runTest(Test.project, Test.fullName) }
-            }
-        });
+        xhr.put('/api/test/save', data, () => {
+            Test.unsavedChanges = false;
+            Main.Utils.toast('success', `Test ${Test.file.fullName} saved`, 3000);
+            if(runAfter){ Main.TestRunner.runTest(this.file.project, Test.file.fullName) }
+        })
     }
 
     this.generatePageInput = function(pageName){
@@ -360,25 +336,18 @@ var Test = new function(){
             Main.Utils.displayErrorModal(errors);
             return
         }
-        $.ajax({
-            url: "/api/project/page",
-            data: JSON.stringify({
-                "project": Test.project,
-                "fullPath": newPageName
-            }),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            type: 'POST',
-            success: function(data) {
-                if(data.errors.length == 0){
-                    Test.allPages.push(newPageName);
-                    Test.addPageToList(newPageName)
-                }
-                else{
-                    Main.Utils.displayErrorModal(data.errors);
-                }
+
+        xhr.post('/api/project/page', {
+            project: this.file.project,
+            fullPath: newPageName
+        }, data => {
+            if(data.errors.length == 0) {
+                Test.allPages.push(newPageName);
+                Test.addPageToList(newPageName)
+            } else {
+                Main.Utils.displayErrorModal(data.errors);
             }
-        });
+        })
     }
 
     this.addPageToList = function(pageName){
@@ -390,23 +359,15 @@ var Test = new function(){
 
     this.loadPageInModal = function(elem){
         let inputVal = $(elem).closest('.page').find('input.page-name').val();
-        $("#pageModalIframe").attr('src', `/project/${Test.project}/page/${inputVal}/no_sidebar/`);
+        $("#pageModalIframe").attr('src', `/project/${this.file.project}/page/${inputVal}/no_sidebar/`);
         $("#pageModal").modal('show');        
     }
 
-    this.getUniqueTags = function(project){
-        $.ajax({
-            url: "/api/project/tags",
-            data: {
-                "project": project
-            },
-            dataType: 'json',
-            type: 'GET',
-            success: function(tags) {
-                Test.projectTags = tags;
-                Test.refreshTagInputAutocomplete();
-            },
-        });
+    this.getUniqueTags = function(){
+        xhr.get('/api/project/tags', {project: this.file.project}, tags => {
+            Test.projectTags = tags;
+            Test.refreshTagInputAutocomplete();
+        })
     }
 
     this.refreshTagInputAutocomplete = function(){
@@ -551,7 +512,7 @@ var Test = new function(){
         this.openPageInNewWindow = function(elem){
             let inputVal = $(elem).closest('.page').find('input.page-name').val();
             if(inputVal.length > 0){
-                let url = `/project/${Test.project}/page/${inputVal}/`;
+                let url = `/project/${this.file.project}/page/${inputVal}/`;
                 window.open(url, '_blank');
             }
         }

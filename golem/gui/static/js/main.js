@@ -677,6 +677,12 @@ const Main = new function(){
         readOnly: 20,
         reportsOnly: 10
     }
+
+    this.FILE_TYPES = {
+        test: 'test',
+        page: 'page',
+        suite: 'suite'
+    }
 }
 
 const xhr = new function() {

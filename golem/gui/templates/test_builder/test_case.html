@@ -12,11 +12,11 @@
 <div>
     <div>
         <div class="header-col" style="width: calc(100% - 270px)">
-            <h3 id="testNameContainer">
-                <span id="testName" class="element-name" onclick="TestCommon.Header.startEditTestName()">
+            <h3 id="filenameContainer">
+                <span id="fileName" class="element-name" onclick="file.startInlineNameEdition()">
                     {{full_test_case_name}}
                 </span>
-                <span id="testNameInput" style="display: none">
+                <span id="filenameInput" style="display: none">
                     <input type="text">
                 </span>
             </h3>
@@ -25,7 +25,7 @@
             {% if g.user.project_weight(project) >= 30 %}
             <div class="btn-group" role="group" aria-label="...">
               <button id="runTest" class="btn btn-default btn-sm" onclick="Test.runTest()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Test</button>
-              <button id="openRunTestConfig" class="btn btn-default btn-sm" onclick="Main.TestRunner.openConfigModal(Test.project, Test.fullName)" style="padding-left: 7px; padding-right: 7px;"><span class="caret"></span></button>
+              <button id="openRunTestConfig" class="btn btn-default btn-sm" onclick="Main.TestRunner.openConfigModal(Test.file.project, Test.file.fullName)" style="padding-left: 7px; padding-right: 7px;"><span class="caret"></span></button>
             </div>
             {% endif %}
             <a id="loadCodeButton" class="btn btn-default btn-sm" href="code/"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Code<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></a>
@@ -224,12 +224,20 @@
 <script src="{{ url_for('static', filename='js/external/code_mirror/python.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/sortable.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/jquery.autocomplete.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/file.js') }}"></script>
 <script src="{{ url_for('static', filename='js/test_case.js') }}"></script>
 <script src="{{ url_for('static', filename='js/test_common.js') }}"></script>
+{% endblock %}
+
+{% block footer_declarations %}
 <script>
     let testCaseName = "{{test_case_name}}";
     let fullTestCaseName = "{{full_test_case_name}}";
     let importedPages = {{test_components.pages|tojson}};
     let steps = {{test_components.steps|tojson}}
+
+    const file = new File('test', Global.project, testCaseName, fullTestCaseName);
+    const test = Test;
+    test.initialize(file, importedPages, steps);
 </script>
 {% endblock %}
