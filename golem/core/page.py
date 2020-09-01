@@ -73,18 +73,19 @@ def edit_page(project, page_name, elements, functions, import_lines):
             # replace the spaces in web element names with underscores
             element['name'] = element['name'].replace(' ', '_')
 
-            if element['value'][0] == '\'' and element['value'][-1] == '\'':
-                # remove first and last single quotes if present
-                element['value'] = element['value'][1:-1]
-            elif element['value'].startswith('"""') and element['value'].endswith('"""')\
-                    and len(element['value']) >= 6:
-                # remove first and last triple double quotes if present
-                element['value'] = element['value'][3:-3]
-            elif element['value'][0] == '"' and element['value'][-1] == '"':
-                # remove first and last double quotes if present
-                element['value'] = element['value'][1:-1]
-            # escape quote characters
-            element['value'] = element['value'].replace('"', '\\"').replace("'", "\\'")
+            if element['value']:
+                if element['value'][0] == '\'' and element['value'][-1] == '\'':
+                    # remove first and last single quotes if present
+                    element['value'] = element['value'][1:-1]
+                elif element['value'].startswith('"""') and element['value'].endswith('"""')\
+                        and len(element['value']) >= 6:
+                    # remove first and last triple double quotes if present
+                    element['value'] = element['value'][3:-3]
+                elif element['value'][0] == '"' and element['value'][-1] == '"':
+                    # remove first and last double quotes if present
+                    element['value'] = element['value'][1:-1]
+                # escape quote characters
+                element['value'] = element['value'].replace('"', '\\"').replace("'", "\\'")
 
             if not element['display_name']:
                 element['display_name'] = element['name']

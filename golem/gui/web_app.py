@@ -183,7 +183,7 @@ def page_view(project, page_name, no_sidebar=False):
                                item_name=page_name, content=content,
                                no_sidebar=no_sidebar)
     else:
-        return render_template('page_builder/page_object.html',
+        return render_template('page_builder/page.html',
                                project=project,
                                page_object_data=page.components,
                                page_name=page_name,
@@ -208,7 +208,7 @@ def page_code_view(project, page_name, no_sidebar=False):
     if not page.exists:
         abort(404, 'The page {} does not exist'.format(page_name))
     _, error = utils.import_module(page.path)
-    return render_template('page_builder/page_object_code.html', project=project,
+    return render_template('page_builder/page_code.html', project=project,
                            page_object_code=page.code, page_name=page_name,
                            error=error, no_sidebar=no_sidebar)
 

@@ -66,7 +66,8 @@ class File {
         let url = '';
         if(this.type == Main.FILE_TYPES.test)
             url = `/project/${this.project}/test/${this.fullName}/`
-
+        else if(this.type == Main.FILE_TYPES.page)
+            url = `/project/${this.project}/page/${this.fullName}/`
         if(this.isCodeView)
             url += 'code/'
         return url

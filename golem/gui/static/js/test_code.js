@@ -2,7 +2,7 @@
 let codeEditor;
 
 
-var TestCode = new function(){
+const TestCode = new function() {
 
     this.codeEditor = undefined;
     this.unsavedChanges = false;
