@@ -4,13 +4,20 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/suite.css') }}">
-{% endblock %} 
+{% endblock %}
 
 {% block content %}
 <div>
     <div class="col-md-8 col-md-offset-2" id="dataContainerContainer">
         <div class="header-col" style="width: calc(100% - 270px)">
-            <h3 id="suiteName" class="element-name"><span>{{suite}}</span></h3>
+            <h3 id="filenameContainer">
+                <span id="fileName" class="element-name" onclick="file.startInlineNameEdition()">
+                    {{suite}}
+                </span>
+                <span id="filenameInput" style="display: none">
+                    <input type="text">
+                </span>
+            </h3>
         </div>
         <div class="header-col header-col-right">
             {% if g.user.project_weight(project) >= 30 %}
@@ -53,7 +60,7 @@
         <br>
         <li id="suiteTests" class="tree" data-type="folder" full-name="">
             <input type="checkbox" id="allTestCasesCheckbox" class="select-testcase-checkbox" style="margin-top: 0px !important;">
-            <h4> Test Cases <small id="testCount"></small></h4>
+            <h4> Tests <small id="testCount"></small></h4>
             <ul id="treeRoot">
                  {%- for elem in all_test_cases recursive %}
                     {%- if elem.type == 'directory' -%}
@@ -78,9 +85,17 @@
 
 <script src="{{ url_for('static', filename='js/external/jquery.autocomplete.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/treeview.js') }}"></script>
+<script src="{{ url_for('static', filename='js/file.js') }}"></script>
 <script src="{{ url_for('static', filename='js/suite.js') }}"></script>
+{% endblock %}
+
+{% block footer_declarations %}
 <script>
-    let suite = "{{suite}}";
+    let suiteName = "{{suite}}";
     let selectedTests = {{selected_tests|tojson}};
+
+    const file = new File('suite', Global.project, '', suiteName);
+    const suite = Suite;
+    suite.initialize(file, selectedTests);
 </script>
 {% endblock %}

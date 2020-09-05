@@ -68,6 +68,8 @@ class File {
             url = `/project/${this.project}/test/${this.fullName}/`
         else if(this.type == Main.FILE_TYPES.page)
             url = `/project/${this.project}/page/${this.fullName}/`
+        else if(this.type == Main.FILE_TYPES.suite)
+            url = `/project/${this.project}/suite/${this.fullName}/`
         if(this.isCodeView)
             url += 'code/'
         return url
