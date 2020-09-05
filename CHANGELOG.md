@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Suite code view
+
 ## [0.9.1] - 2020-08-03
 
 ### Added
