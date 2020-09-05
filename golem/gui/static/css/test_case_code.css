@@ -1,9 +1,7 @@
 
 #codeEditorContainer {
-    width: 100%;
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-	border: 1px solid #e0e0e0;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px
 }
 
 #dataContainerContainer {
@@ -12,17 +10,6 @@
     border-bottom: 1px solid #e0e0e0;
     border-bottom-left-radius: 3px;
     border-bottom-right-radius: 3px
-}
-
-.CodeMirror {
-	font-size:13px;
-	border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-    height: auto;
-}
-
-.CodeMirror-scroll {
-    min-height: 300px
 }
 
 .light-gray-block {

@@ -609,6 +609,19 @@ def suite_save():
     return jsonify('suite-saved')
 
 
+@api_bp.route('/suite/code/save', methods=['PUT'])
+@auth_required
+def suite_code_save():
+    project = request.json['project']
+    suite_name = request.json['suiteName']
+    content = request.json['content']
+    _verify_permissions(Permissions.STANDARD, project)
+    suite_module.edit_suite_code(project, suite_name, content)
+    path = suite_module.Suite(project, suite_name).path
+    _, error = utils.import_module(path)
+    return jsonify({'error': error})
+
+
 @api_bp.route('/test/code/save', methods=['PUT'])
 @auth_required
 def test_code_save():

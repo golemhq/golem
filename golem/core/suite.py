@@ -81,6 +81,14 @@ def edit_suite(project, suite_name, tests, processes, browsers, environments, ta
         f.write('tests = {}\n'.format(_format_list_items(tests)))
 
 
+def edit_suite_code(project, suite_name, content):
+    """Edit Suite code.
+    content must be the file content as string
+    """
+    with open(Suite(project, suite_name).path, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+
 def delete_suite(project, suite):
     errors = []
     path = Suite(project, suite).path

@@ -133,7 +133,7 @@ def test_case_view(project, test_name):
     else:
         test_data = test_data_module.get_test_data(project, test_name,
                                                    repr_strings=True)
-        return render_template('test_builder/test_case.html', project=project,
+        return render_template('test_builder/test.html', project=project,
                                test_components=test.components,
                                test_case_name=test.stem_name,
                                full_test_case_name=test_name,
@@ -152,7 +152,7 @@ def test_case_code_view(project, test_name):
     _, error = utils.import_module(test.path)
     external_data = test_data_module.get_external_test_data(project, test_name)
     test_data_setting = session.settings['test_data']
-    return render_template('test_builder/test_case_code.html', project=project,
+    return render_template('test_builder/test_code.html', project=project,
                            test_case_contents=test.code, test_case_name=test.stem_name,
                            full_test_case_name=test_name, test_data=external_data,
                            test_data_setting=test_data_setting, error=error)
@@ -183,7 +183,7 @@ def page_view(project, page_name, no_sidebar=False):
                                item_name=page_name, content=content,
                                no_sidebar=no_sidebar)
     else:
-        return render_template('page_builder/page_object.html',
+        return render_template('page_builder/page.html',
                                project=project,
                                page_object_data=page.components,
                                page_name=page_name,
@@ -208,7 +208,7 @@ def page_code_view(project, page_name, no_sidebar=False):
     if not page.exists:
         abort(404, 'The page {} does not exist'.format(page_name))
     _, error = utils.import_module(page.path)
-    return render_template('page_builder/page_object_code.html', project=project,
+    return render_template('page_builder/page_code.html', project=project,
                            page_object_code=page.code, page_name=page_name,
                            error=error, no_sidebar=no_sidebar)
 
@@ -238,6 +238,20 @@ def suite_view(project, suite):
                            processes=suite_obj.processes, browsers=suite_obj.browsers,
                            default_browser=default_browser,
                            environments=suite_obj.environments, tags=suite_obj.tags)
+
+
+# SUITE CODE VIEW
+@webapp_bp.route("/project/<project>/suite/<suite>/code/")
+@login_required
+@project_exists
+@permission_required(Permissions.READ_ONLY)
+def suite_code_view(project, suite):
+    suite_obj = suite_module.Suite(project, suite)
+    if not suite_obj.exists:
+        abort(404, 'The suite {} does not exist'.format(suite))
+    _, error = utils.import_module(suite_obj.path)
+    return render_template('suite_code.html', project=project, suite_name=suite,
+                           code=suite_obj.code, error=error)
 
 
 # GLOBAL SETTINGS VIEW

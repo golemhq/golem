@@ -4,18 +4,23 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/codemirror.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/page_object_code.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/code-editor-common.css') }}">
 {% endblock %} 
 
 {% block content %}
 <div class="col-lg-10 col-lg-offset-1 col-md-12">
     <div class="header-col" style="width: calc(100% - 160px)">
-        <h3 id="pageObjectName" class="element-name"><span>{{page_name}}</span></h3>
+        <h3 id="filenameContainer">
+                <span id="fileName" class="element-name" onclick="file.startInlineNameEdition()">{{page_name}}</span>
+                <span id="filenameInput" style="display: none">
+                    <input type="text">
+                </span>
+            </h3>
     </div>
         <div class="header-col header-col-right">
-            <button id="loadGuiButton" class="btn btn-default btn-sm" onclick="loadGuiView()"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Preview</button>
+            <button id="loadGuiButton" class="btn btn-default btn-sm" onclick="pageCode.loadGuiView()"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Preview</button>
             {% if g.user.project_weight(project) >= 30 %}
-            <button id="save" class="btn btn-default btn-sm" onclick="savePageObject();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+            <button id="save" class="btn btn-default btn-sm" onclick="pageCode.save();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
             {% endif %}
         </div>
     <div class="clearfix"></div>
@@ -29,10 +34,18 @@
 
 <script src="{{ url_for('static', filename='js/external/code_mirror/codemirror.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/code_mirror/python.js') }}"></script>
-<script src="{{ url_for('static', filename='js/page_object_code.js') }}"></script>
+<script src="{{ url_for('static', filename='js/file.js') }}"></script>
+<script src="{{ url_for('static', filename='js/page_code.js') }}"></script>
+{% endblock %}
+
+{% block footer_declarations %}
 <script>
     let pageObjectName = "{{page_name}}";
     let pageObjectCode = {{page_object_code|tojson}};
     let codeError = {{error|tojson}};
+
+    const file = new File('page', Global.project, '', pageObjectName, true);
+    const pageCode = PageCode;
+    PageCode.initialize(file, pageObjectCode, codeError);
 </script>
 {% endblock %}

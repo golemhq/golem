@@ -677,4 +677,52 @@ const Main = new function(){
         readOnly: 20,
         reportsOnly: 10
     }
+
+    this.FILE_TYPES = {
+        test: 'test',
+        page: 'page',
+        suite: 'suite'
+    }
+}
+
+const xhr = new function() {
+
+    this.get = function(url, params, success, error) {
+        error = error || (error => console.error('Error:', error));
+        if(Object.keys(params).length) {
+            url = new URL(url, location.origin);
+            url.search = new URLSearchParams(params).toString();
+        }
+        fetch(url, {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'}
+        })
+        .then(res => res.json())
+        .then(result => success(result))
+        .catch(e => error(e))
+    }
+
+    this.post = function(url, body, success, error) {
+        error = error || (error => console.error('Error:', error));
+        fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        })
+        .then(res => res.json())
+        .then(result => success(result))
+        .catch(e => error(e))
+    }
+
+    this.put = function(url, body, success, error) {
+        error = error || (error => console.error('Error:', error));
+        fetch(url, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        })
+        .then(res => res.json())
+        .then(result => success(result))
+        .catch(e => error(e))
+    }
 }
