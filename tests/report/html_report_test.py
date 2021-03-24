@@ -1,5 +1,7 @@
 import os
 
+import pytest
+
 from golem.report import html_report
 
 
@@ -9,7 +11,8 @@ class TestGenerateHTMLReport:
         _, project = project_class.activate()
         execution = test_utils.execute_random_suite(project)
 
-        html = html_report.generate_html_report(project, execution['suite_name'], execution['timestamp'])
+        html = html_report.generate_html_report(
+            project, execution['suite_name'], execution['timestamp'])
 
         html_path = os.path.join(execution['exec_dir'], 'report.html')
         assert os.path.isfile(html_path)

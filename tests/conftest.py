@@ -9,7 +9,8 @@ import pytest
 
 from golem.cli import commands
 from golem.core import settings_manager, suite, test, session, page, utils
-from golem.report.execution_report import get_execution_data, suite_execution_path
+from golem.report.execution_report import get_execution_data
+from golem.report.execution_report import execution_report_path
 
 
 # FIXTURES
@@ -124,6 +125,17 @@ def project_session(testdir_session):
 
 
 @pytest.mark.usefixtures("testdir_session")
+@pytest.fixture(scope="module")
+def project_module(testdir_session):
+    """A project with scope module inside
+    a test directory with scope session.
+    """
+    project = Project(testdir_session)
+    yield project
+    project.remove()
+
+
+@pytest.mark.usefixtures("testdir_session")
 @pytest.fixture(scope="class")
 def project_class(testdir_session):
     """A project with scope class inside
@@ -167,9 +179,14 @@ class TestUtils:
 
     @staticmethod
     def create_empty_file(path, filename):
+        return TestUtils.create_file(path, filename, content='')
+
+    @staticmethod
+    def create_file(path, filename, content=''):
         filepath = os.path.join(path, filename)
         os.makedirs(path, exist_ok=True)
-        open(filepath, 'w+').close()
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(content)
         return filepath
 
     @staticmethod
@@ -317,7 +334,7 @@ class TestUtils:
             if not ignore_sys_exit:
                 raise e
         exec_data = get_execution_data(project=project, suite=suite_name, execution=timestamp)
-        exec_dir = suite_execution_path(project, suite_name, timestamp)
+        exec_dir = execution_report_path(project, suite_name, timestamp)
         return {
             'exec_dir': exec_dir,
             'report_path': os.path.join(exec_dir, 'report.json'),

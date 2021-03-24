@@ -481,31 +481,30 @@ def report_test_status():
     test_name = request.args['test']
     timestamp = request.args['timestamp']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    path = exec_report.single_test_execution_path(project, test_name, timestamp)
+    path = exec_report.execution_report_path(project, test_name, timestamp)
     result = {
-        'sets': {},
-        'is_finished': False
+        'files': {},
+        'is_finished': report.is_execution_finished(path)
     }
-    sets = {}
+    # test_files = {}
     if os.path.isdir(path):
-        for elem in os.listdir(path):
-            if os.path.isdir(os.path.join(path, elem)):
-                sets[elem] = {
-                    'log': [],
-                    'report': None
-                }
-    result['is_finished'] = report.is_execution_finished(path, sets)
-    for set_name in sets:
-        report_path = os.path.join(path, set_name, 'report.json')
-        if os.path.exists(report_path):
-            test_data = test_report.get_test_case_data(project, test_name, execution=timestamp,
-                                                       test_set=set_name, is_single=True)
-            sets[set_name]['report'] = test_data
-        log_path = os.path.join(path, set_name, 'execution_info.log')
-        if os.path.exists(log_path):
-            with open(log_path, encoding='utf-8') as log_file:
-                sets[set_name]['log'] = log_file.readlines()
-    result['sets'] = sets
+        for test_file, test_file_path in utils.subdirectories(path):
+            rx = {
+                'log': [],
+                'test_functions': []
+            }
+            for test_function, test_function_path in utils.subdirectories(tset_file_path):
+                # json_report_path = os.path.join(test_function_path, 'report.json')
+                test_data = test_report.get_test_case_data(project, test_file, test_function,
+                                                           execution_name=test_name,
+                                                           execution_timestamp=timestamp)
+                rx['test_functions'][test_function]['report'] = test_data
+            # log_path = os.path.join(path, set_name, 'execution_info.log')
+            # if os.path.exists(log_path):
+            #     with open(log_path, encoding='utf-8') as log_file:
+            #         test_files[test_file]['log'] = log_file.readlines()
+
+        result['files'][test_file] = rx
     return jsonify(result)
 
 

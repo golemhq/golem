@@ -238,9 +238,9 @@ class TestPageComponents:
         page_name = test_utils.create_random_page(project)
         page_obj = Page(project, page_name)
         with open(page_obj.path, 'w') as f:
-            f.write('elem1 = (\'id\', \'someId\', \'Elem1\')\n')
-            f.write('def func1(c, b, a):\n')
-            f.write('    pass\n')
+            f.write("elem1 = ('id', 'someId', 'Elem1')\n")
+            f.write("def func1(c, b, a):\n")
+            f.write("    pass\n")
         components = page_obj.components
         expected = {
             'functions': [

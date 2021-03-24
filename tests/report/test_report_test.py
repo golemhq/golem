@@ -5,55 +5,90 @@ from golem.core import utils
 from golem.test_runner import test_runner
 
 from golem.report.execution_report import create_execution_directory
-from golem.report.execution_report import create_execution_dir_single_test
 from golem.report import test_report
-from golem.report.test_report import get_test_case_data
+from golem.report.test_report import get_test_file_report_json
 from golem.report.test_report import get_test_debug_log
-from golem.report.test_report import create_report_directory
+from golem.report.test_report import create_test_file_report_dir
 from golem.report.test_report import generate_report
 
 
-class TestGetTestCaseData:
+class TestGetTestFileReportJson:
 
-    def test_get_test_case_data(self, project_class, test_utils):
+    def test_get_test_file_report_json(self, project_class, test_utils):
         _, project = project_class.activate()
         exc = test_utils.execute_random_suite(project)
         test_name = exc['exec_data']['tests'][0]['name']
-        test_set = exc['exec_data']['tests'][0]['test_set']
+        test_set = exc['exec_data']['tests'][0]['set_name']
 
-        test_data = get_test_case_data(project, test_name, exc['suite_name'],
-                                       exc['timestamp'], test_set)
+        test_data = get_test_file_report_json(project, exc['suite_name'], exc['timestamp'],
+                                              test_name, test_set)
 
-        assert test_data['name'] == exc['tests'][0]
-        assert isinstance(test_data['debug_log'], list) and len(test_data['debug_log'])
-        assert isinstance(test_data['info_log'], list) and len(test_data['info_log'])
-        assert test_data['has_finished'] is True
+        assert len(test_data) == 1
+        assert isinstance(test_data[0], dict)
+        assert test_data[0]['test_file'] == test_name
+        assert test_data[0]['test'] == 'test'
+        assert test_data[0]['set_name'] == ''
+        assert len(test_data[0]) == 12
+
+    def test_report_does_not_exist(self, project_class, test_utils):
+        _, project = project_class.activate()
+        test_data = get_test_file_report_json(project, 'execution', 'timestamp', 'test_name')
+
+        assert test_data is None
 
 
-class TestTestReportDirectory:
+# class TestGetTestCaseData:
+#
+#     def test_get_test_case_data(self, project_class, test_utils):
+#         _, project = project_class.activate()
+#         exc = test_utils.execute_random_suite(project)
+#         test_name = exc['exec_data']['tests'][0]['name']
+#         test_set = exc['exec_data']['tests'][0]['test_set']
+#
+#         test_data = get_test_case_data(project, test_name, exc['suite_name'],
+#                                        exc['timestamp'], test_set)
+#
+#         assert test_data['name'] == exc['tests'][0]
+#         assert isinstance(test_data['debug_log'], list) and len(test_data['debug_log'])
+#         assert isinstance(test_data['info_log'], list) and len(test_data['info_log'])
+#         assert test_data['has_finished'] is True
 
-    def test_test_report_directory(self, project_session):
+
+class TestTestFileReportDir:
+
+    def test_create_test_file_report_dir_without_setname(self, project_session):
+        testdir, project = project_session.activate()
+        suite = 'suite1'
+        timestamp = '1.2.3.4'
+        test = 'test1'
+        path = test_report.test_file_report_dir(test, project, suite, timestamp)
+        expected = os.path.join(testdir, 'projects', project, 'reports', suite, timestamp, test)
+        assert path == expected
+
+    def test_create_test_file_report_dir_with_setname(self, project_session):
         testdir, project = project_session.activate()
         suite = 'suite1'
         timestamp = '1.2.3.4'
         test = 'test1'
         test_set = 'test_set1'
-        path = test_report.test_report_directory(project, suite, timestamp, test, test_set)
+        path = test_report.test_file_report_dir(test, project, suite, timestamp, test_set)
         expected = os.path.join(testdir, 'projects', project, 'reports', suite, timestamp,
-                                test, test_set)
+                                '{}.{}'.format(test, test_set))
         assert path == expected
 
 
-class TestTestReportDirectorySingleTest:
+class TestTestFunctionReportDir:
 
-    def test_test_report_directory_single_test(self, project_session):
+    def test_create_test_file_report_dir_without_setname(self, project_session):
         testdir, project = project_session.activate()
+        suite = 'suite1'
         timestamp = '1.2.3.4'
-        test = 'test1'
-        test_set = 'test_set1'
-        path = test_report.test_report_directory_single_test(project, test, timestamp, test_set)
-        expected = os.path.join(testdir, 'projects', project, 'reports', 'single_tests',
-                                test, timestamp, test_set)
+        test_file = 'test1'
+        test_function = 'function1'
+        path = test_report.test_function_report_dir(project, suite, timestamp,
+                                                    test_file, test_function)
+        test_file_path = test_report.test_file_report_dir(test_file, project, suite, timestamp)
+        expected = os.path.join(test_file_path, test_function)
         assert path == expected
 
 
@@ -62,42 +97,33 @@ class TestGetTestLog:
     def test_get_test_x_log(self, project_class, test_utils):
         _, project = project_class.activate()
         exc = test_utils.execute_random_suite(project)
+        suite_name = exc['suite_name']
         test_name = exc['exec_data']['tests'][0]['name']
-        test_set = exc['exec_data']['tests'][0]['test_set']
+        set_name = exc['exec_data']['tests'][0]['set_name']
 
-        log = get_test_debug_log(project, exc['timestamp'], test_name, test_set,
-                                 suite=exc['suite_name'])
+        log = get_test_debug_log(project, suite_name, exc['timestamp'], test_name, set_name)
 
-        assert 'root DEBUG test does not have setup function' in log
+        assert 'root INFO Test execution started: {}'.format(test_name) in log
 
         # inexistent test set
-        log = get_test_debug_log(project, exc['timestamp'], test_name,
-                                 'inexistent_test_set', suite=exc['suite_name'])
+        log = get_test_debug_log(project, suite_name, exc['timestamp'], test_name,
+                                 'inexistent_test_set')
         assert log is None
 
         # inexistent test
-        log = get_test_debug_log(project, exc['timestamp'], 'inexistent_test_name',
-                                 test_set, suite=exc['suite_name'])
+        log = get_test_debug_log(project, suite_name, exc['timestamp'],
+                                 'inexistent_test_name', set_name)
         assert log is None
 
 
 class TestCreateReportDirectory:
 
-    def test_create_report_directory_test(self, project_session):
+    def test_create_report_directory_test_without_set(self, project_session):
         testdir, project = project_session.activate()
         timestamp = utils.get_timestamp()
         test_name = 'testing_report_001'
-        exec_dir = create_execution_dir_single_test(project, test_name, timestamp)
-        directory = create_report_directory(exec_dir, test_name, is_suite=False)
-        assert os.path.isdir(directory)
-
-    def test_create_report_directory_suite(self, project_session):
-        testdir, project = project_session.activate()
-        timestamp = utils.get_timestamp()
-        suite_name = 'suite_foo_002'
-        test_name = 'testing_report_002'
-        exec_dir = create_execution_directory(project, suite_name, timestamp)
-        directory = create_report_directory(exec_dir, test_name, is_suite=True)
+        exec_dir = create_execution_directory(project, test_name, timestamp)
+        directory = create_test_file_report_dir(exec_dir, test_name, '')
         assert os.path.isdir(directory)
 
 
@@ -109,7 +135,7 @@ class TestGenerateReport:
         test_name = 'testing_report_003'
         suite_name = 'suite_foo_003'
         exec_dir = create_execution_directory(project, suite_name, timestamp)
-        report_dir = create_report_directory(exec_dir, test_name, is_suite=True)
+        report_dir = create_test_file_report_dir(exec_dir, test_name, '')
         test_data = {
             'env': {
                 'name': 'env01',
@@ -119,6 +145,11 @@ class TestGenerateReport:
         }
         test_data = test_runner.Data(test_data)
         result = {
+            'name': 'test_function',
+            'set_name': 'set_001',
+            'start_time': '',
+            'end_time': '',
+            'report_directory': '',
             'result': 'success',
             'errors': [],
             'description': 'description of the test',
@@ -130,14 +161,15 @@ class TestGenerateReport:
             'test_timestamp': '2018.02.04.02.16.42.729',
             'browser': 'chrome',
             'browser_full_name': '',
-            'set_name': 'set_001',
         }
-        generate_report(report_dir, test_name, test_data, result)
+        generate_report(test_name, result, test_data, report_dir)
         path = os.path.join(report_dir, 'report.json')
         with open(path) as report_file:
             actual = json.load(report_file)
-            assert len(actual.items()) == 11
-            assert actual['test_case'] == test_name
+            actual = actual[0]
+            assert len(actual.items()) == 12
+            assert actual['test_file'] == test_name
+            assert actual['test'] == 'test_function'
             assert actual['result'] == 'success'
             assert actual['steps'][0]['message'] == 'step1'
             assert actual['steps'][1]['message'] == 'step2'

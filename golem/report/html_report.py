@@ -9,7 +9,7 @@ from golem.report import execution_report as exec_report
 from golem.report import test_report
 
 
-def generate_html_report(project, suite, execution, report_directory=None,
+def generate_html_report(project, execution_name, timestamp, report_directory=None,
                          report_name=None, no_images=False):
     """Generate static HTML report.
     Report is generated in <report_directory>/<report_name>
@@ -17,15 +17,15 @@ def generate_html_report(project, suite, execution, report_directory=None,
     Default name is 'report.html' and 'report-no-images.html'
     """
     if not report_directory:
-        report_directory = os.path.join(session.testdir, 'projects', project,
-                                        'reports', suite, execution)
+        report_directory = exec_report.execution_report_path(project, execution_name, timestamp)
+
     if not report_name:
         if no_images:
             report_name = 'report-no-images'
         else:
             report_name = 'report'
 
-    formatted_date = utils.get_date_time_from_timestamp(execution)
+    formatted_date = utils.get_date_time_from_timestamp(timestamp)
     app = gui.create_app()
     static_folder = app.static_folder
     # css paths
@@ -54,19 +54,20 @@ def generate_html_report(project, suite, execution, report_directory=None,
         'report_execution': open(report_execution_js).read()
     }
 
-    execution_data = exec_report.get_execution_data(project=project, suite=suite, execution=execution)
+    execution_data = exec_report.get_execution_data(execution_directory=report_directory)
     detail_test_data = {}
     for test in execution_data['tests']:
-        test_detail = test_report.get_test_case_data(project, test['full_name'], suite=suite,
-                                                     execution=execution, test_set=test['test_set'],
-                                                     is_single=False, encode_screenshots=True,
-                                                     no_screenshots=no_images)
-        detail_test_data[test['test_set']] = test_detail
+        # test_detail = test_report.get_test_case_data(project, test['full_name'], execution_name,
+        #                                              execution_timestamp=timestamp, test_set=test['test_set'],
+        #                                              is_single=False, encode_screenshots=True,
+        #                                              no_screenshots=no_images)
+        detail_test_data[test['test_set']] = 'test_detail'
     with app.app_context():
-        html_string = render_template('report/report_execution_static.html', project=project,
-                                      suite=suite, execution=execution, execution_data=execution_data,
-                                      detail_test_data=detail_test_data, formatted_date=formatted_date,
-                                      css=css, js=js, static=True)
+        # html_string = render_template('report/report_execution_static.html', project=project,
+        #                               suite=suite, execution=execution, execution_data=execution_data,
+        #                               detail_test_data=detail_test_data, formatted_date=formatted_date,
+        #                               css=css, js=js, static=True)
+        html_string = 'TODO'
     _, file_extension = os.path.splitext(report_name)
     if not file_extension:
         report_name = '{}.html'.format(report_name)

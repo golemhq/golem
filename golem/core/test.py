@@ -5,6 +5,7 @@ from golem.core import file_manager, settings_manager
 from golem.core import test_data as test_data_module
 from golem.core.project import Project, validate_project_element_name, BaseProjectElement
 from golem.core import test_parser
+from golem.core import parsing_utils
 
 
 def create_test(project_name, test_name):
@@ -273,6 +274,15 @@ class Test(BaseProjectElement):
         return steps
 
     @property
+    def test_functions(self):
+        """Test functions are functions defined inside this
+        test file that start with 'test'
+        """
+        ast_module_node = parsing_utils.ast_parse_file(self.path)
+        local_function_names = parsing_utils.top_level_functions(ast_module_node)
+        return [f for f in local_function_names if f.startswith('test')]
+
+    @property
     def skip(self):
         return getattr(self.get_module(), 'skip', False)
 
@@ -293,6 +303,7 @@ class Test(BaseProjectElement):
             'pages': self.pages,
             'tags': self.tags,
             'steps': self.steps,
+            'test_functions': self.test_functions,
             'skip': self.skip
         }
         return components

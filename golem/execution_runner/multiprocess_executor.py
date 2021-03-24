@@ -23,6 +23,8 @@ def multiprocess_executor(project, execution_list, has_failed_tests, processes=1
                 test.env,
                 session.settings,
                 test.reportdir,
+                test.set_name,
+                [],
                 has_failed_tests,
                 tags,
                 is_suite)

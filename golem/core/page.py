@@ -1,4 +1,3 @@
-import ast
 import inspect
 import os
 import re
@@ -6,7 +5,10 @@ import shutil
 import types
 
 from golem.core import file_manager
-from golem.core.project import Project, validate_project_element_name, BaseProjectElement
+from golem.core import parsing_utils
+from golem.core.project import BaseProjectElement
+from golem.core.project import Project
+from golem.core.project import validate_project_element_name
 
 
 def create_page(project_name, page_name):
@@ -157,7 +159,7 @@ class Page(BaseProjectElement):
         components['source_code'] = self.code
         components['code_lines'] = components['source_code'].split('\n')
 
-        # parse import lines
+        # parse import lines  TODO: move to a function
         patterns = (
             re.compile(r'(from .*? import [^\n(]*)\n'),
             re.compile(r'^(import [^\n]*)\n', flags=re.MULTILINE),
@@ -169,24 +171,9 @@ class Page(BaseProjectElement):
                 if result:
                     components['import_lines'] += result
 
-        def top_level_functions(body):
-            return [f.name for f in body if isinstance(f, ast.FunctionDef)]
-
-        def top_level_tuples(body):
-            variables = []
-            for v in body:
-                if type(v) == ast.Assign:
-                    if len(v.targets) == 1:
-                        variables.append(v.targets[0].id)
-            return variables
-
-        def parse_ast(filename):
-            with open(filename, "rt", encoding='utf-8') as file:
-                return ast.parse(file.read(), filename=filename)
-
-        tree = parse_ast(self.path)
-        local_functions = top_level_functions(tree.body)
-        local_variables = top_level_tuples(tree.body)
+        ast_module_node = parsing_utils.ast_parse_file(self.path)
+        local_functions = parsing_utils.top_level_functions(ast_module_node)
+        local_assignments = parsing_utils.top_level_assignments(ast_module_node)
 
         # get all the names of the module,
         # ignoring the ones starting with '_'
@@ -206,7 +193,7 @@ class Page(BaseProjectElement):
                     'code': inspect.getsource(variable)
                 }
                 components['functions'].append(function)
-            elif isinstance(variable, tuple) and var_name in local_variables:
+            elif isinstance(variable, tuple) and var_name in local_assignments:
                 # web element tuple
                 if len(variable) >= 2:
                     display_name = ''

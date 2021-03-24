@@ -176,7 +176,7 @@ class TestDefineExecutionList:
         execution_list = execution_runner._define_execution_list()
         expected_list = [
             SimpleNamespace(name='test_001', data_set={}, secrets={}, browser='chrome',
-                            reportdir=None, env=None)
+                            reportdir=None, env=None, set_name='')
         ]
         assert execution_list == expected_list
 
@@ -207,13 +207,10 @@ class TestDefineExecutionList:
         execution_runner.execution.envs = []
         execution_runner.project = project_function_clean.name
         execution_list = execution_runner._define_execution_list()
-        expected_list = [
-            SimpleNamespace(name=test_name, data_set={'col1': 'a', 'col2': 'b'}, secrets={},
-                            browser='chrome', reportdir=None, env=None),
-            SimpleNamespace(name=test_name, data_set={'col1': 'c', 'col2': 'd'}, secrets={},
-                            browser='chrome', reportdir=None, env=None)
-        ]
-        assert execution_list == expected_list
+        assert execution_list[0].data_set == {'col1': 'a', 'col2': 'b'}
+        assert isinstance(execution_list[0].set_name, str) and execution_list[0].set_name != ''
+        assert execution_list[1].data_set == {'col1': 'c', 'col2': 'd'}
+        assert isinstance(execution_list[1].set_name, str) and execution_list[1].set_name != ''
 
     @pytest.mark.slow
     def test_define_execution_list_multiple_tests(self, project_function_clean):
@@ -244,16 +241,13 @@ class TestDefineExecutionList:
         execution_runner.execution.browsers = ['chrome']
         execution_runner.execution.envs = []
         execution_runner.project = project
-        execution_list = execution_runner._define_execution_list()
-        expected_list = [
-            SimpleNamespace(name='test_one_001', data_set={'col1': 'a', 'col2': 'b'}, secrets={},
-                            browser='chrome', reportdir=None, env=None),
-            SimpleNamespace(name='test_one_001', data_set={'col1': 'c', 'col2': 'd'}, secrets={},
-                            browser='chrome', reportdir=None, env=None),
-            SimpleNamespace(name='test_two_001', data_set={}, secrets={},
-                            browser='chrome', reportdir=None, env=None)
-        ]
-        assert execution_list == expected_list
+        exec_list = execution_runner._define_execution_list()
+        assert exec_list[0].name == 'test_one_001'
+        assert exec_list[0].data_set == {'col1': 'a', 'col2': 'b'}
+        assert exec_list[1].name == 'test_one_001'
+        assert exec_list[1].data_set == {'col1': 'c', 'col2': 'd'}
+        assert exec_list[2].name == 'test_two_001'
+        assert exec_list[2].data_set == {}
 
     @pytest.mark.slow
     def test_define_execution_list_multiple_envs(self, project_function_clean):
@@ -277,14 +271,11 @@ class TestDefineExecutionList:
         execution_runner.execution.browsers = ['chrome']
         execution_runner.execution.envs = ['stage', 'preview']
         execution_runner.project = project
-        execution_list = execution_runner._define_execution_list()
-        expected_list = [
-            SimpleNamespace(name='test_one_003', data_set={'env': {'url': 'xxx', 'name': 'stage'}}, secrets={},
-                            browser='chrome', reportdir=None, env='stage'),
-            SimpleNamespace(name='test_one_003', data_set={'env': {'url': 'yyy', 'name': 'preview'}}, secrets={},
-                            browser='chrome', reportdir=None, env='preview')
-        ]
-        assert execution_list == expected_list
+        exec_list = execution_runner._define_execution_list()
+        assert exec_list[0].data_set == {'env': {'url': 'xxx', 'name': 'stage'}}
+        assert exec_list[0].env == 'stage'
+        assert exec_list[1].data_set == {'env': {'url': 'yyy', 'name': 'preview'}}
+        assert exec_list[1].env == 'preview'
 
     @pytest.mark.slow
     def test_define_execution_list_multiple_drivers(self, project_function_clean):
@@ -306,10 +297,10 @@ class TestDefineExecutionList:
         execution_runner.project = project
         execution_list = execution_runner._define_execution_list()
         expected_list = [
-            SimpleNamespace(name='test_one_004', data_set={}, secrets={}, browser='chrome', reportdir=None, env=None),
-            SimpleNamespace(name='test_one_004', data_set={}, secrets={}, browser='firefox', reportdir=None, env=None),
-            SimpleNamespace(name='test_two_004', data_set={}, secrets={}, browser='chrome', reportdir=None, env=None),
-            SimpleNamespace(name='test_two_004', data_set={}, secrets={}, browser='firefox', reportdir=None, env=None)
+            SimpleNamespace(name='test_one_004', data_set={}, secrets={}, browser='chrome', reportdir=None, env=None, set_name=''),
+            SimpleNamespace(name='test_one_004', data_set={}, secrets={}, browser='firefox', reportdir=None, env=None, set_name=''),
+            SimpleNamespace(name='test_two_004', data_set={}, secrets={}, browser='chrome', reportdir=None, env=None, set_name=''),
+            SimpleNamespace(name='test_two_004', data_set={}, secrets={}, browser='firefox', reportdir=None, env=None, set_name='')
         ]
         assert execution_list == expected_list
 
@@ -325,7 +316,7 @@ class TestDefineExecutionList:
         test.create_test(project, test_name_one)
         # test data for test one
         tdata = [
-            {'col1': 'a' },
+            {'col1': 'a'},
             {'col1': 'b'}
         ]
         test_data.save_external_test_data_file(project, test_name_one, tdata)
@@ -345,34 +336,31 @@ class TestDefineExecutionList:
         execution_runner.execution.browsers = ['chrome', 'firefox']
         execution_runner.execution.envs = ['stage', 'preview']
         execution_runner.project = project
-        execution_list = execution_runner._define_execution_list()
-        expected_list = [
-            SimpleNamespace(browser='chrome', data_set={'col1': 'a', 'env': {'url': 'xxx', 'name': 'stage'}},
-                            secrets={}, name='test_one_005', reportdir=None, env='stage'),
-            SimpleNamespace(browser='firefox', data_set={'col1': 'a', 'env': {'url': 'xxx', 'name': 'stage'}},
-                            secrets={}, name='test_one_005', reportdir=None, env='stage'),
-            SimpleNamespace(browser='chrome', data_set={'col1': 'a', 'env': {'url': 'yyy', 'name': 'preview'}},
-                            secrets={}, name='test_one_005', reportdir=None, env='preview'),
-            SimpleNamespace(browser='firefox', data_set={'col1': 'a', 'env': {'url': 'yyy', 'name': 'preview'}},
-                            secrets={}, name='test_one_005', reportdir=None, env='preview'),
-            SimpleNamespace(browser='chrome', data_set={'col1': 'b', 'env': {'url': 'xxx', 'name': 'stage'}},
-                            secrets={}, name='test_one_005', reportdir=None, env='stage'),
-            SimpleNamespace(browser='firefox', data_set={'col1': 'b', 'env': {'url': 'xxx', 'name': 'stage'}},
-                            secrets={}, name='test_one_005', reportdir=None, env='stage'),
-            SimpleNamespace(browser='chrome', data_set={'col1': 'b', 'env': {'url': 'yyy', 'name': 'preview'}},
-                            secrets={}, name='test_one_005', reportdir=None, env='preview'),
-            SimpleNamespace(browser='firefox', data_set={'col1': 'b', 'env': {'url': 'yyy', 'name': 'preview'}},
-                            secrets={}, name='test_one_005', reportdir=None, env='preview'),
-            SimpleNamespace(browser='chrome', data_set={'env': {'url': 'xxx', 'name': 'stage'}},
-                            secrets={}, name='test_two_005', reportdir=None, env='stage'),
-            SimpleNamespace(browser='firefox', data_set={'env': {'url': 'xxx', 'name': 'stage'}},
-                            secrets={}, name='test_two_005', reportdir=None, env='stage'),
-            SimpleNamespace(browser='chrome', data_set={'env': {'url': 'yyy', 'name': 'preview'}},
-                            secrets={}, name='test_two_005', reportdir=None, env='preview'),
-            SimpleNamespace(browser='firefox', data_set={'env': {'url': 'yyy','name': 'preview'}},
-                            secrets={}, name='test_two_005', reportdir=None, env='preview')
-        ]
-        assert execution_list == expected_list
+        ex = execution_runner._define_execution_list()
+        assert ex[0].browser == 'chrome' and ex[0].env == 'stage' and \
+               ex[0].data_set == {'col1': 'a', 'env': {'url': 'xxx', 'name': 'stage'}}
+        assert ex[1].browser == 'firefox' and ex[1].env == 'stage' and \
+               ex[1].data_set == {'col1': 'a', 'env': {'url': 'xxx', 'name': 'stage'}}
+        assert ex[2].browser == 'chrome' and ex[2].env == 'preview' and \
+               ex[2].data_set == {'col1': 'a', 'env': {'url': 'yyy', 'name': 'preview'}}
+        assert ex[3].browser == 'firefox' and ex[3].env == 'preview' and \
+               ex[3].data_set == {'col1': 'a', 'env': {'url': 'yyy', 'name': 'preview'}}
+        assert ex[4].browser == 'chrome' and ex[4].env == 'stage' and \
+               ex[4].data_set == {'col1': 'b', 'env': {'url': 'xxx', 'name': 'stage'}}
+        assert ex[5].browser == 'firefox' and ex[5].env == 'stage' and \
+               ex[5].data_set == {'col1': 'b', 'env': {'url': 'xxx', 'name': 'stage'}}
+        assert ex[6].browser == 'chrome' and ex[6].env == 'preview' and \
+               ex[6].data_set == {'col1': 'b', 'env': {'url': 'yyy', 'name': 'preview'}}
+        assert ex[7].browser == 'firefox' and ex[7].env == 'preview' and \
+               ex[7].data_set == {'col1': 'b', 'env': {'url': 'yyy', 'name': 'preview'}}
+        assert ex[8].browser == 'chrome' and ex[8].env == 'stage' and \
+               ex[8].data_set == {'env': {'url': 'xxx', 'name': 'stage'}}
+        assert ex[9].browser == 'firefox' and ex[9].env == 'stage' and \
+               ex[9].data_set == {'env': {'url': 'xxx', 'name': 'stage'}}
+        assert ex[10].browser == 'chrome' and ex[10].env == 'preview' and \
+               ex[10].data_set == {'env': {'url': 'yyy', 'name': 'preview'}}
+        assert ex[11].browser == 'firefox' and ex[11].env == 'preview' and \
+               ex[11].data_set == {'env': {'url': 'yyy', 'name': 'preview'}}
 
     @pytest.mark.slow
     def test_define_execution_list_with_secrets(self, project_function_clean):
@@ -392,47 +380,9 @@ class TestDefineExecutionList:
         execution_runner.project = project
         execution_list = execution_runner._define_execution_list()
         expected_list = [
-            SimpleNamespace(name='test_001', data_set={}, secrets={"a": "secret", "b": "secret02"}, browser='chrome', reportdir=None, env=None)
+            SimpleNamespace(name='test_001', data_set={}, secrets={"a": "secret", "b": "secret02"}, browser='chrome', reportdir=None, env=None, set_name='')
         ]
         assert execution_list == expected_list
-
-
-class TestCreateExecutionDirectory:
-
-    @pytest.mark.slow
-    def test__create_execution_directory_is_suite(self, project_class):
-        """Verify that create_execution_directory works as expected when 
-        a suite is passed on
-        """
-        _, project = project_class.activate()
-        timestamp = utils.get_timestamp()
-        suite_name = 'bar'
-        execution_runner = exc_runner.ExecutionRunner()
-        execution_runner.tests = ['test_foo']
-        execution_runner.project = project
-        execution_runner.is_suite = True
-        execution_runner.suite_name = suite_name
-        execution_runner.timestamp = timestamp
-        execution_runner._create_execution_directory()
-        expected_path = os.path.join(project_class.path, 'reports', suite_name, timestamp)
-        assert os.path.isdir(expected_path)
-
-    @pytest.mark.slow
-    def test__create_execution_directory_is_not_suite(self, project_class):
-        """Verify that create_execution_directory works as expected when 
-        a not suite is passed on
-        """
-        _, project = project_class.activate()
-        test_name = 'foo'
-        timestamp = utils.get_timestamp()
-        execution_runner = exc_runner.ExecutionRunner()
-        execution_runner.test_name = test_name
-        execution_runner.project = project
-        execution_runner.is_suite = False
-        execution_runner.timestamp = timestamp
-        execution_runner._create_execution_directory()
-        expected_path = os.path.join(project_class.path, 'reports', 'single_tests', test_name, timestamp)
-        assert os.path.isdir(expected_path)
 
 
 class TestRunSingleTest:
@@ -447,8 +397,7 @@ class TestRunSingleTest:
         execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
         execution_runner.project = project
         execution_runner.run_test(test_name)
-        test_report_dir = os.path.join(testdir, 'projects', project, 'reports',
-                                       'single_tests', test_name, timestamp)
+        test_report_dir = os.path.join(testdir, 'projects', project, 'reports', test_name, timestamp)
         assert os.path.isdir(test_report_dir)
         items = os.listdir(test_report_dir)
         # test set dir + report.json
@@ -472,8 +421,7 @@ class TestRunSingleTest:
         out, err = capsys.readouterr()
         # number of tests is displayed
         assert 'Tests found: 1 (2 sets)' in out
-        test_report_dir = os.path.join(testdir, 'projects', project, 'reports',
-                                       'single_tests', test_name, timestamp)
+        test_report_dir = os.path.join(testdir, 'projects', project, 'reports', test_name, timestamp)
         assert os.path.isdir(test_report_dir)
         items = os.listdir(test_report_dir)
         # two test set dirs + report.json
@@ -494,8 +442,7 @@ class TestRunSingleTest:
                                                       tags=['alfa'])
         execution_runner.project = project
         execution_runner.run_test(test_name)
-        test_report_dir = os.path.join(testdir, 'projects', project, 'reports',
-                                       'single_tests', test_name, timestamp)
+        test_report_dir = os.path.join(testdir, 'projects', project, 'reports', test_name, timestamp)
         assert os.path.isdir(test_report_dir)
         items = os.listdir(test_report_dir)
         # test set dir + report.json
@@ -516,8 +463,7 @@ class TestRunSingleTest:
         execution_runner.run_test(test_name)
         out, err = capsys.readouterr()
         assert 'No tests found with tag(s): charlie' in out
-        test_report_dir = os.path.join(testdir, 'projects', project, 'reports',
-                                       'single_tests', test_name, timestamp)
+        test_report_dir = os.path.join(testdir, 'projects', project, 'reports', test_name, timestamp)
         assert os.path.isdir(test_report_dir)
         items = os.listdir(test_report_dir)
         # only report.json is present

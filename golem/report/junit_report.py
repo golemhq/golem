@@ -7,18 +7,18 @@ from xml.dom import minidom
 
 from golem.test_runner.conf import ResultsEnum as Results
 from golem.report.execution_report import get_execution_data
-from golem.report.execution_report import suite_execution_path
+from golem.report.execution_report import execution_report_path
 from golem.report.test_report import get_test_debug_log
 
 
-def generate_junit_report(project_name, suite_name, timestamp, report_folder=None,
+def generate_junit_report(project_name, execution_name, timestamp, report_folder=None,
                           report_name=None):
     """Generate a report in JUnit XML format.
 
     Output conforms to https://github.com/jenkinsci/xunit-plugin/blob/master/
     src/main/resources/org/jenkinsci/plugins/xunit/types/model/xsd/junit-10.xsd
     """
-    data = get_execution_data(project=project_name, suite=suite_name, execution=timestamp)
+    data = get_execution_data(project=project_name, suite=execution_name, execution=timestamp)
 
     totals = data['totals_by_result']
     errors = totals.get(Results.CODE_ERROR, 0)
@@ -26,7 +26,7 @@ def generate_junit_report(project_name, suite_name, timestamp, report_folder=Non
     skipped = totals.get(Results.SKIPPED, 0)
 
     testsuites_attrs = {
-        'name': suite_name,
+        'name': execution_name,
         'errors': str(errors),
         'failures': str(failures),
         'tests': str(data['total_tests']),
@@ -70,8 +70,8 @@ def generate_junit_report(project_name, suite_name, timestamp, report_folder=Non
             error_message = ET.SubElement(testcase, error_type, error_data)
 
         # add debug log to /test/system-out node
-        log_text = get_test_debug_log(project_name, timestamp, test['full_name'],
-                                      test['test_set'], suite_name)
+        log_text = get_test_debug_log(project_name, execution_name, timestamp, test['full_name'],
+                                      test['test_set'])
         system_out = ET.SubElement(testcase, 'system-out')
         system_out.text = _clean_illegal_xml_chars(log_text)
 
@@ -79,7 +79,7 @@ def generate_junit_report(project_name, suite_name, timestamp, report_folder=Non
     doc = minidom.parseString(xmlstring).toprettyxml(indent=' ' * 4, encoding='UTF-8')
 
     if not report_folder:
-        report_folder = suite_execution_path(project_name, suite_name, timestamp)
+        report_folder = execution_report_path(project_name, execution_name, timestamp)
     if not report_name:
         report_name = 'report'
     report_path = os.path.join(report_folder, report_name + '.xml')
@@ -107,7 +107,7 @@ def get_or_generate_junit_report(project, suite, timestamp):
       <testdir>/projects/<project>/reports/<suite>/<execution>/report.xml
     """
     report_filename = 'report'
-    report_directory = suite_execution_path(project, suite, timestamp)
+    report_directory = execution_report_path(project, suite, timestamp)
     report_filepath = os.path.join(report_directory, report_filename + '.xml')
     if os.path.isfile(report_filepath):
         xml_string = open(report_filepath, encoding='utf-8').read()

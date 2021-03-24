@@ -210,3 +210,13 @@ def normalize_query(path):
     if os.sep in normalized:
         normalized = normalized.replace(os.sep, '.')
     return normalized
+
+
+def subdirectories(path):
+    """Get a list of direct sub-directories of the given path"""
+    subdirs = []
+    for dirname in os.listdir(path):
+        subpath = os.path.join(path, dirname)
+        if os.path.isdir(os.path.join(path, dirname)):
+            subdirs.append((dirname, subpath))
+    return subdirs

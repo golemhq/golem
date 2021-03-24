@@ -1,17 +1,36 @@
 import base64
 import json
 import os
-import uuid
 
-from golem.core import session, utils
+from golem.core import utils
 from golem.report import execution_report
 
 
 __test__ = False
 
 
-def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
-                       is_single=False, encode_screenshots=False, no_screenshots=False):
+def get_test_file_report_json(project, exec_name, timestamp, test_file, set_name=None):
+    path = test_file_report_dir(test_file, project, exec_name, timestamp, set_name)
+    path = os.path.join(path, 'report.json')
+    if os.path.isfile(path):
+        with open(path, 'r', encoding='utf-8') as json_file:
+            return json.load(json_file)
+    else:
+        return None
+
+
+def get_test_function_report_json(project, exec_name, timestamp, test_file, test_function,
+                                  set_name=None):
+    file_json = get_test_file_report_json(project, exec_name, timestamp, test_file, set_name)
+    for test in file_json:
+        if test['test'] == test_function:
+            return test
+    return None
+
+
+# TODO: rename to 'get_test_report' or 'get_test_file_report'
+def get_test_case_data(project, test_file, execution_name, execution_timestamp=None,
+                       set_name=None, encode_screenshots=False, no_screenshots=False):
     """Retrieves all the data of a test set.
 
     :Args:
@@ -24,7 +43,9 @@ def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
         'module': '',
         'sub_modules': '',
         'name': '',
+        'test_file': '',
         'full_name': '',
+        'set_name': '',
         'description': '',
         'result': '',
         'test_elapsed_time': '',
@@ -37,20 +58,19 @@ def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
         'info_log': [],
         'has_finished': False
     }
-    if is_single:
-        test_dir = os.path.join(session.testdir, 'projects', project, 'reports',
-                                'single_tests', test, execution, test_set)
-    else:
-        test_dir = os.path.join(session.testdir, 'projects', project, 'reports',
-                                suite, execution, test, test_set)
-    report_json_path = os.path.join(test_dir, 'report.json')
+
+    report_dir = test_file_report_dir(test_file, project, execution_name, execution_timestamp,
+                                      test_set)
+    report_json_path = os.path.join(report_dir, 'report.json')
+
     if os.path.isfile(report_json_path):
         test_data['has_finished'] = True
+        test_full_name = '{}.{}'.format(test_file, test_function)
         with open(report_json_path, 'r', encoding='utf-8') as json_file:
             report_data = json.load(json_file)
             module = ''
             sub_modules = []
-            test_split = test.split('.')
+            test_split = test_file.split('.')
             if len(test_split) > 1:
                 module = test_split[0]
                 if len(test_split) > 2:
@@ -58,8 +78,9 @@ def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
             test_data['module'] = module
             test_name = test_split[-1]
             test_data['sub_modules'] = sub_modules
-            test_data['name'] = test_name
-            test_data['full_name'] = test
+            test_data['name'] = test_function
+            test_data['test_file'] = test_file
+            test_data['full_name'] = test_full_name
             test_data['description'] = report_data['description']
             test_data['result'] = report_data['result']
             test_data['test_elapsed_time'] = report_data['test_elapsed_time']
@@ -75,17 +96,17 @@ def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
             elif encode_screenshots:
                 for step in test_data['steps']:
                     if step['screenshot'] is not None:
-                        image_filename = os.path.join(test_dir, step['screenshot'])
+                        image_filename = os.path.join(report_dir, step['screenshot'])
                         b64 = base64.b64encode(open(image_filename, "rb").read()).decode('utf-8')
                         step['screenshot'] = b64
             test_data['test_set'] = test_set
-            test_data['execution'] = execution
+            test_data['execution'] = execution_timestamp
             test_data['data'] = report_data['test_data']
             if 'set_name' in report_data:
                 test_data['set_name'] = report_data['set_name']
 
-    debug_log_path = os.path.join(test_dir, 'execution_debug.log')
-    info_log_path = os.path.join(test_dir, 'execution_info.log')
+    debug_log_path = os.path.join(report_dir, 'execution_debug.log')
+    info_log_path = os.path.join(report_dir, 'execution_info.log')
     if os.path.isfile(debug_log_path):
         with open(debug_log_path, encoding='utf-8') as log_file:
             log = log_file.readlines()
@@ -97,26 +118,29 @@ def get_test_case_data(project, test, suite=None, execution=None, test_set=None,
     return test_data
 
 
-def test_report_directory(project, suite, timestamp, test, test_set):
-    execdir = execution_report.suite_execution_path(project, suite, timestamp)
-    return os.path.join(execdir, test, test_set)
-
-
-def test_report_directory_single_test(project, test, timestamp, test_set):
-    execdir = execution_report.single_test_execution_path(project, test, timestamp)
-    return os.path.join(execdir, test_set)
-
-
-def _get_test_log(project, timestamp, test, test_set, suite=None, level='DEBUG'):
-    if suite is None:
-        test_execdir = test_report_directory_single_test(project, test, timestamp, test_set)
+def test_file_report_dir(test_name, project=None, execution_name=None, timestamp=None,
+                         set_name='', execdir=None):
+    if execdir is None:
+        execdir = execution_report.execution_report_path(project, execution_name, timestamp)
+    if set_name:
+        folder_name = '{}.{}'.format(test_name, set_name)
     else:
-        test_execdir = test_report_directory(project, suite, timestamp, test, test_set)
+        folder_name = test_name
+    return os.path.join(execdir, folder_name)
+
+
+def test_function_report_dir(project, exec_name, timestamp, test_file, test_function, set_name=''):
+    test_file_report_path = test_file_report_dir(test_file, project, exec_name, timestamp, set_name)
+    return os.path.join(test_file_report_path, test_function)
+
+
+def _get_test_log(project, exec_name, timestamp, test, test_set='', level='DEBUG'):
+    report_dir = test_file_report_dir(test, project, exec_name, timestamp, test_set)
 
     if level == 'DEBUG':
-        logpath = os.path.join(test_execdir, 'execution_debug.log')
+        logpath = os.path.join(report_dir, 'execution_debug.log')
     elif level == 'INFO':
-        logpath = os.path.join(test_execdir, 'execution_debug.log')
+        logpath = os.path.join(report_dir, 'execution_info.log')
     else:
         raise ValueError
 
@@ -128,44 +152,40 @@ def _get_test_log(project, timestamp, test, test_set, suite=None, level='DEBUG')
         return None
 
 
-def get_test_debug_log(project, timestamp, test, test_set, suite=None):
-    return _get_test_log(project, timestamp, test, test_set, suite=suite, level='DEBUG')
+def get_test_debug_log(project, exec_name, timestamp, test, test_set=''):
+    return _get_test_log(project, exec_name, timestamp, test, test_set=test_set, level='DEBUG')
 
 
-def get_test_info_log(project, timestamp, test, test_set, suite=None):
-    return _get_test_log(project, timestamp, test, test_set, suite=suite, level='INFO')
+def get_test_info_log(project, exec_name, timestamp, test, test_set=''):
+    return _get_test_log(project, exec_name, timestamp, test, test_set=test_set, level='INFO')
 
 
-def create_report_directory(execution_directory, test_case_name, is_suite):
-    """Create directory to store a test set report.
-
-    execution_directory takes the following format for suites:
-      <testdir>/projects/<project>/reports/<suite_name>/<timestamp>/
-    and this format for single tests
-      <testdir>/projects/<project>/reports/<suite_name>/<timestamp>/
-
-    The result for suites is:
-      <execution_directory>/<test_name>/<set_name>/
-    and for single tests is:
-      <execution_directory>/<set_name>/
-    """
-    set_name = 'set_' + str(uuid.uuid4())[:6]
-    # create suite execution folder in reports directory
-    if is_suite:
-        report_directory = os.path.join(execution_directory, test_case_name, set_name)
+def create_test_file_report_dir(execution_report_dir, test_name, set_name):
+    """Create the directory for the report for a test file.
+    If set_name is '':
+      <execution_report_dir>/<test_file>/
     else:
-        report_directory = os.path.join(execution_directory, set_name)
-    if not os.path.isdir(report_directory):
-        try:
-            os.makedirs(report_directory)
-        except:
-            pass
-    return report_directory
+      <execution_report_dir>/<test_file>.<set_name>/
+    """
+    path = test_file_report_dir(test_name, execdir=execution_report_dir, set_name=set_name)
+    os.makedirs(path, exist_ok=True)
+    return path
 
 
-def generate_report(report_directory, test_case_name, test_data, result):
-    """Generate the json report for a test set."""
-    json_report_path = os.path.join(report_directory, 'report.json')
+def create_test_function_report_dir(test_file_report_dir, test_function_name):
+    """Create directory to store a test function report.
+    The result is:
+      <test_file_report_dir>/<test_function_name>/
+    """
+    path = os.path.join(test_file_report_dir, test_function_name)
+
+    os.makedirs(path, exist_ok=True)
+    return path
+
+
+def generate_report(test_file_name, result, test_data, reportdir):
+    """Adds the report of a test function to a test_file report.json"""
+    json_report_path = os.path.join(reportdir, 'report.json')
     # short_error = ''
     # if result['error']:
     #     short_error = '\n'.join(result['error'].split('\n')[-2:])
@@ -198,17 +218,26 @@ def generate_report(report_directory, test_case_name, test_data, result):
         output_browser = 'firefox (remote)'
 
     report = {
-        'test_case': test_case_name,
+        'test_file': test_file_name,
+        'test': result['name'],
+        'set_name': result['set_name'],
+        'environment': env_name,
         'result': result['result'],
-        'steps': result['steps'],
-        'errors': result['errors'],
         'description': result['description'],
         'browser': output_browser,
         'test_data': serialized_data,
-        'environment': env_name,
-        'set_name': result['set_name'],
-        'test_elapsed_time': result['test_elapsed_time'],
-        'test_timestamp': result['test_timestamp']
+        'steps': result['steps'],
+        'errors': result['errors'],
+        'test_elapsed_time': result['test_elapsed_time'],  # TODO elapsed_time
+        'test_timestamp': result['test_timestamp']  # TODO timestamp
     }
+    if os.path.isfile(json_report_path):
+        with open(json_report_path, 'r', encoding='utf-8') as json_file:
+            report_data = json.load(json_file)
+    else:
+        report_data = []
+
+    report_data.append(report)
+
     with open(json_report_path, 'w', encoding='utf-8') as json_file:
-        json.dump(report, json_file, indent=4, ensure_ascii=False)
+        json.dump(report_data, json_file, indent=4, ensure_ascii=False)

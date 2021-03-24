@@ -72,7 +72,7 @@ class TestGenerateJunitReport:
         # testsuites/testsuite/code_error_test/system-out
         system_out = next(node for node in test if node.tag == 'system-out')
         assert 'INFO Browser: chrome' in system_out.text
-        assert 'INFO Test Result: CODE ERROR' in system_out.text
+        assert 'ERROR SyntaxError: unexpected EOF while parsing' in system_out.text
         # testsuites/testsuite/error_test
         test = next(test for test in testsuite if test.attrib['classname'] == error_test)
         assert test.attrib == {

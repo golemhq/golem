@@ -39,7 +39,7 @@ class TestRunCommand:
         commands.run_command(project=project, test_query=suite_name)
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[2].message == 'Test Result: SUCCESS'
+        assert records[3].message == 'Test Result: SUCCESS'
         # the execution report is created for suite
         path = os.path.join(project_session.path, 'reports', suite_name)
         assert os.path.isdir(path)
@@ -56,7 +56,7 @@ class TestRunCommand:
         commands.run_command(project=project, test_query=suite_name)
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[2].message == 'Test Result: SUCCESS'
+        assert records[3].message == 'Test Result: SUCCESS'
         out, err = capsys.readouterr()
         assert 'Tests found: 1' in out
 
@@ -70,7 +70,7 @@ class TestRunCommand:
         commands.run_command(project=project, test_query=with_extension)
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[2].message == 'Test Result: SUCCESS'
+        assert records[3].message == 'Test Result: SUCCESS'
 
     @pytest.mark.slow
     def test_golem_run_suite_py_in_folder(self, project_session, test_utils, caplog):
@@ -83,7 +83,7 @@ class TestRunCommand:
         commands.run_command(project=project, test_query=suite_query)
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[2].message == 'Test Result: SUCCESS'
+        assert records[3].message == 'Test Result: SUCCESS'
 
     @pytest.mark.slow
     def test_golem_run_test(self, project_session, test_utils, caplog):
@@ -92,9 +92,9 @@ class TestRunCommand:
         commands.run_command(project=project, test_query=test_name)
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[2].message == 'Test Result: SUCCESS'
+        assert records[3].message == 'Test Result: SUCCESS'
         # the execution report is created for suite
-        path = os.path.join(project_session.path, 'reports', 'single_tests', test_name)
+        path = os.path.join(project_session.path, 'reports', test_name)
         assert os.path.isdir(path)
         # only one timestamp
         assert len(os.listdir(path)) == 1
@@ -107,9 +107,9 @@ class TestRunCommand:
         commands.run_command(project=project, test_query=test_query)
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[2].message == 'Test Result: SUCCESS'
+        assert records[3].message == 'Test Result: SUCCESS'
         # the execution report is created for suite
-        path = os.path.join(project_session.path, 'reports', 'single_tests', test_name)
+        path = os.path.join(project_session.path, 'reports', test_name)
         assert os.path.isdir(path)
         # only one timestamp
         assert len(os.listdir(path)) == 1
@@ -122,7 +122,7 @@ class TestRunCommand:
         commands.run_command(project=project, test_query=test_name)
         records = caplog.records
         assert records[0].message == 'Test execution started: {}'.format(test_name)
-        assert records[4].message == 'Test Result: SUCCESS'
+        assert records[3].message == 'Test Result: SUCCESS'
 
     @pytest.mark.slow
     def test_golem_run_test_py_in_folder(self, project_function, test_utils, caplog):
@@ -131,7 +131,7 @@ class TestRunCommand:
         commands.run_command(project=project, test_query='folder/test_one.py')
         records = caplog.records
         assert records[0].message == 'Test execution started: folder.test_one'
-        assert records[4].message == 'Test Result: SUCCESS'
+        assert records[3].message == 'Test Result: SUCCESS'
 
     @pytest.mark.slow
     @pytest.mark.skipif("os.name != 'nt'")
@@ -142,7 +142,7 @@ class TestRunCommand:
         commands.run_command(project=project, test_query='folder\\test_one.py')
         records = caplog.records
         assert records[0].message == 'Test execution started: folder.test_one'
-        assert records[4].message == 'Test Result: SUCCESS'
+        assert records[3].message == 'Test Result: SUCCESS'
 
     @pytest.mark.slow
     def test_golem_run_directory(self, project_function, test_utils):

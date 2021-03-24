@@ -562,6 +562,23 @@ class TestTestCode:
         assert test.code == SAMPLE_TEST_CONTENT
 
 
+class TestGetTestFunctions:
+
+    def test_get_test_functions(self, project_class, test_utils):
+        testdir, project = project_class.activate()
+        test_name = 'test_file_one'
+        content = ('def foo(data):\n'
+                   '  pass\n'
+                   'def test_one(data):\n'
+                   '  pass\n'
+                   'def test_two(data):\n'
+                   '  pass\n'
+                   'test_three = 2\n')
+        test_utils.create_test(project, test_name, content)
+        test = test_module.Test(project, test_name)
+        assert test.test_functions == ['test_one', 'test_two']
+
+
 class TestTestComponents:
 
     def test_test_components(self, project_session, test_utils):
@@ -589,6 +606,7 @@ class TestTestComponents:
                                 'type': 'function-call'}]
         assert components['steps']['test'] == expected_test_steps
         assert components['steps']['teardown'] == []
+        assert components['test_functions'] == ['test']
 
     def test_test_components_empty_test(self, project_session, test_utils):
         _, project = project_session.activate()
@@ -599,6 +617,7 @@ class TestTestComponents:
         assert test_content['steps']['setup'] == []
         assert test_content['steps']['test'] == []
         assert test_content['steps']['teardown'] == []
+        assert test_content['test_functions'] == ['test']
 
     def test_test_components_pages(self, project_session, test_utils):
         """components['pages'] contains the imported pages and the pages
