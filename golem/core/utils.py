@@ -172,6 +172,7 @@ def get_valid_filename(s):
     return re.sub(r'(?u)[^-\w.]', '', s)
 
 
+# TODO: capture ctrl+c and stop gracefully
 def prompt_yes_no(question, default=True):
     """Prompt the user through the console for yes or no"""
     while True:

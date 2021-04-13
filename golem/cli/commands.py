@@ -1,6 +1,8 @@
 import os
 import sys
 
+import webdriver_manager
+
 import golem
 from golem.core import errors
 from golem.core import session
@@ -202,7 +204,7 @@ def createsuperuser_command(username, email, password, no_input=False):
         print('Superuser {} was created successfully.'.format(username))
 
 
-def createdirectory_command(dir_name, no_confirm=False):
+def createdirectory_command(dir_name, no_confirm=False, download_drivers=True):
     """Create a new Golem test directory
 
     dir_name must be an absolute or relative path.
@@ -210,7 +212,7 @@ def createdirectory_command(dir_name, no_confirm=False):
     is False the user will be prompted to continue.
     """
     abspath = os.path.abspath(dir_name)
-    if os.path.exists(abspath) and os.listdir(abspath):
+    if os.path.isdir(abspath) and os.listdir(abspath):
         # directory is not empty
         if not no_confirm:
             msg = 'Directory {} is not empty, continue? [Y/n]'.format(dir_name)
@@ -220,10 +222,20 @@ def createdirectory_command(dir_name, no_confirm=False):
             sys.exit('Error: target directory is already an existing Golem test directory')
     session.testdir = abspath
     test_directory.create_test_directory(abspath)
+
     print('New golem test directory created at {}'.format(abspath))
-    print('Use credentials to access the GUI module:')
-    print('user: admin')
-    print('password: admin')
+    print('Use these credentials to access the GUI module:')
+    print('  user:     admin')
+    print('  password: admin')
+
+    if download_drivers:
+        drivers_folder = os.path.join(abspath, 'drivers')
+        update = True
+        if not no_confirm:
+            msg = 'Would you like to download ChromeDriver now? [Y/n]'
+            update = utils.prompt_yes_no(msg, True)
+        if update:
+            webdriver_manager.update('chrome', drivers_folder)
 
 
 def display_version():
