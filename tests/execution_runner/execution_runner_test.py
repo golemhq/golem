@@ -638,7 +638,10 @@ class TestRunSuite:
         out, err = capsys.readouterr()
         expected = ("InvalidTagExpression: unknown expression <class '_ast.Assign'>, the "
                     "only valid operators for tag expressions are: 'and', 'or' & 'not'")
-        assert expected in out
+        # TODO: py 3.9
+        expected2 = ("InvalidTagExpression: unknown expression <class 'ast.Assign'>, the "
+                    "only valid operators for tag expressions are: 'and', 'or' & 'not'")
+        assert expected in out or expected2 in out
         data = exec_report.get_execution_data(project=project, suite=suite_name, execution=timestamp)
         assert data['has_finished'] is True
         assert data['total_tests'] == 0

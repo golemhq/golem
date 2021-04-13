@@ -90,7 +90,10 @@ class TestFilterTestsByTags:
             tags_manager.filter_tests_by_tags(project, _project_with_tags.tests, tags=['foo = 2'])
         expected = ("unknown expression <class '_ast.Assign'>, the only valid "
                     "operators for tag expressions are: 'and', 'or' & 'not'")
-        assert expected in str(excinfo.value)
+        # TODO: message differs for py 3.9
+        expected_ver2 = ("unknown expression <class 'ast.Assign'>, the only valid "
+                         "operators for tag expressions are: 'and', 'or' & 'not'")
+        assert expected in str(excinfo.value) or expected_ver2 in str(excinfo.value)
 
 
 class TestGetTestsTags:
