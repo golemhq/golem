@@ -47,7 +47,7 @@ setup(
     setup_requires=['setuptools-pep8'],
     install_requires=['Flask>=0.12.2',
                       'Flask-login>=0.4.0',
-                      'selenium>=3.6.0',
+                      'selenium>=3.6.0, <4.0.0a1',
                       'requests>=2.18.4',
                       'py-webdriver-manager'
                       ],
