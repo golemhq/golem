@@ -152,7 +152,7 @@ def match_latest_executable_path(glob_path, testdir):
     """
     found_files = []
     glob_path = os.path.normpath(glob_path)
-    if not os.path.isabs(glob_path):
+    if not os.path.isabs(glob_path) and testdir != None:
         glob_path = os.path.join(testdir, glob_path)
     # Note: recursive=True arg is not supported
     # in Python 3.4, so '**' wildcard is not supported
