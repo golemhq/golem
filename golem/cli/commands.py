@@ -1,7 +1,8 @@
 import os
 import sys
 
-import webdriver_manager
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 
 import golem
 from golem.core import errors
@@ -229,13 +230,12 @@ def createdirectory_command(dir_name, no_confirm=False, download_drivers=True):
     print('  password: admin')
 
     if download_drivers:
-        drivers_folder = os.path.join(abspath, 'drivers')
         update = True
         if not no_confirm:
             msg = 'Would you like to download ChromeDriver now? [Y/n]'
             update = utils.prompt_yes_no(msg, True)
         if update:
-            webdriver_manager.update('chrome', drivers_folder)
+            webdriver.Chrome(ChromeDriverManager(path=abspath).install())
 
 
 def display_version():
