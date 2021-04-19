@@ -174,6 +174,24 @@ def _screenshot_on_step():
     """
     _screenshot_on_condition(execution.settings['screenshot_on_step'])
 
+def _highlight_on_step(element):
+    """Take a screenshot if settings['screenshot_on_step']
+    Append the screenshot to the last step.
+    The last step must not have a screenshot already.
+    Use the last step message as the screenshot filename.
+    """
+    _highlight_on_condition(execution.settings['highlight_on_step'],element)
+
+def _highlight_on_condition(condition,element):
+    if len(execution.steps) > 0 and condition:
+        driver = element._parent
+        def apply_style(s):
+          driver.execute_script("arguments[0].setAttribute('style', arguments[1]);",
+                              element, s)
+        original_style = element.get_attribute('style')
+        apply_style("background: yellow; border: 2px solid red;")
+        time.sleep(.1)
+        apply_style(original_style)
 
 @contextmanager
 def _step(message, run_wait_hook=True, take_screenshots=True):
