@@ -42,7 +42,8 @@ const ExecutionReport = new function(){
 	this.netTime = undefined;
 	this.tests = {};
 	this.params = {};
-
+        this.statustimeout = false
+	
 	this.getReportData = function(){
 		 $.ajax({
             url: "/api/report/suite/execution",
@@ -57,13 +58,21 @@ const ExecutionReport = new function(){
 	  			if(executionData.has_finished){
 	  				ExecutionReport.suiteFinished = true;
 	  				ExecutionReport.netTime = executionData.net_elapsed_time;
-                    $(".spinner").hide()
+                                        $(".spinner").hide()
+					if(executionData.totals_by_result['success'] == executionData.total_tests && ExecutionReport.statustimeout == true ) {
+				      Main.Utils.toast('success', 'Completed', 10000)
+					}
+					else if (ExecutionReport.statustimeout == true ){
+						Main.Utils.toast('error', 'Completed', 10000)
+					}
 	  			}
 	  			else{
+				    ExecutionReport.statustimeout = true;
 	  			    $(".spinner").show();
 					if(ExecutionReport.queryDelay <= 10000){
 						ExecutionReport.queryDelay += 50
 					}
+					Main.Utils.toast('info', 'Running', ExecutionReport.queryDelay - 300)
 					setTimeout(function(){ExecutionReport.getReportData()}, ExecutionReport.queryDelay);
 				}
 	  			ExecutionReport.loadReport(executionData);
