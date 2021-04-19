@@ -16,6 +16,7 @@ def interactive(settings, cli_browsers):
     remote_browsers = settings_manager.get_remote_browsers(session.settings)
     default_browsers = gui_utils.get_supported_browsers_suggestions()
     browser_defs = define_browsers(browsers, remote_browsers, default_browsers)
+    execution.testdir = session.testdir
     execution.browser_definition = browser_defs[0]
     execution.settings = settings
     execution.settings['interactive'] = True
