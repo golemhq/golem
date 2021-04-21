@@ -48,7 +48,7 @@ class TestDirectory:
         self.path = os.path.join(self.basedir, self.name)
         self.settings = None
         session.testdir = self.path
-        commands.createdirectory_command(self.path)
+        commands.createdirectory_command(self.path, download_drivers=False)
 
     def activate(self):
         session.testdir = self.path

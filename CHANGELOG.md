@@ -1,10 +1,12 @@
 # Changelog
 
-## [Unreleased]
+## [0.9.2] - 2021-04-15
 
 ### Added
 
 - Suite code view
+
+- Download ChromeDriver in 'golem-admin createdirectory' command
 
 ## [0.9.1] - 2020-08-03
 

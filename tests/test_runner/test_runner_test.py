@@ -95,7 +95,10 @@ step('this step wont be run')
         assert r[1].message == 'Browser: chrome'
         assert r[2].levelname == 'ERROR'
         error_contains = 'def test(data)\n                 ^\nSyntaxError: invalid syntax'
-        assert error_contains in r[2].message
+        error_contains_ver2 = 'def test(data)\n                  ^\nSyntaxError: invalid syntax'
+        # TODO: diff between py 3.9 and py < 3.9
+        assert error_contains in records[2].message or error_contains_ver2 in records[2].message
+        assert records[3].message == CODE_ERROR_MESSAGE
         # verify report.json
         report = runfix.read_report()
         assert len(report) == 1
@@ -112,9 +115,12 @@ step('this step wont be run')
         assert report['steps'] == []
         assert len(report['errors']) == 1
         assert report['errors'][0]['message'] == 'SyntaxError: invalid syntax'
-        assert error_contains in report['errors'][0]['description']
-        assert report['test_elapsed_time'] is None
-        assert len(report['test_timestamp']) > 0
+        assert error_contains in report['errors'][0]['description'] or error_contains_ver2 in report['errors'][0]['description']
+        assert report['result'] == ResultsEnum.CODE_ERROR
+        assert report['set_name'] == ''
+        assert report['steps'] == []
+        assert report['test_case'] == runfix.test_name
+        assert report['test_data'] == {}
 
     def test_import_error_page(self, runfix, caplog, test_utils):
         """The test fails with 'code error' when an imported page has a syntax error"""

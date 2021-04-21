@@ -45,17 +45,15 @@ var Test = new function(){
         Test.renderSectionSteps(steps.teardown, 'teardown');
     }
 
-    this.renderSectionSteps = function(steps, sectionName){
+    this.renderSectionSteps = function(steps, sectionName) {
         if(steps.length == 0){
             Test.addFirstStepInput(sectionName)
-        }
-        else{
-            steps.forEach(function(step){
+        } else{
+            steps.forEach(function(step) {
                 let section = Test.Utils.stepSection(sectionName);
-                if(step.type == 'function-call'){
+                if(step.type == 'function-call') {
                     section.append(Test.functionCallStepTemplate(step.function_name, step.parameters))
-                }
-                else if(step.type == 'code-block'){
+                } else if(step.type == 'code-block') {
                     Test.addCodeBlockStep(section, step.code)
                 }
             })
@@ -75,7 +73,7 @@ var Test = new function(){
         editor.focus()
     }
 
-    this.initializeCodeBlock = function(step, code){
+    this.initializeCodeBlock = function(step, code) {
         code = code || '';
         let editor = CodeMirror(step.find('.code-block')[0], {
             value: code,
@@ -114,9 +112,9 @@ var Test = new function(){
             else{
                 Test.importedPages = Test.importedPages.filter(page => page.name !== pageName)
                 Test.importedPages.push({
-                    'name': pageName,
-                    'elements': result.components.elements,
-                    'functions': result.components.functions
+                    name: pageName,
+                    elements: result.components.elements,
+                    functions: result.components.functions
                 });
                 Test.refreshPagesAutocomplete()
                 Test.refreshElementInputsAutocomplete();
@@ -125,13 +123,13 @@ var Test = new function(){
         })
     }
 
-    this.refreshActionInputsAutocomplete = function(){
+    this.refreshActionInputsAutocomplete = function() {
         let lookup = []
-        Test.golemActions.forEach(function(action){
+        Test.golemActions.forEach(function(action) {
             lookup.push({value: action.name, data: action.description})
         })
-        Test.importedPages.forEach(function(page){
-            page.functions.forEach(function(func){
+        Test.importedPages.forEach(function(page) {
+            page.functions.forEach(function(func) {
                 lookup.push({value: func.partial_name, data: func.description})
             })
         });
@@ -215,8 +213,7 @@ var Test = new function(){
         let actionParameters;
         if(Test.Utils.isGolemAction(elemValue)){
             actionParameters = Test.golemActions.filter(x => x.name == elemValue)[0].parameters;
-        }
-        else{
+        } else {
             // this is a page object function
             actionParameters = Test.Utils.getPageFunctionParameters(elemValue)
         }
@@ -517,25 +514,15 @@ var Test = new function(){
             }
         }
 
-        this.watchForUnsavedChanges = function(){
-            $("#tags").on("change keyup paste", function(){
-                Test.unsavedChanges = true;
-            });
-            $(".page-objects-input").on("change keyup paste", function(){
-                Test.unsavedChanges = true;
-            });
-            $(".step-first-input").on("change keyup paste", function(){
-                Test.unsavedChanges = true;
-            });
-            $(".parameter-input").on("change keyup paste", function(){
-                Test.unsavedChanges = true;
-            });
-            $("#description").on("change keyup paste", function(){
-                Test.unsavedChanges = true;
-            });
-            $("#dataTable").on("change keyup paste", function(){
-                Test.unsavedChanges = true;
-            });
+        this.watchForUnsavedChanges = function() {
+            let unsavedChangesTrue = () => Test.unsavedChanges = true;
+
+            $("#tags").on("change keyup paste", unsavedChangesTrue);
+            $(".page-objects-input").on("change keyup paste", unsavedChangesTrue);
+            $(".step-first-input").on("change keyup paste", unsavedChangesTrue);
+            $(".parameter-input").on("change keyup paste", unsavedChangesTrue);
+            $("#description").on("change keyup paste", unsavedChangesTrue);
+            $("#dataTable").on("change keyup paste", unsavedChangesTrue);
 
             window.addEventListener("beforeunload", function (e) {
                 if(Test.unsavedChanges){
@@ -546,12 +533,12 @@ var Test = new function(){
             });
         }
 
-        this.deleteStep = function(elem){
+        this.deleteStep = function(elem) {
             $(elem).closest('.step').remove();
             Test.unsavedChanges = true;
         }
 
-        this.getSteps = function(){
+        this.getSteps = function() {
             return {
                 'setup': Test.Utils.parseSteps($("#setupSteps .step")),
                 'test': Test.Utils.parseSteps($("#testSteps .step")),
@@ -559,57 +546,53 @@ var Test = new function(){
             }
         }
 
-        this.parseSteps = function(steps){
+        this.parseSteps = function(steps) {
             let parsedSteps = [];
-            steps.each(function(){
-                if(this.getAttribute('step-type') == 'function-call'){
+            steps.each(function() {
+                if(this.getAttribute('step-type') == 'function-call') {
                     let thisStep = Test.Utils.getFunctionCallStepValues(this);
-                    if(thisStep.action.length > 0){
+                    if(thisStep.action.length > 0)
                         parsedSteps.push(thisStep);
-                    }
-                }
-                else{
+                } else {
                     let thisStep = Test.Utils.getCodeBlockStepValues(this);
-                    if(thisStep.code.trim()){
-                        parsedSteps.push(thisStep)
-                    }
+                    if(thisStep.code.trim())
+                        parsedSteps.push(thisStep);
                 }
             })
             return parsedSteps
         }
 
-        this.getFunctionCallStepValues = function(elem){
+        this.getFunctionCallStepValues = function(elem) {
             let thisStep = {
-                'type': 'function-call',
-                'action': '',
-                'parameters': []
+                type: 'function-call',
+                action: '',
+                parameters: []
             }
-            if($(elem).find('.step-first-input').val().length > 0){
+            if($(elem).find('.step-first-input').val().length > 0) {
                 thisStep.action = $(elem).find('.step-first-input').val();
-                $(elem).find('.parameter-input').each(function(){
-                    if($(this).val().length > 0){
+                $(elem).find('.parameter-input').each(function() {
+                    if($(this).val().length > 0)
                         thisStep.parameters.push($(this).val());
-                    }
                 });
             }
             return thisStep
         }
 
-        this.getCodeBlockStepValues = function(elem){
+        this.getCodeBlockStepValues = function(elem) {
             let editor = $(elem).find('.CodeMirror').get(0).CodeMirror;
             return {
-                'type': 'code-block',
-                'code': editor.getValue()
+                type: 'code-block',
+                code: editor.getValue()
             }
         }
 
-        this.stepSection = function(section){
+        this.stepSection = function(section) {
             if(section == 'setup') return $("#setupSteps .steps")
             if(section == 'test') return $("#testSteps .steps")
             if(section == 'teardown') return $("#teardownSteps .steps")
         }
 
-        this.onSkipCheckboxChange = function(){
+        this.onSkipCheckboxChange = function() {
             if($("#skipCheckbox").prop('checked')) {
                 $("#skipReason").show();
             } else {

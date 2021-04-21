@@ -1,15 +1,12 @@
 
 $(document).ready(function() {
-    if(projectName === null){
-        getAllProjectsLastExecutions()
-    }
-    else{
-        if(suiteName === null){
-            getProjectLastExecutions(projectName)
-        }
-        else{
-            getSuiteLastExecutions(projectName, suiteName)
-        }
+    if(projectName === null) {
+        getAllProjectsLastExecutions();
+    } else {
+        if(suiteName === null)
+            getProjectLastExecutions(projectName);
+        else
+            getSuiteLastExecutions(projectName, suiteName);
     }
 })
 
@@ -279,7 +276,7 @@ const ReportDashboard = new function(){
     };
 
     this.generateProjectContainerSingleSuite = function(projectName){
-        let projectContainer = `<div class="col-md-12 project-container" id="${projectName.replace('_',' ')}"></div>`;
+        let projectContainer = `<div class="col-md-12 project-container" id="${projectName}"></div>`;
         return $(projectContainer)
     };
 

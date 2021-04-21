@@ -51,7 +51,7 @@ class TestGolemDirArg:
         os.chdir(dir_function.path)
         golem_dir_name = 'golem_dir'
         golem_directory = os.path.join(dir_function.path, golem_dir_name)
-        commands.createdirectory_command(golem_directory)
+        commands.createdirectory_command(golem_directory, download_drivers=False)
 
         # createproject command in a non golem directory
         # without golem-dir argument

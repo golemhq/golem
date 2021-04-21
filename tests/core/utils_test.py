@@ -59,23 +59,20 @@ class TestImportModule:
     syntax_tests = [
         (
             ('var = 2 +\n'),
-            ('    var = 2 +\n'
-             '            ^\n'
-             'SyntaxError: invalid syntax\n')
+            ['    var = 2 +\n            ^\nSyntaxError: invalid syntax\n',
+             '    var = 2 +\n             ^\nSyntaxError: invalid syntax\n']
         ),
         (
             ('import\n'
              'var = 2 + 2'),
-            ('    import\n'
-             '         ^\n'
-             'SyntaxError: invalid syntax\n')
+            ['    import\n         ^\nSyntaxError: invalid syntax\n',
+             '    import\n          ^\nSyntaxError: invalid syntax\n']
         ),
         (
             ('def func()\n'
              '    var = 2 + 2\n'),
-            ('    def func()\n'
-             '             ^\n'
-             'SyntaxError: invalid syntax\n')
+            ['    def func()\n             ^\nSyntaxError: invalid syntax\n',
+             '    def func()\n              ^\nSyntaxError: invalid syntax\n']
         ),
         (
             'data = [{"key": unknown}]',
@@ -90,7 +87,10 @@ class TestImportModule:
         with open(filepath, 'w') as f:
             f.write(filecontent)
         _, error = utils.import_module(filepath)
-        assert expected in error
+        if type(expected) is list:
+            assert expected[0] in error or expected[1] in error
+        else:
+            assert expected in error
 
 
 class TestModuleLocalFunctions:

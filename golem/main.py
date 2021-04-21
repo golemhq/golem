@@ -7,7 +7,6 @@ from .cli import argument_parser, commands
 def execute_from_command_line(testdir):
     # deactivate .pyc extention file generation
     sys.dont_write_bytecode = True
-    sys.path.insert(0, '')
 
     args = argument_parser.get_parser().parse_args()
 

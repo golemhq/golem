@@ -204,9 +204,27 @@ class TestCreateDirectoryCommand:
     def test_createdirectory_command(self, dir_function):
         os.chdir(dir_function.path)
         name = 'testdirectory_002'
-        commands.createdirectory_command(name)
+        commands.createdirectory_command(name, download_drivers=False)
         testdir = os.path.join(dir_function.path, name)
         assert os.path.isdir(testdir)
+        driversdir = os.path.join(testdir, 'drivers')
+        assert os.listdir(driversdir) == []
+
+    def test_createdirectory_absolute_path(self, dir_function, test_utils, capsys):
+        """A test directory can be created using an absolute path"""
+        name = 'testdir_test_003'
+        full_path = os.path.join(dir_function.path, name)
+        commands.createdirectory_command(full_path, download_drivers=False)
+        assert os.path.exists(full_path)
+        expected = ('New golem test directory created at {}\n'
+                    'Use these credentials to access the GUI module:\n'
+                    '  user:     admin\n'
+                    '  password: admin'.format(full_path))
+        captured = capsys.readouterr()
+        assert expected in captured.out
+
+
+
 
 
 class TestCreateSuperUserCommand:
