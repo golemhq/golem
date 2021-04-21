@@ -25,6 +25,10 @@ def command_dispatcher(args, testdir):
     if args.golem_dir is not None:
         testdir = os.path.abspath(args.golem_dir)
     session.testdir = testdir
+    # Insert the golem testdir into sys.path to allow imports
+    # from the root of this dir when cwd is not this dir
+    sys.path.insert(1, testdir)
+    session.testdir = testdir
 
     if args.help:
         display_help(args.help, args.command)
