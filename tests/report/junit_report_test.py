@@ -25,11 +25,11 @@ class TestGenerateJunitReport:
         xml = generate_junit_report(project, execution['suite_name'], execution['timestamp'])
 
         tests = execution['exec_data']['tests']
-        code_error_exec = next(t for t in tests if t['full_name'] == code_error_test)
-        error_exec = next(t for t in tests if t['full_name'] == error_test)
-        failure_exec = next(t for t in tests if t['full_name'] == failure_test)
-        skip_exec = next(t for t in tests if t['full_name'] == skip_test)
-        success_exec = next(t for t in tests if t['full_name'] == success_test)
+        code_error_exec = next(t for t in tests if t['test_file'] == code_error_test)
+        error_exec = next(t for t in tests if t['test_file'] == error_test)
+        failure_exec = next(t for t in tests if t['test_file'] == failure_test)
+        skip_exec = next(t for t in tests if t['test_file'] == skip_test)
+        success_exec = next(t for t in tests if t['test_file'] == success_test)
         xml = ET.fromstring(xml)
         # testsuites
         assert xml.tag == 'testsuites'
@@ -57,8 +57,8 @@ class TestGenerateJunitReport:
         # testsuites/testsuite/code_error_test
         test = next(test for test in testsuite if test.attrib['classname'] == code_error_test)
         assert test.attrib == {
-            'classname': code_error_exec['full_name'],
-            'name': code_error_exec['test_set'],
+            'classname': code_error_exec['test_file'],
+            'name': code_error_exec['set_name'],
             'time': str(code_error_exec['test_elapsed_time'])
         }
         assert len(test) == 2
@@ -76,8 +76,8 @@ class TestGenerateJunitReport:
         # testsuites/testsuite/error_test
         test = next(test for test in testsuite if test.attrib['classname'] == error_test)
         assert test.attrib == {
-            'classname': error_exec['full_name'],
-            'name': error_exec['test_set'],
+            'classname': error_exec['test_file'],
+            'name': error_exec['set_name'],
             'time': str(error_exec['test_elapsed_time'])
         }
         assert len(test) == 2
@@ -91,8 +91,8 @@ class TestGenerateJunitReport:
         # testsuites/testsuite/failure_test
         test = next(test for test in testsuite if test.attrib['classname'] == failure_test)
         assert test.attrib == {
-            'classname': failure_exec['full_name'],
-            'name': failure_exec['test_set'],
+            'classname': failure_exec['test_file'],
+            'name': failure_exec['set_name'],
             'time': str(failure_exec['test_elapsed_time'])
         }
         assert len(test) == 2
@@ -106,8 +106,8 @@ class TestGenerateJunitReport:
         # testsuites/testsuite/skipped_test
         test = next(test for test in testsuite if test.attrib['classname'] == skip_test)
         assert test.attrib == {
-            'classname': skip_exec['full_name'],
-            'name': skip_exec['test_set'],
+            'classname': skip_exec['test_file'],
+            'name': skip_exec['set_name'],
             'time': str(skip_exec['test_elapsed_time'])
         }
         assert len(test) == 2
@@ -121,8 +121,8 @@ class TestGenerateJunitReport:
         # testsuites/testsuite/success_test
         test = next(test for test in testsuite if test.attrib['classname'] == success_test)
         assert test.attrib == {
-            'classname': success_exec['full_name'],
-            'name': success_exec['test_set'],
+            'classname': success_exec['test_file'],
+            'name': success_exec['set_name'],
             'time': str(success_exec['test_elapsed_time'])
         }
         assert len(test) == 1

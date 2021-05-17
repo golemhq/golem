@@ -11,14 +11,14 @@ from golem.report.execution_report import execution_report_path
 from golem.report.test_report import get_test_debug_log
 
 
-def generate_junit_report(project_name, execution_name, timestamp, report_folder=None,
+def generate_junit_report(project_name, execution, timestamp, report_folder=None,
                           report_name=None):
     """Generate a report in JUnit XML format.
 
     Output conforms to https://github.com/jenkinsci/xunit-plugin/blob/master/
     src/main/resources/org/jenkinsci/plugins/xunit/types/model/xsd/junit-10.xsd
     """
-    data = get_execution_data(project=project_name, suite=execution_name, execution=timestamp)
+    data = get_execution_data(project=project_name, execution=execution, timestamp=timestamp)
 
     totals = data['totals_by_result']
     errors = totals.get(Results.CODE_ERROR, 0)
@@ -26,7 +26,7 @@ def generate_junit_report(project_name, execution_name, timestamp, report_folder
     skipped = totals.get(Results.SKIPPED, 0)
 
     testsuites_attrs = {
-        'name': execution_name,
+        'name': execution,
         'errors': str(errors),
         'failures': str(failures),
         'tests': str(data['total_tests']),
@@ -40,10 +40,10 @@ def generate_junit_report(project_name, execution_name, timestamp, report_folder
 
     for test in data['tests']:
         # If the sets have names use them, otherwise use the generated name.
-        set_name = test['set_name'] if test['set_name'] is not "" else test['test_set']
+        set_name = test['set_name']  # TODO: test
         test_attrs = {
             'name': set_name,
-            'classname': test['full_name'],
+            'classname': test['test_file'],
             'time': str(test['test_elapsed_time'])
         }
         testcase = ET.SubElement(testsuite, 'testcase', test_attrs)
@@ -65,13 +65,13 @@ def generate_junit_report(project_name, execution_name, timestamp, report_folder
                 error_type = 'skipped'
             error_data = {
                 'type': test['result'],
-                'message': str(test['data'])
+                'message': str(test['test_data'])
             }
             error_message = ET.SubElement(testcase, error_type, error_data)
 
         # add debug log to /test/system-out node
-        log_text = get_test_debug_log(project_name, execution_name, timestamp, test['full_name'],
-                                      test['test_set'])
+        log_text = get_test_debug_log(project_name, execution, timestamp, test['test_file'],
+                                      test['set_name'])
         system_out = ET.SubElement(testcase, 'system-out')
         system_out.text = _clean_illegal_xml_chars(log_text)
 
@@ -79,7 +79,7 @@ def generate_junit_report(project_name, execution_name, timestamp, report_folder
     doc = minidom.parseString(xmlstring).toprettyxml(indent=' ' * 4, encoding='UTF-8')
 
     if not report_folder:
-        report_folder = execution_report_path(project_name, execution_name, timestamp)
+        report_folder = execution_report_path(project_name, execution, timestamp)
     if not report_name:
         report_name = 'report'
     report_path = os.path.join(report_folder, report_name + '.xml')
@@ -99,20 +99,20 @@ def generate_junit_report(project_name, execution_name, timestamp, report_folder
     return doc
 
 
-def get_or_generate_junit_report(project, suite, timestamp):
+def get_or_generate_junit_report(project, execution, timestamp):
     """Get the JUnit XML report as a string.
 
     If it does not exist, generate it first.
     Report is generated at:
-      <testdir>/projects/<project>/reports/<suite>/<execution>/report.xml
+      <testdir>/projects/<project>/reports/<execution>/<timestamp>/report.xml
     """
     report_filename = 'report'
-    report_directory = execution_report_path(project, suite, timestamp)
+    report_directory = execution_report_path(project, execution, timestamp)
     report_filepath = os.path.join(report_directory, report_filename + '.xml')
     if os.path.isfile(report_filepath):
         xml_string = open(report_filepath, encoding='utf-8').read()
     else:
-        xml_string = generate_junit_report(project, suite, timestamp)
+        xml_string = generate_junit_report(project, execution, timestamp)
     return xml_string
 
 

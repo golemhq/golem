@@ -9,7 +9,7 @@ from golem.report import execution_report as exec_report
 from golem.report import test_report
 
 
-def generate_html_report(project, execution_name, timestamp, report_directory=None,
+def generate_html_report(project, execution, timestamp, report_directory=None,
                          report_name=None, no_images=False):
     """Generate static HTML report.
     Report is generated in <report_directory>/<report_name>
@@ -17,7 +17,7 @@ def generate_html_report(project, execution_name, timestamp, report_directory=No
     Default name is 'report.html' and 'report-no-images.html'
     """
     if not report_directory:
-        report_directory = exec_report.execution_report_path(project, execution_name, timestamp)
+        report_directory = exec_report.execution_report_path(project, execution, timestamp)
 
     if not report_name:
         if no_images:
@@ -61,7 +61,7 @@ def generate_html_report(project, execution_name, timestamp, report_directory=No
         #                                              execution_timestamp=timestamp, test_set=test['test_set'],
         #                                              is_single=False, encode_screenshots=True,
         #                                              no_screenshots=no_images)
-        detail_test_data[test['test_set']] = 'test_detail'
+        detail_test_data[test['set_name']] = 'test_detail'
     with app.app_context():
         # html_string = render_template('report/report_execution_static.html', project=project,
         #                               suite=suite, execution=execution, execution_data=execution_data,
@@ -89,23 +89,24 @@ def generate_html_report(project, execution_name, timestamp, report_directory=No
     return html_string
 
 
-def get_or_generate_html_report(project, suite, execution, no_images=False):
+def get_or_generate_html_report(project, execution, timestamp, no_images=False):
     """Get the HTML report as a string.
     If it does not exist, generate it:
     Report is generated at
-    <testdir>/projects/<project>/reports/<suite>/<execution>/report.html|report-no-images.html
+    <testdir>/projects/<project>/reports/<execution>/<timestamp>/report.html|report-no-images.html
     """
     if no_images:
         report_filename = 'report-no-images'
     else:
         report_filename = 'report'
-    report_directory = os.path.join(session.testdir, 'projects', project,
-                                    'reports', suite, execution)
+
+    report_directory = exec_report.execution_report_path(project, execution, timestamp)
+
     report_filepath = os.path.join(report_directory, report_filename + '.html')
     if os.path.isfile(report_filepath):
         html_string = open(report_filepath, encoding='utf-8').read()
     else:
-        html_string = generate_html_report(project, suite, execution,
+        html_string = generate_html_report(project, execution, timestamp,
                                            report_directory=report_directory,
                                            report_name=report_filename,
                                            no_images=no_images)

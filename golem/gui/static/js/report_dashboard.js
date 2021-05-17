@@ -238,15 +238,15 @@ const ReportDashboardMain = new function(){
 
     this.deleteExecution = function(elem){
         let row = $(elem).closest('tr');
-        let suite = row.attr('suite-name');
-        let execution = row.attr('execution');
+        let execution = row.attr('suite-name');
+        let timestamp = row.attr('execution');
         let project = $(elem).closest('.project-container').attr('id');
         $.ajax({
             url: "/api/report/execution",
             data: JSON.stringify({
-                "project": project,
-                "suite": suite,
-                "execution": execution
+                project: project,
+                execution: execution,
+                timestamp: timestamp
             }),
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',

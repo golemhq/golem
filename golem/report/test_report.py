@@ -9,8 +9,8 @@ from golem.report import execution_report
 __test__ = False
 
 
-def get_test_file_report_json(project, exec_name, timestamp, test_file, set_name=None):
-    path = test_file_report_dir(test_file, project, exec_name, timestamp, set_name)
+def get_test_file_report_json(project, execution, timestamp, test_file, set_name=None):
+    path = test_file_report_dir(test_file, project, execution, timestamp, set_name)
     path = os.path.join(path, 'report.json')
     if os.path.isfile(path):
         with open(path, 'r', encoding='utf-8') as json_file:
@@ -19,9 +19,9 @@ def get_test_file_report_json(project, exec_name, timestamp, test_file, set_name
         return None
 
 
-def get_test_function_report_json(project, exec_name, timestamp, test_file, test_function,
+def get_test_function_report_json(project, execution, timestamp, test_file, test_function,
                                   set_name=None):
-    file_json = get_test_file_report_json(project, exec_name, timestamp, test_file, set_name)
+    file_json = get_test_file_report_json(project, execution, timestamp, test_file, set_name)
     for test in file_json:
         if test['test'] == test_function:
             return test
@@ -29,7 +29,7 @@ def get_test_function_report_json(project, exec_name, timestamp, test_file, test
 
 
 # TODO: rename to 'get_test_report' or 'get_test_file_report'
-def get_test_case_data(project, test_file, execution_name, execution_timestamp=None,
+def get_test_case_data__(project, test_file, execution, timestamp=None,
                        set_name=None, encode_screenshots=False, no_screenshots=False):
     """Retrieves all the data of a test set.
 
@@ -59,7 +59,7 @@ def get_test_case_data(project, test_file, execution_name, execution_timestamp=N
         'has_finished': False
     }
 
-    report_dir = test_file_report_dir(test_file, project, execution_name, execution_timestamp,
+    report_dir = test_file_report_dir(test_file, project, execution, timestamp,
                                       test_set)
     report_json_path = os.path.join(report_dir, 'report.json')
 
@@ -100,7 +100,7 @@ def get_test_case_data(project, test_file, execution_name, execution_timestamp=N
                         b64 = base64.b64encode(open(image_filename, "rb").read()).decode('utf-8')
                         step['screenshot'] = b64
             test_data['test_set'] = test_set
-            test_data['execution'] = execution_timestamp
+            test_data['execution'] = timestamp
             test_data['data'] = report_data['test_data']
             if 'set_name' in report_data:
                 test_data['set_name'] = report_data['set_name']
@@ -118,10 +118,10 @@ def get_test_case_data(project, test_file, execution_name, execution_timestamp=N
     return test_data
 
 
-def test_file_report_dir(test_name, project=None, execution_name=None, timestamp=None,
+def test_file_report_dir(test_name, project=None, execution=None, timestamp=None,
                          set_name='', execdir=None):
     if execdir is None:
-        execdir = execution_report.execution_report_path(project, execution_name, timestamp)
+        execdir = execution_report.execution_report_path(project, execution, timestamp)
     if set_name:
         folder_name = '{}.{}'.format(test_name, set_name)
     else:
@@ -129,13 +129,13 @@ def test_file_report_dir(test_name, project=None, execution_name=None, timestamp
     return os.path.join(execdir, folder_name)
 
 
-def test_function_report_dir(project, exec_name, timestamp, test_file, test_function, set_name=''):
-    test_file_report_path = test_file_report_dir(test_file, project, exec_name, timestamp, set_name)
+def test_function_report_dir(project, execution, timestamp, test_file, test_function, set_name=''):
+    test_file_report_path = test_file_report_dir(test_file, project, execution, timestamp, set_name)
     return os.path.join(test_file_report_path, test_function)
 
 
-def _get_test_log(project, exec_name, timestamp, test, test_set='', level='DEBUG'):
-    report_dir = test_file_report_dir(test, project, exec_name, timestamp, test_set)
+def _get_test_log(project, execution, timestamp, test, test_set='', level='DEBUG'):
+    report_dir = test_file_report_dir(test, project, execution, timestamp, test_set)
 
     if level == 'DEBUG':
         logpath = os.path.join(report_dir, 'execution_debug.log')
@@ -152,12 +152,12 @@ def _get_test_log(project, exec_name, timestamp, test, test_set='', level='DEBUG
         return None
 
 
-def get_test_debug_log(project, exec_name, timestamp, test, test_set=''):
-    return _get_test_log(project, exec_name, timestamp, test, test_set=test_set, level='DEBUG')
+def get_test_debug_log(project, execution, timestamp, test, test_set=''):
+    return _get_test_log(project, execution, timestamp, test, test_set=test_set, level='DEBUG')
 
 
-def get_test_info_log(project, exec_name, timestamp, test, test_set=''):
-    return _get_test_log(project, exec_name, timestamp, test, test_set=test_set, level='INFO')
+def get_test_info_log(project, execution, timestamp, test, test_set=''):
+    return _get_test_log(project, execution, timestamp, test, test_set=test_set, level='INFO')
 
 
 def create_test_file_report_dir(execution_report_dir, test_name, set_name):

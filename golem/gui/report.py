@@ -124,35 +124,36 @@ def report_execution_junit_download(project, suite, execution):
 
 
 # REPORT EXECUTION VIEW JSON
-@report_bp.route("/report/project/<project>/suite/<suite>/<execution>/json/")
+@report_bp.route("/report/project/<project>/suite/<execution>/<timestamp>/json/")
 @login_required
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
-def report_execution_json(project, suite, execution):
-    json_report = exec_report.get_execution_data(project=project, suite=suite, execution=execution)
+def report_execution_json(project, execution, timestamp):
+    json_report = exec_report.get_execution_data(project=project, execution=execution,
+                                                 timestamp=timestamp)
     return jsonify(json_report)
 
 
 # REPORT EXECUTION VIEW JSON DOWNLOAD
-@report_bp.route("/report/project/<project>/suite/<suite>/<execution>/json/download/")
+@report_bp.route("/report/project/<project>/suite/<execution>/<timestamp>/json/download/")
 @login_required
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
-def report_execution_json_download(project, suite, execution):
-    report_data = exec_report.get_execution_data(project=project, suite=suite,
-                                                 execution=execution)
+def report_execution_json_download(project, execution, timestamp):
+    report_data = exec_report.get_execution_data(project=project, execution=execution,
+                                                 timestamp=execution)
     json_report = json.dumps(report_data, indent=4)
     headers = {'Content-disposition': 'attachment; filename={}'.format('report.json')}
     return Response(json_report, mimetype='application/json', headers=headers)
 
 
 # REPORT TEST VIEW
-@report_bp.route("/report/project/<project>/<suite>/<execution>/<test>/<test_set>/")
+@report_bp.route("/report/project/<project>/<execution>/<timestamp>/<test>/<test_set>/")
 @login_required
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
-def report_test(project, suite, execution, test, test_set):
-    test_data = test_report.get_test_case_data(project, test, suite=suite, execution=execution,
+def report_test(project, execution, timestamp, test, test_set):
+    test_data = test_report.get_test_case_data(project, test, execution=suite, timestamp=execution,
                                                test_set=test_set, is_single=False)
     return render_template('report/report_test.html', project=project, suite=suite,
                            execution=execution, test_case=test, test_set=test_set,

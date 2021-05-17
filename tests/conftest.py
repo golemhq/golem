@@ -333,7 +333,7 @@ class TestUtils:
         except SystemExit as e:
             if not ignore_sys_exit:
                 raise e
-        exec_data = get_execution_data(project=project, suite=suite_name, execution=timestamp)
+        exec_data = get_execution_data(project=project, execution=suite_name, timestamp=timestamp)
         exec_dir = execution_report_path(project, suite_name, timestamp)
         return {
             'exec_dir': exec_dir,

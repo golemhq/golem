@@ -20,10 +20,14 @@ class TestParseExecutionData:
         test_utils.create_suite(project, name=suite_name, tests=['test1'])
         timestamp = test_utils.run_suite(project, suite_name)
 
-        exec_data = _parse_execution_data(project=project, suite=suite_name, execution=timestamp)
+        exec_data = _parse_execution_data(project=project, execution=suite_name,
+                                          timestamp=timestamp)
+
+        print(exec_data)
 
         assert len(exec_data['tests']) == 1
-        assert exec_data['tests'][0]['name'] == 'test1'
+        assert exec_data['tests'][0]['test_file'] == 'test1'
+        assert exec_data['tests'][0]['test'] == 'test'
         assert exec_data['total_tests'] == 1
         assert exec_data['totals_by_result'] == {'success': 1}
         assert exec_data['has_finished'] is False
@@ -44,7 +48,7 @@ class TestParseExecutionData:
         exec_data = _parse_execution_data(execution_directory=exec_dir)
 
         assert len(exec_data['tests']) == 1
-        assert exec_data['tests'][0]['name'] == 'test1'
+        assert exec_data['tests'][0]['test_file'] == 'test1'
         assert exec_data['total_tests'] == 1
 
 
@@ -57,10 +61,10 @@ class TestGetExecutionData:
         test_utils.create_suite(project, name=suite_name, tests=['test1'])
         timestamp = test_utils.run_suite(project, suite_name)
 
-        exec_data = get_execution_data(project=project, suite=suite_name, execution=timestamp)
+        exec_data = get_execution_data(project=project, execution=suite_name, timestamp=timestamp)
 
         assert len(exec_data['tests']) == 1
-        assert exec_data['tests'][0]['name'] == 'test1'
+        assert exec_data['tests'][0]['test_file'] == 'test1'
         assert exec_data['total_tests'] == 1
         assert exec_data['has_finished'] is True
 
@@ -74,10 +78,10 @@ class TestGetExecutionData:
         report_path = os.path.join(exec_dir, 'report.json')
         os.remove(report_path)
 
-        exec_data = get_execution_data(project=project, suite=suite_name, execution=timestamp)
+        exec_data = get_execution_data(project=project, execution=suite_name, timestamp=timestamp)
 
         assert len(exec_data['tests']) == 1
-        assert exec_data['tests'][0]['name'] == 'test1'
+        assert exec_data['tests'][0]['test_file'] == 'test1'
         assert exec_data['total_tests'] == 1
         assert exec_data['has_finished'] is False
 

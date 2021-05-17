@@ -241,13 +241,14 @@ def project_has_tests():
 def project_health():
     project = request.args['project']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    project_data = report.get_last_executions(projects=[project], suite=None, limit=1)
+    project_data = report.get_last_execution_timestamps(projects=[project],
+                                                        execution=None, limit=1)
     health_data = {}
-    for suite, executions in project_data[project].items():
-        execution_data = exec_report.get_execution_data(project=project, suite=suite,
-                                                        execution=executions[0])
-        health_data[suite] = {
-            'execution': executions[0],
+    for execution, timestamps in project_data[project].items():
+        execution_data = exec_report.get_execution_data(project=project, execution=execution,
+                                                        timestamp=timestamps[0])
+        health_data[execution] = {
+            'execution': timestamps[0],
             'total': execution_data['total_tests'],
             'totals_by_result': execution_data['totals_by_result']
         }
@@ -405,10 +406,10 @@ def projects():
 @auth_required
 def report_delete_execution():
     project = request.json['project']
-    suite = request.json['suite']
     execution = request.json['execution']
+    timestamp = request.json['timestamp']
     _verify_permissions(Permissions.ADMIN, project)
-    errors = report.delete_execution(project, suite, execution)
+    errors = report.delete_execution(project, execution, timestamp)
     return jsonify(errors)
 
 
@@ -416,10 +417,10 @@ def report_delete_execution():
 @auth_required
 def report_suite_execution():
     project = request.args['project']
-    suite = request.args['suite']
-    execution = request.args['execution']
+    execution = request.args['suite']
+    timestamp = request.args['execution']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    execution_data = exec_report.get_execution_data(project=project, suite=suite, execution=execution)
+    execution_data = exec_report.get_execution_data(project=project, execution=execution, timestamp=timestamp)
     response = jsonify(execution_data)
     if execution_data['has_finished']:
         response.cache_control.max_age = 60 * 60 * 24 * 7
@@ -432,7 +433,7 @@ def report_suite_execution():
 def report_last_executions():
     user = _get_user_api_or_session()
     project_list = user.project_list
-    project_data = report.get_last_executions(project_list, limit=5)
+    project_data = report.get_last_execution_timestamps(project_list, limit=5)
     return jsonify(projects=project_data)
 
 
@@ -441,7 +442,7 @@ def report_last_executions():
 def report_project_last_executions():
     project = request.args['project']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    project_data = report.get_last_executions([project], limit=10)
+    project_data = report.get_last_execution_timestamps([project], limit=10)
     return jsonify(projects=project_data)
 
 
@@ -451,7 +452,7 @@ def report_suite_last_executions():
     project = request.args['project']
     suite = request.args['suite']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    project_data = report.get_last_executions([project], suite=suite, limit=50)
+    project_data = report.get_last_execution_timestamps([project], execution=suite, limit=50)
     return jsonify(projects=project_data)
 
 
@@ -464,8 +465,8 @@ def report_test_set():
     test_full_name = request.args['testName']
     test_set = request.args['testSet']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    test_detail = test_report.get_test_case_data(project, test_full_name, suite=suite,
-                                                 execution=execution, test_set=test_set,
+    test_detail = test_report.get_test_case_data(project, test_full_name, execution=suite,
+                                                 timestamp=execution, set_name=test_set,
                                                  is_single=False, encode_screenshots=True)
     response = jsonify(test_detail)
     if test_detail['has_finished']:
@@ -496,8 +497,8 @@ def report_test_status():
             for test_function, test_function_path in utils.subdirectories(tset_file_path):
                 # json_report_path = os.path.join(test_function_path, 'report.json')
                 test_data = test_report.get_test_case_data(project, test_file, test_function,
-                                                           execution_name=test_name,
-                                                           execution_timestamp=timestamp)
+                                                           execution=test_name,
+                                                           timestamp=timestamp)
                 rx['test_functions'][test_function]['report'] = test_data
             # log_path = os.path.join(path, set_name, 'execution_info.log')
             # if os.path.exists(log_path):

@@ -97,8 +97,7 @@ step('this step wont be run')
         error_contains = 'def test(data)\n                 ^\nSyntaxError: invalid syntax'
         error_contains_ver2 = 'def test(data)\n                  ^\nSyntaxError: invalid syntax'
         # TODO: diff between py 3.9 and py < 3.9
-        assert error_contains in records[2].message or error_contains_ver2 in records[2].message
-        assert records[3].message == CODE_ERROR_MESSAGE
+        assert error_contains in r[2].message or error_contains_ver2 in r[2].message
         # verify report.json
         report = runfix.read_report()
         assert len(report) == 1
@@ -119,7 +118,7 @@ step('this step wont be run')
         assert report['result'] == ResultsEnum.CODE_ERROR
         assert report['set_name'] == ''
         assert report['steps'] == []
-        assert report['test_case'] == runfix.test_name
+        assert report['test_file'] == runfix.test_name
         assert report['test_data'] == {}
 
     def test_import_error_page(self, runfix, caplog, test_utils):

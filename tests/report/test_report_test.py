@@ -17,15 +17,15 @@ class TestGetTestFileReportJson:
     def test_get_test_file_report_json(self, project_class, test_utils):
         _, project = project_class.activate()
         exc = test_utils.execute_random_suite(project)
-        test_name = exc['exec_data']['tests'][0]['name']
+        test_file = exc['exec_data']['tests'][0]['test_file']
         test_set = exc['exec_data']['tests'][0]['set_name']
 
         test_data = get_test_file_report_json(project, exc['suite_name'], exc['timestamp'],
-                                              test_name, test_set)
+                                              test_file, test_set)
 
         assert len(test_data) == 1
         assert isinstance(test_data[0], dict)
-        assert test_data[0]['test_file'] == test_name
+        assert test_data[0]['test_file'] == test_file
         assert test_data[0]['test'] == 'test'
         assert test_data[0]['set_name'] == ''
         assert len(test_data[0]) == 12
@@ -98,15 +98,15 @@ class TestGetTestLog:
         _, project = project_class.activate()
         exc = test_utils.execute_random_suite(project)
         suite_name = exc['suite_name']
-        test_name = exc['exec_data']['tests'][0]['name']
+        test_file = exc['exec_data']['tests'][0]['test_file']
         set_name = exc['exec_data']['tests'][0]['set_name']
 
-        log = get_test_debug_log(project, suite_name, exc['timestamp'], test_name, set_name)
+        log = get_test_debug_log(project, suite_name, exc['timestamp'], test_file, set_name)
 
-        assert 'root INFO Test execution started: {}'.format(test_name) in log
+        assert 'root INFO Test execution started: {}'.format(test_file) in log
 
         # inexistent test set
-        log = get_test_debug_log(project, suite_name, exc['timestamp'], test_name,
+        log = get_test_debug_log(project, suite_name, exc['timestamp'], test_file,
                                  'inexistent_test_set')
         assert log is None
 
