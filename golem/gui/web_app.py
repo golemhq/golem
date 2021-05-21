@@ -1,6 +1,4 @@
 """Golem GUI main web app blueprint"""
-import os
-
 from flask import abort, redirect, render_template, request, url_for
 from flask.blueprints import Blueprint
 from flask_login import current_user, login_user, login_required, logout_user
@@ -131,8 +129,7 @@ def test_case_view(project, test_name):
         return render_template('common_element_error.html', project=project,
                                item_name=test_name, content=content)
     else:
-        test_data = test_data_module.get_test_data(project, test_name,
-                                                   repr_strings=True)
+        test_data = test_data_module.get_test_data(project, test_name, repr_strings=True)
         return render_template('test_builder/test.html', project=project,
                                test_components=test.components,
                                test_case_name=test.stem_name,

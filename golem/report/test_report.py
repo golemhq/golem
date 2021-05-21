@@ -19,8 +19,7 @@ def get_test_file_report_json(project, execution, timestamp, test_file, set_name
         return None
 
 
-def get_test_function_report_json(project, execution, timestamp, test_file, test_function,
-                                  set_name=None):
+def get_test_function_report_json(project, execution, timestamp, test_file, test_function, set_name=None):
     file_json = get_test_file_report_json(project, execution, timestamp, test_file, set_name)
     for test in file_json:
         if test['test'] == test_function:
@@ -134,8 +133,8 @@ def test_function_report_dir(project, execution, timestamp, test_file, test_func
     return os.path.join(test_file_report_path, test_function)
 
 
-def _get_test_log(project, execution, timestamp, test, test_set='', level='DEBUG'):
-    report_dir = test_file_report_dir(test, project, execution, timestamp, test_set)
+def _get_test_log(project, execution, timestamp, test, set_name='', level='DEBUG'):
+    report_dir = test_file_report_dir(test, project, execution, timestamp, set_name)
 
     if level == 'DEBUG':
         logpath = os.path.join(report_dir, 'execution_debug.log')
@@ -146,18 +145,18 @@ def _get_test_log(project, execution, timestamp, test, test_set='', level='DEBUG
 
     if os.path.isfile(logpath):
         with open(logpath, encoding='utf-8') as log_file:
-            return log_file.read()
+            return log_file.read().splitlines()
     else:
         print('Log file {} not found'.format(logpath))
         return None
 
 
-def get_test_debug_log(project, execution, timestamp, test, test_set=''):
-    return _get_test_log(project, execution, timestamp, test, test_set=test_set, level='DEBUG')
+def get_test_debug_log(project, execution, timestamp, test, set_name=''):
+    return _get_test_log(project, execution, timestamp, test, set_name=set_name, level='DEBUG')
 
 
-def get_test_info_log(project, execution, timestamp, test, test_set=''):
-    return _get_test_log(project, execution, timestamp, test, test_set=test_set, level='INFO')
+def get_test_info_log(project, execution, timestamp, test, set_name=''):
+    return _get_test_log(project, execution, timestamp, test, set_name=set_name, level='INFO')
 
 
 def create_test_file_report_dir(execution_report_dir, test_name, set_name):

@@ -108,7 +108,7 @@ class TestRunner:
             # If test_functions_to_run is empty every test function defined in the
             # file will be run
             if not self.test_functions_to_run:
-                self.test_functions_to_run = self.test.test_functions
+                self.test_functions_to_run = self.test.test_function_list
 
             if not len(self.test_functions_to_run):
                 msg = 'No tests were found for file: {}'.format(self.test.name)

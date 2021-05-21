@@ -41,8 +41,8 @@ def generate_junit_report(project_name, execution, timestamp, report_folder=None
     for test in data['tests']:
         # set_name = test['set_name']
         test_attrs = {
-            'name': test['full_name'],  # TODO: test
-            'classname': test['full_name'],
+            'name': test['test'],  # TODO: test
+            'classname': test['test_file'],
             'time': str(test['test_elapsed_time'])
         }
         testcase = ET.SubElement(testsuite, 'testcase', test_attrs)
@@ -69,10 +69,11 @@ def generate_junit_report(project_name, execution, timestamp, report_folder=None
             error_message = ET.SubElement(testcase, error_type, error_data)
 
         # add debug log to /test/system-out node
-        log_text = get_test_debug_log(project_name, execution, timestamp, test['test_file'],
-                                      test['set_name'])
+        log_lines = get_test_debug_log(project_name, execution, timestamp,
+                                       test['test_file'], test['set_name'])
+        log_string = '\n'.join(log_lines)
         system_out = ET.SubElement(testcase, 'system-out')
-        system_out.text = _clean_illegal_xml_chars(log_text)
+        system_out.text = _clean_illegal_xml_chars(log_string)
 
     xmlstring = ET.tostring(testsuites)
     doc = minidom.parseString(xmlstring).toprettyxml(indent=' ' * 4, encoding='UTF-8')

@@ -58,7 +58,7 @@ class TestGenerateJunitReport:
         test = next(test for test in testsuite if test.attrib['classname'] == code_error_test)
         assert test.attrib == {
             'classname': code_error_exec['test_file'],
-            'name': code_error_exec['set_name'],
+            'name': code_error_exec['test'],
             'time': str(code_error_exec['test_elapsed_time'])
         }
         assert len(test) == 2
@@ -77,7 +77,7 @@ class TestGenerateJunitReport:
         test = next(test for test in testsuite if test.attrib['classname'] == error_test)
         assert test.attrib == {
             'classname': error_exec['test_file'],
-            'name': error_exec['set_name'],
+            'name': error_exec['test'],
             'time': str(error_exec['test_elapsed_time'])
         }
         assert len(test) == 2
@@ -92,7 +92,7 @@ class TestGenerateJunitReport:
         test = next(test for test in testsuite if test.attrib['classname'] == failure_test)
         assert test.attrib == {
             'classname': failure_exec['test_file'],
-            'name': failure_exec['set_name'],
+            'name': failure_exec['test'],
             'time': str(failure_exec['test_elapsed_time'])
         }
         assert len(test) == 2
@@ -107,7 +107,7 @@ class TestGenerateJunitReport:
         test = next(test for test in testsuite if test.attrib['classname'] == skip_test)
         assert test.attrib == {
             'classname': skip_exec['test_file'],
-            'name': skip_exec['set_name'],
+            'name': skip_exec['test'],
             'time': str(skip_exec['test_elapsed_time'])
         }
         assert len(test) == 2
@@ -122,7 +122,7 @@ class TestGenerateJunitReport:
         test = next(test for test in testsuite if test.attrib['classname'] == success_test)
         assert test.attrib == {
             'classname': success_exec['test_file'],
-            'name': success_exec['set_name'],
+            'name': success_exec['test'],
             'time': str(success_exec['test_elapsed_time'])
         }
         assert len(test) == 1

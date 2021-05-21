@@ -482,31 +482,8 @@ def report_test_status():
     test_name = request.args['test']
     timestamp = request.args['timestamp']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    path = exec_report.execution_report_path(project, test_name, timestamp)
-    result = {
-        'files': {},
-        'is_finished': report.is_execution_finished(path)
-    }
-    # test_files = {}
-    if os.path.isdir(path):
-        for test_file, test_file_path in utils.subdirectories(path):
-            rx = {
-                'log': [],
-                'test_functions': []
-            }
-            for test_function, test_function_path in utils.subdirectories(tset_file_path):
-                # json_report_path = os.path.join(test_function_path, 'report.json')
-                test_data = test_report.get_test_case_data(project, test_file, test_function,
-                                                           execution=test_name,
-                                                           timestamp=timestamp)
-                rx['test_functions'][test_function]['report'] = test_data
-            # log_path = os.path.join(path, set_name, 'execution_info.log')
-            # if os.path.exists(log_path):
-            #     with open(log_path, encoding='utf-8') as log_file:
-            #         test_files[test_file]['log'] = log_file.readlines()
-
-        result['files'][test_file] = rx
-    return jsonify(result)
+    status = exec_report.single_test_file_execution_status(project, timestamp, test_name)
+    return jsonify(status)
 
 
 @api_bp.route('/settings/global/save', methods=['PUT'])
@@ -679,12 +656,13 @@ def test_directory_delete():
 @auth_required
 def test_run():
     project = request.json['project']
-    test_name = request.json['testName']
+    test_file_name = request.json['testName']
+    test_functions = request.json['testFunctions']
     browsers = request.json['browsers']
     environments = request.json['environments']
     processes = request.json['processes']
     _verify_permissions(Permissions.STANDARD, project)
-    timestamp = gui_utils.run_test(project, test_name, browsers, environments, processes)
+    timestamp = gui_utils.run_test(project, test_file_name, test_functions, browsers, environments, processes)
     return jsonify(timestamp)
 
 

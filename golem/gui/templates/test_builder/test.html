@@ -88,32 +88,30 @@
     <div class="clearfix"></div>
     <div class="col-sm-12 gray-1-background" id="stepsContainerContainer" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
         <!-- setup -->
-        <div id="showSetupLink" class="col-sm-12 text-center" style="padding-top: 10px; {% if test_components.steps.setup %}display: none{% endif %}">
+        <div id="showSetupLink" class="col-sm-12 text-center" style="padding-top: 10px; {% if test_components.setupSteps %}display: none{% endif %}">
             <a href="javascript:void(0)" class="text-muted link-without-underline" onclick="Test.Utils.showSetupSteps()">Setup</a>
         </div>
-        <div id="setupSteps" class="clearfix" {% if not test_components.steps.setup %}style="display: none"{% endif %}>
+        <div id="setupSteps" class="function clearfix" {% if not test_components.setupSteps %}style="display: none"{% endif %}>
             <div class="steps">
                 <a href="javascript:void(0)" onclick="Test.Utils.collapseSetup()" class="link-without-decoration"><h4>Setup</h4></a>
             </div>
-            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="Test.addFirstStepInput('setup');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
+            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="Test.addStepInputToThis(this);"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
         </div>
-        <!-- test -->
-        <h4>Test</h4>
-        <div id="testSteps">
-            <div class="steps"></div>
-            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="Test.addFirstStepInput('test');">
-                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step
-            </button>
-        </div>
+        <!-- tests -->
+
+        <div id="testFunctions"></div>
+        <button class="btn btn-default btn-sm add-step" onclick="Test.addNewTestFunction();">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Test</button>
+
         <!-- teardown -->
         <div id="showTeardownLink" class="col-sm-12 text-center" style="padding-top: 10px">
             <a href="javascript:void(0)" class="text-muted link-without-underline" onclick="Test.Utils.showTeardownSteps()">Teardown</a>
         </div>
-        <div id="teardownSteps" class="clearfix" style="display: none">
+        <div id="teardownSteps" class="function clearfix" style="display: none">
             <div class="steps">
                 <a href="javascript:void(0)" onclick="Test.Utils.collapseTeardown()" class="link-without-decoration"><h4>Teardown</h4></a>
             </div>
-            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="Test.addFirstStepInput('teardown');"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Step</button>
+            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="Test.addStepInputToThis(this);"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
         </div>
     </div>
     <div class="clearfix"></div>
@@ -234,10 +232,12 @@
     let testCaseName = "{{test_case_name}}";
     let fullTestCaseName = "{{full_test_case_name}}";
     let importedPages = {{test_components.pages|tojson}};
-    let steps = {{test_components.steps|tojson}}
+    let setupSteps = {{test_components.setup_steps|tojson}}
+    let teardownSteps = {{test_components.teardown_steps|tojson}}
+    let test_functions = {{test_components.test_functions|tojson}}
 
     const file = new File('test', Global.project, testCaseName, fullTestCaseName);
     const test = Test;
-    test.initialize(file, importedPages, steps);
+    test.initialize(file, importedPages, setupSteps, teardownSteps, test_functions);
 </script>
 {% endblock %}

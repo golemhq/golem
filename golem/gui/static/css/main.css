@@ -798,3 +798,7 @@ ul.no-bullets {
 #errorModal #errorList li {
     word-break: break-all
 }
+
+.error-msg {
+    color: red;
+}

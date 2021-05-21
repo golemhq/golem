@@ -4,6 +4,7 @@ import errno
 
 from golem.core import utils
 from golem.core.project import Project
+from golem.report import test_report
 
 
 def execution_report_default():
@@ -146,3 +147,36 @@ def create_execution_directory(project, execution, timestamp):
     path = execution_report_path(project, execution, timestamp)
     os.makedirs(path, exist_ok=True)
     return path
+
+
+def has_execution_finished(path):
+    """Is a execution finished."""
+    json_report_path = os.path.join(path, 'report.json')
+    return os.path.isfile(json_report_path)
+
+
+def single_test_file_execution_status(project, timestamp, test_file):
+    """"""
+    status = {
+        'sets': {},
+        'has_finished': False
+    }
+    path = execution_report_path(project, test_file, timestamp)
+    if os.path.isdir(path):
+        set_dirs = [x for x in os.listdir(path) if os.path.isdir(os.path.join(path, x))]
+        set_dirs = [x for x in set_dirs if x.startswith(test_file)]
+        for set_dir in set_dirs:
+            set_name = set_dir.replace(test_file, '')
+            if set_name and set_name.startswith('.'):
+                set_name = set_name[1:]
+            test_file_report = test_report.get_test_file_report_json(project, test_file, timestamp,
+                                                                     test_file, set_name=set_name)
+            log = test_report.get_test_info_log(project, test_file, timestamp, test_file, set_name=set_name)
+            if set_name == '':
+                set_name = 'default'
+            status['sets'][set_name] = {
+                'report': test_file_report,
+                'log': log
+            }
+    status['has_finished'] = has_execution_finished(path)
+    return status

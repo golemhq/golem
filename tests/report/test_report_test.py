@@ -85,8 +85,7 @@ class TestTestFunctionReportDir:
         timestamp = '1.2.3.4'
         test_file = 'test1'
         test_function = 'function1'
-        path = test_report.test_function_report_dir(project, suite, timestamp,
-                                                    test_file, test_function)
+        path = test_report.test_function_report_dir(project, suite, timestamp, test_file, test_function)
         test_file_path = test_report.test_file_report_dir(test_file, project, suite, timestamp)
         expected = os.path.join(test_file_path, test_function)
         assert path == expected
@@ -103,7 +102,7 @@ class TestGetTestLog:
 
         log = get_test_debug_log(project, suite_name, exc['timestamp'], test_file, set_name)
 
-        assert 'root INFO Test execution started: {}'.format(test_file) in log
+        assert 'root INFO Test execution started: {}'.format(test_file) in log[0]
 
         # inexistent test set
         log = get_test_debug_log(project, suite_name, exc['timestamp'], test_file,

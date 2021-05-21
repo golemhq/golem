@@ -72,7 +72,8 @@ class ExecutionRunner:
     """
 
     def __init__(self, browsers=None, processes=1, environments=None, interactive=False,
-                 timestamp=None, reports=None, report_folder=None, report_name=None, tags=None):
+                 timestamp=None, reports=None, report_folder=None, report_name=None, tags=None,
+                 test_functions=None):
         if reports is None:
             reports = []
         if tags is None:
@@ -93,6 +94,7 @@ class ExecutionRunner:
         self.execution_name = None
         self.selected_browsers = None
         self.start_time = None
+        self.test_functions = test_functions
         self.suite = SimpleNamespace(processes=None, browsers=None, envs=None,
                                      before=None, after=None, tags=None)
         has_failed_tests = self._create_execution_has_failed_tests_flag()
@@ -155,17 +157,15 @@ class ExecutionRunner:
         for test in self.tests:
             data_sets = test_data.get_test_data(self.project, test)
 
-            multiple_data_sets = len(data_sets) > 1
+            if len(data_sets) > 1 or len(envs) > 1 or len(self.execution.browsers) > 1:
+                # If the test file contain multiple data sets, envs or browsers
+                # then each set will have a unique id (set_name)
+                multiple_data_sets = True
+            else:
+                # otherwise it's just one set with set_name = ''
+                multiple_data_sets = False
 
             for data_set in data_sets:
-
-                # If the test file contain multiple data sets
-                # then each set will have a unique id (set_name)
-                if multiple_data_sets:
-                    set_name = str(uuid.uuid4())[:6]
-                else:
-                    set_name = ''
-
                 for env in envs:
                     data_set_env = dict(data_set)
                     if env in envs_data:
@@ -173,6 +173,12 @@ class ExecutionRunner:
                         data_set_env['env'] = envs_data[env]
                         data_set_env['env']['name'] = env
                     for browser in self.execution.browsers:
+
+                        if multiple_data_sets:
+                            set_name = str(uuid.uuid4())[:6]
+                        else:
+                            set_name = ''
+
                         testdef = SimpleNamespace(name=test, data_set=data_set_env,
                                                   secrets=secrets, browser=browser,
                                                   reportdir=self.execution.reportdir,
@@ -397,16 +403,15 @@ class ExecutionRunner:
             if self.execution.processes == 1:
                 # run tests serially
                 for test in self.execution.tests:
-                    run_test(session.testdir, self.project, test.name, test.data_set,
-                             test.secrets, test.browser, test.env, session.settings,
-                             test.reportdir, test.set_name, [], self.execution.has_failed_tests,
+                    run_test(session.testdir, self.project, test.name, test.data_set, test.secrets,
+                             test.browser, test.env, session.settings, test.reportdir, test.set_name,
+                             self.test_functions, self.execution.has_failed_tests,
                              self.execution.tags, self.is_suite)
             else:
                 # run tests using multiprocessing
                 multiprocess_executor(self.project, self.execution.tests,
-                                      self.execution.has_failed_tests,
-                                      self.execution.processes, self.execution.tags,
-                                      self.is_suite)
+                                      self.execution.has_failed_tests, self.test_functions,
+                                      self.execution.processes, self.execution.tags, self.is_suite)
 
         # run suite `after` function
         if self.suite.after:

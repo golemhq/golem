@@ -16,6 +16,7 @@ def get_parser():
     parser_run.add_argument('-b', '--browsers', nargs='*', default=[], type=str)
     parser_run.add_argument('-p', '--processes', nargs='?', default=1, type=int)
     parser_run.add_argument('-e', '--environments', nargs='+', default=[], type=str)
+    parser_run.add_argument('--test-functions', nargs='*', default=[], type=str)
     parser_run.add_argument('-t', '--tags', nargs='*', default=[], type=str)
     parser_run.add_argument('-i', '--interactive', action='store_true', default=False)
     parser_run.add_argument('-r', '--report', nargs='+', choices=report_choices,

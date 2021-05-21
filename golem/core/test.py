@@ -176,12 +176,15 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
         else:
             f.write('    pass\n')
         f.write('\n\n')
-        f.write('def test(data):\n')
-        if steps['test']:
-            f.write(_format_steps(steps['test']))
-        else:
-            f.write('    pass\n')
-        f.write('\n\n')
+
+        for test_function_name, test_function_steps in steps['tests'].items():
+            f.write('def {}(data):\n'.format(test_function_name))
+            if test_function_steps:
+                f.write(_format_steps(test_function_steps))
+            else:
+                f.write('    pass\n')
+            f.write('\n\n')
+
         f.write('def teardown(data):\n')
         if steps['teardown']:
             f.write(_format_steps(steps['teardown']))
@@ -247,36 +250,35 @@ class Test(BaseProjectElement):
         return page_list + imported_pages
 
     @property
-    def steps(self):
-        steps = {
-            'setup': [],
-            'test': [],
-            'teardown': []
-        }
-
+    def setup_steps(self):
         setup_function = getattr(self.get_module(), 'setup', None)
         if setup_function:
-            steps['setup'] = test_parser.parse_function_steps(setup_function)
+            return test_parser.parse_function_steps(setup_function)
         else:
-            steps['setup'] = []
+            return None
 
-        test_function = getattr(self.get_module(), 'test', None)
-        if test_function:
-            steps['test'] = test_parser.parse_function_steps(test_function)
-        else:
-            steps['test'] = []
-
+    @property
+    def teardown_steps(self):
         teardown_function = getattr(self.get_module(), 'teardown', None)
         if teardown_function:
-            steps['teardown'] = test_parser.parse_function_steps(teardown_function)
+            return test_parser.parse_function_steps(teardown_function)
         else:
-            steps['teardown'] = []
-        return steps
+            return None
 
     @property
     def test_functions(self):
-        """Test functions are functions defined inside this
-        test file that start with 'test'
+        """Dictionary of parsed steps of each test function"""
+        tests = {}
+        test_function_list = self.test_function_list
+        for test_function in test_function_list:
+            function = getattr(self.get_module(), test_function)
+            tests[test_function] = test_parser.parse_function_steps(function)
+        return tests
+
+    @property
+    def test_function_list(self):
+        """List of test functions.
+        Test functions are functions defined inside this test file that start with 'test'
         """
         ast_module_node = parsing_utils.ast_parse_file(self.path)
         local_function_names = parsing_utils.top_level_functions(ast_module_node)
@@ -290,20 +292,24 @@ class Test(BaseProjectElement):
     def components(self):
         """Parse and return the components of a Test in
         the following structure:
-          'description' :  string
-          'pages' :        list of pages
-          'tags'  :        list of tags
-          'steps' :        step dictionary
-            'setup' :      parsed setup steps
-            'test' :       parsed test steps
-            'teardown' :   parsed teardown steps
+          'description' :    string
+          'pages' :          list of pages
+          'tags' :          list of tags
+          'skip' :          list of tags
+          'setup_steps' :    parsed setup function
+          'teardown_steps' : parsed teardown function
+          'test_functions' : dictionary of test functions
+            '<test_function>' : parsed test function steps
+          'test_function_list': list of test function names
         """
         components = {
             'description': self.description,
             'pages': self.pages,
             'tags': self.tags,
-            'steps': self.steps,
+            'skip': self.skip,
+            'setup_steps': self.setup_steps,
+            'teardown_steps': self.teardown_steps,
             'test_functions': self.test_functions,
-            'skip': self.skip
+            'test_function_list': self.test_function_list
         }
         return components

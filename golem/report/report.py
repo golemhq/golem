@@ -42,32 +42,6 @@ def get_last_execution_timestamps(projects=None, execution=None, limit=5):
     return last_timestamps
 
 
-def is_execution_finished(path):
-    """Is a execution finished.
-
-    It is considered finished when all the tests contain
-    a `report.json` file
-    """
-    # TODO
-    # for dir in [x for x in os.listdir(path) if os.path.isdir(os.path.join(path, x))]:
-    #
-    #
-    # for elem in os.listdir(path):
-    #     if os.path.join(path, elem)
-    #
-    # if sets:
-    #     is_finished = True
-    #     for data_set in sets:
-    #         report_path = os.path.join(path, data_set, 'report.json')
-    #         if not os.path.exists(report_path):
-    #             is_finished = False
-    # else:
-    #     is_finished = False
-    # return is_finished
-    json_report_path = os.path.join(path, 'report.json')
-    return os.path.isfile(json_report_path)
-
-
 def delete_execution(project, execution, timestamp):
     errors = []
     path = execution_report_path(project, execution, timestamp)
