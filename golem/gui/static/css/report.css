@@ -186,7 +186,6 @@
 }
 
 #detailTable .detail-right-column {
-    margin-left: 7px;
     width: calc(50% - 7px);
     padding-left: 0px;
     padding-right: 0px;

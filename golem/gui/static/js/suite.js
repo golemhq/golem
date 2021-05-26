@@ -66,7 +66,7 @@ const Suite = new function() {
                 project: project,
                 suite: fullName,
             }, timestamp => {
-                let url = `/report/project/${project}/suite/${fullName}/${timestamp}/`;
+                let url = `/report/${project}/${fullName}/${timestamp}/`;
                 let msg = `Running suite ${fullName} - <a href="${url}"><strong>open</strong></a>`;
                 Main.Utils.toast('info', msg, 15000)
             })

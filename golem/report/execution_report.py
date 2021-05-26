@@ -1,6 +1,7 @@
-import os
-import json
+import base64
 import errno
+import json
+import os
 
 from golem.core import utils
 from golem.core.project import Project
@@ -155,13 +156,13 @@ def has_execution_finished(path):
     return os.path.isfile(json_report_path)
 
 
-def single_test_file_execution_status(project, timestamp, test_file):
+def test_file_execution_result_all_sets(project, execution, timestamp, test_file):
     """"""
     status = {
         'sets': {},
         'has_finished': False
     }
-    path = execution_report_path(project, test_file, timestamp)
+    path = execution_report_path(project, execution, timestamp)
     if os.path.isdir(path):
         set_dirs = [x for x in os.listdir(path) if os.path.isdir(os.path.join(path, x))]
         set_dirs = [x for x in set_dirs if x.startswith(test_file)]
@@ -169,14 +170,70 @@ def single_test_file_execution_status(project, timestamp, test_file):
             set_name = set_dir.replace(test_file, '')
             if set_name and set_name.startswith('.'):
                 set_name = set_name[1:]
-            test_file_report = test_report.get_test_file_report_json(project, test_file, timestamp,
+            test_file_report = test_report.get_test_file_report_json(project, execution, timestamp,
                                                                      test_file, set_name=set_name)
-            log = test_report.get_test_info_log(project, test_file, timestamp, test_file, set_name=set_name)
+            log_info = test_report.get_test_info_log(project, execution, timestamp, test_file, set_name=set_name)
+            log_debug = test_report.get_test_debug_log(project, execution, timestamp, test_file, set_name=set_name)
             if set_name == '':
                 set_name = 'default'
             status['sets'][set_name] = {
                 'report': test_file_report,
-                'log': log
+                'log_info': log_info,
+                'log_debug': log_debug
             }
     status['has_finished'] = has_execution_finished(path)
     return status
+
+
+def test_file_execution_result(project, execution, timestamp, test_file, set_name):
+    all_sets = test_file_execution_result_all_sets(project, execution, timestamp, test_file)
+    if set_name == '':
+        set_name = 'default'
+    return {
+        'set': all_sets['sets'][set_name],
+        'has_finished': all_sets['has_finished']
+    }
+
+
+def function_test_execution_result(project, execution, timestamp, test_file, test, set_name='',
+                                   no_screenshots=False, encode_screenshots=False):
+    """
+
+    :Args:
+      - encode_screenshots: return screenshot files encoded as a base64 string or
+                            the screenshot filename (rel to its folder).
+      - no_screenshots: convert screenshot values to None
+    """
+    path = execution_report_path(project, execution, timestamp)
+    test_json = {
+        'has_finished': False
+    }
+    if has_execution_finished(path):
+        json_report = get_execution_data(path)
+        for t in json_report['tests']:
+            if t['test_file'] == test_file and t['test'] == test and t['set_name'] == set_name:
+                test_json = t
+                test_json['has_finished'] = True
+                break
+    else:
+        test_json = test_report.get_test_function_report_json(project, execution, timestamp,
+                                                              test_file, test, set_name)
+        test_json['has_finished'] = False
+
+    test_json['debug_log'] = test_report.get_test_debug_log(project, execution, timestamp,
+                                                            test_file, set_name)
+    test_json['info_log'] = test_report.get_test_info_log(project, execution, timestamp,
+                                                          test_file, set_name)
+
+    if no_screenshots:
+        for step in test_json['steps']:
+            step['screenshot'] = None
+    elif encode_screenshots:
+        for step in test_json['steps']:
+            if step['screenshot'] is not None:
+                image_filename = test_report.screenshot_path(project, execution, timestamp,
+                                                             test_file, test, set_name,
+                                                             step['screenshot'])
+                b64 = base64.b64encode(open(image_filename, "rb").read()).decode('utf-8')
+                step['screenshot'] = b64
+    return test_json

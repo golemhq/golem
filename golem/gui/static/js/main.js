@@ -629,7 +629,7 @@ const Main = new function(){
                     }
                     if(step.screenshot){
                         let guid = Main.Utils.guid();
-                        let screenshotUrl = `/test/screenshot/${Main.TestRunner.project}/${Main.TestRunner.testName}/${timestamp}/${setName}/${step.screenshot}/`;
+                        let screenshotUrl = `/report/screenshot/${Main.TestRunner.project}/${Main.TestRunner.testName}/${timestamp}/${Main.TestRunner.testName}/${setName}/${report.test}/${step.screenshot}/`;
                         let screenshotIcon = `
                             <span class="cursor-pointer glyphicon glyphicon-picture" aria-hidden="true"
                                 data-toggle="collapse" data-target="#${guid}"
@@ -660,8 +660,8 @@ const Main = new function(){
         this._updateSet = function(setName, values, timestamp){
             Main.TestRunner._addTabIfDoesNotExist(setName);
             let tab = $(`.test-run-tab-content[set-name='${setName}']`);
-            if(values.log != null) {
-                values.log.forEach(function(line){
+            if(values.log_info != null) {
+                values.log_info.forEach(function(line){
                     let displayedLinesStrings = [];
                     tab.find('.test-result-logs div.log-line').each(function(){
                           displayedLinesStrings.push($(this).html())

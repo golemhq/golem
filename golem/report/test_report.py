@@ -182,6 +182,15 @@ def create_test_function_report_dir(test_file_report_dir, test_function_name):
     return path
 
 
+def screenshot_dir(project, execution, timestamp, test_file, test, set_name):
+    return test_function_report_dir(project, execution, timestamp, test_file, test, set_name)
+
+
+def screenshot_path(project, execution, timestamp, test_file, test, set_name, screenshot_file):
+    path = screenshot_dir(project, execution, timestamp, test_file, test, set_name)
+    return os.path.join(path, screenshot_file)
+
+
 def generate_report(test_file_name, result, test_data, reportdir):
     """Adds the report of a test function to a test_file report.json"""
     json_report_path = os.path.join(reportdir, 'report.json')
