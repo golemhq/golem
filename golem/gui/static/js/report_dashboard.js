@@ -225,8 +225,8 @@ const ReportDashboardMain = new function(){
     this.deleteExecutionConfirm = function(elem){
         let row = $(elem).closest('tr');
         let project = $(elem).closest('.project-container').attr('id');
-        let execution = row.attr('suite-name');
-        let timestamp = row.attr('execution');
+        let execution = row.attr('execution-name');
+        let timestamp = row.attr('timestamp');
         let message = `<span style="word-break: break-all">Are you sure you want to delete this execution? This action cannot be undone.</span>`;
         let callback = function(){
             ReportDashboardMain.deleteExecution(row, project, execution, timestamp);
@@ -236,9 +236,9 @@ const ReportDashboardMain = new function(){
 
     this.deleteExecution = function(elem){
         let row = $(elem).closest('tr');
-        let execution = row.attr('suite-name');
-        let timestamp = row.attr('execution');
         let project = $(elem).closest('.project-container').attr('id');
+        let execution = row.attr('execution-name');
+        let timestamp = row.attr('timestamp');
         $.ajax({
             url: "/api/report/execution",
             data: JSON.stringify({
@@ -346,7 +346,7 @@ const ReportDashboard = new function(){
     this.generateExecutionsTableRow = function(data){
         let executionReportUrl = `document.location.href='/report/${data.project}/${data.execution}/${data.timestamp}/'`;
         let row = `
-            <tr class="cursor-pointer" suite-name="${data.suite}" execution="${data.execution}" onclick="${executionReportUrl}">
+            <tr class="cursor-pointer" execution-name="${data.execution}" timestamp="${data.timestamp}" onclick="${executionReportUrl}">
                 <td class="index">${data.index}</td>
                 <td class="date">${data.dateTime}</td>
                 <td class="environment">${data.environment}</td>

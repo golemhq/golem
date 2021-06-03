@@ -236,8 +236,8 @@ def generate_report(test_file_name, result, test_data, reportdir):
         'test_data': serialized_data,
         'steps': result['steps'],
         'errors': result['errors'],
-        'test_elapsed_time': result['test_elapsed_time'],  # TODO elapsed_time
-        'test_timestamp': result['test_timestamp']  # TODO timestamp
+        'elapsed_time': result['test_elapsed_time'],
+        'timestamp': result['test_timestamp']
     }
     if os.path.isfile(json_report_path):
         with open(json_report_path, 'r', encoding='utf-8') as json_file:

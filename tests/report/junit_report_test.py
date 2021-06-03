@@ -59,7 +59,7 @@ class TestGenerateJunitReport:
         assert test.attrib == {
             'classname': code_error_exec['test_file'],
             'name': code_error_exec['test'],
-            'time': str(code_error_exec['test_elapsed_time'])
+            'time': str(code_error_exec['elapsed_time'])
         }
         assert len(test) == 2
         # testsuites/testsuite/code_error_test/error
@@ -78,7 +78,7 @@ class TestGenerateJunitReport:
         assert test.attrib == {
             'classname': error_exec['test_file'],
             'name': error_exec['test'],
-            'time': str(error_exec['test_elapsed_time'])
+            'time': str(error_exec['elapsed_time'])
         }
         assert len(test) == 2
         # testsuites/testsuite/error_test/failure
@@ -93,7 +93,7 @@ class TestGenerateJunitReport:
         assert test.attrib == {
             'classname': failure_exec['test_file'],
             'name': failure_exec['test'],
-            'time': str(failure_exec['test_elapsed_time'])
+            'time': str(failure_exec['elapsed_time'])
         }
         assert len(test) == 2
         # testsuites/testsuite/failure_test/failure
@@ -108,7 +108,7 @@ class TestGenerateJunitReport:
         assert test.attrib == {
             'classname': skip_exec['test_file'],
             'name': skip_exec['test'],
-            'time': str(skip_exec['test_elapsed_time'])
+            'time': str(skip_exec['elapsed_time'])
         }
         assert len(test) == 2
         # testsuites/testsuite/skipped_test/skipped
@@ -123,7 +123,7 @@ class TestGenerateJunitReport:
         assert test.attrib == {
             'classname': success_exec['test_file'],
             'name': success_exec['test'],
-            'time': str(success_exec['test_elapsed_time'])
+            'time': str(success_exec['elapsed_time'])
         }
         assert len(test) == 1
         # testsuites/testsuite/success_test/system-out

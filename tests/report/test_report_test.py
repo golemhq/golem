@@ -174,8 +174,8 @@ class TestGenerateReport:
             assert actual['steps'][1]['message'] == 'step2'
             assert actual['description'] == 'description of the test'
             assert actual['errors'] == []
-            assert actual['test_elapsed_time'] == 22.22
-            assert actual['test_timestamp'] == '2018.02.04.02.16.42.729'
+            assert actual['elapsed_time'] == 22.22
+            assert actual['timestamp'] == '2018.02.04.02.16.42.729'
             assert actual['browser'] == 'chrome'
             assert actual['environment'] == 'env01'
             assert actual['set_name'] == 'set_001'

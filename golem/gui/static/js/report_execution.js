@@ -191,14 +191,14 @@ const GeneralTable = new function(){
             }
             moduleData[module].resultTotals[test.result] += 1;
             moduleData[module].tests += 1;
-            moduleData[module].moduleElapsedTime += test.test_elapsed_time;
+            moduleData[module].moduleElapsedTime += test.elapsed_time;
             // general data
             if(!generalData.resultTotals.hasOwnProperty(test.result)){
                 generalData.resultTotals[test.result] = 0
             }
             generalData.resultTotals[test.result] += 1;
             generalData.tests += 1;
-            generalData.moduleElapsedTime += test.test_elapsed_time;
+            generalData.moduleElapsedTime += test.elapsed_time;
         }
         moduleData['totalModuleRow'] = generalData;
 
@@ -307,7 +307,7 @@ const DetailTable = new function(){
 			testFile: test.test_file,
 			browser: test.browser,
 			environment: test.environment,
-			elapsedTime: test.test_elapsed_time,
+			elapsedTime: test.elapsed_time,
 			setName: test.set_name,
 			result: test.result,
 			urlToTest: urlToTest,
@@ -337,7 +337,7 @@ const DetailTable = new function(){
 		    testRow.find('.test-environment').html(newTest.environment);
 //		    DetailTable.updateColumnHeaderFilterOptions('environment', newTest.environment);
 		}
-		if(oldTest.test_elapsed_time != newTest.test_elapsed_time){
+		if(oldTest.test_elapsed_time != newTest.elapsed_time){
 //		    testRow.find('.test-time').html(ExecutionReport.formatTimeOutput(newTest.test_elapsed_time));
 		}
 		if(oldTest.set_name != newTest.set_name){

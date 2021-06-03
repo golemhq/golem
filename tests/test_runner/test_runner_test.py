@@ -166,8 +166,8 @@ def teardown(data):
         assert r['set_name'] == ''
         assert r['steps'] == []
         assert r['test_data'] == {}
-        assert 'test_elapsed_time' in r
-        assert 'test_timestamp' in r
+        assert 'elapsed_time' in r
+        assert 'timestamp' in r
         assert len(r.keys()) == 12
 
     def test_single_function_success(self, runfix, caplog):
@@ -212,8 +212,8 @@ def teardown(data):
             # {'message': 'teardown step', 'screenshot': None, 'error': None},
         ]
         assert r['test_data'] == {}
-        assert 'test_elapsed_time' in r
-        assert 'test_timestamp' in r
+        assert 'elapsed_time' in r
+        assert 'timestamp' in r
         assert len(r.keys()) == 12
 
     def test_multi_function_success(self, runfix, caplog):
@@ -435,8 +435,8 @@ def teardown(data):
             # {'message': 'teardown step', 'screenshot': None, 'error': None},
         ]
         assert r['test_data'] == {'username': "'username1'", 'password': "'password1'"}
-        assert 'test_elapsed_time' in r
-        assert 'test_timestamp' in r
+        assert 'elapsed_time' in r
+        assert 'timestamp' in r
         assert len(r.keys()) == 12
 
     def test_assertion_error_in_setup(self, runfix, caplog):

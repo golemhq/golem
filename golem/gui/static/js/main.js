@@ -618,7 +618,7 @@ const Main = new function(){
             if(report.environment.length) {
                 reportContainer.append(`<div><strong style='display: inline-block; width: 120px'>Environment:</strong> ${report.environment}</div>`);
             }
-            reportContainer.append(`<div><strong style='display: inline-block; width: 120px'>Elapsed Time:</strong> ${report.test_elapsed_time}</div>`);
+            reportContainer.append(`<div><strong style='display: inline-block; width: 120px'>Elapsed Time:</strong> ${report.elapsed_time}</div>`);
             reportContainer.append(`<div><strong style='display: inline-block; width: 120px'>Steps:</strong></div>`);
             if(report.steps.length > 0){
                 let stepsList = $("<ol class='step-list' style='margin-left: 20px'></ol>");

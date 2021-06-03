@@ -1,5 +1,4 @@
 """Golem GUI API blueprint"""
-import os
 from copy import deepcopy
 from functools import wraps
 
@@ -16,7 +15,6 @@ from golem.core.page import Page
 from golem.core.project import Project, create_project, delete_project
 from golem.report import report
 from golem.report import execution_report as exec_report
-from golem.report import test_report
 from golem.gui import gui_utils
 from golem.gui.user_management import Users, Permissions
 
