@@ -3,13 +3,13 @@ import os
 from golem.report import report
 
 
-class TestGetLastExecution:
+class TestGetLastExecutionTimestamps:
 
-    def test_get_last_executions(self, project_function, test_utils):
+    def test_get_last_execution_timestamps(self, project_function, test_utils):
         _, project = project_function.activate()
 
         # suite does not exist
-        last_exec = report.get_last_executions([project], 'suite_does_not_exist')
+        last_exec = report.get_last_execution_timestamps([project], 'suite_does_not_exist')
         assert last_exec[project] == {}
 
         # suite with no executions
@@ -21,14 +21,16 @@ class TestGetLastExecution:
 
         # suite with one execution
         timestamp = test_utils.run_suite(project, suite_name)
-        last_exec = report.get_last_executions([project], suite_name)
+        last_exec = report.get_last_execution_timestamps([project], suite_name)
         assert last_exec[project] == {suite_name: [timestamp]}
 
         # multiple executions
-        timestamps = [timestamp]
-        timestamps.append(test_utils.run_suite(project, suite_name))
-        timestamps.append(test_utils.run_suite(project, suite_name))
-        last_exec = report.get_last_executions([project], suite_name, limit=2)
+        timestamps = [
+            timestamp,
+            test_utils.run_suite(project, suite_name),
+            test_utils.run_suite(project, suite_name)
+        ]
+        last_exec = report.get_last_execution_timestamps([project], suite_name, limit=2)
         assert len(last_exec[project][suite_name]) == 2
         assert last_exec[project][suite_name][0] == timestamps[1]
         assert last_exec[project][suite_name][1] == timestamps[2]

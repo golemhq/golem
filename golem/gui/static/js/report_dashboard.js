@@ -3,10 +3,10 @@ $(document).ready(function() {
     if(projectName === null) {
         getAllProjectsLastExecutions();
     } else {
-        if(suiteName === null)
+        if(executionName === null)
             getProjectLastExecutions(projectName);
         else
-            getSuiteLastExecutions(projectName, suiteName);
+            getLastExecutions(projectName, executionName);
     }
 })
 
@@ -28,7 +28,7 @@ function getAllProjectsLastExecutions(){
 function getProjectLastExecutions(project){
     $.ajax({
         url: "/api/report/project/last-executions",
-        data: { "project": project },
+        data: {project},
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
         type: 'GET',
@@ -41,12 +41,12 @@ function getProjectLastExecutions(project){
 }
 
 
-function getSuiteLastExecutions(project, suite){
+function getLastExecutions(project, execution){
     $.ajax({
-        url: "/api/report/suite/last-executions",
+        url: "/api/report/execution/last-executions",
         data: {
-            "project": project,
-            "suite": suite
+            project: project,
+            execution: execution
         },
         dataType: 'json',
         contentType: 'application/json; charset=utf-8',
@@ -67,44 +67,44 @@ const ReportDashboardMain = new function(){
     this.loadProject = function(project, projectData){
         let projectContainer;
         if(projectName !== null)
-            projectContainer = ReportDashboard.generateProjectContainerSingleSuite(project);
+            projectContainer = ReportDashboard.generateProjectContainerSingleExecution(project);
         else
             projectContainer = ReportDashboard.generateProjectContainer(project);
         if(Object.keys(projectData).length == 0){
             projectContainer.append('<p>There are no executions for this project</p>')
         }
-        for(suite in projectData){
-            let suiteContainer;
-            if(suiteName)
-                suiteContainer = ReportDashboard.generateExecutionsContainerSingleSuite(project, suite);
+        for(execution in projectData){
+            let executionContainer;
+            if(executionName)
+                executionContainer = ReportDashboard.generateExecutionsContainerSingleExecution(project, execution);
             else
-                suiteContainer = ReportDashboard.generateExecutionsContainer(project, suite);
+                executionContainer = ReportDashboard.generateExecutionsContainer(project, execution);
             // fill in last executions table
             let index = 1;
-            let executions = []
-            for(e in projectData[suite]){
-                let execution = projectData[suite][e];
-                let dateTime = Main.Utils.getDateTimeFromTimestamp(execution);
-                executions.push(execution)
+            let timestamps = []
+            for(e in projectData[execution]){
+                let timestamp = projectData[execution][e];
+                let dateTime = Main.Utils.getDateTimeFromTimestamp(timestamp);
+                timestamps.push(timestamp)
                 let row = ReportDashboard.generateExecutionsTableRow({
                     project: project,
-                    suite: suite,
                     execution: execution,
+                    timestamp: timestamp,
                     index: index.toString(),
                     dateTime: dateTime,
                     environment: ''
                 });
-                ReportDashboardMain.loadChartAndBars(project, suite, execution, row);
-                suiteContainer.find("tbody").append(row);
-                index += 1;
+                ReportDashboardMain.loadChartAndBars(project, execution, timestamp, row);
+                executionContainer.find("tbody").append(row);
+                index++;
             }
-            projectContainer.append(suiteContainer);
-            // create chart for suite
-            let ctx = suiteContainer.find('canvas')[0].getContext('2d');
+            projectContainer.append(executionContainer);
+            // create chart for execution
+            let ctx = executionContainer.find('canvas')[0].getContext('2d');
             let chart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: executions,
+                    labels: timestamps,
                     datasets: []
                 },
                 options: {
@@ -135,18 +135,18 @@ const ReportDashboardMain = new function(){
                     maintainAspectRatio: false
                 }
             });
-            ReportDashboardMain.charts[project+suite] = chart;
+            ReportDashboardMain.charts[project+execution] = chart;
         }
         $(".all-projects-container").append(projectContainer);
     }
 
-    this.loadChartAndBars = function(project, suite, execution, row){
+    this.loadChartAndBars = function(project, execution, timestamp, row){
          $.ajax({
-            url: "/api/report/suite/execution",
+            url: "/api/report/execution",
             data: {
                 project: project,
-                suite: suite,
-                execution: execution
+                execution: execution,
+                timestamp: timestamp
             },
             dataType: 'json',
             type: 'GET',
@@ -165,8 +165,8 @@ const ReportDashboardMain = new function(){
                 }
                 ReportDashboardMain.updateChart({
                     project: project,
-                    suite: suite,
-                    label: execution,
+                    execution: execution,
+                    label: timestamp,
                     totalsByResult: executionData.totals_by_result
                 });
                 if(executionData.has_finished){
@@ -178,17 +178,16 @@ const ReportDashboardMain = new function(){
                 else{
                     row.find('.spinner').show();
                     window.setTimeout(function(){
-                        ReportDashboardMain.loadChartAndBars(project, suite, execution, row);
-                    }, 2000, project, suite, execution, row)
+                        ReportDashboardMain.loadChartAndBars(project, execution, timestamp, row);
+                    }, 2000, project, execution, timestamp, row)
                 }
             }
         });
     }
 
     this.updateChart = function(data){
-        let chart = ReportDashboardMain.charts[data.project+data.suite];
+        let chart = ReportDashboardMain.charts[data.project+data.execution];
         let indexOfLabel = chart.data.labels.indexOf(data.label);
-
         for(result in data.totalsByResult){
             let dataSetIndex = chart.data.datasets.map(function(o) { return o.label; }).indexOf(result);
             // Add data set if it´s not already present
@@ -211,7 +210,7 @@ const ReportDashboardMain = new function(){
             chart.data.datasets[indexOfDatasetLabel].data[indexOfLabel] = data.totalsByResult[result];
 
             if(!('pending' in data.totalsByResult)){
-                // when suite finishes, set pending to 0
+                // when execution finishes, set pending to 0
                 indexOfDatasetLabel = chart.data.datasets.map(function(o) { return o.label; }).indexOf('pending');
                 let pendingDataset = chart.data.datasets[indexOfDatasetLabel];
                 if(pendingDataset != undefined){
@@ -225,28 +224,27 @@ const ReportDashboardMain = new function(){
 
     this.deleteExecutionConfirm = function(elem){
         let row = $(elem).closest('tr');
-        let suite = row.attr('suite-name');
-        let execution = row.attr('execution');
         let project = $(elem).closest('.project-container').attr('id');
+        let execution = row.attr('execution-name');
+        let timestamp = row.attr('timestamp');
         let message = `<span style="word-break: break-all">Are you sure you want to delete this execution? This action cannot be undone.</span>`;
         let callback = function(){
-            ReportDashboardMain.deleteExecution(row, project, suite, execution,);
+            ReportDashboardMain.deleteExecution(row, project, execution, timestamp);
         }
         Main.Utils.displayConfirmModal('Delete', message, callback);
     }
 
-
     this.deleteExecution = function(elem){
         let row = $(elem).closest('tr');
-        let suite = row.attr('suite-name');
-        let execution = row.attr('execution');
         let project = $(elem).closest('.project-container').attr('id');
+        let execution = row.attr('execution-name');
+        let timestamp = row.attr('timestamp');
         $.ajax({
             url: "/api/report/execution",
             data: JSON.stringify({
-                "project": project,
-                "suite": suite,
-                "execution": execution
+                project: project,
+                execution: execution,
+                timestamp: timestamp
             }),
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',
@@ -269,26 +267,26 @@ const ReportDashboard = new function(){
         let projectContainer = `
             <div class="col-md-12 project-container" id="${projectName}">
                 <h3 class="no-margin-top">
-                    <a href="/report/project/${projectName}/" class="link-without-decoration">${projectName.replace('_',' ')}</a>
+                    <a href="/report/${projectName}/" class="link-without-decoration">${projectName.replace('_',' ')}</a>
                 </h3>
             </div>`;
         return $(projectContainer)
     };
 
-    this.generateProjectContainerSingleSuite = function(projectName){
+    this.generateProjectContainerSingleExecution = function(projectName){
         let projectContainer = `<div class="col-md-12 project-container" id="${projectName}"></div>`;
         return $(projectContainer)
     };
 
-    this.generateExecutionsContainer = function(projectName, suiteName){
+    this.generateExecutionsContainer = function(projectName, executionName){
         let executionsContainer = `
-            <div class="suite-container" id="${suiteName}">
+            <div class="suite-container" id="${executionName}">
                 <div class="widget widget-table">
                     <div class="widget-header">
                         <h3>
                             <i class="fa fa-table"></i><span class="suite-name">
-                                <a href="/report/project/${projectName}/suite/${suiteName}/" class="link-without-decoration">
-                                    <strong>${suiteName}</strong>
+                                <a href="/report/${projectName}/${executionName}/" class="link-without-decoration">
+                                    <strong>${executionName}</strong>
                                 </a>
                             </span>
                         </h3>
@@ -319,9 +317,9 @@ const ReportDashboard = new function(){
         return $(executionsContainer)
     };
 
-    this.generateExecutionsContainerSingleSuite = function(projectName, suiteName){
+    this.generateExecutionsContainerSingleExecution = function(projectName, executionName){
         let executionsContainer = `
-            <div class="suite-container" id="${suiteName}">
+            <div class="suite-container" id="${executionName}">
                 <div class="widget widget-table">
                     <div style="height: 218px; padding: 10px"><canvas></canvas></div>
                     <div class="widget-content table-content">
@@ -346,9 +344,9 @@ const ReportDashboard = new function(){
     };
 
     this.generateExecutionsTableRow = function(data){
-        let suiteReportUrl = `document.location.href='/report/project/${data.project}/suite/${data.suite}/${data.execution}'`;
+        let executionReportUrl = `document.location.href='/report/${data.project}/${data.execution}/${data.timestamp}/'`;
         let row = `
-            <tr class="cursor-pointer" suite-name="${data.suite}" execution="${data.execution}" onclick="${suiteReportUrl}">
+            <tr class="cursor-pointer" execution-name="${data.execution}" timestamp="${data.timestamp}" onclick="${executionReportUrl}">
                 <td class="index">${data.index}</td>
                 <td class="date">${data.dateTime}</td>
                 <td class="environment">${data.environment}</td>

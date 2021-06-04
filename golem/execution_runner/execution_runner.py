@@ -1,8 +1,9 @@
+import multiprocessing
 import os
 import sys
-import traceback
 import time
-import multiprocessing
+import traceback
+import uuid
 from types import SimpleNamespace
 from collections import OrderedDict
 
@@ -20,7 +21,6 @@ from golem.execution_runner.multiprocess_executor import multiprocess_executor
 
 from golem.test_runner.test_runner import run_test
 from golem.report import execution_report as exec_report
-from golem.report import test_report
 from golem.report import junit_report
 from golem.report import html_report
 
@@ -72,7 +72,8 @@ class ExecutionRunner:
     """
 
     def __init__(self, browsers=None, processes=1, environments=None, interactive=False,
-                 timestamp=None, reports=None, report_folder=None, report_name=None, tags=None):
+                 timestamp=None, reports=None, report_folder=None, report_name=None, tags=None,
+                 test_functions=None):
         if reports is None:
             reports = []
         if tags is None:
@@ -90,8 +91,10 @@ class ExecutionRunner:
         self.is_suite = False
         self.suite_name = None
         self.test_name = None
+        self.execution_name = None
         self.selected_browsers = None
         self.start_time = None
+        self.test_functions = test_functions
         self.suite = SimpleNamespace(processes=None, browsers=None, envs=None,
                                      before=None, after=None, tags=None)
         has_failed_tests = self._create_execution_has_failed_tests_flag()
@@ -134,13 +137,7 @@ class ExecutionRunner:
 
     def _create_execution_directory(self):
         """Generate the execution report directory"""
-        if self.is_suite:
-            directory = exec_report.create_execution_directory(
-                self.project, self.suite_name, self.timestamp)
-        else:
-            directory = exec_report.create_execution_dir_single_test(
-                self.project, self.test_name, self.timestamp)
-        return directory
+        return exec_report.create_execution_directory(self.project, self.execution_name, self.timestamp)
 
     def _define_execution_list(self):
         """Generate the execution list
@@ -159,6 +156,15 @@ class ExecutionRunner:
 
         for test in self.tests:
             data_sets = test_data.get_test_data(self.project, test)
+
+            if len(data_sets) > 1 or len(envs) > 1 or len(self.execution.browsers) > 1:
+                # If the test file contain multiple data sets, envs or browsers
+                # then each set will have a unique id (set_name)
+                multiple_data_sets = True
+            else:
+                # otherwise it's just one set with set_name = ''
+                multiple_data_sets = False
+
             for data_set in data_sets:
                 for env in envs:
                     data_set_env = dict(data_set)
@@ -167,8 +173,16 @@ class ExecutionRunner:
                         data_set_env['env'] = envs_data[env]
                         data_set_env['env']['name'] = env
                     for browser in self.execution.browsers:
-                        testdef = SimpleNamespace(name=test, data_set=data_set_env, secrets=secrets,
-                                                  browser=browser, reportdir=None, env=env)
+
+                        if multiple_data_sets:
+                            set_name = str(uuid.uuid4())[:6]
+                        else:
+                            set_name = ''
+
+                        testdef = SimpleNamespace(name=test, data_set=data_set_env,
+                                                  secrets=secrets, browser=browser,
+                                                  reportdir=self.execution.reportdir,
+                                                  env=env, set_name=set_name)
                         execution_list.append(testdef)
         return execution_list
 
@@ -228,7 +242,8 @@ class ExecutionRunner:
             test = '.'.join(os.path.normpath(filename).split(os.sep))
         self.tests = [test]
         self.test_name = test
-        self.suite_name = 'single_tests'
+        self.suite_name = test
+        self.execution_name = test
         self._prepare()
 
     def run_suite(self, suite):
@@ -258,6 +273,7 @@ class ExecutionRunner:
         self.suite.before = getattr(module, 'before', None)
         self.suite.after = getattr(module, 'after', None)
         self.suite_name = suite
+        self.execution_name = suite
         self.is_suite = True
         self._prepare()
 
@@ -275,6 +291,7 @@ class ExecutionRunner:
         else:
             suite_name = '.'.join(os.path.normpath(directory).split(os.sep))
         self.suite_name = suite_name
+        self.execution_name = suite_name
         self._prepare()
 
     def _prepare(self):
@@ -286,11 +303,8 @@ class ExecutionRunner:
             self.timestamp = utils.get_timestamp()
 
         # create the execution report directory
-        # if this is a suite, the directory takes this structure:
-        #   reports/<suite_name>/<timestamp>/
-        #
-        # if this is a single test, the directory takes this structure:
-        #   reports/single_tests/<test_name>/<timestamp>/
+        # The directory takes this structure:
+        #   reports/<execution_name>/<timestamp>/
         self.execution.reportdir = self._create_execution_directory()
 
         # Filter tests by tags
@@ -364,12 +378,6 @@ class ExecutionRunner:
 
             self._print_number_of_tests_found()
 
-            # for each test, create the test report directory
-            # for example, in a suite 'suite1' with a 'test1':
-            # reports/suite1/2017.07.02.19.22.20.001/test1/set_00001/
-            for test in self.execution.tests:
-                test.reportdir = test_report.create_report_directory(self.execution.reportdir,
-                                                                     test.name, self.is_suite)
             try:
                 self._execute()
             except KeyboardInterrupt:
@@ -395,16 +403,15 @@ class ExecutionRunner:
             if self.execution.processes == 1:
                 # run tests serially
                 for test in self.execution.tests:
-                    run_test(session.testdir, self.project, test.name, test.data_set,
-                             test.secrets, test.browser, test.env, session.settings,
-                             test.reportdir, self.execution.has_failed_tests,
+                    run_test(session.testdir, self.project, test.name, test.data_set, test.secrets,
+                             test.browser, test.env, session.settings, test.reportdir, test.set_name,
+                             self.test_functions, self.execution.has_failed_tests,
                              self.execution.tags, self.is_suite)
             else:
                 # run tests using multiprocessing
                 multiprocess_executor(self.project, self.execution.tests,
-                                      self.execution.has_failed_tests,
-                                      self.execution.processes, self.execution.tags,
-                                      self.is_suite)
+                                      self.execution.has_failed_tests, self.test_functions,
+                                      self.execution.processes, self.execution.tags, self.is_suite)
 
         # run suite `after` function
         if self.suite.after:
@@ -430,25 +437,26 @@ class ExecutionRunner:
         if self.is_suite or len(self.execution.tests) > 1:
             self._print_results()
         # generate requested reports
-        if self.is_suite:
-            report_name = self.report_name or 'report'
-            report_folder = self.report_folder or self.execution.reportdir
-            if 'junit' in self.reports:
-                junit_report.generate_junit_report(self.project, self.suite_name,
-                                                   self.timestamp, self.report_folder,
-                                                   report_name)
-            if 'json' in self.reports and (self.report_folder or self.report_name):
-                exec_report.save_execution_json_report(self.report, report_folder, report_name)
+        # TODO should the reports work for single tests?
+        # if self.is_suite:
+        report_name = self.report_name or 'report'
+        report_folder = self.report_folder or self.execution.reportdir
+        if 'junit' in self.reports:
+            junit_report.generate_junit_report(self.project, self.execution_name,
+                                               self.timestamp, self.report_folder,
+                                               report_name)
+        if 'json' in self.reports and (self.report_folder or self.report_name):
+            exec_report.save_execution_json_report(self.report, report_folder, report_name)
+        if 'html' in self.reports:
+            html_report.generate_html_report(self.project, self.suite_name,
+                                             self.timestamp, self.report_folder,
+                                             report_name)
+        if 'html-no-images' in self.reports:
             if 'html' in self.reports:
-                html_report.generate_html_report(self.project, self.suite_name,
-                                                 self.timestamp, self.report_folder,
-                                                 report_name)
-            if 'html-no-images' in self.reports:
-                if 'html' in self.reports:
-                    report_name = report_name + '-no-images'
-                html_report.generate_html_report(self.project, self.suite_name, self.timestamp,
-                                                 self.report_folder, report_name,
-                                                 no_images=True)
+                report_name = report_name + '-no-images'
+            html_report.generate_html_report(self.project, self.suite_name, self.timestamp,
+                                             self.report_folder, report_name,
+                                             no_images=True)
 
         # exit to the console with exit status code 1 in case a test fails
         if self.execution.has_failed_tests.value:

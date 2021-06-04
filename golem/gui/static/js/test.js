@@ -8,7 +8,7 @@ var Test = new function(){
     this.importedPages = [];
     this.unsavedChanges = false;
 
-    this.initialize = function(file, importedPages, steps){
+    this.initialize = function(file, importedPages, setupSteps, teardownSteps, testFunctions){
 
         this.file = file;
 
@@ -18,7 +18,9 @@ var Test = new function(){
         });
         Test.getAllProjectPages();
         Test.getGolemActions();
-        Test.renderSteps(steps);
+        Test.renderSectionSteps(Test.Utils.stepSection('setup'), setupSteps);
+        Test.renderSectionSteps(Test.Utils.stepSection('teardown'), teardownSteps);
+        Test.addTestFunctions(testFunctions);
         Test.refreshActionInputsAutocomplete();
         Test.refreshValueInputsAutocomplete();
         $('#pageModal').on('hidden.bs.modal', function(){
@@ -39,34 +41,70 @@ var Test = new function(){
         })
     }
 
-    this.renderSteps = function(steps){
-        Test.renderSectionSteps(steps.setup, 'setup');
-        Test.renderSectionSteps(steps.test, 'test');
-        Test.renderSectionSteps(steps.teardown, 'teardown');
-    }
-
-    this.renderSectionSteps = function(steps, sectionName) {
-        if(steps.length == 0){
-            Test.addFirstStepInput(sectionName)
-        } else{
-            steps.forEach(function(step) {
-                let section = Test.Utils.stepSection(sectionName);
-                if(step.type == 'function-call') {
-                    section.append(Test.functionCallStepTemplate(step.function_name, step.parameters))
-                } else if(step.type == 'code-block') {
-                    Test.addCodeBlockStep(section, step.code)
-                }
-            })
+    this.addTestFunctions = function(testFunctions){
+        for (const testFunction in testFunctions) {
+            Test.addTestFunction(testFunction, testFunctions[testFunction]);
         }
     }
 
-    this.addCodeBlockStep = function(section, code){
+    this.addTestFunction = function(testName, testSteps) {
+        testSteps = testSteps || [];
+        let testFunctionContainer = $('#testFunctions');
+        let testFunctionTemplate = $(`
+            <div class='test-function function'>
+                <div class='testFunctionNameContainer'>
+                    <h4 class="testFunctionNameContainer">
+                        <span class="test-function-name" onclick="Test.Utils.startTestFunctionInlineNameEdition(this)">${testName}</span>
+                        <span class="test-function-name-input" style="display: none">
+                            <input type="text">
+                        </span>
+                    </h4>
+                    <div class="test-function-remove-icon">
+                        <a href="javascript:void(0)" onclick="Test.Utils.deleteTestFunction(this)">
+                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                </div>
+                <div class='steps'></div>
+                <button class='btn btn-default btn-sm add-step' style='margin-left: 21px;' onclick="Test.addStepInputToThis(this);">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+            </div>
+            <div style='height: 10px'></div>
+        `);
+
+        let stepContainer = testFunctionTemplate.find('.steps');
+        if(testSteps.length) {
+            Test.renderSectionSteps(stepContainer, testSteps);
+        } else {
+            Test.addStepInputToThis(stepContainer);
+        }
+        testFunctionContainer.append(testFunctionTemplate);
+        Test.refreshActionInputsAutocomplete();
+        Test.refreshValueInputsAutocomplete();
+    }
+
+    this.renderSectionSteps = function(container, steps) {
+        if(!steps) {
+            Test.addStepInputToThis(container)
+        } else {
+            steps.forEach(function(step) {
+                if(step.type == 'function-call') {
+                    container.append(Test.functionCallStepTemplate(step.function_name, step.parameters))
+                } else if(step.type == 'code-block') {
+                    Test.addCodeBlockStep(container, step.code)
+                }
+            })
+        }
+        Test.Utils.fillStepNumbering();
+    }
+
+    this.addCodeBlockStep = function(container, code) {
         let step = Test.codeBlockStepTemplate();
-        section.append(step);
+        container.append(step);
         Test.initializeCodeBlock(step, code)
     }
 
-    this.addEmptyCodeBlockStep = function(step){
+    this.addEmptyCodeBlockStep = function(step) {
         let codeBlockStep = Test.codeBlockStepTemplate();
         step.replaceWith(codeBlockStep);
         let editor = Test.initializeCodeBlock(codeBlockStep, '');
@@ -87,8 +125,27 @@ var Test = new function(){
                 Tab: TestCommon.Utils.convertTabToSpaces
             }
         });
+        setTimeout(() => editor.refresh(), 250);
         editor.on('change', editor => Test.unsavedChanges = true);
         return editor
+    }
+
+    this.addNewTestFunction = function() {
+        let callback = (testName) => {
+            Test.addTestFunction(testName)
+        }
+        let validationCallback = (testName) => {
+            return Test.Utils.validateTestFunctionName(testName);
+        }
+        Main.Utils.displayPromptModal('Add Test', '', 'test', 'test name', callback, validationCallback)
+    }
+
+    this.getAllTestFunctionNames = function() {
+        let testFunctionNames = []
+        $('#testFunctions > .test-function span.test-function-name').each(function() {
+            testFunctionNames.push($(this).html().trim())
+        })
+        return testFunctionNames
     }
 
     this.getAllProjectPages = function(){
@@ -299,11 +356,11 @@ var Test = new function(){
         return pageInput
     }
 
-    this.addFirstStepInput = function(targetSection){
-        let section = Test.Utils.stepSection(targetSection);
-        section.append(Test.functionCallStepTemplate())
+    this.addStepInputToThis = function(elem) {
+        let stepsContainer = $(elem).closest('.function').find('.steps');
+        stepsContainer.append(Test.functionCallStepTemplate())
         // give focus to the last step action input
-        section.find(".step-first-input").last().focus();
+        stepsContainer.find(".step-first-input").last().focus();
         Test.Utils.fillStepNumbering();
         Test.refreshActionInputsAutocomplete()
     }
@@ -473,37 +530,26 @@ var Test = new function(){
         }
 
         this.startSortableSteps = function(){
-            let setupSteps = document.querySelector("[id='setupSteps']>.steps");
-            let testSteps = document.querySelector("[id='testSteps']>.steps");
-            let teardownSteps = document.querySelector("[id='teardownSteps']>.steps");
             let settings = {
                 handle: '.step-numbering',
                 draggable: '.step',
-                onEnd: function (/**Event*/evt) {
+                onEnd: function (evt) {
                     Test.Utils.fillStepNumbering();
                 }
             };
-            Sortable.create(setupSteps, settings);
-            Sortable.create(testSteps, settings);
-            Sortable.create(teardownSteps, settings);
+            $('.steps').each(function() {
+                Sortable.create(this, settings);
+            })
         }
 
         this.fillStepNumbering = function(){
-            let count = 1;
-            $("#setupSteps .step").each(function(){
-                $(this).find('.step-numbering').html(count);
-                count++;
-            });
-            count = 1;
-            $("#testSteps .step").each(function(){
-                $(this).find('.step-numbering').html(count);
-                count++;
-            });
-            count = 1;
-            $("#teardownSteps .step").each(function(){
-                $(this).find('.step-numbering').html(count);
-                count++;
-            });
+            $(".steps").each(function(){
+                let count = 1;
+                $(this).find(".step").each(function(){
+                    $(this).find('.step-numbering').html(count);
+                    count++;
+                })
+            })
         }
 
         this.openPageInNewWindow = function(elem){
@@ -539,11 +585,16 @@ var Test = new function(){
         }
 
         this.getSteps = function() {
-            return {
-                'setup': Test.Utils.parseSteps($("#setupSteps .step")),
-                'test': Test.Utils.parseSteps($("#testSteps .step")),
-                'teardown': Test.Utils.parseSteps($("#teardownSteps .step"))
+            let steps = {
+                setup: Test.Utils.parseSteps($("#setupSteps .step")),
+                tests: {},
+                teardown: Test.Utils.parseSteps($("#teardownSteps .step"))
             }
+            $('#testFunctions > .test-function').each(function() {
+                let testName = $(this).find('span.test-function-name').html().trim();
+                steps.tests[testName] = Test.Utils.parseSteps($(this).find('.step'))
+            })
+            return steps
         }
 
         this.parseSteps = function(steps) {
@@ -597,6 +648,53 @@ var Test = new function(){
                 $("#skipReason").show();
             } else {
                 $("#skipReason").hide();
+            }
+        }
+
+        this.deleteTestFunction = function(elem) {
+            Main.Utils.displayConfirmModal('Delete Test', 'Delete test?', () => {
+                $(elem).closest('.test-function').remove();
+                Test.unsavedChanges = true;
+            });
+        }
+
+        this.startTestFunctionInlineNameEdition = function(elem) {
+            let nameContainer = $(elem).closest('.testFunctionNameContainer');
+            let valueSpan = nameContainer.find('.test-function-name');
+            let inputSpan = nameContainer.find('.test-function-name-input');
+            let input = inputSpan.find('input');
+            let callback = function() {
+                Test.Utils.updateTestFunctionName(valueSpan, inputSpan, input);
+            }
+            Main.Utils.startGenericInlineName(
+                inputSpan, valueSpan, valueSpan.html().trim(), callback)
+        }
+
+        this.updateTestFunctionName = function(valueSpan, inputSpan, input) {
+            let newNameValue = input.val().trim();
+            let error = Test.Utils.validateTestFunctionName(newNameValue);
+            if(error.length) {
+                inputSpan.hide();
+                valueSpan.show();
+                Main.Utils.toast('error', error, 2000);
+                return
+            } else {
+                input.val('');
+                inputSpan.hide();
+                valueSpan.html(newNameValue).show();
+                Test.unsavedChanges = true;
+            }
+        }
+
+        this.validateTestFunctionName = function(testName) {
+            if(testName.length == 0) {
+                return 'test name cannot be blank'
+            } else if(!testName.startsWith('test')) {
+                return 'test name should start with "test"'
+            } else if(Test.getAllTestFunctionNames().includes(testName)) {
+                return `a test with name "${testName}" already exists`
+            } else {
+                return ''
             }
         }
     }

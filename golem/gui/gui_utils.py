@@ -25,7 +25,7 @@ def is_safe_url(target):
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 
-def run_test(project, test_name, browsers=None, environments=None, processes=1):
+def run_test(project, test_name, test_functions=None, browsers=None, environments=None, processes=1):
     """Run a test case. This is used when running tests from the GUI"""
     script_name = sys.argv[0]
     timestamp = utils.get_timestamp()
@@ -50,7 +50,10 @@ def run_test(project, test_name, browsers=None, environments=None, processes=1):
     if processes:
         param_list.append('--processes')
         param_list.append(str(processes))
-
+    if test_functions:
+        param_list.append('--test-functions')
+        for test_function in test_functions:
+            param_list.append(test_function)
     subprocess.Popen(param_list)
     return timestamp
 

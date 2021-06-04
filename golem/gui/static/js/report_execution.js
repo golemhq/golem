@@ -5,8 +5,7 @@ $(document).ready(function(){
 
     if(global.executionData == null){
         ExecutionReport.getReportData();
-    }
-    else{
+    } else {
 	    ExecutionReport.suiteFinished = true;
         ExecutionReport.netTime = global.executionData.net_elapsed_time;
         $(".spinner").hide()
@@ -24,7 +23,9 @@ $(document).ready(function(){
 	TestRenderer.render();
 
     $("#detailTable").on('click', 'tr.test-row', function () {
-        DetailTable.updateTestDetail($(this).attr('test-full-name'), $(this).attr('test-set'))
+        DetailTable.updateTestDetail(
+            $(this).attr('test-id'), $(this).attr('test-name'),
+            $(this).attr('test-file'), $(this).attr('set-name'))
     });
     $("#detailTable").on('click', 'td.tc-name>span', function (e) {
         e.stopPropagation();
@@ -45,11 +46,11 @@ const ExecutionReport = new function(){
 
 	this.getReportData = function(){
 		 $.ajax({
-            url: "/api/report/suite/execution",
+            url: "/api/report/execution",
             data: {
                 project: global.project,
-                suite: global.suite,
-                execution: global.execution
+                execution: global.execution,
+                timestamp: global.timestamp
             },
             dataType: 'json',
             type: 'GET',
@@ -58,8 +59,7 @@ const ExecutionReport = new function(){
 	  				ExecutionReport.suiteFinished = true;
 	  				ExecutionReport.netTime = executionData.net_elapsed_time;
                     $(".spinner").hide()
-	  			}
-	  			else{
+	  			} else {
 	  			    $(".spinner").show();
 					if(ExecutionReport.queryDelay <= 10000){
 						ExecutionReport.queryDelay += 50
@@ -76,18 +76,18 @@ const ExecutionReport = new function(){
 	this.loadReport = function(execution_data){
 		for(tc in execution_data.tests){
 		    let test = execution_data.tests[tc];
-		    if(ExecutionReport.tests.hasOwnProperty(test.test_set)){
+		    let testUniqueId = ExecutionReport.testUniqueId(test);
+		    if(ExecutionReport.tests.hasOwnProperty(testUniqueId)){
 		        // is the test modified?
-		        let equal = Main.Utils.shallowObjectCompare(test, ExecutionReport.tests[test.test_set]);
+		        let equal = Main.Utils.shallowObjectCompare(test, ExecutionReport.tests[testUniqueId]);
 		        if(!equal){
-		            DetailTable.updateTest(ExecutionReport.tests[test.test_set], test);
-		            ExecutionReport.tests[test.test_set] = test;
+		            DetailTable.updateTest(ExecutionReport.tests[testUniqueId], test);
+		            ExecutionReport.tests[testUniqueId] = test;
 		        }
-		    }
-		    else{
+		    } else {
 		        // add test to table
 		        DetailTable.addNewTestToTable(test);
-		        ExecutionReport.tests[test.test_set] = test;
+		        ExecutionReport.tests[testUniqueId] = test;
 		    }
 		}
 		if(DetailTable.hasSetNameColumn){
@@ -125,8 +125,7 @@ const ExecutionReport = new function(){
 				sec = remainder;
 				sec = Math.round(sec * 10) / 10;
 			}
-		}
-		else{
+		} else {
 			sec = Math.round(seconds * 10) / 10;
 		}
 		if(min != undefined){
@@ -136,6 +135,28 @@ const ExecutionReport = new function(){
 			final += sec + 's'
 		}
 		return final
+	}
+
+	this.testUniqueId = function(test) {
+	    let uniqueId = `${test.test_file}.${test.test}`;
+	    if(test.set_name)
+	        uniqueId = uniqueId + `.${test.set_name}`;
+	    return uniqueId
+	}
+
+	this.testUniqueIdHref = function(uniqueId) {
+	    return `${uniqueId}Collapse`.replaceAll('.', '-')
+	}
+
+	this.testModule = function(testFile) {
+        // for test file 'module.submodule.test_file' module is 'module'
+	    let module = ''
+        let parts = testFile.split('.');
+        parts.pop()
+        if (parts.length) {
+            module = parts[0]
+        }
+        return module
 	}
 }
 
@@ -154,28 +175,30 @@ const GeneralTable = new function(){
             tests: 0,
             moduleElapsedTime: 0
         };
-        for(t in ExecutionReport.tests){
+        for(t in ExecutionReport.tests) {
             let test = ExecutionReport.tests[t];
-            if(!moduleData.hasOwnProperty(test.module)){
-                moduleData[test.module] = {
+            let module = ExecutionReport.testModule(test.test_file);
+
+            if(!moduleData.hasOwnProperty(module)){
+                moduleData[module] = {
                     resultTotals: {},
                     tests: 0,
                     moduleElapsedTime: 0
                 }
             }
-            if(!moduleData[test.module].resultTotals.hasOwnProperty(test.result)){
-                moduleData[test.module].resultTotals[test.result] = 0
+            if(!moduleData[module].resultTotals.hasOwnProperty(test.result)){
+                moduleData[module].resultTotals[test.result] = 0
             }
-            moduleData[test.module].resultTotals[test.result] += 1;
-            moduleData[test.module].tests += 1;
-            moduleData[test.module].moduleElapsedTime += test.test_elapsed_time;
+            moduleData[module].resultTotals[test.result] += 1;
+            moduleData[module].tests += 1;
+            moduleData[module].moduleElapsedTime += test.elapsed_time;
             // general data
             if(!generalData.resultTotals.hasOwnProperty(test.result)){
                 generalData.resultTotals[test.result] = 0
             }
             generalData.resultTotals[test.result] += 1;
             generalData.tests += 1;
-            generalData.moduleElapsedTime += test.test_elapsed_time;
+            generalData.moduleElapsedTime += test.elapsed_time;
         }
         moduleData['totalModuleRow'] = generalData;
 
@@ -276,21 +299,20 @@ const DetailTable = new function(){
 	this.hasSetNameColumn = false;
 
 	this.addNewTestToTable = function(test){
-		let urlToTest = `/report/project/${global.project}/${global.suite}/${global.execution}/${test.full_name}/${test.test_set}/`;
+		let urlToTest = `/report/${global.project}/${global.execution}/${global.timestamp}/${test.test_file}/${test.set_name}/`;
 		let number = Object.keys(ExecutionReport.tests).length + 1;
 		let testRow = DetailTable.generateTestRow({
 		    number: number,
-			testSet: test.test_set,
-			module: test.module,
-			name: test.name,
-			fullName: test.full_name,
+			test: test.test,
+			testFile: test.test_file,
 			browser: test.browser,
 			environment: test.environment,
-			elapsedTime: test.test_elapsed_time,
+			elapsedTime: test.elapsed_time,
 			setName: test.set_name,
 			result: test.result,
 			urlToTest: urlToTest,
-			static: global.static
+			static: global.static,
+			testUniqueId: ExecutionReport.testUniqueId(test)
 		});
 		if(test.set_name.length > 0 && !DetailTable.hasSetNameColumn){
 		    DetailTable.hasSetNameColumn = true;
@@ -300,40 +322,41 @@ const DetailTable = new function(){
 	}
 
     this.updateTest = function(oldTest, newTest){
-        let testRow = DetailTable.getTestRow(newTest.test_set);
+        let testRow = DetailTable.getTestRow(ExecutionReport.testUniqueId(oldTest));
 		if(oldTest.result != newTest.result){
 		    let resultString = `${Main.Utils.getResultIcon(newTest.result)} ${newTest.result}`;
 		    testRow.find('.test-result').html(resultString);
 		    testRow.attr('result', newTest.result);
-		    DetailTable.updateColumnHeaderFilterOptions('result', newTest.result);
+//		    DetailTable.updateColumnHeaderFilterOptions('result', newTest.result);
 		}
 		if(oldTest.browser != newTest.browser){
 		    testRow.find('.test-browser').html(newTest.browser);
-		    DetailTable.updateColumnHeaderFilterOptions('browser', newTest.browser);
+//		    DetailTable.updateColumnHeaderFilterOptions('browser', newTest.browser);
 		}
 		if(oldTest.environment != newTest.environment){
 		    testRow.find('.test-environment').html(newTest.environment);
-		    DetailTable.updateColumnHeaderFilterOptions('environment', newTest.environment);
+//		    DetailTable.updateColumnHeaderFilterOptions('environment', newTest.environment);
 		}
-		if(oldTest.test_elapsed_time != newTest.test_elapsed_time){
-		    testRow.find('.test-time').html(ExecutionReport.formatTimeOutput(newTest.test_elapsed_time));
+		if(oldTest.test_elapsed_time != newTest.elapsed_time){
+//		    testRow.find('.test-time').html(ExecutionReport.formatTimeOutput(newTest.test_elapsed_time));
 		}
 		if(oldTest.set_name != newTest.set_name){
 		    DetailTable.hasSetNameColumn = true;
 			DetailTable.displaySetNameColumn();
 			testRow.find('.set-name').html(newTest.set_name.toString());
-			DetailTable.updateColumnHeaderFilterOptions('set-name', newTest.set_name);
+//			DetailTable.updateColumnHeaderFilterOptions('set-name', newTest.set_name);
 
 		}
-		if(oldTest.module != newTest.module){
-		    let module = newTest.module.length > 0 ? newTest.module : '';
-		    DetailTable.updateColumnHeaderFilterOptions('module', module);
-		}
+//		if(oldTest.module != newTest.module){
+//		    let module = newTest.module.length > 0 ? newTest.module : '';
+//		    DetailTable.updateColumnHeaderFilterOptions('module', module);
+//		}
+        DetailTable.updateColumnHeaderFilterOptions();
 	}
 
-	this.updateTestDetail = function(testFullName, testSet){
-	    let _loadTest = function(testDetail){
-	        let detailPanel = $(`#${testSet}Collapse`);
+	this.updateTestDetail = function(testId, testName, testFile, setName){
+	    let _loadTest = function(report){
+	        let detailPanel = $(`#${ExecutionReport.testUniqueIdHref(testId)}`);
             // update logs
             let logPanel = detailPanel.find('div.logs');
             let loadLogs = function(logs, logContainer){
@@ -349,29 +372,29 @@ const DetailTable = new function(){
                     }
                 });
             }
-            loadLogs(testDetail.info_log, logPanel.find('.info-log'));
-            loadLogs(testDetail.debug_log, logPanel.find('.debug-log'));
+            loadLogs(report.info_log, logPanel.find('.info-log'));
+            loadLogs(report.debug_log, logPanel.find('.debug-log'));
 
             let rightColumn = detailPanel.find('.detail-right-column');
             // add description
             let detailHasDescription = rightColumn.find('.detail-description').length > 0;
-            if(testDetail.description && !detailHasDescription){
+            if(report.description && !detailHasDescription){
                 let descriptionBox = $(
                     `<div class="detail-description test-detail-box">
                         <div class="test-detail-box-title">Description</div>
-                        <div class="detail-description-value">${testDetail.description}</div>
+                        <div class="detail-description-value">${report.description}</div>
                     </div>`);
                 rightColumn.append(descriptionBox)
             }
             // update steps
             let stepBox = rightColumn.find('div.step-list');
-            if(testDetail.steps.length > 0 && stepBox.length == 0){
+            if(report.steps.length > 0 && stepBox.length == 0){
                 let stepBox = $(`
                     <div class="step-list test-detail-box">
                         <div class="test-detail-box-title">Steps</div>
                         <ol></ol>
                     </div>`);
-                testDetail.steps.forEach(function(step){
+                report.steps.forEach(function(step){
                     let stepContent = $(`<li>${step.message}</li>`);
                     if(step.error){
                         stepContent.append(' - ');
@@ -396,25 +419,25 @@ const DetailTable = new function(){
 	    }
 
 	    if(global.static){
-	        _loadTest(global.detailTestData[testSet])
-	    }
-	    else{
+	        _loadTest(global.detailTestData[testId])
+	    } else {
             $.ajax({
-                url: "/api/report/test-set",
+                url: "/api/report/test",
                 data: {
                     project: global.project,
-                    suite: global.suite,
                     execution: global.execution,
-                    testName: testFullName,
-                    testSet: testSet
+                    timestamp: global.timestamp,
+                    testFile: testFile,
+                    test: testName,
+                    setName: setName
                 },
                 dataType: 'json',
                 contentType: 'application/json; charset=utf-8',
                 type: 'GET',
-                success: function( testDetail ) {
-                    _loadTest(testDetail)
-                    if(testDetail.result == 'pending' || testDetail.result == 'running' || testDetail.result == ''){
-                        setTimeout(() => DetailTable.updateTestDetail(testFullName, testSet), 1500, testFullName, testSet);
+                success: function(report) {
+                    _loadTest(report)
+                    if(report.result == 'pending' || report.result == 'running' || report.result == ''){
+                        setTimeout(() => DetailTable.updateTestDetail(testId, testName, testFile, setName), 1500);
                     }
                 }
             });
@@ -426,16 +449,14 @@ const DetailTable = new function(){
 	        'module': [],
 	        'browser': [],
 	        'result': [],
-	        'environment': [],
-	        'set-name': []
+	        'environment': []
 	    }
-	    let modules = Object.values(ExecutionReport.tests).map(value => value.module );
-        modules = [...new Set(modules)];
-        let index = modules.findIndex(x => x === "");
+        let modules = Object.values(ExecutionReport.tests).map(value => ExecutionReport.testModule(value.test_file) );
+        columns.module = [...new Set(modules)];
+        let index = columns.module.findIndex(x => x === '');
         if(index != -1){
-            modules[index] = "-"
+            columns.module[index] = '-'
         }
-        columns.module = modules;
 
 	    let browsers = Object.values(ExecutionReport.tests).map(value => value.browser );
         columns.browser = [...new Set(browsers)];
@@ -449,9 +470,9 @@ const DetailTable = new function(){
         columns.environment = [...new Set(environments)];
         if(columns.environment.indexOf('') > -1){ columns.environment.splice(index, 1) }
 
-        let setNames = Object.values(ExecutionReport.tests).map(value => value.set_name);
-        columns['set-name'] = [...new Set(setNames)];
-        if(columns['set-name'].indexOf('') > -1){ columns['set-name'].splice(index, 1) }
+//        let setNames = Object.values(ExecutionReport.tests).map(value => value.set_name);
+//        columns['set-name'] = [...new Set(setNames)];
+//        if(columns['set-name'].indexOf('') > -1){ columns['set-name'].splice(index, 1) }
 
         for(column in columns){
             let columnOptions = columns[column];
@@ -496,27 +517,36 @@ const DetailTable = new function(){
 			let thisColumnHeader = $(this);
 			let checkedCheckboxes = thisColumnHeader.find("input[type='checkbox']:checked");
 			let columnIndex = $index;
-			if(checkedCheckboxes.length > 0){
+			let colname = $(this).attr('colname');
+			if(checkedCheckboxes.length){
 				// mark this column header as 'filtered'
 				thisColumnHeader.addClass('filtered');
 				let checkedValues = [];
 				checkedCheckboxes.each(function(i, checkbox){
 				    let value = $(checkbox).attr('value')
-				    if(value == '-'){ value = '' }
 					checkedValues.push(value);
 				});
 				// for reach row
 				testTableRows.each(function(){
 					let thisRow = $(this);
 					let thisCellValue = $(this).find('td').get(columnIndex).innerText;
-					if(!checkedValues.includes(thisCellValue.trim())){
+
+                    let showRow = false;
+                    if(colname == 'module' && checkedValues.includes('-') && ExecutionReport.testModule(thisCellValue.trim()) == '') {
+					    // Hide if it's the module column, '-' option is checked and current
+					    // test has a module
+					    showRow = true;
+					}
+					if(checkedValues.some(value => thisCellValue.trim().includes(value))){
+                        showRow = true
+                    }
+					if(!showRow){
 						thisRow.hide();
-						let setName = thisRow.attr('test-set');
-						DetailTable.getTestDetailRow(setName).hide()
+						let testId = thisRow.attr('test-id');
+						DetailTable.getTestDetailRow(testId).hide()
 					}
 				})
-			}
-			else {
+			} else {
 				// mark column header as not filtered
 				thisColumnHeader.removeClass('filtered');
 			}
@@ -531,20 +561,21 @@ const DetailTable = new function(){
 		moduleColumnHeader.find('input:checkbox').prop('checked', false).change();
 		if(moduleName != 'Total'){
 			moduleColumnHeader.find(`div.checkbox label:contains('${moduleName}') input`)
-						  	  .prop('checked', true).change();
+			                  .prop('checked', true).change();
 		}
 	}
 
-	// Expects the following data: testSet, fullName, module, name, result, urlToTest
 	this.generateTestRow = function(data){
 		let resultString = `${Main.Utils.getResultIcon(data.result)} ${data.result}`;
-		let testDetailRow = DetailTable.generateTestDetailRow(data.name, data.fullName, data.testSet);
+		let href = ExecutionReport.testUniqueIdHref(data.testUniqueId);
+		let testDetailRow = DetailTable.generateTestDetailRow(data.test, data.testFile, data.setName, data.testUniqueId, href);
         var row = `
-            <tr test-name="${data.name}" test-full-name="${data.fullName}" test-set="${data.testSet}" result="${data.result}" class="test-row cursor-pointer"
-                    data-toggle="collapse" href="#${data.testSet}Collapse" aria-expanded="false">
+            <tr test-id="${data.testUniqueId}" test-name="${data.test}" test-file="${data.testFile}"
+                    set-name="${data.setName}" result="${data.result}" class="test-row cursor-pointer"
+                    data-toggle="collapse" href="#${href}" aria-expanded="false">
                 <td class="tc-number">${data.number}</td>
-                <td class="tc-module">${data.module}</td>
-                <td class="tc-name"><span class="cursor-auto">${data.name}</span></td>
+                <td class="tc-module">${data.testFile}</td>
+                <td class="tc-name"><span class="cursor-auto">${data.test}</span></td>
                 <td class="set-name">${data.setName}</td>
                 <td class="test-environment">${data.environment}</td>
                 <td class="test-browser">${data.browser}</td>
@@ -555,28 +586,29 @@ const DetailTable = new function(){
                         <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>
                     </a>
                 </td>
-            </tr>${testDetailRow}`;
+            </tr>
+            ${testDetailRow}`;
         return row
     }
 
-    this.generateTestDetailRow = function(testName, testFullName, testSet){
-        let id = `${testSet}Collapse`;
+    this.generateTestDetailRow = function(testName, testFile, setName, testUniqueId, href){
+        let id = `${testUniqueId}Collapse`;
         let onclick = "$(this).siblings().removeClass('active');$(this).addClass('active');"
         let row = `
-            <tr test-name="${testName}" test-full-name="${testFullName}" test-set="${testSet}" class="test-detail-row">
+            <tr test-id="${testUniqueId}" test-name="${testName}" test-file="${testFile}" set-name="${setName}" class="test-detail-row">
                 <td colspan="100%">
-                    <div id="${id}" class="collapse row test-detail">
+                    <div id="${href}" class="collapse row test-detail">
                         <div class="logs col-md-6 test-detail-box">
                             <div class="test-detail-box-title">
                                 Logs &nbsp;
-                                <a href="#${testSet}InfoLog" aria-controls="${testSet}InfoLog" class="active link-without-underline" role="tab"
+                                <a href="#${testUniqueId}InfoLog" aria-controls="${testUniqueId}InfoLog" class="active link-without-underline" role="tab"
                                     data-toggle="tab" onclick="${onclick}">info</a>
-                                <a href="#${testSet}DebugLog" aria-controls="${testSet}DebugLog" class="link-without-underline" role="tab"
+                                <a href="#${testUniqueId}DebugLog" aria-controls="${testUniqueId}DebugLog" class="link-without-underline" role="tab"
                                     data-toggle="tab" onclick="${onclick}">debug</a>
                             </div>
                             <div class="tab-content">
-                                <div role="tabpanel" class="tab-pane info-log active" id="${testSet}InfoLog"></div>
-                                <div role="tabpanel" class="tab-pane debug-log" id="${testSet}DebugLog"></div>
+                                <div role="tabpanel" class="tab-pane info-log active" id="${testUniqueId}InfoLog"></div>
+                                <div role="tabpanel" class="tab-pane debug-log" id="${testUniqueId}DebugLog"></div>
                             </div>
                         </div>
                         <div class='detail-right-column col-md-6'></div>

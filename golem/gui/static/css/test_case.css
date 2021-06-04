@@ -21,6 +21,35 @@ body.modal-open {
 	margin-bottom: 20px;	
 }
 
+
+#testFunctions {
+    clear: both
+}
+
+.test-function {
+    overflow: auto
+}
+
+.testFunctionNameContainer {
+    clear: both
+}
+
+.testFunctionNameContainer h4 {
+    display: inline-block;
+    float: left;
+}
+
+.test-function-remove-icon {
+    display: inline-block;
+    margin-top: 10px;
+    margin-left: 5px
+}
+
+.steps {
+    overflow: auto;
+    clear: both
+}
+
 .step-input-container {
 	padding-left: 0px;
 	padding-right: 10px;
@@ -45,7 +74,7 @@ body.modal-open {
 	width: 16px;
 }
 
-.step-remove-icon a {
+.step-remove-icon a, .test-function-remove-icon a {
 	color: black;
 }
 

@@ -8,7 +8,7 @@ from golem.core import session
 from golem.test_runner.test_runner import run_test
 
 
-def multiprocess_executor(project, execution_list, has_failed_tests, processes=1,
+def multiprocess_executor(project, execution_list, has_failed_tests, test_functions, processes=1,
                           tags=None, is_suite=False):
     """Runs a list of tests in parallel using multiprocessing"""
     pool = Pool(processes=processes, maxtasksperchild=1)
@@ -23,6 +23,8 @@ def multiprocess_executor(project, execution_list, has_failed_tests, processes=1
                 test.env,
                 session.settings,
                 test.reportdir,
+                test.set_name,
+                test_functions,
                 has_failed_tests,
                 tags,
                 is_suite)

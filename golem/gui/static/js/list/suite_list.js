@@ -61,23 +61,23 @@ const SuiteList = new function(){
             </table>`;
         $("#healthTableContainer").append(table);
 
-        $.each(healthData, function(suite){
-            let suiteData = healthData[suite];
-            let dateTime = Main.Utils.getDateTimeFromTimestamp(suiteData.execution);
+        $.each(healthData, function(execution){
+            let executionData = healthData[execution];
+            let dateTime = Main.Utils.getDateTimeFromTimestamp(executionData.execution);
             let newRow = $(`
                 <tr class="cursor-pointer" onclick="">
-                    <td class="suite-name"><span class="suite-name-span">${suite}</span></td>
+                    <td class="suite-name"><span class="suite-name-span">${execution}</span></td>
                     <td>${dateTime}</td>
                     <td class="result"><div class="progress"></div></td>
                 </tr>`);
-            newRow.attr('onclick', `document.location.href='/report/project/${Global.project}/suite/${suite}/${suiteData.execution}/'`);
+            newRow.attr('onclick', `document.location.href='/report/project/${Global.project}/suite/${execution}/${executionData.timestamp}/'`);
             $("#healthTable tbody").append(newRow);
-            let results = Object.keys(suiteData.totals_by_result).sort()
+            let results = Object.keys(executionData.totals_by_result).sort()
             let container = newRow.find('td.result>div.progress');
             Main.ReportUtils.createProgressBars(container, results)
             results.forEach(function(result){
-                let thisResultTotal = suiteData.totals_by_result[result];
-                let percentage = thisResultTotal * 100 / suiteData.total;
+                let thisResultTotal = executionData.totals_by_result[result];
+                let percentage = thisResultTotal * 100 / executionData.total;
                 if(result in dataContainer){
                     dataContainer[result]['total'] += thisResultTotal
                 }

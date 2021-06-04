@@ -8,17 +8,17 @@
 
 {% block content %}
 <div class="content-wrapper">
-    <h2 style="display:inline-block;"><a class="link-without-decoration" href="/report/project/{{project}}/">{{project|replace("_", " ")}}</a> - <a class="link-without-decoration" href="/report/project/{{project}}/suite/{{suite}}/">{{suite|replace("_", " ")}}</a> <small>({{formatted_date}}) <i class="fa fa-cog fa-spin spinner" style="display: none"></i></small></h2>
+    <h2 style="display:inline-block;"><a class="link-without-decoration" href="/report/{{project}}/">{{project|replace("_", " ")}}</a> - <a class="link-without-decoration" href="/report/project/{{project}}/suite/{{suite}}/">{{suite|replace("_", " ")}}</a> <small>({{formatted_date}}) <i class="fa fa-cog fa-spin spinner" style="display: none"></i></small></h2>
 
 	<div class="btn-group" style="display:inline-block; float:right; margin-top:20px; margin-bottom:10px;">
 	  	<button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 			Download <span class="caret"></span>
 	  	</button>
 	  	<ul class="dropdown-menu dropdown-menu-right">
-			<li><a href="/report/project/{{project}}/suite/{{suite}}/{{execution}}/html/download/">HTML</a></li>
-			<li><a href="/report/project/{{project}}/suite/{{suite}}/{{execution}}/html-no-images/download/">HTML no images</a></li>
-			<li><a href="/report/project/{{project}}/suite/{{suite}}/{{execution}}/json/download/">JSON</a></li>
-			<li><a href="/report/project/{{project}}/suite/{{suite}}/{{execution}}/junit/download/">JUnit</a></li>
+			<li><a href="/report/project/{{project}}/suite/{{execution}}/{{timestamp}}/html/download/">HTML</a></li>
+			<li><a href="/report/project/{{project}}/suite/{{execution}}/{{timestamp}}/html-no-images/download/">HTML no images</a></li>
+			<li><a href="/report/project/{{project}}/suite/{{execution}}/{{timestamp}}/json/download/">JSON</a></li>
+			<li><a href="/report/project/{{project}}/suite/{{execution}}/{{timestamp}}/junit/download/">JUnit</a></li>
 	  	</ul>
 	</div>
 	<div class="col-md-12 report-container">
@@ -57,17 +57,12 @@
 						<th>#</th>
 						<th class="dropdown filter-table-dropdown" colname="module">
 							<a type="button" class="link-without-decoration" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-								Module <span class="icon funnel-icon" aria-hidden="true" style="display:none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></span>
+								Test File <span class="icon funnel-icon" aria-hidden="true" style="display:none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></span>
 							</a>
 							<ul class="dropdown-menu"><form></form></ul>
 						</th>
 						<th class="test-name-header" colname="test-name">Test Name</th>
-						<th class="dropdown filter-table-dropdown set-name" colname="set-name">
-							<a type="button" class="link-without-decoration" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-								Set Name <span class="icon funnel-icon" aria-hidden="true" style="display:none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></span>
-							</a>
-							<ul class="dropdown-menu"><form></form></ul>
-						</th>
+						<th class="dropdown filter-table-dropdown set-name" colname="set-name">Set</th>
 						<th class="dropdown filter-table-dropdown" colname="environment">
 							<a type="button" class="link-without-decoration" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 								Environment <span class="icon funnel-icon" aria-hidden="true" style="display:none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg></span>
@@ -109,8 +104,8 @@
 <script type="text/javascript">
 	const global = {
 		project: '{{project}}',
-		suite: '{{suite}}',
 		execution: '{{execution}}',
+		timestamp: '{{timestamp}}',
 		executionData: {{execution_data|tojson}},
 		detailTestData: {},
 		static: {{static|tojson}},

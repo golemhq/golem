@@ -1,10 +1,11 @@
-"""This module contains the method for running a single test."""
+"""This module contains the method for running a single test file."""
 import sys
 import os
 import time
 import traceback
 
-from golem.core import utils, session
+from golem.core import session
+from golem.core import utils
 from golem.core.test import Test
 from golem.core.project import Project
 from golem.test_runner.test_runner_utils import import_page_into_test
@@ -34,30 +35,13 @@ class Secrets(dict):
     __delattr__ = dict.__delitem__
 
 
-def _get_set_name(test_data):
-    """Get the set_name from test_data
-    Return the value of 'set_name' key if present in the data
-    If set_name it is not present in data, return the value of the first key.
-    If there's no data, leave set_name as ''
-    """
-    set_name = ''
-    if 'set_name' in test_data:
-        set_name = test_data['set_name']
-    else:
-        data_without_env = dict(test_data)
-        data_without_env.pop('env', None)
-        if data_without_env:
-            set_name = test_data[next(iter(data_without_env))]
-    return set_name
-
-
 def run_test(testdir, project, test_name, test_data, secrets, browser, env_name,
-             settings, report_directory, execution_has_failed_tests=None,
-             tags=None, from_suite=False):
+             settings, exec_report_dir, set_name, test_functions=None,
+             execution_has_failed_tests=None, tags=None, from_suite=False):
     """Run a single test"""
     session.testdir = testdir
     runner = TestRunner(testdir, project, test_name, test_data, secrets, browser, env_name,
-                        settings, report_directory, execution_has_failed_tests,
+                        settings, exec_report_dir, set_name, test_functions, execution_has_failed_tests,
                         tags, from_suite)
     runner.prepare()
 
@@ -67,19 +51,8 @@ class TestRunner:
     __test__ = False  # ignore this class from Pytest
 
     def __init__(self, testdir, project, test_name, test_data, secrets, browser, env_name,
-                 settings, report_directory, execution_has_failed_tests=None,
-                 tags=None, from_suite=False):
-        self.result = {
-            'result': None,
-            'errors': [],
-            'description': '',
-            'steps': [],
-            'test_elapsed_time': None,
-            'test_timestamp': None,
-            'browser': '',
-            'browser_full_name': '',
-            'set_name': '',
-        }
+                 settings, exec_report_dir, set_name, test_functions_to_run=None,
+                 execution_has_failed_tests=None, tags=None, from_suite=False):
         self.testdir = testdir
         self.project = Project(project)
         self.test = Test(project, test_name)
@@ -88,21 +61,32 @@ class TestRunner:
         self.browser = browser
         self.env_name = env_name
         self.settings = settings
-        self.report_directory = report_directory
-        self.test_module = None
-        self.test_timestamp = utils.get_timestamp()
-        self.test_start_time = time.time()
-        self.logger = None
+        self.exec_report_dir = exec_report_dir
+        self.set_name = set_name
+        # When test_functions_to_run is empty or None, all the test functions
+        # defined in the test file will be run
+        self.test_functions_to_run = test_functions_to_run or []
         self.execution_has_failed_tests = execution_has_failed_tests
         self.execution_tags = tags or []
         self.from_suite = from_suite
 
+        self.result = None
+        self.reportdir = None
+        self.test_module = None
+        self.test_functions = {}
+        self.test_timestamp = utils.get_timestamp()
+        self.logger = None
+
     def prepare(self):
-        self.result['set_name'] = _get_set_name(self.test_data)
-        # initialize logger
-        self.logger = test_logger.get_logger(self.report_directory,
+        # Create report directory for the test file
+        self.reportdir = test_report.create_test_file_report_dir(
+            self.exec_report_dir, self.test.name, self.set_name)
+
+        # Initialize logger for the test file
+        self.logger = test_logger.get_logger(self.reportdir,
                                              self.settings['cli_log_level'],
                                              self.settings['log_all_events'])
+
         # set execution module values
         self._set_execution_module_values()
         self._print_test_info()
@@ -110,50 +94,68 @@ class TestRunner:
         # to enable relative imports from the test
         # TODO
         sys.path.append(os.path.join(self.testdir, 'projects', self.project.path))
-        self.import_modules()
+        self.import_test()
 
-    def import_modules(self):
+    def import_test(self):
         test_module, error = utils.import_module(self.test.path)
         if error:
             actions._add_error(message=error.splitlines()[-1], description=error)
-            self.result['result'] = ResultsEnum.CODE_ERROR
+            self.result = ResultsEnum.CODE_ERROR
+            self.finalize(import_modules_failed=True)
         else:
             self.test_module = test_module
-            # import logger
-            setattr(self.test_module, 'logger', execution.logger)
 
-            # import actions module
-            if self.settings['implicit_actions_import']:
-                for action in utils.module_local_public_functions(actions):
-                    setattr(self.test_module, action, getattr(actions, action))
+            # If test_functions_to_run is empty every test function defined in the
+            # file will be run
+            if not self.test_functions_to_run:
+                self.test_functions_to_run = self.test.test_function_list
 
-            # store test description
-            if hasattr(self.test_module, 'description'):
-                execution.description = self.test_module.description
+            if not len(self.test_functions_to_run):
+                msg = 'No tests were found for file: {}'.format(self.test.name)
+                actions._add_error(message=msg, log_level='INFO')
+                self.result = ResultsEnum.NOT_RUN
+                self.finalize(import_modules_failed=True)
+            else:
+                for test_function in self.test_functions_to_run:
+                    self.test_functions[test_function] = self._test_function_result_dict(test_function)
+                self.import_modules()
 
-            # import pages
-            try:
-                if hasattr(self.test_module, 'pages') and self.settings['implicit_page_import']:
-                    base_path = self.project.page_directory_path
-                    for page in self.test_module.pages:
-                        self.test_module = import_page_into_test(base_path, self.test_module,
-                                                                 page.split('.'))
-            except Exception as e:
-                message = '{}: {}'.format(e.__class__.__name__, e)
-                trcbk = traceback.format_exc()
-                actions._add_error(message=message, description=trcbk)
-                self.result['result'] = ResultsEnum.CODE_ERROR
+    def import_modules(self):
+        # import logger
+        setattr(self.test_module, 'logger', execution.logger)
 
-            # check for skip flag
-            # test is skipped only when run from a suite
-            skip = getattr(self.test_module, 'skip', False)
-            if skip and self.from_suite:
-                self.result['result'] = ResultsEnum.SKIPPED
-                msg = 'Skip: {}'.format(skip) if type(skip) is str else 'Skip'
-                execution.logger.info(msg)
+        # import actions module
+        if self.settings['implicit_actions_import']:
+            for action in utils.module_local_public_functions(actions):
+                setattr(self.test_module, action, getattr(actions, action))
 
-        if self.result['result'] in [ResultsEnum.CODE_ERROR, ResultsEnum.SKIPPED]:
-            self.finalize()
+        # store test description
+        if hasattr(self.test_module, 'description'):
+            execution.description = self.test_module.description
+
+        # import pages
+        try:
+            if hasattr(self.test_module, 'pages') and self.settings['implicit_page_import']:
+                base_path = self.project.page_directory_path
+                for page in self.test_module.pages:
+                    self.test_module = import_page_into_test(base_path, self.test_module,
+                                                             page.split('.'))
+        except Exception as e:
+            message = '{}: {}'.format(e.__class__.__name__, e)
+            trcbk = traceback.format_exc()
+            actions._add_error(message=message, description=trcbk)
+            self.result = ResultsEnum.CODE_ERROR
+
+        # check for skip flag
+        # test is skipped only when run from a suite
+        skip = getattr(self.test_module, 'skip', False)
+        if skip and self.from_suite:
+            self.result = ResultsEnum.SKIPPED
+            msg = 'Skip: {}'.format(skip) if type(skip) is str else 'Skip'
+            execution.logger.info(msg)
+
+        if self.result in [ResultsEnum.CODE_ERROR, ResultsEnum.SKIPPED]:
+            self.finalize(import_modules_failed=True)
         else:
             self.run_setup()
 
@@ -161,53 +163,112 @@ class TestRunner:
         try:
             if hasattr(self.test_module, 'setup'):
                 self.test_module.setup(execution.data)
-            else:
-                execution.logger.debug('test does not have setup function')
         except AssertionError as e:
             self._add_error(message='Failure', exception=e)
-            self.result['result'] = ResultsEnum.FAILURE
+            self.result = ResultsEnum.FAILURE
         except Exception as e:
             self._add_error(message='Error', exception=e)
-            self.result['result'] = ResultsEnum.CODE_ERROR
-        if self.result['result'] in [ResultsEnum.CODE_ERROR, ResultsEnum.FAILURE]:
-            self.run_teardown()
+            self.result = ResultsEnum.CODE_ERROR
+        if self.result in [ResultsEnum.CODE_ERROR, ResultsEnum.FAILURE]:
+            self.run_teardown(setup_failed=True)
         else:
-            self.run_test()
+            self.run_test_functions()
 
-    def run_test(self):
-        try:
-            if hasattr(self.test_module, 'test'):
-                self.test_module.test(execution.data)
-                # take screenshot_on_end
-                if self.settings['screenshot_on_end'] and execution.browser:
-                    actions.take_screenshot('Test end')
-            else:
-                error_msg = 'test {} does not have a test function'.format(self.test.name)
-                actions._add_error(error_msg)
-                self.result['result'] = ResultsEnum.CODE_ERROR
-        except AssertionError as e:
-            self._add_error(message='Failure', exception=e)
-            self.result['result'] = ResultsEnum.FAILURE
-        except Exception as e:
-            if not self.result['result'] == ResultsEnum.FAILURE:
-                self.result['result'] = ResultsEnum.CODE_ERROR
-            self._add_error(message='Error', exception=e)
+    def run_test_functions(self):
+        for test_function in self.test_functions:
+            self.run_test_function(test_function)
         self.run_teardown()
 
-    def run_teardown(self):
+    def run_test_function(self, test_name):
+        execution.logger.info('Test started: {}'.format(test_name))
+
+        result = self.test_functions[test_name]
+
+        # Create folder for the test function report
+        report_directory = test_report.create_test_function_report_dir(
+            self.reportdir, test_name)
+        result['report_directory'] = report_directory
+
+        # Add logger handlers for this single test function
+        # logger, file_handler_debug, file_handler_info = test_logger.get_logger_for_test_function(
+        #     report_directory, self.settings['log_all_events'])
+
+        # reset execution values specific to this test
+        self._reset_execution_module_values_for_test_function(
+            report_directory=report_directory, test_name=test_name)
+
+        result['start_time'] = time.time()
+
+        try:
+            f = getattr(self.test_module, test_name)
+            f(execution.data)
+
+            # take screenshot_on_end
+            if self.settings['screenshot_on_end'] and execution.browser:
+                actions.take_screenshot('Test end')
+        except AssertionError as e:
+            self._add_error(message='Failure', exception=e)
+            result['result'] = ResultsEnum.FAILURE
+        except Exception as e:
+            result['result'] = ResultsEnum.CODE_ERROR
+            self._add_error(message='Error', exception=e)
+
+        result['end_time'] = time.time()
+
+        if result['result'] not in [ResultsEnum.CODE_ERROR, ResultsEnum.FAILURE]:
+            if execution.errors:
+                result['result'] = ResultsEnum.ERROR
+
+        if result['result'] is None:
+            result['result'] = ResultsEnum.SUCCESS
+
+        execution.logger.info('Test Result: {}'.format(result['result'].upper()))
+
+        # Stop test function logger handlers
+        # test_logger.remove_handler_and_close(logger, file_handler_debug)
+        # test_logger.remove_handler_and_close(logger, file_handler_info)
+
+        self._finalize_test_function(test_name)
+
+    def _finalize_test_function(self, test_name):
+        result = self.test_functions[test_name]
+
+        test_elapsed_time = round(result['end_time'] - result['start_time'], 2)
+
+        result['description'] = execution.description
+        result['steps'] = execution.steps
+        result['errors'] = execution.errors
+        result['test_elapsed_time'] = test_elapsed_time
+        result['test_timestamp'] = self.test_timestamp
+        result['browser'] = execution.browser_definition['name']
+        result['browser_full_name'] = execution.browser_definition['full_name']
+        # Report a test has failed in the test execution,
+        # this will later determine the exit status
+        _error_codes = [ResultsEnum.CODE_ERROR, ResultsEnum.ERROR, ResultsEnum.FAILURE]
+        if self.execution_has_failed_tests is not None and result['result'] in _error_codes:
+            self.execution_has_failed_tests.value = True
+
+        test_report.generate_report(self.test.name, result, execution.data, self.reportdir)
+
+        self._reset_execution_module_values_for_test_function()
+
+    def run_teardown(self, setup_failed=False):
+        teardown_failed = False
         try:
             if hasattr(self.test_module, 'teardown'):
                 self.test_module.teardown(execution.data)
             else:
                 execution.logger.debug('test does not have a teardown function')
         except AssertionError as e:
-            if not self.result['result'] == ResultsEnum.CODE_ERROR:
-                self.result['result'] = ResultsEnum.FAILURE
+            if not self.result == ResultsEnum.CODE_ERROR:
+                self.result = ResultsEnum.FAILURE
             self._add_error(message='Failure', exception=e)
+            teardown_failed = True
         except Exception as e:
-            if not self.result['result'] == ResultsEnum.FAILURE:
-                self.result['result'] = ResultsEnum.CODE_ERROR
+            if not self.result == ResultsEnum.FAILURE:
+                self.result = ResultsEnum.CODE_ERROR
             self._add_error(message='Error', exception=e)
+            teardown_failed = True
         # if there is no teardown or teardown failed or it did not close the driver,
         # let's try to close the driver manually
         if execution.browser:
@@ -221,35 +282,44 @@ class TestRunner:
                                        exc_info=True)
             finally:
                 execution.browser = None
-        self.finalize()
+        self.finalize(setup_failed=setup_failed, teardown_failed=teardown_failed)
 
-    def finalize(self):
-        test_end_time = time.time()
-        test_elapsed_time = round(test_end_time - self.test_start_time, 2)
-        if self.result['result'] not in [ResultsEnum.CODE_ERROR, ResultsEnum.FAILURE]:
-            if execution.errors:
-                self.result['result'] = ResultsEnum.ERROR
+    def finalize(self, import_modules_failed=False, setup_failed=False, teardown_failed=False):
+        # TODO this should be called at the point it failed
+        # instead of here. Use a common method to generate
+        # report for test functions and not test functions, like setup, teardown.
+        # Reset the execution module after each so the steps and errors
+        # collected belong to each function/non function phase
+        if import_modules_failed:
+            result = self._test_function_result_dict('setup')
+            result['result'] = self.result
+            result['test_timestamp'] = self.test_timestamp
+            result['errors'] = execution.errors
+            test_report.generate_report(self.test.name, result, execution.data,
+                                        self.reportdir)
 
-        if self.result['result'] is None:
-            self.result['result'] = ResultsEnum.SUCCESS
-        execution.logger.info('Test Result: {}'.format(self.result['result'].upper()))
+        if setup_failed:
+            result = self._test_function_result_dict('setup')
+            result['result'] = self.result
+            result['description'] = execution.description
+            result['test_timestamp'] = self.test_timestamp
+            result['errors'] = execution.errors
+            test_report.generate_report(self.test.name, result, execution.data,
+                                        self.reportdir)
 
-        self.result['description'] = execution.description
-        self.result['steps'] = execution.steps
-        self.result['errors'] = execution.errors
-        self.result['test_elapsed_time'] = test_elapsed_time
-        self.result['test_timestamp'] = self.test_timestamp
-        self.result['browser'] = execution.browser_definition['name']
-        self.result['browser_full_name'] = execution.browser_definition['full_name']
-        # Report a test has failed in the test execution, this will later determine the exit status
-        _error_codes = [ResultsEnum.CODE_ERROR, ResultsEnum.ERROR, ResultsEnum.FAILURE]
-        if self.execution_has_failed_tests is not None and self.result['result'] in _error_codes:
-            self.execution_has_failed_tests.value = True
-        test_report.generate_report(self.report_directory, self.test.name, execution.data, self.result)
+        if teardown_failed:
+            result = self._test_function_result_dict('teardown')
+            result['result'] = self.result
+            result['description'] = execution.description
+            result['test_timestamp'] = self.test_timestamp
+            result['errors'] = execution.errors
+            test_report.generate_report(self.test.name, result, execution.data,
+                                        self.reportdir)
+
         test_logger.reset_logger(execution.logger)
-        # execution._reset()
 
     def _set_execution_module_values(self):
+        execution.test_file = self.test.name
         execution.browser = None
         execution.browser_definition = self.browser
         execution.browsers = {}
@@ -259,16 +329,24 @@ class TestRunner:
         execution.description = None
         execution.errors = []
         execution.settings = self.settings
-        execution.test_name = self.test.name
         execution.test_dirname = self.test.dirname
         execution.test_path = self.test.path
         execution.project_name = self.project.name
         execution.project_path = self.project.path
         execution.testdir = self.testdir
-        execution.report_directory = self.report_directory
+        execution.report_directory = None
         execution.logger = self.logger
         execution.tags = self.execution_tags
+        execution.timers = {}
         execution.environment = self.env_name
+
+    @staticmethod
+    def _reset_execution_module_values_for_test_function(report_directory=None, test_name=None):
+        execution.test_name = test_name
+        execution.steps = []
+        execution.errors = []
+        execution.report_directory = report_directory
+        execution.timers = {}
 
     def _print_test_info(self):
         execution.logger.info('Test execution started: {}'.format(self.test.name))
@@ -314,3 +392,20 @@ class TestRunner:
         except:
             # if the driver is not available capture screenshot is not possible
             pass
+
+    def _test_function_result_dict(self, test_name):
+        return {
+            'name': test_name,
+            'set_name': self.set_name,
+            'start_time': None,
+            'end_time': None,
+            'report_directory': None,
+            'result': None,
+            'errors': [],
+            'description': '',
+            'steps': [],
+            'test_elapsed_time': None,
+            'test_timestamp': None,
+            'browser': '',
+            'browser_full_name': ''
+        }

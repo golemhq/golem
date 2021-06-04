@@ -52,7 +52,13 @@ def teardown(data):
 """
 
 
-EMPTY_STEPS = {'setup': [], 'test': [], 'teardown': []}
+EMPTY_STEPS = {
+    'setup': [],
+    'tests': {
+        'test_name': []
+    },
+    'teardown': []
+}
 
 
 class TestCreateTest:
@@ -330,9 +336,11 @@ class TestEditTest:
             'setup': [
                 {'type': 'function-call', 'action': 'click', 'parameters': ['elem1']}
             ],
-            'test': [
-                {'type': 'function-call', 'action': 'send_keys', 'parameters': ['elem2', 'keys']}
-            ],
+            'tests': {
+                'test_one': [
+                    {'type': 'function-call', 'action': 'send_keys', 'parameters': ['elem2', 'keys']}
+                ]
+            },
             'teardown': []
         }
         data = [{
@@ -358,7 +366,7 @@ class TestEditTest:
             'def setup(data):\n'
             '    click(elem1)\n'
             '\n\n'
-            'def test(data):\n'
+            'def test_one(data):\n'
             '    send_keys(elem2, keys)\n'
             '\n\n'
             'def teardown(data):\n'
@@ -373,9 +381,11 @@ class TestEditTest:
         pages = []
         test_steps = {
             'setup': [],
-            'test': [
-                {'type': 'function-call', 'action': 'send_keys', 'parameters': ['elem2', 'keys']}
-            ],
+            'tests': {
+                'test': [
+                    {'type': 'function-call', 'action': 'send_keys', 'parameters': ['elem2', 'keys']}
+                ]
+            },
             'teardown': []
         }
         data = [{
@@ -425,7 +435,7 @@ class TestEditTest:
                     'def setup(data):\n'
                     '    pass\n'
                     '\n\n'
-                    'def test(data):\n'
+                    'def test_name(data):\n'
                     '    pass\n'
                     '\n\n'
                     'def teardown(data):\n'
@@ -445,7 +455,7 @@ class TestEditTest:
                     'pages = []\n\n\n'
                     'def setup(data):\n'
                     '    pass\n\n\n'
-                    'def test(data):\n'
+                    'def test_name(data):\n'
                     '    pass\n\n\n'
                     'def teardown(data):\n'
                     '    pass\n')
@@ -465,7 +475,7 @@ class TestEditTest:
                     'skip = True\n\n\n'
                     'def setup(data):\n'
                     '    pass\n\n\n'
-                    'def test(data):\n'
+                    'def test_name(data):\n'
                     '    pass\n\n\n'
                     'def teardown(data):\n'
                     '    pass\n')
@@ -483,7 +493,7 @@ class TestEditTest:
                     'skip = \'please skip this\'\n\n\n'
                     'def setup(data):\n'
                     '    pass\n\n\n'
-                    'def test(data):\n'
+                    'def test_name(data):\n'
                     '    pass\n\n\n'
                     'def teardown(data):\n'
                     '    pass\n')
@@ -562,6 +572,23 @@ class TestTestCode:
         assert test.code == SAMPLE_TEST_CONTENT
 
 
+class TestGetTestFunctions:
+
+    def test_get_test_functions(self, project_class, test_utils):
+        testdir, project = project_class.activate()
+        test_name = 'test_file_one'
+        content = ('def foo(data):\n'
+                   '  pass\n'
+                   'def test_one(data):\n'
+                   '  pass\n'
+                   'def test_two(data):\n'
+                   '  pass\n'
+                   'test_three = 2\n')
+        test_utils.create_test(project, test_name, content)
+        test = test_module.Test(project, test_name)
+        assert test.test_function_list == ['test_one', 'test_two']
+
+
 class TestTestComponents:
 
     def test_test_components(self, project_session, test_utils):
@@ -575,20 +602,23 @@ class TestTestComponents:
         assert components['pages'] == ['page1', 'page2']
         assert components['tags'] == []
         assert components['skip'] is False
-        assert components['steps']['setup'] == [{'code': 'page1.func1()',
-                                                 'function_name': 'page1.func1',
-                                                 'parameters': [],
-                                                 'type': 'function-call'}]
-        expected_test_steps = [{'code': "page2.func2('a', 'b')",
-                                'function_name': 'page2.func2',
-                                'parameters': ["'a'", "'b'"],
-                                'type': 'function-call'},
-                               {'code': 'click(page2.elem1)',
-                                'function_name': 'click',
-                                'parameters': ['page2.elem1'],
-                                'type': 'function-call'}]
-        assert components['steps']['test'] == expected_test_steps
-        assert components['steps']['teardown'] == []
+        assert components['setup_steps'] == [{'code': 'page1.func1()',
+                                              'function_name': 'page1.func1',
+                                              'parameters': [],
+                                              'type': 'function-call'}]
+        assert len(components['test_functions']) == 1
+        expected_test_steps = [
+            {'code': "page2.func2('a', 'b')",
+             'function_name': 'page2.func2',
+             'parameters': ["'a'", "'b'"],
+             'type': 'function-call'},
+            {'code': 'click(page2.elem1)',
+             'function_name': 'click',
+             'parameters': ['page2.elem1'],
+             'type': 'function-call'}]
+        assert components['test_functions']['test'] == expected_test_steps
+        assert components['test_function_list'] == ['test']
+        assert components['teardown_steps'] == []
 
     def test_test_components_empty_test(self, project_session, test_utils):
         _, project = project_session.activate()
@@ -596,9 +626,10 @@ class TestTestComponents:
         test_content = Test(project, test_name).components
         assert test_content['description'] == ''
         assert test_content['pages'] == []
-        assert test_content['steps']['setup'] == []
-        assert test_content['steps']['test'] == []
-        assert test_content['steps']['teardown'] == []
+        assert test_content['setup_steps'] == []
+        assert test_content['teardown_steps'] == []
+        assert test_content['test_functions'] == {'test': []}
+        assert test_content['test_function_list'] == ['test']
 
     def test_test_components_pages(self, project_session, test_utils):
         """components['pages'] contains the imported pages and the pages

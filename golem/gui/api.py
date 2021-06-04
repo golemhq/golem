@@ -1,5 +1,4 @@
 """Golem GUI API blueprint"""
-import os
 from copy import deepcopy
 from functools import wraps
 
@@ -16,7 +15,6 @@ from golem.core.page import Page
 from golem.core.project import Project, create_project, delete_project
 from golem.report import report
 from golem.report import execution_report as exec_report
-from golem.report import test_report
 from golem.gui import gui_utils
 from golem.gui.user_management import Users, Permissions
 
@@ -241,13 +239,14 @@ def project_has_tests():
 def project_health():
     project = request.args['project']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    project_data = report.get_last_executions(projects=[project], suite=None, limit=1)
+    project_data = report.get_last_execution_timestamps(projects=[project],
+                                                        execution=None, limit=1)
     health_data = {}
-    for suite, executions in project_data[project].items():
-        execution_data = exec_report.get_execution_data(project=project, suite=suite,
-                                                        execution=executions[0])
-        health_data[suite] = {
-            'execution': executions[0],
+    for execution, timestamps in project_data[project].items():
+        execution_data = exec_report.get_execution_data(project=project, execution=execution,
+                                                        timestamp=timestamps[0])
+        health_data[execution] = {
+            'execution': timestamps[0],
             'total': execution_data['total_tests'],
             'totals_by_result': execution_data['totals_by_result']
         }
@@ -401,25 +400,14 @@ def projects():
     return jsonify(test_directory.get_projects())
 
 
-@api_bp.route('/report/execution', methods=['DELETE'])
+@api_bp.route('/report/execution')
 @auth_required
-def report_delete_execution():
-    project = request.json['project']
-    suite = request.json['suite']
-    execution = request.json['execution']
-    _verify_permissions(Permissions.ADMIN, project)
-    errors = report.delete_execution(project, suite, execution)
-    return jsonify(errors)
-
-
-@api_bp.route('/report/suite/execution')
-@auth_required
-def report_suite_execution():
+def report_execution():
     project = request.args['project']
-    suite = request.args['suite']
     execution = request.args['execution']
+    timestamp = request.args['timestamp']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    execution_data = exec_report.get_execution_data(project=project, suite=suite, execution=execution)
+    execution_data = exec_report.get_execution_data(project=project, execution=execution, timestamp=timestamp)
     response = jsonify(execution_data)
     if execution_data['has_finished']:
         response.cache_control.max_age = 60 * 60 * 24 * 7
@@ -427,12 +415,23 @@ def report_suite_execution():
     return response
 
 
+@api_bp.route('/report/execution', methods=['DELETE'])
+@auth_required
+def report_delete_execution():
+    project = request.json['project']
+    execution = request.json['execution']
+    timestamp = request.json['timestamp']
+    _verify_permissions(Permissions.ADMIN, project)
+    errors = report.delete_execution(project, execution, timestamp)
+    return jsonify(errors)
+
+
 @api_bp.route('/report/last-executions')
 @auth_required
 def report_last_executions():
     user = _get_user_api_or_session()
     project_list = user.project_list
-    project_data = report.get_last_executions(project_list, limit=5)
+    project_data = report.get_last_execution_timestamps(project_list, limit=5)
     return jsonify(projects=project_data)
 
 
@@ -441,34 +440,35 @@ def report_last_executions():
 def report_project_last_executions():
     project = request.args['project']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    project_data = report.get_last_executions([project], limit=10)
+    project_data = report.get_last_execution_timestamps([project], limit=10)
     return jsonify(projects=project_data)
 
 
-@api_bp.route('/report/suite/last-executions')
+@api_bp.route('/report/execution/last-executions')
 @auth_required
 def report_suite_last_executions():
     project = request.args['project']
-    suite = request.args['suite']
+    execution = request.args['execution']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    project_data = report.get_last_executions([project], suite=suite, limit=50)
+    project_data = report.get_last_execution_timestamps([project], execution=execution, limit=50)
     return jsonify(projects=project_data)
 
 
-@api_bp.route('/report/test-set')
+@api_bp.route('/report/test')
 @auth_required
-def report_test_set():
+def report_test():
     project = request.args['project']
-    suite = request.args['suite']
     execution = request.args['execution']
-    test_full_name = request.args['testName']
-    test_set = request.args['testSet']
+    timestamp = request.args['timestamp']
+    test_file = request.args['testFile']
+    test = request.args['test']
+    set_name = request.args['setName']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    test_detail = test_report.get_test_case_data(project, test_full_name, suite=suite,
-                                                 execution=execution, test_set=test_set,
-                                                 is_single=False, encode_screenshots=True)
-    response = jsonify(test_detail)
-    if test_detail['has_finished']:
+    result = exec_report.function_test_execution_result(project, execution, timestamp,
+                                                        test_file, test, set_name,
+                                                        encode_screenshots=True)
+    response = jsonify(result)
+    if result['has_finished']:
         response.cache_control.max_age = 604800
         response.cache_control.public = True
     return response
@@ -481,32 +481,8 @@ def report_test_status():
     test_name = request.args['test']
     timestamp = request.args['timestamp']
     _verify_permissions(Permissions.REPORTS_ONLY, project)
-    path = exec_report.single_test_execution_path(project, test_name, timestamp)
-    result = {
-        'sets': {},
-        'is_finished': False
-    }
-    sets = {}
-    if os.path.isdir(path):
-        for elem in os.listdir(path):
-            if os.path.isdir(os.path.join(path, elem)):
-                sets[elem] = {
-                    'log': [],
-                    'report': None
-                }
-    result['is_finished'] = report.is_execution_finished(path, sets)
-    for set_name in sets:
-        report_path = os.path.join(path, set_name, 'report.json')
-        if os.path.exists(report_path):
-            test_data = test_report.get_test_case_data(project, test_name, execution=timestamp,
-                                                       test_set=set_name, is_single=True)
-            sets[set_name]['report'] = test_data
-        log_path = os.path.join(path, set_name, 'execution_info.log')
-        if os.path.exists(log_path):
-            with open(log_path, encoding='utf-8') as log_file:
-                sets[set_name]['log'] = log_file.readlines()
-    result['sets'] = sets
-    return jsonify(result)
+    status = exec_report.test_file_execution_result_all_sets(project, test_name, timestamp, test_name)
+    return jsonify(status)
 
 
 @api_bp.route('/settings/global/save', methods=['PUT'])
@@ -679,12 +655,13 @@ def test_directory_delete():
 @auth_required
 def test_run():
     project = request.json['project']
-    test_name = request.json['testName']
+    test_file_name = request.json['testName']
+    test_functions = request.json['testFunctions']
     browsers = request.json['browsers']
     environments = request.json['environments']
     processes = request.json['processes']
     _verify_permissions(Permissions.STANDARD, project)
-    timestamp = gui_utils.run_test(project, test_name, browsers, environments, processes)
+    timestamp = gui_utils.run_test(project, test_file_name, test_functions, browsers, environments, processes)
     return jsonify(timestamp)
 
 

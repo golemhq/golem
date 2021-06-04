@@ -11,14 +11,7 @@ class File {
     }
 
     startInlineNameEdition() {
-        $("#filenameInput input").val(this.fullName);
-        $("#filenameInput").show();
-        $("#fileName").hide();
-        $("#filenameInput input").focus();
-        $("#filenameInput input").unbind('blur');
-        $("#filenameInput input").unbind('keyup');
-        $("#filenameInput input").on('blur', (e) => this.saveInlineNameEdition());
-        $("#filenameInput input").on('keyup', (e) => {if(e.keyCode == '13') e.target.blur()});
+        Main.Utils.startGenericInlineName($("#filenameInput"), $("#fileName"), this.fullName, () => this.saveInlineNameEdition())
     };
 
     saveInlineNameEdition() {
@@ -42,8 +35,7 @@ class File {
                 $("#fileName").html(newNameValue).show();
                 window.history.pushState("object or string", "", this.fileUrl());
                 Main.Utils.toast('success', 'File was renamed', 2000);
-            }
-            else{
+            } else {
                 result.errors.forEach(function(error){
                     Main.Utils.toast('error', error, 3000);
                 });

@@ -100,11 +100,12 @@ const Main = new function(){
         // var callback = function(){
         //     myCustomFunction(param1, param2);
         // }
-        this.displayPromptModal = function(title, description, inputValue, inputPlaceholder, callback){
+        this.displayPromptModal = function(title, description, inputValue, inputPlaceholder, callback, validationCallback){
             $("#promptModal .modal-title").html(title);
             $("#promptModal .modal-body .description").html(description);
             $("#promptModal .modal-body input").val(inputValue);
             $("#promptModal .modal-body input").attr('placeholder', inputPlaceholder);
+            $("#promptModal .error-msg").html('');
 
             $("#promptModal").modal("show");
             $('#promptModal').on('shown.bs.modal', function () {
@@ -113,9 +114,20 @@ const Main = new function(){
 
             var sendValue = function(){
                 var sentValue = $("#promptModalInput").val();
-                callback(sentValue);
-                $("#promptModal").modal("hide");
-                $("#prompSaveButton").unbind('click');
+                if(validationCallback){
+                    let error = validationCallback(sentValue);
+                    if(error.length) {
+                        $("#promptModal .error-msg").html(error);
+                    } else {
+                        callback(sentValue);
+                        $("#promptModal").modal("hide");
+                        $("#prompSaveButton").unbind('click');
+                    }
+                } else {
+                    callback(sentValue);
+                    $("#promptModal").modal("hide");
+                    $("#prompSaveButton").unbind('click');
+                }
             }
 
             let btn = $("#promptModal button.confirm");
@@ -164,6 +176,18 @@ const Main = new function(){
             btn.click(function(){
                 confirm();
             })
+        }
+
+        this.startGenericInlineName = function(inputSpan, valueSpan, currentValue, saveCallback) {
+            let input = inputSpan.find('input');
+            input.val(currentValue);
+            inputSpan.show();
+            valueSpan.hide();
+            input.focus();
+            input.unbind('blur');
+            input.unbind('keyup');
+            input.on('blur', (e) => saveCallback());
+            input.on('keyup', (e) => {if(e.keyCode == '13') e.target.blur()});
         }
 
         this.guid = function()  {
@@ -365,6 +389,7 @@ const Main = new function(){
         this.browsers = '';
         this.environments = [];
         this.processes = 1;
+        this.testFunctions = [];
 
         this.openConfigModal = async function(project, testName){
             Main.TestRunner._clearInfoBars();
@@ -374,6 +399,7 @@ const Main = new function(){
             if($("#runTestBrowsers").val().length == 0){
                 $("#runTestBrowsers").val(Main.TestRunner.defaultBrowser+', ');
             }
+            Main.TestRunner._startTestFunctionAutocomplete();
             Main.TestRunner._startBrowsersAutocomplete();
             await Main.TestRunner._getProjectEnvironments();
             Main.TestRunner._startEnvironmentsAutocomplete();
@@ -383,19 +409,22 @@ const Main = new function(){
         this.runTest = async function(project, testName){
             Main.TestRunner.project = project;
             Main.TestRunner.testName = testName;
+            Main.TestRunner.testFunctions = [];  // empty array indicates run all test functions
             let projectEnvironments = await Main.TestRunner._getProjectEnvironments();
             if(projectEnvironments.length > 1 && Main.TestRunner.environments.length == 0){
                  Main.TestRunner.openConfigModal(project, testName);
                  Main.TestRunner._clearInfoBars();
                  Main.TestRunner.addInfoBar('Select at least one environment');
-            }
-            else{
+            } else {
                 Main.TestRunner._doRunTestCase()
             }
         };
 
         this.runTestFromConfigModal = async function(){
             let errors = [];
+            // test functions
+            let testFunctions = Main.Utils.csvToArray($("#runTestFunctions").val());
+            Main.TestRunner.testFunctions = [...new Set(testFunctions)];  // remove duplicates
             // browsers
             Main.TestRunner.browsers = Main.Utils.csvToArray($("#runTestBrowsers").val());
             // environments
@@ -413,8 +442,7 @@ const Main = new function(){
             Main.TestRunner.processes = parseInt($("#runTestProcesses").val());
             if(isNaN(Main.TestRunner.processes)){
                 errors.push('Processes must be an integer')
-            }
-            else if(Main.TestRunner.processes < 1){
+            } else if(Main.TestRunner.processes < 1){
                 errors.push('Processes must be at least one')
             }
 
@@ -422,8 +450,7 @@ const Main = new function(){
                 Main.TestRunner.openConfigModal(Main.TestRunner.project, Main.TestRunner.testName);
                 Main.TestRunner._clearInfoBars();
                 errors.forEach( error => Main.TestRunner.addInfoBar(error) );
-            }
-            else{
+            } else {
                 Main.TestRunner._doRunTestCase();
             }
         };
@@ -438,11 +465,12 @@ const Main = new function(){
             $.ajax({
                 url: "/api/test/run",
                 data: JSON.stringify({
-                     "project": Main.TestRunner.project,
-                     "testName": Main.TestRunner.testName,
-                     "browsers": Main.TestRunner.browsers,
-                     "environments": Main.TestRunner.environments,
-                     "processes": Main.TestRunner.processes
+                     project: Main.TestRunner.project,
+                     testName: Main.TestRunner.testName,
+                     testFunctions: Main.TestRunner.testFunctions,
+                     browsers: Main.TestRunner.browsers,
+                     environments: Main.TestRunner.environments,
+                     processes: Main.TestRunner.processes
                  }),
                 dataType: 'json',
                 contentType: 'application/json; charset=utf-8',
@@ -459,7 +487,7 @@ const Main = new function(){
             $("#testRunModal #testRunModalTabNav").html('');
             $("#testRunModalTabNav").hide();
             $("#testRunModal #TestRunModalTabContainer").html('');
-            $("#testRunModal #testRunModalLoadingIcon").show()
+            $("#testRunModal #testRunModalLoadingIcon").show();
             $("#testResults").html('');
             $("#testResultLogs").html('');
             $("#testRunModal").modal("show");
@@ -471,9 +499,9 @@ const Main = new function(){
             $.ajax({
                 url: "/api/report/test/status",
                 data: {
-                     "project": Main.TestRunner.project,
-                     "test": Main.TestRunner.testName,
-                     "timestamp": timestamp
+                     project: Main.TestRunner.project,
+                     test: Main.TestRunner.testName,
+                     timestamp: timestamp
                 },
                 dataType: 'json',
                 type: 'GET',
@@ -482,10 +510,9 @@ const Main = new function(){
                         Main.TestRunner._updateSet(setName, values, timestamp)
                     }
                     checkDelay += 100;
-                    if(result.is_finished){
+                    if(result.has_finished){
                         $("#testRunModal #testRunModalLoadingIcon").hide()
-                    }
-                    else{
+                    } else {
                          setTimeout(function(){
                             Main.TestRunner._checkAndRecheckStatus(checkDelay, timestamp);
                         }, checkDelay, Main.TestRunner.project, Main.TestRunner.testName, timestamp);
@@ -516,6 +543,25 @@ const Main = new function(){
                 triggerSelectOnValidInput: false,
                 onSelect: function (suggestion) {
                     $('#runTestBrowsers').val($('#runTestBrowsers').val()+', ');
+                }
+            });
+        }
+
+        this._startTestFunctionAutocomplete = async function(){
+            let testFunctions = [];
+            try {
+                // This will fail if this is not run from the Test Builder
+                testFunctions = Test.getAllTestFunctionNames();
+            } catch (e) {
+                console.error('Test functions cannot be obtained')
+            }
+            $('#runTestFunctions').autocomplete({
+                lookup: testFunctions,
+                minChars: 0,
+                delimiter: ', ',
+                triggerSelectOnValidInput: false,
+                onSelect: function (suggestion) {
+                    $('#runTestFunctions').val($('#runTestFunctions').val()+', ');
                 }
             });
         }
@@ -562,20 +608,18 @@ const Main = new function(){
         }
 
         this._loadSetReport = function(setName, report, timestamp){
-            let reportContainer = $("<div class='report-result'></div>");
+            let reportContainer = $(`
+            <div class='report-result'>
+                <h4>${report.test}</h4>
+            </div>`);
             let resultIcon = Main.Utils.getResultIcon(report.result);
-            reportContainer.append(`<div class="test-result"><strong>Result:</strong> ${report.result} ${resultIcon}</div>`);
-            reportContainer.append('<div><strong>Errors:</strong></div>');
-            if(report.errors.length > 0){
-                let errorsList = $("<ol class='error-list' style='margin-left: 20px'></ol>");
-                report.errors.forEach(function(error){
-                    errorsList.append(`<li>${error.message}</li>`);
-                });
-                reportContainer.append(errorsList);
-            };
-            reportContainer.append(`<div><strong>Elapsed Time:</strong> ${report.test_elapsed_time}</div>`);
-            reportContainer.append(`<div><strong>Browser:<strong> ${report.browser}</div>`);
-            reportContainer.append(`<div><strong>Steps:</strong></div>`);
+            reportContainer.append(`<div class="test-result"><strong style='display: inline-block; width: 120px'>Result:</strong> ${report.result} ${resultIcon}</div>`);
+            reportContainer.append(`<div><strong style='display: inline-block; width: 120px'>Browser:</strong> ${report.browser}</div>`);
+            if(report.environment.length) {
+                reportContainer.append(`<div><strong style='display: inline-block; width: 120px'>Environment:</strong> ${report.environment}</div>`);
+            }
+            reportContainer.append(`<div><strong style='display: inline-block; width: 120px'>Elapsed Time:</strong> ${report.elapsed_time}</div>`);
+            reportContainer.append(`<div><strong style='display: inline-block; width: 120px'>Steps:</strong></div>`);
             if(report.steps.length > 0){
                 let stepsList = $("<ol class='step-list' style='margin-left: 20px'></ol>");
                 report.steps.forEach(function(step){
@@ -585,7 +629,7 @@ const Main = new function(){
                     }
                     if(step.screenshot){
                         let guid = Main.Utils.guid();
-                        let screenshotUrl = `/test/screenshot/${Main.TestRunner.project}/${Main.TestRunner.testName}/${timestamp}/${setName}/${step.screenshot}/`;
+                        let screenshotUrl = `/report/screenshot/${Main.TestRunner.project}/${Main.TestRunner.testName}/${timestamp}/${Main.TestRunner.testName}/${setName}/${report.test}/${step.screenshot}/`;
                         let screenshotIcon = `
                             <span class="cursor-pointer glyphicon glyphicon-picture" aria-hidden="true"
                                 data-toggle="collapse" data-target="#${guid}"
@@ -600,31 +644,44 @@ const Main = new function(){
                 });
                 reportContainer.append(stepsList)
             }
-            $(`.test-run-tab-content[set-name='${setName}']>.test-results`).html(reportContainer.html());
+            reportContainer.append(`<div><strong style='display: inline-block; width: 120px'>Errors:</strong></div>`);
+            if(report.errors.length > 0){
+                let errorsList = $("<ol class='error-list' style='margin-left: 20px'></ol>");
+                report.errors.forEach(function(error){
+                    errorsList.append(`<li>${error.message}</li>`);
+                });
+                reportContainer.append(errorsList);
+            };
+            reportContainer.append(`<br>`);
+            $(`.test-run-tab-content[set-name='${setName}']>.test-results`).append(reportContainer);
             $('.modal-body').scrollTop($('.modal-body')[0].scrollHeight);
         }
 
         this._updateSet = function(setName, values, timestamp){
             Main.TestRunner._addTabIfDoesNotExist(setName);
             let tab = $(`.test-run-tab-content[set-name='${setName}']`);
-            values.log.forEach(function(line){
-                let displayedLinesStrings = [];
-                tab.find('.test-result-logs div.log-line').each(function(){
-                      displayedLinesStrings.push($(this).html())
-                 });
-                if(!displayedLinesStrings.includes(line)){
-                    tab.find('.test-result-logs').append("<div class='log-line'>"+line+"</div>");
-                    $('.modal-body').scrollTop($('.modal-body')[0].scrollHeight);
-                }
-            });
+            if(values.log_info != null) {
+                values.log_info.forEach(function(line){
+                    let displayedLinesStrings = [];
+                    tab.find('.test-result-logs div.log-line').each(function(){
+                          displayedLinesStrings.push($(this).html())
+                     });
+                    if(!displayedLinesStrings.includes(line)){
+                        tab.find('.test-result-logs').append("<div class='log-line'>"+line+"</div>");
+                        $('.modal-body').scrollTop($('.modal-body')[0].scrollHeight);
+                    }
+                });
+            }
             // If this test set has finished
             if(values.report != null){
                 let tabNav = $(`.test-run-tab[set-name='${setName}']`);
                 if(tabNav.attr('running') == 'true'){
                     tabNav.removeAttr('running');
                     tabNav.find('i').remove();
-                    tabNav.find('a').append(Main.Utils.getResultIcon(values.report.result));
-                    Main.TestRunner._loadSetReport(setName, values.report, timestamp);
+//                    tabNav.find('a').append(Main.Utils.getResultIcon(values.report.result));
+                    values.report.forEach((r) => {
+                        Main.TestRunner._loadSetReport(setName, r, timestamp);
+                    })
                 }
             }
         }

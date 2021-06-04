@@ -8,14 +8,14 @@
 
 {% block content %}
 <div class="all-projects-container">
-	<h3>{% if project %}{{project|replace("_", " ")|capitalize}} - {% endif %}{% if suite %}{{suite|replace("_", " ")|capitalize}} - {% endif %}Reports</h3>
+	<h3>{% if project %}{{project|replace("_", " ")|capitalize}} - {% endif %}{% if execution %}{{execution|replace("_", " ")|capitalize}} - {% endif %}Reports</h3>
 </div>
 {% endblock %}
 
 {% block footer_declarations %}
 <script>
 	let projectName = {{project|tojson}};
-	let suiteName = {{suite|tojson}}
+	let executionName = {{execution|tojson}}
 </script>
 <script src="{{ url_for('static', filename='js/external/chart.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/report_dashboard.js') }}"></script>
