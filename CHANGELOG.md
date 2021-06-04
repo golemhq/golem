@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Multi-test file: A test file can have more than one test function
+- The report format changed, older reports won't work with this version
+
 ## [0.9.2] - 2021-04-15
 
 ### Added
