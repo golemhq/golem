@@ -21,47 +21,9 @@ def test(data):
     execution.logger.info('log this message')
 ```
 
+## test_file
 
-## testdir
-
-Golem root directory.
-
-## project_name
-
-Name of the project.
-
-## project_path
-
-Path to the project directory.
-
-## test_name
-
-Test name.
-
-## test_dirname
-
-The directory path where the test is located.
-
-## test_path
-
-Full path to the test file.
-
-## settings
-
-The settings passed to this test.
-
-## environment
-
-Name of the environment passed to the test.
-None is no environment was selected.
-
-## tags
-
-The list of tags passed to the execution.
-
-## report_directory
-
-Path to the directory where the reports will be saved.
+Module path of the current test file, relative to the tests folder.
 
 ## browser
 
@@ -75,10 +37,6 @@ The browser definition passed to this test.
 
 A dictionary with all the open browsers.
 
-## steps
-
-Steps collected by the test.
-
 ## data
 
 The data object.
@@ -91,15 +49,61 @@ The secrets data object.
 
 The description of the test.
 
-## errors
+## settings
 
-A list of errors collected by the test.
+The settings passed to this test.
 
+## test_dirname
+
+The directory path where the test is located.
+
+## test_path
+
+Full path to the test file.
+
+## project_name
+
+Name of the project.
+
+## project_path
+
+Path to the project directory.
+
+## testdir
+
+Golem root directory.
 
 ## logger
 
 Test logger object.
 
-## timers
+## tags
+
+The list of tags passed to the execution.
+
+## environment
+
+Name of the environment passed to the test.
+None is no environment was selected.
+
+## Values for each test function
+
+### test_name
+
+Current test function name.
+
+### steps
+
+Steps collected by the current test function.
+
+### errors
+
+A list of errors collected by the test function.
+
+### report_directory
+
+Path to the directory where the reports will be saved.
+
+### timers
 
 A dictionary with timers, used by the *timer_start* and *timer_stop* actions.

@@ -1,38 +1,19 @@
 Test Framework
 ==================================================
 
-## Test
+## Test File
 
-A test contains a series of steps, input and output values and some assertions or verifications to determine if it passes or fails. 
+A test file contains one or more tests (functions that start with 'test') 
 
-### Test Components
+Test files also can have the setup and teardown hooks:
 
-A test is composed of the following elements:
+### Setup
 
-#### Description
+A function that is executed before every test of a test file.
 
-The description of the test. It is displayed in the report at the end. Optional.
+### Teardown
 
-#### Data
-
-Data can be defined inside the test. It can be a dictionary or a list of dictionaries.
-In the latter scenario, the test will be run once per dictionary (test set). See [Test Data](test-data.html).
-
-#### Pages
-
-A list of pages to import to the test.
-
-#### Setup Function
-
-A function that is executed before the test.
-
-#### Test Function
-
-The test function itself. This is the only required element for the test. Everything else is optional.
-
-#### Teardown Function
-
-A function that is executed after the test even if there are exceptions or errors in setup or test.
+A function that is executed after all tests even if there were exceptions or errors.
 
 ### Example
 
@@ -55,12 +36,6 @@ def test(data):
 def teardown(data):
     releases.remove_release(data.release_name)
 ```
-
-### Order of Execution
-
-The order of execution is: setup, test, teardown.
-If there are any exception errors in setup, then the test function will not be executed.
-The teardown function is executed even if there were exceptions or errors in setup or test. 
 
 ## Test Results
 

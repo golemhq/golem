@@ -15,7 +15,7 @@ Default time to wait looking for an element until it is present. Default is 20 s
 
 ### wait_displayed
 
-Wait for elements to be present and displayed. Default is False
+Wait for elements to be present and displayed. Default is False.
 
 ### screenshot_on_error
 

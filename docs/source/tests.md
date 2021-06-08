@@ -1,15 +1,27 @@
 Tests
 ==================================================
 
-A test in Golem is a Python file. It must be located in the *tests* folder of a *project* in the Test Directory.
-To create a Test Directory and a project follow [these steps](tutorial-part-1.html#create-a-test-directory) and [these steps](tutorial-part-1.html#create-a-new-project).
+Tests are functions that begin with 'test' and are located in Python modules in the test folder of a project.
 
-A test can be created from the Web Module or using the following command:
+To create a test first start a Golem test directory, if you don't already have one, and add a project to it:
 
-```bash
-golem createtest project_name test_name
+```
+golem-admin createdirectory <directory_name>
+cd <directory_name>
+golem createproject <project_name>
+```
+
+Then add a test file inside that project:
+
+```
+golem createtest <project_name> <test_name>
 ``` 
 
+A project and a test can also be created using the Web Module:
+
+```
+golem gui
+```
 
 ## Test Structure
 
@@ -28,7 +40,11 @@ def setup(data):
     pass
 
 
-def test(data):
+def test_one(data):
+    pass
+
+
+def test_two(data):
     pass
 
 
@@ -36,8 +52,13 @@ def teardown(data):
     pass
 ```
 
-A test must implement at least a **test** function that receives a data object as argument.
 
+A test file must implement at least one **test** function that receives a data object as argument.
+
+## Multiple Tests per File
+
+All test functions inside a test file are run in sequence. The data is shared between tests.
+The browser session is shared as well, unless a test explicitly closes the current open browser.
 
 ## Test Data
 
@@ -86,7 +107,7 @@ See [Filter Tests by Tags](running-tests.html#filter-tests-by-tags).
 
 ## Implicit vs Explicit Imports
 
-By default the test runner imports the golem.actions module and any page module implicitly during the execution.
+By default, the test runner imports the golem.actions module and any page module implicitly during the execution.
 Pages are saved as a list of strings.
 The GUI test builder complies with this format and generates code like the following:
 

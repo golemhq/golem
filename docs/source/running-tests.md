@@ -3,13 +3,13 @@ Running tests
 
 ## Run a single test
 
-A single test can be run using the file path or the test module path.
+A test file can be run using the file path or the test module path.
 In both cases it should be relative to the *tests* folder.
 ```
-golem run project test_name
-golem run project test_name.py
-golem run project folder.test_name
-golem run project folder/test_name.py
+golem run project_name test_name
+golem run project_name test_name.py
+golem run project_name folder.test_name
+golem run project_name folder/test_name.py
 ```
 
 ## Run a suite
@@ -18,10 +18,10 @@ Similar to a test, a suite can be run using the file path or the test module pat
 In both cases it should be relative to the *suites* folder.
 
 ```
-golem run project suite_name
-golem run project suite_name.py
-golem run project folder.suite_name
-golem run project folder/suite_name.py
+golem run project_name suite_name
+golem run project_name suite_name.py
+golem run project_name folder.suite_name
+golem run project_name folder/suite_name.py
 ```
 
 ## Run every test in a directory
@@ -30,13 +30,13 @@ To select all the tests in a directory and subdirectories a relative path can be
 The path has to be relative to the *tests* folder.
 
 ```
-golem run project folder/
+golem run project_name folder/
 ```
 
 ### Run every test in a project
 
 ```
-golem run project .
+golem run project_name .
 ```
 
 ## Select Browsers
@@ -46,13 +46,13 @@ golem run project suite -b chrome firefox
 ```
 
 Every selected test will be run for each of the selected browsers.
-Browsers can also be defined inside a suite.
+The browsers can also be defined inside a suite.
 If no browser is set, the default defined in settings will be used.
 The valid options for browsers are listed [here](browsers.html#valid-options).
 
 ## Run Tests in Parallel
 
-To run tests in parallel the number of processes must be set to more than 1.
+To run test files in parallel the number of processes must be set to more than 1.
 This can be done through the *golem run* command or by the *processes* attribute of a suite. 
 
 ```

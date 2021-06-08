@@ -2,14 +2,14 @@ Tutorial - Part 2
 ==================================================
 
 
-## Adding a New Test
+## Adding a New Test File
 
-**Tests** are Python files and need to be placed inside the *tests* folder of a project.
+**Test files** are Python modules located inside the *tests* folder of a project.
 
-To create a new **test** use the following command:
+To create a new **test file** use the following command:
 
 ```
-golem createtest <project name> <test name>
+golem createtest <project_name> <test_name>
 ```
 
 A test can also be created from the Web Module.
@@ -41,11 +41,11 @@ The **description** is used to define the goal of the test and its value is disp
 
 **Pages** is a list of the pages of the application under test that this test will interact with. More about pages later.
 
-After that, a test implements three functions: **setup**, **test**, and **teardown**. These functions are always executed in that order.
+After that, a test file implements three functions: **setup**, **test**, and **teardown**. These functions are always executed in that order.
 
 Use the **setup** function to separate the preconditions from the main test steps.
 
-The **test** method should contain the steps of the test and should have at least one assertion or validation at the end.
+A test file can have one or more **test functions**, and they should start with 'test'.
 
 The **teardown** function is always executed, even if the other functions fail. So use the Teardown function to run final commands needed to set everything back to the original position.
 
@@ -64,7 +64,6 @@ def test(data):
     send_keys(('id', 'searchInput'), 'automation')
     click(('id', 'searchButton'))
     verify_element_text(('id', 'firstHeading'), 'Automation')
-
 ```
 
 From the Web Module:

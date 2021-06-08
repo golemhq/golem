@@ -11,7 +11,7 @@ A **Test Directory** needs to be created first. This directory contains the init
 To create a Test Directory, open a console wherever you want the new directory to be and execute this command:
 
 ```
-golem-admin createdirectory testdir
+golem-admin createdirectory <test_dir_name>
 ```
 
 This will create a **testdir** folder that will be used for all subsequent projects.

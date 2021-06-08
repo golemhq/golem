@@ -132,4 +132,4 @@ pip install waitress
 waitress-serve --call "golem.gui:create_app"
 ```
  
-There are a lot of different options. Here is a complete guide: <http://flask.pocoo.org/docs/latest/deploying/>
+There are a lot of different options. Here is a complete guide: <https://flask.palletsprojects.com/en/2.0.x/deploying/>
