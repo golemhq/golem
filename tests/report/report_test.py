@@ -1,6 +1,7 @@
 import os
 
 from golem.report import report
+from golem.core.project import Project
 
 
 class TestGetLastExecutionTimestamps:
@@ -41,9 +42,26 @@ class TestDeleteExecution:
     def test_delete_execution(self, project_class, test_utils):
         _, project = project_class.activate()
         execution = test_utils.execute_random_suite(project)
+        execpath = os.path.join(Project(project).report_directory_path, execution['suite_name'])
+        assert os.path.isdir(execpath)
         assert os.path.isdir(execution['exec_dir'])
 
-        errors = report.delete_execution(project, execution['suite_name'], execution['timestamp'])
+        errors = report.delete_execution(project, execution['suite_name'])
+
+        assert errors == []
+        assert not os.path.isdir(execpath)
+
+
+class TestDeleteExecutionTimestamp:
+
+    def test_delete_execution_timestamp(self, project_class, test_utils):
+        _, project = project_class.activate()
+        execution = test_utils.execute_random_suite(project)
+        execpath = os.path.join(Project(project).report_directory_path, execution['suite_name'])
+        assert os.path.isdir(execution['exec_dir'])
+
+        errors = report.delete_execution_timestamp(project, execution['suite_name'], execution['timestamp'])
 
         assert errors == []
         assert not os.path.isdir(execution['exec_dir'])
+        assert os.path.isdir(execpath)  # folder for execution name still exists

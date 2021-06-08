@@ -420,9 +420,19 @@ def report_execution():
 def report_delete_execution():
     project = request.json['project']
     execution = request.json['execution']
+    _verify_permissions(Permissions.ADMIN, project)
+    errors = report.delete_execution(project, execution)
+    return jsonify(errors)
+
+
+@api_bp.route('/report/execution/timestamp', methods=['DELETE'])
+@auth_required
+def report_delete_execution_timestamp():
+    project = request.json['project']
+    execution = request.json['execution']
     timestamp = request.json['timestamp']
     _verify_permissions(Permissions.ADMIN, project)
-    errors = report.delete_execution(project, execution, timestamp)
+    errors = report.delete_execution_timestamp(project, execution, timestamp)
     return jsonify(errors)
 
 

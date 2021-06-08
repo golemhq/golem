@@ -221,31 +221,52 @@ const ReportDashboardMain = new function(){
         chart.update();
     }
 
-
     this.deleteExecutionConfirm = function(elem){
+        let executionContainer = $(elem).closest('.execution-container');
+        let execution = executionContainer.attr('id');
+        let project = $(elem).closest('.project-container').attr('id');
+        let message = `<span style="word-break: break-all">Are you sure you want to delete all reports in this execution? This action cannot be undone.</span>`;
+        let callback = function(){
+            ReportDashboardMain.deleteExecution(executionContainer, project, execution);
+        }
+        Main.Utils.displayConfirmModal('Delete', message, callback);
+    }
+
+    this.deleteExecution = function(executionContainer, project, execution){
+        $.ajax({
+            url: "/api/report/execution",
+            data: JSON.stringify({project, execution}),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            type: 'DELETE',
+            success: function( errors ) {
+                if(errors.length == 0){
+                    executionContainer.remove();
+                    Main.Utils.toast('info', 'Execution deleted', 2000)
+                } else {
+                    errors.forEach(error => Main.Utils.toast('error', error, 3000));
+                }
+            }
+        });
+        return false
+    }
+
+    this.deleteExecutionTimestampConfirm = function(elem){
         let row = $(elem).closest('tr');
         let project = $(elem).closest('.project-container').attr('id');
         let execution = row.attr('execution-name');
         let timestamp = row.attr('timestamp');
         let message = `<span style="word-break: break-all">Are you sure you want to delete this execution? This action cannot be undone.</span>`;
         let callback = function(){
-            ReportDashboardMain.deleteExecution(row, project, execution, timestamp);
+            ReportDashboardMain.deleteExecutionTimestamp(row, project, execution, timestamp);
         }
         Main.Utils.displayConfirmModal('Delete', message, callback);
     }
 
-    this.deleteExecution = function(elem){
-        let row = $(elem).closest('tr');
-        let project = $(elem).closest('.project-container').attr('id');
-        let execution = row.attr('execution-name');
-        let timestamp = row.attr('timestamp');
+    this.deleteExecutionTimestamp = function(row, project, execution, timestamp){
         $.ajax({
-            url: "/api/report/execution",
-            data: JSON.stringify({
-                project: project,
-                execution: execution,
-                timestamp: timestamp
-            }),
+            url: "/api/report/execution/timestamp",
+            data: JSON.stringify({project, execution, timestamp}),
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',
             type: 'DELETE',
@@ -253,6 +274,8 @@ const ReportDashboardMain = new function(){
                 if(errors.length == 0){
                     row.remove();
                     Main.Utils.toast('info', 'Execution deleted', 2000)
+                } else {
+                    errors.forEach(error => Main.Utils.toast('error', error, 3000));
                 }
             }
         });
@@ -280,7 +303,7 @@ const ReportDashboard = new function(){
 
     this.generateExecutionsContainer = function(projectName, executionName){
         let executionsContainer = `
-            <div class="suite-container" id="${executionName}">
+            <div class="execution-container" id="${executionName}">
                 <div class="widget widget-table">
                     <div class="widget-header">
                         <h3>
@@ -289,6 +312,10 @@ const ReportDashboard = new function(){
                                     <strong>${executionName}</strong>
                                 </a>
                             </span>
+                        </h3>
+                        <h3 style="float: right">
+                            <i class="glyphicon glyphicon-trash cursor-pointer" style="color: #b3b3b3"
+                                onclick="event.stopPropagation(); ReportDashboardMain.deleteExecutionConfirm(this)"></i>
                         </h3>
                     </div>
                     <div class="flex-row">
@@ -353,7 +380,7 @@ const ReportDashboard = new function(){
                 <td class="result"><div class="progress"></div></td>
                 <td class="spinner-container">
                     <i class="glyphicon glyphicon-trash" style="display: none; color: #b3b3b3"
-                        onclick="event.stopPropagation(); ReportDashboardMain.deleteExecutionConfirm(this)"></i>
+                        onclick="event.stopPropagation(); ReportDashboardMain.deleteExecutionTimestampConfirm(this)"></i>
                     <i class="fa fa-cog fa-spin spinner" style="display: none;"></i>
                 </td>
             </tr>`;

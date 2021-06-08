@@ -42,7 +42,20 @@ def get_last_execution_timestamps(projects=None, execution=None, limit=5):
     return last_timestamps
 
 
-def delete_execution(project, execution, timestamp):
+def delete_execution(project, execution):
+    errors = []
+    path = os.path.join(Project(project).report_directory_path, execution)
+    if os.path.isdir(path):
+        try:
+            shutil.rmtree(path)
+        except Exception as e:
+            errors.append(repr(e))
+    else:
+        errors.append('Execution {} of project {} does not exist'.format(project, execution))
+    return errors
+
+
+def delete_execution_timestamp(project, execution, timestamp):
     errors = []
     path = execution_report_path(project, execution, timestamp)
     if os.path.isdir(path):
