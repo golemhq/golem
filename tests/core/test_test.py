@@ -29,28 +29,10 @@ def teardown(data):
 
 """
 
-
 NEW_TEST_CONTENT = """
-description = ''
-
-tags = []
-
-pages = []
-
-
-def setup(data):
-    pass
-
-
 def test(data):
     pass
-
-
-def teardown(data):
-    pass
-
 """
-
 
 EMPTY_STEPS = {
     'setup': [],
@@ -352,8 +334,6 @@ class TestEditTest:
             '\n'
             'description = \'description\'\n'
             '\n'
-            'tags = []\n'
-            '\n'
             'pages = [\'page1\',\n'
             '         \'page2\']\n'
             '\n'
@@ -367,10 +347,7 @@ class TestEditTest:
             '    click(elem1)\n'
             '\n\n'
             'def test_one(data):\n'
-            '    send_keys(elem2, keys)\n'
-            '\n\n'
-            'def teardown(data):\n'
-            '    pass\n')
+            '    send_keys(elem2, keys)\n')
         with open(Test(project, test_name).path) as f:
             assert f.read() == expected
 
@@ -397,18 +374,9 @@ class TestEditTest:
             '\n'
             'description = \'description\'\n'
             '\n'
-            'tags = []\n'
             '\n'
-            'pages = []\n'
-            '\n\n'
-            'def setup(data):\n'
-            '    pass\n'
-            '\n\n'
             'def test(data):\n'
-            '    send_keys(elem2, keys)\n'
-            '\n\n'
-            'def teardown(data):\n'
-            '    pass\n')
+            '    send_keys(elem2, keys)\n')
         with open(Test(project, test_name).path) as f:
             assert f.read() == expected
         data_path = os.path.join(Project(project).test_directory_path,
@@ -427,18 +395,9 @@ class TestEditTest:
                               steps=EMPTY_STEPS, test_data=[], tags=[])
         expected = ('from projects.{}.pages import page1\n'
                     'from projects.{}.pages.module import page2\n'
-                    '\n\n'
-                    'description = \'\'\n'
                     '\n'
-                    'tags = []\n'
-                    '\n\n'
-                    'def setup(data):\n'
-                    '    pass\n'
-                    '\n\n'
+                    '\n'
                     'def test_name(data):\n'
-                    '    pass\n'
-                    '\n\n'
-                    'def teardown(data):\n'
                     '    pass\n'.format(project, project))
         with open(Test(project, test_name).path) as f:
             assert f.read() == expected
@@ -450,14 +409,7 @@ class TestEditTest:
         test_module.edit_test(project, test_name, description='', pages=[],
                               steps=EMPTY_STEPS, test_data=[], tags=[])
         expected = ('from golem import actions\n\n\n'
-                    'description = \'\'\n\n'
-                    'tags = []\n\n'
-                    'pages = []\n\n\n'
-                    'def setup(data):\n'
-                    '    pass\n\n\n'
                     'def test_name(data):\n'
-                    '    pass\n\n\n'
-                    'def teardown(data):\n'
                     '    pass\n')
         with open(Test(project, test_name).path) as f:
             assert f.read() == expected
@@ -469,15 +421,8 @@ class TestEditTest:
                               steps=EMPTY_STEPS, test_data=[], tags=[], skip=True)
         path = Test(project, test_name).path
         expected = ('\n'
-                    'description = \'\'\n\n'
-                    'tags = []\n\n'
-                    'pages = []\n\n'
                     'skip = True\n\n\n'
-                    'def setup(data):\n'
-                    '    pass\n\n\n'
                     'def test_name(data):\n'
-                    '    pass\n\n\n'
-                    'def teardown(data):\n'
                     '    pass\n')
         with open(path) as f:
             assert f.read() == expected
@@ -487,15 +432,8 @@ class TestEditTest:
                               skip='please skip this')
         path = Test(project, test_name).path
         expected = ('\n'
-                    'description = \'\'\n\n'
-                    'tags = []\n\n'
-                    'pages = []\n\n'
                     'skip = \'please skip this\'\n\n\n'
-                    'def setup(data):\n'
-                    '    pass\n\n\n'
                     'def test_name(data):\n'
-                    '    pass\n\n\n'
-                    'def teardown(data):\n'
                     '    pass\n')
         with open(path) as f:
             assert f.read() == expected
@@ -626,8 +564,8 @@ class TestTestComponents:
         test_content = Test(project, test_name).components
         assert test_content['description'] == ''
         assert test_content['pages'] == []
-        assert test_content['setup_steps'] == []
-        assert test_content['teardown_steps'] == []
+        assert test_content['setup_steps'] is None
+        assert test_content['teardown_steps'] is None
         assert test_content['test_functions'] == {'test': []}
         assert test_content['test_function_list'] == ['test']
 

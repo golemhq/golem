@@ -10,16 +10,10 @@ from golem.core import parsing_utils
 
 def create_test(project_name, test_name):
     test_content = (
-        "\n"
-        "description = ''\n\n"
-        "tags = []\n\n"
-        "pages = []\n\n\n"
-        "def setup(data):\n"
-        "    pass\n\n\n"
-        "def test(data):\n"
-        "    pass\n\n\n"
-        "def teardown(data):\n"
-        "    pass\n\n")
+        '\n'
+        'def test(data):\n'
+        '    pass\n'
+    )
     errors = []
     project = Project(project_name)
     if test_name in project.tests():
@@ -93,9 +87,9 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
             formatted_description = 'description = \'\'\''
             for line in desc_lines:
                 formatted_description = formatted_description + '\n' + line
-            formatted_description = formatted_description + '\'\'\'\n'
+            formatted_description = formatted_description + '\'\'\''
         else:
-            formatted_description = 'description = \'{}\'\n'.format(description)
+            formatted_description = 'description = \'{}\''.format(description)
         return formatted_description
 
     def _format_tags_string(tags):
@@ -122,74 +116,105 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
                     value = "''"
                 result += '        \'{}\': {},\n'.format(key, value)
             result += '    },\n'
-        result += ']\n\n'
+        result += ']'
         return result
 
     def _format_steps(steps):
-        step_str = ''
+        step_lines = []
         for step in steps:
             if step['type'] == 'function-call':
                 step_action = step['action'].replace(' ', '_')
                 param_str = ', '.join(step['parameters'])
-                step_str += '    {0}({1})\n'.format(step_action, param_str)
+                step_lines.append('    {0}({1})'.format(step_action, param_str))
             else:
                 lines = step['code'].splitlines()
                 for line in lines:
-                    step_str += '    {}\n'.format(line)
-        return step_str
+                    step_lines.append('    {}'.format(line))
+        return '\n'.join(step_lines)
+
+    def _print_extra_blank_line():
+        nonlocal extra_blank_line
+        if extra_blank_line:
+            test_.append('')
+            extra_blank_line = False
 
     path = Test(project, test_name).path
     settings = settings_manager.get_project_settings(project)
-    with open(path, 'w', encoding='utf-8') as f:
-        if not settings['implicit_actions_import']:
-            f.write('from golem import actions\n\n')
-        if not settings['implicit_page_import']:
-            for page in pages:
-                split = page.split('.')
-                top = split.pop()
-                parents = '.'.join(split)
-                parents = '.{}'.format(parents) if parents else ''
-                f.write('from projects.{}.pages{} import {}\n'.format(project, parents, top))
-            f.write('\n')
-        f.write('\n')
-        f.write(_format_description(description))
-        f.write('\n')
-        f.write('tags = {}\n'.format(_format_tags_string(tags)))
-        f.write('\n')
-        if settings['implicit_page_import']:
-            f.write('pages = {}\n'.format(_format_page_string(pages)))
-            f.write('\n')
+
+    test_ = []
+
+    if not settings['implicit_actions_import']:
+        test_.append('from golem import actions')
+    if not settings['implicit_page_import']:
+        if pages and not settings['implicit_actions_import']:
+            test_.append('')
+        for page in pages:
+            split = page.split('.')
+            top = split.pop()
+            parents = '.'.join(split)
+            parents = '.{}'.format(parents) if parents else ''
+            test_.append('from projects.{}.pages{} import {}'.format(project, parents, top))
+
+    extra_blank_line = False
+    if not settings['implicit_actions_import'] or not settings['implicit_page_import']:
+        extra_blank_line = True
+
+    if description:
+        _print_extra_blank_line()
+        test_.append('')
+        test_.append(_format_description(description))
+
+    if tags:
+        _print_extra_blank_line()
+        test_.append('')
+        test_.append('tags = {}'.format(_format_tags_string(tags)))
+
+    if pages and settings['implicit_page_import']:
+        _print_extra_blank_line()
+        test_.append('')
+        test_.append('pages = {}'.format(_format_page_string(pages)))
+
+    if test_data:
         if settings['test_data'] == 'infile':
-            if test_data:
-                f.write('data = {}'.format(_format_data(test_data)))
-                test_data_module.remove_csv_if_exists(project, test_name)
+            _print_extra_blank_line()
+            test_.append('')
+            test_.append('data = {}'.format(_format_data(test_data)))
+            test_data_module.remove_csv_if_exists(project, test_name)
         else:
             test_data_module.save_external_test_data_file(project, test_name, test_data)
-        if skip:
-            if type(skip) is str:
-                skip = "'{}'".format(skip)
-            f.write('skip = {}\n\n'.format(skip))
-        f.write('\n')
-        f.write('def setup(data):\n')
-        if steps['setup']:
-            f.write(_format_steps(steps['setup']))
-        else:
-            f.write('    pass\n')
-        f.write('\n\n')
 
-        for test_function_name, test_function_steps in steps['tests'].items():
-            f.write('def {}(data):\n'.format(test_function_name))
-            if test_function_steps:
-                f.write(_format_steps(test_function_steps))
-            else:
-                f.write('    pass\n')
-            f.write('\n\n')
+    if skip:
+        _print_extra_blank_line()
+        test_.append('')
+        if type(skip) is str:
+            skip = "'{}'".format(skip)
+        test_.append('skip = {}'.format(skip))
 
-        f.write('def teardown(data):\n')
-        if steps['teardown']:
-            f.write(_format_steps(steps['teardown']))
+    if steps['setup']:
+        test_.append('')
+        test_.append('')
+        test_.append('def setup(data):')
+        test_.append(_format_steps(steps['setup']))
+
+    for test_function_name, test_function_steps in steps['tests'].items():
+        test_.append('')
+        test_.append('')
+        test_.append('def {}(data):'.format(test_function_name))
+        if test_function_steps:
+            test_.append(_format_steps(test_function_steps))
         else:
-            f.write('    pass\n')
+            test_.append('    pass')
+
+    if steps['teardown']:
+        test_.append('')
+        test_.append('')
+        test_.append('def teardown(data):')
+        test_.append(_format_steps(steps['teardown']))
+
+    test_.append('')
+
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(test_))
 
 
 def edit_test_code(project, test_name, content, table_test_data):
