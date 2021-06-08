@@ -310,20 +310,6 @@ def assert_amount_of_windows(amount):
     _screenshot_on_step()
 
 
-def assert_contains(element, value):
-    """DEPRECATED
-    Assert element contains value
-    Parameters:
-    element : element
-    value : value
-    """
-    step_message = 'Assert that {0} contains {1}'.format(element, value)
-    execution.logger.warning('Action assert_contains is deprecated')
-    _add_step(step_message)
-    _run_wait_hook()
-    assert value not in element, 'Expected {} to contain {}'.format(element, value)
-
-
 def assert_cookie_present(name):
     """Assert a cookie exists in the current session.
     The cookie is found by its name.
@@ -654,31 +640,6 @@ def assert_element_value_is_not(element, value):
     _screenshot_on_step()
 
 
-def assert_equals(actual_value, expected_value):
-    """DEPRECATED
-    Assert actual value equals expected value
-    Parameters:
-    actual_value : value
-    expected_value : value
-    """
-    step_message = 'Assert that {0} equals {1}'.format(actual_value, expected_value)
-    execution.logger.warning('Action assert_equals is deprecated')
-    _add_step(step_message)
-    assert actual_value == expected_value, 'expected {} to equal {}'.format(actual_value, expected_value)
-
-
-def assert_false(condition):
-    """DEPRECATED
-    Assert condition is false
-    Parameters:
-    condition : value
-    """
-    step_message = 'Assert that {} is false'.format(condition)
-    execution.logger.warning('Action assert_false is deprecated')
-    _add_step(step_message)
-    assert not condition, 'expected {} to be false'.format(condition)
-
-
 def assert_page_contains_text(text):
     """Assert the given text is present anywhere in the page source
 
@@ -810,18 +771,6 @@ def assert_title_not_contains(text):
     _screenshot_on_step()
 
 
-def assert_true(condition):
-    """DEPRECATED
-    Assert condition is true
-    Parameters:
-    condition : value
-    """
-    step_message = 'Assert that {0} is true'.format(condition)
-    execution.logger.warning('Action assert_true is deprecated')
-    _add_step(step_message)
-    assert condition, 'expected {} to be true'.format(condition)
-
-
 def assert_url(url):
     """Assert the current URL
 
@@ -931,16 +880,6 @@ def assert_window_present_by_url(url):
     _screenshot_on_step()
 
 
-def capture(message=''):
-    """DEPRECATED, use take_screenshot
-    Take a screenshot
-    Parameters:
-    message (optional) : value
-    """
-    execution.logger.warning('capture is DEPRECATED, Use take_screenshot')
-    take_screenshot(message)
-
-
 def check_element(element):
     """Check an element (checkbox or radiobutton).
     If element is already checked this is is ignored.
@@ -951,16 +890,6 @@ def check_element(element):
     element = get_browser().find(element)
     with _step('Check element {}'.format(element.name)):
         get_browser().check_element(element)
-
-
-def clear(element):
-    """DEPRECATED, use clear_element
-    Clear an input
-    Parameters:
-    element : element
-    """
-    execution.logger.warning('clear is DEPRECATED, use clear_element')
-    clear_element(element)
 
 
 def clear_element(element):
@@ -983,13 +912,6 @@ def click(element):
     element = browser.get_browser().find(element)
     with _step('Click {}'.format(element.name)):
         element.click()
-
-
-def close():
-    """DEPRECATED, use close_browser or close_window
-    Close a browser. Closes the current active browser"""
-    execution.logger.warning('close is DEPRECATED, use close_browser or close_window')
-    close_browser()
 
 
 def close_browser():
@@ -1061,13 +983,6 @@ def close_window_by_url(url):
     """
     with _step("Close window by URL '{}'".format(url)):
         get_browser().close_window_by_url(url)
-
-
-def debug():
-    """DEPRECATED, use interactive_mode
-    Enter debug mode"""
-    execution.logger.warning('debug is DEPRECATED, use interactive_mode')
-    interactive_mode()
 
 
 def delete_all_cookies():
@@ -1454,16 +1369,6 @@ def maximize_window():
     get_browser().maximize_window()
 
 
-def mouse_hover(element):
-    """DEPRECATED, used mouse_over
-    Hover an element with the mouse
-
-    Parameters:
-    element : element
-    """
-    execution.logger.warning('mouse_hover is DEPRECATED, use mouse_over instead')
-
-
 def mouse_over(element):
     """Perform a mouse over on element
 
@@ -1509,25 +1414,6 @@ def press_key(element, key):
     element = get_browser().find(element)
     with _step("Press key: '{}' in element {}".format(key, element.name)):
         element.press_key(key)
-
-
-def random(value):
-    """DEPRECATED - use random_str, random_int or random_float
-    Generate a random string value.
-
-    Parameters:
-    value : value
-    """
-    random_string = ''
-    for char in value:
-        if char == 'c':
-            random_string += rand.choice(string.ascii_lowercase)
-        elif char == 'd':
-            random_string += str(rand.randint(0, 9))
-        else:
-            random_string += char
-    execution.logger.info('Random value generated: {}'.format(random_string))
-    return random_string
 
 
 def random_float(min=1.0, max=100.0, decimals=None):
@@ -1590,41 +1476,6 @@ def refresh_page():
     """Refresh the page"""
     with _step('Refresh page'):
         get_browser().refresh()
-
-
-def select_by_index(element, index):
-    """DEPRECATED, use select_option_by_index
-    Select an option from a select dropdown by index.
-
-    Parameters:
-    element : element
-    index : value
-    """
-    execution.logger.warning('select_by_index is DEPRECATED, use select_option_by_index')
-    select_option_by_index(element, index)
-
-
-def select_by_text(element, text):
-    """DEPRECATED, use select_option_by_text
-    Select an option from a select dropdown by text.
-
-    Parameters:
-    element : element
-    text : value
-    """
-    execution.logger.warning('select_by_text is DEPRECATED, use select_option_by_text')
-    select_option_by_text(element, text)
-
-
-def select_by_value(element, value):
-    """DEPRECATED, use select_option_by_value
-
-    Parameters:
-    element : element
-    value : value
-    """
-    execution.logger.warning('select_by_value is DEPRECATED, use select_option_by_value')
-    select_option_by_value(element, value)
 
 
 def select_option_by_index(element, index):
@@ -1981,19 +1832,6 @@ def uncheck_element(checkbox):
         get_browser().uncheck_element(element)
 
 
-def verify_alert_is_not_present():
-    """DEPRECATED, use verify_alert_not_present.
-    Verify an alert is not present"""
-    execution.logger.warning('verify_alert_is_not_present is DEPRECATED, use verify_alert_not_present')
-    verify_alert_not_present()
-
-
-def verify_alert_is_present():
-    """DEPRECATED, use verify_alert_present"""
-    execution.logger.warning('verify_alert_is_present is DEPRECATED, use verify_alert_present')
-    verify_alert_present()
-
-
 def verify_alert_not_present():
     """Verify an alert is not present"""
     with _verify_step('Verify an alert is not present', 'an alert was present') as s:
@@ -2042,18 +1880,6 @@ def verify_amount_of_windows(amount):
         actual_amount = len(get_window_handles())
         s.error = 'Expected {} windows but got {}'.format(amount, actual_amount)
         s.condition = actual_amount == amount
-
-
-def verify_cookie_exists(name):
-    """DEPRECATED, use verify_cookie_present
-    Verify a cookie exists in the current session.
-    The cookie is found by its name.
-
-    Parameters:
-    name: value
-    """
-    execution.logger.warning('verify_cookie_exists is DEPRECATED, use verify_cookie_present')
-    verify_cookie_present(name)
 
 
 def verify_cookie_present(name):
@@ -2360,89 +2186,6 @@ def verify_element_value_is_not(element, value):
         s.condition = element_value != value
 
 
-def verify_exists(element):
-    """DEPRECATED, use verify_element_present.
-    Verify that en element exists.
-    Parameters:
-    element : element
-    """
-    execution.logger.warning('verify_exists is DEPRECATED, use verify_element_present')
-    verify_element_present(element)
-
-
-def verify_is_enabled(element):
-    """DEPRECATED, use verify_element_enabled
-    Verify an element is enabled.
-
-    Parameters:
-    element : element
-    """
-    execution.logger.warning('verify_is_enabled is DEPRECATED, use verify_element_enabled')
-    verify_element_enabled(element)
-
-
-def verify_is_not_enabled(element):
-    """DEPRECATED, use verify_element_not_enabled
-    Verify an element is not enabled
-
-    Parameters:
-    element : element
-    """
-    execution.logger.warning('verify_is_not_enabled is DEPRECATED, use verify_element_not_enabled')
-    verify_element_not_enabled(element)
-
-
-def verify_is_not_selected(element):
-    """DEPRECATED, use verify_element_not_checked
-
-    Parameters:
-    element : element
-    """
-    execution.logger.warning('verify_is_not_selected is DEPRECATED, use verify_element_not_checked')
-    verify_element_not_checked(element)
-
-
-def verify_is_not_visible(element):
-    """DEPRECATED, use verify_element_not_displayed
-
-    Parameters:
-    element : element
-    """
-    execution.logger.warning('verify_is_not_visible is DEPRECATED, use verify_element_not_displayed')
-    verify_element_not_displayed(element)
-
-
-def verify_is_selected(element):
-    """DEPRECATED, use verify_element_checked
-
-    Verify an element is selected
-    Parameters:
-    element : element
-    """
-    execution.logger.warning('verify_is_selected is DEPRECATED, use verify_element_checked')
-    verify_element_checked(element)
-
-
-def verify_is_visible(element):
-    """DEPRECATED, use verify_element_displayed
-
-    Parameters:
-    element : element
-    """
-    execution.logger.warning('verify_is_visible is DEPRECATED, use verify_element_displayed')
-    verify_element_displayed(element)
-
-
-def verify_not_exists(element):
-    """DEPRECATED, use verify_element_not_present
-
-    Parameters:
-    element : element
-    """
-    execution.logger.warning('verify_not_exists is DEPRECATED, use verify_element_not_present')
-    verify_element_not_present(element)
-
-
 def verify_page_contains_text(text):
     """Verify the given text is present anywhere in the page source
 
@@ -2481,20 +2224,6 @@ def verify_response_status_code(response, status_code):
         s.condition = response.status_code == status_code
 
 
-def verify_selected_option(element, text):
-    """DEPRECATED, use verify_selected_option_by_text or verify_selected_option_by_value
-
-    Verify an element has a selected option, passed by option text.
-    Parameters:
-    element : element
-    text : value
-    """
-    execution.logger.warning(('verify_selected_option is DEPRECATED, use '
-                              'verify_selected_option_by_text or '
-                              'verify_selected_option_by_value'))
-    verify_selected_option_by_text(element, text)
-
-
 def verify_selected_option_by_text(element, text):
     """Verify an element has a selected option by the option text
 
@@ -2525,27 +2254,6 @@ def verify_selected_option_by_value(element, value):
         s.error = ('Expected selected option in element {} to be {} but was {}'
                    .format(element.name, value, selected_option_value))
         s.condition = selected_option_value == value
-
-
-def verify_text(text):
-    """DEPRECATED, use verify_page_contains_text
-
-    Parameters:
-    text : value
-    """
-    execution.logger.warning('verify_text is DEPRECATED, use verify_page_contains_text')
-    verify_page_contains_text(text)
-
-
-def verify_text_in_element(element, text):
-    """DEPRECATED, use verify_element_text
-
-    Parameters:
-    element : element
-    text : value
-    """
-    execution.logger.warning('verify_text_in_element is DEPRECATED, use verify_element_text or verify_element_text_contains')
-    verify_element_text_contains(element, text)
 
 
 def verify_title(title):
@@ -2797,18 +2505,6 @@ def wait_for_element_not_enabled(element, timeout=30):
         get_browser().wait_for_element_not_enabled(element, timeout)
 
 
-def wait_for_element_not_exist(element, timeout=20):
-    """DEPRECATED, use wait_for_element_not_present
-    Wait for a webelement to stop existing in the DOM.
-
-    Parameters:
-    element : element
-    timeout (optional, default: 20) : value
-    """
-    execution.logger.warning('wait_for_element_not_exists is DEPRECATED, use wait_for_element_not_present')
-    wait_for_element_not_present(element, timeout)
-
-
 def wait_for_element_not_present(element, timeout=30):
     """Wait for element to stop being present in the DOM.
     If element is not present, this will be ignored.
@@ -2819,18 +2515,6 @@ def wait_for_element_not_present(element, timeout=30):
     """
     with _step('Wait for element {} to be not present'.format(element)):
         get_browser().wait_for_element_not_present(element, timeout)
-
-
-def wait_for_element_not_visible(element, timeout=20):
-    """DEPRECATED, use wait_for_element_not_displayed
-
-    Wait for an element to stop being visible.
-    Parameters:
-    element : element
-    timeout (optional, default: 20) : value
-    """
-    execution.logger.warning('wait_for_element_not_visible is DEPRECATED, use wait_for_element_not_displayed')
-    wait_for_element_not_displayed(element, timeout)
 
 
 def wait_for_element_present(element, timeout=30):
@@ -2890,18 +2574,6 @@ def wait_for_element_text_not_contains(element, text, timeout=30):
     """
     with _step("Wait for element {} to not contain text '{}'".format(element, text)):
         get_browser().wait_for_element_text_not_contains(element, text, timeout)
-
-
-def wait_for_element_visible(element, timeout=20):
-    """DEPRECATED, use wait_for_element_displayed
-
-    Wait for element to be visible.
-    Parameters:
-    element : element
-    timeout (optional, default: 20) : value
-    """
-    execution.logger.warning('wait_for_element_visible is DEPRECATED, use wait_for_element_displayed')
-    wait_for_element_displayed(element, timeout)
 
 
 def wait_for_page_contains_text(text, timeout=30):

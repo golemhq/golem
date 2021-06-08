@@ -54,14 +54,6 @@ Send text to an alert
 
 Send text to a prompt alert and accept it. If there is no prompt alert present this will fail.
 
-### verify_alert_is_not_present()
-
-DEPRECATED, use verify_alert_not_present
-
-### verify_alert_is_present()
-
-DEPRECATED, use verify_alert_present
-
 ### verify_alert_not_present()
 
 Verify an alert is not present. This applies to alerts, confirms and prompts.
@@ -98,7 +90,7 @@ Returns the response.
 Example:
 ```
 http_get('http://google.com/')
-assert_equals(data.last_response.status_code, 200)
+assert data.last_response.status_code == 200
 ```
 
 ### http_post(url, headers={}, data={}, verify_ssl_cert=True)
@@ -119,10 +111,6 @@ Verify response status code
 Activates a browser to use in subsequent actions.
 When opening more than one browser (not windows or tabs) for a single test, the new browser can be assigned to an ID.
 Default browser ID is 'main'.
-
-### close()
-
-DEPRECATED, use close_browser or close_window instead.
 
 ### close_browser()
 
@@ -201,10 +189,6 @@ Returns the cookie if found, None if not.
 ### get_cookies()
 
 Returns a list of dictionaries, corresponding to cookies present in the current session.
-
-### verify_cookie_exists(name)
-
-DEPRECATED, use verify_cookie_present instead.
 
 ### verify_cookie_present(name)
 
@@ -302,10 +286,6 @@ Assert element value is not *value*
 Check an element (checkbox or radiobutton).
 If element is already checked this is is ignored.
 
-### clear(element)
-
-DEPRECATED, use clear_element instead
-
 ### clear_element(element)
 
 Clear element (e.g. a text input)
@@ -338,10 +318,6 @@ Get the element value attribute
 ### javascript_click(element)
 
 Click an element using Javascript
-
-### mouse_hover(element)
-
-DEPRECATED, use mouse_over instead
 
 ### mouse_over(element)
 
@@ -460,42 +436,6 @@ Verify element value
 
 Verify element value is not *value*
 
-### verify_exists(element)
-
-DEPRECATED, use verify_element_present
-
-### verify_is_enabled(element)
-
-DEPRECATED, use verify_element_enabled
-
-### verify_is_not_enabled(element)
-
-DEPRECATED, use verify_element_not_enabled
-
-### verify_is_not_selected(element)
-
-DEPRECATED, use verify_element_not_checked
-
-### verify_is_not_visible(element)
-
-DEPRECATED, use verify_element_not_displayed
-
-### verify_is_selected(element)
-
-DEPRECATED, use verify_element_checked
-
-### verify_is_visible(element)
-
-DEPRECATED, use verify_element_displayed
-
-### verify_not_exists(element)
-
-DEPRECATED, use verify_element_not_present
-
-### verify_text_in_element(element, text)
-
-DEPRECATED, use verify_element_text or verify_element_text_contains
-
 ### wait_for_element_displayed(element, timeout=30)
 
 Wait for element to be present and displayed
@@ -522,18 +462,10 @@ When element is not present this will raise ElementNotFound.
 
 Wait for element to be not enabled
 
-### wait_for_element_not_exist(element, timeout=20)
-
-DEPRECATED, use wait_for_element_not_present
-
 ### wait_for_element_not_present(element, timeout=30)
 
 Wait for element to stop being present in the DOM.
 If element is already not present, this will be ignored.
-
-### wait_for_element_not_visible(element, timeout=20)
-
-DEPRECATED, use wait_for_element_not_displayed
 
 ### wait_for_element_present(element, timeout=30)
 
@@ -554,10 +486,6 @@ Wait for element text to not match given text
 ### wait_for_element_text_not_contains(element, text, timeout=30)
 
 Wait for element text to not contain given text
-
-### wait_for_element_visible(element, timeout=20)
-
-DEPRECATED, use wait_for_element_displayed
 
 ## Frames
 
@@ -582,18 +510,6 @@ Assert the option selected in a \<select\> by the option text
 ### assert_selected_option_by_value(element, text)
 
 Assert the option selected in a \<select\> by the option value
-
-### select_by_index(element, text)
-
-DEPRECATED, use select_option_by_index instead
-
-### select_by_text(element, text)
-
-DEPRECATED, use select_option_by_text instead
-
-### select_by_value(element, value)
-
-DEPRECATED, use select_option_by_value instead
 
 ### select_option_by_index(element, text)
 
@@ -624,10 +540,6 @@ select_option_by_index('#countrySelect', 0)
 select_option_by_text('#countrySelect', 'Canada')
 select_option_by_value('#countrySelect', 'CA')
 ```
-
-### verify_selected_option(element, text)
-
-DEPRECATED, use verify_selected_option_by_text or verify_selected_option_by_value
 
 ### verify_selected_option_by_text(element, text)
 
@@ -736,10 +648,6 @@ Verify the given text is present anywhere in the page (in the entire DOM)
 ### verify_page_not_contains_text(text)
 
 Verify the given text is present anywhere in the page (in the entire DOM)
-
-### verify_text(text)
-
-DEPRECATED, use verify_page_contains_text
 
 ### verify_title(title)
 
@@ -937,31 +845,6 @@ Wait for window/tab present by url
 
 ## General Actions
 
-### assert_contains(element, value)
-
-DEPRECATED. Assert that the element contains the value
-
-### assert_equals(actual, expected)
-
-DEPRECATED. Assert that the actual value equals the expected value
-
-### assert_false(condition)
-
-DEPRECATED. Assert that the condition is false
-
-### assert_true(condition)
-
-DEPRECATED. Assert that the condition is true
-
-### capture(message='')
-
-DEPRECATED, use take_screenshot instead.
-Take a screenshot of the browser, the message is optional
-
-### debug()
-
-DEPRECATED, use interactive_mode instead.
-
 ### error(message='')
 
 Add an error to the test. The test will continue.
@@ -991,17 +874,6 @@ See [Interactive Mode](interactive-mode.html) for more details.
 ### log(message, level='INFO')
 
 Log a message. Valid log levels are: DEBUG, INFO, WARNING, ERROR and CRITICAL.
-
-### random(args)
-
-DEPRECATED, use random_str, random_int or random_float. 
-
-Generate a random string. Options:
-
-* 'c' generate a random lowercase letter
-* 'd' generate a random digit
-
-For example: random('cccddd') => 'aeg147'
 
 
 ### random_float(min=1.0, max=100.0, decimals=None)
