@@ -131,7 +131,7 @@ def report_execution_junit_download(project, execution, timestamp):
 def report_execution_json(project, execution, timestamp):
     json_report = exec_report.get_execution_data(project=project, execution=execution,
                                                  timestamp=timestamp)
-    return jsonify(json_report)
+    return json_report
 
 
 # REPORT EXECUTION VIEW JSON DOWNLOAD
