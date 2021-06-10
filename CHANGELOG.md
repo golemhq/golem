@@ -1,10 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## [0.10.0] - 2021-06-10
 
 ### Changed
 
-- Multi-test file: A test file can have more than one test function
+- Multi-test file: A test file can have more than one test function [#201](https://github.com/golemhq/golem/issues/201)
 - The report format changed, older reports won't work with this version
 
 ## [0.9.2] - 2021-04-15
