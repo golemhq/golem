@@ -139,8 +139,7 @@ class TestExtractVersionFromWebDriverFilename:
         ('chromedriver_2.3.4', '2.3.4'),
         ('chromedriver_2.3.exe', '2.3'),
         ('chromedriver-no-version', '0.0'),
-        ('invalid_2a.3', '0.0'),
-        ('invalid_test', '0.0'),
+        ('invalid_2a.3', '2a.3'),
         ('chromedriver_test_2.3', '2.3'),
     ]
 
@@ -164,8 +163,20 @@ class TestMatchLatestExecutablePath:
         result = utils.match_latest_executable_path('chromedriver*', basedir)
         assert result == os.path.join(basedir, 'chromedriver_2.4')
 
-    def test_match_latest_executable_path__compare_versions_not_strings(self, dir_function,
-                                                                        test_utils):
+    def test_match_latest_executable__version_has_four_components(self, dir_function, test_utils):
+        basedir = dir_function.path
+        test_utils.create_empty_file(basedir, 'chromedriver_91.0.4472.19.exe')
+        test_utils.create_empty_file(basedir, 'chromedriver_89.0.4389.23.exe')
+        result = utils.match_latest_executable_path('chromedriver*', basedir)
+        assert result == os.path.join(basedir, 'chromedriver_91.0.4472.19.exe')
+
+        test_utils.create_empty_file(basedir, 'geckodriver_91.0.4472.19')
+        test_utils.create_empty_file(basedir, 'geckodriver_89.0.4389.23')
+        result = utils.match_latest_executable_path('geckodriver*', basedir)
+        assert result == os.path.join(basedir, 'geckodriver_91.0.4472.19')
+
+    def test_match_latest_executable_path__compare_versions_not_strings(
+            self, dir_function, test_utils):
         """2.12 should be higher than 2.9
         (but it's when not comparing just strings)
         e.g. '2.9' > '2.12'
@@ -173,8 +184,9 @@ class TestMatchLatestExecutablePath:
         basedir = dir_function.path
         test_utils.create_empty_file(basedir, 'chromedriver_2.9')
         test_utils.create_empty_file(basedir, 'chromedriver_2.12')
+        test_utils.create_empty_file(basedir, 'chromedriver_2.22')
         result = utils.match_latest_executable_path('chromedriver*', basedir)
-        assert result == os.path.join(basedir, 'chromedriver_2.12')
+        assert result == os.path.join(basedir, 'chromedriver_2.22')
 
     def test_match_latest_executable_path_exe(self, dir_function, test_utils):
         """test that match_latest works for filenames ending in .exe"""

@@ -7,7 +7,7 @@ import re
 import traceback
 import types
 from datetime import datetime
-from distutils.version import StrictVersion
+from pkg_resources import parse_version
 
 
 def get_timestamp():
@@ -137,10 +137,10 @@ def extract_version_from_webdriver_filename(filename):
     if '_' in filename:
         components = filename.replace('.exe', '').split('_')
         if len(components) > 1:
-            parsed_version = components[-1]
+            version_component = components[-1]
             try:
-                StrictVersion(parsed_version)
-                version = parsed_version
+                parse_version(version_component)
+                version = version_component
             except:
                 pass
     return version
@@ -160,7 +160,7 @@ def match_latest_executable_path(glob_path, testdir):
     for matched_file in matched_files:
         found_files.append((matched_file, extract_version_from_webdriver_filename(matched_file)))
     if found_files:
-        highest_version = sorted(found_files, key=lambda tup: StrictVersion(tup[1]), reverse=True)
+        highest_version = sorted(found_files, key=lambda tup: parse_version(tup[1]), reverse=True)
         return highest_version[0][0]
     else:
         return None
