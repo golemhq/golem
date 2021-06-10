@@ -1150,19 +1150,21 @@ class TestTestRunnerSetExecutionModuleValues:
         testdir, project = project_module.activate()
         test_file = test_utils.create_random_test(project)
         test = test_module.Test(project, test_file)
-        report_directory = _mock_report_directory(testdir, project, test_file)
+        timestamp = utils.get_timestamp()
+        executiondir = _mock_report_directory(project, test_file, timestamp)
+        testfile_reportdir = test_report.test_file_report_dir(test_file, execdir=executiondir)
         settings = settings_manager.get_project_settings(project)
         browser = _define_browsers_mock(['chrome'])[0]
         test_data = {}
         secrets = {}
         env_name = 'foo'
         runner = test_runner.TestRunner(testdir, project, test_file, test_data, secrets,
-                                        browser, env_name, settings, report_directory,
+                                        browser, env_name, settings, executiondir,
                                         set_name='')
         runner._set_execution_module_values()
         from golem import execution
         attrs = [x for x in dir(execution) if not x.startswith('_')]
-        assert len(attrs) == 21
+        assert len(attrs) == 23
         assert execution.browser is None
         assert execution.browser_definition == browser
         assert execution.browsers == {}
@@ -1176,6 +1178,8 @@ class TestTestRunnerSetExecutionModuleValues:
         assert execution.project_name == project
         assert execution.project_path == test.project.path
         assert execution.testdir == testdir
+        assert execution.execution_reportdir == executiondir
+        assert execution.testfile_reportdir is None  # Not populated at this point
         assert execution.logger is None
         assert execution.tags == []
         assert execution.environment == env_name
@@ -1183,7 +1187,7 @@ class TestTestRunnerSetExecutionModuleValues:
         assert execution.test_name is None
         assert execution.steps == []
         assert execution.errors == []
-        assert execution.report_directory is None
+        assert execution.test_reportdir is None
         assert execution.timers == {}
 
         # test _reset_execution_module_values_for_test_function
@@ -1193,10 +1197,10 @@ class TestTestRunnerSetExecutionModuleValues:
         execution.report_directory = 'foo'
         execution.timers = {'foo': 'bar'}
 
-        runner._reset_execution_module_values_for_test_function(report_directory='x',
+        runner._reset_execution_module_values_for_test_function(test_reportdir='x',
                                                                 test_name='test-name')
         assert execution.test_name == 'test-name'
         assert execution.steps == []
         assert execution.errors == []
-        assert execution.report_directory == 'x'
+        assert execution.test_reportdir == 'x'
         assert execution.timers == {}

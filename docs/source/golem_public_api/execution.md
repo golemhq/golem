@@ -73,6 +73,14 @@ Path to the project directory.
 
 Golem root directory.
 
+## execution_reportdir
+
+Path for the execution report.
+
+## testfile_reportdir
+
+Path for the test file report
+
 ## logger
 
 Test logger object.
@@ -100,9 +108,9 @@ Steps collected by the current test function.
 
 A list of errors collected by the test function.
 
-### report_directory
+### test_reportdir
 
-Path to the directory where the reports will be saved.
+Path for the test function report.
 
 ### timers
 

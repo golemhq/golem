@@ -555,7 +555,7 @@ var Test = new function(){
         this.openPageInNewWindow = function(elem){
             let inputVal = $(elem).closest('.page').find('input.page-name').val();
             if(inputVal.length > 0){
-                let url = `/project/${this.file.project}/page/${inputVal}/`;
+                let url = `/project/${Test.file.project}/page/${inputVal}/`;
                 window.open(url, '_blank');
             }
         }

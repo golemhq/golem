@@ -73,8 +73,8 @@ def _assert_step(step_message, error='', take_screenshots=True):
 
 
 def _capture_screenshot(image_name):
-    """take a screenshot and store it in execution.report_directory.
-    report_directory must already exist.
+    """take a screenshot and store it in execution.test_reportdir.
+    test_reportdir must already exist.
 
     Screenshot format, size and quality can be modified using the
       'screenshots' setting key.
@@ -87,13 +87,13 @@ def _capture_screenshot(image_name):
       - resize: must be an int greater than 0.
           Str in the format '55' or '55%' is also allowed.
     """
-    if not execution.report_directory:
+    if not execution.test_reportdir:
         execution.logger.debug('cannot take screenshot, report directory does not exist')
         return None
 
     if not execution.settings['screenshots']:
         screenshot_filename = '{}.png'.format(image_name)
-        screenshot_path = os.path.join(execution.report_directory, screenshot_filename)
+        screenshot_path = os.path.join(execution.test_reportdir, screenshot_filename)
         get_browser().get_screenshot_as_file(screenshot_path)
     else:
         screenshot_settings = execution.settings['screenshots']
@@ -104,7 +104,7 @@ def _capture_screenshot(image_name):
         width = screenshot_settings.get('width', None)
         height = screenshot_settings.get('height', None)
         resize = screenshot_settings.get('resize', None)
-        screenshot_filename = report_utils.save_screenshot(execution.report_directory,
+        screenshot_filename = report_utils.save_screenshot(execution.test_reportdir,
                                                            image_name, format, quality,
                                                            width, height, resize)
     return screenshot_filename

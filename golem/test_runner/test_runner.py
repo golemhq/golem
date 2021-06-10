@@ -185,17 +185,15 @@ class TestRunner:
         result = self.test_functions[test_name]
 
         # Create folder for the test function report
-        report_directory = test_report.create_test_function_report_dir(
-            self.reportdir, test_name)
-        result['report_directory'] = report_directory
+        test_reportdir = test_report.create_test_function_report_dir(self.reportdir, test_name)
+        result['test_reportdir'] = test_reportdir
 
         # Add logger handlers for this single test function
         # logger, file_handler_debug, file_handler_info = test_logger.get_logger_for_test_function(
-        #     report_directory, self.settings['log_all_events'])
+        #     test_reportdir, self.settings['log_all_events'])
 
         # reset execution values specific to this test
-        self._reset_execution_module_values_for_test_function(
-            report_directory=report_directory, test_name=test_name)
+        self._reset_execution_module_values_for_test_function(test_reportdir, test_name)
 
         result['start_time'] = time.time()
 
@@ -323,29 +321,33 @@ class TestRunner:
         execution.browser = None
         execution.browser_definition = self.browser
         execution.browsers = {}
-        execution.steps = []
         execution.data = Data(self.test_data)
         execution.secrets = Secrets(self.secrets)
         execution.description = None
-        execution.errors = []
         execution.settings = self.settings
         execution.test_dirname = self.test.dirname
         execution.test_path = self.test.path
         execution.project_name = self.project.name
         execution.project_path = self.project.path
         execution.testdir = self.testdir
-        execution.report_directory = None
+        execution.execution_reportdir = self.exec_report_dir
+        execution.testfile_reportdir = self.reportdir
         execution.logger = self.logger
         execution.tags = self.execution_tags
-        execution.timers = {}
         execution.environment = self.env_name
 
+        execution.test_name = None
+        execution.steps = []
+        execution.errors = []
+        execution.test_reportdir = None
+        execution.timers = {}
+
     @staticmethod
-    def _reset_execution_module_values_for_test_function(report_directory=None, test_name=None):
+    def _reset_execution_module_values_for_test_function(test_reportdir=None, test_name=None):
         execution.test_name = test_name
         execution.steps = []
         execution.errors = []
-        execution.report_directory = report_directory
+        execution.test_reportdir = test_reportdir
         execution.timers = {}
 
     def _print_test_info(self):
@@ -399,7 +401,7 @@ class TestRunner:
             'set_name': self.set_name,
             'start_time': None,
             'end_time': None,
-            'report_directory': None,
+            'test_reportdir': None,
             'result': None,
             'errors': [],
             'description': '',
