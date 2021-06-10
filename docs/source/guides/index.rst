@@ -5,8 +5,9 @@ Guides
    :maxdepth: 1
    :glob:
 
-   standalone-executable
+   run-from-jenkins
    using-multiple-browsers
+   standalone-executable
 
 
 .. Indices and tables
