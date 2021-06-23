@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/code-editor-common.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_code.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_common.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/addon/hint/simple-hint.css') }}">
 {% endblock %} 
 
 {% block content %}
@@ -135,6 +136,9 @@
 
 <script src="{{ url_for('static', filename='js/external/code_mirror/codemirror.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/code_mirror/python.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/addon/hint/python-hint.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/addon/hint/simple-hint.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/addon/edit/matchbrackets.js') }}"></script>
 <script src="{{ url_for('static', filename='js/file.js') }}"></script>
 <script src="{{ url_for('static', filename='js/test_code.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/jquery.autocomplete.min.js') }}"></script>
