@@ -1,5 +1,7 @@
 import os
 
+import webdriver_manager
+
 from golem.core import file_manager, settings_manager, session
 from golem.gui.user_management import Users
 
@@ -39,3 +41,44 @@ def is_valid_test_directory(testdir):
     It must contain a .golem file.
     """
     return os.path.isfile(os.path.join(testdir, '.golem'))
+
+
+def drivers_path():
+    return os.path.join(session.testdir, 'drivers')
+
+
+# def get_driver_versions():
+#     return webdriver_manager.versions(drivers_path())
+
+
+def get_driver_folder_files():
+    """Get the list of files in testdir/drivers folder.
+    Folders are ignored. TODO
+    """
+    files = []
+    path = drivers_path()
+    lst = os.listdir(path)
+    for elem in lst:
+        if os.path.isfile(os.path.join(path, elem)):
+            files.append(elem)
+    return files
+
+
+def delete_driver_file(filename):
+    errors = []
+    path = os.path.join(drivers_path(), filename)
+    if not os.path.isfile(path):
+        errors.append('File {} does not exist'.format(filename))
+    else:
+        try:
+            os.remove(path)
+        except Exception as e:
+            errors.append('There was an error removing file {}'.format(filename))
+    return errors
+
+
+def update_driver(driver_name):
+    if driver_name not in ['chromedriver', 'geckodriver']:
+        return '{} is not a valid driver name'.format(driver_name)
+    webdriver_manager.update(driver_name, drivers_path())
+    return ''  # TODO: webdriver-manager should return actual error messages

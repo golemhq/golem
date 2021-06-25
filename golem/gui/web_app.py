@@ -280,6 +280,14 @@ def environments_view(project):
     return render_template('environments.html', project=project, environment_data=data)
 
 
+# DRIVERS VIEW
+@webapp_bp.route("/drivers/")
+@login_required
+@permission_required(Permissions.SUPER_USER)
+def drivers_view():
+    return render_template('drivers.html')
+
+
 # USERS VIEW
 @webapp_bp.route("/users/")
 @login_required

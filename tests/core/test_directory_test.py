@@ -74,3 +74,36 @@ class TestIsValidTestDirectory:
         assert not test_directory.is_valid_test_directory(path)
         test_directory.create_testdir_golem_file(path)
         assert test_directory.is_valid_test_directory(path)
+
+
+class TestGetDriverFolderFiles:
+
+    def test_get_driver_folder_files(self, testdir_function, test_utils):
+        testdir_function.activate()
+        drivers_path = test_directory.drivers_path()
+        open(os.path.join(drivers_path, 'file1'), 'w+').close()
+        open(os.path.join(drivers_path, 'file2'), 'w+').close()
+        os.mkdir(os.path.join(drivers_path, 'folder1'))
+        assert len(os.listdir(drivers_path)) == 3
+        files = test_directory.get_driver_folder_files()
+        assert len(files) == 2
+        assert 'file1' in files
+        assert 'file2' in files
+
+
+class TestDeleteDriverFile:
+
+    def test_delete_driver_file(self, testdir_class, test_utils):
+        testdir_class.activate()
+        drivers_path = test_directory.drivers_path()
+        filepath = os.path.join(drivers_path, 'file1')
+        open(filepath, 'w+').close()
+        assert os.path.isfile(filepath)
+        errors = test_directory.delete_driver_file('file1')
+        assert errors == []
+        assert not os.path.isfile('file11')
+
+    def test_delete_driver_file_does_not_exist(self, testdir_class, test_utils):
+        testdir_class.activate()
+        errors = test_directory.delete_driver_file('file2')
+        assert errors == ['File file2 does not exist']

@@ -79,6 +79,40 @@ def golem_permissions_project():
     return jsonify(Permissions.project_permissions)
 
 
+# @api_bp.route('/drivers')
+# @auth_required
+# def drivers_get_drivers():
+#     TODO
+#     _verify_permissions(Permissions.SUPER_USER)
+#     return jsonify(test_directory.get_driver_versions())
+
+
+@api_bp.route('/drivers/files')
+@auth_required
+def drivers_get_driver_files():
+    files = test_directory.get_driver_folder_files()
+    _verify_permissions(Permissions.SUPER_USER)
+    return jsonify(files)
+
+
+@api_bp.route('/drivers/delete', methods=['DELETE'])
+@auth_required
+def drivers_delete_driver():
+    filename = request.json['filename']
+    _verify_permissions(Permissions.SUPER_USER)
+    errors = test_directory.delete_driver_file(filename)
+    return jsonify(errors)
+
+
+@api_bp.route('/drivers/update', methods=['POST'])
+@auth_required
+def drivers_update_driver():
+    driver_name = request.json['driverName']
+    _verify_permissions(Permissions.SUPER_USER)
+    errors = test_directory.update_driver(driver_name)
+    return jsonify(errors)
+
+
 @api_bp.route('/page/code/save', methods=['PUT'])
 @auth_required
 def page_code_save():

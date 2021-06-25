@@ -759,10 +759,10 @@ const xhr = new function() {
         .catch(e => error(e))
     }
 
-    this.post = function(url, body, success, error) {
+    this._request = function(method, url, body, success, error) {
         error = error || (error => console.error('Error:', error));
         fetch(url, {
-            method: 'POST',
+            method: method,
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(body)
         })
@@ -771,15 +771,15 @@ const xhr = new function() {
         .catch(e => error(e))
     }
 
+    this.post = function(url, body, success, error) {
+        xhr._request('POST', url, body, success, error)
+    }
+
     this.put = function(url, body, success, error) {
-        error = error || (error => console.error('Error:', error));
-        fetch(url, {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(body)
-        })
-        .then(res => res.json())
-        .then(result => success(result))
-        .catch(e => error(e))
+        xhr._request('PUT', url, body, success, error)
+    }
+
+    this.delete = function(url, body, success, error) {
+        xhr._request('DELETE', url, body, success, error)
     }
 }
