@@ -557,6 +557,7 @@ class TestTestComponents:
         assert components['test_functions']['test'] == expected_test_steps
         assert components['test_function_list'] == ['test']
         assert components['teardown_steps'] == []
+        assert components['code'] == SAMPLE_TEST_CONTENT
 
     def test_test_components_empty_test(self, project_session, test_utils):
         _, project = project_session.activate()

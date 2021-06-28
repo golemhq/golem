@@ -57,28 +57,6 @@ def auth_token():
         return jsonify(token.decode())
 
 
-@api_bp.route('/golem/actions')
-@auth_required
-def golem_actions():
-    project = request.args.get('project', None)
-    response = jsonify(gui_utils.GolemActionParser().get_actions(project))
-    response.cache_control.max_age = 604800
-    response.cache_control.public = True
-    return response
-
-
-@api_bp.route('/golem/default-browser')
-@auth_required
-def golem_default_browser():
-    return jsonify(session.settings['default_browser'])
-
-
-@api_bp.route('/golem/project-permissions')
-@auth_required
-def golem_permissions_project():
-    return jsonify(Permissions.project_permissions)
-
-
 # @api_bp.route('/drivers')
 # @auth_required
 # def drivers_get_drivers():
@@ -111,6 +89,28 @@ def drivers_update_driver():
     _verify_permissions(Permissions.SUPER_USER)
     errors = test_directory.update_driver(driver_name)
     return jsonify(errors)
+
+
+@api_bp.route('/golem/actions')
+@auth_required
+def golem_actions():
+    project = request.args.get('project', None)
+    response = jsonify(gui_utils.GolemActionParser().get_actions(project))
+    response.cache_control.max_age = 604800
+    response.cache_control.public = True
+    return response
+
+
+@api_bp.route('/golem/default-browser')
+@auth_required
+def golem_default_browser():
+    return jsonify(session.settings['default_browser'])
+
+
+@api_bp.route('/golem/project-permissions')
+@auth_required
+def golem_permissions_project():
+    return jsonify(Permissions.project_permissions)
 
 
 @api_bp.route('/page/code/save', methods=['PUT'])
@@ -155,7 +155,7 @@ def page_components():
     _verify_permissions(Permissions.READ_ONLY, project)
     result = {
         'error': '',
-        'contents': []
+        'components': []
     }
     page = Page(project, page_name)
     if not page.exists:
@@ -640,6 +640,24 @@ def suite_code_save():
     path = suite_module.Suite(project, suite_name).path
     _, error = utils.import_module(path)
     return jsonify({'error': error})
+
+
+@api_bp.route('/test/components')
+@auth_required
+def test_components():
+    project = request.args['project']
+    test_name = request.args['test']
+    _verify_permissions(Permissions.READ_ONLY, project)
+    result = {
+        'error': '',
+        'components': []
+    }
+    test = test_module.Test(project, test_name)
+    if not test.exists:
+        result['error'] = 'test does not exist'
+    else:
+        result['components'] = test.components
+    return jsonify(result)
 
 
 @api_bp.route('/test/code/save', methods=['PUT'])

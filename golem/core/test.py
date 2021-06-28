@@ -317,15 +317,16 @@ class Test(BaseProjectElement):
     def components(self):
         """Parse and return the components of a Test in
         the following structure:
-          'description' :    string
-          'pages' :          list of pages
-          'tags' :          list of tags
-          'skip' :          list of tags
-          'setup_steps' :    parsed setup function
-          'teardown_steps' : parsed teardown function
-          'test_functions' : dictionary of test functions
+          'description' :       string
+          'pages' :             list of pages
+          'tags' :              list of tags
+          'skip' :              list of tags
+          'setup_steps' :       parsed setup function
+          'teardown_steps' :    parsed teardown function
+          'test_functions' :    dictionary of test functions
             '<test_function>' : parsed test function steps
           'test_function_list': list of test function names
+          'code'
         """
         components = {
             'description': self.description,
@@ -335,6 +336,7 @@ class Test(BaseProjectElement):
             'setup_steps': self.setup_steps,
             'teardown_steps': self.teardown_steps,
             'test_functions': self.test_functions,
-            'test_function_list': self.test_function_list
+            'test_function_list': self.test_function_list,
+            'code': self.code
         }
         return components

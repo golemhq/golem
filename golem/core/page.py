@@ -63,9 +63,8 @@ def duplicate_page(project, name, new_name):
 
 def edit_page(project, page_name, elements, functions, import_lines):
     def format_element_string(name, selector, value, display_name):
-        with_format = ("\n\n{0} = ('{1}', \'{2}\', '{3}')"
-                       .format(name, selector, value, display_name))
-        return with_format
+        return "\n\n{0} = ('{1}', \'{2}\', '{3}')".format(name, selector, value,
+                                                          display_name)
 
     path = Page(project, page_name).path
     with open(path, 'w', encoding='utf-8') as f:

@@ -51,7 +51,7 @@ def delete_execution(project, execution):
         except Exception as e:
             errors.append(repr(e))
     else:
-        errors.append('Execution {} of project {} does not exist'.format(project, execution))
+        errors.append('Execution {} of project {} does not exist'.format(execution, project))
     return errors
 
 
