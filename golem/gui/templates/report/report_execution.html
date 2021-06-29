@@ -8,7 +8,11 @@
 
 {% block content %}
 <div class="content-wrapper">
-    <h2 style="display:inline-block;"><a class="link-without-decoration" href="/report/{{project}}/">{{project|replace("_", " ")}}</a> - <a class="link-without-decoration" href="/report/project/{{project}}/suite/{{suite}}/">{{suite|replace("_", " ")}}</a> <small>({{formatted_date}}) <i class="fa fa-cog fa-spin spinner" style="display: none"></i></small></h2>
+    <h2 style="display:inline-block;">
+		<a class="link-without-decoration" href="/report/{{project}}/">{{project|replace("_", " ")}}</a> -
+		<a class="link-without-decoration" href="/report/{{project}}/{{execution}}/">{{execution|replace("_", " ")}}</a>
+		<small>({{formatted_date}}) <i class="fa fa-cog fa-spin spinner" style="display: none"></i></small>
+	</h2>
 
 	<div class="btn-group" style="display:inline-block; float:right; margin-top:20px; margin-bottom:10px;">
 	  	<button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

@@ -20,9 +20,12 @@
         <!-- Page Content Holder -->
         <div id="content" class="container-fluid">
             <div class="content-wrapper">
-                <h2 style="display:inline-block;"><a class="link-without-decoration" href="/report/project/{{project}}/">{{project|replace("_", " ")}}</a> - <a class="link-without-decoration" href="/report/project/{{project}}/suite/{{suite}}/">{{suite|replace("_", " ")}}</a>
+                <h2 style="display:inline-block;">
+                    <a class="link-without-decoration" href="/report/{{project}}/">{{project|replace("_", " ")}}</a> -
+                    <a class="link-without-decoration" href="/report/{{project}}/{{execution}}/">{{execution|replace("_", " ")}}</a>
                     <small>({{formatted_date}}) <i class="fa fa-cog fa-spin spinner" style="display: none"></i></small>
                 </h2>
+
                 <div class="col-md-12 report-container">
                     <h3 class="no-margin-top">General</h3>
                     <div class="table-container">

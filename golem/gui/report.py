@@ -1,12 +1,11 @@
 """Golem GUI Report blueprint"""
 import json
-import os
 
 from flask import jsonify, render_template, Response, send_from_directory
 from flask.blueprints import Blueprint
 from flask_login import login_required
 
-from golem.core import session, utils
+from golem.core import utils
 from .gui_utils import project_exists, permission_required
 from golem.gui.user_management import Permissions
 from golem.report import execution_report as exec_report
@@ -49,7 +48,7 @@ def report_dashboard_suite(project, execution):
 @project_exists
 @permission_required(Permissions.REPORTS_ONLY)
 def report_execution(project, execution, timestamp):
-    formatted_date = utils.get_date_time_from_timestamp(execution)
+    formatted_date = utils.get_date_time_from_timestamp(timestamp)
     return render_template('report/report_execution.html', project=project,
                            execution=execution, timestamp=timestamp, execution_data=None,
                            formatted_date=formatted_date, static=False)

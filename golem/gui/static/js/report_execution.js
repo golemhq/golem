@@ -27,6 +27,9 @@ $(document).ready(function(){
             $(this).attr('test-id'), $(this).attr('test-name'),
             $(this).attr('test-file'), $(this).attr('set-name'))
     });
+    $("#detailTable").on('click', 'td.tc-module>span', function (e) {
+        e.stopPropagation();
+    });
     $("#detailTable").on('click', 'td.tc-name>span', function (e) {
         e.stopPropagation();
     });
@@ -574,7 +577,7 @@ const DetailTable = new function(){
                     set-name="${data.setName}" result="${data.result}" class="test-row cursor-pointer"
                     data-toggle="collapse" href="#${href}" aria-expanded="false">
                 <td class="tc-number">${data.number}</td>
-                <td class="tc-module">${data.testFile}</td>
+                <td class="tc-module"><span class="cursor-auto">${data.testFile}</span></td>
                 <td class="tc-name"><span class="cursor-auto">${data.test}</span></td>
                 <td class="set-name">${data.setName}</td>
                 <td class="test-environment">${data.environment}</td>
