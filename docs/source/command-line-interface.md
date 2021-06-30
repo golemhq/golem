@@ -127,10 +127,6 @@ golem createsuite <project name> <suite name>
 
 Creates a new suite inside the given project.
 
-### createuser
-
-DEPRECATED. Use *createsuperuser* instead.
-
 ### createsuperuser
 
 ```

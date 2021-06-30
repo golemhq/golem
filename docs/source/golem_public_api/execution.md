@@ -1,7 +1,7 @@
 Execution Module
 ==================================================
 
-This module stores values specific to a single test execution.
+This module stores values specific to a test file execution.
 These values should be read-only, modifying them can cause errors.
 
 Location: golem.**execution**
@@ -27,7 +27,7 @@ Module path of the current test file, relative to the tests folder.
 
 ## browser
 
-The current active browser. None if there is no open browser yet.
+The current active browser object. None if there is no open browser yet.
 
 ## browser_definition
 

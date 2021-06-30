@@ -76,17 +76,20 @@ from golem import execution
 print(execution.data.my_value)
 ```
 
-Data object is shared among *setup*, *test* and *teardown* functions:
+Data object is shared among all the functions of a test file::
 
 ```python
 def setup(data):
     store('title', 'My Title')
+    data.username = 'my-username'  # direct assignment also works
 
-def test(data):
-   assert_title(data.title)
+def test_one(data):
+    assert_title(data.title)
+    assert_username(data.username)
    
-def setup(data):
-   assert_title_is_not(data.title)
+def test_two(data):
+    assert_title_is_not(data.title)
+    assert_username_is_not(data.username)
 ```
 
 The *get_data* action can be used to retrieve the data object:

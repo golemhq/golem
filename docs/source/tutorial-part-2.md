@@ -14,74 +14,36 @@ golem createtest <project_name> <test_name>
 
 A test can also be created from the Web Module.
 
-A new test will have the following structure:
-
-```python
-
-description = ''
-
-pages = []
-
-def setup(data):
-    pass
-
-def test(data):
-    pass
-
-def teardown(data):
-    pass
-
-```
-
-And the same test as seen with the Web Module:
-
-![empty test](_static/img/empty-test.png "Empty Test")
-
-The **description** is used to define the goal of the test and its value is displayed in the generated report, afterward. The description is optional.
-
-**Pages** is a list of the pages of the application under test that this test will interact with. More about pages later.
-
-After that, a test file implements three functions: **setup**, **test**, and **teardown**. These functions are always executed in that order.
-
-Use the **setup** function to separate the preconditions from the main test steps.
-
-A test file can have one or more **test functions**, and they should start with 'test'.
-
-The **teardown** function is always executed, even if the other functions fail. So use the Teardown function to run final commands needed to set everything back to the original position.
-
 ### A test example
 
-Next is a bare minimum test that navigates to 'en.wikipedia.org', searches an article and validates that the title of the article is correct.
-
+Next is a test that navigates to 'en.wikipedia.org', searches an article and validates that the title of the article is correct.
 
 **validate_article_title.py**
 ```python
 
 description = 'Search an article in Wikipedia'
 
-def test(data):
+def test_validate_article_title(data):
     navigate('http://en.wikipedia.org/')
     send_keys(('id', 'searchInput'), 'automation')
     click(('id', 'searchButton'))
     verify_element_text(('id', 'firstHeading'), 'Automation')
 ```
 
-From the Web Module:
+In the Web Module:
 
-![example test](_static/img/example-test.png "Example Test")
-
+![](https://raw.githubusercontent.com/golemhq/resources/master/img/test_example.jpg)
 
 ### Golem Actions
 
-In the previous example, *navigate*, *send_keys*, *click*, and *verify_element_text* are Golem actions. Check out [the entire list of actions](golem-actions.html) for more information.
+In the previous example, *navigate*, *send_keys*, *click*, and *verify_element_text* are Golem actions. Check out [the entire list of actions](golem-actions.html).
 
 
 ### Opening and Closing the Browser
 
 There is no need to open or close the browser.
 The first action that requires a browser will open one. At the end, Golem will close the browser.
-However, this can be done explicitly with the *open_browser* and *close_browser* actions.
-
+However, this can be done explicitly with the [open_browser](golem-actions.html#open-browser-browser-id-none) and [close_browser](golem-actions.html#close-browser) actions.
 
 ## Running a Test
 
@@ -98,7 +60,7 @@ The data for each test can be stored inside the test or in a separate csv file.
 
 To select which location Golem should use, set the *test_data* setting to 'csv' or 'infile'.
 
-**Note**: All csv values are considered strings. If you need different value types use the 'infile' setting.
+**Note**: All csv values are considered as strings. If you need different value types use the 'infile' setting.
 
 
 ### Using the Data Table
@@ -120,7 +82,7 @@ Then we refactor the test to use the data object instead of hardcoded values:
 ```python
 description = 'Search an article in Wikipedia'
 
-def test(data):
+def test_validate_article_title(data):
     go_to(data.URL)
     send_keys(('id', 'searchInput'), data.search_value)
     click(('id', 'searchButton'))
@@ -129,7 +91,7 @@ def test(data):
 
 This is the final result:
 
-![test with data table](_static/img/test-with-data-table.png "Test With Data Table")
+![](https://raw.githubusercontent.com/golemhq/resources/master/img/test_example_with_datatable.jpg)
 
 
 ### Multiple data sets
@@ -214,30 +176,28 @@ Inside the Page Object, the elements of the page can be defined so they can be u
 Let's see an example. Consider the previous test (validate_article_title).
 Let's extract all the element selectors and put them inside Page Objects.
 
-For this, we create two page objects. The first will be the 'header', as it's the same header for every page of the application.
+For this, we create two pages. The first will be the 'header', as it's the same header for every page of the application.
 The second page object will be the 'article'.
 
 **header.py**
 ```python
-
 search_input = ('id', 'searchInput')
 
 search_button = ('id', 'searchButton')
-
 ```
 
 **article.py**
 ```python
-
 title = ('id', 'firstHeading')
-
 ```
 
 These pages, as seen with the Web Module, look like this:
 
-<img class="border-image" src="_static/img/header-page.png">
+<img class="border-image" src="https://raw.githubusercontent.com/golemhq/resources/master/img/page_example_header.jpg">
 
-<img class="border-image" src="_static/img/article-page.png">
+<br>
+
+<img class="border-image" src="https://raw.githubusercontent.com/golemhq/resources/master/img/page_example_article.jpg">
 
 
 ### Using Pages Inside Tests
@@ -250,52 +210,48 @@ description = 'Search an article in Wikipedia'
 
 pages = ['header', 'article']
 
-def test(data):
+def test_validate_article_title(data):
     navigate(data.URL)
     send_keys(header.search_input, data.search_value)
     click(header.search_button)
     verify_element_text(article.title, data.article_title)
 ```
 
-And from the Web Module:
+In the Web Module:
 
-![test with pages](_static/img/test-with-pages.png "Test With Pages")
-
+![](https://raw.githubusercontent.com/golemhq/resources/master/img/test_example_with_datatable_and_pages.jpg)
 
 With this change, the 'Search input', 'Search button' and 'Article Title' elements are defined in a separate file.
 A test that needs to interact with these elements, just needs to import the page object and reference them.
 This reduces the required time to write new tests and the maintenance of existing tests.
-In the future, when the selector of an element changes, even if it's used by hundreds of tests, its definition needs to be modified in a single file.
-
 
 ## Creating a suite
 
 A suite lets you arbitrarily select a subset of all the tests to execute as a group.
-Let's say, you want to test only the most important tests or the tests for a specific module.
 
 A suite contains a list of *tests*, *browsers*, *environments*, *tags*, and the number of *processes*.
 Consider the following example:
 
-
 **full_regression.py**
 ```python
 
-browsers = ['firefox', 'chrome']
+browsers = ['chrome', 'firefox']
 
-environments = []
+environments = ['staging']
 
-processes = 2
+processes = 3
 
 tags = []
 
 tests = [
-    'test1',
-    'test2',
-    'some_folder.test3',
+    'module.module_test1',
+    'module.module_test2',
+    'another_test',
+    'validate_article_title'
 ]
 ```
 
-<img class="border-image" src="_static/img/suite-example.png">
+<img class="border-image" src="https://raw.githubusercontent.com/golemhq/resources/master/img/suite_example.jpg">
 
 <div class="admonition note">
     <p class="first admonition-title">Note</p>

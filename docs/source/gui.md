@@ -1,6 +1,38 @@
 GUI - Web Module
 ==================================================
 
+## Commands
+
+### Start the web module:
+
+```
+golem gui
+```
+
+### Specify the port
+
+```
+golem gui -p 8080
+```
+
+### Specify the host
+
+```
+golem gui --host 127.0.0.1
+```
+
+Default is localhost.
+Running it in host=0.0.0.0 will make Golem accessible from outside the computer by using the public IP of the computer running Golem.
+Use this only if debug mode is turned off or if you trust the users of your network.
+
+If public access to the web module is needed, consider using a [production server](gui.html#using-a-production-server).
+
+### Run in debug mode
+
+```
+golem gui -d
+```
+
 ## Users
 
 ### User Permissions

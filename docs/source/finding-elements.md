@@ -130,7 +130,7 @@ for row in table_rows:
 
 ## element() and elements() Shortcuts
 
-**elemenent()** and **elements()** provide handy shortcuts to **find()** and **find_all()** respectively.
+**element()** and **elements()** provide handy shortcuts to **find()** and **find_all()** respectively.
 
 ```python
 from golem.browser import element, elements

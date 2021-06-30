@@ -1,8 +1,8 @@
 Golem Actions
 ==================================================
 
-Golem comes with a list of predefined actions that cover most of the scenarios for tests.
-They are self-documenting, meaning, they store the steps, logs and screenshots in the execution report.
+Golem has a list of predefined actions that cover most of the scenarios for tests.
+These are self-documenting, meaning, they store the steps, logs and screenshots in the execution report.
 
 Location: golem.**actions**
 
@@ -14,6 +14,19 @@ They will stop the test when they fail (jump to teardown) and the test will end 
 Actions that start with 'verify_' are soft assertions.
 When a verify_ action fails it stores an error but the test continues with the next statement.
 The test will end with result: error.
+
+## Contents
+
+- [Alerts](#alerts)
+- [API](#api)
+- [Browser](#browser)
+- [Cookies](#cookies)
+- [Element](#element)
+- [Frames](#frames)
+- [Select](#select)
+- [Window](#window)
+- [Windows/Tabs](#windows-tabs)
+- [General](#general-actions)
 
 
 ## Alerts

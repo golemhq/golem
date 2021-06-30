@@ -134,10 +134,6 @@ Example:
 }
 ```
 
-### console_log_level
-
-Deprecated, use *cli_log_level*.
-
 ### cli_log_level
 
 command line log level.

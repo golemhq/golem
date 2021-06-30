@@ -2,10 +2,8 @@ Suites
 ==================================================
 
 A suite can execute a set of tests with the specified configuration.
-For example, running the most important tests or the tests for a specific module.
-It can define which browsers to use and how many tests should run in parallel.
-
-A suite contains a list of *tests*, a list of *browsers*, a list of *environments* and the number of *processes*. Consider the following example:
+A suite contains a list of *tests*,  *browsers*, and *environments* and the number of *processes*, and *tags*.
+Consider the following example:
 
 **full_regression.py**
 ```python
@@ -16,6 +14,8 @@ environments = []
 
 processes = 2
 
+tags = []
+
 tests = [
     'test1',
     'test2',
@@ -24,7 +24,7 @@ tests = [
 
 ```
 
-<img class="border-image" src="_static/img/suite-example.png">
+<img class="border-image" src="https://raw.githubusercontent.com/golemhq/resources/master/img/suite_example.jpg">
 
 <div class="admonition note">
     <p class="first admonition-title">Note</p>
@@ -39,4 +39,4 @@ The 'processes = 2' tells Golem how many tests should be executed at the same ti
 
 ### Environments
 
-Environments are defined in the environments.json file inside a project
+Environments are defined in the environments.json file inside a project. See [Environments](test-data.html#environments).
