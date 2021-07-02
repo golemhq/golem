@@ -381,7 +381,7 @@ class TestRunner:
         """
         actions._add_step(message, log_step=False)
         error_message = '{}: {}'.format(exception.__class__.__name__, exception)
-        trcbk = traceback.format_exc()
+        trcbk = traceback.format_exc().rstrip()
         actions._add_error(message=error_message, description=trcbk)
         actions._append_error(message=error_message, description=trcbk)
         self._take_screeenshot_on_error()
