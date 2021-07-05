@@ -3,4 +3,5 @@ Flask-Login
 selenium
 pytest
 requests
+colorama
 py-webdriver-manager

@@ -23,6 +23,7 @@ from golem.test_runner.test_runner import run_test
 from golem.report import execution_report as exec_report
 from golem.report import junit_report
 from golem.report import html_report
+from golem.report import cli_report
 
 
 def define_browsers(browsers, remote_browsers, default_browsers):
@@ -208,20 +209,6 @@ class ExecutionRunner:
             if len(tests) == 0:
                 print("No tests found with tag(s): {}".format(', '.join(self.execution.tags)))
         return tests
-
-    def _print_results(self):
-        if self.report['total_tests'] > 0:
-            result_string = ''
-            for result, number in OrderedDict(self.report['totals_by_result']).items():
-                result_string += ' {} {},'.format(number, result)
-            elapsed_time = self.report['net_elapsed_time']
-            if elapsed_time > 60:
-                in_elapsed_time = ' in {} minutes'.format(round(elapsed_time / 60, 2))
-            else:
-                in_elapsed_time = ' in {} seconds'.format(elapsed_time)
-            output = 'Result:{}{}'.format(result_string[:-1], in_elapsed_time)
-            print()
-            print(output)
 
     def _get_elapsed_time(self, start_time):
         elapsed_time = 0
@@ -434,11 +421,11 @@ class ExecutionRunner:
                                                             self.execution.envs,
                                                             self.execution.tags,
                                                             session.settings['remote_url'])
-        if self.is_suite or len(self.execution.tests) > 1:
-            self._print_results()
+
+        cli_report.report_to_cli(self.report)
+        cli_report.print_totals(self.report)
+
         # generate requested reports
-        # TODO should the reports work for single tests?
-        # if self.is_suite:
         report_name = self.report_name or 'report'
         report_folder = self.report_folder or self.execution.reportdir
         if 'junit' in self.reports:

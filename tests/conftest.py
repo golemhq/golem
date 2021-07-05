@@ -259,13 +259,16 @@ class TestUtils:
 
     @staticmethod
     def create_random_test(project):
+        # TODO replace with create_test(name=None)
         test_name = TestUtils.random_string(10)
         test.create_test(project, test_name)
         return test_name
 
     @staticmethod
-    def create_suite(project, name, content=None, tests=None, processes=1, browsers=None,
+    def create_suite(project, name=None, content=None, tests=None, processes=1, browsers=None,
                      environments=None, tags=None):
+        if name is None:
+            name = TestUtils.random_string()
         browsers = browsers or []
         environments = environments or []
         tags = tags or []
@@ -275,6 +278,7 @@ class TestUtils:
         else:
             with open(suite.Suite(project, name).path, 'w+') as f:
                 f.write(content)
+        return name
 
     @staticmethod
     def create_page(project, page_name):
@@ -282,6 +286,7 @@ class TestUtils:
 
     @staticmethod
     def create_random_suite(project):
+        # TODO replace with create_suite(name=None)
         suite_name = TestUtils.random_string()
         suite.create_suite(project, suite_name)
         return suite_name
