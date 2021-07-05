@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Improved CLI reporter
+
 ## [0.10.0] - 2021-06-10
 
 ### Changed
