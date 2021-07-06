@@ -1,4 +1,4 @@
-# from typing import List # not supported in 3.4
+from typing import List
 import time
 
 from selenium.webdriver.remote.webelement import WebElement as RemoteWebElement
@@ -38,7 +38,9 @@ class ExtendedWebElement:
         action_chains = ActionChains(self.parent)
         action_chains.double_click(self).perform()
 
-    def find(self, *args, **kwargs) -> 'ExtendedRemoteWebElement':
+    def find(self, element=None, id=None, name=None, link_text=None,
+             partial_link_text=None, css=None, xpath=None, tag_name=None,
+             timeout=None, wait_displayed=None) -> 'ExtendedRemoteWebElement':
         """Find a WebElement
 
         Search criteria:
@@ -63,12 +65,12 @@ class ExtendedWebElement:
         :Returns:
           a golem.webdriver.extended_webelement.ExtendedRemoteWebElement
         """
-        if len(args) == 1:
-            kwargs['element'] = args[0]
-        return _find(self, **kwargs)
+        return _find(self, element, id, name, link_text, partial_link_text,
+                     css, xpath, tag_name, timeout, wait_displayed)
 
-    #  -> List['ExtendedRemoteWebElement']
-    def find_all(self, *args, **kwargs):
+    def find_all(self, element=None, id=None, name=None, link_text=None,
+                 partial_link_text=None, css=None, xpath=None,
+                 tag_name=None) -> List['ExtendedRemoteWebElement']:
         """Find all WebElements that match the search criteria.
 
         Search criteria:
@@ -86,9 +88,8 @@ class ExtendedWebElement:
         :Returns:
             a list of ExtendedRemoteWebElement
         """
-        if len(args) == 1:
-            kwargs['element'] = args[0]
-        return _find_all(self, **kwargs)
+        return _find_all(self, element, id, name, link_text, partial_link_text, css,
+                         xpath, tag_name)
 
     def focus(self):
         """Give focus to element"""
@@ -134,8 +135,7 @@ class ExtendedWebElement:
             key_attr = getattr(Keys, key)
             self.send_keys(key_attr)
         else:
-            defined_keys = [name for name in dir(Keys) if
-                            not name.startswith('_')]
+            defined_keys = [name for name in dir(Keys) if not name.startswith('_')]
             error_msg = ('Key {} is invalid\n'
                          'valid keys are:\n'
                          '{}'.format(key, ','.join(defined_keys)))

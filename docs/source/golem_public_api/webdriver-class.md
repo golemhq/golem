@@ -203,7 +203,7 @@ from the current file_detector, then the class is instantiated with args and kwa
 instantiation.
 * kwargs - Keyword arguments, passed the same way as args.
 
-#### **find**(*args, **kwargs) <small>[Golem]</small>
+#### **find**(element=None, id=None, name=None, link_text=None, partial_link_text=None, css=None, xpath=None, tag_name=None, timeout=None, wait_displayed=None) <small>[Golem]</small>
 
 Find a WebElement
 
@@ -230,7 +230,7 @@ A golem.webdriver.extended_webelement.ExtendedRemoteWebElement
 
 Described in more detail [here](../finding-elements.html#find).
 
-#### **find_all**(*args, **kwargs) <small>[Golem]</small>
+#### **find_all**(element=None, id=None, name=None, link_text=None, partial_link_text=None, css=None, xpath=None, tag_name=None) <small>[Golem]</small>
 
 Find all WebElements that match the search criteria.
 

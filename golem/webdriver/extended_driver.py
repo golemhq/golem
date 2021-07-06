@@ -1,4 +1,4 @@
-# from typing import List # not supported in 3.4
+from typing import List
 
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
@@ -37,7 +37,7 @@ class GolemExtendedDriver:
         If element is already checked this is ignored.
 
         :Args:
-         - element: an element tuple, a CSS string or a WebElement object
+         - element: an element tuple, a CSS string, an XPath string or a WebElement object
         """
         element = self.find(element)
         element.check()
@@ -133,7 +133,7 @@ class GolemExtendedDriver:
         If element is not present return False
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         """
         try:
             element = self.find(element, timeout=0)
@@ -147,7 +147,9 @@ class GolemExtendedDriver:
     #     target_element = self.find(target)
     #     actionChains.drag_and_drop(source_element, target_element).perform()
 
-    def find(self, *args, **kwargs) -> ExtendedRemoteWebElement:
+    def find(self, element=None, id=None, name=None, link_text=None,
+             partial_link_text=None, css=None, xpath=None, tag_name=None,
+             timeout=None, wait_displayed=None) -> ExtendedRemoteWebElement:
         """Find a WebElement
 
         Search criteria:
@@ -172,15 +174,12 @@ class GolemExtendedDriver:
         :Returns:
           a golem.webdriver.extended_webelement.ExtendedRemoteWebElement
         """
-        if len(args) == 1:
-            kwargs['element'] = args[0]
-        return common._find(self, **kwargs)
+        return common._find(self, element, id, name, link_text, partial_link_text, css,
+                            xpath, tag_name, timeout, wait_displayed)
 
-    # should use type annotation:
-    # from typing import List
-    ##  -> List[ExtendedRemoteWebElement]
-    # typing not supported in 3.4
-    def find_all(self, *args, **kwargs):
+    def find_all(self, element=None, id=None, name=None, link_text=None,
+                 partial_link_text=None, css=None, xpath=None,
+                 tag_name=None) -> List[ExtendedRemoteWebElement]:
         """Find all WebElements that match the search criteria.
 
         Search criteria:
@@ -198,9 +197,8 @@ class GolemExtendedDriver:
         :Returns:
             a list of ExtendedRemoteWebElement
         """
-        if len(args) == 1:
-            kwargs['element'] = args[0]
-        return common._find_all(self, **kwargs)
+        return common._find_all(self, element, id, name, link_text, partial_link_text,
+                                css, xpath, tag_name)
 
     def get_window_index(self):
         """Get the index of the current window/tab"""
@@ -303,7 +301,7 @@ class GolemExtendedDriver:
         If element is already unchecked this is ignored.
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         """
         element = self.find(element)
         element.uncheck()
@@ -322,7 +320,7 @@ class GolemExtendedDriver:
         """Wait for element to be present and displayed
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - timeout: time to wait (in seconds)
         """
         try:
@@ -336,7 +334,7 @@ class GolemExtendedDriver:
         """Wait for element to be enabled
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - timeout: time to wait (in seconds)
         """
         element = self.find(element, timeout=0)
@@ -346,7 +344,7 @@ class GolemExtendedDriver:
         """Wait for element to have attribute
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - attribute: attribute name
         - timeout: time to wait (in seconds)
 
@@ -360,7 +358,7 @@ class GolemExtendedDriver:
         """Wait for element to not have attribute
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - attribute: attribute name
         - timeout: time to wait (in seconds)
 
@@ -376,7 +374,7 @@ class GolemExtendedDriver:
         When element is not present this will raise ElementNotFound.
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - timeout: time to wait (in seconds)
         """
         try:
@@ -389,7 +387,7 @@ class GolemExtendedDriver:
         """Wait for element to be not enabled
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - timeout: time to wait (in seconds)
         """
         element = self.find(element, timeout=0)
@@ -399,7 +397,7 @@ class GolemExtendedDriver:
         """Wait for element not present in the DOM
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - timeout: time to wait (in seconds)
         """
         found_element = None
@@ -417,7 +415,7 @@ class GolemExtendedDriver:
         """Wait for element present in the DOM
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - timeout: time to wait (in seconds)
         """
         try:
@@ -431,7 +429,7 @@ class GolemExtendedDriver:
         """Wait for element text to match given text
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - text: expected element text to be
         - timeout: time to wait (in seconds)
         """
@@ -442,7 +440,7 @@ class GolemExtendedDriver:
         """Wait for element to contain text
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - text: expected element to be contained by element
         - timeout: time to wait (in seconds)
         """
@@ -453,7 +451,7 @@ class GolemExtendedDriver:
         """Wait for element text to not match given text
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - text: expected text to not be element's text
         - timeout: time to wait (in seconds)
         """
@@ -464,7 +462,7 @@ class GolemExtendedDriver:
         """Wait for element to not contain text
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - text: expected text to not be contained in element
         - timeout: time to wait (in seconds)
         """

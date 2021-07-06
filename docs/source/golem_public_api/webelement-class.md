@@ -23,7 +23,7 @@ Clicks the element.
 #### **double_click**() <small>[Golem]</small>
 Double click the element
 
-#### **find**(*args, **kwargs) <small>[Golem]</small>
+#### **find**(element=None, id=None, name=None, link_text=None, partial_link_text=None, css=None, xpath=None, tag_name=None, timeout=None, wait_displayed=None) <small>[Golem]</small>
 Find a WebElement
 
 Search criteria:
@@ -45,7 +45,7 @@ element.find(xpath='//div/input', timeout=5, wait_displayed=True)
 
 Returns: a golem.webdriver.extended_webelement.ExtendedRemoteWebElement
 
-#### **find_all**(*args, **kwargs) <small>[Golem]</small>
+#### **find_all**(element=None, id=None, name=None, link_text=None, partial_link_text=None, css=None, xpath=None, tag_name=None) <small>[Golem]</small>
 
 Find all WebElements that match the search criteria.
 
