@@ -1,6 +1,6 @@
 # Golem - Test Automation
 
-![Tests](https://github.com/golemhq/golem/actions/workflows/run-tests.yml/badge.svg?branch=master)
+[![Tests](https://github.com/golemhq/golem/actions/workflows/run-tests.yml/badge.svg?branch=master)](https://github.com/golemhq/golem/actions/workflows/run-tests.yml?query=branch:master)
 [![Documentation Status](https://readthedocs.org/projects/golem-framework/badge/?version=latest)](https://golem-framework.readthedocs.io/en/latest/?badge=latest)
 [![Join the chat at https://gitter.im/golem-framework/golem](https://badges.gitter.im/golem-framework/golem.svg)](https://gitter.im/golem-framework/golem?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
