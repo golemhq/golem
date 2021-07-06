@@ -6,6 +6,10 @@
 
 - Improved CLI reporter
 
+### Changed
+
+- find(), find_all() now accept XPath as first positional parameter
+
 ## [0.10.0] - 2021-06-10
 
 ### Changed

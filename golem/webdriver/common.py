@@ -59,15 +59,15 @@ def _find_webelement(root, selector_type, selector_value, element_name,
         return webelement
 
 
-def _find(self, element=None, id=None, name=None,
-          link_text=None, partial_link_text=None, css=None,
-          xpath=None, tag_name=None, timeout=None, wait_displayed=None):
+def _find(self, element=None, id=None, name=None, link_text=None, partial_link_text=None,
+          css=None, xpath=None, tag_name=None, timeout=None, wait_displayed=None):
     """Find a webelement.
 
     `element` can be:
       a web element
       a tuple with format (<selector_type>, <selector_value>, [<display_nane>])
       a css selector string
+      an XPath selector string
     """
     # TODO: avoid circular import
     from golem.webdriver.extended_webelement import extend_webelement, ExtendedWebElement
@@ -90,9 +90,14 @@ def _find(self, element=None, id=None, name=None,
         selector_value = element[1]
         element_name = element[2] if len(element) == 3 else element[1]
     elif isinstance(element, str):
-        selector_type = 'css'
-        selector_value = element
-        element_name = element
+        if _str_is_xpath_selector(element):
+            selector_type = 'xpath'
+            selector_value = element
+            element_name = element
+        else:
+            selector_type = 'css'
+            selector_value = element
+            element_name = element
     elif id:
         selector_type = 'id'
         selector_value = element_name = id
@@ -134,6 +139,7 @@ def _find_all(self, element=None, id=None, name=None, link_text=None,
     `element` can be:
       a tuple with format (<selector_type>, <selector_value>, [<display_nane>])
       a css selector string
+      an XPath selector string
     """
     # TODO: avoid circular import
     from golem.webdriver.extended_webelement import extend_webelement
@@ -160,7 +166,10 @@ def _find_all(self, element=None, id=None, name=None, link_text=None,
         else:
             raise Exception('Incorrect element {}'.format(element))
     elif isinstance(element, str):
-        css = element
+        if _str_is_xpath_selector(element):
+            xpath = element
+        else:
+            css = element
 
     if id:
         selector_type = 'id'
@@ -208,3 +217,11 @@ def _find_all(self, element=None, id=None, name=None, link_text=None,
         extended_webelements.append(extend_webelement(elem))
 
     return extended_webelements
+
+
+def _str_is_xpath_selector(selector):
+    options = ['/', './', '(', '../', '..', '*/']
+    for option in options:
+        if selector.startswith(option):
+            return True
+    return False

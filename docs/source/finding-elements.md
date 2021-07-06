@@ -3,7 +3,7 @@ Finding Elements
 
 ## Actions and Elements
 
-Golem actions that require a WebElement can be defined in three different ways:
+Golem actions that require a WebElement can be defined in four different ways:
 
 An element tuple:
 
@@ -25,6 +25,15 @@ from golem import actions
 
 actions.send_keys('#myElementId', 'my username')
 actions.click('button.btn-default')
+```
+
+An XPath selector string:
+
+```python
+from golem import actions
+
+actions.send_keys('//input[@id="myElementId"]', 'my username')
+actions.click('//button[@class="btn-default"]')
 ```
 
 A WebElement object:
@@ -49,7 +58,8 @@ The browser has two methods used to find elements: **find** and **find_all**
 GolemExtendedDriver.**find**(*element=None, id=None, name=None, link_text=None, partial_link_text=None, css=None, xpath=None, tag_name=None, timeout=None, wait_displayed=None*)
 
 The **find()** method provides a few ways to find elements.
-Only one search criteria must be provided. *element* must be a CSS selector string, an element tuple or a WebElement object.
+Only one search criteria must be provided.
+*element* must be a CSS selector string, an XPath selector string, an element tuple, or a WebElement object.
 
 The *timeout* argument determines how much time to wait until the element is present.
 If this is not provided, the value defined in settings by the *search_timeout* key will be used.
@@ -66,11 +76,14 @@ from golem import actions
 
 browser = actions.get_browser()
 
-# by a tuple
+# by an element tuple
 element = browser.find(('id', 'someId'))
 
 # by a css selector (positional argument) 
 element = browser.find('input.someClass')
+
+# by an XPath selector (positional argument) 
+element = browser.find('//input[@class="someClass"]')
 
 # by a WebElement object 
 element = browser.find(id='someId')
@@ -91,7 +104,7 @@ element = browser.find(link_text='link text')
 # by partial link text
 element = browser.find(partial_link_text='link')
 
-# by xpath
+# by xpath (keyword argument)
 element = browser.find(xpath="//input[@id='someId']")
 
 # by tag name
@@ -104,7 +117,7 @@ GolemExtendedDriver.**find_all**(*element=None, id=None, name=None, link_text=No
 
 Finds all the elements that match the selected criteria.
 Only one search criteria must be provided. Returns a list of WebElements.
-*element* must be a CSS selector string, an element tuple or a WebElement object.
+*element* must be a CSS selector string, an XPath selector string, an element tuple, or a WebElement object.
 
 ```python
 from golem import actions

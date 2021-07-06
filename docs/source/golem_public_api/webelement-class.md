@@ -27,7 +27,7 @@ Double click the element
 Find a WebElement
 
 Search criteria:
-* The first argument must be: an element tuple, a CSS string or a WebElement object.
+* The first argument must be: an element tuple, a CSS string, an XPath string, or a WebElement object.
 * Keyword search criteria: id, name, link_text, partial_link_text, css, xpath, tag_name.
 * Only one search criteria should be provided.
 
@@ -50,7 +50,7 @@ Returns: a golem.webdriver.extended_webelement.ExtendedRemoteWebElement
 Find all WebElements that match the search criteria.
 
 Search criteria:
-* The first argument must be: an element tuple, a CSS string or a WebElement object.
+* The first argument must be: an element tuple, a CSS string, or an XPath string.
 * Keyword search criteria: id, name, link_text, partial_link_text, css, xpath, tag_name.
 * Only one search criteria should be provided.
 
