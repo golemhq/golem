@@ -45,6 +45,7 @@ Contents
    tutorial-part-2
    browsers
    finding-elements
+   waiting-for-elements
    golem-actions
    tests
    pages

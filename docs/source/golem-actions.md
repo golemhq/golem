@@ -924,7 +924,7 @@ This must be called before the browser is started.
 
 ### set_search_timeout(timeout)
 
-Set the search timeout value. Timeout must be either int or float.
+Set the search timeout value (in seconds). Timeout must be either int or float.
 
 ### set_trace()
 

@@ -1580,7 +1580,7 @@ def set_browser_capability(capability_key, capability_value):
 
 
 def set_search_timeout(timeout):
-    """Set the search timeout value
+    """Set the search timeout value (in seconds)
 
     Parameters:
     timeout : value
