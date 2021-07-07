@@ -11,50 +11,28 @@ $(document).ready(function() {
 })
 
 
-function getAllProjectsLastExecutions(){
-    $.ajax({
-        url: "/api/report/last-executions",
-        dataType: 'json',
-        type: 'GET',
-        success: function( data ) {
-            for(project in data.projects){
-                ReportDashboardMain.loadProject(project, data.projects[project]);
-            }
+function getAllProjectsLastExecutions() {
+    xhr.get('/api/report/last-executions', {}, data => {
+        for(project in data.projects) {
+            ReportDashboardMain.loadProject(project, data.projects[project]);
         }
     })
 }
 
 
-function getProjectLastExecutions(project){
-    $.ajax({
-        url: "/api/report/project/last-executions",
-        data: {project},
-        dataType: 'json',
-        contentType: 'application/json; charset=utf-8',
-        type: 'GET',
-        success: function( data ) {
-            for(project in data.projects){
-                ReportDashboardMain.loadProject(project, data.projects[project]);
-            }
+function getProjectLastExecutions(project) {
+    xhr.get('/api/report/project/last-executions', {project}, data => {
+        for(project in data.projects) {
+            ReportDashboardMain.loadProject(project, data.projects[project]);
         }
     })
 }
 
 
-function getLastExecutions(project, execution){
-    $.ajax({
-        url: "/api/report/execution/last-executions",
-        data: {
-            project: project,
-            execution: execution
-        },
-        dataType: 'json',
-        contentType: 'application/json; charset=utf-8',
-        type: 'GET',
-        success: function( data ) {
-            for(project in data.projects){
-                ReportDashboardMain.loadProject(project, data.projects[project]);
-            }
+function getLastExecutions(project, execution) {
+    xhr.get('/api/report/execution/last-executions', {project, execution}, data => {
+        for(project in data.projects) {
+            ReportDashboardMain.loadProject(project, data.projects[project]);
         }
     })
 }
@@ -141,48 +119,37 @@ const ReportDashboardMain = new function(){
     }
 
     this.loadChartAndBars = function(project, execution, timestamp, row){
-         $.ajax({
-            url: "/api/report/execution",
-            data: {
+        xhr.get('/api/report/execution', {project, execution, timestamp}, executionData => {
+            let results = Object.keys(executionData.totals_by_result).sort();
+            let container = row.find('td.result>div.progress');
+            results.forEach(result => {
+                if(!Main.ReportUtils.hasProgressBarForResult(container, result)) {
+                    Main.ReportUtils.createProgressBars(container, [result])
+                }
+                let percentage = executionData.totals_by_result[result] * 100 / executionData.total_tests;
+                Main.ReportUtils.animateProgressBar(container, result, percentage);
+            });
+            if(!('pending' in executionData.totals_by_result)) {
+                Main.ReportUtils.animateProgressBar(container, 'pending', 0);
+            }
+            ReportDashboardMain.updateChart({
                 project: project,
                 execution: execution,
-                timestamp: timestamp
-            },
-            dataType: 'json',
-            type: 'GET',
-            success: function( executionData ) {
-                let results = Object.keys(executionData.totals_by_result).sort()
-                let container = row.find('td.result>div.progress');
-                results.forEach(function(result){
-                    if(!Main.ReportUtils.hasProgressBarForResult(container, result)){
-                        Main.ReportUtils.createProgressBars(container, [result])
-                    }
-                    let percentage = executionData.totals_by_result[result] * 100 / executionData.total_tests;
-                    Main.ReportUtils.animateProgressBar(container, result, percentage);
-                });
-                if(!('pending' in executionData.totals_by_result)){
-                    Main.ReportUtils.animateProgressBar(container, 'pending', 0);
+                label: timestamp,
+                totalsByResult: executionData.totals_by_result
+            });
+            if(executionData.has_finished) {
+                row.find('.spinner').hide();
+                if(Global.user.projectWeight >= Main.PermissionWeightsEnum.admin) {
+                    row.find('.glyphicon-trash').show()
                 }
-                ReportDashboardMain.updateChart({
-                    project: project,
-                    execution: execution,
-                    label: timestamp,
-                    totalsByResult: executionData.totals_by_result
-                });
-                if(executionData.has_finished){
-                    row.find('.spinner').hide();
-                    if(Global.user.projectWeight >= Main.PermissionWeightsEnum.admin){
-                        row.find('.glyphicon-trash').show()
-                    }
-                }
-                else{
-                    row.find('.spinner').show();
-                    window.setTimeout(function(){
-                        ReportDashboardMain.loadChartAndBars(project, execution, timestamp, row);
-                    }, 2000, project, execution, timestamp, row)
-                }
+            } else {
+                row.find('.spinner').show();
+                window.setTimeout(function() {
+                    ReportDashboardMain.loadChartAndBars(project, execution, timestamp, row);
+                }, 2000, project, execution, timestamp, row)
             }
-        });
+        })
     }
 
     this.updateChart = function(data){
@@ -233,50 +200,36 @@ const ReportDashboardMain = new function(){
     }
 
     this.deleteExecution = function(executionContainer, project, execution){
-        $.ajax({
-            url: "/api/report/execution",
-            data: JSON.stringify({project, execution}),
-            dataType: 'json',
-            contentType: 'application/json; charset=utf-8',
-            type: 'DELETE',
-            success: function( errors ) {
-                if(errors.length == 0){
-                    executionContainer.remove();
-                    Main.Utils.toast('info', 'Execution deleted', 2000)
-                } else {
-                    errors.forEach(error => Main.Utils.toast('error', error, 3000));
-                }
+        xhr.delete('/api/report/execution', {project, execution}, errors => {
+            if(errors.length) {
+                errors.forEach(error => Main.Utils.toast('error', error, 3000));
+            } else {
+                executionContainer.remove();
+                Main.Utils.toast('info', 'Execution deleted', 2000)
             }
-        });
+        })
         return false
     }
 
-    this.deleteExecutionTimestampConfirm = function(elem){
+    this.deleteExecutionTimestampConfirm = function(elem) {
         let row = $(elem).closest('tr');
         let project = $(elem).closest('.project-container').attr('id');
         let execution = row.attr('execution-name');
         let timestamp = row.attr('timestamp');
         let message = `<span style="word-break: break-all">Are you sure you want to delete this execution? This action cannot be undone.</span>`;
-        let callback = function(){
+        let callback = function() {
             ReportDashboardMain.deleteExecutionTimestamp(row, project, execution, timestamp);
         }
         Main.Utils.displayConfirmModal('Delete', message, callback);
     }
 
     this.deleteExecutionTimestamp = function(row, project, execution, timestamp){
-        $.ajax({
-            url: "/api/report/execution/timestamp",
-            data: JSON.stringify({project, execution, timestamp}),
-            dataType: 'json',
-            contentType: 'application/json; charset=utf-8',
-            type: 'DELETE',
-            success: function( errors ) {
-                if(errors.length == 0){
-                    row.remove();
-                    Main.Utils.toast('info', 'Execution deleted', 2000)
-                } else {
-                    errors.forEach(error => Main.Utils.toast('error', error, 3000));
-                }
+        xhr.delete('/api/report/execution/timestamp', {project, execution, timestamp}, errors => {
+            if(errors.length) {
+                errors.forEach(error => Main.Utils.toast('error', error, 3000));
+            } else {
+                row.remove();
+                Main.Utils.toast('info', 'Execution deleted', 2000)
             }
         });
         return false

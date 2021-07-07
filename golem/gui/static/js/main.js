@@ -462,23 +462,16 @@ const Main = new function(){
         this._doRunTestCase = function(){
             Main.Utils.toast('info', 'Running test ' + Main.TestRunner.testName, 3000);
 
-            $.ajax({
-                url: "/api/test/run",
-                data: JSON.stringify({
-                     project: Main.TestRunner.project,
-                     testName: Main.TestRunner.testName,
-                     testFunctions: Main.TestRunner.testFunctions,
-                     browsers: Main.TestRunner.browsers,
-                     environments: Main.TestRunner.environments,
-                     processes: Main.TestRunner.processes
-                 }),
-                dataType: 'json',
-                contentType: 'application/json; charset=utf-8',
-                type: 'POST',
-                success: function(timestamp) {
-                    Main.TestRunner._openResultModal(timestamp);
-                 }
-             });
+            xhr.post('/api/test/run', {
+                project: Main.TestRunner.project,
+                testName: Main.TestRunner.testName,
+                testFunctions: Main.TestRunner.testFunctions,
+                browsers: Main.TestRunner.browsers,
+                environments: Main.TestRunner.environments,
+                processes: Main.TestRunner.processes
+            }, timestamp => {
+                Main.TestRunner._openResultModal(timestamp);
+            })
         }
 
         this._openResultModal = function(timestamp){
@@ -495,30 +488,24 @@ const Main = new function(){
             Main.TestRunner._checkAndRecheckStatus(checkDelay, timestamp);
         }
 
-        this._checkAndRecheckStatus = function(checkDelay, timestamp){
-            $.ajax({
-                url: "/api/report/test/status",
-                data: {
-                     project: Main.TestRunner.project,
-                     test: Main.TestRunner.testName,
-                     timestamp: timestamp
-                },
-                dataType: 'json',
-                type: 'GET',
-                success: function(result) {
-                    for (const [setName, values] of Object.entries(result.sets)){
-                        Main.TestRunner._updateSet(setName, values, timestamp)
-                    }
-                    checkDelay += 100;
-                    if(result.has_finished){
-                        $("#testRunModal #testRunModalLoadingIcon").hide()
-                    } else {
-                         setTimeout(function(){
-                            Main.TestRunner._checkAndRecheckStatus(checkDelay, timestamp);
-                        }, checkDelay, Main.TestRunner.project, Main.TestRunner.testName, timestamp);
-                    }
+        this._checkAndRecheckStatus = function(checkDelay, timestamp) {
+            xhr.get('/api/report/test/status', {
+                project: Main.TestRunner.project,
+                test: Main.TestRunner.testName,
+                timestamp: timestamp
+            }, result => {
+                for (const [setName, values] of Object.entries(result.sets)) {
+                    Main.TestRunner._updateSet(setName, values, timestamp)
                 }
-            });
+                checkDelay += 100;
+                if(result.has_finished) {
+                    $("#testRunModal #testRunModalLoadingIcon").hide()
+                } else {
+                    setTimeout(function() {
+                        Main.TestRunner._checkAndRecheckStatus(checkDelay, timestamp);
+                    }, checkDelay, Main.TestRunner.project, Main.TestRunner.testName, timestamp);
+                }
+            })
         }
 
         this._getDefaultBrowser = async function(){

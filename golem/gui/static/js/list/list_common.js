@@ -95,24 +95,16 @@ const FileExplorer = new function(){
         let callback = function(filename){
             if(filename.trim().length == 0) return
             if(folder.folderpath().length) filename = `${folder.folderpath()}.${filename}`
-            $.ajax({
-                url: Endpoints.createFile[FileExplorer.fileType],
-                data: JSON.stringify({
-                    "project": Global.project,
-                    "fullPath": filename
-                }),
-                contentType: 'application/json;charset=utf-8',
-                dataType: 'json',
-                type: 'POST',
-                success: function(data) {
-                    if(data.errors.length == 0)
-                        FileExplorer.rootFolder.addFile(filename)
-                    else
-                        Main.Utils.displayErrorModal(data.errors)
-                },
-                error: function(){
-                    Main.Utils.toast('error', 'There was an error adding file', 4000)
-                }
+            xhr.post(Endpoints.createFile[FileExplorer.fileType], {
+                project: Global.project,
+                fullPath: filename
+            }, data => {
+                if(data.errors.length)
+                    Main.Utils.displayErrorModal(data.errors)
+                else
+                    FileExplorer.rootFolder.addFile(filename)
+            }, () => {
+                Main.Utils.toast('error', 'There was an error adding file', 4000)
             })
         }
         Main.Utils.displayPromptModal('Add File', '', '', 'filename', callback)
@@ -123,28 +115,19 @@ const FileExplorer = new function(){
         let callback = function(newFilepath){
             if(file.filepath() === newFilepath || newFilepath.trim().length == 0) return
 
-            $.ajax({
-                url: Endpoints.renameFile[FileExplorer.fileType],
-                data: JSON.stringify({
-                    "project": Global.project,
-                    "fullFilename": file.filepath(),
-                    "newFullFilename": newFilepath
-                }),
-                contentType: 'application/json;charset=utf-8',
-                dataType: 'json',
-                type: 'POST',
-                success: function(result) {
-                    if(result.errors.length == 0){
-                        file.rename(newFilepath)
-                        Main.Utils.toast('success', 'File was renamed', 2000);
-                    }
-                    else{
-                        Main.Utils.displayErrorModal(result.errors)
-                    }
-                },
-                error: function(){
-                    Main.Utils.toast('error', 'There was an error renaming file', 4000)
+            xhr.post(Endpoints.renameFile[FileExplorer.fileType], {
+                project: Global.project,
+                fullFilename: file.filepath(),
+                newFullFilename: newFilepath
+            }, result => {
+                if(result.errors.length) {
+                    Main.Utils.displayErrorModal(result.errors)
+                } else {
+                    file.rename(newFilepath)
+                    Main.Utils.toast('success', 'File was renamed', 2000);
                 }
+            }, () => {
+                Main.Utils.toast('error', 'There was an error renaming file', 4000)
             })
         }
         Main.Utils.displayPromptModal('Rename file', 'Enter a new name for this file...',
@@ -156,57 +139,40 @@ const FileExplorer = new function(){
         let callback = function(newFilepath){
             if(file.filepath() === newFilepath || newFilepath.trim().length == 0) return
 
-            $.ajax({
-                url: Endpoints.duplicateFile[FileExplorer.fileType],
-                data: JSON.stringify({
-                    "project": Global.project,
-                    "fullPath": file.filepath(),
-                    "newFileFullPath": newFilepath
-                }),
-                contentType: 'application/json;charset=utf-8',
-                dataType: 'json',
-                type: 'POST',
-                success: function(errors) {
-                    if(errors.length == 0){
-                        FileExplorer.rootFolder.addFile(newFilepath)
-                        if(FileExplorer.fileType == 'test'){
-                            FileExplorer.getFile(newFilepath).addTags(file.tags)
-                        }
-                        Main.Utils.toast('success', 'File was copied', 2000);
+            xhr.post(Endpoints.duplicateFile[FileExplorer.fileType], {
+                project: Global.project,
+                fullPath: file.filepath(),
+                newFileFullPath: newFilepath
+            }, errors => {
+                if(errors.length) {
+                    Main.Utils.displayErrorModal(errors)
+                } else {
+                    FileExplorer.rootFolder.addFile(newFilepath)
+                    if(FileExplorer.fileType == 'test') {
+                        FileExplorer.getFile(newFilepath).addTags(file.tags)
                     }
-                    else{
-                        Main.Utils.displayErrorModal(errors)
-                    }
-                },
-                error: function(){
-                    Main.Utils.toast('error', 'There was an error duplicating file', 4000)
+                    Main.Utils.toast('success', 'File was copied', 2000);
                 }
-            });
+            }, () => {
+                Main.Utils.toast('error', 'There was an error duplicating file', 4000)
+            })
         }
         Main.Utils.displayPromptModal('Copy file', 'Enter a new file path...', file.filepath(), 'new filename', callback)
     }
 
 
-    this.deleteFile = function(file){
+    this.deleteFile = function(file) {
 
-        let callback = function(){
-            $.ajax({
-                url: Endpoints.deleteFile[FileExplorer.fileType],
-                data: JSON.stringify({
-                    "project": Global.project,
-                    "fullPath": file.filepath()
-                }),
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                type: 'DELETE',
-                success: function(errors) {
-                    if(errors.length == 0){
-                        file.parent.removeFile(file.name);
-                        Main.Utils.toast('success', `File ${file.filepath()} was removed`, 2000)
-                    }
-                    else{
-                        Main.Utils.toast('error', 'There was an error removing file', 4000)
-                    }
+        let callback = function() {
+            xhr.delete(Endpoints.deleteFile[FileExplorer.fileType], {
+                project: Global.project,
+                fullPath: file.filepath()
+            }, errors => {
+                if(errors.length) {
+                    Main.Utils.toast('error', 'There was an error removing file', 4000)
+                } else {
+                    file.parent.removeFile(file.name);
+                    Main.Utils.toast('success', `File ${file.filepath()} was removed`, 2000)
                 }
             })
         }
@@ -215,94 +181,66 @@ const FileExplorer = new function(){
     }
 
 
-    this.addFolder = function(folder){
+    this.addFolder = function(folder) {
 
-        let callback = function(folderName){
+        let callback = function(folderName) {
             if(folderName.trim().length == 0) return
             let fullpath = folderName;
             if(folder.folderpath().length) fullpath = `${folder.folderpath()}.${folderName}`
-
-            $.ajax({
-                url: Endpoints.createFolder[FileExplorer.fileType],
-                data: JSON.stringify({
-                    "project": Global.project,
-                    "fullPath": fullpath
-                }),
-                contentType: 'application/json;charset=utf-8',
-                dataType: 'json',
-                type: 'POST',
-                success: function(data) {
-                    if(data.errors.length == 0){
-                        folder.addFolder(folderName)
-                    }
-                    else{
-                        Main.Utils.displayErrorModal(data.errors)
-                    }
-                },
-                error: function() {
-                    Main.Utils.toast('error', 'There was an error adding folder', 4000)
+            xhr.post(Endpoints.createFolder[FileExplorer.fileType], {
+                project: Global.project,
+                fullPath: fullpath
+            }, data => {
+                if(data.errors.length) {
+                    Main.Utils.displayErrorModal(data.errors)
+                } else {
+                    folder.addFolder(folderName)
                 }
+            }, () => {
+                Main.Utils.toast('error', 'There was an error adding folder', 4000)
             })
         }
         Main.Utils.displayPromptModal('Add Folder', '', '', 'folder name', callback)
     }
 
-    this.renameFolder = function(folder){
+    this.renameFolder = function(folder) {
 
-        let callback = function(newFolderName){
+        let callback = function(newFolderName) {
             if(newFolderName.trim().length == 0) return
-            $.ajax({
-                url: Endpoints.renameFolder[FileExplorer.fileType],
-                data: JSON.stringify({
-                    "project": Global.project,
-                    "fullDirname": folder.folderpath(),
-                    "newFullDirname": newFolderName
-                }),
-                contentType: 'application/json;charset=utf-8',
-                dataType: 'json',
-                type: 'POST',
-                success: function(data) {
-                    if(data.errors.length == 0){
-                        folder.rename(newFolderName)
-                    }
-                    else{
-                        Main.Utils.displayErrorModal(data.errors);
-                    }
-                },
-                error: function() {
-                    Main.Utils.toast('error', 'There was an error renaming folder', 4000)
+            xhr.post(Endpoints.renameFolder[FileExplorer.fileType], {
+                project: Global.project,
+                fullDirname: folder.folderpath(),
+                newFullDirname: newFolderName
+            }, data => {
+                if(data.errors.length) {
+                    Main.Utils.displayErrorModal(data.errors);
+                } else {
+                    folder.rename(newFolderName)
                 }
-            });
+            }, () => {
+                Main.Utils.toast('error', 'There was an error renaming folder', 4000)
+            })
         }
         Main.Utils.displayPromptModal('Rename Folder', 'Enter a new name for this folder...', folder.folderpath(), '', callback)
     }
 
-    this.deleteFolder = function(folder){
+    this.deleteFolder = function(folder) {
 
-        let callback = function(){
-            $.ajax({
-                url: Endpoints.deleteFolder[FileExplorer.fileType],
-                data: JSON.stringify({
-                    "project": Global.project,
-                    "fullDirname": folder.folderpath(),
-                }),
-                contentType: 'application/json;charset=utf-8',
-                dataType: 'json',
-                type: 'DELETE',
-                success: function(data) {
-                    if(data.errors.length == 0){
-                        FileExplorer.renderFinished = false;
-                        folder.parent.removeFolder(folder.name);
-                        FileExplorer.renderFinished = true;
-                    }
-                    else{
-                        Main.Utils.displayErrorModal(data.errors);
-                    }
-                },
-                error: function() {
-                    Main.Utils.toast('error', 'There was an error deleting folder', 4000)
+        let callback = function() {
+            xhr.delete(Endpoints.deleteFolder[FileExplorer.fileType], {
+                project: Global.project,
+                fullDirname: folder.folderpath()
+            }, data => {
+                if(data.errors.length) {
+                    Main.Utils.displayErrorModal(data.errors);
+                } else {
+                    FileExplorer.renderFinished = false;
+                    folder.parent.removeFolder(folder.name);
+                    FileExplorer.renderFinished = true;
                 }
-            });
+            }, () => {
+                Main.Utils.toast('error', 'There was an error deleting folder', 4000)
+            })
         }
         let message = `<span style="">
             Are you sure you want to delete folder <strong>${folder.folderpath()}</strong> and all its contents?.

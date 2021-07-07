@@ -21,47 +21,30 @@ $(document).ready(function() {
 });
 
 
-function saveSettings(){
+function saveSettings() {
     let settings = settingsEditor.getValue();
-    $.ajax({
-        url: "/api/settings/project/save",
-        data: JSON.stringify({
-            "project": Global.project,
-            "settings": settings
-        }),
-        dataType: 'json',
-        contentType: 'application/json; charset=utf-8',
-        type: 'PUT',
-        success: function(data) {
-            Main.Utils.toast('success', "Settings saved", 2000);
-            settingsEditor.markClean();
-        },
-    });
+    xhr.put('/api/settings/project/save', {
+        'project': Global.project,
+        settings
+    }, data => {
+        Main.Utils.toast('success', "Settings saved", 2000);
+        settingsEditor.markClean();
+    })
 }
 
-function saveGlobalSettings(){
-    let globalSettings = settingsEditor.getValue();
-
-    $.ajax({
-        url: "/api/settings/global/save",
-        data: JSON.stringify({
-            "settings": globalSettings
-        }),
-        dataType: 'json',
-        contentType: 'application/json; charset=utf-8',
-        type: 'PUT',
-        success: function(data) {
-            Main.Utils.toast('success', "Settings saved", 2000);
-            settingsEditor.markClean();
-        },
-    });
+function saveGlobalSettings() {
+    let settings = settingsEditor.getValue();
+    xhr.put('/api/settings/global/save', {settings}, data => {
+        Main.Utils.toast('success', "Settings saved", 2000);
+        settingsEditor.markClean();
+    })
 }
 
 
-function watchForUnsavedChanges(){
+function watchForUnsavedChanges() {
     window.addEventListener("beforeunload", function (e) {
         let settingsIsClean = settingsEditor.isClean();
-        if(!settingsIsClean){
+        if(!settingsIsClean) {
             let confirmationMessage = 'There are unsaved changes';
             (e || window.event).returnValue = confirmationMessage;
             return confirmationMessage

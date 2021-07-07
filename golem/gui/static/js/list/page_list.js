@@ -6,17 +6,9 @@ $(document).ready(function() {
 
 const PageList = new function(){
 
-    this.getPages = function(projectName){
-        $.ajax({
-            url: "/api/project/page-tree",
-            data: {
-                "project": projectName
-            },
-            dataType: 'json',
-            type: 'GET',
-            success: function(pages) {
-                FileExplorer.initialize(pages, 'page', $('#fileExporerContainer')[0]);
-            },
-        });
+    this.getPages = function(projectName) {
+        xhr.get('/api/project/page-tree', {'project': projectName}, pages => {
+            FileExplorer.initialize(pages, 'page', $('#fileExporerContainer')[0]);
+        })
     }
 }

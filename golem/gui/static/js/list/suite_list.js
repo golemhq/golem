@@ -8,38 +8,20 @@ $(document).ready(function() {
 
 const SuiteList = new function(){
 
-    this.getSuites = function(projectName){
-        $.ajax({
-            url: "/api/project/suite-tree",
-            data: {
-                "project": projectName
-            },
-            dataType: 'json',
-            contentType: 'application/json',
-            type: 'GET',
-            success: function(suites) {
-                FileExplorer.initialize(suites, 'suite', $('#fileExporerContainer')[0]);
-            },
-        });
+    this.getSuites = function(projectName) {
+        xhr.get('/api/project/suite-tree', {'project': projectName}, suites => {
+            FileExplorer.initialize(suites, 'suite', $('#fileExporerContainer')[0]);
+        })
     }
 
-    this.generateHealthChart = function(projectName){
-        $.ajax({
-            url: "/api/project/health",
-            data: {
-                "project": projectName,
-            },
-            dataType: 'json',
-            type: 'GET',
-            success: function( healthData ) {
-                if($.isEmptyObject(healthData)){
-                    $("#healthContainer").html("<div class='text-center' style='padding-top: 0px; color: darkgrey'>no previous executions</div>");
-                }
-                else{
-                    SuiteList.loadHealthData(healthData);
-                }
+    this.generateHealthChart = function(projectName) {
+        xhr.get('/api/project/health', {'project': projectName}, healthData => {
+            if(Object.keys(healthData).length) {
+                SuiteList.loadHealthData(healthData);
+            } else {
+                $("#healthContainer").html("<div class='text-center' style='padding-top: 0px; color: darkgrey'>no previous executions</div>");
             }
-        });
+        })
     }
 
     this.loadHealthData = function(healthData){
@@ -119,20 +101,12 @@ const SuiteList = new function(){
         });
     }
 
-    this.checkIfProjectHasNoTests = function(){
-        $.ajax({
-            url: "/api/project/has-tests",
-            data: {
-                "project": Global.project,
-            },
-            dataType: 'json',
-            type: 'GET',
-            success: function(projectHasTests) {
-                if(!projectHasTests){
-                    let content = `This project has no tests. Create the first test <strong><a href="/project/${Global.project}/tests/" class="alert-link">here</a>.</strong>`;
-                    Main.Utils.infoBar($("#infoBarContainer"), content)
-                }
+    this.checkIfProjectHasNoTests = function() {
+        xhr.get('/api/project/has-tests', {'project': Global.project}, projectHasTests => {
+            if(!projectHasTests) {
+                let content = `This project has no tests. Create the first test <strong><a href="/project/${Global.project}/tests/" class="alert-link">here</a>.</strong>`;
+                Main.Utils.infoBar($("#infoBarContainer"), content)
             }
-        });
+        })
     }
 }

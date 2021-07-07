@@ -47,33 +47,27 @@ const ExecutionReport = new function(){
 	this.tests = {};
 	this.params = {};
 
-	this.getReportData = function(){
-		 $.ajax({
-            url: "/api/report/execution",
-            data: {
-                project: global.project,
-                execution: global.execution,
-                timestamp: global.timestamp
-            },
-            dataType: 'json',
-            type: 'GET',
-            success: function(executionData){
-	  			if(executionData.has_finished){
-	  				ExecutionReport.suiteFinished = true;
-	  				ExecutionReport.netTime = executionData.net_elapsed_time;
-                    $(".spinner").hide()
-	  			} else {
-	  			    $(".spinner").show();
-					if(ExecutionReport.queryDelay <= 10000){
-						ExecutionReport.queryDelay += 50
-					}
-					setTimeout(function(){ExecutionReport.getReportData()}, ExecutionReport.queryDelay);
-				}
-	  			ExecutionReport.loadReport(executionData);
-	  			GeneralTable.updateGeneralTable();
-	  			DetailTable.updateColumnHeaderFilterOptions();
-	  		}
-        });
+	this.getReportData = function() {
+	    xhr.get('/api/report/execution', {
+		    project: global.project,
+            execution: global.execution,
+            timestamp: global.timestamp
+        }, executionData => {
+            if(executionData.has_finished) {
+                ExecutionReport.suiteFinished = true;
+                ExecutionReport.netTime = executionData.net_elapsed_time;
+                $(".spinner").hide()
+            } else {
+                $(".spinner").show();
+                if(ExecutionReport.queryDelay <= 10000) {
+                    ExecutionReport.queryDelay += 50
+                }
+                setTimeout(function(){ExecutionReport.getReportData()}, ExecutionReport.queryDelay);
+            }
+            ExecutionReport.loadReport(executionData);
+            GeneralTable.updateGeneralTable();
+            DetailTable.updateColumnHeaderFilterOptions();
+        })
 	}
 
 	this.loadReport = function(execution_data){
@@ -421,29 +415,22 @@ const DetailTable = new function(){
             }
 	    }
 
-	    if(global.static){
+	    if(global.static) {
 	        _loadTest(global.detailTestData[testId])
 	    } else {
-            $.ajax({
-                url: "/api/report/test",
-                data: {
-                    project: global.project,
-                    execution: global.execution,
-                    timestamp: global.timestamp,
-                    testFile: testFile,
-                    test: testName,
-                    setName: setName
-                },
-                dataType: 'json',
-                contentType: 'application/json; charset=utf-8',
-                type: 'GET',
-                success: function(report) {
-                    _loadTest(report)
-                    if(report.result == 'pending' || report.result == 'running' || report.result == ''){
-                        setTimeout(() => DetailTable.updateTestDetail(testId, testName, testFile, setName), 1500);
-                    }
+	        xhr.get('/api/report/test', {
+                project: global.project,
+                execution: global.execution,
+                timestamp: global.timestamp,
+                testFile: testFile,
+                test: testName,
+                setName: setName
+            }, report => {
+                _loadTest(report)
+                if(report.result == 'pending' || report.result == 'running' || report.result == '') {
+                    setTimeout(() => DetailTable.updateTestDetail(testId, testName, testFile, setName), 1500);
                 }
-            });
+            })
         }
 	}
 
