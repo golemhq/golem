@@ -5,6 +5,7 @@
 ### Added
 
 - Improved CLI reporter
+- Add autocomplete suggestions for test code editor [#214](https://github.com/golemhq/golem/issues/214) :: Sunil-Rathore
 
 ### Changed
 
