@@ -28,9 +28,12 @@ def is_safe_url(target):
 def run_test(project, test_name, test_functions=None, browsers=None, environments=None, processes=1):
     """Run a test case. This is used when running tests from the GUI"""
     script_name = sys.argv[0]
-    if script_name[-5:] != 'golem':
-        which_golem = subprocess.run(['which', 'golem'], stdout=subprocess.PIPE)
-        script_name = which_golem.stdout.decode('utf-8').strip()
+    if script_name[-5:] != 'golem' and script_name[-9:] != 'golem.exe':
+        if sys.platform == 'win32':
+            script_name = 'golem'
+        else:
+            which_golem = subprocess.run(['which', 'golem'], stdout=subprocess.PIPE)
+            script_name = which_golem.stdout.decode('utf-8').strip()
     timestamp = utils.get_timestamp()
     param_list = [
         script_name,
@@ -64,9 +67,12 @@ def run_test(project, test_name, test_functions=None, browsers=None, environment
 def run_suite(project, suite_name):
     """Run a suite. This is used when running suites from the GUI"""
     script_name = sys.argv[0]
-    if script_name[-5:] != 'golem':
-        which_golem = subprocess.run(['which', 'golem'], stdout=subprocess.PIPE)
-        script_name = which_golem.stdout.decode('utf-8').strip()
+    if script_name[-5:] != 'golem' and script_name[-9:] != 'golem.exe':
+        if sys.platform == 'win32':
+            script_name = 'golem'
+        else:
+            which_golem = subprocess.run(['which', 'golem'], stdout=subprocess.PIPE)
+            script_name = which_golem.stdout.decode('utf-8').strip()
     timestamp = utils.get_timestamp()
     param_list = [
         script_name,
