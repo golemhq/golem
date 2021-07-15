@@ -6,6 +6,7 @@
 
 - Improved CLI reporter
 - Add autocomplete suggestions for test code editor [#214](https://github.com/golemhq/golem/issues/214) :: Sunil-Rathore
+- Highlight element when found, toggled by setting, action of find method [#220](https://github.com/golemhq/golem/pull/220)
 
 ### Changed
 
