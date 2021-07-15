@@ -203,7 +203,7 @@ from the current file_detector, then the class is instantiated with args and kwa
 instantiation.
 * kwargs - Keyword arguments, passed the same way as args.
 
-#### **find**(element=None, id=None, name=None, link_text=None, partial_link_text=None, css=None, xpath=None, tag_name=None, timeout=None, wait_displayed=None) <small>[Golem]</small>
+#### **find**(element=None, id=None, name=None, link_text=None, partial_link_text=None, css=None, xpath=None, tag_name=None, timeout=None, wait_displayed=None, highlight=None) <small>[Golem]</small>
 
 Find a WebElement
 
@@ -215,6 +215,7 @@ Search criteria:
 Other args:
 * timeout: timeout (in seconds) to wait for element to be present. by default it uses the *search_timeout* setting value
 * wait_displayed: wait for element to be displayed (visible). By default uses the *wait_displayed* setting value
+* highlight: highlights element on the page when found
 
 Usage:
 ```python

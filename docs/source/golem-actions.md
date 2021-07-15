@@ -328,6 +328,10 @@ Get the element text
 
 Get the element value attribute
 
+### highlight_element(element)
+
+Highlight element on the page
+
 ### javascript_click(element)
 
 Click an element using Javascript

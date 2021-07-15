@@ -10,7 +10,7 @@ from golem.core.exceptions import (IncorrectSelectorType,
 
 
 def _find_webelement(root, selector_type, selector_value, element_name,
-                     timeout=0, wait_displayed=False):
+                     timeout=0, wait_displayed=False, highlight=False):
     """Finds a web element."""
     webelement = None
     remaining_time = lambda: timeout - (time.time() - start_time)
@@ -60,7 +60,8 @@ def _find_webelement(root, selector_type, selector_value, element_name,
 
 
 def _find(self, element=None, id=None, name=None, link_text=None, partial_link_text=None,
-          css=None, xpath=None, tag_name=None, timeout=None, wait_displayed=None):
+          css=None, xpath=None, tag_name=None, timeout=None, wait_displayed=None,
+          highlight=None):
     """Find a webelement.
 
     `element` can be:
@@ -82,6 +83,9 @@ def _find(self, element=None, id=None, name=None, link_text=None, partial_link_t
 
     if wait_displayed is None:
         wait_displayed = execution.settings['wait_displayed']
+
+    if highlight is None:
+        highlight = execution.settings['highlight_elements']
 
     if isinstance(element, WebElement) or isinstance(element, ExtendedWebElement):
         webelement = element
@@ -123,13 +127,18 @@ def _find(self, element=None, id=None, name=None, link_text=None, partial_link_t
         raise IncorrectSelectorType('Selector is not a valid option')
     
     if not webelement:
-        webelement = _find_webelement(self, selector_type, selector_value,
-                                      element_name, timeout, wait_displayed)
+        webelement = _find_webelement(self, selector_type, selector_value, element_name,
+                                      timeout, wait_displayed, highlight)
         webelement.selector_type = selector_type
         webelement.selector_value = selector_value
         webelement.name = element_name
 
-    return extend_webelement(webelement)
+    webelement = extend_webelement(webelement)
+    # highlight element
+    if highlight:
+        webelement.highlight()
+
+    return webelement
 
 
 def _find_all(self, element=None, id=None, name=None, link_text=None,

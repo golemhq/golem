@@ -4,6 +4,6 @@ selenium
 pytest
 requests
 py-webdriver-manager
-sphinx
+sphinx==2.4.4
 recommonmark
 tox

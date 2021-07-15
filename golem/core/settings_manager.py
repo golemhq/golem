@@ -22,6 +22,9 @@ SETTINGS_FILE_CONTENT = (
 // Take a screenshot at the end of every test
 "screenshot_on_end": false,
 
+// Highlight elements on the screen when found
+"highlight_elements": false,
+
 // Where to store test data. Options are: 'infile', 'csv'. Default is 'csv'
 "test_data": "csv",
 
@@ -79,6 +82,7 @@ DEFAULTS = [
     ('screenshot_on_error', True),
     ('screenshot_on_step', False),
     ('screenshot_on_end', False),
+    ('highlight_elements', False),
     ('test_data', 'csv'),
     ('wait_hook', None),
     ('default_browser', 'chrome'),

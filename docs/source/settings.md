@@ -29,6 +29,10 @@ Take a screenshot on every step. Default is False.
 
 Take a screenshot after 'test' function ends. Default is False.
 
+### highlight_elements
+
+Highlight elements on the screen when found. Default is False
+
 ### test_data
 
 The location to store test data. Options are: 'infile' and 'csv'. Default is 'csv.'. 

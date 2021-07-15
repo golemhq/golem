@@ -1252,6 +1252,16 @@ def go_forward():
         get_browser().forward()
 
 
+def highlight_element(element):
+    """Highlight element on the page
+
+    Parameters:
+    element : element
+    """
+    element = get_browser().find(element)
+    element.highlight()
+
+
 def http_get(url, headers={}, params={}, verify_ssl_cert=True):
     """Perform an HTTP GET request to the given URL.
     Headers and params are optional dictionaries.
