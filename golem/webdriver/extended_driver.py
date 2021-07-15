@@ -149,7 +149,7 @@ class GolemExtendedDriver:
 
     def find(self, element=None, id=None, name=None, link_text=None,
              partial_link_text=None, css=None, xpath=None, tag_name=None,
-             timeout=None, wait_displayed=None) -> ExtendedRemoteWebElement:
+             timeout=None, wait_displayed=None, highlight=None) -> ExtendedRemoteWebElement:
         """Find a WebElement
 
         Search criteria:
@@ -175,7 +175,7 @@ class GolemExtendedDriver:
           a golem.webdriver.extended_webelement.ExtendedRemoteWebElement
         """
         return common._find(self, element, id, name, link_text, partial_link_text, css,
-                            xpath, tag_name, timeout, wait_displayed)
+                            xpath, tag_name, timeout, wait_displayed, highlight)
 
     def find_all(self, element=None, id=None, name=None, link_text=None,
                  partial_link_text=None, css=None, xpath=None,

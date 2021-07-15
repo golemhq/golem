@@ -40,7 +40,7 @@ class ExtendedWebElement:
 
     def find(self, element=None, id=None, name=None, link_text=None,
              partial_link_text=None, css=None, xpath=None, tag_name=None,
-             timeout=None, wait_displayed=None) -> 'ExtendedRemoteWebElement':
+             timeout=None, wait_displayed=None, highlight=None) -> 'ExtendedRemoteWebElement':
         """Find a WebElement
 
         Search criteria:
@@ -66,7 +66,7 @@ class ExtendedWebElement:
           a golem.webdriver.extended_webelement.ExtendedRemoteWebElement
         """
         return _find(self, element, id, name, link_text, partial_link_text,
-                     css, xpath, tag_name, timeout, wait_displayed)
+                     css, xpath, tag_name, timeout, wait_displayed, highlight)
 
     def find_all(self, element=None, id=None, name=None, link_text=None,
                  partial_link_text=None, css=None, xpath=None,
@@ -103,6 +103,13 @@ class ExtendedWebElement:
         """Returns whether element has focus"""
         script = 'return arguments[0] == document.activeElement'
         return self.parent.execute_script(script, self)
+
+    def highlight(self):
+        """Highlight element"""
+        try:
+            self.parent.execute_script(HIGHLIGHT_ELEMENT_SCRIPT, self)
+        except Exception as e:
+            pass
 
     @property
     def inner_html(self):
@@ -331,3 +338,62 @@ def extend_webelement(web_element) -> ExtendedRemoteWebElement:
         web_element.__class__ = ExtendedRemoteWebElement
     return web_element
 
+
+HIGHLIGHT_ELEMENT_SCRIPT = """
+	let boundingRect = arguments[0].getBoundingClientRect();
+	boundingRect.left = boundingRect.left + window.scrollX;
+	boundingRect.top = boundingRect.top + window.scrollY;
+	if(isNaN(boundingRect.width)) {
+		boundingRect.width = 0;
+	}
+	if(isNaN(boundingRect.height)) {
+		boundingRect.height = 0;
+	}
+	
+	let borders = {
+		top: document.createElement('div'),
+		left: document.createElement('div'),
+		right: document.createElement('div'),
+		bottom: document.createElement('div'),
+	}
+
+	Object.keys(borders).forEach(border => {
+		borders[border].style.position = 'absolute';
+		borders[border].style.backgroundColor = 'yellow';
+	});
+
+	borders.top.style.left = boundingRect.left - 5 + 'px';
+	borders.top.style.top = boundingRect.top - 5 + 'px';
+	borders.top.style.width = boundingRect.width + 10 + 'px';
+	borders.top.style.height = '4px';
+
+	borders.left.style.left = boundingRect.left - 5 + 'px';
+	borders.left.style.top = boundingRect.top - 5 + 'px';
+	borders.left.style.height = boundingRect.height + 10 + 'px';
+	borders.left.style.width = '4px';
+
+	borders.right.style.left = boundingRect.left + boundingRect.width + 1 + 'px';
+	borders.right.style.top = boundingRect.top - 5 + 'px';
+	borders.right.style.height = boundingRect.height + 10 + 'px';
+	borders.right.style.width = '4px';
+
+	borders.bottom.style.left = boundingRect.left - 5 + 'px';
+	borders.bottom.style.top = boundingRect.top + boundingRect.height + 1 + 'px';
+	borders.bottom.style.width = boundingRect.width + 10 + 'px';
+	borders.bottom.style.height = '4px';
+
+	let zIndex = parseInt(arguments[0].style.zIndex);
+	if(!Number.isNaN(zIndex)) {
+		Object.keys(borders).forEach(border => borders[border].style.zIndex = zIndex + 1);
+	}
+	Object.keys(borders).forEach(border => document.body.appendChild(borders[border]));
+	
+	setTimeout(() => {
+		Object.keys(borders).forEach(border => borders[border].style.backgroundColor = 'transparent');
+	}, 300);
+	setTimeout(() => {
+		Object.keys(borders).forEach(border => borders[border].style.backgroundColor = 'yellow');
+	}, 600);
+	setTimeout(() => {
+		Object.keys(borders).forEach(border => borders[border].remove());
+	}, 900);"""
