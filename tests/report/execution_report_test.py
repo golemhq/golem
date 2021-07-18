@@ -93,7 +93,7 @@ class TestGenerateExecutionReport:
         execution = test_utils.execute_random_suite(project)
         os.remove(execution['report_path'])
         elapsed_time = 1122
-        browsers = define_browsers(['chrome'], [], ['chrome'])
+        browsers = define_browsers(['chrome'], [], ['chrome'], [])
         processes = 2
         envs = ['test', 'staging']
         tags = ['foo', 'bar']

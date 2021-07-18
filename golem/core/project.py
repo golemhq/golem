@@ -1,6 +1,11 @@
 import os
+import traceback
 
-from golem.core import session, file_manager, settings_manager, utils
+from golem.core import file_manager
+from golem.core import parsing_utils
+from golem.core import session
+from golem.core import settings_manager
+from golem.core import utils
 
 
 def create_project(project_name):
@@ -162,6 +167,22 @@ class Project:
         else:
             errors = file_manager.delete_directory(fullpath)
         return errors
+
+    def custom_browsers(self):
+        browser_functions = []
+        path = os.path.join(self.path, 'browsers.py')
+        if os.path.isfile(path):
+            try:
+                ast_module_node = parsing_utils.ast_parse_file(path)
+                browser_functions = parsing_utils.top_level_functions(ast_module_node)
+                browser_functions = [f for f in browser_functions if not f.startswith('_')]
+            except Exception as e:
+                print('There was an error reading browsers.py:\n'+traceback.format_exc())
+        return browser_functions
+
+    def custom_browser_module(self):
+        path = os.path.join(self.path, 'browsers.py')
+        return utils.import_module(path)
 
     def __repr__(self):
         return self.name

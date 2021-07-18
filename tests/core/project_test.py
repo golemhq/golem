@@ -354,6 +354,24 @@ class TestDeleteDirectory:
         assert not os.path.isdir(path)
 
 
+class TestGetProjectCustomBrowsers:
+
+    def test_project_custom_browsers(self, project_function, test_utils):
+        testdir, project_name = project_function.activate()
+        project = Project(project_name)
+        path = os.path.join(project.path, 'browsers.py')
+        content = 'def browser1(settings):\n' \
+                  '    pass\n' \
+                  'def browser2(settings):\n' \
+                  '    pass\n' \
+                  'def _not_a_browser(settings):\n' \
+                  '    pass'
+        with open(path, 'w') as f:
+            f.write(content)
+        custom_browsers = project.custom_browsers()
+        assert custom_browsers == ['browser1', 'browser2']
+
+
 class TestValidateProjectElementName:
 
     names = [
