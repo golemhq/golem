@@ -5,7 +5,6 @@ import time
 import traceback
 import uuid
 from types import SimpleNamespace
-from collections import OrderedDict
 
 from golem.core import session
 from golem.core import utils
@@ -31,37 +30,25 @@ def define_browsers(browsers, remote_browsers, default_browsers, custom_browsers
 
     A defined browser contains the following attributes:
       'name':         real name
-      'full_name':    remote browser name defined by user in settings
-      'remote':       boolean
       'capabilities': capabilities defined by remote_browsers setting
     """
     browsers_definition = []
     for browser in browsers:
         if browser in remote_browsers:
-            remote_browser = remote_browsers[browser]
-            b = {
-                'name': remote_browser['browserName'],
-                'full_name': browser,
-                'remote': True,
-                'capabilities': remote_browser
-            }
-            browsers_definition.append(b)
+            browsers_definition.append({
+                'name': browser,
+                'capabilities': remote_browsers[browser]
+            })
         elif browser in default_browsers:
-            b = {
+            browsers_definition.append({
                 'name': browser,
-                'full_name': None,
-                'remote': False,
                 'capabilities': {}
-            }
-            browsers_definition.append(b)
+            })
         elif browser in custom_browsers:
-            b = {
+            browsers_definition.append({
                 'name': browser,
-                'full_name': None,
-                'remote': False,
                 'capabilities': {}
-            }
-            browsers_definition.append(b)
+            })
         else:
             msg = ['Error: the browser {} is not defined\n'.format(browser),
                    'available options are:\n',
@@ -336,15 +323,12 @@ class ExecutionRunner:
             #
             # Each defined browser must have the following attributes:
             # 'name': real name,
-            # 'full_name': the remote_browser name defined by the user,
-            # 'remote': is this a remote_browser or not
             # 'capabilities': full capabilities defined in the remote_browsers setting
             remote_browsers = settings_manager.get_remote_browsers(session.settings)
             default_browsers = gui_utils.get_supported_browsers_suggestions()
             custom_browsers = self.project.custom_browsers()
             self.execution.browsers = define_browsers(self.selected_browsers, remote_browsers,
                                                       default_browsers, custom_browsers)
-            # Select which environments to use
             # The user can define environments in the environments.json file.
             # The suite/test can be executed in one or more of these environments.
             # Which environments will be used is defined by this order of preference:

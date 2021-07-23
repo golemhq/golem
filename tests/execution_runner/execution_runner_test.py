@@ -35,14 +35,10 @@ class TestDefineBrowsers:
         expected = [
             {
                 'name': 'chrome',
-                'full_name': None,
-                'remote': False,
                 'capabilities': {}
             },
             {
-                'name': 'chrome',
-                'full_name': 'chrome_60_mac',
-                'remote': True,
+                'name': 'chrome_60_mac',
                 'capabilities': {
                     'browserName': 'chrome',
                     'version': '60.0',
@@ -92,7 +88,6 @@ class TestDefineBrowsers:
         drivers = ['chromex']
         drivers_defined = exc_runner.define_browsers(drivers, remote_drivers, default_drivers, self.custom_browsers)
         assert len(drivers_defined) == 1
-        assert drivers_defined[0]['remote'] is True
         assert drivers_defined[0]['capabilities']['version'] == '60.0'
 
 

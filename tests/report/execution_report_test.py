@@ -103,7 +103,7 @@ class TestGenerateExecutionReport:
                                           browsers, processes, envs, tags, remote_url)
 
         expected_params = {
-            'browsers': [{'name': 'chrome', 'full_name': None, 'remote': False, 'capabilities': {}}],
+            'browsers': [{'name': 'chrome', 'capabilities': {}}],
             'processes': 2,
             'environments': ['test', 'staging'],
             'tags': ['foo', 'bar'],

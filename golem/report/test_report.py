@@ -214,8 +214,8 @@ def generate_report(test_file_name, result, test_data, reportdir):
 
     browser = result['browser']
     output_browser = result['browser']
-    if result['browser_full_name']:
-        output_browser = '{} - {}'.format(result['browser'], result['browser_full_name'])
+    if result['browser_capabilities'] and 'browserName' in result['browser_capabilities']:
+        output_browser = '{} - {}'.format(result['browser'], result['browser_capabilities']['browserName'])
     elif browser == 'chrome-remote':
         output_browser = 'chrome (remote)'
     elif browser == 'chrome-headless':
