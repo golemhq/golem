@@ -18,7 +18,7 @@ from golem.core import utils
 
 def _define_browsers_mock(selected_browsers):
     default_browsers = gui_utils.get_supported_browsers_suggestions()
-    return execution_runner.define_browsers(selected_browsers, [], default_browsers)
+    return execution_runner.define_browsers(selected_browsers, [], default_browsers, [])
 
 
 def _mock_report_directory(project, execution_name, timestamp):

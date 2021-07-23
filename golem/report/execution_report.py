@@ -105,7 +105,7 @@ def generate_execution_report(execution_directory, elapsed_time, browsers, proce
     data = _parse_execution_data(execution_directory=execution_directory, finalize=True)
     data['net_elapsed_time'] = elapsed_time
     data['params']['browsers'] = browsers
-    remote_browser = any([b['remote'] for b in browsers])
+    remote_browser = any([b['capabilities'] for b in browsers])
     contains_remote = any('remote' in b['name'] for b in browsers)
     if remote_browser or contains_remote:
         data['params']['remote_url'] = remote_url

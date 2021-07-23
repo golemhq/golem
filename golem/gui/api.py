@@ -383,7 +383,8 @@ def project_supported_browsers():
     settings = settings_manager.get_project_settings(project)
     remote_browsers = settings_manager.get_remote_browser_list(settings)
     default_browsers = gui_utils.get_supported_browsers_suggestions()
-    return jsonify(remote_browsers + default_browsers)
+    custom_browsers = Project(project).custom_browsers()
+    return jsonify(remote_browsers + default_browsers + custom_browsers)
 
 
 @api_bp.route('/project/tags')

@@ -81,11 +81,14 @@ def display_help(help, command):
 def run_command(project='', test_query='', browsers=None, processes=1, environments=None, interactive=False,
                 timestamp=None, reports=None, report_folder=None, report_name=None, tags=None,
                 cli_log_level=None, test_functions=None):
-    execution_runner = ExecutionRunner(browsers, processes, environments, interactive, timestamp, reports,
-                                       report_folder, report_name, tags, test_functions)
+
     if project:
         if test_directory.project_exists(project):
-            execution_runner.project = project
+            execution_runner = ExecutionRunner(project, browsers, processes, environments,
+                                               interactive, timestamp, reports,
+                                               report_folder, report_name,
+                                               tags, test_functions)
+
             session.settings = settings_manager.get_project_settings(project)
             # add --interactive value to settings to make
             # it available from inside a test

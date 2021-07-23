@@ -239,7 +239,7 @@ class TestRunner:
         result['test_elapsed_time'] = test_elapsed_time
         result['test_timestamp'] = self.test_timestamp
         result['browser'] = execution.browser_definition['name']
-        result['browser_full_name'] = execution.browser_definition['full_name']
+        result['browser_capabilities'] = execution.browser_definition['capabilities']
         # Report a test has failed in the test execution,
         # this will later determine the exit status
         _error_codes = [ResultsEnum.CODE_ERROR, ResultsEnum.ERROR, ResultsEnum.FAILURE]
@@ -411,5 +411,5 @@ class TestRunner:
             'test_elapsed_time': None,
             'test_timestamp': None,
             'browser': '',
-            'browser_full_name': ''
+            'browser_capabilities': ''
         }

@@ -27,20 +27,18 @@ class TestDefineBrowsers:
 
     default_browsers = ['chrome', 'chrome-headless']
 
+    custom_browsers = []
+
     def test_define_browsers(self):
         """Verify that _define_browsers returns the correct values"""
         browsers = ['chrome', 'chrome_60_mac']
         expected = [
             {
                 'name': 'chrome',
-                'full_name': None,
-                'remote': False,
                 'capabilities': {}
             },
             {
-                'name': 'chrome',
-                'full_name': 'chrome_60_mac',
-                'remote': True,
+                'name': 'chrome_60_mac',
                 'capabilities': {
                     'browserName': 'chrome',
                     'version': '60.0',
@@ -49,7 +47,7 @@ class TestDefineBrowsers:
             }
         ]
         drivers_defined = exc_runner.define_browsers(browsers, self.remote_browsers,
-                                                     self.default_browsers)
+                                                     self.default_browsers, self.custom_browsers)
         assert drivers_defined == expected
 
     def test_define_browsers_drivers_empty(self):
@@ -59,7 +57,7 @@ class TestDefineBrowsers:
         drivers = []
         expected = []
         drivers_defined = exc_runner.define_browsers(drivers, self.remote_browsers,
-                                                     self.default_browsers)
+                                                     self.default_browsers, self.custom_browsers)
         assert drivers_defined == expected
 
     def test_define_browsers_driver_is_not_defined(self):
@@ -73,7 +71,7 @@ class TestDefineBrowsers:
                         '\n'.join(list(self.remote_browsers.keys()))]
         expected_msg = ''.join(expected_msg)
         with pytest.raises(Exception) as excinfo:      
-            _ = exc_runner.define_browsers(drivers, self.remote_browsers, self.default_browsers)
+            _ = exc_runner.define_browsers(drivers, self.remote_browsers, self.default_browsers, self.custom_browsers)
         assert str(excinfo.value) == expected_msg
 
     def test_define_browsers_browser_order_of_preference(self):
@@ -88,9 +86,8 @@ class TestDefineBrowsers:
         }
         default_drivers = ['chromex']
         drivers = ['chromex']
-        drivers_defined = exc_runner.define_browsers(drivers, remote_drivers, default_drivers)
+        drivers_defined = exc_runner.define_browsers(drivers, remote_drivers, default_drivers, self.custom_browsers)
         assert len(drivers_defined) == 1
-        assert drivers_defined[0]['remote'] is True
         assert drivers_defined[0]['capabilities']['version'] == '60.0'
 
 
@@ -102,8 +99,7 @@ class TestSelectEnvironments:
         of precedence"""
         _, project = project_session.activate()
         cli_envs = ['cli_env_1', 'cli_env_2']
-        execution_runner = exc_runner.ExecutionRunner()
-        execution_runner.project = project
+        execution_runner = exc_runner.ExecutionRunner(project)
         execution_runner.cli_args.envs = cli_envs
         execution_runner.suite.envs = ['suite_env_1', 'suite_env_2']
         project_envs = environment_manager.get_envs(project)
@@ -117,8 +113,7 @@ class TestSelectEnvironments:
         testdir, project = project_function.activate()
         cli_envs = []
         suite_envs = ['suite_env_1', 'suite_env_2']
-        execution_runner = exc_runner.ExecutionRunner()
-        execution_runner.project = project
+        execution_runner = exc_runner.ExecutionRunner(project)
         execution_runner.cli_args.envs = cli_envs
         execution_runner.suite.envs = suite_envs
         path = os.path.join(testdir, 'environments.json')
@@ -133,8 +128,7 @@ class TestSelectEnvironments:
         """Verify that _select_environments uses the correct order
         of precedence when cli environments and suite environments are empty"""
         testdir, project = project_function.activate()
-        execution_runner = exc_runner.ExecutionRunner()
-        execution_runner.project = project
+        execution_runner = exc_runner.ExecutionRunner(project)
         execution_runner.cli_args.envs = []
         execution_runner.suite.envs = []
         path = os.path.join(testdir, 'projects', project, 'environments.json')
@@ -150,8 +144,7 @@ class TestSelectEnvironments:
         of precedence when cli environments, suite environments and 
         project environments are empty"""
         _, project = project_function.activate()
-        execution_runner = exc_runner.ExecutionRunner()
-        execution_runner.project = project
+        execution_runner = exc_runner.ExecutionRunner(project)
         execution_runner.cli_args.envs = []
         execution_runner.cli_args.envs = []
         project_envs = environment_manager.get_envs(project)
@@ -166,13 +159,12 @@ class TestDefineExecutionList:
         """Verify that the execution list is generated properly when there's only
         one test without datasets, one driver and zero environments
         """
-        project_function_clean.activate()
-        execution_runner = exc_runner.ExecutionRunner()
+        _, project = project_function_clean.activate()
+        execution_runner = exc_runner.ExecutionRunner(project)
         execution_runner.tests = ['test_001']
         execution_runner.execution.processes = 1
         execution_runner.execution.browsers = ['chrome']
         execution_runner.execution.envs = []
-        execution_runner.project = project_function_clean.name
         execution_list = execution_runner._define_execution_list()
         expected_list = [
             SimpleNamespace(name='test_001', data_set={}, secrets={}, browser='chrome',
@@ -200,12 +192,11 @@ class TestDefineExecutionList:
 
         ]
         test_data.save_external_test_data_file(project, test_name, tdata)
-        execution_runner = exc_runner.ExecutionRunner()
+        execution_runner = exc_runner.ExecutionRunner(project)
         execution_runner.tests = [test_name]
         execution_runner.execution.processes = 1
         execution_runner.execution.browsers = ['chrome']
         execution_runner.execution.envs = []
-        execution_runner.project = project_function_clean.name
         execution_list = execution_runner._define_execution_list()
         assert execution_list[0].data_set == {'col1': 'a', 'col2': 'b'}
         assert isinstance(execution_list[0].set_name, str) and execution_list[0].set_name != ''
@@ -235,12 +226,11 @@ class TestDefineExecutionList:
         # create test two
         test_name_two = 'test_two_001'
         test.create_test(project, test_name_two)
-        execution_runner = exc_runner.ExecutionRunner()
+        execution_runner = exc_runner.ExecutionRunner(project)
         execution_runner.tests = [test_name_one, test_name_two]
         execution_runner.execution.processes = 1
         execution_runner.execution.browsers = ['chrome']
         execution_runner.execution.envs = []
-        execution_runner.project = project
         exec_list = execution_runner._define_execution_list()
         assert exec_list[0].name == 'test_one_001'
         assert exec_list[0].data_set == {'col1': 'a', 'col2': 'b'}
@@ -265,12 +255,11 @@ class TestDefineExecutionList:
         }
         env_data_json = json.dumps(env_data)
         environment_manager.save_environments(project, env_data_json)
-        execution_runner = exc_runner.ExecutionRunner()
+        execution_runner = exc_runner.ExecutionRunner(project)
         execution_runner.tests = [test_name_one]
         execution_runner.execution.processes = 1
         execution_runner.execution.browsers = ['chrome']
         execution_runner.execution.envs = ['stage', 'preview']
-        execution_runner.project = project
         exec_list = execution_runner._define_execution_list()
         assert exec_list[0].data_set == {'env': {'url': 'xxx', 'name': 'stage'}}
         assert exec_list[0].env == 'stage'
@@ -289,12 +278,11 @@ class TestDefineExecutionList:
         # create test two
         test_name_two = 'test_two_004'
         test.create_test(project, test_name_two)
-        execution_runner = exc_runner.ExecutionRunner()
+        execution_runner = exc_runner.ExecutionRunner(project)
         execution_runner.tests = [test_name_one, test_name_two]
         execution_runner.execution.processes = 1
         execution_runner.execution.browsers = ['chrome', 'firefox']
         execution_runner.execution.envs = []
-        execution_runner.project = project
         execution_list = execution_runner._define_execution_list()
         # expected_list = [
         #     SimpleNamespace(name='test_one_004', data_set={}, secrets={}, browser='chrome', reportdir=None, env=None, set_name=''),
@@ -335,12 +323,11 @@ class TestDefineExecutionList:
         }
         env_data_json = json.dumps(env_data)
         environment_manager.save_environments(project, env_data_json)
-        execution_runner = exc_runner.ExecutionRunner()
+        execution_runner = exc_runner.ExecutionRunner(project)
         execution_runner.tests = [test_name_one, test_name_two]
         execution_runner.execution.processes = 1
         execution_runner.execution.browsers = ['chrome', 'firefox']
         execution_runner.execution.envs = ['stage', 'preview']
-        execution_runner.project = project
         ex = execution_runner._define_execution_list()
         assert ex[0].browser == 'chrome' and ex[0].env == 'stage' and \
                ex[0].data_set == {'col1': 'a', 'env': {'url': 'xxx', 'name': 'stage'}}
@@ -377,12 +364,11 @@ class TestDefineExecutionList:
         secrets_path = os.path.join(project_function_clean.path, 'secrets.json')
         with open(secrets_path, 'w') as secrets_file:
             secrets_file.write(json.dumps(secrets, indent=True))
-        execution_runner = exc_runner.ExecutionRunner()
+        execution_runner = exc_runner.ExecutionRunner(project)
         execution_runner.tests = ['test_001']
         execution_runner.execution.processes = 1
         execution_runner.execution.browsers = ['chrome']
         execution_runner.execution.envs = []
-        execution_runner.project = project
         execution_list = execution_runner._define_execution_list()
         expected_list = [
             SimpleNamespace(name='test_001', data_set={}, secrets={"a": "secret", "b": "secret02"}, browser='chrome', reportdir=None, env=None, set_name='')
@@ -399,8 +385,7 @@ class TestRunSingleTest:
         timestamp = utils.get_timestamp()
         session.settings = settings_manager.get_project_settings(project)
         test_utils.create_test(project, test_name)
-        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
-        execution_runner.project = project
+        execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'], timestamp=timestamp)
         execution_runner.run_test(test_name)
         test_report_dir = os.path.join(testdir, 'projects', project, 'reports', test_name, timestamp)
         assert os.path.isdir(test_report_dir)
@@ -420,8 +405,7 @@ class TestRunSingleTest:
                    'def test(data):\n'
                    '    pass\n')
         test_utils.create_test(project, test_name, content=content)
-        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
-        execution_runner.project = project
+        execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'], timestamp=timestamp)
         execution_runner.run_test(test_name)
         out, err = capsys.readouterr()
         # number of tests is displayed
@@ -443,9 +427,8 @@ class TestRunSingleTest:
                    'def test(data):\n'
                    '    pass\n')
         test_utils.create_test(project, test_name, content=content)
-        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp,
+        execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'], timestamp=timestamp,
                                                       tags=['alfa'])
-        execution_runner.project = project
         execution_runner.run_test(test_name)
         test_report_dir = os.path.join(testdir, 'projects', project, 'reports', test_name, timestamp)
         assert os.path.isdir(test_report_dir)
@@ -462,9 +445,8 @@ class TestRunSingleTest:
                    'def test(data):\n'
                    '    pass\n')
         test_utils.create_test(project, test_name, content=content)
-        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp,
+        execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'], timestamp=timestamp,
                                                       tags=['charlie'])
-        execution_runner.project = project
         execution_runner.run_test(test_name)
         out, err = capsys.readouterr()
         assert 'No tests found with tag(s): charlie' in out
@@ -507,8 +489,7 @@ class TestRunSuite:
                  _project_with_tags.t.test_bravo_charlie]
         test_utils.create_suite(project, suite_name, tests=tests)
         timestamp = utils.get_timestamp()
-        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
-        execution_runner.project = project
+        execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'], timestamp=timestamp)
         execution_runner.run_suite(suite_name)
         out, err = capsys.readouterr()
         assert 'Tests found: 2' in out
@@ -521,8 +502,7 @@ class TestRunSuite:
         suite_name = test_utils.random_numeric_string(10, 'suite')
         test_utils.create_suite(project, suite_name, tests=[])
         timestamp = utils.get_timestamp()
-        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
-        execution_runner.project = project
+        execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'], timestamp=timestamp)
         execution_runner.run_suite(suite_name)
         out, err = capsys.readouterr()
         assert 'No tests found for suite {}'.format(suite_name) in out
@@ -538,10 +518,9 @@ class TestRunSuite:
                  _project_with_tags.t.test_bravo_charlie]
         test_utils.create_suite(project, suite_name, tests=tests)
         timestamp = utils.get_timestamp()
-        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'],
+        execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'],
                                                       timestamp=timestamp,
                                                       tags=['alfa', 'bravo'])
-        execution_runner.project = project
         execution_runner.run_suite(suite_name)
         out, err = capsys.readouterr()
         assert 'Tests found: 1' in out
@@ -557,10 +536,9 @@ class TestRunSuite:
                  _project_with_tags.t.test_bravo_charlie]
         test_utils.create_suite(project, suite_name, tests=tests)
         timestamp = utils.get_timestamp()
-        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'],
+        execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'],
                                                       timestamp=timestamp,
                                                       tags=['sierra', 'tango'])
-        execution_runner.project = project
         execution_runner.run_suite(suite_name)
         out, err = capsys.readouterr()
         assert 'No tests found with tag(s): sierra, tango' in out
@@ -580,10 +558,9 @@ class TestRunSuite:
                  _project_with_tags.t.test_bravo_charlie]
         test_utils.create_suite(project, suite_name, tests=tests)
         timestamp = utils.get_timestamp()
-        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'],
+        execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'],
                                                       timestamp=timestamp,
                                                       tags=['sierra = tango'])
-        execution_runner.project = project
         with pytest.raises(SystemExit):
             execution_runner.run_suite(suite_name)
         out, err = capsys.readouterr()
@@ -630,8 +607,8 @@ class TestRunDirectory:
     def test_run_directory(self, _project_with_tags, capsys):
         _, project = _project_with_tags.activate()
         timestamp = utils.get_timestamp()
-        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
-        execution_runner.project = project
+        execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'],
+                                                      timestamp=timestamp)
         execution_runner.run_directory('foo')
         out, err = capsys.readouterr()
         assert 'Tests found: 2' in out
@@ -643,8 +620,7 @@ class TestRunDirectory:
         _, project = _project_with_tags.activate()
         timestamp = utils.get_timestamp()
         dirname = 'empty'
-        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'], timestamp=timestamp)
-        execution_runner.project = project
+        execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'], timestamp=timestamp)
         execution_runner.run_directory(dirname)
         out, err = capsys.readouterr()
         expected = 'No tests were found in {}'.format(os.path.join('tests', dirname))
@@ -658,10 +634,9 @@ class TestRunDirectory:
         _, project = _project_with_tags.activate()
         timestamp = utils.get_timestamp()
         dirname = 'foo'
-        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'],
+        execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'],
                                                       timestamp=timestamp,
                                                       tags=['alfa', 'bravo'])
-        execution_runner.project = project
         execution_runner.run_directory(dirname)
         out, err = capsys.readouterr()
         assert 'Tests found: 1' in out
@@ -679,10 +654,9 @@ class TestRunWithEnvs:
         environment_manager.save_environments(project, environments)
         test_utils.create_test(project, 'test01')
         timestamp = utils.get_timestamp()
-        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'],
+        execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'],
                                                       timestamp=timestamp,
                                                       environments=['test', 'stage'])
-        execution_runner.project = project
         execution_runner.run_directory('')
         out, err = capsys.readouterr()
         assert 'Tests found: 1 (2 sets)' in out
@@ -697,10 +671,9 @@ class TestRunWithEnvs:
         _, project = project_function.activate()
         test_utils.create_test(project, 'test01')
         timestamp = utils.get_timestamp()
-        execution_runner = exc_runner.ExecutionRunner(browsers=['chrome'],
+        execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'],
                                                       timestamp=timestamp,
                                                       environments=['not_existing'])
-        execution_runner.project = project
         with pytest.raises(SystemExit) as wrapped_execution:
             execution_runner.run_directory('')
 

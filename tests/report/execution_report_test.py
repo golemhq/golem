@@ -93,7 +93,7 @@ class TestGenerateExecutionReport:
         execution = test_utils.execute_random_suite(project)
         os.remove(execution['report_path'])
         elapsed_time = 1122
-        browsers = define_browsers(['chrome'], [], ['chrome'])
+        browsers = define_browsers(['chrome'], [], ['chrome'], [])
         processes = 2
         envs = ['test', 'staging']
         tags = ['foo', 'bar']
@@ -103,7 +103,7 @@ class TestGenerateExecutionReport:
                                           browsers, processes, envs, tags, remote_url)
 
         expected_params = {
-            'browsers': [{'name': 'chrome', 'full_name': None, 'remote': False, 'capabilities': {}}],
+            'browsers': [{'name': 'chrome', 'capabilities': {}}],
             'processes': 2,
             'environments': ['test', 'staging'],
             'tags': ['foo', 'bar'],

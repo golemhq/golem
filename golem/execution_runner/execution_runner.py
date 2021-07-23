@@ -5,7 +5,6 @@ import time
 import traceback
 import uuid
 from types import SimpleNamespace
-from collections import OrderedDict
 
 from golem.core import session
 from golem.core import utils
@@ -26,34 +25,30 @@ from golem.report import html_report
 from golem.report import cli_report
 
 
-def define_browsers(browsers, remote_browsers, default_browsers):
+def define_browsers(browsers, remote_browsers, default_browsers, custom_browsers):
     """Generate the definitions for the browsers.
 
     A defined browser contains the following attributes:
       'name':         real name
-      'full_name':    remote browser name defined by user in settings
-      'remote':       boolean
       'capabilities': capabilities defined by remote_browsers setting
     """
     browsers_definition = []
     for browser in browsers:
         if browser in remote_browsers:
-            remote_browser = remote_browsers[browser]
-            b = {
-                'name': remote_browser['browserName'],
-                'full_name': browser,
-                'remote': True,
-                'capabilities': remote_browser
-            }
-            browsers_definition.append(b)
-        elif browser in default_browsers:
-            b = {
+            browsers_definition.append({
                 'name': browser,
-                'full_name': None,
-                'remote': False,
+                'capabilities': remote_browsers[browser]
+            })
+        elif browser in default_browsers:
+            browsers_definition.append({
+                'name': browser,
                 'capabilities': {}
-            }
-            browsers_definition.append(b)
+            })
+        elif browser in custom_browsers:
+            browsers_definition.append({
+                'name': browser,
+                'capabilities': {}
+            })
         else:
             msg = ['Error: the browser {} is not defined\n'.format(browser),
                    'available options are:\n',
@@ -72,14 +67,14 @@ class ExecutionRunner:
       run_directory
     """
 
-    def __init__(self, browsers=None, processes=1, environments=None, interactive=False,
-                 timestamp=None, reports=None, report_folder=None, report_name=None, tags=None,
-                 test_functions=None):
+    def __init__(self, project_name, browsers=None, processes=1, environments=None,
+                 interactive=False, timestamp=None, reports=None, report_folder=None,
+                 report_name=None, tags=None, test_functions=None):
         if reports is None:
             reports = []
         if tags is None:
             tags = []
-        self.project = None
+        self.project = Project(project_name)
         self.cli_args = SimpleNamespace(browsers=browsers, processes=processes,
                                         envs=environments, tags=tags)
         self.interactive = interactive
@@ -138,7 +133,8 @@ class ExecutionRunner:
 
     def _create_execution_directory(self):
         """Generate the execution report directory"""
-        return exec_report.create_execution_directory(self.project, self.execution_name, self.timestamp)
+        return exec_report.create_execution_directory(
+            self.project.name, self.execution_name, self.timestamp)
 
     def _define_execution_list(self):
         """Generate the execution list
@@ -152,11 +148,11 @@ class ExecutionRunner:
         """
         execution_list = []
         envs = self.execution.envs or [None]
-        envs_data = environment_manager.get_environment_data(self.project)
-        secrets = secrets_manager.get_secrets(self.project)
+        envs_data = environment_manager.get_environment_data(self.project.name)
+        secrets = secrets_manager.get_secrets(self.project.name)
 
         for test in self.tests:
-            data_sets = test_data.get_test_data(self.project, test)
+            data_sets = test_data.get_test_data(self.project.name, test)
 
             if len(data_sets) > 1 or len(envs) > 1 or len(self.execution.browsers) > 1:
                 # If the test file contain multiple data sets, envs or browsers
@@ -200,7 +196,7 @@ class ExecutionRunner:
     def _filter_tests_by_tags(self):
         tests = []
         try:
-            tests = tags_manager.filter_tests_by_tags(self.project, self.tests,
+            tests = tags_manager.filter_tests_by_tags(self.project.name, self.tests,
                                                       self.execution.tags)
         except tags_manager.InvalidTagExpression as e:
             print('{}: {}'.format(e.__class__.__name__, e))
@@ -246,7 +242,7 @@ class ExecutionRunner:
             filename, _ = os.path.splitext(suite)
             suite = '.'.join(os.path.normpath(filename).split(os.sep))
 
-        suite_obj = suite_module.Suite(self.project, suite)
+        suite_obj = suite_module.Suite(self.project.name, suite)
 
         self.tests = suite_obj.tests
         if len(self.tests) == 0:
@@ -269,7 +265,7 @@ class ExecutionRunner:
         `directory` has to be a relative path from the tests folder.
         To run every test in tests folder use: directory=''
         """
-        self.tests = Project(self.project).tests(directory=directory)
+        self.tests = self.project.tests(directory=directory)
         if len(self.tests) == 0:
             print('No tests were found in {}'.format(os.path.join('tests', directory)))
         self.is_suite = True
@@ -327,14 +323,12 @@ class ExecutionRunner:
             #
             # Each defined browser must have the following attributes:
             # 'name': real name,
-            # 'full_name': the remote_browser name defined by the user,
-            # 'remote': is this a remote_browser or not
             # 'capabilities': full capabilities defined in the remote_browsers setting
             remote_browsers = settings_manager.get_remote_browsers(session.settings)
             default_browsers = gui_utils.get_supported_browsers_suggestions()
+            custom_browsers = self.project.custom_browsers()
             self.execution.browsers = define_browsers(self.selected_browsers, remote_browsers,
-                                                      default_browsers)
-            # Select which environments to use
+                                                      default_browsers, custom_browsers)
             # The user can define environments in the environments.json file.
             # The suite/test can be executed in one or more of these environments.
             # Which environments will be used is defined by this order of preference:
@@ -345,12 +339,12 @@ class ExecutionRunner:
             #
             # Note, in the case of 4, the test might fail if it tries
             # to use env variables
-            project_envs = environment_manager.get_envs(self.project)
+            project_envs = environment_manager.get_envs(self.project.name)
             self.execution.envs = self._select_environments(project_envs)
             invalid_envs = [e for e in self.execution.envs if e not in project_envs]
             if invalid_envs:
                 print('ERROR: the following environments do not exist for project {}: {}'
-                      .format(self.project, ', '.join(invalid_envs)))
+                      .format(self.project.name, ', '.join(invalid_envs)))
                 self.execution.has_failed_tests.value = True
                 self._finalize()
                 return
@@ -390,13 +384,13 @@ class ExecutionRunner:
             if self.execution.processes == 1:
                 # run tests serially
                 for test in self.execution.tests:
-                    run_test(session.testdir, self.project, test.name, test.data_set, test.secrets,
+                    run_test(session.testdir, self.project.name, test.name, test.data_set, test.secrets,
                              test.browser, test.env, session.settings, test.reportdir, test.set_name,
                              self.test_functions, self.execution.has_failed_tests,
                              self.execution.tags, self.is_suite)
             else:
                 # run tests using multiprocessing
-                multiprocess_executor(self.project, self.execution.tests,
+                multiprocess_executor(self.project.name, self.execution.tests,
                                       self.execution.has_failed_tests, self.test_functions,
                                       self.execution.processes, self.execution.tags, self.is_suite)
 
@@ -429,19 +423,19 @@ class ExecutionRunner:
         report_name = self.report_name or 'report'
         report_folder = self.report_folder or self.execution.reportdir
         if 'junit' in self.reports:
-            junit_report.generate_junit_report(self.project, self.execution_name,
+            junit_report.generate_junit_report(self.project.name, self.execution_name,
                                                self.timestamp, self.report_folder,
                                                report_name)
         if 'json' in self.reports and (self.report_folder or self.report_name):
             exec_report.save_execution_json_report(self.report, report_folder, report_name)
         if 'html' in self.reports:
-            html_report.generate_html_report(self.project, self.suite_name,
+            html_report.generate_html_report(self.project.name, self.suite_name,
                                              self.timestamp, self.report_folder,
                                              report_name)
         if 'html-no-images' in self.reports:
             if 'html' in self.reports:
                 report_name = report_name + '-no-images'
-            html_report.generate_html_report(self.project, self.suite_name, self.timestamp,
+            html_report.generate_html_report(self.project.name, self.suite_name, self.timestamp,
                                              self.report_folder, report_name,
                                              no_images=True)
 

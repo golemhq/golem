@@ -146,11 +146,11 @@ size = {
 
 ### maximize_window()
 
-### open_browser(browser_id=None)
+### open_browser(browser_name=None, capabilities=None, remote_url=None, browser_id=None)
 
 Open a new browser.
-browser_id is optional and only used to manage more than one browser for the same test.
-Default browser ID is 'main'.
+
+See [open_browser](golem_public_api/browser.html#open-browser-browser-name-none-capabilities-none-remote-url-none-browser-id-none)
 
 ### set_window_size(width, height)
 

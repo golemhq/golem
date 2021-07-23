@@ -23,7 +23,7 @@ class TestGetBrowser:
         ]
         for setting_path, browser_name in drivers:
             execution.browser_definition = execution_runner.define_browsers(
-                [browser_name], [], default_browsers)[0]
+                [browser_name], [], default_browsers, [])[0]
             with pytest.raises(Exception) as excinfo:
                 browser.open_browser()
                 expected = 'Exception: {} setting is not defined'.format(setting_path)
@@ -43,7 +43,7 @@ class TestGetBrowser:
         ]
         for setting_key, setting_path, browser_name in drivers:
             execution.browser_definition = execution_runner.define_browsers(
-                [browser_name], [], default_browsers)[0]
+                [browser_name], [], default_browsers, [])[0]
             execution.settings[setting_key] = setting_path
             with pytest.raises(Exception) as excinfo:
                 browser.open_browser()

@@ -159,7 +159,7 @@ class TestGenerateReport:
             'test_elapsed_time': 22.22,
             'test_timestamp': '2018.02.04.02.16.42.729',
             'browser': 'chrome',
-            'browser_full_name': '',
+            'browser_capabilities': '',
         }
         generate_report(test_name, result, test_data, report_dir)
         path = os.path.join(report_dir, 'report.json')

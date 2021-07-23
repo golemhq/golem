@@ -168,3 +168,78 @@ from golem import actions
 
 print(actions.get_browser().title)
 ```
+
+## Custom Browser Boot Up
+
+To have full control over the configuration of a WebDriver instance a custom browser boot up function can be defined.
+
+Custom browsers are defined inside a **browsers.py** module in the folder of a project.
+
+Custom browser functions receive the settings dictionary and must return an instance of a GolemXDriver class
+(golem.webdriver.*GolemChromeDriver*, golem.webdriver.*GolemGeckoDriver*, golem.webdriver.*GolemRemoteDriver*, etc.)
+
+projects/my_project/browsers.py
+```python
+from selenium import webdriver
+from golem.webdriver import GolemChromeDriver
+
+def my_custom_chrome(settings):
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--window-size=800,600")
+    executable_path = 'path/to/chromedriver'
+    return GolemChromeDriver(executable_path=executable_path,
+                             chrome_options=chrome_options)
+```
+
+Then use it:
+
+```
+golem run my_project . -b my_custom_chrome
+```
+
+The following custom browser uses the version matching mechanism to get the latest executable from the /drivers folder:
+
+```python
+from selenium import webdriver
+from golem.core.utils import match_latest_executable_path
+from golem import execution
+from golem.webdriver import GolemChromeDriver
+
+def my_custom_chrome(settings):
+    executable_path = settings['chromedriver_path']
+    matched_executable_path = match_latest_executable_path(executable_path,
+                                                           execution.testdir)
+    return GolemChromeDriver(executable_path=matched_executable_path,
+                             chrome_options=chrome_options)
+```
+
+A custom Firefox:
+```python
+from selenium.webdriver.firefox.options import Options
+from golem.core.utils import match_latest_executable_path
+from golem import execution
+from golem.webdriver import GolemGeckoDriver
+
+def my_custom_firefox(settings):
+    executable_path = settings['geckodriver_path']
+    matched_executable_path = match_latest_executable_path(executable_path,
+                                                           execution.testdir)
+    options = Options()
+    options.add_argument("--headless")
+    return GolemGeckoDriver(executable_path=matched_executable_path, options=options)
+```
+
+A custom remote browser
+```python
+from golem.webdriver import GolemRemoteDriver
+
+def my_custom_remote_driver(settings):
+    capabilities = {
+        'browserName': 'chrome',
+        'platform': 'WINDOWS',
+        'version': ''
+    }
+    grid_url = 'http://localhost:4444'
+    return GolemRemoteDriver(command_executor=grid_url,
+                             desired_capabilities=capabilities)
+```

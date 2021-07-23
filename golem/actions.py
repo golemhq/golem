@@ -1400,18 +1400,44 @@ def navigate(url):
         get_browser().get(url)
 
 
-def open_browser(browser_id=None):
+def open_browser(browser_name=None, capabilities=None, remote_url=None, browser_id=None):
     """Open a new browser.
-    browser_id is optional and only used to manage more than one
-    browser for the same test.
-    Default browser ID is 'main'.
+    When no arguments are provided the browser is selected from
+    the CLI -b|--browsers argument, the suite `browsers` list,
+    or the `default_browser` setting.
+
+    This can be overridden in two ways:
+    - a local webdriver instance or
+    - a remote Selenium Grid driver instance.
+
+    To open a local Webdriver instance pass browser_name with a valid value:
+    chrome, chrome-remote, chrome-headless, chrome-remote-headless, edge,
+    edge-remote, firefox, firefox-headless, firefox-remote,
+    firefox-remote-headless, ie, ie-remote, opera, opera-remote
+
+    To open a remote Selenium Grid driver pass a capabilities dictionary and
+    a remote_url.
+    The minimum capabilities required is: {
+        browserName: 'chrome'
+        version: ''
+        platform: ''
+    }
+    More info here: https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities
+    If remote_url is None it will be taken from the `remote_url` setting.
+
+    browser_id is optional and only used to manage more than one browser for
+    the same test. Default browser ID is 'main'.
+
     Returns the opened browser.
 
     Parameters:
+    browser_name (optional) : value
+    capabilities (optional) : value
+    remote_url (optional) : value
     browser_id (optional) : value
     """
     with _step('Open browser', take_screenshots=False, run_wait_hook=False):
-        return browser.open_browser(browser_id)
+        return browser.open_browser(browser_name, capabilities, remote_url, browser_id)
 
     
 def press_key(element, key):

@@ -6,14 +6,35 @@ Functions to manipulate WebDriver Browser instances.
 Location: golem.**browser**
 
 
-## **open_browser**(browser_id=None)
+## **open_browser**(browser_name=None, capabilities=None, remote_url=None, browser_id=None)
 
-When opening more than one browser instance per test provide a browser_id to switch between browsers later on.
+When no arguments are provided the browser is selected from the CLI -b|--browsers argument, the suite *browsers* list, or the *default_browser* setting.
 
-Raises:
-  - InvalidBrowserIdError: The browser Id is already in use
+This can be overridden in two ways:
+- a local webdriver instance or
+- a remote Selenium Grid driver instance.
 
-Returns: the opened browser
+To open a local Webdriver instance pass browser_name with a [valid value](../browsers.html#valid-options)
+
+To open a remote Selenium Grid driver pass a capabilities dictionary and
+a remote_url.
+The minimum capabilities required is:
+```
+{
+    browserName: 'chrome'
+    version: ''
+    platform: ''
+}
+```
+More info here: [https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities](https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities)
+
+If remote_url is None it will be taken from the `remote_url` setting.
+
+When opening more than one browser instance per test
+provide a browser_id to switch between browsers later on
+
+Returns:
+  the opened browser
 
 ## **get_browser**()
 
