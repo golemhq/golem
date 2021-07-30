@@ -1,15 +1,14 @@
 """Golem actions"""
 import code
 import importlib
+import logging
 import os
 import pdb
-import random as rand
-import string
 import sys
 import time
-import uuid
+import traceback
 import types
-import logging
+import uuid
 from contextlib import contextmanager
 
 import requests
@@ -146,13 +145,16 @@ def _screenshot_on_condition(condition):
     Use the last step message as the screenshot filename.
     """
     if len(execution.steps) > 0:
-        last_step = execution.steps[-1]
-        last_screenshot = last_step['screenshot']
-        if condition and not last_screenshot:
-            last_step_message = last_step['message']
-            screenshot_name = _generate_screenshot_name(last_step_message)
-            screenshot_filename = _capture_screenshot(screenshot_name)
-            last_step['screenshot'] = screenshot_filename
+        try:
+            last_step = execution.steps[-1]
+            last_screenshot = last_step['screenshot']
+            if condition and not last_screenshot:
+                last_step_message = last_step['message']
+                screenshot_name = _generate_screenshot_name(last_step_message)
+                screenshot_filename = _capture_screenshot(screenshot_name)
+                last_step['screenshot'] = screenshot_filename
+        except Exception as e:
+            _log('There was an error while taking screenshot:\n'+traceback.format_exc(), 'WARNING')
     else:
         raise Exception('There is no step to attach the screenshot')
 
@@ -1815,11 +1817,14 @@ def take_screenshot(message='Screenshot'):
     Parameters:
     message (optional, 'Screenshot') : value
     """
-    _add_step(message)
-    screenshot_name = _generate_screenshot_name(message)
-    screenshot_filename = _capture_screenshot(screenshot_name)
-    last_step = execution.steps[-1]
-    last_step['screenshot'] = screenshot_filename
+    try:
+        screenshot_name = _generate_screenshot_name(message)
+        screenshot_filename = _capture_screenshot(screenshot_name)
+        _add_step(message)
+        last_step = execution.steps[-1]
+        last_step['screenshot'] = screenshot_filename
+    except Exception as e:
+        _log('There was an error while taking screenshot:\n' + traceback.format_exc(), 'WARNING')
 
 
 def timer_start(timer_name=''):
