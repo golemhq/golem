@@ -1,13 +1,13 @@
 # Changelog
 
-## [Unreleased]
+## [0.10.1] - 2021-07-30
 
 ### Added
 
 - Improved CLI reporter
 - Add autocomplete suggestions for test code editor [#214](https://github.com/golemhq/golem/issues/214) :: Sunil-Rathore
 - Highlight element when found, toggled by setting, action of find method [#220](https://github.com/golemhq/golem/pull/220)
-- feature: custom browser boot up [Custom Browser Boot Up](https://golem-framework.readthedocs.io/en/latest/browsers.html#custom-browser-boot-up) [#222](https://github.com/golemhq/golem/pull/222)
+- feature: [Custom Browser Boot Up](https://golem-framework.readthedocs.io/en/latest/browsers.html#custom-browser-boot-up) [#222](https://github.com/golemhq/golem/pull/222)
 
 ### Changed
 
