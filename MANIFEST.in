@@ -1,19 +1,5 @@
 include MANIFEST.in
 include LICENSE
 
-include golem/gui/static/css/*
-include golem/gui/static/css/*/*
-include golem/gui/static/css/*/*/*
-include golem/gui/static/img/*
-include golem/gui/static/img/*/*
-include golem/gui/static/js/*
-include golem/gui/static/js/*/*
-include golem/gui/static/js/*/*/*
-
-include golem/gui/templates/*
-include golem/gui/templates/page_builder/*
-include golem/gui/templates/list/*
-include golem/gui/templates/report/*
-include golem/gui/templates/settings/*
-include golem/gui/templates/test_builder/*
-include golem/gui/templates/users/*
+recursive-include golem/gui/static *.*
+recursive-include golem/gui/templates *.*
