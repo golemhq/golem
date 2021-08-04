@@ -4,9 +4,26 @@ import os
 
 from golem.core import utils
 from golem.report import execution_report
+from golem.test_runner.conf import ResultsEnum
 
 
 __test__ = False
+
+
+def test_file_report_default():
+    default = utils.ImmutableKeysDict(test_file=None,
+                                      test=None,
+                                      set_name=None,
+                                      environment=None,
+                                      result=None,
+                                      description=None,
+                                      browser=None,
+                                      test_data=None,
+                                      steps=[],
+                                      errors=[],
+                                      elapsed_time=None,
+                                      timestamp=None)
+    return default
 
 
 def get_test_file_report_json(project, execution, timestamp, test_file, set_name=None):
@@ -191,6 +208,26 @@ def screenshot_path(project, execution, timestamp, test_file, test, set_name, sc
     return os.path.join(path, screenshot_file)
 
 
+def initialize_test_file_report(test_file, tests, set_name, reportdir):
+    """Given a test file and a list of test functions initialize
+    test file json report with default values and result `pending`
+    """
+    json_report_path = os.path.join(reportdir, 'report.json')
+
+    test_list = []
+
+    for test in tests:
+        report = test_file_report_default()
+        report['test_file'] = test_file
+        report['test'] = test
+        report['result'] = ResultsEnum.PENDING
+        report['set_name'] = set_name
+        test_list.append(report)
+
+    with open(json_report_path, 'w', encoding='utf-8') as f:
+        json.dump(test_list, f, indent=4, ensure_ascii=False)
+
+
 def generate_report(test_file_name, result, test_data, reportdir):
     """Adds the report of a test function to a test_file report.json"""
     json_report_path = os.path.join(reportdir, 'report.json')
@@ -225,27 +262,34 @@ def generate_report(test_file_name, result, test_data, reportdir):
     elif browser == 'firefox-remote':
         output_browser = 'firefox (remote)'
 
-    report = {
-        'test_file': test_file_name,
-        'test': result['name'],
-        'set_name': result['set_name'],
-        'environment': env_name,
-        'result': result['result'],
-        'description': result['description'],
-        'browser': output_browser,
-        'test_data': serialized_data,
-        'steps': result['steps'],
-        'errors': result['errors'],
-        'elapsed_time': result['test_elapsed_time'],
-        'timestamp': result['test_timestamp']
-    }
+    report = test_file_report_default()
+    report['test_file'] = test_file_name
+    report['test'] = result['name']
+    report['set_name'] = result['set_name']
+    report['environment'] = env_name
+    report['result'] = result['result']
+    report['description'] = result['description']
+    report['browser'] = output_browser
+    report['test_data'] = serialized_data
+    report['steps'] = result['steps']
+    report['errors'] = result['errors']
+    report['elapsed_time'] = result['test_elapsed_time']
+    report['timestamp'] = result['test_timestamp']
+
     if os.path.isfile(json_report_path):
         with open(json_report_path, 'r', encoding='utf-8') as json_file:
             report_data = json.load(json_file)
     else:
         report_data = []
 
-    report_data.append(report)
+    index = None
+    for i, test in enumerate(report_data):
+        if test['test'] == result['name']:
+            index = i
+    if index is None:
+        report_data.append(report)
+    else:
+        report_data[index] = report
 
     with open(json_report_path, 'w', encoding='utf-8') as json_file:
         json.dump(report_data, json_file, indent=4, ensure_ascii=False)

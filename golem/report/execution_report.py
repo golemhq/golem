@@ -6,6 +6,7 @@ import os
 from golem.core import utils
 from golem.core.project import Project
 from golem.report import test_report
+from golem.test_runner.conf import ResultsEnum
 
 
 def execution_report_default():
@@ -49,27 +50,15 @@ def _parse_execution_data(execution_directory=None, project=None, execution=None
             test_file_report = []
 
         for test_function in test_file_report:
-            new_test_function = test_function
             execution_data['total_tests'] += 1
-            status = test_function['result']
 
-            # except FileNotFoundError:
-            #     if os.path.isfile(report_log_path):
-            #         # test had been started
-            #         status = ResultsEnum.STOPPED if finalize else ResultsEnum.RUNNING
-            #     else:
-            #         # test had not been started
-            #         status = ResultsEnum.NOT_RUN if finalize else ResultsEnum.PENDING
-            # except json.decoder.JSONDecodeError:
-            #     # report.json exists but contains malformed JSON
-            #     status = ResultsEnum.STOPPED if finalize else ResultsEnum.RUNNING
-            # except Exception:
-            #     sys.exit('an error occurred generating JSON report\n{}'
-            #              .format(traceback.format_exc()))
-            # new_test_function['result'] = status
-            _status_total = execution_data['totals_by_result'].get(status, 0) + 1
-            execution_data['totals_by_result'][status] = _status_total
-            execution_data['tests'].append(new_test_function)
+            if finalize:
+                if test_function['result'] == ResultsEnum.PENDING:
+                    test_function['result'] = ResultsEnum.NOT_RUN
+
+            _status_total = execution_data['totals_by_result'].get(test_function['result'], 0) + 1
+            execution_data['totals_by_result'][test_function['result']] = _status_total
+            execution_data['tests'].append(test_function)
     return execution_data
 
 

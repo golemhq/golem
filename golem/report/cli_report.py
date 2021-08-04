@@ -47,6 +47,9 @@ def _print_test_file_section(test_file_tests):
                 print(error['message'])
                 if error['description']:
                     print(error['description'])
+            # if test does not have errors show custom message
+            if not len(test['errors']):
+                print(test['result'])
 
 
 def report_to_cli(report):

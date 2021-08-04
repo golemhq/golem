@@ -76,8 +76,8 @@ const ExecutionReport = new function(){
 		    let testUniqueId = ExecutionReport.testUniqueId(test);
 		    if(ExecutionReport.tests.hasOwnProperty(testUniqueId)){
 		        // is the test modified?
-		        let equal = Main.Utils.shallowObjectCompare(test, ExecutionReport.tests[testUniqueId]);
-		        if(!equal){
+//		        let equal = Main.Utils.shallowObjectCompare(test, ExecutionReport.tests[testUniqueId]);
+		        if(test.result != ExecutionReport.tests[testUniqueId].result){
 		            DetailTable.updateTest(ExecutionReport.tests[testUniqueId], test);
 		            ExecutionReport.tests[testUniqueId] = test;
 		        }
@@ -114,21 +114,21 @@ const ExecutionReport = new function(){
 	this.formatTimeOutput = function(seconds){
 		let final = '';
 		let min, sec, ms;
-		if(seconds >= 60){
+		if(seconds >= 60) {
 			min = Math.floor(seconds/60);
 			min = Math.round(min * 10) / 10;
 			remainder = seconds % 60
-			if(remainder != 0){
+			if(remainder != 0) {
 				sec = remainder;
 				sec = Math.round(sec * 10) / 10;
 			}
 		} else {
 			sec = Math.round(seconds * 10) / 10;
 		}
-		if(min != undefined){
+		if(min != undefined) {
 			final += min + 'm '
 		}
-		if(sec != undefined){
+		if(sec != undefined) {
 			final += sec + 's'
 		}
 		return final
@@ -324,24 +324,20 @@ const DetailTable = new function(){
 		    let resultString = `${Main.Utils.getResultIcon(newTest.result)} ${newTest.result}`;
 		    testRow.find('.test-result').html(resultString);
 		    testRow.attr('result', newTest.result);
-//		    DetailTable.updateColumnHeaderFilterOptions('result', newTest.result);
 		}
 		if(oldTest.browser != newTest.browser){
 		    testRow.find('.test-browser').html(newTest.browser);
-//		    DetailTable.updateColumnHeaderFilterOptions('browser', newTest.browser);
 		}
 		if(oldTest.environment != newTest.environment){
 		    testRow.find('.test-environment').html(newTest.environment);
-//		    DetailTable.updateColumnHeaderFilterOptions('environment', newTest.environment);
 		}
 		if(oldTest.test_elapsed_time != newTest.elapsed_time){
-//		    testRow.find('.test-time').html(ExecutionReport.formatTimeOutput(newTest.test_elapsed_time));
+		    testRow.find('.test-time').html(ExecutionReport.formatTimeOutput(newTest.elapsed_time));
 		}
 		if(oldTest.set_name != newTest.set_name){
 		    DetailTable.hasSetNameColumn = true;
 			DetailTable.displaySetNameColumn();
 			testRow.find('.set-name').html(newTest.set_name.toString());
-//			DetailTable.updateColumnHeaderFilterOptions('set-name', newTest.set_name);
 
 		}
 //		if(oldTest.module != newTest.module){
@@ -615,8 +611,8 @@ const DetailTable = new function(){
         }
     }
 
-    this.getTestRow = function(setName){
-        return $(`tr.test-row[test-set='${setName}']`)
+    this.getTestRow = function(testId){
+        return $(`tr.test-row[test-id='${testId}']`)
     }
 
     this.getTestDetailRow = function(setName){

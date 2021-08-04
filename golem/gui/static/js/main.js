@@ -316,6 +316,7 @@ const Main = new function(){
             return errors
         }
 
+        // This does not work when the object contains arrays
         this.shallowObjectCompare = (obj1, obj2) =>
             Object.keys(obj1).length === Object.keys(obj2).length &&
             Object.keys(obj1).every(key => obj2.hasOwnProperty(key) && obj1[key] === obj2[key]);

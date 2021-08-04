@@ -3,6 +3,7 @@ import os
 
 from golem.core import utils
 from golem.test_runner import test_runner
+from golem.test_runner.conf import ResultsEnum
 
 from golem.report.execution_report import create_execution_directory
 from golem.report import test_report
@@ -124,6 +125,32 @@ class TestCreateReportDirectory:
         exec_dir = create_execution_directory(project, test_name, timestamp)
         directory = create_test_file_report_dir(exec_dir, test_name, '')
         assert os.path.isdir(directory)
+
+
+class TestInitializeTestFileReport:
+
+    def test_initialize_test_file_report(self, project_session, test_utils):
+        _, project = project_session.activate()
+        # create a test
+        test_file = test_utils.random_string()
+        content = 'def test_one(data):\n' \
+                  '    pass\n' \
+                  'def test_two(data):\n' \
+                  '    pass'
+        test_utils.create_test(project, test_file, content)
+        # create test file reportdir
+        execution = test_file
+        timestamp = utils.get_timestamp()
+        exec_dir = create_execution_directory(project, test_file, timestamp)
+        test_file_reportdir = create_test_file_report_dir(exec_dir, test_file, '')
+        # initialize report for test file
+        test_report.initialize_test_file_report(
+            test_file, ['test_one', 'test_two'], '', test_file_reportdir)
+        test_file_report = test_report.get_test_file_report_json(
+            project, execution, timestamp, test_file)
+        assert len(test_file_report) == 2
+        assert any(t['test'] == 'test_one' and t['result'] == ResultsEnum.PENDING for t in test_file_report)
+        assert any(t['test'] == 'test_two' and t['result'] == ResultsEnum.PENDING for t in test_file_report)
 
 
 class TestGenerateReport:

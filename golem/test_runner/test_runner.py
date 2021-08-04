@@ -69,6 +69,7 @@ class TestRunner:
         self.execution_has_failed_tests = execution_has_failed_tests
         self.execution_tags = tags or []
         self.from_suite = from_suite
+        self.global_skip = False
 
         self.result = None
         self.reportdir = None
@@ -150,9 +151,7 @@ class TestRunner:
         # test is skipped only when run from a suite
         skip = getattr(self.test_module, 'skip', False)
         if skip and self.from_suite:
-            self.result = ResultsEnum.SKIPPED
-            msg = 'Skip: {}'.format(skip) if type(skip) is str else 'Skip'
-            execution.logger.info(msg)
+            self.global_skip = skip
 
         if self.result in [ResultsEnum.CODE_ERROR, ResultsEnum.SKIPPED]:
             self.finalize(import_modules_failed=True)
@@ -160,6 +159,10 @@ class TestRunner:
             self.run_setup()
 
     def run_setup(self):
+        if self.global_skip:
+            self.run_test_functions()
+            return
+
         try:
             if hasattr(self.test_module, 'setup'):
                 self.test_module.setup(execution.data)
@@ -180,9 +183,15 @@ class TestRunner:
         self.run_teardown()
 
     def run_test_function(self, test_name):
-        execution.logger.info('Test started: {}'.format(test_name))
-
         result = self.test_functions[test_name]
+
+        if self.global_skip:
+            result['result'] = ResultsEnum.SKIPPED
+            execution.logger.info('Test skipped: {}'.format(test_name))
+            self._finalize_test_function(test_name)
+            return
+        else:
+            execution.logger.info('Test started: {}'.format(test_name))
 
         # Create folder for the test function report
         test_reportdir = test_report.create_test_function_report_dir(self.reportdir, test_name)
@@ -217,7 +226,7 @@ class TestRunner:
             if execution.errors:
                 result['result'] = ResultsEnum.ERROR
 
-        if result['result'] is None:
+        if result['result'] in [None, ResultsEnum.PENDING]:
             result['result'] = ResultsEnum.SUCCESS
 
         execution.logger.info('Test Result: {}'.format(result['result'].upper()))
@@ -231,7 +240,10 @@ class TestRunner:
     def _finalize_test_function(self, test_name):
         result = self.test_functions[test_name]
 
-        test_elapsed_time = round(result['end_time'] - result['start_time'], 2)
+        if result['end_time'] and result['start_time']:
+            test_elapsed_time = round(result['end_time'] - result['start_time'], 2)
+        else:
+            test_elapsed_time = 0
 
         result['description'] = execution.description
         result['steps'] = execution.steps
@@ -252,6 +264,11 @@ class TestRunner:
 
     def run_teardown(self, setup_failed=False):
         teardown_failed = False
+
+        if self.global_skip:
+            self.finalize()
+            return
+
         try:
             if hasattr(self.test_module, 'teardown'):
                 self.test_module.teardown(execution.data)
@@ -404,7 +421,7 @@ class TestRunner:
             'start_time': None,
             'end_time': None,
             'test_reportdir': None,
-            'result': None,
+            'result': ResultsEnum.PENDING,
             'errors': [],
             'description': '',
             'steps': [],

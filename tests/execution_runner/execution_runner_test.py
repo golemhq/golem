@@ -13,6 +13,8 @@ from golem.core import settings_manager
 from golem.core import file_manager
 from golem.core import session
 from golem.report import execution_report as exec_report
+from golem.report import test_report
+from golem.test_runner.conf import ResultsEnum
 
 
 class TestDefineBrowsers:
@@ -89,6 +91,40 @@ class TestDefineBrowsers:
         drivers_defined = exc_runner.define_browsers(drivers, remote_drivers, default_drivers, self.custom_browsers)
         assert len(drivers_defined) == 1
         assert drivers_defined[0]['capabilities']['version'] == '60.0'
+
+
+class TestInitializeReportsForTestFiles:
+
+    def test_initialize_reports_for_test_files(self, project_class, test_utils):
+        """test file json reports are initialized with status pending
+        for each test function"""
+        _, project = project_class.activate()
+        test_name = test_utils.random_string()
+        content = 'def test_one(data):\n' \
+                  '    pass\n' \
+                  'def test_two(data):\n' \
+                  '    pass'
+        test_utils.create_test(project, test_name, content)
+
+        timestamp = utils.get_timestamp()
+        execution_name = test_name
+
+        execution_runner = exc_runner.ExecutionRunner(project, timestamp=timestamp)
+        execution_runner.tests = [test_name]
+        execution_runner.execution.processes = 1
+        execution_runner.execution.browsers = ['chrome']
+        execution_runner.execution.envs = []
+        execution_runner.execution_name = execution_name
+        execution_runner.execution.reportdir = execution_runner._create_execution_directory()
+        execution_list = execution_runner._define_execution_list()
+
+        exc_runner.initialize_reports_for_test_files(project, execution_list)
+
+        test_file_report = test_report.get_test_file_report_json(project, execution_name, timestamp, test_name)
+
+        assert len(test_file_report) == 2
+        assert any(t['test'] == 'test_one' and t['result'] == ResultsEnum.PENDING for t in test_file_report)
+        assert any(t['test'] == 'test_two' and t['result'] == ResultsEnum.PENDING for t in test_file_report)
 
 
 class TestSelectEnvironments:

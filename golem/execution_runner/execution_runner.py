@@ -14,6 +14,7 @@ from golem.core import settings_manager
 from golem.core import secrets_manager
 from golem.core import suite as suite_module
 from golem.core import tags_manager
+from golem.core.test import Test
 from golem.core.project import Project
 from golem.gui import gui_utils
 from golem.execution_runner.multiprocess_executor import multiprocess_executor
@@ -23,6 +24,7 @@ from golem.report import execution_report as exec_report
 from golem.report import junit_report
 from golem.report import html_report
 from golem.report import cli_report
+from golem.report import test_report
 
 
 def define_browsers(browsers, remote_browsers, default_browsers, custom_browsers):
@@ -56,6 +58,35 @@ def define_browsers(browsers, remote_browsers, default_browsers, custom_browsers
                    '\n'.join(remote_browsers)]
             raise Exception(''.join(msg))
     return browsers_definition
+
+
+def initialize_reports_for_test_files(project_name, test_sets):
+    """Initialize test file json report with status `pending`.
+    This enables live reporting.
+    test_sets are all the combinations of test files, environments,
+    browsers and test sets.
+    TODO this could be run in the background meanwhile the execution
+    continues to reduce startup time
+    """
+    test_functions_cache = {}
+
+    for s in test_sets:
+        test_file_reportdir = test_report.create_test_file_report_dir(s.reportdir,
+                                                                      s.name, s.set_name)
+        if s.name not in test_functions_cache:
+            test_file = Test(project_name, s.name)
+            # When there is an error reading the test file (eg. SyntaxError)
+            # the list of test functions is not available
+            try:
+                test_functions_cache[s.name] = test_file.test_function_list
+            except:
+                pass
+
+        # If the test functions are not available this test file report
+        # will not be initialized
+        if s.name in test_functions_cache:
+            test_report.initialize_test_file_report(s.name, test_functions_cache[s.name],
+                                                    s.set_name, test_file_reportdir)
 
 
 class ExecutionRunner:
@@ -356,6 +387,9 @@ class ExecutionRunner:
             # * browser
             # The result is a list that contains all the requested combinations
             self.execution.tests = self._define_execution_list()
+
+            # Initialize reports with status 'pending'
+            initialize_reports_for_test_files(self.project.name, self.execution.tests)
 
             self._print_number_of_tests_found()
 

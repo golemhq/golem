@@ -446,9 +446,9 @@ def teardown(data):
         assert 'timestamp' in r
         assert len(r.keys()) == 12
 
-    def test_assertion_error_in_setup(self, runfix, caplog):
+    def test_assertion_failure_in_setup(self, runfix, caplog):
         """The test ends with 'failure' when the setup function throws AssertionError.
-        Test is not run
+        Tests are not run
         Teardown is run
         """
         code = """
@@ -1068,25 +1068,6 @@ def teardown(data):
 #         assert report['errors'][1]['message'] == 'test error'
 #         assert report['errors'][2]['message'] == 'teardown error'
 
-    # TestRunner decision table: Skip is True
-    #
-    # CE : code error
-    # S  : success
-    # F  : failure
-    # SK : skip
-    #
-    #                        S0  S1  S2
-    # Skip is True           Y   Y   Y
-    # Import error test      N   N   Y
-    # Import error page      N   N   .
-    # Run from suite         N   Y   .
-    #
-    # result                 S   SK  CE
-    # setup is run           Y   N   N
-    # test is run            Y   N   N
-    # teardown is run        Y   N   N
-
-    # S0
     # def test_run_test__skip_true__not_from_suite(self, runfix, caplog):
     #     code = ('skip = True\n'
     #             'def setup(data):\n'
@@ -1105,24 +1086,22 @@ def teardown(data):
     #     # verify report.json
     #     report = runfix.read_report()
     #     assert report['result'] == ResultsEnum.SUCCESS
-    #
-    # # S1
-    # def test_run_test__skip_true__from_suite(self, runfix, caplog):
-    #     code = ('skip = True\n'
-    #             'def setup(data):\n'
-    #             '    step("setup")\n'
-    #             'def test(data):\n'
-    #             '    step("test")\n'
-    #             'def teardown(data):\n'
-    #             '    step("teardown")')
-    #     runfix.run_test(code, from_suite=True)
-    #     # verify console logs
-    #     records = caplog.records
-    #     assert records[2].message == 'Skip'
-    #     assert records[3].message == SKIPPED_MESSAGE
-    #     # verify report.json
-    #     report = runfix.read_report()
-    #     assert report['result'] == ResultsEnum.SKIPPED
+
+    def test_run_test__skip_true__from_suite(self, runfix, caplog):
+        """Test functions are skipped when run from suite and skip is True"""
+        code = ('skip = True\n'
+                'def setup(data):\n'
+                '    step("setup")\n'
+                'def test(data):\n'
+                '    step("test")\n'
+                'def teardown(data):\n'
+                '    step("teardown")')
+        runfix.run_test(code, from_suite=True)
+        records = caplog.records
+        assert records[2].message == 'Test skipped: test'
+        report = runfix.read_report()
+        assert len(report) == 1
+        assert report[0]['result'] == ResultsEnum.SKIPPED
     #
     # # S1
     # def test_run_test__skip_true__syntax_error(self, runfix, caplog):
