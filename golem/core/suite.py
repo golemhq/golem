@@ -16,7 +16,7 @@ def create_suite(project_name, suite_name,suite_content = ('\n'
     errors = []
     project = Project(project_name)
     if suite_name in project.suites():
-        errors.append(f'A suite {suite_name} with that name already exists')
+        errors.append('A suite with that name already exists')
     else:
         errors = validate_project_element_name(suite_name)
     if not errors:
