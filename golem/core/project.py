@@ -203,7 +203,7 @@ def validate_project_element_name(name, isdir=False):
             errors.append('Directory name cannot be empty')
             break
         elif len(part) > 150:
-            errors.append(f'{{last_part}} Maximum name length is 150 characters')
+            errors.append('Maximum name length is 150 characters')
             break
     if len(last_part) == 0:
         if isdir:
@@ -211,10 +211,10 @@ def validate_project_element_name(name, isdir=False):
         else:
             errors.append('File name cannot be empty')
     elif len(last_part) > 150:
-        errors.append(f' {last_part} Maximum name length is 150 characters')
+        errors.append('Maximum name length is 150 characters')
     for c in name:
         if not c.isalnum() and c not in ['_', '.']:
-            errors.append(f'{name} Only letters, numbers and underscores are allowed')
+            errors.append('Only letters, numbers and underscores are allowed')
             break
     return errors
 
