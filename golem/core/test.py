@@ -16,7 +16,7 @@ def create_test(project_name, test_name,test_content = (
     errors = []
     project = Project(project_name)
     if test_name in project.tests():
-        errors.append(f'A test {test_name} with that name already exists')
+        errors.append('A test with that name already exists')
     else:
         errors = validate_project_element_name(test_name)
     if not errors:
