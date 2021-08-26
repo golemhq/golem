@@ -10,14 +10,14 @@ from itsdangerous import BadSignature, SignatureExpired
 from golem.core import (environment_manager, settings_manager,
                         test as test_module, page as page_module,
                         suite as suite_module, session, utils, tags_manager,
-                        test_directory)
+                        test_directory,convert_side)
 from golem.core.page import Page
-from golem.core.project import Project, create_project, delete_project
+from golem.core.project import Project, create_project, delete_project,validate_project_element_name
 from golem.report import report
 from golem.report import execution_report as exec_report
 from golem.gui import gui_utils
 from golem.gui.user_management import Users, Permissions
-
+import json,os
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -214,6 +214,83 @@ def project_create():
         # update projects cache
         gui_utils.ProjectsCache.add(project_name)
     return jsonify({'errors': errors, 'project_name': project_name})
+    
+
+@api_bp.route('/uploadside', methods=["GET",'POST'])
+@auth_required
+def upload_side_project():
+  if request.method == 'POST':
+        file_val = request.files['file']
+        _verify_permissions(Permissions.SUPER_USER)
+        try:        
+         data_content = json.loads(file_val.read().decode('utf-8'))
+        except Exception as e:
+         return jsonify({'errors': ['This file have some error like ' + str(e)]})
+        project_name = data_content['name']
+        url = data_content['url'] + '/'
+        project_name = project_name.strip().replace(' ', '_')
+        test_ids = {}
+        testsuite = {}
+        suites_tests = {}
+        test_data={}
+        test_content={}
+        # fetch all test data
+        for k in range(0,len(data_content['tests'])):
+         test_id = data_content['tests'][k]['id']
+         test_name = data_content['tests'][k]['name'].strip().replace(' ', '_')
+         test_data[test_name] = data_content['tests'][k]['commands']
+         test_ids[test_id] = test_name
+        # fetch all suite data which contain test name
+        for l in range(0,len(data_content['suites'])):
+         suite_name= data_content['suites'][l]['name'].strip().replace(' ', '_')
+         suites_tests[suite_name] = [test_ids[testmatch] for testmatch in data_content['suites'][l]['tests']]
+        errors = []
+        # validation of project
+        if len(project_name) == 0 :
+         errors.append('Either file is empty or project name not defined')
+        elif len(project_name) < 3:
+         errors.append(f'Project name {project_name} is too short')
+        elif len(project_name) > 50:
+         errors.append(f'Project name {project_name} is too long')
+        elif test_directory.project_exists(project_name):
+         errors.append(f'A project {project_name} with that name already exists')
+        else:
+         for c in project_name:
+          if not c.isalnum() and c not in ['_']:
+            errors.append(f' {project_name} Only letters, numbers and underscores are allowed')
+         #validation of suite
+         for s in  list(suites_tests.keys()):
+            error = validate_project_element_name(s)
+            if len(error) != 0:
+             errors.append(error)      
+             break;
+         #validation of test
+         for t in  list(test_data.keys()):
+            test_error = validate_project_element_name(t)
+            if len(test_error) != 0:
+             errors.append(test_error)      
+             break;             
+        if len(errors) == 0:
+         try:
+          for testname in list(test_data.keys()):
+           # convert selenium side script to golem script
+           test_content[testname],errors = convert_side.create_test_script(test_data[testname],url,testname,project_name)
+           if len(errors) != 0:
+             break
+          if len(errors) == 0:    
+           create_project(project_name)
+           #update projects cache
+           gui_utils.ProjectsCache.add(project_name)
+           # create test           
+           for testname in list(test_data.keys()):
+            errors = test_module.create_test(project_name, testname,test_content[testname])
+           # create suite             
+           for suite_name in list(suites_tests.keys()):
+            suite_content = convert_side.create_suite_script(suites_tests[suite_name])
+            errors = suite_module.create_suite(project_name, suite_name,suite_content)
+         except Exception as e:
+          errors.append(str(e))
+        return jsonify({'errors': errors, 'project_name': project_name,'test_names': list(test_data.keys()), 'suite_names': list(suites_tests.keys()) })
 
 
 @api_bp.route('/project/delete', methods=['DELETE'])

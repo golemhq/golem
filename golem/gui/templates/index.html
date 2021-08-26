@@ -24,6 +24,30 @@
             <div id="projectCreationButton">
                 <button class="btn btn-default">Create Project</button>
             </div>
+            <div id="projectImportButton">
+                <button class="btn btn-default">Side Project Import</button>
+            </div>
+
+    <!-- Modal -->
+<div id="projectImportForm" style="display: none;">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Import Selenium Side Project</h4>
+      </div>
+      <div class="modal-body">
+        <!-- Form -->
+        <form method='post' action='/api/uploadside' enctype="multipart/form-data" id="upload-file">
+          Select selenium side file : <input type='file' name='file' id='file' class='form-control' ><br>
+          <input type='button' class='btn btn-info' value='Upload' id='btn_upload' onclick="importProject();">
+        </form>
+      </div>
+	  <div class="modal-footer">
+        <button id="ProjectImportCancel" class="btn btn-default">close</button>
+      </div>
+ 
+    </div>
+</div>	
             <div id="projectCreationForm" style="display: none;">
                 <div class="form-group" style="margin-bottom: 5px">
                     <input type="text" class="form-control" id="newProjectName" placeholder="Project Name" maxlength="50" onkeyup="if(event.keyCode==13){createProject()}">

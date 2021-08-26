@@ -8,16 +8,15 @@ from golem.core import file_manager
 from golem.core.project import Project, validate_project_element_name, BaseProjectElement
 
 
-def create_suite(project_name, suite_name):
-    suite_content = ('\n'
+def create_suite(project_name, suite_name,suite_content = ('\n'
                      'browsers = []\n\n'
                      'environments = []\n\n'
                      'processes = 1\n\n'
-                     'tests = []\n')
+                     'tests = []\n')):
     errors = []
     project = Project(project_name)
     if suite_name in project.suites():
-        errors.append('A suite with that name already exists')
+        errors.append(f'A suite {suite_name} with that name already exists')
     else:
         errors = validate_project_element_name(suite_name)
     if not errors:
