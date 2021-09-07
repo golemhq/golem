@@ -595,19 +595,56 @@ const Main = new function(){
             }
         }
 
-        this._loadSetReport = function(setName, report, timestamp){
-            let reportContainer = $(`
-            <div class='report-result'>
-                <h4>${report.test}</h4>
-            </div>`);
-            let resultIcon = Main.Utils.getResultIcon(report.result);
-            reportContainer.append(`<div class="test-result"><strong style='display: inline-block; width: 120px'>Result:</strong> ${report.result} ${resultIcon}</div>`);
-            reportContainer.append(`<div><strong style='display: inline-block; width: 120px'>Browser:</strong> ${report.browser}</div>`);
-            if(report.environment.length) {
-                reportContainer.append(`<div><strong style='display: inline-block; width: 120px'>Environment:</strong> ${report.environment}</div>`);
+        this._updateSet = function(setName, testFileReport, timestamp){
+            Main.TestRunner._addTabIfDoesNotExist(setName);
+            let tab = $(`.test-run-tab-content[set-name='${setName}']`);
+            // update log
+            if(testFileReport.log_info != null) {
+                testFileReport.log_info.forEach(function(line){
+                    let displayedLinesStrings = [];
+                    tab.find('.test-result-logs div.log-line').each(function(){
+                          displayedLinesStrings.push($(this).html())
+                     });
+                    if(!displayedLinesStrings.includes(line)){
+                        tab.find('.test-result-logs').append("<div class='log-line'>"+line+"</div>");
+                        $('.modal-body').scrollTop($('.modal-body')[0].scrollHeight);
+                    }
+                });
             }
-            reportContainer.append(`<div><strong style='display: inline-block; width: 120px'>Elapsed Time:</strong> ${report.elapsed_time}</div>`);
-            reportContainer.append(`<div><strong style='display: inline-block; width: 120px'>Steps:</strong></div>`);
+            // update test file functions if this test file set has finished
+            // a test file set is finished when there is no test function
+            // with result pending or running
+            let somePending = testFileReport.report.some(testFunction => testFunction.result == Main.ResultsEnum.pending.code);
+            let someRunning = testFileReport.report.some(testFunction => testFunction.result == Main.ResultsEnum.running.code);
+
+            if(!somePending && !someRunning){
+                let tabNav = $(`.test-run-tab[set-name='${setName}']`);
+                if(tabNav.attr('running') == 'true'){
+                    tabNav.removeAttr('running');
+                    tabNav.find('i').remove();
+                    testFileReport.report.forEach((r) => {
+                        Main.TestRunner._loadOrUpdateTestFunctionReport(tab, setName, r, timestamp);
+                    })
+                }
+            }
+        }
+
+        this._loadOrUpdateTestFunctionReport = function(tab, setName, report, timestamp){
+            let testFunctionReport = $(`
+                <div class='report-result' test-function-name='${report.test}'>
+                    <h4>${report.test}</h4>
+                </div>`);
+            tab.append(testFunctionReport);
+
+            let resultIcon = Main.Utils.getResultIcon(report.result);
+            testFunctionReport.append(`<div class="test-result"><strong style='display: inline-block; width: 120px'>Result:</strong> <span>${report.result} ${resultIcon}</span></div>`);
+
+            testFunctionReport.append(`<div><strong style='display: inline-block; width: 120px'>Browser:</strong> ${report.browser}</div>`);
+            if(report.environment) {
+                testFunctionReport.append(`<div><strong style='display: inline-block; width: 120px'>Environment:</strong> ${report.environment}</div>`);
+            }
+            testFunctionReport.append(`<div><strong style='display: inline-block; width: 120px'>Elapsed Time:</strong> ${report.elapsed_time}</div>`);
+            testFunctionReport.append(`<div><strong style='display: inline-block; width: 120px'>Steps:</strong></div>`);
             if(report.steps.length > 0){
                 let stepsList = $("<ol class='step-list' style='margin-left: 20px'></ol>");
                 report.steps.forEach(function(step){
@@ -630,48 +667,18 @@ const Main = new function(){
                     }
                     stepsList.append(stepContent);
                 });
-                reportContainer.append(stepsList)
+                testFunctionReport.append(stepsList)
             }
-            reportContainer.append(`<div><strong style='display: inline-block; width: 120px'>Errors:</strong></div>`);
+            testFunctionReport.append(`<div><strong style='display: inline-block; width: 120px'>Errors:</strong></div>`);
             if(report.errors.length > 0){
                 let errorsList = $("<ol class='error-list' style='margin-left: 20px'></ol>");
                 report.errors.forEach(function(error){
                     errorsList.append(`<li>${error.message}</li>`);
                 });
-                reportContainer.append(errorsList);
+                testFunctionReport.append(errorsList);
             };
-            reportContainer.append(`<br>`);
-            $(`.test-run-tab-content[set-name='${setName}']>.test-results`).append(reportContainer);
+            testFunctionReport.append(`<br>`);
             $('.modal-body').scrollTop($('.modal-body')[0].scrollHeight);
-        }
-
-        this._updateSet = function(setName, values, timestamp){
-            Main.TestRunner._addTabIfDoesNotExist(setName);
-            let tab = $(`.test-run-tab-content[set-name='${setName}']`);
-            if(values.log_info != null) {
-                values.log_info.forEach(function(line){
-                    let displayedLinesStrings = [];
-                    tab.find('.test-result-logs div.log-line').each(function(){
-                          displayedLinesStrings.push($(this).html())
-                     });
-                    if(!displayedLinesStrings.includes(line)){
-                        tab.find('.test-result-logs').append("<div class='log-line'>"+line+"</div>");
-                        $('.modal-body').scrollTop($('.modal-body')[0].scrollHeight);
-                    }
-                });
-            }
-            // If this test set has finished
-            if(values.report != null){
-                let tabNav = $(`.test-run-tab[set-name='${setName}']`);
-                if(tabNav.attr('running') == 'true'){
-                    tabNav.removeAttr('running');
-                    tabNav.find('i').remove();
-//                    tabNav.find('a').append(Main.Utils.getResultIcon(values.report.result));
-                    values.report.forEach((r) => {
-                        Main.TestRunner._loadSetReport(setName, r, timestamp);
-                    })
-                }
-            }
         }
 
         this.addInfoBar = function(msg){
