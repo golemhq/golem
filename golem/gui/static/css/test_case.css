@@ -39,12 +39,6 @@ body.modal-open {
     float: left;
 }
 
-.test-function-remove-icon {
-    display: inline-block;
-    margin-top: 10px;
-    margin-left: 5px
-}
-
 .steps {
     overflow: auto;
     clear: both
@@ -74,7 +68,7 @@ body.modal-open {
 	width: 16px;
 }
 
-.step-remove-icon a, .test-function-remove-icon a {
+.step-remove-icon a{
 	color: black;
 }
 

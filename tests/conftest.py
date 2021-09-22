@@ -228,7 +228,7 @@ class TestUtils:
             content = ('def test(data):\n'
                        '    print("hello")\n')
         test.create_test(project, name)
-        test.edit_test_code(project, name, content, table_test_data=[])
+        test.edit_test_code(project, name, content)
         return test.Test(project, name).path
 
     @staticmethod

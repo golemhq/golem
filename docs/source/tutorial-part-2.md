@@ -56,19 +56,14 @@ golem run <project_name> validate_article_title
 
 ## Managing Test Data
 
-The data for each test can be stored inside the test or in a separate csv file.
+The data for each test can be stored inside the test file, in CSV or JSON files.
 
-To select which location Golem should use, set the *test_data* setting to 'csv' or 'infile'.
+### Using the CSV Data Table
 
-**Note**: All csv values are considered as strings. If you need different value types use the 'infile' setting.
+Let's rewrite the previous test but extracting all the data outside the code:
 
-
-### Using the Data Table
-
-Let's rewrite the previous test but extracting all the data outside of the code:
-
-The values of a test can be defined using the data table in the Web Module at the bottom of the test builder.
-This will generate a csv file in the same folder as the test with the following data:
+In the Test Builder select *Add Data Source* -> *CSV*.
+Then we fill the table with the following values:
 
 **validate_article_title.csv**
 ```
@@ -76,7 +71,7 @@ URL,search_value,article_title
 http://en.wikipedia.org/,automation,Automation
 ```
 
-Then we refactor the test to use the data object instead of hardcoded values:
+And we refactor the test to use the data object instead of hardcoded values:
 
 **validate_article_title.py**
 ```python
@@ -111,53 +106,7 @@ http://fr.wikipedia.org/,soupe à l'oignon,Soupe à l'oignon
 
 Using this data file, Golem will run the same test 4 times, using each time a different data set.
 
-<div class="admonition note">
-    <p class="first admonition-title">Check this out</p>
-    <p>In the third and fourth rows we used a different URL, so we can even point the same test to different environments by just changing the data sets.</p>
-</div>
-
-### Infile data
-
-When using *"test_data": "infile"* in settings.json different Python variable types can be used. **Strings must be defined in quotes in the Web Module data table**.
-
-![data table infile](_static/img/data-infile.png "Test With Data Table")
-
-The test code looks like this:
-
-**test_with_infile_data.py**
-```
-description = 'Hey! this test has infile data!'
-
-data = [
-    {
-        'numbers': 12,
-        'boolean': False,
-        'none': None,
-        'list': [1,2,3],
-        'dict': {'key': 'string'},
-        'tuple': (1, '2', 3.0),
-        'str_single': 'test',
-        'str_double': "test",
-    },
-    {
-        'numbers': 12,
-        'boolean': True,
-        'none': None,
-        'list': ['a', 'b', 'c'],
-        'dict': {"key": 12},
-        'tuple': ('a', 'a"b"c', "a'b'c"),
-        'str_single': 'a "b" c',
-        'str_double': "a 'b' c",
-    },
-]
-
-def test(data):
-    navigate('some_url')
-    send_keys(('id', 'searchInput'), data.str_single)
-    
-```
-
-Infile data is stored as a list of dictionaries. Each dictionary is a different test set.
+Test data can also be [JSON](test-data.html#json-data) and [internal](test-data.html#internal-data).
 
 
 ## Using Page Objects

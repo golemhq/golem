@@ -174,14 +174,20 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
         test_.append('')
         test_.append('pages = {}'.format(_format_page_string(pages)))
 
-    if test_data:
-        if settings['test_data'] == 'infile':
-            _print_extra_blank_line()
-            test_.append('')
-            test_.append('data = {}'.format(_format_data(test_data)))
-            test_data_module.remove_csv_if_exists(project, test_name)
-        else:
-            test_data_module.save_external_test_data_file(project, test_name, test_data)
+    if test_data['csv'] is not None:
+        test_data_module.save_csv_test_data(project, test_name, test_data['csv'])
+    else:
+        test_data_module.remove_csv_if_present(project, test_name)
+
+    if test_data['json'] is not None and test_data['json'].strip():
+        test_data_module.save_json_test_data(project, test_name, test_data['json'])
+    else:
+        test_data_module.remove_json_data_if_present(project, test_name)
+
+    if test_data['internal'] is not None and test_data['internal'].strip():
+        _print_extra_blank_line()
+        test_.append('')
+        test_.append(test_data['internal'])
 
     if skip:
         _print_extra_blank_line()
@@ -217,18 +223,22 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
         f.write('\n'.join(test_))
 
 
-def edit_test_code(project, test_name, content, table_test_data):
+def edit_test_code(project, test_name, content, test_data=None):
     path = Test(project, test_name).path
     with open(path, 'w', encoding='utf-8') as f:
         f.write(content)
     # save test data
-    settings = settings_manager.get_project_settings(project)
-    if settings['test_data'] == 'csv':
-        # save csv data
-        test_data_module.save_external_test_data_file(project, test_name, table_test_data)
-    elif settings['test_data'] == 'infile':
-        # remove csv files
-        test_data_module.remove_csv_if_exists(project, test_name)
+    if test_data is not None:
+        if test_data['csv'] is not None:
+            test_data_module.save_csv_test_data(project, test_name, test_data['csv'])
+            test_data_module.remove_json_data_if_present(project, test_name)
+        else:
+            test_data_module.remove_csv_if_present(project, test_name)
+
+        if test_data['json'] is not None and test_data['json'].strip():
+            test_data_module.save_json_test_data(project, test_name, test_data['json'])
+        else:
+            test_data_module.remove_json_data_if_present(project, test_name)
 
 
 def delete_test(project, test_name):

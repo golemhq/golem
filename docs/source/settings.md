@@ -33,14 +33,6 @@ Take a screenshot after 'test' function ends. Default is False.
 
 Highlight elements on the screen when found. Default is False
 
-### test_data
-
-The location to store test data. Options are: 'infile' and 'csv'. Default is 'csv.'. 
-
-With 'test_data' = 'infile'  data is stored inside the test file as a list of dictionaries. 
-
-With 'test_data' = 'csv' data is stored in a csv file in the same folder of the test and with the same name, e.g.: /tests/test1.py -> /tests/test1.csv
-
 ### wait_hook
 
 Custom wait method to use for every action, that can be specific to each application. It must be defined inside extend.py

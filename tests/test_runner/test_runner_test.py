@@ -52,7 +52,7 @@ def runfix(project_module, test_utils):
     env_name = None
 
     def set_content(test_content):
-        test_module.edit_test_code(project, test_name, test_content, [])
+        test_module.edit_test_code(project, test_name, test_content)
 
     def run_test(code, test_data={}, secrets={}, from_suite=False, set_name=''):
         set_content(code)

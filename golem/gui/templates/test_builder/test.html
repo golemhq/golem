@@ -116,91 +116,15 @@
     </div>
     <div class="clearfix"></div>
     <div class="col-sm-12 gray-1-background" id="dataContainerContainer" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px;">
-        <h4>Data</h4>
-        <div id="dataTableContainer">
-            <table class="table table-bordered table-condensed" id="dataTable">
-                {% if test_data[0] %}
-                <thead>
-                    <tr>
-                        <th class="index">#</th>
-                        {% for key, val in test_data[0].items() %}
-                        <th>
-                            <div class="input-group">
-                                <input class="form-control" type="text" value="{{key}}" onchange="Test.refreshValueInputsAutocomplete()">
-                            </div>
-                        </th>
-                        {% endfor %}
-                        <th>
-                            <div class="input-group">
-                                <input class="form-control" type="text" onchange="Test.refreshValueInputsAutocomplete()">
-                            </div>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in test_data %}
-                    <tr>
-                        <th scope="row" class="index">{{loop.index}}</th>
-                        {% for key, value in row.items() %}
-                        <td>
-                            <div class="input-group">
-                                <input class="form-control" type="text" value="{{value}}">
-                            </div>
-                        </td>
-                        {% endfor %}
-                        <td><div class="input-group"><input class="form-control" type="text"></div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                    <tr>
-                        <th scope="row" class="index">{{test_data|length + 1}}</th>
-                        {% for item in test_data[0].items() %}
-                        <td><div class="input-group"><input class="form-control" type="text"></div>
-                        </td>
-                        {% endfor %}
-                        <td><div class="input-group"><input class="form-control" type="text"></div>
-                        </td>
-                    </tr>
-                </tbody>
-                {% else %}
-                <thead>
-                    <tr>
-                        <th class="index">#</th>
-                        {% for i in range(4) %}
-                        <th>
-                            <div class="input-group">
-                                <input class="form-control" type="text" onchange="Test.refreshValueInputsAutocomplete()">
-                            </div>
-                        </th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for i in range(3) %}
-                    <tr>
-                        <th scope="row" class="index">{{i+1}}</th>
-                        {% for j in range(4) %}
-                        <td>
-                            <div class="input-group">
-                                <input class="form-control" type="text">
-                            </div>
-                        </td>
-                        {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                {% endif %}
-            </table>
-        </div>
-        <div style="display: table-cell; position: relative;">
-            <a href="javascript:void(0)" onclick="TestCommon.DataTable.addColumn();">
-                <img src="{{ url_for('static', filename='img/plus_sign.png') }}" class="add-new-icon" style="margin-left: 5px;">
-            </a>
-        </div>
-        <div class="text-right" style="width: 100%">
-            <a href="javascript:void(0)" onclick="TestCommon.DataTable.addRow();">
-                <img src="{{ url_for('static', filename='img/plus_sign.png') }}" class="add-new-icon" style="margin-right: 30px;">
-            </a>
+        <div class="btn-group" id="dataSourceSelector">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" style="margin-top: 10px">
+                Add data source <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" style="position: static;">
+                <li><a href="javascript:void(0)" id="addCsvDataSourceOption" onclick="TestCommon.DataSource.addDataSourceCsv()">CSV</a></li>
+                <li><a href="javascript:void(0)" id="addJsonDataSourceOption" onclick="TestCommon.DataSource.addDataSourceJson()">JSON</a></li>
+                <li><a href="javascript:void(0)" id="addInternalDataSourceOption" onclick="TestCommon.DataSource.addDataSourceInternal()">internal</a></li>
+            </ul>
         </div>
     </div>
 </div>
@@ -235,9 +159,11 @@
     let setupSteps = {{test_components.setup_steps|tojson}}
     let teardownSteps = {{test_components.teardown_steps|tojson}}
     let test_functions = {{test_components.test_functions|tojson}}
+    let testData = {{test_data|tojson}}
 
     const file = new File('test', Global.project, testCaseName, fullTestCaseName);
     const test = Test;
     test.initialize(file, importedPages, setupSteps, teardownSteps, test_functions);
+    TestCommon.DataSource.loadData(testData.csv, testData.json, testData.internal);
 </script>
 {% endblock %}

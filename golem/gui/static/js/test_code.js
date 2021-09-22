@@ -82,17 +82,17 @@ if (!cm.state.completionActive &&   /*Enables keyboard navigation in autocomplet
             }
         })
     }
-	this.getAllData = function()
-	{
-		let dataTableHeaders = TestCommon.DataTable.getHeaders();
+	this.getAllData = function() {
+		let dataTableHeaders = TestCommon.DataSource.DataTable.getHeaders();
         dataTableHeaders.forEach(function(header){
             TestCode.test_data.push(`data.${header}`)
         });
 	}
+
     this.save = function(callback){
         let content = this.codeEditor.getValue();
         // get data from table
-        let testData = TestCommon.DataTable.getData();
+        let testData = TestCommon.DataSource.getData();
         let payload = {
             'content': content,
             'testData': testData,
@@ -100,24 +100,33 @@ if (!cm.state.completionActive &&   /*Enables keyboard navigation in autocomplet
             'testName': this.file.fullName
         }
         xhr.put('/api/test/code/save', payload, result => {
-            this.unsavedChanges = false;
-            this.codeEditor.markClean();
-            Main.Utils.toast('success', `Test ${this.file.fullName} saved`, 3000);
-            if(result.error != null) {
-                $(".error-container").show();
-                $(".error-container pre").html(result.error);
-                Main.Utils.toast('info', "There are errors in the code", 3000)
+            if(result.dataErrors.length) {
+                result.dataErrors.forEach(error => Main.Utils.toast('error', error, 10000));
             } else {
-                $(".error-container").hide();
-                $(".error-container pre").html('');
-                if(callback != undefined)
-                    callback()
+                this.unsavedChanges = false;
+                this.codeEditor.markClean();
+                Main.Utils.toast('success', `Test ${this.file.fullName} saved`, 3000);
+                if(result.testError != null) {
+                    $(".error-container").show();
+                    $(".error-container pre").html(result.testError);
+                    Main.Utils.toast('info', "There are errors in the code", 3000)
+                } else {
+                    $(".error-container").hide();
+                    $(".error-container pre").html('');
+                    if(callback != undefined) {
+                        callback()
+                    }
+                }
             }
         })
     }
 
     this.watchForUnsavedChanges = function(){
-        $("#dataTable").on("change keyup paste", () => this.unsavedChanges = true);
+        let unsavedChangesTrue = () => this.unsavedChanges = true;
+
+        $("#dataTable").on("change keyup paste", unsavedChangesTrue);
+        $("#dataContainerContainer").on("change paste", "#dataTable input", unsavedChangesTrue);
+        $("#dataContainerContainer").on("change paste", "#jsonEditorContainer", unsavedChangesTrue);
 
         window.addEventListener("beforeunload", e => {
             if(this.hasUnsavedChanges()){

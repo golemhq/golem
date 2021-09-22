@@ -1,64 +1,87 @@
 Test data
 ==================================================
 
-The data for each test can be stored inside the test or in a separate CSV file.
-To select which location Golem should use, set the *test_data* setting to 'csv' or 'infile'.
+A test file can have one of three different types of data sources: CSV, JSON and internal.
 
 
 ## CSV Data
 
-When *"test_data"* setting is set to "csv" the data will be saved in a separate csv file in the same folder as the test.
+The CSV data file must have the same filename as the test file and be located in the same folder.
+Note that: All CSV values are considered strings.
+If you need different value types use JSON or internal data.
 
-**Note**: All csv values are considered strings. If you need different value types use the 'infile' setting.
-
-
-## Infile Data
-
-When using *"test_data": "infile"* in settings different Python variable types can be used. **Strings must be defined in quotes in the Web Module data table**.
-
-![data table infile](_static/img/data-infile.png "Test With Data Table")
-
-The test code looks like this:
-
-**test_with_infile_data.py**
+**test_01.csv**
 ```
-description = 'Hey! this test has infile data!'
+name,age
+John,23
+Marie,32
+```
+
+**test_01.py**
+```python
+def test(data):
+    print(data.name, data.age)
+```
+
+## JSON Data
+
+The JSON data file must have the same filename as the test file and be located in the same folder.
+Valid JSON data must be an object (dictionary), or an array of objects (list of dictionaries).
+Invalid data is ignored.
+
+**test_02.json**
+```json
+[
+   {
+      "item_id": 5143,
+      "price": 2134.55,
+   },
+   {
+      "item_id": 8429,
+      "price": 462.21,
+   }
+]
+```
+
+**test_01.py**
+```python
+def test(data):
+    print(data.item_id, data.price)
+```
+
+## Internal Data
+
+Internal data must be a variable with name "data" defined inside the test file and of type either dictionary or list of dictionaries.
+
+**test_03.py**
+```python
 
 data = [
     {
-        'numbers': 12,
-        'boolean': False,
-        'none': None,
-        'list': [1,2,3],
-        'dict': {'key': 'string'},
-        'tuple': (1, '2', 3.0),
-        'str_single': 'test',
-        'str_double': "test",
+        'name': 'Chicken S Rice',
+        'price': 100,
+        'discount': True
     },
     {
-        'numbers': 12,
-        'boolean': True,
-        'none': None,
-        'list': ['a', 'b', 'c'],
-        'dict': {"key": 12},
-        'tuple': ('a', 'a"b"c', "a'b'c"),
-        'str_single': 'a "b" c',
-        'str_double': "a 'b' c",
+        'customer': 'Paneer Schezwan Rice',
+        'price': 110 
+        'discount': False,
     },
 ]
 
 def test(data):
-    navigate('some_url')
-    send_keys(('id', 'searchInput'), data.str_single)
+    print(data.name, data.price, data.discount)
     
 ```
 
-Infile data is stored as a list of dictionaries. Each dictionary is a different test set.
+## Repeating the test based on data
 
+When the data is a list (or array) with more than one item, or a CSV table with more than one row,
+the test will repeat once per each test data set.
 
 ## Adding Values to Data at Runtime
 
-Values can be added to the data object using the *store* action
+Values can be added to the data object using the *store* action.
 
 ```python
 def test(data):
@@ -68,7 +91,7 @@ def test(data):
 
 ## Accesing data during the test
 
-Data object is present in the execution module during the test.
+The data object is present in the execution module during the test.
 
 ```python
 from golem import execution
@@ -76,7 +99,7 @@ from golem import execution
 print(execution.data.my_value)
 ```
 
-Data object is shared among all the functions of a test file::
+The data object is shared among all the test functions of a test file:
 
 ```python
 def setup(data):
@@ -94,7 +117,7 @@ def test_two(data):
 
 The *get_data* action can be used to retrieve the data object:
 
-page1.py
+**page1.py**
 ```python
 from golem import actions
 
@@ -109,7 +132,7 @@ This file can be used to store environment specific data, such as the URL and th
 
 For example:
 
-environments.json
+**environments.json**
 ```json
 {
     "testing": {
@@ -139,7 +162,7 @@ environments.json
 
 During the execution of the test, the environment data is stored in data.env:
 
-test1.py
+**test1.py**
 ```python
 def test(data):
     navigate(data.env.url)
@@ -158,7 +181,7 @@ There are two ways to define the environment (or environments) for a test or sui
 
 2. from the definition of a suite:
     
-    suite1.py
+    **suite1.py**
     ```python
     environments = ['testing']
     ```

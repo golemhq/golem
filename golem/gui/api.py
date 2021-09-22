@@ -7,10 +7,16 @@ from flask.blueprints import Blueprint
 from flask_login import current_user
 from itsdangerous import BadSignature, SignatureExpired
 
-from golem.core import (environment_manager, settings_manager,
-                        test as test_module, page as page_module,
-                        suite as suite_module, session, utils, tags_manager,
-                        test_directory)
+from golem.core import environment_manager
+from golem.core import page as page_module
+from golem.core import settings_manager
+from golem.core import suite as suite_module
+from golem.core import session
+from golem.core import tags_manager
+from golem.core import test as test_module
+from golem.core import test_directory
+from golem.core import test_data as test_data_module
+from golem.core import utils
 from golem.core.page import Page
 from golem.core.project import Project, create_project, delete_project
 from golem.report import report
@@ -666,13 +672,18 @@ def test_components():
 def test_code_save():
     project = request.json['project']
     test_name = request.json['testName']
-    table_test_data = request.json['testData']
+    test_data = request.json['testData']
     content = request.json['content']
     _verify_permissions(Permissions.STANDARD, project)
-    test_module.edit_test_code(project, test_name, content, table_test_data)
-    path = test_module.Test(project, test_name).path
-    _, error = utils.import_module(path)
-    return jsonify({'error': error})
+    test_error = None
+    data_errors = []
+    if test_data['json']:
+        data_errors.extend(utils.json_parse_error(test_data['json']))
+    if not data_errors:
+        test_module.edit_test_code(project, test_name, content, test_data)
+        path = test_module.Test(project, test_name).path
+        _, test_error = utils.import_module(path)
+    return jsonify({'testError': test_error, 'dataErrors': data_errors})
 
 
 @api_bp.route('/test/delete', methods=['DELETE'])
@@ -735,14 +746,20 @@ def test_save():
     test_name = request.json['testName']
     description = request.json['description']
     pages = request.json['pages']
-    test_data_content = request.json['testData']
+    test_data = request.json['testData']
     test_steps = request.json['steps']
     tags = request.json['tags']
     skip = request.json['skip']
+    errors = []
     _verify_permissions(Permissions.STANDARD, project)
-    test_module.edit_test(project, test_name, description, pages, test_steps,
-                          test_data_content, tags, skip)
-    return jsonify('test-saved')
+    if test_data['internal'] is not None:
+        errors.extend(test_data_module.validate_internal_data(test_data['internal']))
+    if test_data['json'] is not None and test_data['json'].strip():
+        errors.extend(utils.json_parse_error(test_data['json']))
+    if not errors:
+        test_module.edit_test(project, test_name, description, pages, test_steps,
+                              test_data, tags, skip)
+    return jsonify({'errors': errors})
 
 
 @api_bp.route('/users')
