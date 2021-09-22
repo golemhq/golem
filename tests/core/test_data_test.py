@@ -184,7 +184,7 @@ class TestValidateInternalData:
 
     def test_validate_internal_data_invalid(self):
         result = test_data.validate_internal_data('data = [{"foo": "bar"]')
-        assert '^\nSyntaxError: invalid syntax\n' in result[0]
+        assert '^\nSyntaxError:' in result[0]
         assert len(result) == 1
 
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Added JSON as data source, internal data uses a Python code editor, test_data setting is deprecated [#225](https://github.com/golemhq/golem/issues/225)
+
 ## [0.10.1] - 2021-07-30
 
 ### Added
