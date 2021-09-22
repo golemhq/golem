@@ -59,7 +59,7 @@ var Test = new function(){
                             <input type="text">
                         </span>
                     </h4>
-                    <div class="test-function-remove-icon">
+                    <div class="inline-remove-icon">
                         <a href="javascript:void(0)" onclick="Test.Utils.deleteTestFunction(this)">
                             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                         </a>
@@ -207,7 +207,7 @@ var Test = new function(){
     }
 
     this.refreshValueInputsAutocomplete = function(){
-        let dataTableHeaders = TestCommon.DataTable.getHeaders();
+        let dataTableHeaders = TestCommon.DataSource.DataTable.getHeaders();
         let lookup = []
         dataTableHeaders.forEach(function(header){
             lookup.push(`data.${header}`)
@@ -302,7 +302,7 @@ var Test = new function(){
         runAfter = config.runAfter || false;
         let description = $("#description").val();
         let pageObjects = Test.importedPages.map(x => x.name);
-        let testData = TestCommon.DataTable.getData();
+        let testData = TestCommon.DataSource.getData();
         let testSteps = Test.Utils.getSteps();
         let tags = [];
         if($("#tags").val().length > 0){
@@ -331,10 +331,14 @@ var Test = new function(){
             'skip': skip
         }
 
-        xhr.put('/api/test/save', data, () => {
-            Test.unsavedChanges = false;
-            Main.Utils.toast('success', `Test ${Test.file.fullName} saved`, 3000);
-            if(runAfter){ Main.TestRunner.runTest(this.file.project, Test.file.fullName) }
+        xhr.put('/api/test/save', data, (result) => {
+            if(result.errors.length) {
+                result.errors.forEach(error => Main.Utils.toast('error', error, 10000));
+            } else {
+                Test.unsavedChanges = false;
+                Main.Utils.toast('success', `Test ${Test.file.fullName} saved`, 3000);
+                if(runAfter){ Main.TestRunner.runTest(this.file.project, Test.file.fullName) }
+            }
         })
     }
 
@@ -568,7 +572,9 @@ var Test = new function(){
             $(".step-first-input").on("change keyup paste", unsavedChangesTrue);
             $(".parameter-input").on("change keyup paste", unsavedChangesTrue);
             $("#description").on("change keyup paste", unsavedChangesTrue);
-            $("#dataTable").on("change keyup paste", unsavedChangesTrue);
+            $("#dataContainerContainer").on("change paste", "#dataTable input", unsavedChangesTrue);
+            $("#dataContainerContainer").on("change paste", "#jsonEditorContainer", unsavedChangesTrue);
+            $("#dataContainerContainer").on("change paste", "#internalEditorContainer", unsavedChangesTrue);
 
             window.addEventListener("beforeunload", function (e) {
                 if(Test.unsavedChanges){

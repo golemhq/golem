@@ -7,6 +7,16 @@
 	width: calc(100% - 20px);
 }
 
+.inline-remove-icon {
+    display: inline-block;
+    margin-top: 10px;
+    margin-left: 5px;
+}
+
+.inline-remove-icon a {
+	color: black;
+}
+
 /* data table */
 
 #dataContainerContainer {
@@ -41,4 +51,18 @@
 	border: 0px;
 	padding: 4px 4px;
 	height: 25px;
+}
+
+
+/* CODE EDITOR CODEMIRROR */
+
+.CodeMirror {
+	font-size:13px;
+	height: auto;
+	border-radius: 3px;
+	border: 1px solid #e0e0e0;
+}
+
+.CodeMirror-scroll {
+    min-height: 150px
 }

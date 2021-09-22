@@ -129,7 +129,7 @@ def test_case_view(project, test_name):
         return render_template('common_element_error.html', project=project,
                                item_name=test_name, content=content)
     else:
-        test_data = test_data_module.get_test_data(project, test_name, repr_strings=True)
+        test_data = test_data_module.get_test_data(project, test_name)
         return render_template('test_builder/test.html', project=project,
                                test_components=test.components,
                                test_case_name=test.stem_name,
@@ -147,12 +147,12 @@ def test_case_code_view(project, test_name):
     if not test.exists:
         abort(404, 'The test {} does not exist'.format(test_name))
     _, error = utils.import_module(test.path)
-    external_data = test_data_module.get_external_test_data(project, test_name)
-    test_data_setting = session.settings['test_data']
+    csv_data = test_data_module.get_csv_test_data(project, test_name)
+    json_data = test_data_module.get_json_test_data_as_string(project, test_name)
     return render_template('test_builder/test_code.html', project=project,
                            test_case_contents=test.code, test_case_name=test.stem_name,
-                           full_test_case_name=test_name, test_data=external_data,
-                           test_data_setting=test_data_setting, error=error)
+                           full_test_case_name=test_name, csv_data=csv_data,
+                           json_data=json_data, error=error)
 
 
 # PAGE OBJECT VIEW

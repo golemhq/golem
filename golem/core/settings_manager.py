@@ -25,9 +25,6 @@ SETTINGS_FILE_CONTENT = (
 // Highlight elements on the screen when found
 "highlight_elements": false,
 
-// Where to store test data. Options are: 'infile', 'csv'. Default is 'csv'
-"test_data": "csv",
-
 // Custom wait method to use before each step, must be defined inside extend.py
 "wait_hook": null,
 
@@ -83,7 +80,6 @@ DEFAULTS = [
     ('screenshot_on_step', False),
     ('screenshot_on_end', False),
     ('highlight_elements', False),
-    ('test_data', 'csv'),
     ('wait_hook', None),
     ('default_browser', 'chrome'),
     ('chromedriver_path', None),

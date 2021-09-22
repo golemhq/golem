@@ -227,7 +227,7 @@ class TestDefineExecutionList:
             }
 
         ]
-        test_data.save_external_test_data_file(project, test_name, tdata)
+        test_data.save_csv_test_data(project, test_name, tdata)
         execution_runner = exc_runner.ExecutionRunner(project)
         execution_runner.tests = [test_name]
         execution_runner.execution.processes = 1
@@ -258,7 +258,7 @@ class TestDefineExecutionList:
                 'col2': 'd',
             }
         ]
-        test_data.save_external_test_data_file(project, test_name_one, tdata)
+        test_data.save_csv_test_data(project, test_name_one, tdata)
         # create test two
         test_name_two = 'test_two_001'
         test.create_test(project, test_name_two)
@@ -348,7 +348,7 @@ class TestDefineExecutionList:
             {'col1': 'a'},
             {'col1': 'b'}
         ]
-        test_data.save_external_test_data_file(project, test_name_one, tdata)
+        test_data.save_csv_test_data(project, test_name_one, tdata)
         # create test two
         test_name_two = 'test_two_005'
         test.create_test(project, test_name_two)

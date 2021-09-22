@@ -221,3 +221,11 @@ def subdirectories(path):
         if os.path.isdir(os.path.join(path, dirname)):
             subdirs.append((dirname, subpath))
     return subdirs
+
+
+def json_parse_error(json_str):
+    try:
+        json.loads(json_str)
+    except json.JSONDecodeError:
+        return [traceback.format_exc(limit=0)]
+    return []

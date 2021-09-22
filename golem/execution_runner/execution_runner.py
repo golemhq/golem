@@ -183,7 +183,7 @@ class ExecutionRunner:
         secrets = secrets_manager.get_secrets(self.project.name)
 
         for test in self.tests:
-            data_sets = test_data.get_test_data(self.project.name, test)
+            data_sets = test_data.get_parsed_test_data(self.project.name, test)
 
             if len(data_sets) > 1 or len(envs) > 1 or len(self.execution.browsers) > 1:
                 # If the test file contain multiple data sets, envs or browsers

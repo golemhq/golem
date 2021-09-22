@@ -6,6 +6,7 @@ import pytest
 from golem.core import test as test_module, settings_manager
 from golem.core.project import Project
 from golem.core.test import Test
+from golem.core import test_data as test_data_module
 
 
 SAMPLE_TEST_CONTENT = """
@@ -40,6 +41,12 @@ EMPTY_STEPS = {
         'test_name': []
     },
     'teardown': []
+}
+
+EMPTY_TEST_DATA = {
+    'csv': None,
+    'json': None,
+    'internal': None
 }
 
 
@@ -309,7 +316,7 @@ class TestDuplicateTest:
 
 class TestEditTest:
 
-    def test_edit_test_data_infile(self, project_function, test_utils):
+    def test_edit_test_data_internal(self, project_function, test_utils):
         _, project = project_function.activate()
         test_name = test_utils.create_random_test(project)
         description = 'description'
@@ -325,10 +332,11 @@ class TestEditTest:
             },
             'teardown': []
         }
-        data = [{
-            'key': '\'value\''
-        }]
-        settings_manager.save_project_settings(project, '{"test_data": "infile"}')
+        data = {
+            'csv': None,
+            'json': None,
+            'internal': "data = [{'key': 'value'}]"
+        }
         test_module.edit_test(project, test_name, description, pages, test_steps, data, [])
         expected = (
             '\n'
@@ -337,11 +345,7 @@ class TestEditTest:
             'pages = [\'page1\',\n'
             '         \'page2\']\n'
             '\n'
-            'data = [\n'
-            '    {\n'
-            '        \'key\': \'value\',\n'
-            '    },\n'
-            ']\n'
+            'data = [{\'key\': \'value\'}]\n'
             '\n\n'
             'def setup(data):\n'
             '    click(elem1)\n'
@@ -365,10 +369,11 @@ class TestEditTest:
             },
             'teardown': []
         }
-        data = [{
-            'key': '\'value\''
-        }]
-        settings_manager.save_project_settings(project, '{"test_data": "csv"}')
+        data = {
+            'csv': [{'key': 'value'}],
+            'json': None,
+            'internal': None
+        }
         test_module.edit_test(project, test_name, description, pages, test_steps, data, [])
         expected = (
             '\n'
@@ -379,11 +384,9 @@ class TestEditTest:
             '    send_keys(elem2, keys)\n')
         with open(Test(project, test_name).path) as f:
             assert f.read() == expected
-        data_path = os.path.join(Project(project).test_directory_path,
-                                 '{}.csv'.format(test_name))
         expected = ('key\n'
-                    '\'value\'\n')
-        with open(data_path) as f:
+                    'value\n')
+        with open(test_data_module.csv_file_path(project, test_name)) as f:
             assert f.read() == expected
 
     def test_edit_test_explicit_page_import(self, project_function, test_utils):
@@ -392,7 +395,7 @@ class TestEditTest:
         pages = ['page1', 'module.page2']
         settings_manager.save_project_settings(project, '{"implicit_page_import": false}')
         test_module.edit_test(project, test_name, description='', pages=pages,
-                              steps=EMPTY_STEPS, test_data=[], tags=[])
+                              steps=EMPTY_STEPS, test_data=EMPTY_TEST_DATA, tags=[])
         expected = ('from projects.{}.pages import page1\n'
                     'from projects.{}.pages.module import page2\n'
                     '\n'
@@ -407,7 +410,7 @@ class TestEditTest:
         test_name = test_utils.create_random_test(project)
         settings_manager.save_project_settings(project, '{"implicit_actions_import": false}')
         test_module.edit_test(project, test_name, description='', pages=[],
-                              steps=EMPTY_STEPS, test_data=[], tags=[])
+                              steps=EMPTY_STEPS, test_data=EMPTY_TEST_DATA, tags=[])
         expected = ('from golem import actions\n\n\n'
                     'def test_name(data):\n'
                     '    pass\n')
@@ -418,7 +421,7 @@ class TestEditTest:
         _, project = project_session.activate()
         test_name = test_utils.create_random_test(project)
         test_module.edit_test(project, test_name, description='', pages=[],
-                              steps=EMPTY_STEPS, test_data=[], tags=[], skip=True)
+                              steps=EMPTY_STEPS, test_data=EMPTY_TEST_DATA, tags=[], skip=True)
         path = Test(project, test_name).path
         expected = ('\n'
                     'skip = True\n\n\n'
@@ -428,7 +431,7 @@ class TestEditTest:
             assert f.read() == expected
         # skip is string
         test_module.edit_test(project, test_name, description='', pages=[],
-                              steps=EMPTY_STEPS, test_data=[], tags=[],
+                              steps=EMPTY_STEPS, test_data=EMPTY_TEST_DATA, tags=[],
                               skip='please skip this')
         path = Test(project, test_name).path
         expected = ('\n'
@@ -443,7 +446,11 @@ class TestEditTestCode:
 
     def test_edit_test_code_csv_data(self, project_session, test_utils):
         _, project = project_session.activate()
-        test_data = [{'key': "'value'"}]
+        test_data = {
+            'csv': [{'key': "'value'"}],
+            'json': '',
+            'internal': ''
+        }
         settings_manager.save_project_settings(project, '{"test_data": "csv"}')
         test_name = test_utils.create_random_test(project)
         test_module.edit_test_code(project, test_name, SAMPLE_TEST_CONTENT, test_data)
@@ -600,9 +607,9 @@ class TestTestComponents:
         assert Test(project, test_name).components['skip'] is False
         # skip is True
         test_module.edit_test(project, test_name, description='', pages=[],
-                              steps=EMPTY_STEPS, test_data=[], tags=[], skip=True)
+                              steps=EMPTY_STEPS, test_data=EMPTY_TEST_DATA, tags=[], skip=True)
         assert Test(project, test_name).components['skip'] is True
         # skip is string
         test_module.edit_test(project, test_name, description='', pages=[],
-                              steps=EMPTY_STEPS, test_data=[], tags=[], skip='please skip')
+                              steps=EMPTY_STEPS, test_data=EMPTY_TEST_DATA, tags=[], skip='please skip')
         assert Test(project, test_name).components['skip'] == 'please skip'
