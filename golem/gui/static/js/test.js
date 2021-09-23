@@ -123,7 +123,8 @@ var Test = new function(){
             indentWithTabs: false,
             extraKeys: {
                 Tab: TestCommon.Utils.convertTabToSpaces
-            }
+            },
+            viewportMargin: Infinity
         });
         setTimeout(() => editor.refresh(), 250);
         editor.on('change', editor => Test.unsavedChanges = true);

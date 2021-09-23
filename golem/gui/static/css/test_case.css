@@ -209,6 +209,10 @@ body.modal-open {
     border-radius: 3px;
 }
 
+.code-block .CodeMirror-scroll {
+    min-height: 50px
+}
+
 .CodeMirror-lines {
   padding: 6px 0; /* Vertical padding around content */
 }
