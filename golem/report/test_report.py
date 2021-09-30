@@ -208,7 +208,7 @@ def screenshot_path(project, execution, timestamp, test_file, test, set_name, sc
     return os.path.join(path, screenshot_file)
 
 
-def initialize_test_file_report(test_file, tests, set_name, reportdir):
+def initialize_test_file_report(test_file, tests, set_name, reportdir, environment, browser_name):
     """Given a test file and a list of test functions initialize
     test file json report with default values and result `pending`
     """
@@ -222,6 +222,8 @@ def initialize_test_file_report(test_file, tests, set_name, reportdir):
         report['test'] = test
         report['result'] = ResultsEnum.PENDING
         report['set_name'] = set_name
+        report['environment'] = environment
+        report['browser'] = browser_name
         test_list.append(report)
 
     with open(json_report_path, 'w', encoding='utf-8') as f:

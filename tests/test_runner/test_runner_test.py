@@ -74,7 +74,6 @@ SUCCESS_MESSAGE = 'Test Result: SUCCESS'
 CODE_ERROR_MESSAGE = 'Test Result: CODE ERROR'
 FAILURE_MESSAGE = 'Test Result: FAILURE'
 ERROR_MESSAGE = 'Test Result: ERROR'
-SKIPPED_MESSAGE = 'Test Result: SKIPPED'
 
 
 class TestRunTest:
@@ -90,7 +89,6 @@ def test(data)
 step('this step wont be run')
 """
         runfix.run_test(code)
-        # verify console logs
         r = caplog.records
         assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
         assert r[1].message == 'Browser: chrome'
@@ -99,7 +97,6 @@ step('this step wont be run')
         error_contains_ver2 = 'def test(data)\n                  ^\nSyntaxError: invalid syntax'
         # TODO: diff between py 3.9 and py < 3.9
         assert error_contains in r[2].message or error_contains_ver2 in r[2].message
-        # verify report.json
         report = runfix.read_report()
         assert len(report) == 1
         report = report[0]
@@ -131,15 +128,14 @@ element2 = ('css', '.oh.no')
         page_name = test_utils.create_random_page(runfix.project, code=page_code)
         code = """
 pages = ['{}']
-def setup(data):
+def before_test(data):
     step('this step wont be run')
 def test(data):
     step('this step wont be run')
-def teardown(data):
+def after_Test(data):
     step('this step wont be run')
 """.format(page_name)
         runfix.run_test(code)
-        # verify console logs
         r = caplog.records
         assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
         assert r[1].message == 'Browser: chrome'
@@ -150,7 +146,6 @@ def teardown(data):
                              "SyntaxError: invalid syntax"  # Python 3.8 version
         assert error_contains_one in r[2].message or \
                error_contains_two in r[2].message
-        # verify report.json
         r = runfix.read_report()
         assert len(r) == 1
         r = r[0]
@@ -176,26 +171,24 @@ def teardown(data):
         code = """
 description = 'some description'
 
-def setup(data):
-    step('setup step')
+def before_test(data):
+    step('before_test step')
 
 def test_one(data):
     step('test step')
 
-def teardown(data):
-    step('teardown step')
+def after_test(data):
+    step('after_test step')
 """
         runfix.run_test(code)
-        # verify console logs
         r = caplog.records
         assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
         assert r[1].message == 'Browser: chrome'
-        assert r[2].message == 'setup step'
+        assert r[2].message == 'before_test step'
         assert r[3].message == 'Test started: test_one'
         assert r[4].message == 'test step'
         assert r[5].message == SUCCESS_MESSAGE
-        assert r[6].message == 'teardown step'
-        # verify report.json
+        assert r[6].message == 'after_test step'
         r = runfix.read_report()
         assert len(r) == 1
         r = r[0]
@@ -208,9 +201,7 @@ def teardown(data):
         assert r['result'] == ResultsEnum.SUCCESS
         assert r['set_name'] == ''
         assert r['steps'] == [
-            # {'message': 'setup step', 'screenshot': None, 'error': None},
             {'message': 'test step', 'screenshot': None, 'error': None},
-            # {'message': 'teardown step', 'screenshot': None, 'error': None},
         ]
         assert r['test_data'] == {}
         assert 'elapsed_time' in r
@@ -224,8 +215,8 @@ def teardown(data):
         code = """
 description = 'some description'
 
-def setup(data):
-    step('setup step')
+def before_test(data):
+    step('before_test step')
 
 def test_one(data):
     step('test one step')
@@ -233,23 +224,21 @@ def test_one(data):
 def test_two(data):
     step('test two step')
 
-def teardown(data):
-    step('teardown step')
+def after_test(data):
+    step('after_test step')
 """
         runfix.run_test(code)
-        # verify console logs
         r = caplog.records
         assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
         assert r[1].message == 'Browser: chrome'
-        assert r[2].message == 'setup step'
+        assert r[2].message == 'before_test step'
         assert r[3].message == 'Test started: test_one'
         assert r[4].message == 'test one step'
         assert r[5].message == SUCCESS_MESSAGE
         assert r[6].message == 'Test started: test_two'
         assert r[7].message == 'test two step'
         assert r[8].message == SUCCESS_MESSAGE
-        assert r[9].message == 'teardown step'
-        # verify report.json
+        assert r[9].message == 'after_test step'
         r = runfix.read_report()
         assert len(r) == 2
         assert r[0]['test_file'] == runfix.test_name
@@ -272,8 +261,8 @@ def teardown(data):
         code = """
 description = 'some description'
 
-def setup(data):
-    step('setup step')
+def before_test(data):
+    step('before_test step')
 
 def test_one(data):
     step('test one step')
@@ -281,21 +270,21 @@ def test_one(data):
 def test_two(data):
     assert False
 
-def teardown(data):
-    step('teardown step')
+def after_test(data):
+    step('after_test step')
 """
         runfix.run_test(code)
         r = caplog.records
         assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
         assert r[1].message == 'Browser: chrome'
-        assert r[2].message == 'setup step'
+        assert r[2].message == 'before_test step'
         assert r[3].message == 'Test started: test_one'
         assert r[4].message == 'test one step'
         assert r[5].message == SUCCESS_MESSAGE or r[5].message == FAILURE_MESSAGE
         assert r[6].message == 'Test started: test_two'
         assert 'AssertionError' in r[7].message
         assert r[8].message == FAILURE_MESSAGE or r[5].message == SUCCESS_MESSAGE
-        assert r[9].message == 'teardown step'
+        assert r[9].message == 'after_test step'
         r = runfix.read_report()
         assert len(r) == 2
         assert r[0]['test_file'] == runfix.test_name
@@ -319,8 +308,8 @@ def teardown(data):
         code = """
 description = 'some description'
 
-def setup(data):
-    step('setup step')
+def before_test(data):
+    step('before_test step')
 
 def test_one(data):
     assert 2 + 2 == 5
@@ -328,21 +317,21 @@ def test_one(data):
 def test_two(data):
     assert False
 
-def teardown(data):
-    step('teardown step')
+def after_test(data):
+    step('after_test step')
 """
         runfix.run_test(code)
         r = caplog.records
         assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
         assert r[1].message == 'Browser: chrome'
-        assert r[2].message == 'setup step'
+        assert r[2].message == 'before_test step'
         assert r[3].message == 'Test started: test_one'
         assert 'AssertionError' in r[4].message
         assert r[5].message == FAILURE_MESSAGE
         assert r[6].message == 'Test started: test_two'
         assert 'AssertionError' in r[7].message
         assert r[8].message == FAILURE_MESSAGE
-        assert r[9].message == 'teardown step'
+        assert r[9].message == 'after_test step'
         r = runfix.read_report()
         assert len(r) == 2
         assert r[0]['test_file'] == r[1]['test_file'] == runfix.test_name
@@ -355,39 +344,27 @@ def teardown(data):
         assert r[1]['test'] == 'test_two'
         assert r[1]['errors'][0]['message'] == 'AssertionError: '
 
-    def test_file_has_no_test_function(self, runfix, caplog):
+    def test_file_has_no_test_functions(self, runfix, caplog):
         """Test does not have any function starting with 'test'"""
         code = """
 description = 'some description'
 
-def setup(data):
-    step('setup step')
+def before_test(data):
+    step('before_test step')
 
 def this_is_not_a_test(data):
     step('test step')
 
-def teardown(data):
-    step('teardown step')
+def after_test(data):
+    step('after_test step')
 """
         runfix.run_test(code)
-        # verify console logs
         r = caplog.records
         assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
         assert r[1].message == 'Browser: chrome'
         assert r[2].message == 'No tests were found for file: {}'.format(runfix.test_name)
-        # verify report.json
-        report = runfix.read_report()
-        assert len(report) == 1
-        report = report[0]
-        assert report['test_file'] == runfix.test_name
-        assert report['test'] == 'setup'
-        assert report['errors'] == [
-            {
-                'message': 'No tests were found for file: {}'.format(runfix.test_name),
-                'description': ''
-            }
-        ]
-        assert report['result'] == ResultsEnum.NOT_RUN
+        assert len(r) == 3
+        # assert report json was not generated
 
     @pytest.mark.slow
     def test_success_with_data(self, runfix, caplog):
@@ -395,14 +372,14 @@ def teardown(data):
         code = """
 description = 'some description'
     
-def setup(data):
-    step('setup step')
+def before_test(data):
+    step('before_test step')
 
 def test_name(data):
     step('test step')
 
-def teardown(data):
-    step('teardown step')
+def after_test(data):
+    step('after_test step')
 """
         test_data = {
             'username': 'username1',
@@ -410,7 +387,6 @@ def teardown(data):
         }
         secrets = dict(very='secret')
         runfix.run_test(code, test_data=test_data, secrets=secrets)
-        # verify console logs
         r = caplog.records
         assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
         assert r[1].message == 'Browser: chrome'
@@ -418,12 +394,11 @@ def teardown(data):
         value_a = 'Using data:\n    username: username1\n    password: password1'
         value_b = 'Using data:\n    password: password1\n    username: username1'
         assert r[2].message in [value_a, value_b]
-        assert r[3].message == 'setup step'
+        assert r[3].message == 'before_test step'
         assert r[4].message == 'Test started: test_name'
         assert r[5].message == 'test step'
         assert r[6].message == SUCCESS_MESSAGE
-        assert r[7].message == 'teardown step'
-        # verify report.json
+        assert r[7].message == 'after_test step'
         r = runfix.read_report()
         assert len(r) == 1
         r = r[0]
@@ -437,190 +412,177 @@ def teardown(data):
         # Python 3.4 TODO
         assert r['set_name'] == ''  # set_name is empty because it only has one set of data
         assert r['steps'] == [
-            # {'message': 'setup step', 'screenshot': None, 'error': None},
             {'message': 'test step', 'screenshot': None, 'error': None},
-            # {'message': 'teardown step', 'screenshot': None, 'error': None},
         ]
         assert r['test_data'] == {'username': "'username1'", 'password': "'password1'"}
         assert 'elapsed_time' in r
         assert 'timestamp' in r
         assert len(r.keys()) == 12
 
-    def test_assertion_failure_in_setup(self, runfix, caplog):
-        """The test ends with 'failure' when the setup function throws AssertionError.
+    def test_assertion_failure_in_before_test(self, runfix, caplog):
+        """The test ends with 'failure' when the before_test function throws AssertionError.
         Tests are not run
-        Teardown is run
+        after_test is run
         """
         code = """
 description = 'desc'
 
-def setup(data):
-    fail('setup step fail')
+def before_test(data):
+    fail('before_test step fail')
 
 def test_one(data):
     step('test step')
 
-def teardown(data):
-    step('teardown step')
+def after_test(data):
+    step('after_test step')
 """
         runfix.run_test(code)
-        # verify console logs
         r = caplog.records
         assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
         assert r[1].message == 'Browser: chrome'
         assert r[2].levelname == 'ERROR'
-        assert 'setup step fail' in r[2].message
-        assert 'AssertionError: setup step fail' in r[2].message
-        assert r[3].message == 'teardown step'
-        # verify report.json
+        assert 'before_test step fail' in r[2].message
+        assert 'AssertionError: before_test step fail' in r[2].message
+        assert r[3].message == 'after_test step'
         r = runfix.read_report()
         assert len(r) == 1
         r = r[0]
         assert r['test_file'] == runfix.test_name
-        assert r['test'] == 'setup'
+        assert r['test'] == 'before_test'
         assert r['description'] == 'desc'
         assert len(r['errors']) == 1
-        assert 'setup step fail' in r['errors'][0]['message']
+        assert 'before_test step fail' in r['errors'][0]['message']
         assert r['result'] == ResultsEnum.FAILURE
 
     @pytest.mark.slow
-    def test_failure_and_error_in_setup(self, runfix, caplog):
-        """The test ends with 'failure' when the setup function throws AssertionError,
-        even when there's an error in setup
+    def test_failure_and_error_in_before_test(self, runfix, caplog):
+        """The test ends with 'failure' when the before_test function throws AssertionError,
+        even when there's an error in before_test
         Test is not run
-        Teardown is run
+        after_test is run
         """
         code = """
 description = 'desc'
 
-def setup(data):
-    error('error in setup')
-    fail('setup step fail')
+def before_test(data):
+    error('error in before_test')
+    fail('before_test step fail')
 
 def test_one(data):
     step('test step')
 
-def teardown(data):
-    step('teardown step')
+def after_test(data):
+    step('after_test step')
 """
         runfix.run_test(code)
-        # verify report.json
         r = runfix.read_report()
         r = r[0]
         assert len(r['errors']) == 2
         assert r['result'] == ResultsEnum.FAILURE
-        assert r['errors'][0]['message'] == 'error in setup'
-        assert r['errors'][1]['message'] == 'AssertionError: setup step fail'
+        assert r['errors'][0]['message'] == 'error in before_test'
+        assert r['errors'][1]['message'] == 'AssertionError: before_test step fail'
 
     # A5
-    def test_failure_in_setup_error_in_teardown(self, runfix, caplog):
-        """Setup throws AssertionError
-        Teardown throws error
-        Test ends with 'failure'
+    def test_failure_in_before_test_error_in_after_test(self, runfix, caplog):
+        """before_test throws AssertionError
+        after_test throws error
         tests are not run
         """
         code = """
 description = 'desc'
 
-def setup(data):
-    fail('setup step fail')
+def before_test(data):
+    fail('before_test step fail')
 
 def test_one(data):
     step('test step')
 
-def teardown(data):
-    step('teardown step')
-    error('error in teardown')
+def after_test(data):
+    step('after_test step')
+    error('error in after_test')
 """
         runfix.run_test(code)
-        # verify console logs
         r = caplog.records
-        assert 'AssertionError: setup step fail' in r[2].message
-        assert r[3].message == 'teardown step'
-        assert r[4].message == 'error in teardown'
-        # verify report.json
+        assert 'AssertionError: before_test step fail' in r[2].message
+        assert r[3].message == 'after_test step'
+        assert r[4].message == 'error in after_test'
         r = runfix.read_report()
-        assert len(r) == 1
-        r = r[0]
-        assert len(r['errors']) == 2
-        assert r['result'] == ResultsEnum.FAILURE
-        assert r['errors'][0]['message'] == 'AssertionError: setup step fail'
-        assert r['errors'][1]['message'] == 'error in teardown'
+        assert len(r) == 2
+        assert r[0]['test'] == 'before_test'
+        assert len(r[0]['errors']) == 1
+        assert r[0]['result'] == ResultsEnum.FAILURE
+        assert r[0]['errors'][0]['message'] == 'AssertionError: before_test step fail'
+        assert r[1]['test'] == 'after_test'
+        assert len(r[1]['errors']) == 1
+        assert r[1]['result'] == ResultsEnum.ERROR
+        assert r[1]['errors'][0]['message'] == 'error in after_test'
 
     @pytest.mark.slow
-    def test_failure_in_setup_exception_in_teardown(self, runfix, caplog):
-        """Setup throws AssertionError
-        Teardown throws AssertionError
+    def test_failure_in_before_test_exception_in_after_test(self, runfix, caplog):
+        """before_test throws AssertionError
+        after_test throws AssertionError
         Test ends with 'failure'
         tests are not run
         """
         code = """
 description = 'desc'
 
-def setup(data):
-    fail('setup step fail')
+def before_test(data):
+    fail('before_test step fail')
 
 def test_one(data):
     step('test step')
 
-def teardown(data):
-    step('teardown step')
+def after_test(data):
+    step('after_test step')
     foo = bar
 """
         runfix.run_test(code)
-        # verify console logs
         r = caplog.records
-        assert 'AssertionError: setup step fail' in r[2].message
-        assert r[3].message == 'teardown step'
+        assert 'AssertionError: before_test step fail' in r[2].message
+        assert r[3].message == 'after_test step'
         assert "NameError: name 'bar' is not defined" in r[4].message
-        # verify report.json
         r = runfix.read_report()
         assert len(r) == 2
-        assert r[0]['test'] == 'setup'
+        assert r[0]['test'] == 'before_test'
         assert r[0]['result'] == ResultsEnum.FAILURE
-        assert r[0]['steps'] == []
-        assert len(r[0]['errors']) == 2
-        assert r[0]['errors'][0]['message'] == 'AssertionError: setup step fail'
-        # TODO setup and teardown errors are repeated for both reports
-        assert r[0]['errors'][1]['message'] == "NameError: name 'bar' is not defined"
-        assert r[1]['test'] == 'teardown'
-        # TODO teardown should end with status code error
-        assert r[1]['result'] == ResultsEnum.FAILURE
-        assert r[1]['steps'] == []
-        assert len(r[1]['errors']) == 2
-        assert r[1]['errors'][0]['message'] == 'AssertionError: setup step fail'
-        assert r[1]['errors'][1]['message'] == "NameError: name 'bar' is not defined"
+        assert len(r[0]['steps']) == 1
+        assert len(r[0]['errors']) == 1
+        assert r[0]['errors'][0]['message'] == 'AssertionError: before_test step fail'
+        assert r[1]['test'] == 'after_test'
+        assert r[1]['result'] == ResultsEnum.CODE_ERROR
+        assert len(r[1]['steps']) == 2
+        assert len(r[1]['errors']) == 1
+        assert r[1]['errors'][0]['message'] == "NameError: name 'bar' is not defined"
 
     @pytest.mark.slow
-    def test_failure_in_setup_failure_in_teardown(self, runfix, caplog):
-        """Setup throws AssertionError
-        Teardown throws exception
+    def test_failure_in_before_test_failure_in_after_test(self, runfix, caplog):
+        """before_test throws AssertionError
+        after_test throws exception
         Test ends with 'failure'
         tests are not run
         """
         code = """
 description = 'desc'
 
-def setup(data):
-    fail('setup step fail')
+def before_test(data):
+    fail('before_test step fail')
 
 def test(data):
     step('test step')
 
-def teardown(data):
-    fail('failure in teardown')
+def after_test(data):
+    fail('failure in after_test')
 """
         runfix.run_test(code)
-        # verify console logs
         r = caplog.records
-        assert 'setup step fail' in r[2].message
-        assert 'AssertionError: failure in teardown' in r[3].message
-        # verify report.json
+        assert 'before_test step fail' in r[2].message
+        assert 'AssertionError: failure in after_test' in r[3].message
         r = runfix.read_report()
         assert len(r) == 2
-        assert r[0]['test'] == 'setup'
+        assert r[0]['test'] == 'before_test'
         assert r[0]['result'] == ResultsEnum.FAILURE
-        assert r[1]['test'] == 'teardown'
+        assert r[1]['test'] == 'after_test'
         assert r[1]['result'] == ResultsEnum.FAILURE
 
 #     def test_run_test__exception_in_setup(self, runfix, caplog):
@@ -642,10 +604,8 @@ def teardown(data):
 #     step('teardown step')
 # """
 #         runfix.run_test(code)
-#         # verify console logs
 #         records = caplog.records
 #         assert records[4].message == CODE_ERROR_MESSAGE
-#         # verify report.json
 #         report = runfix.read_report()
 #         assert len(report['errors']) == 1
 #         assert report['result'] == ResultsEnum.CODE_ERROR
@@ -672,10 +632,8 @@ def teardown(data):
 #     step('teardown step')
 # """
 #         runfix.run_test(code)
-#         # verify console logs
 #         records = caplog.records
 #         assert records[5].message == CODE_ERROR_MESSAGE
-#         # verify report.json
 #         report = runfix.read_report()
 #         assert report['result'] == ResultsEnum.CODE_ERROR
 #         assert len(report['steps']) == 3
@@ -702,10 +660,8 @@ def teardown(data):
 #     foo = baz
 # """
 #         runfix.run_test(code)
-#         # verify console logs
 #         records = caplog.records
 #         assert records[4].message == CODE_ERROR_MESSAGE
-#         # verify report.json
 #         report = runfix.read_report()
 #         assert report['result'] == ResultsEnum.CODE_ERROR
 #         assert len(report['steps']) == 2
@@ -732,10 +688,8 @@ def teardown(data):
 #     fail('teardown failure')
 # """
 #         runfix.run_test(code)
-#         # verify console logs
 #         records = caplog.records
 #         assert records[4].message == CODE_ERROR_MESSAGE
-#         # verify report.json
 #         report = runfix.read_report()
 #         assert report['result'] == ResultsEnum.CODE_ERROR
 #         assert len(report['steps']) == 2
@@ -761,10 +715,8 @@ def teardown(data):
 #     step('teardown step')
 # """
 #         runfix.run_test(code)
-#         # verify console logs
 #         records = caplog.records
 #         assert records[5].message == ERROR_MESSAGE
-#         # verify report.json
 #         report = runfix.read_report()
 #         assert report['result'] == ResultsEnum.ERROR
 #         assert len(report['steps']) == 3
@@ -789,10 +741,8 @@ def teardown(data):
 #     foo = bar
 # """
 #         runfix.run_test(code)
-#         # verify console logs
 #         records = caplog.records
 #         assert records[5].message == CODE_ERROR_MESSAGE
-#         # verify report.json
 #         report = runfix.read_report()
 #         assert report['result'] == ResultsEnum.CODE_ERROR
 #         assert len(report['steps']) == 3
@@ -818,10 +768,8 @@ def teardown(data):
 #     fail('teardown fail')
 # """
 #         runfix.run_test(code)
-#         # verify console logs
 #         records = caplog.records
 #         assert records[5].message == FAILURE_MESSAGE
-#         # verify report.json
 #         report = runfix.read_report()
 #         assert report['result'] == ResultsEnum.FAILURE
 #         assert len(report['steps']) == 3
@@ -831,30 +779,28 @@ def teardown(data):
 
     def test_failure_in_test(self, runfix, caplog):
         """a test throws AssertionError
-        teardown() is run
+        after_test() is run
         """
         code = """
 description = 'desc'
 
-def setup(data):
-    step('setup step')
+def before_test(data):
+    step('before_test step')
 
 def test(data):
     step('test step')
     fail('test fail')
 
-def teardown(data):
-    step('teardown step')
+def after_test(data):
+    step('after_test step')
 """
         runfix.run_test(code)
-        # verify console logs
         r = caplog.records
         assert r[3].message == 'Test started: test'
         assert r[4].message == 'test step'
         assert 'AssertionError: test fail' in r[5].message
         assert r[6].message == FAILURE_MESSAGE
-        assert r[7].message == 'teardown step'
-        # verify report.json
+        assert r[7].message == 'after_test step'
         report = runfix.read_report()
         assert len(report) == 1
         r = report[0]
@@ -881,10 +827,8 @@ def teardown(data):
 #     step('teardown step')
 # """
 #         runfix.run_test(code)
-#         # verify console logs
 #         records = caplog.records
 #         assert records[6].message == FAILURE_MESSAGE
-#         # verify report.json
 #         report = runfix.read_report()
 #         assert report['result'] == ResultsEnum.FAILURE
 #         assert len(report['steps']) == 4
@@ -892,31 +836,29 @@ def teardown(data):
 #         assert report['errors'][0]['message'] == 'test error'
 #         assert report['errors'][1]['message'] == 'AssertionError: test fail'
 
-    def test_failure_in_test_exception_in_teardown(self, runfix, caplog):
+    def test_failure_in_test_exception_in_after_test(self, runfix, caplog):
         """test() throws AssertionError
-        teardown() throws exception
+        after_test() throws exception
         """
         code = """
 description = 'desc'
 
-def setup(data):
-    step('setup step')
+def before_test(data):
+    step('before_test step')
 
 def test_one(data):
     fail('test fail')
 
-def teardown(data):
+def after_test(data):
     foo = bar
 """
         runfix.run_test(code)
-        # verify console logs
         r = caplog.records
-        assert r[2].message == 'setup step'
+        assert r[2].message == 'before_test step'
         assert r[3].message == 'Test started: test_one'
         assert 'AssertionError: test fail' in r[4].message
         assert r[5].message == FAILURE_MESSAGE
         assert "NameError: name 'bar' is not defined" in r[6].message
-        # verify report.json
         r = runfix.read_report()
         assert len(r) == 2
         assert r[0]['test'] == 'test_one'
@@ -924,7 +866,7 @@ def teardown(data):
         assert len(r[0]['steps']) == 1
         assert len(r[0]['errors']) == 1
         assert r[0]['errors'][0]['message'] == 'AssertionError: test fail'
-        assert r[1]['test'] == 'teardown'
+        assert r[1]['test'] == 'after_test'
         assert r[1]['result'] == ResultsEnum.CODE_ERROR
         assert len(r[1]['errors']) == 1
         assert r[1]['errors'][0]['message'] == "NameError: name 'bar' is not defined"
@@ -946,10 +888,8 @@ def teardown(data):
 #     fail('teardown fail')
 # """
 #         runfix.run_test(code)
-#         # verify console logs
 #         records = caplog.records
 #         assert records[5].message == FAILURE_MESSAGE
-#         # verify report.json
 #         report = runfix.read_report()
 #         assert report['result'] == ResultsEnum.FAILURE
 #         assert len(report['steps']) == 3
@@ -972,10 +912,8 @@ def teardown(data):
 #     step('teardown step')
 # """
 #         runfix.run_test(code)
-#         # verify console logs
 #         r = caplog.records
 #         assert r[5].message == CODE_ERROR_MESSAGE
-#         # verify report.json
 #         r = runfix.read_report()
 #         assert r['result'] == ResultsEnum.CODE_ERROR
 #         assert len(r['steps']) == 3
@@ -987,23 +925,21 @@ def teardown(data):
         code = """
 description = 'desc'
 
-def setup(data):
-    step('setup step')
+def before_test(data):
+    step('before_test step')
 
 def test(data):
     error('error in test')
     foo = bar
 
-def teardown(data):
-    step('teardown step')
+def after_test(data):
+    step('after_test step')
 """
         runfix.run_test(code)
-        # verify console logs
         r = caplog.records
         assert r[4].message == 'error in test'
         assert "NameError: name 'bar' is not defined" in r[5].message
         assert r[6].message == CODE_ERROR_MESSAGE
-        # verify report.json
         r = runfix.read_report()
         r = r[0]
         assert r['result'] == ResultsEnum.CODE_ERROR
@@ -1029,10 +965,8 @@ def teardown(data):
 #     fail('teardown fail')
 # """
 #         runfix.run_test(code)
-#         # verify console logs
 #         records = caplog.records
 #         assert records[5].message == CODE_ERROR_MESSAGE
-#         # verify report.json
 #         report = runfix.read_report()
 #         assert report['result'] == ResultsEnum.CODE_ERROR
 #         assert len(report['steps']) == 3
@@ -1056,10 +990,8 @@ def teardown(data):
 #     error('teardown error')
 # """
 #         runfix.run_test(code)
-#         # verify console logs
 #         records = caplog.records
 #         assert records[5].message == ERROR_MESSAGE
-#         # verify report.json
 #         report = runfix.read_report()
 #         assert report['result'] == ResultsEnum.ERROR
 #         assert len(report['steps']) == 3
@@ -1077,25 +1009,23 @@ def teardown(data):
     #             'def teardown(data):\n'
     #             '    step("teardown")')
     #     runfix.run_test(code, from_suite=False)
-    #     # verify console logs
     #     records = caplog.records
     #     assert records[2].message == 'setup'
     #     assert records[3].message == 'test'
     #     assert records[4].message == 'teardown'
     #     assert records[5].message == SUCCESS_MESSAGE
-    #     # verify report.json
     #     report = runfix.read_report()
     #     assert report['result'] == ResultsEnum.SUCCESS
 
     def test_run_test__skip_true__from_suite(self, runfix, caplog):
         """Test functions are skipped when run from suite and skip is True"""
         code = ('skip = True\n'
-                'def setup(data):\n'
-                '    step("setup")\n'
+                'def before_test(data):\n'
+                '    step("before_test")\n'
                 'def test(data):\n'
                 '    step("test")\n'
-                'def teardown(data):\n'
-                '    step("teardown")')
+                'def after_test(data):\n'
+                '    step("after_test")')
         runfix.run_test(code, from_suite=True)
         records = caplog.records
         assert records[2].message == 'Test skipped: test'
@@ -1112,15 +1042,191 @@ def teardown(data):
     #             'def test(data)\n'
     #             '    step("test")\n')
     #     runfix.run_test(code, from_suite=True)
-    #     # verify console logs
     #     records = caplog.records
     #     assert records[2].levelname == 'ERROR'
     #     assert records[3].message == CODE_ERROR_MESSAGE
-    #     # verify report.json
     #     report = runfix.read_report()
     #     assert len(report['errors']) == 1
     #     assert report['errors'][0]['message'] == 'SyntaxError: invalid syntax'
     #     assert report['result'] == ResultsEnum.CODE_ERROR
+
+    def test_setup_is_deprecated(self, runfix, caplog):
+        """setup test hook is run when before_test is not defined
+        a deprecation warning log is displayed
+        """
+        code = """
+def setup(data):
+    fail('setup step fail')
+
+def test_one(data):
+    step('test step')
+"""
+        runfix.run_test(code)
+        r = caplog.records
+        assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
+        assert r[1].message == 'Browser: chrome'
+        assert r[2].levelname == 'INFO'
+        assert r[2].message == 'setup hook function is deprecated, use before_test'
+        assert r[3].levelname == 'ERROR'
+        assert 'setup step fail' in r[3].message
+        r = runfix.read_report()
+        assert len(r) == 1
+        r = r[0]
+        assert r['test_file'] == runfix.test_name
+        assert r['test'] == 'setup'
+        assert len(r['errors']) == 1
+        assert 'setup step fail' in r['errors'][0]['message']
+        assert r['result'] == ResultsEnum.FAILURE
+
+    def test_teardown_is_deprecated(self, runfix, caplog):
+        """teardown test hook is run when after_test is not defined
+        a deprecation warning log is displayed
+        """
+        code = """
+def test_one(data):
+    step('test step')
+
+def teardown(data):
+    fail('teardown fail')
+"""
+        runfix.run_test(code)
+        r = caplog.records
+        assert r[5].message == 'teardown hook function is deprecated, use after_test'
+        assert 'AssertionError: teardown fail' in r[6].message
+        r = runfix.read_report()
+        assert len(r) == 2
+        assert r[0]['test'] == 'test_one'
+        assert r[0]['result'] == ResultsEnum.SUCCESS
+        assert r[1]['test'] == 'teardown'
+        assert r[1]['result'] == ResultsEnum.FAILURE
+
+    def test_before_each_hook(self, runfix, caplog):
+        code = """
+def before_each(data):
+    step('before_each step')
+
+def test_one(data):
+    step('test step')
+
+def test_two(data):
+    step('test step')
+"""
+        runfix.run_test(code)
+        r = caplog.records
+        assert r[2].message == 'before_each step'
+        assert r[3].message == 'Test started: test_one'
+        assert r[4].message == 'test step'
+        assert r[5].message == SUCCESS_MESSAGE
+        assert r[6].message == 'before_each step'
+        assert r[7].message == 'Test started: test_two'
+        assert r[8].message == 'test step'
+        assert r[9].message == SUCCESS_MESSAGE
+        r = runfix.read_report()
+        assert len(r) == 2
+        assert r[0]['test'] == 'test_one'
+        assert r[0]['result'] == ResultsEnum.SUCCESS
+        assert r[1]['test'] == 'test_two'
+        assert r[1]['result'] == ResultsEnum.SUCCESS
+
+    def test_after_each_hook(self, runfix, caplog):
+        code = """
+def after_each(data):
+    step('after_each step')
+
+def test_one(data):
+    step('test step')
+
+def test_two(data):
+    step('test step')
+"""
+        runfix.run_test(code)
+        r = caplog.records
+        assert r[2].message == 'Test started: test_one'
+        assert r[3].message == 'test step'
+        assert r[4].message == SUCCESS_MESSAGE
+        assert r[5].message == 'after_each step'
+        assert r[6].message == 'Test started: test_two'
+        assert r[7].message == 'test step'
+        assert r[8].message == SUCCESS_MESSAGE
+        assert r[9].message == 'after_each step'
+        r = runfix.read_report()
+        assert len(r) == 2
+        assert r[0]['test'] == 'test_one'
+        assert r[0]['result'] == ResultsEnum.SUCCESS
+        assert r[1]['test'] == 'test_two'
+        assert r[1]['result'] == ResultsEnum.SUCCESS
+
+    def test_before_each_hook_fails(self, runfix, caplog):
+        """When before_each hook fails, a report for it is generated.
+        after_each for that test is not run.
+        all subsequent tests are skipped. after_test is executed anyway"""
+        code = """
+def before_each(data):
+    step('before_each step')
+    fail('before_each fail')
+
+def after_each(data):
+    step('after_each step')
+
+def after_test(data):
+    step('after_test step')
+
+def test_one(data):
+    step('test step')
+
+def test_two(data):
+    step('test step')
+"""
+        runfix.run_test(code)
+        r = caplog.records
+        assert r[2].message == 'before_each step'
+        assert 'AssertionError: before_each fail' in r[3].message
+        assert r[4].message == 'Test skipped: test_one'
+        assert r[5].message == 'Test skipped: test_two'
+        assert r[6].message == 'after_test step'
+        r = runfix.read_report()
+        assert len(r) == 3
+        assert r[0]['test'] == 'before_each'
+        assert r[0]['result'] == ResultsEnum.FAILURE
+        assert r[1]['test'] == 'test_one'
+        assert r[1]['result'] == ResultsEnum.SKIPPED
+        assert r[2]['test'] == 'test_two'
+        assert r[2]['result'] == ResultsEnum.SKIPPED
+
+    def test_after_each_hook_fails(self, runfix, caplog):
+        """When after_each hook fails, a report for it is generated.
+        all subsequent tests are skipped. after_test is executed anyway"""
+        code = """
+def after_each(data):
+    step('after_each step')
+    fail('after_each fail')
+
+def after_test(data):
+    step('after_test step')
+
+def test_one(data):
+    step('test step')
+
+def test_two(data):
+    step('test step')
+"""
+        runfix.run_test(code)
+        r = caplog.records
+        assert r[2].message == 'Test started: test_one'
+        assert r[3].message == 'test step'
+        assert r[4].message == SUCCESS_MESSAGE
+        assert r[5].message == 'after_each step'
+        assert 'AssertionError: after_each fail' in r[6].message
+        assert r[7].message == 'Test skipped: test_two'
+        assert r[8].message == 'after_test step'
+        r = runfix.read_report()
+        assert len(r) == 3
+        assert r[0]['test'] == 'test_one'
+        assert r[0]['result'] == ResultsEnum.SUCCESS
+        assert r[1]['test'] == 'after_each'
+        assert r[1]['result'] == ResultsEnum.FAILURE
+        assert r[2]['test'] == 'test_two'
+        assert r[2]['result'] == ResultsEnum.SKIPPED
 
 
 class TestTestRunnerSetExecutionModuleValues:

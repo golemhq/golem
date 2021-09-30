@@ -38,7 +38,7 @@
     <div id="descriptionPageObjectsContainer" style="display: table; width: 100%;">
         <div class="col-sm-6 same-heigth-col gray-1-background" id="descriptionContainer" style="border: 1px solid #e0e0e0;  border-top-left-radius: 3px; ">
             <h4>Description</h4>
-            <textarea id="description" class="form-control" rows="3">{{test_components.description }}</textarea>
+            <textarea id="description" class="form-control" rows="2">{{test_components.description }}</textarea>
             <div class="clearfix" style="margin-bottom: 5px"></div>
             <div class="form-horizontal">
                 <div class="col-xs-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Tags</div>
@@ -87,38 +87,32 @@
     </div>
     <div class="clearfix"></div>
     <div class="col-sm-12 gray-1-background" id="stepsContainerContainer" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
-        <!-- setup -->
-        <div id="showSetupLink" class="col-sm-12 text-center" style="padding-top: 10px; {% if test_components.setupSteps %}display: none{% endif %}">
-            <a href="javascript:void(0)" class="text-muted link-without-underline" onclick="Test.Utils.showSetupSteps()">Setup</a>
-        </div>
-        <div id="setupSteps" class="function clearfix" {% if not test_components.setupSteps %}style="display: none"{% endif %}>
-            <div class="steps">
-                <a href="javascript:void(0)" onclick="Test.Utils.collapseSetup()" class="link-without-decoration"><h4>Setup</h4></a>
-            </div>
-            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="Test.addStepInputToThis(this);"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
-        </div>
-        <!-- tests -->
 
-        <div id="testFunctions"></div>
-        <button class="btn btn-default btn-sm add-step" onclick="Test.addNewTestFunction();">
+        <div class="btn-group" id="hookSelector">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" style="margin-top: 10px">
+                Add Test Hook <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a href="javascript:void(0)" id="addTestHookBeforeTest" hook-name="before_test" onclick="Test.Hooks.addHook('before_test')">before_test</a></li>
+                <li><a href="javascript:void(0)" id="addTestHookBeforeEach" hook-name="before_each" onclick="Test.Hooks.addHook('before_each')">before_each</a></li>
+                <li><a href="javascript:void(0)" id="addTestHookAfterEach" hook-name="after_each" onclick="Test.Hooks.addHook('after_each')">after_each</a></li>
+                <li><a href="javascript:void(0)" id="addTestHookAfterTest" hook-name="after_test" onclick="Test.Hooks.addHook('after_test')">after_test</a></li>
+            </ul>
+        </div>
+
+        <div id="testHooks"></div>
+
+        <!-- tests -->
+        <div id="testFunctions" style="margin-bottom: 10px"></div>
+        <button class="btn btn-default add-step" onclick="Test.addNewTestFunction();">
             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Test</button>
 
-        <!-- teardown -->
-        <div id="showTeardownLink" class="col-sm-12 text-center" style="padding-top: 10px">
-            <a href="javascript:void(0)" class="text-muted link-without-underline" onclick="Test.Utils.showTeardownSteps()">Teardown</a>
-        </div>
-        <div id="teardownSteps" class="function clearfix" style="display: none">
-            <div class="steps">
-                <a href="javascript:void(0)" onclick="Test.Utils.collapseTeardown()" class="link-without-decoration"><h4>Teardown</h4></a>
-            </div>
-            <button class="btn btn-default btn-sm add-step" style="margin-left: 21px;" onclick="Test.addStepInputToThis(this);"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
-        </div>
     </div>
     <div class="clearfix"></div>
     <div class="col-sm-12 gray-1-background" id="dataContainerContainer" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px;">
         <div class="btn-group" id="dataSourceSelector">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" style="margin-top: 10px">
-                Add data source <span class="caret"></span>
+                Add Data Source <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" style="position: static;">
                 <li><a href="javascript:void(0)" id="addCsvDataSourceOption" onclick="TestCommon.DataSource.addDataSourceCsv()">CSV</a></li>
@@ -156,14 +150,13 @@
     let testCaseName = "{{test_case_name}}";
     let fullTestCaseName = "{{full_test_case_name}}";
     let importedPages = {{test_components.pages|tojson}};
-    let setupSteps = {{test_components.setup_steps|tojson}}
-    let teardownSteps = {{test_components.teardown_steps|tojson}}
+    let testHooks = {{test_components.test_hooks|tojson}}
     let test_functions = {{test_components.test_functions|tojson}}
     let testData = {{test_data|tojson}}
 
     const file = new File('test', Global.project, testCaseName, fullTestCaseName);
     const test = Test;
-    test.initialize(file, importedPages, setupSteps, teardownSteps, test_functions);
+    test.initialize(file, importedPages, testHooks, test_functions);
     TestCommon.DataSource.loadData(testData.csv, testData.json, testData.internal);
 </script>
 {% endblock %}
