@@ -145,7 +145,7 @@ class TestInitializeTestFileReport:
         test_file_reportdir = create_test_file_report_dir(exec_dir, test_file, '')
         # initialize report for test file
         test_report.initialize_test_file_report(
-            test_file, ['test_one', 'test_two'], '', test_file_reportdir)
+            test_file, ['test_one', 'test_two'], '', test_file_reportdir, '', '')
         test_file_report = test_report.get_test_file_report_json(
             project, execution, timestamp, test_file)
         assert len(test_file_report) == 2

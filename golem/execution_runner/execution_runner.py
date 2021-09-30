@@ -86,7 +86,8 @@ def initialize_reports_for_test_files(project_name, test_sets):
         # will not be initialized
         if s.name in test_functions_cache:
             test_report.initialize_test_file_report(s.name, test_functions_cache[s.name],
-                                                    s.set_name, test_file_reportdir)
+                                                    s.set_name, test_file_reportdir, s.env,
+                                                    s.browser['name'])
 
 
 class ExecutionRunner:

@@ -18,14 +18,14 @@ data = [{'a': 'b'}]
 
 pages = ['page1', 'page2']
 
-def setup(data):
+def before_test(data):
     page1.func1()
 
 def test(data):
     page2.func2('a', 'b')
     click(page2.elem1)
 
-def teardown(data):
+def after_test(data):
     pass
 
 """
@@ -36,11 +36,10 @@ def test(data):
 """
 
 EMPTY_STEPS = {
-    'setup': [],
+    'hooks': {},
     'tests': {
         'test_name': []
-    },
-    'teardown': []
+    }
 }
 
 EMPTY_TEST_DATA = {
@@ -322,9 +321,11 @@ class TestEditTest:
         description = 'description'
         pages = ['page1', 'page2']
         test_steps = {
-            'setup': [
-                {'type': 'function-call', 'action': 'click', 'parameters': ['elem1']}
-            ],
+            'hooks': {
+                'before_test': [
+                    {'type': 'function-call', 'action': 'click', 'parameters': ['elem1']}
+                ]
+            },
             'tests': {
                 'test_one': [
                     {'type': 'function-call', 'action': 'send_keys', 'parameters': ['elem2', 'keys']}
@@ -347,7 +348,7 @@ class TestEditTest:
             '\n'
             'data = [{\'key\': \'value\'}]\n'
             '\n\n'
-            'def setup(data):\n'
+            'def before_test(data):\n'
             '    click(elem1)\n'
             '\n\n'
             'def test_one(data):\n'
@@ -361,13 +362,12 @@ class TestEditTest:
         description = 'description'
         pages = []
         test_steps = {
-            'setup': [],
+            'hooks': {},
             'tests': {
                 'test': [
                     {'type': 'function-call', 'action': 'send_keys', 'parameters': ['elem2', 'keys']}
                 ]
-            },
-            'teardown': []
+            }
         }
         data = {
             'csv': [{'key': 'value'}],
@@ -547,10 +547,12 @@ class TestTestComponents:
         assert components['pages'] == ['page1', 'page2']
         assert components['tags'] == []
         assert components['skip'] is False
-        assert components['setup_steps'] == [{'code': 'page1.func1()',
-                                              'function_name': 'page1.func1',
-                                              'parameters': [],
-                                              'type': 'function-call'}]
+        assert components['test_hooks']['before_test'] == [{'code': 'page1.func1()',
+                                                       'function_name': 'page1.func1',
+                                                       'parameters': [],
+                                                       'type': 'function-call'}]
+        assert components['test_hooks']['after_test'] == []
+        assert components['test_hook_list'] == ['before_test', 'after_test']
         assert len(components['test_functions']) == 1
         expected_test_steps = [
             {'code': "page2.func2('a', 'b')",
@@ -563,7 +565,6 @@ class TestTestComponents:
              'type': 'function-call'}]
         assert components['test_functions']['test'] == expected_test_steps
         assert components['test_function_list'] == ['test']
-        assert components['teardown_steps'] == []
         assert components['code'] == SAMPLE_TEST_CONTENT
 
     def test_test_components_empty_test(self, project_session, test_utils):
@@ -572,8 +573,8 @@ class TestTestComponents:
         test_content = Test(project, test_name).components
         assert test_content['description'] == ''
         assert test_content['pages'] == []
-        assert test_content['setup_steps'] is None
-        assert test_content['teardown_steps'] is None
+        assert test_content['test_hooks'] == {}
+        assert test_content['test_hook_list'] == []
         assert test_content['test_functions'] == {'test': []}
         assert test_content['test_function_list'] == ['test']
 

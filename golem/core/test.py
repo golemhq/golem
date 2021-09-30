@@ -138,6 +138,15 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
             test_.append('')
             extra_blank_line = False
 
+    def _order_hooks(test_hooks):
+        """Put the test hooks in a predefined order"""
+        ordered = {}
+        order_list = ['before_test', 'setup', 'before_each', 'after_each', 'after_test', 'teardown']
+        for hook_name in order_list:
+            if hook_name in test_hooks:
+                ordered[hook_name] = test_hooks[hook_name]
+        return ordered
+
     path = Test(project, test_name).path
     settings = settings_manager.get_project_settings(project)
 
@@ -196,11 +205,14 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
             skip = "'{}'".format(skip)
         test_.append('skip = {}'.format(skip))
 
-    if steps['setup']:
-        test_.append('')
-        test_.append('')
-        test_.append('def setup(data):')
-        test_.append(_format_steps(steps['setup']))
+    if steps['hooks']:
+        ordered_hooks = _order_hooks(steps['hooks'])
+        for hook, hook_steps in ordered_hooks.items():
+            if hook_steps:
+                test_.append('')
+                test_.append('')
+                test_.append(f'def {hook}(data):')
+                test_.append(_format_steps(hook_steps))
 
     for test_function_name, test_function_steps in steps['tests'].items():
         test_.append('')
@@ -210,12 +222,6 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
             test_.append(_format_steps(test_function_steps))
         else:
             test_.append('    pass')
-
-    if steps['teardown']:
-        test_.append('')
-        test_.append('')
-        test_.append('def teardown(data):')
-        test_.append(_format_steps(steps['teardown']))
 
     test_.append('')
 
@@ -285,22 +291,6 @@ class Test(BaseProjectElement):
         return page_list + imported_pages
 
     @property
-    def setup_steps(self):
-        setup_function = getattr(self.get_module(), 'setup', None)
-        if setup_function:
-            return test_parser.parse_function_steps(setup_function)
-        else:
-            return None
-
-    @property
-    def teardown_steps(self):
-        teardown_function = getattr(self.get_module(), 'teardown', None)
-        if teardown_function:
-            return test_parser.parse_function_steps(teardown_function)
-        else:
-            return None
-
-    @property
     def test_functions(self):
         """Dictionary of parsed steps of each test function"""
         tests = {}
@@ -318,6 +308,37 @@ class Test(BaseProjectElement):
         ast_module_node = parsing_utils.ast_parse_file(self.path)
         local_function_names = parsing_utils.top_level_functions(ast_module_node)
         return [f for f in local_function_names if f.startswith('test')]
+
+    @property
+    def test_hooks(self):
+        """Dictionary of parsed steps of each test hook function"""
+        hooks = {}
+        test_hooks = self.test_hook_list
+        for hook_name in test_hooks:
+            h = getattr(self.get_module(), hook_name)
+            # TODO setup / teardown are deprecated, returned as before_test/after_test
+            if hook_name == 'setup':
+                hook_name = 'before_test'
+            if hook_name == 'teardown':
+                hook_name = 'after_test'
+            hooks[hook_name] = test_parser.parse_function_steps(h)
+
+        from collections import OrderedDict
+        return OrderedDict(hooks)
+
+    @property
+    def test_hook_list(self):
+        """List of test hook functions"""
+        ast_module_node = parsing_utils.ast_parse_file(self.path)
+        local_function_names = parsing_utils.top_level_functions(ast_module_node)
+        test_hook_names = ['setup', 'teardown', 'before_test', 'before_each', 'after_each', 'after_test']
+        test_hooks = [f for f in local_function_names if f in test_hook_names]
+        # TODO: setup / teardown are deprecated
+        if 'setup' in test_hooks and 'before_test' in test_hooks:
+            test_hooks.remove('setup')
+        if 'teardown' in test_hooks and 'after_test' in test_hooks:
+            test_hooks.remove('teardown')
+        return test_hooks
 
     @property
     def skip(self):
@@ -343,10 +364,10 @@ class Test(BaseProjectElement):
             'pages': self.pages,
             'tags': self.tags,
             'skip': self.skip,
-            'setup_steps': self.setup_steps,
-            'teardown_steps': self.teardown_steps,
             'test_functions': self.test_functions,
             'test_function_list': self.test_function_list,
+            'test_hooks': self.test_hooks,
+            'test_hook_list': self.test_hook_list,
             'code': self.code
         }
         return components

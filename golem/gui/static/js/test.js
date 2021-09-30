@@ -8,7 +8,7 @@ var Test = new function(){
     this.importedPages = [];
     this.unsavedChanges = false;
 
-    this.initialize = function(file, importedPages, setupSteps, teardownSteps, testFunctions){
+    this.initialize = function(file, importedPages, testHooks, testFunctions){
 
         this.file = file;
 
@@ -18,15 +18,12 @@ var Test = new function(){
         });
         Test.getAllProjectPages();
         Test.getGolemActions();
-        Test.renderSectionSteps(Test.Utils.stepSection('setup'), setupSteps);
-        Test.renderSectionSteps(Test.Utils.stepSection('teardown'), teardownSteps);
+        Test.addTestHooks(testHooks);
         Test.addTestFunctions(testFunctions);
         Test.refreshActionInputsAutocomplete();
         Test.refreshValueInputsAutocomplete();
-        $('#pageModal').on('hidden.bs.modal', function(){
-            Test.importedPages.forEach(function(page){
-                Test.getPageContents(page.name)
-            })
+        $('#pageModal').on('hidden.bs.modal', function() {
+            Test.importedPages.forEach((page) => Test.getPageContents(page.name))
         });
         Test.Utils.watchForUnsavedChanges();
         Test.Utils.startSortableSteps();
@@ -47,20 +44,44 @@ var Test = new function(){
         }
     }
 
-    this.addTestFunction = function(testName, testSteps) {
-        testSteps = testSteps || [];
-        let testFunctionContainer = $('#testFunctions');
+    this.addTestFunction = function(functionName, steps) {
+        this.addXFunction(functionName, steps, $('#testFunctions'), true);
+    }
+
+    this.addTestHooks = function(testHooks) {
+        let orderedTestHooks = Test.Hooks.orderTestHooks(testHooks);
+
+        for (const testHook in orderedTestHooks) {
+            Test.addTestHook(testHook, testHooks[testHook]);
+        }
+    }
+
+    this.addTestHook = function(hookName, steps) {
+        Test.Hooks.addHook(hookName, steps);
+    }
+
+    this.addXFunction = function(functionName, testSteps, container, isTestFunction) {
+        // only test functions have on click to modify test function name
+        // test hooks names cannot be modified
+        if(isTestFunction) {
+            functionNameOnClick = 'Test.Utils.startTestFunctionInlineNameEdition(this)';
+            removeIconOnClick = 'Test.Utils.deleteTestFunction(this)';
+        } else {
+            functionNameOnClick = '';
+            removeIconOnClick = 'Test.Hooks.deleteHook(this)';
+        }
+
         let testFunctionTemplate = $(`
             <div class='test-function function'>
                 <div class='testFunctionNameContainer'>
                     <h4 class="testFunctionNameContainer">
-                        <span class="test-function-name" onclick="Test.Utils.startTestFunctionInlineNameEdition(this)">${testName}</span>
+                        <span class="test-function-name" onclick="${functionNameOnClick}">${functionName}</span>
                         <span class="test-function-name-input" style="display: none">
                             <input type="text">
                         </span>
                     </h4>
                     <div class="inline-remove-icon">
-                        <a href="javascript:void(0)" onclick="Test.Utils.deleteTestFunction(this)">
+                        <a href="javascript:void(0)" onclick="${removeIconOnClick}">
                             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                         </a>
                     </div>
@@ -68,9 +89,7 @@ var Test = new function(){
                 <div class='steps'></div>
                 <button class='btn btn-default btn-sm add-step' style='margin-left: 21px;' onclick="Test.addStepInputToThis(this);">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
-            </div>
-            <div style='height: 10px'></div>
-        `);
+            </div>`);
 
         let stepContainer = testFunctionTemplate.find('.steps');
         if(testSteps.length) {
@@ -78,7 +97,7 @@ var Test = new function(){
         } else {
             Test.addStepInputToThis(stepContainer);
         }
-        testFunctionContainer.append(testFunctionTemplate);
+        container.append(testFunctionTemplate);
         Test.refreshActionInputsAutocomplete();
         Test.refreshValueInputsAutocomplete();
     }
@@ -133,7 +152,7 @@ var Test = new function(){
 
     this.addNewTestFunction = function() {
         let callback = (testName) => {
-            Test.addTestFunction(testName)
+            Test.addTestFunction(testName, [])
         }
         let validationCallback = (testName) => {
             return Test.Utils.validateTestFunctionName(testName);
@@ -299,7 +318,7 @@ var Test = new function(){
             Main.TestRunner.runTest(this.file.project, Test.file.fullName);
     }
 
-    this.save = function(config){
+    this.save = function(config) {
         runAfter = config.runAfter || false;
         let description = $("#description").val();
         let pageObjects = Test.importedPages.map(x => x.name);
@@ -480,10 +499,38 @@ var Test = new function(){
         return template
     }
 
+    this.Hooks = new function() {
 
-    this.Utils = new function(){
+        this.orderTestHooks = function(hooks) {
+            ordered = {}
+            orderList = ['before_test', 'setup', 'before_each', 'after_each', 'after_test', 'teardown']
+            for (hookName of orderList) {
+                if(hookName in hooks) {
+                    ordered[hookName] = hooks[hookName]
+                }
+            }
+            return ordered
+        }
 
-        this.getNotImportedPages = function(){
+        this.addHook = function(name, steps) {
+            steps = steps || [];
+            Test.addXFunction(name, steps, $('#testHooks'), false);
+            $(`#hookSelector a[hook-name='${name}']`).hide();
+        }
+
+        this.deleteHook = function(elem) {
+            let hookName = $(elem).closest('.test-function').find('h4 span').html();
+            Main.Utils.displayConfirmModal('Delete Test Hook?', '', () => {
+                $(elem).closest('.test-function').remove();
+                Test.unsavedChanges = true;
+                $(`#hookSelector a[hook-name='${hookName}']`).show();
+            });
+        }
+    }
+
+    this.Utils = new function() {
+
+        this.getNotImportedPages = function() {
             let notImported = [];
             let importedPagesNames = Test.importedPages.map(x => x.name);
             Test.allPages.forEach(function(page){
@@ -593,10 +640,13 @@ var Test = new function(){
 
         this.getSteps = function() {
             let steps = {
-                setup: Test.Utils.parseSteps($("#setupSteps .step")),
+                hooks: {},
                 tests: {},
-                teardown: Test.Utils.parseSteps($("#teardownSteps .step"))
             }
+            $('#testHooks > .test-function').each(function() {
+                let hookName = $(this).find('span.test-function-name').html().trim();
+                steps.hooks[hookName] = Test.Utils.parseSteps($(this).find('.step'))
+            })
             $('#testFunctions > .test-function').each(function() {
                 let testName = $(this).find('span.test-function-name').html().trim();
                 steps.tests[testName] = Test.Utils.parseSteps($(this).find('.step'))
@@ -659,7 +709,7 @@ var Test = new function(){
         }
 
         this.deleteTestFunction = function(elem) {
-            Main.Utils.displayConfirmModal('Delete Test', 'Delete test?', () => {
+            Main.Utils.displayConfirmModal('Delete Test?', '', () => {
                 $(elem).closest('.test-function').remove();
                 Test.unsavedChanges = true;
             });

@@ -112,7 +112,7 @@ class TestInitializeReportsForTestFiles:
         execution_runner = exc_runner.ExecutionRunner(project, timestamp=timestamp)
         execution_runner.tests = [test_name]
         execution_runner.execution.processes = 1
-        execution_runner.execution.browsers = ['chrome']
+        execution_runner.execution.browsers = exc_runner.define_browsers(['chrome'], [], ['chrome'], [])
         execution_runner.execution.envs = []
         execution_runner.execution_name = execution_name
         execution_runner.execution.reportdir = execution_runner._create_execution_directory()
