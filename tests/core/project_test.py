@@ -227,7 +227,7 @@ class TestCreatePackagesForElement:
         _, project = project_session.activate()
         project_obj = Project(project)
         random_dir = test_utils.random_string()
-        elem_name = '{}.{}'.format(random_dir, test_utils.random_string())
+        elem_name = f'{random_dir}.{test_utils.random_string()}'
         project_obj.create_packages_for_element(elem_name, project_obj.file_types.TEST)
         dir_path = os.path.join(project_obj.test_directory_path, random_dir)
         assert os.path.isdir(dir_path)
@@ -240,7 +240,7 @@ class TestCreatePackagesForElement:
         assert not os.path.isdir(dir_path)
         # page
         random_dir = test_utils.random_string()
-        elem_name = '{}.{}'.format(random_dir, test_utils.random_string())
+        elem_name = f'{random_dir}.{test_utils.random_string()}'
         project_obj.create_packages_for_element(elem_name, project_obj.file_types.PAGE)
         dir_path = os.path.join(project_obj.page_directory_path, random_dir)
         assert os.path.isdir(dir_path)
@@ -248,7 +248,7 @@ class TestCreatePackagesForElement:
         assert os.path.isfile(init_path)
         # suite
         random_dir = test_utils.random_string()
-        elem_name = '{}.{}'.format(random_dir, test_utils.random_string())
+        elem_name = f'{random_dir}.{test_utils.random_string()}'
         project_obj.create_packages_for_element(elem_name, project_obj.file_types.SUITE)
         dir_path = os.path.join(project_obj.suite_directory_path, random_dir)
         assert os.path.isdir(dir_path)
@@ -278,7 +278,7 @@ class TestCreateDirectories:
         part_one = test_utils.random_string()
         part_two = test_utils.random_string()
         part_three = test_utils.random_string()
-        dir_name = '{}.{}.{}'.format(part_one, part_two, part_three)
+        dir_name = f'{part_one}.{part_two}.{part_three}'
         errors = project_obj.create_directories(dir_name, 'suite')
         assert errors == []
         path = os.path.join(project_obj.suite_directory_path, part_one, part_two, part_three)
@@ -307,7 +307,8 @@ class TestRenameDirectory:
     def test_rename_directory(self, project_session, test_utils):
         testdir, project_name = project_session.activate()
         src = test_utils.random_string()
-        test_utils.create_test(project_name, '{}.foo'.format(src))
+        test_name = f'{src}.foo'
+        test_utils.create_test(project_name, test_name)
         dst = test_utils.random_string()
         project = Project(project_name)
         errors = project.rename_directory(src, dst, 'test')
@@ -316,27 +317,27 @@ class TestRenameDirectory:
         dstpath = os.path.join(project.test_directory_path, dst)
         assert not os.path.isdir(srcpath)
         assert os.path.isdir(dstpath)
-        assert not test.Test(project_name, '{}.foo'.format(src)).exists
-        assert test.Test(project_name, '{}.foo'.format(dst)).exists
+        assert not test.Test(project_name, test_name).exists
+        assert test.Test(project_name, f'{dst}.foo').exists
 
     def test_rename_directories_dest_exists(self, project_session, test_utils):
         testdir, project_name = project_session.activate()
         src = test_utils.random_string()
         dst = test_utils.random_string()
-        test_utils.create_test(project_name, '{}.foo'.format(src))
-        test_utils.create_test(project_name, '{}.bar'.format(dst))
+        test_utils.create_test(project_name, f'{src}.foo')
+        test_utils.create_test(project_name, f'{dst}.bar')
         project = Project(project_name)
         errors = project.rename_directory(src, dst, 'test')
-        assert errors == ['Path {} already exists'.format(dst)]
+        assert errors == [f'Path {dst} already exists']
 
     def test_rename_directory_invalid_name(self, project_session, test_utils):
         testdir, project_name = project_session.activate()
         src = test_utils.random_string()
-        test_utils.create_test(project_name, '{}.foo'.format(src))
+        test_utils.create_test(project_name, f'{src}.foo')
         project = Project(project_name)
         errors = project.rename_directory(src, '', 'test')
         assert errors == ['File name cannot be empty']
-        dst = 'test-{}'.format(test_utils.random_string())
+        dst = f'test-{test_utils.random_string()}'
         errors = project.rename_directory(src, dst, 'test')
         assert errors == ['Only letters, numbers and underscores are allowed']
 
@@ -346,7 +347,7 @@ class TestDeleteDirectory:
     def test_delete_directory(self, project_session, test_utils):
         testdir, project_name = project_session.activate()
         src = test_utils.random_string()
-        test_utils.create_test(project_name, '{}.foo'.format(src))
+        test_utils.create_test(project_name, f'{src}.foo')
         project = Project(project_name)
         errors = project.delete_directory(src, 'test')
         assert errors == []
@@ -460,7 +461,7 @@ class TestBaseProjectElement:
         assert base_element.project.name == project
         assert base_element.name == name
         assert base_element.stem_name == name
-        filename = '{}.py'.format(name)
+        filename = f'{name}.py'
         assert base_element.filename == filename
         assert base_element.relpath == filename
         with pytest.raises(ValueError):
@@ -491,6 +492,6 @@ class TestBaseProjectElement:
         base_element = BaseProjectElement(project, name)
         assert base_element.name == name
         assert base_element.stem_name == 'bar'
-        filename = '{}.py'.format('bar')
+        filename = 'bar.py'
         assert base_element.filename == filename
         assert base_element.relpath == '{}.py'.format(name.replace('.', os.sep))

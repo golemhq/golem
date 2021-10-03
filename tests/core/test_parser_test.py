@@ -42,26 +42,26 @@ class TestReplaceSubstrings:
                                                              '(', ')')
         assert len(replacements) == 1
         assert replacements[0][1] == '(test)'
-        assert code == 'this is a {} string'.format(replacements[0][0])
+        assert code == f'this is a {replacements[0][0]} string'
         # two parentheses
         code, replacements = test_parser._replace_substrings('this is (a) (test) string',
                                                              '(', ')')
         assert len(replacements) == 2
-        assert code == 'this is {} {} string'.format(replacements[0][0], replacements[1][0])
+        assert code == f'this is {replacements[0][0]} {replacements[1][0]} string'
         # nested parentheses
         code, replacements = test_parser._replace_substrings('this is (a (nested) ) test',
                                                              '(', ')')
         assert len(replacements) == 1
-        assert code == 'this is {} test'.format(replacements[0][0])
+        assert code == f'this is {replacements[0][0]} test'
         # new lines inside parentheses
         code, replacements = test_parser._replace_substrings('this is (a \ntest) string',
                                                              '(', ')')
         assert len(replacements) == 1
-        assert code == 'this is {} string'.format(replacements[0][0])
+        assert code == f'this is {replacements[0][0]} string'
         code, replacements = test_parser._replace_substrings('this is (\na test\n) string',
                                                              '(', ')')
         assert len(replacements) == 1
-        assert code == 'this is {} string'.format(replacements[0][0])
+        assert code == f'this is {replacements[0][0]} string'
 
 
 class TestReplaceRePattern:

@@ -128,7 +128,7 @@ def _read_json_with_comments(json_path):
     try:
         json_data = json.loads(file_content_without_comments)
     except Exception:
-        print('There was an error reading file {}'.format(json_path))
+        print(f'There was an error reading file {json_path}')
         print(traceback.format_exc())
     return json_data
 

@@ -26,7 +26,7 @@ def _add_error(message, description='', log_level='ERROR'):
         'description': description
     }
     execution.errors.append(error)
-    message = '{}\n{}'.format(message, description) if description else message
+    message = f'{message}\n{description}' if description else message
     _log(message, log_level)
 
 
@@ -91,7 +91,7 @@ def _capture_screenshot(image_name):
         return None
 
     if not execution.settings['screenshots']:
-        screenshot_filename = '{}.png'.format(image_name)
+        screenshot_filename = f'{image_name}.png'
         screenshot_path = os.path.join(execution.test_reportdir, screenshot_filename)
         get_browser().get_screenshot_as_file(screenshot_path)
     else:
@@ -113,7 +113,7 @@ def _generate_screenshot_name(message):
     """Generate a valid filename from a message string"""
     sanitized_filename = utils.get_valid_filename(message)
     random_id = str(uuid.uuid4())[:5]
-    return '{}_{}'.format(sanitized_filename, random_id)
+    return f'{sanitized_filename}_{random_id}'
 
 
 def _log(message, log_level="INFO"):
@@ -123,19 +123,17 @@ def _log(message, log_level="INFO"):
         log_level_int = getattr(logging, log_level)
         execution.logger.log(log_level_int, message)
     else:
-        raise Exception('log level {} is invalid'.format(log_level))
+        raise Exception(f'log level {log_level} is invalid')
 
 
 def _run_wait_hook():
     wait_hook = execution.settings['wait_hook']
     if wait_hook:
         start_time = time.time()
-        extend_module = importlib.import_module('projects.{0}.extend'
-                                                .format(execution.project))
+        extend_module = importlib.import_module(f'projects.{execution.project}.extend')
         wait_hook_function = getattr(extend_module, wait_hook)
         wait_hook_function()
-        execution.logger.debug('Wait hook waited for {} seconds'
-                               .format(time.time() - start_time))
+        execution.logger.debug(f'Wait hook waited for {time.time() - start_time} seconds')
 
 
 def _screenshot_on_condition(condition):
@@ -227,7 +225,7 @@ def activate_browser(browser_id):
     Parameters:
     browser_id : value
     """
-    with _step('Activate browser {}'.format(browser_id), run_wait_hook=False):
+    with _step(f'Activate browser {browser_id}', run_wait_hook=False):
         return browser.activate_browser(browser_id)
 
 
@@ -248,7 +246,7 @@ def add_cookie(cookie_dict):
     Parameters:
     cookie_dict : value
     """
-    execution.logger.info('Add cookie: {}'.format(cookie_dict))
+    execution.logger.info(f'Add cookie: {cookie_dict}')
     get_browser().add_cookie(cookie_dict)
 
 
@@ -275,10 +273,10 @@ def assert_alert_text(text):
     Parameters:
     text : value
     """
-    _add_step("Assert alert text is '{}'".format(text))
+    _add_step(f"Assert alert text is '{text}'")
     _run_wait_hook()
     alert_text = get_browser().switch_to.alert.text
-    error_msg = "expected alert text to be '{}' but was '{}'".format(text, alert_text)
+    error_msg = f"expected alert text to be '{text}' but was '{alert_text}'"
     assert alert_text == text, error_msg
     _screenshot_on_step()
 
@@ -290,10 +288,10 @@ def assert_alert_text_is_not(text):
     Parameters:
     text : value
     """
-    _add_step("Assert alert text is not '{}'".format(text))
+    _add_step(f"Assert alert text is not '{text}'")
     _run_wait_hook()
     alert_text = get_browser().switch_to.alert.text
-    error_msg = "expected alert text not to be '{}'".format(text)
+    error_msg = f"expected alert text not to be '{text}'"
     assert alert_text != text, error_msg
     _screenshot_on_step()
 
@@ -304,10 +302,10 @@ def assert_amount_of_windows(amount):
     Parameters:
     amount : value
     """
-    _add_step('Assert amount of open windows is {}'.format(amount))
+    _add_step(f'Assert amount of open windows is {amount}')
     _run_wait_hook()
     actual_amount = len(get_window_handles())
-    error_msg = 'expected {} windows but got {}'.format(amount, actual_amount)
+    error_msg = f'expected {amount} windows but got {actual_amount}'
     assert actual_amount == amount, error_msg
     _screenshot_on_step()
 
@@ -319,10 +317,10 @@ def assert_cookie_present(name):
     Parameters:
     name: value
     """
-    _add_step("Assert that cookie '{}' exists".format(name))
+    _add_step(f"Assert that cookie '{name}' exists")
     _run_wait_hook()
     cookie = browser.get_browser().get_cookie(name)
-    assert cookie, "cookie '{}' was not found".format(name)
+    assert cookie, f"cookie '{name}' was not found"
 
 
 def assert_cookie_value(name, value):
@@ -333,16 +331,15 @@ def assert_cookie_value(name, value):
     name: value
     value: value
     """
-    _add_step("Assert that cookie '{}' value is '{}'".format(name, value))
+    _add_step(f"Assert that cookie '{name}' value is '{value}'")
     _run_wait_hook()
     cookie = browser.get_browser().get_cookie(name)
     if not cookie:
-        raise Exception('Cookie "{}" was not found'.format(name))
+        raise Exception(f'Cookie "{name}" was not found')
     elif not 'value' in cookie:
-        raise Exception('Cookie "{}" did not have "value" key'.format(name))
+        raise Exception(f'Cookie "{name}" did not have "value" key')
     else:
-        msg = ("expected cookie '{}' value to be '{}' but was '{}'"
-               .format(name, value, cookie['value']))
+        msg = f"expected cookie '{name}' value to be '{value}' but was \'{cookie['value']}\'"
         assert cookie['value'] == value, msg
 
 
@@ -355,13 +352,12 @@ def assert_element_attribute(element, attribute, value):
     value : value
     """
     element = get_browser().find(element, timeout=0)
-    step_message = ("Assert element {} attribute {} value is '{}'"
-                    .format(element.name, attribute, value))
+    step_message = f"Assert element {element.name} attribute {attribute} value is '{value}'"
     _add_step(step_message)
     _run_wait_hook()
     attr_value = element.get_attribute(attribute)
-    msg = ("expected element {} attribute {} value to be '{}' was '{}'"
-           .format(element.name, attribute, value, attr_value))
+    msg = f"expected element {element.name} attribute {attribute} value to be " \
+          f"'{value}' was '{attr_value}'"
     assert attr_value == value, msg
     _screenshot_on_step()
 
@@ -375,12 +371,11 @@ def assert_element_attribute_is_not(element, attribute, value):
     value : value
     """
     element = get_browser().find(element, timeout=0)
-    step_message = 'Assert element {} attribute {} value is not {}'.format(element.name, attribute, value)
+    step_message = f'Assert element {element.name} attribute {attribute} value is not {value}'
     _add_step(step_message)
     _run_wait_hook()
     attr_value = element.get_attribute(attribute)
-    msg = ('expected element {} attribute {} value to not be {}'
-           .format(element.name, attribute, value))
+    msg = f'expected element {element.name} attribute {attribute} value to not be {value}'
     assert attr_value != value, msg
     _screenshot_on_step()
 
@@ -393,9 +388,9 @@ def assert_element_checked(element):
     element : element
     """
     element = get_browser().find(element, timeout=0)
-    _add_step('Assert element {} is checked'.format(element.name))
+    _add_step(f'Assert element {element.name} is checked')
     _run_wait_hook()
-    assert element.is_selected(), 'element {} is not checked'.format(element.name)
+    assert element.is_selected(), f'element {element.name} is not checked'
     _screenshot_on_step()
 
 
@@ -407,9 +402,9 @@ def assert_element_displayed(element):
     """
     element = get_browser().find(element, timeout=0, wait_displayed=False)
     element = get_browser().find(element, timeout=0, wait_displayed=False)
-    _add_step('Assert element {} is displayed'.format(element.name))
+    _add_step(f'Assert element {element.name} is displayed')
     _run_wait_hook()
-    assert element.is_displayed(), 'element {} is not displayed'.format(element.name)
+    assert element.is_displayed(), f'element {element.name} is not displayed'
     _screenshot_on_step()
 
 
@@ -420,9 +415,9 @@ def assert_element_enabled(element):
     element : element
     """
     element = get_browser().find(element, timeout=0)
-    _add_step('Assert element {} is enabled'.format(element.name))
+    _add_step(f'Assert element {element.name} is enabled')
     _run_wait_hook()
-    assert element.is_enabled(), 'element {} is not enabled'.format(element.name)
+    assert element.is_enabled(), f'element {element.name} is not enabled'
     _screenshot_on_step()
 
 
@@ -434,9 +429,9 @@ def assert_element_has_attribute(element, attribute):
     attribute : value
     """
     element = get_browser().find(element, timeout=0)
-    _add_step('Assert element {} has attribute {}'.format(element.name, attribute))
+    _add_step(f'Assert element {element.name} has attribute {attribute}')
     _run_wait_hook()
-    error_msg = 'element {} does not have attribute {}'.format(element.name, attribute)
+    error_msg = f'element {element.name} does not have attribute {attribute}'
     assert element.has_attribute(attribute), error_msg
     _screenshot_on_step()
 
@@ -448,9 +443,9 @@ def assert_element_has_focus(element):
     element : element
     """
     element = get_browser().find(element, timeout=0)
-    _add_step('Assert element {} has focus'.format(element.name))
+    _add_step(f'Assert element {element.name} has focus')
     _run_wait_hook()
-    error_msg = 'element {} does not have focus'.format(element.name)
+    error_msg = f'element {element.name} does not have focus'
     assert element.has_focus(), error_msg
 
 
@@ -462,9 +457,9 @@ def assert_element_has_not_attribute(element, attribute):
     attribute : value
     """
     element = get_browser().find(element, timeout=0)
-    _add_step('Assert element {} has not attribute {}'.format(element.name, attribute))
+    _add_step(f'Assert element {element.name} has not attribute {attribute}')
     _run_wait_hook()
-    error_msg = 'element {} has attribute {}'.format(element.name, attribute)
+    error_msg = f'element {element.name} has attribute {attribute}'
     assert not element.has_attribute(attribute), error_msg
 
 
@@ -475,9 +470,9 @@ def assert_element_has_not_focus(element):
     element : element
     """
     element = get_browser().find(element, timeout=0)
-    _add_step('Assert element {} does not have focus'.format(element.name))
+    _add_step(f'Assert element {element.name} does not have focus')
     _run_wait_hook()
-    error_msg = 'element {} has focus'.format(element.name)
+    error_msg = f'element {element.name} has focus'
     assert not element.has_focus(), error_msg
 
 
@@ -489,9 +484,9 @@ def assert_element_not_checked(element):
     element : element
     """
     element = browser.get_browser().find(element, timeout=0)
-    _add_step('Assert element {} is not checked'.format(element.name))
+    _add_step(f'Assert element {element.name} is not checked')
     _run_wait_hook()
-    assert not element.is_selected(), 'element {} is checked'.format(element.name)
+    assert not element.is_selected(), f'element {element.name} is checked'
     _screenshot_on_step()
 
 
@@ -502,9 +497,9 @@ def assert_element_not_displayed(element):
     element : element
     """
     element = get_browser().find(element, timeout=0, wait_displayed=False)
-    _add_step('Assert element {} is not displayed'.format(element.name))
+    _add_step(f'Assert element {element.name} is not displayed')
     _run_wait_hook()
-    assert not element.is_displayed(), 'element {} is displayed'.format(element.name)
+    assert not element.is_displayed(), f'element {element.name} is displayed'
     _screenshot_on_step()
 
 
@@ -515,9 +510,9 @@ def assert_element_not_enabled(element):
     element : element
     """
     element = get_browser().find(element, timeout=0)
-    _add_step('Assert element {} is not enabled'.format(element.name))
+    _add_step(f'Assert element {element.name} is not enabled')
     _run_wait_hook()
-    assert not element.is_enabled(), 'element {} is enabled'.format(element.name)
+    assert not element.is_enabled(), f'element {element.name} is enabled'
     _screenshot_on_step()
 
 
@@ -529,8 +524,7 @@ def assert_element_not_present(element):
     """
     _add_step('Assert element is not present')
     _run_wait_hook()
-    msg = 'element {} is present'.format(element)
-    assert not get_browser().element_is_present(element), msg
+    assert not get_browser().element_is_present(element), f'element {element} is present'
 
 
 def assert_element_present(element):
@@ -541,8 +535,7 @@ def assert_element_present(element):
     """
     _add_step('Assert element is present')
     _run_wait_hook()
-    msg = 'element {} is not present'.format(element)
-    assert get_browser().element_is_present(element), msg
+    assert get_browser().element_is_present(element), f'element {element} is not present'
 
 
 def assert_element_text(element, text):
@@ -553,10 +546,9 @@ def assert_element_text(element, text):
     text : value
     """
     element = get_browser().find(element, timeout=0)
-    _add_step("Assert element {} text is '{}'".format(element.name, text))
+    _add_step(f"Assert element {element.name} text is '{text}'")
     _run_wait_hook()
-    msg = ("expected element {} text to be '{}' but was '{}'"
-           .format(element.name, text, element.text))
+    msg = f"expected element {element.name} text to be '{text}' but was '{element.text}'"
     assert element.text == text, msg
     _screenshot_on_step()
 
@@ -569,10 +561,9 @@ def assert_element_text_contains(element, text):
     text : value
     """
     element = get_browser().find(element, timeout=0)
-    _add_step("Assert element {} contains text '{}'".format(element.name, text))
+    _add_step(f"Assert element {element.name} contains text '{text}'")
     _run_wait_hook()
-    msg = ("expected element {} text '{}' to contain '{}'"
-           .format(element.name, element.text, text))
+    msg = f"expected element {element.name} text '{element.text}' to contain '{text}'"
     assert text in element.text, msg
     _screenshot_on_step()
 
@@ -585,9 +576,9 @@ def assert_element_text_is_not(element, text):
     text : value
     """
     element = browser.get_browser().find(element, timeout=0)
-    _add_step("Assert element {} text is not '{}'".format(element.name, text))
+    _add_step(f"Assert element {element.name} text is not '{text}'")
     _run_wait_hook()
-    msg = "expected element {} text to not be '{}'".format(element.name, text)
+    msg = f"expected element {element.name} text to not be '{text}'"
     assert element.text != text, msg
     _screenshot_on_step()
 
@@ -600,9 +591,9 @@ def assert_element_text_not_contains(element, text):
     text : value
     """
     element = get_browser().find(element, timeout=0)
-    _add_step("Assert element {} does not contain text '{}'".format(element.name, text))
+    _add_step(f"Assert element {element.name} does not contain text '{text}'")
     _run_wait_hook()
-    msg = "element {} text '{}' contains text '{}'".format(element.name, element.text, text)
+    msg = f"element {element.name} text '{element.text}' contains text '{text}'"
     assert text not in element.text, msg
     _screenshot_on_step()
 
@@ -615,12 +606,10 @@ def assert_element_value(element, value):
     value : value
     """
     element = get_browser().find(element, timeout=0)
-    step_message = ("Assert element {} value is '{}'".format(element.name, value))
-    _add_step(step_message)
+    _add_step(f"Assert element {element.name} value is '{value}'")
     _run_wait_hook()
     element_value = element.value
-    msg = ("expected element {} value to be '{}' but was '{}'"
-           .format(element.name, value, element_value))
+    msg = f"expected element {element.name} value to be '{value}' but was '{element_value}'"
     assert element_value == value, msg
     _screenshot_on_step()
 
@@ -633,11 +622,10 @@ def assert_element_value_is_not(element, value):
     value : value
     """
     element = get_browser().find(element, timeout=0)
-    step_message = ("Assert element {} value is not '{}'".format(element.name, value))
-    _add_step(step_message)
+    _add_step(f"Assert element {element.name} value is not '{value}'")
     _run_wait_hook()
     element_value = element.value
-    msg = ("expected element {} value to not be '{}'".format(element.name, value))
+    msg = f"expected element {element.name} value to not be '{value}'"
     assert element_value != value, msg
     _screenshot_on_step()
 
@@ -648,9 +636,9 @@ def assert_page_contains_text(text):
     Parameters:
     text : value
     """
-    _add_step("Assert '{}' is present in the page".format(text))
+    _add_step(f"Assert '{text}' is present in the page")
     _run_wait_hook()
-    assert text in get_browser().page_source, "text '{}' not found in the page".format(text)
+    assert text in get_browser().page_source, f"text '{text}' not found in the page"
     _screenshot_on_step()
 
 
@@ -660,9 +648,9 @@ def assert_page_not_contains_text(text):
     Parameters:
     text : value
     """
-    _add_step("Assert '{}' is not present in the page".format(text))
+    _add_step(f"Assert '{text}' is not present in the page")
     _run_wait_hook()
-    assert text not in get_browser().page_source, "text '{}' was found in the page".format(text)
+    assert text not in get_browser().page_source, f"text '{text}' was found in the page"
     _screenshot_on_step()
 
 
@@ -676,9 +664,8 @@ def assert_response_status_code(response, status_code):
     if isinstance(status_code, str):
         if status_code.isdigit():
             status_code = int(status_code)
-    _add_step('Assert response status code is {}'.format(status_code))
-    msg = ('expected response status code to be {} but was {}'
-           .format(status_code, response.status_code))
+    _add_step(f'Assert response status code is {status_code}')
+    msg = f'expected response status code to be {status_code} but was {response.status_code}'
     assert response.status_code == status_code, msg
 
 
@@ -690,13 +677,11 @@ def assert_selected_option_by_text(element, text):
     text : value
     """
     element = get_browser().find(element)
-    step_message = ("Assert selected option text of element {} is '{}'"
-                    .format(element.name, text))
-    _add_step(step_message)
+    _add_step(f"Assert selected option text of element {element.name} is '{text}'")
     _run_wait_hook()
     selected_option_text = element.select.first_selected_option.text
-    error_msg = ("expected selected option in element {} to be '{}' but was '{}'"
-                 .format(element.name, text, selected_option_text))
+    error_msg = f"expected selected option in element {element.name} to be '{text}' " \
+                f"but was '{selected_option_text}'"
     assert selected_option_text == text, error_msg
     _screenshot_on_step()
 
@@ -709,13 +694,11 @@ def assert_selected_option_by_value(element, value):
     value : value
     """
     element = get_browser().find(element)
-    step_message = ('Assert selected option value of element {} is {}'
-                    .format(element.name, value))
-    _add_step(step_message)
+    _add_step(f'Assert selected option value of element {element.name} is {value}')
     _run_wait_hook()
     selected_option_value = element.select.first_selected_option.value
-    error_msg = ('expected selected option in element {} to be {} but was {}'
-                 .format(element.name, value, selected_option_value))
+    error_msg = f'expected selected option in element {element.name} to be {value} ' \
+                f'but was {selected_option_value}'
     assert selected_option_value == value, error_msg
     _screenshot_on_step()
 
@@ -726,10 +709,9 @@ def assert_title(title):
     Parameters:
     title : value
     """
-    _add_step("Assert page title is '{}'".format(title))
+    _add_step(f"Assert page title is '{title}'")
     _run_wait_hook()
-    error_msg = ("expected title to be '{}' but was '{}'"
-                 .format(title, get_browser().title))
+    error_msg = f"expected title to be '{title}' but was '{get_browser().title}'"
     assert get_browser().title == title, error_msg
     _screenshot_on_step()
 
@@ -740,9 +722,9 @@ def assert_title_contains(partial_title):
     Parameters:
     partial_title : value
     """
-    _add_step("Assert page title contains '{}'".format(partial_title))
+    _add_step(f"Assert page title contains '{partial_title}'")
     _run_wait_hook()
-    error_msg = "expected title to contain '{}'".format(partial_title)
+    error_msg = f"expected title to contain '{partial_title}'"
     assert partial_title in get_browser().title, error_msg
     _screenshot_on_step()
 
@@ -753,10 +735,9 @@ def assert_title_is_not(title):
     Parameters:
     title : value
     """
-    _add_step("Assert page title is not '{}'".format(title))
+    _add_step(f"Assert page title is not '{title}'")
     _run_wait_hook()
-    error_msg = "expected title to not be '{}'".format(title)
-    assert get_browser().title != title, error_msg
+    assert get_browser().title != title, f"expected title to not be '{title}'"
     _screenshot_on_step()
 
 
@@ -766,10 +747,9 @@ def assert_title_not_contains(text):
     Parameters:
     text : value
     """
-    _add_step("Assert page title does not contain '{}'".format(text))
+    _add_step(f"Assert page title does not contain '{text}'")
     _run_wait_hook()
-    error_msg = "title contains '{}'".format(text)
-    assert text not in get_browser().title, error_msg
+    assert text not in get_browser().title, f"title contains '{text}'"
     _screenshot_on_step()
 
 
@@ -779,10 +759,9 @@ def assert_url(url):
     Parameters:
     url : value
     """
-    _add_step("Assert URL is '{}'".format(url))
+    _add_step(f"Assert URL is '{url}'")
     _run_wait_hook()
-    error_msg = ("expected URL to be '{}' but was '{}'"
-                 .format(url, get_browser().current_url))
+    error_msg = f"expected URL to be '{url}' but was '{get_browser().current_url}'"
     assert get_browser().current_url == url, error_msg
     _screenshot_on_step()
 
@@ -793,9 +772,9 @@ def assert_url_contains(partial_url):
     Parameters:
     partial_url : value
     """
-    _add_step("Assert URL contains '{}'".format(partial_url))
+    _add_step(f"Assert URL contains '{partial_url}'")
     _run_wait_hook()
-    error_msg = "expected URL to contain '{}'".format(partial_url)
+    error_msg = f"expected URL to contain '{partial_url}'"
     assert partial_url in get_browser().current_url, error_msg
     _screenshot_on_step()
 
@@ -806,10 +785,9 @@ def assert_url_is_not(url):
     Parameters:
     url : value
     """
-    _add_step("Assert URL is not '{}'".format(url))
+    _add_step(f"Assert URL is not '{url}'")
     _run_wait_hook()
-    error_msg = "expected URL to not be '{}'".format(url)
-    assert get_browser().current_url != url, error_msg
+    assert get_browser().current_url != url, f"expected URL to not be '{url}'"
     _screenshot_on_step()
 
 
@@ -819,11 +797,10 @@ def assert_url_not_contains(partial_url):
     Parameters:
     partial_url : value
     """
-    _add_step("Assert page title does not contain '{}'".format(partial_url))
+    _add_step(f"Assert page title does not contain '{partial_url}'")
     _run_wait_hook()
     actual_url = get_browser().current_url
-    error_msg = ("expected URL '{}' to not contain '{}'"
-                 .format(actual_url, partial_url))
+    error_msg = f"expected URL '{actual_url}' to not contain '{partial_url}'"
     assert partial_url not in actual_url, error_msg
     _screenshot_on_step()
 
@@ -834,9 +811,9 @@ def assert_window_present_by_partial_title(partial_title):
     Parameters:
     partial_title : value
     """
-    _add_step("Assert window present by partial title '{}'".format(partial_title))
+    _add_step(f"Assert window present by partial title '{partial_title}'")
     _run_wait_hook()
-    error_msg = "There is no window present with partial title '{}'".format(partial_title)
+    error_msg = f"There is no window present with partial title '{partial_title}'"
     window_titles = get_browser().get_window_titles()
     assert any(partial_title in t for t in window_titles), error_msg
     _screenshot_on_step()
@@ -848,10 +825,10 @@ def assert_window_present_by_partial_url(partial_url):
     Parameters:
     partial_url : value
     """
-    _add_step("Assert window present by partial URL '{}'".format(partial_url))
+    _add_step(f"Assert window present by partial URL '{partial_url}'")
     _run_wait_hook()
     urls = get_browser().get_window_urls()
-    error_msg = "There is no window present with partial URL '{}'".format(partial_url)
+    error_msg = f"There is no window present with partial URL '{partial_url}'"
     assert any(partial_url in url for url in urls), error_msg
     _screenshot_on_step()
 
@@ -862,9 +839,9 @@ def assert_window_present_by_title(title):
     Parameters:
     title : value
     """
-    _add_step("Assert window present by title '{}'".format(title))
+    _add_step(f"Assert window present by title '{title}'")
     _run_wait_hook()
-    error_msg = "There is no window present with title '{}'".format(title)
+    error_msg = f"There is no window present with title '{title}'"
     assert title in get_browser().get_window_titles(), error_msg
     _screenshot_on_step()
 
@@ -875,9 +852,9 @@ def assert_window_present_by_url(url):
     Parameters:
     url : value
     """
-    _add_step("Assert window present by URL '{}'".format(url))
+    _add_step(f"Assert window present by URL '{url}'")
     _run_wait_hook()
-    error_msg = "There is no window present with URL '{}'".format(url)
+    error_msg = f"There is no window present with URL '{url}'"
     assert url in get_browser().get_window_urls(), error_msg
     _screenshot_on_step()
 
@@ -890,7 +867,7 @@ def check_element(element):
     element : element
     """
     element = get_browser().find(element)
-    with _step('Check element {}'.format(element.name)):
+    with _step(f'Check element {element.name}'):
         get_browser().check_element(element)
 
 
@@ -901,7 +878,7 @@ def clear_element(element):
     element : element
     """
     element = get_browser().find(element)
-    with _step('Clear element {}'.format(element.name)):
+    with _step(f'Clear element {element.name}'):
         element.clear()
 
 
@@ -912,7 +889,7 @@ def click(element):
     element : element
     """
     element = browser.get_browser().find(element)
-    with _step('Click {}'.format(element.name)):
+    with _step(f'Click {element.name}'):
         element.click()
 
 
@@ -943,7 +920,7 @@ def close_window_by_index(index):
     Parameters:
     index : value
     """
-    with _step('Close window by index {}'.format(index)):
+    with _step(f'Close window by index {index}'):
         get_browser().close_window_by_index(index)
 
 
@@ -953,7 +930,7 @@ def close_window_by_partial_title(partial_title):
     Parameters:
     partial_title : value
     """
-    with _step("Close window by partial title '{}'".format(partial_title)):
+    with _step(f"Close window by partial title '{partial_title}'"):
         get_browser().close_window_by_partial_title(partial_title)
 
 
@@ -963,7 +940,7 @@ def close_window_by_partial_url(partial_url):
     Parameters:
     partial_title : value
     """
-    with _step("Close window by partial URL '{}'".format(partial_url)):
+    with _step(f"Close window by partial URL '{partial_url}'"):
         get_browser().close_window_by_partial_url(partial_url)
 
 
@@ -973,7 +950,7 @@ def close_window_by_title(title):
     Parameters:
     title : value
     """
-    with _step("Close window by title '{}'".format(title)):
+    with _step(f"Close window by title '{title}'"):
         get_browser().close_window_by_title(title)
 
 
@@ -983,7 +960,7 @@ def close_window_by_url(url):
     Parameters:
     url : value
     """
-    with _step("Close window by URL '{}'".format(url)):
+    with _step(f"Close window by URL '{url}'"):
         get_browser().close_window_by_url(url)
 
 
@@ -1001,10 +978,10 @@ def delete_cookie(name):
     Parameters:
     name: value
     """
-    with _step("Delete cookie '{}'".format(name)):
+    with _step(f"Delete cookie '{name}'"):
         cookie = get_browser().get_cookie(name)
         if not cookie:
-            raise Exception('Cookie "{}" was not found'.format(name))
+            raise Exception(f"Cookie '{name}' was not found")
         else:
             get_browser().delete_cookie(name)
 
@@ -1026,7 +1003,7 @@ def double_click(element):
     element : element
     """
     element = get_browser().find(element)
-    with _step('Double click element {}'.format(element.name)):
+    with _step(f'Double click element {element.name}'):
         element.double_click()
 
 
@@ -1070,7 +1047,7 @@ def execute_javascript(script, *args):
     script : value
     *args : value
     """
-    _add_step("Execute javascript code '{}' with args '{}'".format(script, args))
+    _add_step(f"Execute javascript code '{script}' with args '{args}'")
     return get_browser().execute_script(script, *args)
 
 
@@ -1090,7 +1067,7 @@ def focus_element(element):
     element : element
     """
     element = get_browser().find(element)
-    with _step('Focus element {}'.format(element.name)):
+    with _step(f'Focus element {element.name}'):
         element.focus()
 
 
@@ -1127,7 +1104,7 @@ def get_cookie(name):
     Parameters:
     name : value
     """
-    execution.logger.debug('Get cookie "{}"'.format(name))
+    execution.logger.debug(f"Get cookie '{name}'")
     return get_browser().get_cookie(name)
 
 
@@ -1163,7 +1140,7 @@ def get_element_attribute(element, attribute):
     attribute : value
     """
     element = get_browser().find(element)
-    execution.logger.debug("Get '{}' element '{}' attribute".format(element, attribute))
+    execution.logger.debug(f"Get '{element}' element '{attribute}' attribute")
     return element.get_attribute(attribute)
 
 
@@ -1174,7 +1151,7 @@ def get_element_text(element):
     element : element
     """
     element = get_browser().find(element)
-    execution.logger.debug("Get '{}' element text".format(element))
+    execution.logger.debug(f"Get '{element}' element text")
     return element.text
 
 
@@ -1185,7 +1162,7 @@ def get_element_value(element):
     element : element
     """
     element = get_browser().find(element)
-    execution.logger.debug("Get '{}' element value".format(element))
+    execution.logger.debug(f"Get '{element}' element value")
     return element.value
 
 
@@ -1276,7 +1253,7 @@ def http_get(url, headers={}, params={}, verify_ssl_cert=True):
     params (optional, dict) : value
     verify_ssl_cert (optional, True) : value
     """
-    _add_step('Make a GET request to {}'.format(url))
+    _add_step(f'Make a GET request to {url}')
     response = requests.get(url, headers=headers, params=params,
                             verify=verify_ssl_cert)
     store('last_response', response)
@@ -1295,7 +1272,7 @@ def http_post(url, headers={}, data={}, verify_ssl_cert=True):
     data (optional, dict) : value
     verify_ssl_cert (optional, default is True) : value
     """
-    _add_step('Make a POST request to {}'.format(url))
+    _add_step(f'Make a POST request to {url}')
     response = requests.post(url, headers=headers, data=data,
                              verify=verify_ssl_cert)
     store('last_response', response)
@@ -1360,7 +1337,7 @@ def javascript_click(element):
     element : element
     """
     element = get_browser().find(element)
-    with _step('Javascript click element {}'.format(element.name)):
+    with _step(f'Javascript click element {element.name}'):
         element.javascript_click()
 
 
@@ -1388,7 +1365,7 @@ def mouse_over(element):
     element : element
     """
     element = get_browser().find(element)
-    with _step("Mouse over element '{}'".format(element.name)):
+    with _step(f"Mouse over element '{element.name}'"):
         element.mouse_over()
 
 
@@ -1398,7 +1375,7 @@ def navigate(url):
     Parameters:
     url : value
     """
-    with _step("Navigate to: '{}'".format(url), run_wait_hook=False):
+    with _step(f"Navigate to: '{url}'", run_wait_hook=False):
         get_browser().get(url)
 
 
@@ -1450,7 +1427,7 @@ def press_key(element, key):
     key : value
     """
     element = get_browser().find(element)
-    with _step("Press key: '{}' in element {}".format(key, element.name)):
+    with _step(f"Press key: '{key}' in element {element.name}"):
         element.press_key(key)
 
 
@@ -1466,7 +1443,7 @@ def random_float(min=1.0, max=100.0, decimals=None):
     decimals (optional, None) : value
     """
     randfloat = helpers.random_float(min, max, decimals)
-    execution.logger.debug('Random float generated: {}'.format(randfloat))
+    execution.logger.debug(f'Random float generated: {randfloat}')
     return randfloat
 
 
@@ -1478,7 +1455,7 @@ def random_int(min=1, max=100):
     max (optional, 100) : value
     """
     randint = helpers.random_int(min, max)
-    execution.logger.debug('Random int generated: {}'.format(randint))
+    execution.logger.debug(f'Random int generated: {randint}')
     return randint
 
 
@@ -1506,7 +1483,7 @@ def random_str(length=10, sample=None, prefix='', suffix=''):
     suffix (optional, '') : value
     """
     random_string = helpers.random_str(length, sample, prefix, suffix)
-    execution.logger.debug('Random string generated: {}'.format(random_string))
+    execution.logger.debug(f'Random string generated: {random_string}')
     return random_string
 
 
@@ -1524,7 +1501,7 @@ def select_option_by_index(element, index):
     index : value
     """
     element = get_browser().find(element)
-    with _step('Select option of index {} from element {}'.format(index, element.name)):
+    with _step(f'Select option of index {index} from element {element.name}'):
         element.select.select_by_index(index)
 
 
@@ -1536,7 +1513,7 @@ def select_option_by_text(element, text):
     text : value
     """
     element = get_browser().find(element)
-    with _step("Select option '{}' from element {}".format(text, element.name)):
+    with _step(f"Select option '{text}' from element {element.name}"):
         element.select.select_by_visible_text(text)
 
 
@@ -1548,7 +1525,7 @@ def select_option_by_value(element, value):
     value : value
     """
     element = get_browser().find(element)
-    with _step("Select option of value '{}' from element {}".format(value, element.name)):
+    with _step(f"Select option of value '{value}' from element {element.name}"):
         element.select.select_by_value(value)
 
 
@@ -1562,7 +1539,7 @@ def send_secure_keys(element, text):
     """
     element = get_browser().find(element)
     hidden_text = len(text)*'*'
-    with _step("Write '{}' in element {}".format(hidden_text, element.name)):
+    with _step(f"Write '{hidden_text}' in element {element.name}"):
         element.send_keys(text)
 
 
@@ -1574,7 +1551,7 @@ def send_keys(element, text):
     text : value
     """
     element = get_browser().find(element)
-    with _step("Write '{}' in element {}".format(text, element.name)):
+    with _step(f"Write '{text}' in element {element.name}"):
         element.send_keys(text)
 
 
@@ -1588,7 +1565,7 @@ def send_keys_with_delay(element, text, delay=0.1):
     delay (optional, 0.1) : value
     """
     element = get_browser().find(element)
-    with _step("Write '{}' in element {} with delay".format(text, element.name)):
+    with _step(f"Write '{text}' in element {element.name} with delay"):
         element.send_keys_with_delay(text, delay)
 
 
@@ -1598,7 +1575,7 @@ def send_text_to_alert(text):
     Parameters:
     text : value
     """
-    with _step("Send '{}' to alert".format(text)):
+    with _step(f"Send '{text}' to alert"):
         get_browser().switch_to.alert.send_keys(text)
 
 
@@ -1611,8 +1588,7 @@ def set_browser_capability(capability_key, capability_value):
     capability_key : value
     capability_value : value
     """
-    step_message = ('Set browser capability "{}" to "{}"'
-                    .format(capability_key, capability_value))
+    step_message = f"Set browser capability '{capability_key}' to '{capability_value}'"
     execution.logger.debug(step_message)
     execution.browser_definition['capabilities'][capability_key] = capability_value
 
@@ -1623,7 +1599,7 @@ def set_search_timeout(timeout):
     Parameters:
     timeout : value
     """
-    execution.logger.debug('Set search_timeout to: {}'.format(timeout))
+    execution.logger.debug(f'Set search_timeout to: {timeout}')
     if not isinstance(timeout, int) and not isinstance(timeout, float):
         raise ValueError('timeout must be int or float')
     else:
@@ -1647,7 +1623,7 @@ def set_window_size(width, height):
     width : value
     height : value
     """
-    step_message = 'Set browser window size to {0}x, {1}y.'.format(width, height)
+    step_message = f'Set browser window size to {width}x, {height}y.'
     execution.logger.debug(step_message)
     get_browser().set_window_size(width, height)
 
@@ -1668,7 +1644,7 @@ def store(key, value):
     key : value
     value : value
     """
-    execution.logger.info("Store value '{}' in key '{}'".format(value, key))
+    execution.logger.info(f"Store value '{value}' in key '{key}'")
     setattr(execution.data, key, value)
 
 
@@ -1701,7 +1677,7 @@ def submit_prompt_alert(text):
     Parameters:
     text : value
     """
-    with _step("Submit alert with text '{}'".format(text)):
+    with _step(f"Submit alert with text '{text}'"):
         get_browser().switch_to.alert.send_keys(text)
         get_browser().switch_to.alert.accept()
 
@@ -1725,7 +1701,7 @@ def switch_to_frame(frame):
     Parameters:
     frame : value
     """
-    with _step('Switch to frame {}'.format(frame), take_screenshots=False):
+    with _step(f'Switch to frame {frame}', take_screenshots=False):
         get_browser().switch_to.frame(frame)
 
 
@@ -1766,7 +1742,7 @@ def switch_to_window_by_index(index):
     Parameters:
     index : value
     """
-    with _step('Switch to window of index {}'.format(index)):
+    with _step(f'Switch to window of index {index}'):
         get_browser().switch_to_window_by_index(index)
 
 
@@ -1776,7 +1752,7 @@ def switch_to_window_by_partial_title(partial_title):
     Parameters:
     partial_title : value
     """
-    with _step("Switch to window with partial title '{}'".format(partial_title)):
+    with _step(f"Switch to window with partial title '{partial_title}'"):
         get_browser().switch_to_window_by_partial_title(partial_title)
 
 
@@ -1786,7 +1762,7 @@ def switch_to_window_by_partial_url(partial_url):
     Parameters:
     partial_url : value
     """
-    with _step("Switch to window with partial URL '{}'".format(partial_url)):
+    with _step(f"Switch to window with partial URL '{partial_url}'"):
         get_browser().switch_to_window_by_partial_url(partial_url)
 
 
@@ -1796,7 +1772,7 @@ def switch_to_window_by_title(title):
     Parameters:
     title : value
     """
-    with _step("Switch to window with title '{}'".format(title)):
+    with _step(f"Switch to window with title '{title}'"):
         get_browser().switch_to_window_by_title(title)
 
 
@@ -1806,7 +1782,7 @@ def switch_to_window_by_url(url):
     Parameters:
     url : value
     """
-    with _step("Switch to window with URL '{}'".format(url)):
+    with _step(f"Switch to window with URL '{url}'"):
         get_browser().switch_to_window_by_url(url)
 
 
@@ -1838,7 +1814,7 @@ def timer_start(timer_name=''):
     """
     current_time = None
     if timer_name in execution.timers:
-        execution.logger.debug('timer "{}" has already been started'.format(timer_name))
+        execution.logger.debug(f"timer '{timer_name}' has already been started")
     else:
         execution.timers[timer_name] = time.time()
     return current_time
@@ -1855,9 +1831,9 @@ def timer_stop(timer_name=''):
     elapsed_time = None
     if timer_name in execution.timers:
         elapsed_time = round(time.time() - execution.timers[timer_name], 4)
-        execution.logger.debug('timer {} stopped: {}'.format(timer_name, elapsed_time))
+        execution.logger.debug(f'timer {timer_name} stopped: {elapsed_time}')
     else:
-        execution.logger.debug('timer {} has not been started'.format(timer_name))
+        execution.logger.debug(f'timer {timer_name} has not been started')
     return elapsed_time
 
 
@@ -1869,7 +1845,7 @@ def uncheck_element(checkbox):
     checkbox : element
     """
     element = get_browser().find(checkbox)
-    with _step('Uncheck checkbox {}'.format(element.name)):
+    with _step(f'Uncheck checkbox {element.name}'):
         get_browser().uncheck_element(element)
 
 
@@ -1892,9 +1868,9 @@ def verify_alert_text(text):
     Parameters:
     text : value
     """
-    with _verify_step("Verify alert text is '{}'".format(text)) as s:
+    with _verify_step(f"Verify alert text is '{text}'") as s:
         alert_text = get_browser().switch_to.alert.text
-        s.error = "Expected alert text to be '{}' but was '{}'".format(text, alert_text)
+        s.error = f"Expected alert text to be '{text}' but was '{alert_text}'"
         s.condition = alert_text == text
 
 
@@ -1905,9 +1881,9 @@ def verify_alert_text_is_not(text):
     Parameters:
     text : value
     """
-    with _verify_step("Verify alert text is not '{}'".format(text)) as s:
+    with _verify_step(f"Verify alert text is not '{text}'") as s:
         alert_text = get_browser().switch_to.alert.text
-        s.error = "Expected alert text not to be '{}'".format(text)
+        s.error = f"Expected alert text not to be '{text}'"
         s.condition = alert_text != text
 
 
@@ -1917,9 +1893,9 @@ def verify_amount_of_windows(amount):
     Parameters:
     amount : value
     """
-    with _verify_step('Verify amount of open windows is {}'.format(amount)) as s:
+    with _verify_step(f'Verify amount of open windows is {amount}') as s:
         actual_amount = len(get_window_handles())
-        s.error = 'Expected {} windows but got {}'.format(amount, actual_amount)
+        s.error = f'Expected {amount} windows but got {actual_amount}'
         s.condition = actual_amount == amount
 
 
@@ -1930,8 +1906,8 @@ def verify_cookie_present(name):
     Parameters:
     name: value
     """
-    with _verify_step("Verify that cookie '{}' exists".format(name), take_screenshots=False) as s:
-        s.error = "Cookie '{}' was not found".format(name)
+    with _verify_step(f"Verify that cookie '{name}' exists", take_screenshots=False) as s:
+        s.error = f"Cookie '{name}' was not found"
         s.condition = browser.get_browser().get_cookie(name)
 
 
@@ -1943,15 +1919,14 @@ def verify_cookie_value(name, value):
     name: value
     value: value
     """
-    message = "Verify that cookie '{}' value is '{}'".format(name, value)
+    message = f"Verify that cookie '{name}' value is '{value}'"
     with _verify_step(message, take_screenshots=False) as s:
         cookie = browser.get_browser().get_cookie(name)
-        s.error = ("Expected cookie '{}' value to be '{}' but was '{}'"
-                   .format(name, value, cookie['value']))
+        s.error = f"Expected cookie '{name}' value to be '{value}' but was \'{cookie['value']}\'"
         if not cookie:
-            raise Exception("Cookie '{}' was not found".format(name))
+            raise Exception(f"Cookie '{name}' was not found")
         elif not 'value' in cookie:
-            raise Exception("Cookie '{}' did not have 'value' key".format(name))
+            raise Exception(f"Cookie '{name}' did not have 'value' key")
         s.condition = cookie['value'] == value
 
 
@@ -1964,12 +1939,11 @@ def verify_element_attribute(element, attribute, value):
     value : value
     """
     element = get_browser().find(element, timeout=0)
-    message = ("Verify element {} attribute {} value is '{}'"
-               .format(element.name, attribute, value))
+    message = f"Verify element {element.name} attribute {attribute} value is '{value}'"
     with _verify_step(message) as s:
         actual_value = element.get_attribute(attribute)
-        s.error = ("expected element {} attribute {} to be '{}' but was '{}'"
-                   .format(element.name, attribute, value, actual_value))
+        s.error = f"expected element {element.name} attribute {attribute} to be " \
+                  f"'{value}' but was '{actual_value}'"
         s.condition = actual_value == value
 
 
@@ -1982,12 +1956,10 @@ def verify_element_attribute_is_not(element, attribute, value):
     value : value
     """
     element = get_browser().find(element, timeout=0)
-    message = ("Verify element {} attribute {} value is not '{}'"
-               .format(element.name, attribute, value))
+    message = f"Verify element {element.name} attribute {attribute} value is not '{value}'"
     with _verify_step(message) as s:
         actual_value = element.get_attribute(attribute)
-        s.error = ("expected element {} attribute {} to not be '{}'"
-                   .format(element.name, attribute, value))
+        s.error = f"expected element {element.name} attribute {attribute} to not be '{value}'"
         s.condition = actual_value != value
 
 
@@ -1999,8 +1971,8 @@ def verify_element_checked(element):
     element : element
     """
     element = get_browser().find(element, timeout=0)
-    with _verify_step('Verify element {} is checked'.format(element.name)) as s:
-        s.error = 'element {} is not checked'.format(element.name)
+    with _verify_step(f'Verify element {element.name} is checked') as s:
+        s.error = f'element {element.name} is not checked'
         s.condition = element.is_selected()
 
 
@@ -2011,8 +1983,8 @@ def verify_element_displayed(element):
     element : element
     """
     element = get_browser().find(element, timeout=0, wait_displayed=False)
-    with _verify_step('Verify element {} is displayed'.format(element.name)) as s:
-        s.error = 'element {} is not displayed'.format(element.name)
+    with _verify_step(f'Verify element {element.name} is displayed') as s:
+        s.error = f'element {element.name} is not displayed'
         s.condition = element.is_displayed()
 
 
@@ -2023,8 +1995,8 @@ def verify_element_enabled(element):
     element : element
     """
     element = get_browser().find(element, timeout=0)
-    with _verify_step('Verify element {} is enabled'.format(element.name)) as s:
-        s.error = 'element {} is not enabled'.format(element.name)
+    with _verify_step(f'Verify element {element.name} is enabled') as s:
+        s.error = f'element {element.name} is not enabled'
         s.condition = element.is_enabled()
 
 
@@ -2036,8 +2008,8 @@ def verify_element_has_attribute(element, attribute):
     attribute : value
     """
     element = get_browser().find(element, timeout=0)
-    with _verify_step('Verify element {} has attribute {}'.format(element.name, attribute)) as s:
-        s.error = 'element {} does not have attribute {}'.format(element.name, attribute)
+    with _verify_step(f'Verify element {element.name} has attribute {attribute}') as s:
+        s.error = f'element {element.name} does not have attribute {attribute}'
         s.condition = element.has_attribute(attribute)
 
 
@@ -2048,8 +2020,8 @@ def verify_element_has_focus(element):
     element : element
     """
     element = get_browser().find(element, timeout=0)
-    with _verify_step('Verify element {} has focus'.format(element.name)) as s:
-        s.error = 'element {} does not have focus'.format(element.name)
+    with _verify_step(f'Verify element {element.name} has focus') as s:
+        s.error = f'element {element.name} does not have focus'
         s.condition = element.has_focus()
 
 
@@ -2061,9 +2033,8 @@ def verify_element_has_not_attribute(element, attribute):
     attribute : value
     """
     element = get_browser().find(element, timeout=0)
-    with _verify_step('Verify element {} has not attribute {}'
-                              .format(element.name, attribute)) as s:
-        s.error = 'element {} has attribute {}'.format(element.name, attribute)
+    with _verify_step(f'Verify element {element.name} has not attribute {attribute}') as s:
+        s.error = f'element {element.name} has attribute {attribute}'
         s.condition = not element.has_attribute(attribute)
 
 
@@ -2074,9 +2045,8 @@ def verify_element_has_not_focus(element):
     element : element
     """
     element = get_browser().find(element, timeout=0)
-    with _verify_step('Verify element {} does not have focus'
-                              .format(element.name)) as s:
-        s.error = 'element {} has focus'.format(element.name)
+    with _verify_step(f'Verify element {element.name} does not have focus') as s:
+        s.error = f'element {element.name} has focus'
         s.condition = not element.has_focus()
 
 
@@ -2088,8 +2058,8 @@ def verify_element_not_checked(element):
     element : element
     """
     element = browser.get_browser().find(element, timeout=0)
-    with _verify_step('Verify element {} is not checked'.format(element.name)) as s:
-        s.error = 'element {} is checked'.format(element.name)
+    with _verify_step(f'Verify element {element.name} is not checked') as s:
+        s.error = f'element {element.name} is checked'
         s.condition = not element.is_selected()
 
 
@@ -2100,8 +2070,8 @@ def verify_element_not_displayed(element):
     element : element
     """
     element = get_browser().find(element, timeout=0, wait_displayed=False)
-    with _verify_step('Verify element {} is not displayed'.format(element.name)) as s:
-        s.error = 'element {} is displayed'.format(element.name)
+    with _verify_step(f'Verify element {element.name} is not displayed') as s:
+        s.error = f'element {element.name} is displayed'
         s.condition = not element.is_displayed()
 
 
@@ -2112,8 +2082,8 @@ def verify_element_not_enabled(element):
     element : element
     """
     element = get_browser().find(element, timeout=0)
-    with _verify_step('Verify element {} is not enabled'.format(element.name)) as s:
-        s.error = 'Element {} is enabled'.format(element.name)
+    with _verify_step(f'Verify element {element.name} is not enabled') as s:
+        s.error = f'Element {element.name} is enabled'
         s.condition = not element.is_enabled()
 
 
@@ -2123,8 +2093,8 @@ def verify_element_not_present(element):
     Parameters:
     element : element
     """
-    with _verify_step('Verify element {} is not present'.format(element)) as s:
-        s.error = 'element {} is present'.format(element)
+    with _verify_step(f'Verify element {element} is not present') as s:
+        s.error = f'element {element} is present'
         s.condition = not get_browser().element_is_present(element)
 
 
@@ -2134,8 +2104,8 @@ def verify_element_present(element):
     Parameters:
     element : element
     """
-    with _verify_step('Verify element {} is present'.format(element)) as s:
-        s.error = 'element {} is not present'.format(element)
+    with _verify_step(f'Verify element {element} is present') as s:
+        s.error = f'element {element} is not present'
         s.condition = get_browser().element_is_present(element)
 
 
@@ -2147,9 +2117,8 @@ def verify_element_text(element, text):
     text : value
     """
     element = browser.get_browser().find(element, timeout=0)
-    with _verify_step("Verify element {} text is '{}'".format(element.name, text)) as s:
-        s.error = ("expected element {} text to be '{}' but was '{}'"
-                         .format(element.name, text, element.text))
+    with _verify_step(f"Verify element {element.name} text is '{text}'") as s:
+        s.error = f"expected element {element.name} text to be '{text}' but was '{element.text}'"
         s.condition = element.text == text
 
 
@@ -2161,9 +2130,8 @@ def verify_element_text_contains(element, text):
     text : value
     """
     element = browser.get_browser().find(element, timeout=0)
-    with _verify_step("Verify element {} contains text '{}'".format(element.name, text)) as s:
-        s.error = ("expected element {} text '{}' to contain '{}'"
-                   .format(element.name, element.text, text))
+    with _verify_step(f"Verify element {element.name} contains text '{text}'") as s:
+        s.error = f"expected element {element.name} text '{element.text}' to contain '{text}'"
         s.condition = text in element.text
 
 
@@ -2175,9 +2143,8 @@ def verify_element_text_is_not(element, text):
     text : value
     """
     element = browser.get_browser().find(element, timeout=0)
-    with _verify_step("Verify element {} text is not '{}'"
-                              .format(element.name, text)) as s:
-        s.error = ("expected element {} text to not be '{}'".format(element.name, text))
+    with _verify_step(f"Verify element {element.name} text is not '{text}'") as s:
+        s.error = f"expected element {element.name} text to not be '{text}'"
         s.condition = element.text != text
 
 
@@ -2189,10 +2156,8 @@ def verify_element_text_not_contains(element, text):
     text : value
     """
     element = browser.get_browser().find(element, timeout=0)
-    with _verify_step("Verify element {} does not contains text '{}'"
-                              .format(element.name, text)) as s:
-        s.error = ("expected element {} text '{}' to not contain '{}'"
-                   .format(element.name, element.text, text))
+    with _verify_step(f"Verify element {element.name} does not contains text '{text}'") as s:
+        s.error = f"expected element {element.name} text '{element.text}' to not contain '{text}'"
         s.condition = text not in element.text
 
 
@@ -2204,11 +2169,10 @@ def verify_element_value(element, value):
     value : value
     """
     element = get_browser().find(element, timeout=0)
-    step_message = ("Verify element {} value is '{}'".format(element.name, value))
+    step_message = f"Verify element {element.name} value is '{value}'"
     with _verify_step(step_message) as s:
         element_value = element.value
-        s.error = ("expected element {} value to be '{}' but was '{}'"
-                   .format(element.name, value, element_value))
+        s.error = f"expected element {element.name} value to be '{value}' but was '{element_value}'"
         s.condition = element_value == value
 
 
@@ -2220,10 +2184,10 @@ def verify_element_value_is_not(element, value):
     value : value
     """
     element = get_browser().find(element, timeout=0)
-    step_message = ("Verify element {} value is not '{}'".format(element.name, value))
+    step_message = f"Verify element {element.name} value is not '{value}'"
     with _verify_step(step_message) as s:
         element_value = element.value
-        s.error = ("expected element {} value to not be '{}'".format(element.name, value))
+        s.error = f"expected element {element.name} value to not be '{value}'"
         s.condition = element_value != value
 
 
@@ -2233,8 +2197,8 @@ def verify_page_contains_text(text):
     Parameters:
     text : value
     """
-    with _verify_step("Verify '{}' is present in the page".format(text)) as s:
-        s.error = "text '{}' not found in the page".format(text)
+    with _verify_step(f"Verify '{text}' is present in the page") as s:
+        s.error = f"text '{text}' not found in the page"
         s.condition = text in get_browser().page_source
 
 
@@ -2244,8 +2208,8 @@ def verify_page_not_contains_text(text):
     Parameters:
     text : value
     """
-    with _verify_step("Verify '{}' is not present in the page".format(text)) as s:
-        s.error = "text '{}' was found in the page".format(text)
+    with _verify_step(f"Verify '{text}' is not present in the page") as s:
+        s.error = f"text '{text}' was found in the page"
         s.condition = text not in get_browser().page_source
 
 
@@ -2256,12 +2220,12 @@ def verify_response_status_code(response, status_code):
     response : value
     status_code : value
     """
-    with _verify_step('Verify response status code is {}'.format(status_code)) as s:
+    with _verify_step(f'Verify response status code is {status_code}') as s:
         if isinstance(status_code, str):
             if status_code.isdigit():
                 status_code = int(status_code)
-        s.error = ('expected response status code to be {} but was {}'
-                         .format(status_code, response.status_code))
+        s.error = f'expected response status code to be {status_code} but ' \
+                  f'was {response.status_code}'
         s.condition = response.status_code == status_code
 
 
@@ -2273,11 +2237,10 @@ def verify_selected_option_by_text(element, text):
     text : value
     """
     element = get_browser().find(element)
-    with _verify_step('Verify selected option text of element {} is {}'
-                              .format(element.name, text)) as s:
+    with _verify_step(f'Verify selected option text of element {element.name} is {text}') as s:
         selected_option_text = element.select.first_selected_option.text
-        s.error = ('Expected selected option in element {} to be {} but was {}'
-                   .format(element.name, text, selected_option_text))
+        s.error = f'Expected selected option in element {element.name} to be {text} ' \
+                  f'but was {selected_option_text}'
         s.condition = selected_option_text == text
 
 
@@ -2289,11 +2252,10 @@ def verify_selected_option_by_value(element, value):
     value : value
     """
     element = get_browser().find(element)
-    with _verify_step('Verify selected option value of element {} is {}'
-                              .format(element.name, value)) as s:
+    with _verify_step(f'Verify selected option value of element {element.name} is {value}') as s:
         selected_option_value = element.select.first_selected_option.value
-        s.error = ('Expected selected option in element {} to be {} but was {}'
-                   .format(element.name, value, selected_option_value))
+        s.error = f'Expected selected option in element {element.name} to be {value} ' \
+                  f'but was {selected_option_value}'
         s.condition = selected_option_value == value
 
 
@@ -2303,10 +2265,9 @@ def verify_title(title):
     Parameters:
     title : value
     """
-    with _verify_step("Verify page title is '{}'".format(title)) as s:
+    with _verify_step(f"Verify page title is '{title}'") as s:
         actual_title = get_browser().title
-        s.error = ("expected title to be '{}' but was '{}'"
-                   .format(title, actual_title))
+        s.error = f"expected title to be '{title}' but was '{actual_title}'"
         s.condition = actual_title == title
 
 
@@ -2316,8 +2277,8 @@ def verify_title_contains(partial_title):
     Parameters:
     partial_title : value
     """
-    with _verify_step("Verify page title contains '{}'".format(partial_title)) as s:
-        s.error = "expected title to contain '{}'".format(partial_title)
+    with _verify_step(f"Verify page title contains '{partial_title}'") as s:
+        s.error = f"expected title to contain '{partial_title}'"
         s.condition = partial_title in get_browser().title
 
 
@@ -2327,8 +2288,8 @@ def verify_title_is_not(title):
     Parameters:
     title : value
     """
-    with _verify_step("Verify page title is not '{}'".format(title)) as s:
-        s.error = "expected title to not be '{}'".format(title)
+    with _verify_step(f"Verify page title is not '{title}'") as s:
+        s.error = f"expected title to not be '{title}'"
         s.condition = get_browser().title != title
 
 
@@ -2338,8 +2299,8 @@ def verify_title_not_contains(text):
     Parameters:
     text : value
     """
-    with _verify_step("Verify page title does not contain '{}'".format(text)) as s:
-        s.error = "title contains '{}'".format(text)
+    with _verify_step(f"Verify page title does not contain '{text}'") as s:
+        s.error = f"title contains '{text}'"
         s.condition = text not in get_browser().title
 
 
@@ -2350,8 +2311,8 @@ def verify_url(url):
     url : value
     """
     current_url = get_browser().current_url
-    msg = "Verify URL is '{}'".format(url)
-    err = "expected URL to be '{}' but was '{}'".format(url, current_url)
+    msg = f"Verify URL is '{url}'"
+    err = f"expected URL to be '{url}' but was '{current_url}'"
     with _verify_step(msg, err) as s:
         s.condition = current_url == url
 
@@ -2363,8 +2324,8 @@ def verify_url_contains(partial_url):
     partial_url : value
     """
     current_url = get_browser().current_url
-    msg = "Verify URL contains '{}'".format(partial_url)
-    err = "expected URL '{}' to contain '{}'".format(current_url, partial_url)
+    msg = f"Verify URL contains '{partial_url}'"
+    err = f"expected URL '{current_url}' to contain '{partial_url}'"
     with _verify_step(msg, err) as s:
         s.condition = partial_url in current_url
 
@@ -2375,8 +2336,8 @@ def verify_url_is_not(url):
     Parameters:
     url : value
     """
-    msg = "Verify URL is not '{}'".format(url)
-    err = "expected URL to not be '{}'".format(url)
+    msg = f"Verify URL is not '{url}'"
+    err = f"expected URL to not be '{url}'"
     with _verify_step(msg, err) as s:
         s.condition = get_browser().current_url != url
 
@@ -2388,8 +2349,8 @@ def verify_url_not_contains(partial_url):
     partial_url : value
     """
     current_url = get_browser().current_url
-    msg = "Verify URL does not contain '{}'".format(partial_url)
-    err = "expected URL '{}' to not contain '{}'".format(current_url, partial_url)
+    msg = f"Verify URL does not contain '{partial_url}'"
+    err = f"expected URL '{current_url}' to not contain '{partial_url}'"
     with _verify_step(msg, err) as s:
         s.condition = partial_url not in current_url
 
@@ -2400,9 +2361,8 @@ def verify_window_present_by_partial_title(partial_title):
     Parameters:
     partial_title : value
     """
-    with _verify_step("Verify window present by partial title '{}'"
-                              .format(partial_title)) as s:
-        s.error = "There is no window present with partial title '{}'".format(partial_title)
+    with _verify_step(f"Verify window present by partial title '{partial_title}'") as s:
+        s.error = f"There is no window present with partial title '{partial_title}'"
         titles = get_browser().get_window_titles()
         s.error_description = '{}\nWindow titles: {}'.format(s.error, ','.join(titles))
         s.condition = any(partial_title in t for t in titles)
@@ -2414,9 +2374,8 @@ def verify_window_present_by_partial_url(partial_url):
     Parameters:
     partial_url : value
     """
-    with _verify_step("Verify window present by partial URL '{}'"
-                              .format(partial_url)) as s:
-        s.error = "There is no window present with partial URL '{}'".format(partial_url)
+    with _verify_step(f"Verify window present by partial URL '{partial_url}'") as s:
+        s.error = f"There is no window present with partial URL '{partial_url}'"
         urls = get_browser().get_window_urls()
         s.error_description = '{}\nWindow URLs:\n{}'.format(s.error, '\n'.join(urls))
         s.condition = any(partial_url in url for url in urls)
@@ -2428,8 +2387,8 @@ def verify_window_present_by_title(title):
     Parameters:
     title : value
     """
-    with _verify_step("Verify window present by title '{}'".format(title)) as s:
-        s.error = "There is no window present with title '{}'".format(title)
+    with _verify_step(f"Verify window present by title '{title}'") as s:
+        s.error = f"There is no window present with title '{title}'"
         titles = get_browser().get_window_titles()
         s.error_description = '{}\nWindow titles: {}'.format(s.error, ','.join(titles))
         s.condition = title in titles
@@ -2441,8 +2400,8 @@ def verify_window_present_by_url(url):
     Parameters:
     url : value
     """
-    with _verify_step("Verify window present by URL '{}'".format(url)) as s:
-        s.error = "There is no window present with URL '{}'".format(url)
+    with _verify_step(f"Verify window present by URL '{url}'") as s:
+        s.error = f"There is no window present with URL '{url}'"
         urls = get_browser().get_window_urls()
         s.error_description = '{}\nWindow URLs:\n{}'.format(s.error, '\n'.join(urls))
         s.condition = url in urls
@@ -2454,7 +2413,7 @@ def wait(seconds):
     Parameters:
     seconds (int or float) : value
     """
-    execution.logger.info('Waiting for {} seconds'.format(seconds))
+    execution.logger.info(f'Waiting for {seconds} seconds')
     try:
         to_float = float(seconds)
     except:
@@ -2479,7 +2438,7 @@ def wait_for_element_displayed(element, timeout=30):
     element : element
     timeout (optional, 30) : value
     """
-    with _step('Wait for element {} to be displayed'.format(element)):
+    with _step(f'Wait for element {element} to be displayed'):
         get_browser().wait_for_element_displayed(element, timeout)
 
 
@@ -2491,7 +2450,7 @@ def wait_for_element_enabled(element, timeout=30):
     timeout (optional, 30) : value
     """
     element = get_browser().find(element, timeout=0)
-    with _step('Wait for element {} to be enabled'.format(element.name)):
+    with _step(f'Wait for element {element.name} to be enabled'):
         get_browser().wait_for_element_enabled(element, timeout)
 
 
@@ -2504,7 +2463,7 @@ def wait_for_element_has_attribute(element, attribute, timeout=30):
     timeout (optional, 30) : value
     """
     element = get_browser().find(element, timeout=0)
-    with _step('Wait for element {} to have {} attribute'.format(element.name, attribute)):
+    with _step(f'Wait for element {element.name} to have {attribute} attribute'):
         get_browser().wait_for_element_has_attribute(element, attribute, timeout)
 
 
@@ -2517,7 +2476,7 @@ def wait_for_element_has_not_attribute(element, attribute, timeout=30):
     timeout (optional, 30) : value
     """
     element = get_browser().find(element, timeout=0)
-    with _step('Wait for element {} to not have {} attribute'.format(element.name, attribute)):
+    with _step(f'Wait for element {element.name} to not have {attribute} attribute'):
         get_browser().wait_for_element_has_not_attribute(element, attribute, timeout)
 
 
@@ -2530,7 +2489,7 @@ def wait_for_element_not_displayed(element, timeout=30):
     element : element
     timeout (optional, 30) : value
     """
-    with _step('Wait for element {} to be not displayed'.format(element)):
+    with _step(f'Wait for element {element} to be not displayed'):
         get_browser().wait_for_element_not_displayed(element, timeout)
 
 
@@ -2542,7 +2501,7 @@ def wait_for_element_not_enabled(element, timeout=30):
     timeout (optional, 30) : value
     """
     element = get_browser().find(element, timeout=0)
-    with _step('Wait for element {} to be not enabled'.format(element.name)):
+    with _step(f'Wait for element {element.name} to be not enabled'):
         get_browser().wait_for_element_not_enabled(element, timeout)
 
 
@@ -2554,7 +2513,7 @@ def wait_for_element_not_present(element, timeout=30):
     element : element
     timeout (optional, 30) : value
     """
-    with _step('Wait for element {} to be not present'.format(element)):
+    with _step(f'Wait for element {element} to be not present'):
         get_browser().wait_for_element_not_present(element, timeout)
 
 
@@ -2565,7 +2524,7 @@ def wait_for_element_present(element, timeout=30):
     element : element
     timeout (optional, 30) : value
     """
-    with _step('Wait for element {} to be present'.format(element)):
+    with _step(f'Wait for element {element} to be present'):
         get_browser().wait_for_element_present(element, timeout)
 
 
@@ -2577,7 +2536,7 @@ def wait_for_element_text(element, text, timeout=30):
     text : value
     timeout (optional, 30) : value
     """
-    with _step("Wait for element {} text to be '{}'".format(element, text)):
+    with _step(f"Wait for element {element} text to be '{text}'"):
         get_browser().wait_for_element_text(element, text, timeout)
 
 
@@ -2589,7 +2548,7 @@ def wait_for_element_text_contains(element, text, timeout=30):
     text : value
     timeout (optional, 30) : value
     """
-    with _step("Wait for element {} to contain text '{}'".format(element, text)):
+    with _step(f"Wait for element {element} to contain text '{text}'"):
         get_browser().wait_for_element_text_contains(element, text, timeout)
 
 
@@ -2601,7 +2560,7 @@ def wait_for_element_text_is_not(element, text, timeout=30):
     text : value
     timeout (optional, 30) : value
     """
-    with _step("Wait for element {} text to not be '{}'".format(element, text)):
+    with _step(f"Wait for element {element} text to not be '{text}'"):
         get_browser().wait_for_element_text_is_not(element, text, timeout)
 
 
@@ -2613,7 +2572,7 @@ def wait_for_element_text_not_contains(element, text, timeout=30):
     text : value
     timeout (optional, 30) : value
     """
-    with _step("Wait for element {} to not contain text '{}'".format(element, text)):
+    with _step(f"Wait for element {element} to not contain text '{text}'"):
         get_browser().wait_for_element_text_not_contains(element, text, timeout)
 
 
@@ -2624,7 +2583,7 @@ def wait_for_page_contains_text(text, timeout=30):
     text : value
     timeout (optional, 30) : value
     """
-    with _step("Wait for page contains text '{}'".format(text)):
+    with _step(f"Wait for page contains text '{text}'"):
         get_browser().wait_for_page_contains_text(text, timeout)
 
 
@@ -2635,7 +2594,7 @@ def wait_for_page_not_contains_text(text, timeout=30):
     text : value
     timeout (optional, 30) : value
     """
-    with _step("Wait for page to not contain text '{}'".format(text)):
+    with _step(f"Wait for page to not contain text '{text}'"):
         get_browser().wait_for_page_not_contains_text(text, timeout)
 
 
@@ -2646,7 +2605,7 @@ def wait_for_title(title, timeout=30):
     title : value
     timeout (optional, 30) : value
     """
-    with _step("Wait for title to be '{}'".format(title)):
+    with _step(f"Wait for title to be '{title}'"):
         get_browser().wait_for_title(title, timeout)
 
 
@@ -2657,7 +2616,7 @@ def wait_for_title_contains(partial_title, timeout=30):
     partial_title : value
     timeout (optional, 30) : value
     """
-    with _step("Wait for title to contain '{}'".format(partial_title)):
+    with _step(f"Wait for title to contain '{partial_title}'"):
         get_browser().wait_for_title_contains(partial_title, timeout)
 
 
@@ -2668,7 +2627,7 @@ def wait_for_title_is_not(title, timeout=30):
     title : value
     timeout (optional, 30) : value
     """
-    with _step("Wait for title to not be '{}'".format(title)):
+    with _step(f"Wait for title to not be '{title}'"):
         get_browser().wait_for_title_is_not(title, timeout)
 
 
@@ -2679,7 +2638,7 @@ def wait_for_title_not_contains(partial_title, timeout=30):
     partial_title : value
     timeout (optional, 30) : value
     """
-    with _step("Wait for title to not contain '{}'".format(partial_title)):
+    with _step(f"Wait for title to not contain '{partial_title}'"):
         get_browser().wait_for_title_not_contains(partial_title, timeout)
 
 
@@ -2690,7 +2649,7 @@ def wait_for_window_present_by_partial_title(partial_title, timeout=30):
     partial_title : value
     timeout (optional, 30) : value
     """
-    with _step("Wait for window present by partial title '{}'".format(partial_title),
+    with _step(f"Wait for window present by partial title '{partial_title}'",
                take_screenshots=False):
         get_browser().wait_for_window_present_by_partial_title(partial_title, timeout)
 
@@ -2702,7 +2661,7 @@ def wait_for_window_present_by_partial_url(partial_url, timeout=30):
     partial_url : value
     timeout (optional, 30) : value
     """
-    with _step("Wait for window present by partial url '{}'".format(partial_url),
+    with _step(f"Wait for window present by partial url '{partial_url}'",
                take_screenshots=False):
         get_browser().wait_for_window_present_by_partial_url(partial_url, timeout)
 
@@ -2714,8 +2673,7 @@ def wait_for_window_present_by_title(title, timeout=30):
     title : value
     timeout (optional, 30) : value
     """
-    with _step("Wait for window present by title '{}'".format(title),
-               take_screenshots=False):
+    with _step(f"Wait for window present by title '{title}'", take_screenshots=False):
         get_browser().wait_for_window_present_by_title(title, timeout)
 
 
@@ -2726,6 +2684,5 @@ def wait_for_window_present_by_url(url, timeout=30):
     url : value
     timeout (optional, 30) : value
     """
-    with _step("Wait for window present by url '{}'".format(url),
-               take_screenshots=False):
+    with _step(f"Wait for window present by url '{url}'", take_screenshots=False):
         get_browser().wait_for_window_present_by_url(url, timeout)

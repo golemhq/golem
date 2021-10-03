@@ -25,7 +25,7 @@ def create_test(project_name, test_name):
         path = Test(project_name, test_name).path
         with open(path, 'w', encoding='utf-8') as f:
             f.write(test_content)
-        print('Test {} created for project {}'.format(test_name, project_name))
+        print(f'Test {test_name} created for project {project_name}')
     return errors
 
 
@@ -33,7 +33,7 @@ def rename_test(project_name, test_name, new_test_name):
     errors = []
     project = Project(project_name)
     if test_name not in project.tests():
-        errors.append('Test {} does not exist'.format(test_name))
+        errors.append(f'Test {test_name} does not exist')
     else:
         errors = validate_project_element_name(new_test_name)
     if not errors:
@@ -56,7 +56,7 @@ def duplicate_test(project, name, new_name):
     if name == new_name:
         errors.append('New test name cannot be the same as the original')
     elif not os.path.isfile(old_path):
-        errors.append('Test {} does not exist'.format(name))
+        errors.append(f'Test {name} does not exist')
     elif os.path.isfile(new_path):
         errors.append('A test with that name already exists')
     else:
@@ -89,7 +89,7 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
                 formatted_description = formatted_description + '\n' + line
             formatted_description = formatted_description + '\'\'\''
         else:
-            formatted_description = 'description = \'{}\''.format(description)
+            formatted_description = f"description = '{description}'"
         return formatted_description
 
     def _format_tags_string(tags):
@@ -114,7 +114,7 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
             for key, value in data_set.items():
                 if not value:
                     value = "''"
-                result += '        \'{}\': {},\n'.format(key, value)
+                result += f"        '{key}': {value},\n"
             result += '    },\n'
         result += ']'
         return result
@@ -125,11 +125,11 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
             if step['type'] == 'function-call':
                 step_action = step['action'].replace(' ', '_')
                 param_str = ', '.join(step['parameters'])
-                step_lines.append('    {0}({1})'.format(step_action, param_str))
+                step_lines.append(f'    {step_action}({param_str})')
             else:
                 lines = step['code'].splitlines()
                 for line in lines:
-                    step_lines.append('    {}'.format(line))
+                    step_lines.append(f'    {line}')
         return '\n'.join(step_lines)
 
     def _print_extra_blank_line():
@@ -161,8 +161,8 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
             split = page.split('.')
             top = split.pop()
             parents = '.'.join(split)
-            parents = '.{}'.format(parents) if parents else ''
-            test_.append('from projects.{}.pages{} import {}'.format(project, parents, top))
+            parents = f'.{parents}' if parents else ''
+            test_.append(f'from projects.{project}.pages{parents} import {top}')
 
     extra_blank_line = False
     if not settings['implicit_actions_import'] or not settings['implicit_page_import']:
@@ -176,12 +176,12 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
     if tags:
         _print_extra_blank_line()
         test_.append('')
-        test_.append('tags = {}'.format(_format_tags_string(tags)))
+        test_.append(f'tags = {_format_tags_string(tags)}')
 
     if pages and settings['implicit_page_import']:
         _print_extra_blank_line()
         test_.append('')
-        test_.append('pages = {}'.format(_format_page_string(pages)))
+        test_.append(f'pages = {_format_page_string(pages)}')
 
     if test_data['csv'] is not None:
         test_data_module.save_csv_test_data(project, test_name, test_data['csv'])
@@ -202,8 +202,8 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
         _print_extra_blank_line()
         test_.append('')
         if type(skip) is str:
-            skip = "'{}'".format(skip)
-        test_.append('skip = {}'.format(skip))
+            skip = f"'{skip}'"
+        test_.append(f'skip = {skip}')
 
     if steps['hooks']:
         ordered_hooks = _order_hooks(steps['hooks'])
@@ -217,7 +217,7 @@ def edit_test(project, test_name, description, pages, steps, test_data, tags, sk
     for test_function_name, test_function_steps in steps['tests'].items():
         test_.append('')
         test_.append('')
-        test_.append('def {}(data):'.format(test_function_name))
+        test_.append(f'def {test_function_name}(data):')
         if test_function_steps:
             test_.append(_format_steps(test_function_steps))
         else:
@@ -251,7 +251,7 @@ def delete_test(project, test_name):
     errors = []
     path = Test(project, test_name).path
     if not os.path.isfile(path):
-        errors.append('Test {} does not exist'.format(test_name))
+        errors.append(f'Test {test_name} does not exist')
     else:
         try:
             os.remove(path)
@@ -259,7 +259,7 @@ def delete_test(project, test_name):
             if os.path.isfile(data_path):
                 os.remove(data_path)
         except:
-            errors.append('There was an error removing file {}'.format(test_name))
+            errors.append(f'There was an error removing file {test_name}')
     return errors
 
 

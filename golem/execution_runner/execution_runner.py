@@ -52,7 +52,7 @@ def define_browsers(browsers, remote_browsers, default_browsers, custom_browsers
                 'capabilities': {}
             })
         else:
-            msg = ['Error: the browser {} is not defined\n'.format(browser),
+            msg = [f'Error: the browser {browser} is not defined\n',
                    'available options are:\n',
                    '\n'.join(default_browsers),
                    '\n'.join(remote_browsers)]
@@ -220,9 +220,9 @@ class ExecutionRunner:
         test_number = len(self.tests)
         set_number = len(self.execution.tests)
         if test_number > 0:
-            msg = 'Tests found: {}'.format(test_number)
+            msg = f'Tests found: {test_number}'
             if test_number != set_number:
-                msg = '{} ({} sets)'.format(msg, set_number)
+                msg = f'{msg} ({set_number} sets)'
             print(msg)
 
     def _filter_tests_by_tags(self):
@@ -231,7 +231,7 @@ class ExecutionRunner:
             tests = tags_manager.filter_tests_by_tags(self.project.name, self.tests,
                                                       self.execution.tags)
         except tags_manager.InvalidTagExpression as e:
-            print('{}: {}'.format(e.__class__.__name__, e))
+            print(f'{e.__class__.__name__}: {e}')
             self.execution.has_failed_tests.value = True
         else:
             if len(tests) == 0:
@@ -278,7 +278,7 @@ class ExecutionRunner:
 
         self.tests = suite_obj.tests
         if len(self.tests) == 0:
-            print('No tests found for suite {}'.format(suite))
+            print(f'No tests found for suite {suite}')
 
         self.suite.processes = suite_obj.processes
         self.suite.browsers = suite_obj.browsers
@@ -299,7 +299,7 @@ class ExecutionRunner:
         """
         self.tests = self.project.tests(directory=directory)
         if len(self.tests) == 0:
-            print('No tests were found in {}'.format(os.path.join('tests', directory)))
+            print(f'No tests were found in {os.path.join("tests", directory)}')
         self.is_suite = True
         if directory == '':
             suite_name = 'all'
@@ -375,8 +375,8 @@ class ExecutionRunner:
             self.execution.envs = self._select_environments(project_envs)
             invalid_envs = [e for e in self.execution.envs if e not in project_envs]
             if invalid_envs:
-                print('ERROR: the following environments do not exist for project {}: {}'
-                      .format(self.project.name, ', '.join(invalid_envs)))
+                print('ERROR: the following environments do not exist for project '
+                      f'{self.project.name}: {", ".join(invalid_envs)}')
                 self.execution.has_failed_tests.value = True
                 self._finalize()
                 return

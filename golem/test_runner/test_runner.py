@@ -139,7 +139,7 @@ class TestRunner:
                 self.test_functions_to_run = self.test.test_function_list
 
             if not len(self.test_functions_to_run):
-                msg = 'No tests were found for file: {}'.format(self.test.name)
+                msg = f'No tests were found for file: {self.test.name}'
                 execution.logger.info(msg)
                 self.finalize()
                 return
@@ -169,7 +169,7 @@ class TestRunner:
                     self.test_module = import_page_into_test(base_path, self.test_module,
                                                              page.split('.'))
         except Exception as e:
-            message = '{}: {}'.format(e.__class__.__name__, e)
+            message = f'{e.__class__.__name__}: {e}'
             trcbk = traceback.format_exc()
             actions._add_error(message=message, description=trcbk)
             self.result = ResultsEnum.CODE_ERROR
@@ -220,7 +220,7 @@ class TestRunner:
 
         if self.global_skip or self.skip_tests:
             result['result'] = ResultsEnum.SKIPPED
-            execution.logger.info('Test skipped: {}'.format(test_name))
+            execution.logger.info(f'Test skipped: {test_name}')
             self._finalize_test_function(test_name)
             return
 
@@ -244,11 +244,11 @@ class TestRunner:
 
         if self.skip_tests:
             result['result'] = ResultsEnum.SKIPPED
-            execution.logger.info('Test skipped: {}'.format(test_name))
+            execution.logger.info(f'Test skipped: {test_name}')
             self._finalize_test_function(test_name)
             return
 
-        execution.logger.info('Test started: {}'.format(test_name))
+        execution.logger.info(f'Test started: {test_name}')
 
         result['start_time'] = time.time()
 
@@ -276,7 +276,7 @@ class TestRunner:
         result['end_time'] = time.time()
         result['test_elapsed_time'] = round(result['end_time'] - result['start_time'], 2)
 
-        execution.logger.info('Test Result: {}'.format(result['result'].upper()))
+        execution.logger.info(f"Test Result: {result['result'].upper()}")
 
         self._finalize_test_function(test_name)
 
@@ -426,21 +426,20 @@ class TestRunner:
         execution.timers = {}
 
     def _print_test_info(self):
-        execution.logger.info('Test execution started: {}'.format(self.test.name))
-        execution.logger.info('Browser: {}'.format(self.browser['name']))
+        execution.logger.info(f'Test execution started: {self.test.name}')
+        execution.logger.info(f"Browser: {self.browser['name']}")
         if 'env' in self.test_data:
             if 'name' in self.test_data['env']:
-                execution.logger.info('Environment: {}'
-                                      .format(self.test_data['env']['name']))
+                execution.logger.info(f"Environment: {self.test_data['env']['name']}")
         if self.test_data:
             data_string = ''
             for key, value in self.test_data.items():
                 if key == 'env':
                     if 'url' in value:
-                        data_string += '\n    {}: {}'.format('url', value['url'])
+                        data_string += f"\n    url: {value['url']}"
                 else:
-                    data_string += '\n    {}: {}'.format(key, value)
-            execution.logger.info('Using data:{}'.format(data_string))
+                    data_string += f'\n    {key}: {value}'
+            execution.logger.info(f'Using data:{data_string}')
 
     def _add_error(self, message, exception):
         """Add an error to the test from an exception.
@@ -455,7 +454,7 @@ class TestRunner:
             there is an open browser
         """
         actions._add_step(message, log_step=False)
-        error_message = '{}: {}'.format(exception.__class__.__name__, exception)
+        error_message = f'{exception.__class__.__name__}: {exception}'
         trcbk = traceback.format_exc().rstrip()
         actions._add_error(message=error_message, description=trcbk)
         actions._append_error(message=error_message, description=trcbk)

@@ -100,7 +100,7 @@ class TestCreateTest:
         _, project = project_session.activate()
         random_dir = test_utils.random_string()
         # to folder
-        test_name = '{}.test001'.format(random_dir)
+        test_name = f'{random_dir}.test001'
         errors = test_module.create_test(project, test_name)
         assert errors == []
         # verify that each parent dir has __init__.py file
@@ -111,7 +111,7 @@ class TestCreateTest:
         # to sub-folder
         random_dir = test_utils.random_string()
         random_subdir = test_utils.random_string()
-        test_name = '{}.{}.test001'.format(random_dir, random_subdir)
+        test_name = f'{random_dir}.{random_subdir}.test001'
         errors = test_module.create_test(project, test_name)
         assert errors == []
         assert test_name in Project(project).tests()
@@ -140,11 +140,11 @@ class TestRenameTest:
         _, project = project_session.activate()
         dir = test_utils.random_string()
         name = test_utils.random_string()
-        test_name = '{}.{}'.format(dir, name)
+        test_name = f'{dir}.{name}'
         test_utils.create_test(project, test_name)
         # rename within same folder
         new_name = test_utils.random_string()
-        new_test_name = '{}.{}'.format(dir, new_name)
+        new_test_name = f'{dir}.{new_name}'
         errors = test_module.rename_test(project, test_name, new_test_name)
         assert errors == []
         tests = Project(project).tests()
@@ -154,7 +154,7 @@ class TestRenameTest:
         test_name = new_test_name
         name = new_name
         new_dir = test_utils.random_string()
-        new_test_name = '{}.{}'.format(new_dir, name)
+        new_test_name = f'{new_dir}.{name}'
         errors = test_module.rename_test(project, test_name, new_test_name)
         assert errors == []
         tests = Project(project).tests()
@@ -191,7 +191,7 @@ class TestRenameTest:
         test_name = test_utils.random_string()
         new_test_name = test_utils.random_string()
         errors = test_module.rename_test(project, test_name, new_test_name)
-        assert errors == ['Test {} does not exist'.format(test_name)]
+        assert errors == [f'Test {test_name} does not exist']
         assert new_test_name not in Project(project).tests()
 
     def test_rename_test_with_data_file(self, project_session, test_utils):
@@ -211,9 +211,9 @@ class TestRenameTest:
         _, project = project_session.activate()
         dir = test_utils.random_string()
         name_one = test_utils.random_string()
-        test_one = '{}.{}'.format(dir, name_one)
+        test_one = f'{dir}.{name_one}'
         name_two = test_utils.random_string()
-        test_two = '{}.{}'.format(dir, name_two)
+        test_two = f'{dir}.{name_two}'
         test_utils.create_test(project, test_one)
         test_utils.create_test(project, test_two)
         # rename test to existing test name
@@ -249,10 +249,10 @@ class TestDuplicateTest:
         # in folder
         dir = test_utils.random_string()
         name = test_utils.random_string()
-        test_name = '{}.{}'.format(dir, name)
+        test_name = f'{dir}.{name}'
         test_utils.create_test(project, test_name)
         new_name = test_utils.random_string()
-        new_test_name = '{}.{}'.format(dir, new_name)
+        new_test_name = f'{dir}.{new_name}'
         errors = test_module.duplicate_test(project, test_name, new_test_name)
         assert errors == []
         tests = Project(project).tests()
@@ -273,7 +273,7 @@ class TestDuplicateTest:
         assert errors == ['A test with that name already exists']
         # to another folder
         test_one = test_utils.create_random_test(project)
-        test_two = '{}.{}'.format(test_utils.random_string(), test_utils.random_string())
+        test_two = f'{test_utils.random_string()}.{test_utils.random_string()}'
         test_utils.create_test(project, test_two)
         errors = test_module.duplicate_test(project, test_one, test_two)
         assert errors == ['A test with that name already exists']
@@ -396,12 +396,12 @@ class TestEditTest:
         settings_manager.save_project_settings(project, '{"implicit_page_import": false}')
         test_module.edit_test(project, test_name, description='', pages=pages,
                               steps=EMPTY_STEPS, test_data=EMPTY_TEST_DATA, tags=[])
-        expected = ('from projects.{}.pages import page1\n'
-                    'from projects.{}.pages.module import page2\n'
+        expected = (f'from projects.{project}.pages import page1\n'
+                    f'from projects.{project}.pages.module import page2\n'
                     '\n'
                     '\n'
                     'def test_name(data):\n'
-                    '    pass\n'.format(project, project))
+                    '    pass\n')
         with open(Test(project, test_name).path) as f:
             assert f.read() == expected
 
@@ -469,7 +469,7 @@ class TestDeleteTest:
     def test_delete_test(self, project_session, test_utils):
         _, project = project_session.activate()
         test_one = test_utils.random_string()
-        test_two = '{}.{}'.format(test_utils.random_string(), test_utils.random_string())
+        test_two = f'{test_utils.random_string()}.{test_utils.random_string()}'
         test_utils.create_test(project, test_one)
         test_utils.create_test(project, test_two)
         errors_one = test_module.delete_test(project, test_one)
@@ -589,13 +589,13 @@ class TestTestComponents:
         test_utils.create_page(project, 'module.page3')
         sys.path.append(testdir)
         with open(Test(project, test_name).path, 'w') as f:
-            test_content = ('from projects.{}.pages import page1, page2\n'
-                            'from projects.{}.pages.module import page3\n'
+            test_content = (f'from projects.{project}.pages import page1, page2\n'
+                            f'from projects.{project}.pages.module import page3\n'
                             '\n'
                             'pages = ["page4", "module2.page5"]\n'
                             '\n'
                             'def test(data):\n'
-                            '    pass\n'.format(project, project))
+                            '    pass\n')
             f.write(test_content)
         components = Test(project, test_name).components
         expected = ['page1', 'page2', 'module.page3', 'page4', 'module2.page5']

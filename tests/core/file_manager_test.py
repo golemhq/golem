@@ -169,9 +169,8 @@ class TestRenameFile:
         oldpath = os.path.join(path, 'testfile.txt')
         newpath = os.path.join(path, 'subfolder', 'newtestfile.txt')
         errors = file_manager.rename_file(oldpath, newpath)
-        expected_error = ('File {} does not exist'.format(oldpath))
-        assert errors == [expected_error]
-        assert not os.path.isfile((newpath))
+        assert errors == [f'File {oldpath} does not exist']
+        assert not os.path.isfile(newpath)
 
 
 class TestNewDirectoryOfType:
@@ -281,7 +280,7 @@ class TestRenameDirectory:
         src = 'a'
         dst = 'b'
         errors = file_manager.rename_directory(basepath, src, dst)
-        assert errors == ['Directory {} does not exist'.format(src)]
+        assert errors == [f'Directory {src} does not exist']
         assert not os.path.isdir(os.path.join(basepath, dst))
 
     def test_rename_directory_src_is_not_a_directory(self, dir_function, test_utils):
@@ -290,7 +289,7 @@ class TestRenameDirectory:
         dst = 'b'
         test_utils.create_empty_file(basepath, src)
         errors = file_manager.rename_directory(basepath, src, dst)
-        assert errors == ['Path {} is not a directory'.format(src)]
+        assert errors == [f'Path {src} is not a directory']
         assert not os.path.isdir(os.path.join(basepath, dst))
 
     def test_rename_directory_dst_exists(self, dir_function, test_utils):
@@ -302,7 +301,7 @@ class TestRenameDirectory:
         file_manager.create_package_directories(basepath, src)
         test_utils.create_empty_file(basepath, dst)
         errors = file_manager.rename_directory(basepath, src, dst)
-        assert errors == ['Path {} already exists'.format(dst)]
+        assert errors == [f'Path {dst} already exists']
         assert os.path.isdir(os.path.join(basepath, src))
         assert os.path.isfile(os.path.join(basepath, dst))
         # dst is directory
@@ -311,7 +310,7 @@ class TestRenameDirectory:
         file_manager.create_package_directories(basepath, src)
         file_manager.create_package_directories(basepath, dst)
         errors = file_manager.rename_directory(basepath, src, dst)
-        assert errors == ['Path {} already exists'.format(dst)]
+        assert errors == [f'Path {dst} already exists']
         assert os.path.isdir(os.path.join(basepath, src))
         assert os.path.isdir(os.path.join(basepath, dst))
 
@@ -344,7 +343,7 @@ class TestRenameDirectory:
         file_manager.create_package_directories(basepath, src)
         test_utils.create_empty_file(os.path.join(basepath, src), 'foo.txt')
         errors = file_manager.rename_directory(basepath, src, dst)
-        assert errors == ['Path {} already exists'.format(dst)]
+        assert errors == [f'Path {dst} already exists']
         assert os.path.isdir(os.path.join(basepath, src))
         assert os.path.isdir(os.path.join(basepath, dst))
         assert os.path.isfile(os.path.join(basepath, src, '__init__.py'))

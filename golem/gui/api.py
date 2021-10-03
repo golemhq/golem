@@ -229,7 +229,7 @@ def project_delete():
     _verify_permissions(Permissions.SUPER_USER)
     errors = []
     if not test_directory.project_exists(project_name):
-        errors.append('Project {} does not exist'.format(project_name))
+        errors.append(f'Project {project_name} does not exist')
     else:
         delete_project(project_name)
         # update projects cache
@@ -857,7 +857,7 @@ def _create_project_element(project_name, element_name, element_type):
     elif element_type == Project.file_types.SUITE:
         errors = suite_module.create_suite(project_name, element_name)
     else:
-        errors.append('Invalid element type {}'.format(element_type))
+        errors.append(f'Invalid element type {element_type}')
     return jsonify({'errors': errors})
 
 
@@ -874,7 +874,7 @@ def _rename_project_element(element_type):
     elif element_type == Project.file_types.SUITE:
         errors = suite_module.rename_suite(project, name, new_name)
     else:
-        errors.append('Invalid element type {}'.format(element_type))
+        errors.append(f'Invalid element type {element_type}')
     return jsonify({'errors': errors})
 
 

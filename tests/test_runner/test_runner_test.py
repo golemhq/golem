@@ -90,7 +90,7 @@ step('this step wont be run')
 """
         runfix.run_test(code)
         r = caplog.records
-        assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
+        assert r[0].message == f'Test execution started: {runfix.test_name}'
         assert r[1].message == 'Browser: chrome'
         assert r[2].levelname == 'ERROR'
         error_contains = 'def test(data)\n                 ^\nSyntaxError: invalid syntax'
@@ -126,18 +126,18 @@ element1 = ('id', 'someId'
 element2 = ('css', '.oh.no')
 """
         page_name = test_utils.create_random_page(runfix.project, code=page_code)
-        code = """
-pages = ['{}']
+        code = f"""
+pages = ['{page_name}']
 def before_test(data):
     step('this step wont be run')
 def test(data):
     step('this step wont be run')
 def after_Test(data):
     step('this step wont be run')
-""".format(page_name)
+"""
         runfix.run_test(code)
         r = caplog.records
-        assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
+        assert r[0].message == f'Test execution started: {runfix.test_name}'
         assert r[1].message == 'Browser: chrome'
         assert r[2].levelname == 'ERROR'
         error_contains_one = "element2 = ('css', '.oh.no')\n           ^\n" \
@@ -182,7 +182,7 @@ def after_test(data):
 """
         runfix.run_test(code)
         r = caplog.records
-        assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
+        assert r[0].message == f'Test execution started: {runfix.test_name}'
         assert r[1].message == 'Browser: chrome'
         assert r[2].message == 'before_test step'
         assert r[3].message == 'Test started: test_one'
@@ -208,8 +208,6 @@ def after_test(data):
         assert 'timestamp' in r
         assert len(r.keys()) == 12
 
-    # TODO: 3.5 does not maintain order but it should be deprecated soon
-    @pytest.mark.skipif(sys.version_info < (3, 6), reason="order of tests not preserved")
     def test_multi_function_success(self, runfix, caplog):
         """Test with two test functions runs successfully"""
         code = """
@@ -229,7 +227,7 @@ def after_test(data):
 """
         runfix.run_test(code)
         r = caplog.records
-        assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
+        assert r[0].message == f'Test execution started: {runfix.test_name}'
         assert r[1].message == 'Browser: chrome'
         assert r[2].message == 'before_test step'
         assert r[3].message == 'Test started: test_one'
@@ -254,8 +252,6 @@ def after_test(data):
         assert r[1]['set_name'] == ''
         assert r[1]['steps'] == [{'message': 'test two step', 'screenshot': None, 'error': None}]
 
-    # TODO: 3.5 does not maintain order but it should be deprecated soon
-    @pytest.mark.skipif(sys.version_info < (3, 6), reason="order of tests not preserved")
     def test_first_test_passes_second_test_fails(self, runfix, caplog):
         """Test with two test functions, first passes, second fails"""
         code = """
@@ -275,7 +271,7 @@ def after_test(data):
 """
         runfix.run_test(code)
         r = caplog.records
-        assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
+        assert r[0].message == f'Test execution started: {runfix.test_name}'
         assert r[1].message == 'Browser: chrome'
         assert r[2].message == 'before_test step'
         assert r[3].message == 'Test started: test_one'
@@ -301,8 +297,6 @@ def after_test(data):
         assert len(r[1]['steps']) == 1
         assert r[1]['steps'][0]['message'] == 'Failure'
 
-    # TODO: 3.5 does not maintain order but it should be deprecated soon
-    @pytest.mark.skipif(sys.version_info < (3, 6), reason="order of tests not preserved")
     def test_first_test_fails_second_test_fails(self, runfix, caplog):
         """Test with two test functions, both fail"""
         code = """
@@ -322,7 +316,7 @@ def after_test(data):
 """
         runfix.run_test(code)
         r = caplog.records
-        assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
+        assert r[0].message == f'Test execution started: {runfix.test_name}'
         assert r[1].message == 'Browser: chrome'
         assert r[2].message == 'before_test step'
         assert r[3].message == 'Test started: test_one'
@@ -360,9 +354,9 @@ def after_test(data):
 """
         runfix.run_test(code)
         r = caplog.records
-        assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
+        assert r[0].message == f'Test execution started: {runfix.test_name}'
         assert r[1].message == 'Browser: chrome'
-        assert r[2].message == 'No tests were found for file: {}'.format(runfix.test_name)
+        assert r[2].message == f'No tests were found for file: {runfix.test_name}'
         assert len(r) == 3
         # assert report json was not generated
 
@@ -388,12 +382,9 @@ def after_test(data):
         secrets = dict(very='secret')
         runfix.run_test(code, test_data=test_data, secrets=secrets)
         r = caplog.records
-        assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
+        assert r[0].message == f'Test execution started: {runfix.test_name}'
         assert r[1].message == 'Browser: chrome'
-        # Python 3.4 results not in order TODO
-        value_a = 'Using data:\n    username: username1\n    password: password1'
-        value_b = 'Using data:\n    password: password1\n    username: username1'
-        assert r[2].message in [value_a, value_b]
+        assert r[2].message == 'Using data:\n    username: username1\n    password: password1'
         assert r[3].message == 'before_test step'
         assert r[4].message == 'Test started: test_name'
         assert r[5].message == 'test step'
@@ -409,7 +400,6 @@ def after_test(data):
         assert r['environment'] == ''
         assert r['errors'] == []
         assert r['result'] == ResultsEnum.SUCCESS
-        # Python 3.4 TODO
         assert r['set_name'] == ''  # set_name is empty because it only has one set of data
         assert r['steps'] == [
             {'message': 'test step', 'screenshot': None, 'error': None},
@@ -438,7 +428,7 @@ def after_test(data):
 """
         runfix.run_test(code)
         r = caplog.records
-        assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
+        assert r[0].message == f'Test execution started: {runfix.test_name}'
         assert r[1].message == 'Browser: chrome'
         assert r[2].levelname == 'ERROR'
         assert 'before_test step fail' in r[2].message
@@ -1063,7 +1053,7 @@ def test_one(data):
 """
         runfix.run_test(code)
         r = caplog.records
-        assert r[0].message == 'Test execution started: {}'.format(runfix.test_name)
+        assert r[0].message == f'Test execution started: {runfix.test_name}'
         assert r[1].message == 'Browser: chrome'
         assert r[2].levelname == 'INFO'
         assert r[2].message == 'setup hook function is deprecated, use before_test'

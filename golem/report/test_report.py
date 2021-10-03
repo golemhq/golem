@@ -44,96 +44,6 @@ def get_test_function_report_json(project, execution, timestamp, test_file, test
     return None
 
 
-# TODO: rename to 'get_test_report' or 'get_test_file_report'
-def get_test_case_data__(project, test_file, execution, timestamp=None,
-                       set_name=None, encode_screenshots=False, no_screenshots=False):
-    """Retrieves all the data of a test set.
-
-    :Args:
-      - encode_screenshots: return screenshot files encoded as a base64 string or
-                            the screenshot filename (rel to its folder).
-      - no_screenshots: convert screenshot values to None
-    """
-    # TODO execution and test_set are not optional
-    test_data = {
-        'module': '',
-        'sub_modules': '',
-        'name': '',
-        'test_file': '',
-        'full_name': '',
-        'set_name': '',
-        'description': '',
-        'result': '',
-        'test_elapsed_time': '',
-        'start_date_time': '',
-        'errors': [],
-        'browser': '',
-        'environment': '',
-        'steps': [],
-        'debug_log': [],
-        'info_log': [],
-        'has_finished': False
-    }
-
-    report_dir = test_file_report_dir(test_file, project, execution, timestamp,
-                                      test_set)
-    report_json_path = os.path.join(report_dir, 'report.json')
-
-    if os.path.isfile(report_json_path):
-        test_data['has_finished'] = True
-        test_full_name = '{}.{}'.format(test_file, test_function)
-        with open(report_json_path, 'r', encoding='utf-8') as json_file:
-            report_data = json.load(json_file)
-            module = ''
-            sub_modules = []
-            test_split = test_file.split('.')
-            if len(test_split) > 1:
-                module = test_split[0]
-                if len(test_split) > 2:
-                    sub_modules = test_split[1:-1]
-            test_data['module'] = module
-            test_name = test_split[-1]
-            test_data['sub_modules'] = sub_modules
-            test_data['name'] = test_function
-            test_data['test_file'] = test_file
-            test_data['full_name'] = test_full_name
-            test_data['description'] = report_data['description']
-            test_data['result'] = report_data['result']
-            test_data['test_elapsed_time'] = report_data['test_elapsed_time']
-            start_date_time = utils.get_date_time_from_timestamp(report_data['test_timestamp'])
-            test_data['start_date_time'] = start_date_time
-            test_data['errors'] = report_data['errors']
-            test_data['browser'] = report_data['browser']
-            test_data['environment'] = report_data['environment']
-            test_data['steps'] = report_data['steps']
-            if no_screenshots:
-                for step in test_data['steps']:
-                    step['screenshot'] = None
-            elif encode_screenshots:
-                for step in test_data['steps']:
-                    if step['screenshot'] is not None:
-                        image_filename = os.path.join(report_dir, step['screenshot'])
-                        b64 = base64.b64encode(open(image_filename, "rb").read()).decode('utf-8')
-                        step['screenshot'] = b64
-            test_data['test_set'] = test_set
-            test_data['execution'] = timestamp
-            test_data['data'] = report_data['test_data']
-            if 'set_name' in report_data:
-                test_data['set_name'] = report_data['set_name']
-
-    debug_log_path = os.path.join(report_dir, 'execution_debug.log')
-    info_log_path = os.path.join(report_dir, 'execution_info.log')
-    if os.path.isfile(debug_log_path):
-        with open(debug_log_path, encoding='utf-8') as log_file:
-            log = log_file.readlines()
-            test_data['debug_log'] = log
-    if os.path.isfile(info_log_path):
-        with open(info_log_path, encoding='utf-8') as log_file:
-            log = log_file.readlines()
-            test_data['info_log'] = log
-    return test_data
-
-
 def test_file_report_dir(test_name, project=None, execution=None, timestamp=None,
                          set_name='', execdir=None):
     if execdir is None:
@@ -164,7 +74,7 @@ def _get_test_log(project, execution, timestamp, test, set_name='', level='DEBUG
         with open(logpath, encoding='utf-8') as log_file:
             return log_file.read().splitlines()
     else:
-        print('Log file {} not found'.format(logpath))
+        print(f'Log file {logpath} not found')
         return None
 
 

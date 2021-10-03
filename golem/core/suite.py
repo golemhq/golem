@@ -24,7 +24,7 @@ def create_suite(project_name, suite_name):
         project.create_packages_for_element(suite_name, project.file_types.SUITE)
         with open(Suite(project_name, suite_name).path, 'w', encoding='utf-8') as f:
             f.write(suite_content)
-        print('Suite {} created for project {}'.format(suite_name, project_name))
+        print(f'Suite {suite_name} created for project {project_name}')
     return errors
 
 
@@ -32,7 +32,7 @@ def rename_suite(project, suite_name, new_suite_name):
     errors = []
     project_obj = Project(project)
     if suite_name not in project_obj.suites():
-        errors.append('Suite {} does not exist'.format(suite_name))
+        errors.append(f'Suite {suite_name} does not exist')
     else:
         errors = validate_project_element_name(new_suite_name)
     if not errors:
@@ -50,7 +50,7 @@ def duplicate_suite(project, name, new_name):
     if name == new_name:
         errors.append('New suite name cannot be the same as the original')
     elif not os.path.isfile(old_path):
-        errors.append('Suite {} does not exist'.format(name))
+        errors.append(f'Suite {name} does not exist')
     elif os.path.isfile(new_path):
         errors.append('A suite with that name already exists')
     else:
@@ -67,18 +67,18 @@ def duplicate_suite(project, name, new_name):
 def edit_suite(project, suite_name, tests, processes, browsers, environments, tags):
     with open(Suite(project, suite_name).path, 'w', encoding='utf-8') as f:
         f.write('\n\n')
-        f.write('browsers = {}\n'.format(_format_list_items(browsers)))
+        f.write(f'browsers = {_format_list_items(browsers)}\n')
         f.write('\n')
-        f.write('environments = {}\n'.format(_format_list_items(environments)))
+        f.write(f'environments = {_format_list_items(environments)}\n')
         f.write('\n')
         if tags:
-            f.write('tags = {}\n'.format(_format_list_items(tags)))
+            f.write(f'tags = {_format_list_items(tags)}\n')
             f.write('\n')
         if not processes:
             processes = 1
-        f.write('processes = {}'.format(processes))
+        f.write(f'processes = {processes}')
         f.write('\n\n')
-        f.write('tests = {}\n'.format(_format_list_items(tests)))
+        f.write(f'tests = {_format_list_items(tests)}\n')
 
 
 def edit_suite_code(project, suite_name, content):
@@ -93,12 +93,12 @@ def delete_suite(project, suite):
     errors = []
     path = Suite(project, suite).path
     if not os.path.isfile(path):
-        errors.append('Suite {} does not exist'.format(suite))
+        errors.append(f'Suite {suite} does not exist')
     else:
         try:
             os.remove(path)
         except:
-            errors.append('There was an error removing file {}'.format(suite))
+            errors.append(f'There was an error removing file {suite}')
     return errors
 
 
@@ -108,7 +108,7 @@ def _format_list_items(list_items):
     if list_items:
         for item in list_items:
             list_string = list_string + "    '" + item + "',\n"
-        list_string = "[\n    {}\n]".format(list_string.strip()[:-1])
+        list_string = f"[\n    {list_string.strip()[:-1]}\n]"
     else:
         list_string = '[]'
     return list_string
@@ -160,7 +160,7 @@ class Suite(BaseProjectElement):
                     path = os.path.join(self.project.test_directory_path,
                                         os.sep.join(this_dir.split('.')))
                     this_dir_tests = file_manager.get_files_dot_path(path, extension='.py')
-                    this_dir_tests = ['{}.{}'.format(this_dir, x) for x in this_dir_tests]
+                    this_dir_tests = [f'{this_dir}.{x}' for x in this_dir_tests]
                     tests = tests + this_dir_tests
                 else:
                     tests.append(test)

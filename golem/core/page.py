@@ -29,7 +29,7 @@ def rename_page(project_name, page_name, new_page_name):
     errors = []
     project = Project(project_name)
     if page_name not in project.pages():
-        errors.append('Page {} does not exist'.format(page_name))
+        errors.append(f'Page {page_name} does not exist')
     else:
         errors = validate_project_element_name(new_page_name)
     if not errors:
@@ -47,7 +47,7 @@ def duplicate_page(project, name, new_name):
     if name == new_name:
         errors.append('New page name cannot be the same as the original')
     elif not os.path.isfile(old_path):
-        errors.append('Page {} does not exist'.format(name))
+        errors.append(f'Page {name} does not exist')
     elif os.path.isfile(new_path):
         errors.append('A page with that name already exists')
     else:
@@ -63,13 +63,12 @@ def duplicate_page(project, name, new_name):
 
 def edit_page(project, page_name, elements, functions, import_lines):
     def format_element_string(name, selector, value, display_name):
-        return "\n\n{0} = ('{1}', \'{2}\', '{3}')".format(name, selector, value,
-                                                          display_name)
+        return f"\n\n{name} = ('{selector}', \'{value}\', '{display_name}')"
 
     path = Page(project, page_name).path
     with open(path, 'w', encoding='utf-8') as f:
         for line in import_lines:
-            f.write("{}\n".format(line))
+            f.write(f"{line}\n")
         for element in elements:
             # replace the spaces in web element names with underscores
             element['name'] = element['name'].replace(' ', '_')
@@ -109,12 +108,12 @@ def delete_page(project, page):
     errors = []
     path = Page(project, page).path
     if not os.path.isfile(path):
-        errors.append('Page {} does not exist'.format(page))
+        errors.append(f'Page {page} does not exist')
     else:
         try:
             os.remove(path)
         except:
-            errors.append('There was an error removing file {}'.format(page))
+            errors.append(f'There was an error removing file {page}')
     return errors
 
 
@@ -182,11 +181,11 @@ class Page(BaseProjectElement):
             variable = getattr(module, var_name)
             if isinstance(variable, types.FunctionType) and var_name in local_functions:
                 # function
-                partial_name = '{}.{}'.format(self.name.split('.')[-1], var_name)
+                partial_name = f'{self.stem_name}.{var_name}'
                 function = {
                     'name': var_name,
                     'partial_name': partial_name,
-                    'full_name': '{}.{}'.format(self.name, var_name),
+                    'full_name': f"{self.name}.{var_name}",
                     'description': inspect.getdoc(variable),
                     'arguments': list(inspect.signature(variable).parameters),
                     'code': inspect.getsource(variable)
@@ -198,7 +197,7 @@ class Page(BaseProjectElement):
                     display_name = ''
                     if len(variable) >= 3:
                         display_name = variable[2]
-                    partial_name = '{}.{}'.format(self.name.split('.')[-1], var_name)
+                    partial_name = f'{self.stem_name}.{var_name}'
                     element = {
                         'name': var_name,
                         'selector': variable[0],

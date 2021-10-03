@@ -199,7 +199,7 @@ class TestUtils:
     def random_email():
         local = TestUtils.random_string(10)
         domain = TestUtils.random_string(10)
-        return '{}@{}.com'.format(local, domain)
+        return f'{local}@{domain}.com'
 
     @staticmethod
     def random_numeric_string(length, prefix=''):
@@ -220,7 +220,7 @@ class TestUtils:
     def set_project_setting(testdir, setting, setting_value):
         setting_path = os.path.join(testdir, 'settings.json')
         with open(setting_path, 'w') as f:
-            f.write('{{"{}": "{}"}}'.format(setting, setting_value))
+            f.write(f'{{"{setting}": "{setting_value}"}}')
 
     @staticmethod
     def create_test(project, name, content=None):

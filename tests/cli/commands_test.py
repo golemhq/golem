@@ -4,6 +4,8 @@ import pytest
 
 from golem.cli import commands, messages
 from golem.core import file_manager
+from golem.core import utils
+from golem.report import execution_report
 from golem.gui.user_management import Users
 
 
@@ -36,26 +38,25 @@ class TestRunCommand:
         test_name = test_utils.create_random_test(project)
         suite_name = test_utils.random_string()
         test_utils.create_suite(project, suite_name, tests=[test_name])
-        commands.run_command(project=project, test_query=suite_name)
+        timestamp = utils.get_timestamp()
+        commands.run_command(project=project, test_query=suite_name, timestamp=timestamp)
         records = caplog.records
-        assert records[0].message == 'Test execution started: {}'.format(test_name)
+        assert records[0].message == f'Test execution started: {test_name}'
         assert records[3].message == 'Test Result: SUCCESS'
         # the execution report is created for suite
-        path = os.path.join(project_session.path, 'reports', suite_name)
-        assert os.path.isdir(path)
-        timestamp = os.listdir(path)[0]
-        report = os.path.join(path, timestamp, 'report.json')
-        assert os.path.isfile(report)
+        path = os.path.join(execution_report.execution_report_path(project, suite_name, timestamp),
+                            'report.json')
+        assert os.path.isfile(path)
 
     @pytest.mark.slow
     def test_golem_run_suite_in_folder(self, project_session, test_utils, caplog, capsys):
         testdir, project = project_session.activate()
         test_name = test_utils.create_random_test(project)
-        suite_name = '{}.{}'.format(test_utils.random_string(), test_utils.random_string())
+        suite_name = f'{test_utils.random_string()}.{test_utils.random_string()}'
         test_utils.create_suite(project, suite_name, tests=[test_name])
         commands.run_command(project=project, test_query=suite_name)
         records = caplog.records
-        assert records[0].message == 'Test execution started: {}'.format(test_name)
+        assert records[0].message == f'Test execution started: {test_name}'
         assert records[3].message == 'Test Result: SUCCESS'
         out, err = capsys.readouterr()
         assert 'Tests found: 1' in out
@@ -69,7 +70,7 @@ class TestRunCommand:
         with_extension = suite_name + '.py'
         commands.run_command(project=project, test_query=with_extension)
         records = caplog.records
-        assert records[0].message == 'Test execution started: {}'.format(test_name)
+        assert records[0].message == f'Test execution started: {test_name}'
         assert records[3].message == 'Test Result: SUCCESS'
 
     @pytest.mark.slow
@@ -77,12 +78,12 @@ class TestRunCommand:
         _, project = project_session.activate()
         test_name = test_utils.create_random_test(project)
         random_dir = test_utils.random_string()
-        suite_name = '{}.{}'.format(random_dir, 'suite_one')
+        suite_name = f'{random_dir}.suite_one'
         suite_query = os.path.join(random_dir, 'suite_one.py')
         test_utils.create_suite(project, suite_name, tests=[test_name])
         commands.run_command(project=project, test_query=suite_query)
         records = caplog.records
-        assert records[0].message == 'Test execution started: {}'.format(test_name)
+        assert records[0].message == f'Test execution started: {test_name}'
         assert records[3].message == 'Test Result: SUCCESS'
 
     @pytest.mark.slow
@@ -91,7 +92,7 @@ class TestRunCommand:
         test_name = test_utils.create_random_test(project)
         commands.run_command(project=project, test_query=test_name)
         records = caplog.records
-        assert records[0].message == 'Test execution started: {}'.format(test_name)
+        assert records[0].message == f'Test execution started: {test_name}'
         assert records[3].message == 'Test Result: SUCCESS'
         # the execution report is created for suite
         path = os.path.join(project_session.path, 'reports', test_name)
@@ -103,10 +104,10 @@ class TestRunCommand:
     def test_golem_run_test_py(self, project_session, test_utils, caplog):
         _, project = project_session.activate()
         test_name = test_utils.create_random_test(project)
-        test_query = '{}.py'.format(test_name)
+        test_query = f'{test_name}.py'
         commands.run_command(project=project, test_query=test_query)
         records = caplog.records
-        assert records[0].message == 'Test execution started: {}'.format(test_name)
+        assert records[0].message == f'Test execution started: {test_name}'
         assert records[3].message == 'Test Result: SUCCESS'
         # the execution report is created for suite
         path = os.path.join(project_session.path, 'reports', test_name)
@@ -117,11 +118,11 @@ class TestRunCommand:
     @pytest.mark.slow
     def test_golem_run_test_in_folder(self, project_session, test_utils, caplog):
         _, project = project_session.activate()
-        test_name = '{}.test_one'.format(test_utils.random_string())
+        test_name = f'{test_utils.random_string()}.test_one'
         test_utils.create_test(project, test_name)
         commands.run_command(project=project, test_query=test_name)
         records = caplog.records
-        assert records[0].message == 'Test execution started: {}'.format(test_name)
+        assert records[0].message == f'Test execution started: {test_name}'
         assert records[3].message == 'Test Result: SUCCESS'
 
     @pytest.mark.slow
@@ -187,14 +188,14 @@ class TestRunCommand:
         _, project = project_function.activate()
         # run all tests, there are no tests in project
         commands.run_command(project=project, test_query='.')
-        msg = 'No tests were found in {}'.format(os.path.join('tests', ''))
+        msg = f'No tests were found in {os.path.join("tests", "")}'
         out, err = capsys.readouterr()
         assert msg in out
         # run tests in an empty directory
         path = os.path.join(project_function.path, 'tests', 'foo')
         file_manager.create_directory(path=path, add_init=True)
         commands.run_command(project=project, test_query='foo')
-        msg = 'No tests were found in {}'.format(os.path.join('tests', 'foo'))
+        msg = f'No tests were found in {os.path.join("tests", "foo")}'
         out, err = capsys.readouterr()
         assert msg in out
 
@@ -216,15 +217,12 @@ class TestCreateDirectoryCommand:
         full_path = os.path.join(dir_function.path, name)
         commands.createdirectory_command(full_path, download_drivers=False)
         assert os.path.exists(full_path)
-        expected = ('New golem test directory created at {}\n'
+        expected = (f'New golem test directory created at {full_path}\n'
                     'Use these credentials to access the GUI module:\n'
                     '  user:     admin\n'
-                    '  password: admin'.format(full_path))
+                    '  password: admin')
         captured = capsys.readouterr()
         assert expected in captured.out
-
-
-
 
 
 class TestCreateSuperUserCommand:
@@ -236,8 +234,7 @@ class TestCreateSuperUserCommand:
         password = test_utils.random_string(5)
         commands.createsuperuser_command(username, email, password, no_input=True)
         out, err = capsys.readouterr()
-        msg = 'Superuser {} was created successfully.'.format(username)
-        assert msg in out
+        assert f'Superuser {username} was created successfully.' in out
         assert Users.user_exists(username)
         user = Users.get_user_by_username(username)
         assert user.email == email
@@ -251,7 +248,7 @@ class TestCreateSuperUserCommand:
             commands.createsuperuser_command(username, email, password, no_input=True)
         assert wrapped_execution.value.code == 1
         captured = capsys.readouterr()
-        assert 'Error: {} is not a valid email address'.format(email) in captured.out
+        assert f'Error: {email} is not a valid email address' in captured.out
 
     def test_create_superuser_command_no_email(self, testdir_class, test_utils):
         testdir_class.activate()

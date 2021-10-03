@@ -26,7 +26,7 @@ class TestGetBrowser:
                 [browser_name], [], default_browsers, [])[0]
             with pytest.raises(Exception) as excinfo:
                 browser.open_browser()
-                expected = 'Exception: {} setting is not defined'.format(setting_path)
+                expected = 'Exception: {setting_path} setting is not defined'
                 assert expected in str(excinfo.value)
 
     def test_executable_not_present(self):
@@ -47,5 +47,5 @@ class TestGetBrowser:
             execution.settings[setting_key] = setting_path
             with pytest.raises(Exception) as excinfo:
                 browser.open_browser()
-                expected = 'No executable file found using path {}'.format(setting_path)
+                expected = f'No executable file found using path {setting_path}'
                 assert expected in str(excinfo.value)

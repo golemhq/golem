@@ -15,7 +15,7 @@ from golem.core import utils
 
 def csv_file_path(project, test_name):
     test = test_module.Test(project, test_name)
-    return os.path.join(test.dirname, '{}.csv'.format(test.stem_name))
+    return os.path.join(test.dirname, f'{test.stem_name}.csv')
 
 
 def save_csv_test_data(project, test_name, test_data):
@@ -53,7 +53,7 @@ def remove_csv_if_present(project, test_name):
 
 def json_file_path(project, test_name):
     test = test_module.Test(project, test_name)
-    return os.path.join(test.dirname, '{}.json'.format(test.stem_name))
+    return os.path.join(test.dirname, f'{test.stem_name}.json')
 
 
 def save_json_test_data(project, test_name, json_data_str):

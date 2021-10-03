@@ -32,15 +32,15 @@ class TestGolemAdmin:
     @pytest.mark.slow
     def test_createdirectory(self, dir_function, test_utils):
         name = 'testdir_test_002'
-        cmd = 'golem-admin createdirectory {}'.format(name)
+        cmd = f'golem-admin createdirectory {name}'
         result = test_utils.run_command(cmd)
         full_path = os.path.join(dir_function.path, name)
         assert os.path.exists(full_path)
-        expected = ('New golem test directory created at {}\n'
+        expected = (f'New golem test directory created at {full_path}\n'
                     'Use these credentials to access the GUI module:\n'
                     '  user:     admin\n'
                     '  password: admin\n'
-                    'Would you like to download ChromeDriver now? [Y/n]'.format(full_path))
+                    'Would you like to download ChromeDriver now? [Y/n]')
         assert expected in result
 
     @pytest.mark.slow
@@ -52,7 +52,7 @@ class TestGolemAdmin:
         name = 'testdir_test_006'
         full_path = os.path.join(dir_function.path, name)
         test_directory.create_test_directory(full_path)
-        cmd = 'golem-admin createdirectory {} -y'.format(full_path)
+        cmd = f'golem-admin createdirectory {full_path} -y'
         result = test_utils.run_command(cmd)
         expected = 'Error: target directory is already an existing Golem test directory'
         assert result == expected

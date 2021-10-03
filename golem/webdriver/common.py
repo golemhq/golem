@@ -32,7 +32,7 @@ def _find_webelement(root, selector_type, selector_value, element_name,
             elif selector_type == 'tag_name':
                 webelement = root.find_element_by_tag_name(selector_value)
             else:
-                msg = 'Selector {} is not a valid option'.format(selector_type)
+                msg = f'Selector {selector_type} is not a valid option'
                 raise IncorrectSelectorType(msg)
             execution.logger.debug('Element found')
         except:
@@ -43,8 +43,8 @@ def _find_webelement(root, selector_type, selector_value, element_name,
                 execution.logger.debug('Element not found yet, remaining time: {:.2f}'
                                        .format(remaining_time()))
     if webelement is None:
-        raise ElementNotFound('Element {0} not found using selector {1}:\'{2}\''
-                              .format(element_name, selector_type, selector_value))
+        raise ElementNotFound(f'Element {element_name} not found using selector '
+                              f'{selector_type}:\'{selector_value}\'')
     else:
         if wait_displayed:
             while not webelement.is_displayed() and remaining_time() > 0:
@@ -52,9 +52,8 @@ def _find_webelement(root, selector_type, selector_value, element_name,
                 time.sleep(0.5)
 
             if not webelement.is_displayed():
-                msg = ('Timeout waiting for element {0} to be displayed, '
-                       'using selector {1}:\'{2}\''
-                       .format(element_name, selector_type, selector_value))
+                msg = (f'Timeout waiting for element {element_name} to be displayed, '
+                       f'using selector {selector_type}:\'{selector_value}\'')
                 raise ElementNotDisplayed(msg)
         return webelement
 
@@ -173,7 +172,7 @@ def _find_all(self, element=None, id=None, name=None, link_text=None,
         elif selector_type == 'tag_name':
             tag_name = selector_value
         else:
-            raise Exception('Incorrect element {}'.format(element))
+            raise Exception(f'Incorrect element {element}')
     elif isinstance(element, str):
         if _str_is_xpath_selector(element):
             xpath = element

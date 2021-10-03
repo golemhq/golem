@@ -42,7 +42,7 @@ def _print_test_file_section(test_file_tests):
         # list each test in this test file that was not a success
         for i, test in enumerate(not_success):
             print()
-            print('{}) {}'.format(i + 1, test['test']))
+            print(f'{i + 1}) {test["test"]}')
             for error in test['errors']:
                 print(error['message'])
                 if error['description']:
@@ -56,7 +56,7 @@ def report_to_cli(report):
     # group each test by test_file.set_name
     unique_test_files = {}
     for test in report['tests']:
-        test_file_id = '{}.{}'.format(test['test_file'], test['set_name'])
+        test_file_id = f"{test['test_file']}.{test['set_name']}"
         if test_file_id not in unique_test_files:
             unique_test_files[test_file_id] = []
         unique_test_files[test_file_id].append(test)
@@ -70,12 +70,12 @@ def print_totals(report):
     if report['total_tests'] > 0:
         result_string = ''
         for result, number in OrderedDict(report['totals_by_result']).items():
-            result_string += ' {} {},'.format(number, result)
+            result_string += f' {number} {result},'
         elapsed_time = report['net_elapsed_time']
         if elapsed_time > 60:
-            in_elapsed_time = 'in {} minutes'.format(round(elapsed_time / 60, 2))
+            in_elapsed_time = f'in {round(elapsed_time / 60, 2)} minutes'
         else:
-            in_elapsed_time = 'in {} seconds'.format(elapsed_time)
-        output = 'Total: {} tests,{} {}'.format(report['total_tests'], result_string[:-1], in_elapsed_time)
+            in_elapsed_time = f'in {elapsed_time} seconds'
+        output = f"Total: {report['total_tests']} tests,{result_string[:-1]} {in_elapsed_time}"
         print()
         print(output)

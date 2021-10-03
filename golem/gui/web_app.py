@@ -74,9 +74,9 @@ def index():
 def project_view(project):
     user_weight = current_user.project_weight(project)
     if user_weight == Permissions.weights[Permissions.REPORTS_ONLY]:
-        return redirect('/report/project/{}/'.format(project))
+        return redirect(f'/report/project/{project}/')
     else:
-        return redirect('/project/{}/suites/'.format(project))
+        return redirect(f'/project/{project}/suites/')
 
 
 # PROJECT TESTS VIEW
@@ -117,15 +117,14 @@ def project_pages(project, path):
 def test_case_view(project, test_name):
     test = Test(project, test_name)
     if not test.exists:
-        abort(404, 'The test {} does not exist'.format(test_name))
+        abort(404, f'The test {test_name} does not exist')
     _, error = utils.import_module(test.path)
     if error:
         url = url_for('webapp.test_case_code_view', project=project, test_name=test_name)
         content = ('<h4>There are errors in the test</h4>'
                    '<p>There are errors and the test cannot be displayed, '
                    'open the test code editor to solve them.</p>'
-                   '<a class="btn btn-default" href="{}">Open Test Code</a>'
-                   .format(url))
+                   f'<a class="btn btn-default" href="{url}">Open Test Code</a>')
         return render_template('common_element_error.html', project=project,
                                item_name=test_name, content=content)
     else:
@@ -145,7 +144,7 @@ def test_case_view(project, test_name):
 def test_case_code_view(project, test_name):
     test = Test(project, test_name)
     if not test.exists:
-        abort(404, 'The test {} does not exist'.format(test_name))
+        abort(404, f'The test {test_name} does not exist')
     _, error = utils.import_module(test.path)
     csv_data = test_data_module.get_csv_test_data(project, test_name)
     json_data = test_data_module.get_json_test_data_as_string(project, test_name)
@@ -163,7 +162,7 @@ def test_case_code_view(project, test_name):
 def page_view(project, page_name, no_sidebar=False):
     page = Page(project, page_name)
     if not page.exists:
-        abort(404, 'The page {} does not exist'.format(page_name))
+        abort(404, f'The page {page_name} does not exist')
     _, error = utils.import_module(page.path)
     if error:
         if no_sidebar:
@@ -174,8 +173,7 @@ def page_view(project, page_name, no_sidebar=False):
         content = ('<h4>There are errors in the page</h4>'
                    '<p>There are errors and the page cannot be displayed, '
                    'open the page code editor to solve them.</p>'
-                   '<a class="btn btn-default" href="{}">Open Page Code</a>'
-                   .format(url))
+                   f'<a class="btn btn-default" href="{url}">Open Page Code</a>')
         return render_template('common_element_error.html', project=project,
                                item_name=page_name, content=content,
                                no_sidebar=no_sidebar)
@@ -203,7 +201,7 @@ def page_view_no_sidebar(project, page_name):
 def page_code_view(project, page_name, no_sidebar=False):
     page = Page(project, page_name)
     if not page.exists:
-        abort(404, 'The page {} does not exist'.format(page_name))
+        abort(404, f'The page {page_name} does not exist')
     _, error = utils.import_module(page.path)
     return render_template('page_builder/page_code.html', project=project,
                            page_object_code=page.code, page_name=page_name,
@@ -226,7 +224,7 @@ def page_code_view_no_sidebar(project, page_name):
 def suite_view(project, suite):
     suite_obj = suite_module.Suite(project, suite)
     if not suite_obj.exists:
-        abort(404, 'The suite {} does not exist'.format(suite))
+        abort(404, f'The suite {suite} does not exist')
     all_tests = Project(project).test_tree
     default_browser = session.settings['default_browser']
     return render_template('suite.html', project=project,
@@ -245,7 +243,7 @@ def suite_view(project, suite):
 def suite_code_view(project, suite):
     suite_obj = suite_module.Suite(project, suite)
     if not suite_obj.exists:
-        abort(404, 'The suite {} does not exist'.format(suite))
+        abort(404, f'The suite {suite} does not exist')
     _, error = utils.import_module(suite_obj.path)
     return render_template('suite_code.html', project=project, suite_name=suite,
                            code=suite_obj.code, error=error)

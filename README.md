@@ -51,7 +51,7 @@ Tests can be written with code in Python, codeless using the web IDE, or both.
 
 ## Installation
 
-Golem works with Python 3.5+
+Golem works with Python 3.6+
 
 ```
 pip install golem-framework

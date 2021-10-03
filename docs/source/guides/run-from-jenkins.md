@@ -6,7 +6,7 @@ In this guide let's see how Golem tests can be run in jenkins.
 ## Pre-requisites
 
 - Jenkins is installed.
-- Python 3.5+ is installed in the Jenkins machine.
+- Python 3.6+ is installed in the Jenkins machine.
 - A Golem directory with tests is stored in a git repository.
 
 ## Steps

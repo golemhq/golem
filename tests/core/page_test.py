@@ -26,7 +26,7 @@ class TestCreatePage:
     def test_create_page_into_subdirectory(self, project_session, test_utils):
         _, project = project_session.activate()
         random_dir = test_utils.random_string()
-        page_name = '{}.page_name'.format(random_dir)
+        page_name = f'{random_dir}.page_name'
         page.create_page(project, page_name)
         init_path = os.path.join(Project(project).page_directory_path,
                                  random_dir, '__init__.py')
@@ -57,7 +57,7 @@ class TestRenamePage:
         _, project = project_session.activate()
         page_name = test_utils.create_random_page(project)
         random_dirname = test_utils.random_string()
-        new_page_name = '{}.{}'.format(random_dirname, test_utils.random_string())
+        new_page_name = f'{random_dirname}.{test_utils.random_string()}'
         errors = page.rename_page(project, page_name, new_page_name)
         assert errors == []
         pages = Project(project).pages()
@@ -198,7 +198,7 @@ class TestPagePath:
         page_one = test_utils.random_string()
         random_dir = test_utils.random_string()
         random_name = test_utils.random_string()
-        page_two = '{}.{}'.format(random_dir, random_name)
+        page_two = f'{random_dir}.{random_name}'
         test_utils.create_page(project, page_one)
         test_utils.create_page(project, page_two)
         path_one = os.path.join(Project(project).page_directory_path, page_one + '.py')
@@ -246,8 +246,8 @@ class TestPageComponents:
             'functions': [
                 {
                     'name': 'func1',
-                    'full_name': '{}.func1'.format(page_name),
-                    'partial_name': '{}.func1'.format(page_name),
+                    'full_name': f'{page_name}.func1',
+                    'partial_name': f'{page_name}.func1',
                     'description': None,
                     'arguments': ['c', 'b', 'a'],
                     'code': 'def func1(c, b, a):\n    pass\n'
@@ -259,8 +259,8 @@ class TestPageComponents:
                     'selector': 'id',
                     'value': 'someId',
                     'display_name': 'Elem1',
-                    'partial_name': '{}.elem1'.format(page_name),
-                    'full_name': '{}.elem1'.format(page_name)
+                    'partial_name': f'{page_name}.elem1',
+                    'full_name': f'{page_name}.elem1'
                 }
             ],
             'import_lines': [],
@@ -312,12 +312,12 @@ class TestPageComponents:
 
         # page_two imports page_one
         page_two = test_utils.create_random_page(project)
-        code = ('from projects.{}.pages import {}\n'
+        code = (f'from projects.{project}.pages import {page_one}\n'
                 '\n'
                 'elem2 = ("id", "test")\n'
                 '\n'
                 'def func2():\n'
-                '    pass\n'.format(project, page_one))
+                '    pass\n')
         page.edit_page_code(project, page_two, code)
         components = Page(project, page_two).components
         assert len(components['elements']) == 1
@@ -326,12 +326,12 @@ class TestPageComponents:
         assert components['functions'][0]['name'] == 'func2'
 
         # import *
-        code = ('from projects.{}.pages.{} import *\n'
+        code = (f'from projects.{project}.pages.{page_one} import *\n'
                 '\n'
                 'elem3 = ("id", "test")\n'
                 '\n'
                 'def func3():\n'
-                '    pass\n'.format(project, page_one))
+                '    pass\n')
         page.edit_page_code(project, page_two, code)
         components = Page(project, page_two).components
         assert len(components['elements']) == 1
@@ -351,25 +351,25 @@ class TestPageComponents:
 
         # page_two imports page_one
         page_two = test_utils.create_random_page(project)
-        code = ('from projects.{}.pages import {}\n'
+        code = (f'from projects.{project}.pages import {page_one}\n'
                 '\n'
-                'elem2 = ("id", "test")\n'.format(project, page_one))
+                'elem2 = ("id", "test")\n')
         page.edit_page_code(project, page_two, code)
 
         # page_three imports page_two
         page_three = test_utils.create_random_page(project)
-        code = ('from projects.{}.pages import {}\n'
+        code = (f'from projects.{project}.pages import {page_two}\n'
                 '\n'
-                'elem3 = ("id", "test")\n'.format(project, page_two))
+                'elem3 = ("id", "test")\n')
         page.edit_page_code(project, page_three, code)
         components = Page(project, page_three).components
         assert len(components['elements']) == 1
         assert components['elements'][0]['name'] == 'elem3'
 
         # import *
-        code = ('from projects.{}.pages.{} import *\n'
+        code = (f'from projects.{project}.pages.{page_two} import *\n'
                 '\n'
-                'elem3 = ("id", "test")\n'.format(project, page_two))
+                'elem3 = ("id", "test")\n')
         page.edit_page_code(project, page_three, code)
         components = Page(project, page_three).components
         assert len(components['elements']) == 1

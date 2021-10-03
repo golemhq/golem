@@ -67,7 +67,7 @@ class TestDefineBrowsers:
         when a driver name that is not defined is passed
         """
         drivers = ['not_defined']
-        expected_msg = ['Error: the browser {} is not defined\n'.format('not_defined'),
+        expected_msg = [f'Error: the browser not_defined is not defined\n',
                         'available options are:\n',
                         '\n'.join(self.default_browsers),
                         '\n'.join(list(self.remote_browsers.keys()))]
@@ -541,7 +541,7 @@ class TestRunSuite:
         execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'], timestamp=timestamp)
         execution_runner.run_suite(suite_name)
         out, err = capsys.readouterr()
-        assert 'No tests found for suite {}'.format(suite_name) in out
+        assert f'No tests found for suite {suite_name}' in out
         data = exec_report.get_execution_data(project=project, execution=suite_name, timestamp=timestamp)
         assert data['has_finished'] is True
         assert data['total_tests'] == 0
@@ -621,11 +621,11 @@ class TestRunDirectory:
         base_content = 'def test(data):\n     pass\n'
         tests.test_alfa_bravo = 'test_alfa_bravo'
         content = 'tags = ["alfa", "bravo"]'
-        test_name = '{}.{}'.format('foo', tests.test_alfa_bravo)
+        test_name = f'foo.{tests.test_alfa_bravo}'
         test_utils.create_test(project, test_name, content=base_content + content)
         tests.test_bravo_charlie = 'test_bravo_charlie'
         content = 'tags = ["bravo", "charlie"]'
-        test_name = '{}.{}'.format('foo', tests.test_bravo_charlie)
+        test_name = f'foo.{tests.test_bravo_charlie}'
         test_utils.create_test(project, test_name, content=base_content + content)
         tests.test_empty_tags = 'test_empty_tags'
         content = 'tags = []'
@@ -659,7 +659,7 @@ class TestRunDirectory:
         execution_runner = exc_runner.ExecutionRunner(project, browsers=['chrome'], timestamp=timestamp)
         execution_runner.run_directory(dirname)
         out, err = capsys.readouterr()
-        expected = 'No tests were found in {}'.format(os.path.join('tests', dirname))
+        expected = f"No tests were found in {os.path.join('tests', dirname)}"
         assert expected in out
         data = exec_report.get_execution_data(project=project, execution=dirname, timestamp=timestamp)
         assert data['has_finished'] is True
@@ -715,8 +715,7 @@ class TestRunWithEnvs:
 
         assert wrapped_execution.value.code == 1
         out, err = capsys.readouterr()
-        msg = ('ERROR: the following environments do not exist for project {}: '
-               'not_existing'.format(project))
+        msg = f'ERROR: the following environments do not exist for project {project}: not_existing'
         assert msg in out
         data = exec_report.get_execution_data(project=project, execution='all', timestamp=timestamp)
         assert data['has_finished'] is True

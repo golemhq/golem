@@ -75,14 +75,14 @@ class TestUsers:
         username = test_utils.random_string(5)
         Users.create_user(username, '123', None)
         errors = Users.create_user(username, '123', None)
-        assert errors == ['Username {} already exists'.format(username)]
+        assert errors == [f'Username {username} already exists']
 
     def test_create_user_invalid_email(self, testdir_class, test_utils):
         testdir_class.activate()
         username = test_utils.random_string(5)
         email = 'test@'
         errors = Users.create_user(username, '123', email)
-        assert errors == ['{} is not a valid email address'.format(email)]
+        assert errors == [f'{email} is not a valid email address']
 
     def test_create_user_empty_password(self, testdir_class, test_utils):
         testdir_class.activate()
@@ -159,7 +159,7 @@ class TestUsers:
         testdir_class.activate()
         username = 'username01'
         errors = Users.delete_user(username)
-        assert errors == ['Username {} does not exist'.format(username)]
+        assert errors == [f'Username {username} does not exist']
 
     def test_edit_user(self, testdir_class, test_utils):
         testdir_class.activate()
@@ -204,7 +204,7 @@ class TestUsers:
         new_username = test_utils.random_string(5)
         Users.create_user(new_username, '123456')
         errors = Users.edit_user(username, new_username=new_username)
-        assert errors == ['Username {} already exists'.format(new_username)]
+        assert errors == [f'Username {new_username} already exists']
 
     def test_edit_user_email(self, testdir_class, test_utils):
         testdir_class.activate()
@@ -230,7 +230,7 @@ class TestUsers:
         Users.create_user(username, '123456', email)
         new_email = 'test@'
         errors = Users.edit_user(username, new_email=new_email)
-        assert errors == ['{} is not a valid email address'.format(new_email)]
+        assert errors == [f'{new_email} is not a valid email address']
 
     @pytest.mark.slow
     def test_reset_user_password(self, testdir_class, test_utils):
@@ -247,7 +247,7 @@ class TestUsers:
         testdir_class.activate()
         username = test_utils.random_string(5)
         errors = Users.reset_user_password(username, '234567')
-        assert errors == ['Username {} does not exist'.format(username)]
+        assert errors == [f'Username {username} does not exist']
 
     def test_reset_user_password_blank(self, testdir_class, test_utils):
         testdir_class.activate()

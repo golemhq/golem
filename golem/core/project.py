@@ -25,7 +25,7 @@ def create_project(project_name):
         with open(base_file_path, 'a', encoding='utf-8') as base_file:
             base_file.write('{}')
 
-    print('Project {} created'.format(project_name))
+    print(f'Project {project_name} created')
 
 
 def delete_project(project_name):
@@ -163,7 +163,7 @@ class Project:
         relpath = os.sep.join(dir_name.split('.'))
         fullpath = os.path.join(base_path, relpath)
         if not os.path.isdir(fullpath):
-            errors.append('Directory {} does not exist'.format(relpath))
+            errors.append(f'Directory {relpath} does not exist')
         else:
             errors = file_manager.delete_directory(fullpath)
         return errors
@@ -177,7 +177,7 @@ class Project:
                 browser_functions = parsing_utils.top_level_functions(ast_module_node)
                 browser_functions = [f for f in browser_functions if not f.startswith('_')]
             except Exception as e:
-                print('There was an error reading browsers.py:\n'+traceback.format_exc())
+                print('There was an error reading browsers.py:\n' + traceback.format_exc())
         return browser_functions
 
     def custom_browser_module(self):
@@ -228,8 +228,9 @@ class BaseProjectElement:
         self.project = Project(project)
         self.name = name
         self.stem_name = name.split('.')[-1]
-        self.filename = '{}.py'.format(self.stem_name)
-        self.relpath = '{}.py'.format(self.name.replace('.', os.sep))
+        self.filename = f'{self.stem_name}.py'
+        relpath = self.name.replace('.', os.sep)
+        self.relpath = f'{relpath}.py'
 
     @property
     def path(self):

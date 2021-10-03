@@ -65,3 +65,10 @@ class TestDeleteExecutionTimestamp:
         assert errors == []
         assert not os.path.isdir(execution['exec_dir'])
         assert os.path.isdir(execpath)  # folder for execution name still exists
+
+    def test_delete_execution_timestamp_does_not_exist(self, project_class, test_utils):
+        _, project = project_class.activate()
+        execution = test_utils.random_string()
+        timestamp = test_utils.random_string()
+        errors = report.delete_execution_timestamp(project, execution, timestamp)
+        assert errors == [f'Execution for {project} {execution} {timestamp} does not exist']

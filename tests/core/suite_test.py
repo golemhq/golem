@@ -25,9 +25,8 @@ class TestCreateSuite:
 
     def test_create_suite_with_parents(self, project_session, test_utils):
         _, project = project_session.activate()
-        random_name = test_utils.random_string()
         parents = [test_utils.random_string(), test_utils.random_string()]
-        suite_name = '{}.{}.{}'.format(parents[0], parents[1], random_name)
+        suite_name = f'{parents[0]}.{parents[1]}.{test_utils.random_string()}'
         errors = suite.create_suite(project, suite_name)
         assert errors == []
         assert os.path.isfile(Suite(project, suite_name).path)
@@ -68,7 +67,7 @@ class TestRenameSuite:
         _, project = project_session.activate()
         suite_name = test_utils.create_random_suite(project)
         random_dir = test_utils.random_string()
-        new_suite_name = '{}.{}'.format(random_dir, test_utils.random_string())
+        new_suite_name = f'{random_dir}.{test_utils.random_string()}'
         suite.rename_suite(project, suite_name, new_suite_name)
         suites = Project(project).suites()
         assert suite_name not in suites

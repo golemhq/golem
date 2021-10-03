@@ -7,6 +7,10 @@
 - Added JSON as data source, internal data uses a Python code editor, test_data setting is deprecated [#225](https://github.com/golemhq/golem/issues/225)
 - Added 4 test hooks: before_test, before_each, after_each, after_test [#227](https://github.com/golemhq/golem/issues/227)
 
+### Deprecated
+
+- Python 3.5
+
 ## [0.10.1] - 2021-07-30
 
 ### Added

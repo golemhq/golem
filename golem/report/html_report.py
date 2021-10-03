@@ -63,9 +63,9 @@ def generate_html_report(project, execution, timestamp, destination_folder=None,
             no_screenshots=no_images, encode_screenshots=True
         )
         # testId is test_file + test + set_name
-        test_id = '{}.{}'.format(test['test_file'], test['test'])
+        test_id = f"{test['test_file']}.{test['test']}"
         if test['set_name']:
-            test_id = '{}.{}'.format(test_id, test['set_name'])
+            test_id = f"{test_id}.{test['set_name']}"
         detail_test_data[test_id] = test_detail
     with app.app_context():
         html_string = render_template(
@@ -76,7 +76,7 @@ def generate_html_report(project, execution, timestamp, destination_folder=None,
         )
     _, file_extension = os.path.splitext(report_name)
     if not file_extension:
-        report_name = '{}.html'.format(report_name)
+        report_name = f'{report_name}.html'
     destination = os.path.join(destination_folder, report_name)
 
     if not os.path.exists(os.path.dirname(destination)):
@@ -87,10 +87,9 @@ def generate_html_report(project, execution, timestamp, destination_folder=None,
             f.write(html_string)
     except IOError as e:
         if e.errno == errno.EACCES:
-            print('ERROR: cannot write to {}, PermissionError (Errno 13)'
-                  .format(destination))
+            print(f'ERROR: cannot write to {destination}, PermissionError (Errno 13)')
         else:
-            print('ERROR: There was an error writing to {}'.format(destination))
+            print(f'ERROR: There was an error writing to {destination}')
 
     return html_string
 

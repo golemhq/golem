@@ -41,7 +41,7 @@ def generate_junit_report(project_name, execution, timestamp, report_folder=None
     for test in data['tests']:
         class_name = test['test_file']
         if test['set_name']:
-            class_name = '{}_{}'.format(class_name, test['set_name'])
+            class_name = f"{class_name}_{test['set_name']}"
         test_attrs = {
             'name': test['test'],
             'classname': class_name,
@@ -93,10 +93,9 @@ def generate_junit_report(project_name, execution, timestamp, report_folder=None
             f.write(doc.decode('UTF-8'))
     except IOError as e:
         if e.errno == errno.EACCES:
-            print('ERROR: cannot write to {}, PermissionError (Errno 13)'
-                  .format(report_path))
+            print(f'ERROR: cannot write to {report_path}, PermissionError (Errno 13)')
         else:
-            print('ERROR: There was an error writing to {}'.format(report_path))
+            print(f'ERROR: There was an error writing to {report_path}')
 
     return doc
 

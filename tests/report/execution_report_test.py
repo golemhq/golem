@@ -172,7 +172,7 @@ class TestCreateExecutionDirectory:
     def test_create_execution_directory__for_single_test_with_parents(self, project_session, test_utils):
         _, project = project_session.activate()
         timestamp = utils.get_timestamp()
-        test_name = 'foo.bar.{}'.format(test_utils.random_string())
+        test_name = f'foo.bar.{test_utils.random_string()}'
         directory = create_execution_directory(project, test_name, timestamp)
         path = os.path.join(project_session.path, 'reports', test_name, timestamp)
         assert os.path.isdir(path)

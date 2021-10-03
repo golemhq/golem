@@ -34,7 +34,7 @@ def get_date_time_from_timestamp(timestamp):
     date_time_string = timestamp
     sp = timestamp.split('.')
     if len(sp) >= 5:
-        date_time_string = '{0}/{1}/{2} {3}:{4}'.format(sp[0], sp[1], sp[2], sp[3], sp[4])
+        date_time_string = f'{sp[0]}/{sp[1]}/{sp[2]} {sp[3]}:{sp[4]}'
     return date_time_string
 
 
@@ -87,7 +87,7 @@ def load_json_from_file(filepath, ignore_failure=False, default=None):
             if len(contents.strip()):
                 json_data = json.loads(contents)
         except Exception as e:
-            msg = 'There was an error parsing file {}'.format(filepath)
+            msg = f'There was an error parsing file {filepath}'
             print(msg)
             print(traceback.format_exc())
             if not ignore_failure:
@@ -154,9 +154,7 @@ def match_latest_executable_path(glob_path, testdir):
     glob_path = os.path.normpath(glob_path)
     if not os.path.isabs(glob_path):
         glob_path = os.path.join(testdir, glob_path)
-    # Note: recursive=True arg is not supported
-    # in Python 3.4, so '**' wildcard is not supported
-    matched_files = [x for x in glob.glob(glob_path) if os.path.isfile(x)]
+    matched_files = [x for x in glob.glob(glob_path, recursive=True) if os.path.isfile(x)]
     for matched_file in matched_files:
         found_files.append((matched_file, extract_version_from_webdriver_filename(matched_file)))
     if found_files:

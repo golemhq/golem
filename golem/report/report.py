@@ -51,7 +51,7 @@ def delete_execution(project, execution):
         except Exception as e:
             errors.append(repr(e))
     else:
-        errors.append('Execution {} of project {} does not exist'.format(execution, project))
+        errors.append(f'Execution {execution} of project {project} does not exist')
     return errors
 
 
@@ -64,6 +64,5 @@ def delete_execution_timestamp(project, execution, timestamp):
         except Exception as e:
             errors.append(repr(e))
     else:
-        errors.append('Execution for {} {} {} does not exist'
-                      .format(project, execution, timestamp))
+        errors.append(f'Execution for {project} {execution} {timestamp} does not exist')
     return errors

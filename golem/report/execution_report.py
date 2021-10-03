@@ -110,7 +110,7 @@ def generate_execution_report(execution_directory, elapsed_time, browsers, proce
 
 def save_execution_json_report(report_data, reportdir, report_name='report'):
     """Save execution report data to the specified reportdir and report_name"""
-    report_path = os.path.join(reportdir, '{}.json'.format(report_name))
+    report_path = os.path.join(reportdir, f'{report_name}.json')
     if not os.path.exists(os.path.dirname(report_path)):
         os.makedirs(os.path.dirname(report_path), exist_ok=True)
     try:
@@ -118,10 +118,9 @@ def save_execution_json_report(report_data, reportdir, report_name='report'):
             json.dump(report_data, f, indent=4, ensure_ascii=False)
     except IOError as e:
         if e.errno == errno.EACCES:
-            print('ERROR: cannot write to {}, PermissionError (Errno 13)'
-                  .format(report_path))
+            print(f'ERROR: cannot write to {report_path}, PermissionError (Errno 13)')
         else:
-            print('ERROR: There was an error writing to {}'.format(report_path))
+            print(f'ERROR: There was an error writing to {report_path}')
 
 
 def execution_report_path(project, execution, timestamp):

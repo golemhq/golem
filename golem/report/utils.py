@@ -91,7 +91,7 @@ def save_screenshot(reportdir, image_name, format='PNG', quality=None, width=Non
             new_height = round(pil_image.size[1] * resize / 100)
         pil_image = pil_image.resize((new_width, new_height), resample=resample_filter)
 
-    screenshot_filename = '{}.{}'.format(image_name, extension)
+    screenshot_filename = f'{image_name}.{extension}'
     screenshot_path = os.path.join(reportdir, screenshot_filename)
     if format == 'PNG':
         pil_image.save(screenshot_path, format=format, optimize=True)

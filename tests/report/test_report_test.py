@@ -74,7 +74,7 @@ class TestTestFileReportDir:
         test_set = 'test_set1'
         path = test_report.test_file_report_dir(test, project, suite, timestamp, test_set)
         expected = os.path.join(testdir, 'projects', project, 'reports', suite, timestamp,
-                                '{}.{}'.format(test, test_set))
+                                f'{test}.{test_set}')
         assert path == expected
 
 
@@ -103,7 +103,7 @@ class TestGetTestLog:
 
         log = get_test_debug_log(project, suite_name, exc['timestamp'], test_file, set_name)
 
-        assert 'root INFO Test execution started: {}'.format(test_file) in log[0]
+        assert f'root INFO Test execution started: {test_file}' in log[0]
 
         # inexistent test set
         log = get_test_debug_log(project, suite_name, exc['timestamp'], test_file,

@@ -2,7 +2,9 @@ import ast
 import json
 import os
 
-from golem.core import utils, file_manager, session
+from golem.core import file_manager
+from golem.core import session
+from golem.core.test import Test
 
 
 class InvalidTagExpression(Exception):
@@ -78,7 +80,7 @@ def filter_tests_by_tags(project, tests, tags):
                 ast.parse(tag)
                 cleaned.append(tag)
             except SyntaxError:
-                cleaned.append('"{}"'.format(tag))
+                cleaned.append(f'"{tag}"')
         return ' and '.join(cleaned)
 
     def _test_matches_tag_query(query, tags):
@@ -97,14 +99,9 @@ def filter_tests_by_tags(project, tests, tags):
 
 def get_test_tags(project, full_test_case_name):
     result = []
-    tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    path = os.path.join(session.testdir, 'projects', project, 'tests',
-                        os.sep.join(parents), '{}.py'.format(tc_name))
-    test_module, _ = utils.import_module(path)
-
+    test_module = Test(project, full_test_case_name).module
     if hasattr(test_module, 'tags'):
         result = getattr(test_module, 'tags')
-
     return result
 
 
@@ -129,10 +126,8 @@ def get_tests_tags(project, tests):
             return get_tests_tags(project, tests)
 
     for test in tests:
-        tc_name, parents = utils.separate_file_from_parents(test)
-        path = os.path.join(session.testdir, 'projects', project, 'tests',
-                            os.sep.join(parents), '{}.py'.format(tc_name))
-        last_modified_time = os.path.getmtime(path)
+        t = Test(project, test)
+        last_modified_time = os.path.getmtime(t.path)
         if test in cache_tags:
             cache_timestamp = cache_tags[test]['timestamp']
             if last_modified_time != cache_timestamp:

@@ -96,7 +96,7 @@ def _replace_substrings(code, first_char, last_char):
     code_ = code
     replacements = []
     for substr_index in substrings:
-        unique_id = '{}"{}"{}'.format(first_char, str(uuid.uuid4()), last_char)
+        unique_id = f'{first_char}"{str(uuid.uuid4())}"{last_char}'
         substring = code[substr_index[0]:substr_index[1]]
         code_ = code_.replace(substring, unique_id)
         replacements.append((unique_id, substring))
@@ -112,7 +112,7 @@ def _replace_re_pattern(code, pattern):
     matches = re.findall(pattern, code)
     code_ = code
     for m in matches:
-        unique_id = '"{}"'.format(str(uuid.uuid4()))
+        unique_id = f'"{str(uuid.uuid4())}"'
         code_ = code_.replace(m, unique_id)
         replacements.append((unique_id, m))
     return code_, replacements
