@@ -52,7 +52,7 @@ const SuiteList = new function(){
                     <td>${dateTime}</td>
                     <td class="result"><div class="progress"></div></td>
                 </tr>`);
-            newRow.attr('onclick', `document.location.href='/report/project/${Global.project}/suite/${execution}/${executionData.timestamp}/'`);
+            newRow.attr('onclick', `document.location.href='/report/${Global.project}/${execution}/${executionData.execution}/'`);
             $("#healthTable tbody").append(newRow);
             let results = Object.keys(executionData.totals_by_result).sort()
             let container = newRow.find('td.result>div.progress');

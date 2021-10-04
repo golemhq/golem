@@ -1,7 +1,7 @@
 
 
 body .container-fluid {
-    max-width: 1440px
+    max-width: 2000px
 }
 
 .container-fluid {
@@ -80,7 +80,7 @@ body .container-fluid {
 #wrapper.sidebar-collapsed #sidebar ul li a i {
     margin-right: 0;
     display: block;
-    font-size: 1.8em;
+    font-size: 1.5em;
     margin-bottom: 3px;
 }
 
@@ -128,8 +128,8 @@ body .container-fluid {
 }
 
 #sidebar ul li a {
-    padding: 10px;
-    font-size: 1.2em;
+    padding: 8px;
+    font-size: 1.1em;
     display: block;
 }
 

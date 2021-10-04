@@ -283,13 +283,14 @@ def project_health():
                                                         execution=None, limit=1)
     health_data = {}
     for execution, timestamps in project_data[project].items():
-        execution_data = exec_report.get_execution_data(project=project, execution=execution,
-                                                        timestamp=timestamps[0])
-        health_data[execution] = {
-            'execution': timestamps[0],
-            'total': execution_data['total_tests'],
-            'totals_by_result': execution_data['totals_by_result']
-        }
+        if timestamps:
+            execution_data = exec_report.get_execution_data(project=project, execution=execution,
+                                                            timestamp=timestamps[0])
+            health_data[execution] = {
+                'execution': timestamps[0],
+                'total': execution_data['total_tests'],
+                'totals_by_result': execution_data['totals_by_result']
+            }
     return jsonify(health_data)
 
 
