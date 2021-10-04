@@ -233,11 +233,19 @@ def createdirectory_command(dir_name, no_confirm=False, download_drivers=True):
     if download_drivers:
         drivers_folder = os.path.join(abspath, 'drivers')
         update = True
+        # Download ChromeDriver
         if not no_confirm:
             msg = 'Would you like to download ChromeDriver now? [Y/n]'
             update = utils.prompt_yes_no(msg, True)
         if update:
             webdriver_manager.update('chrome', drivers_folder)
+        update = True
+        # Download GeckoDriver
+        if not no_confirm:
+            msg = 'Would you like to download GeckoDriver now? [Y/n]'
+            update = utils.prompt_yes_no(msg, True)
+        if update:
+            webdriver_manager.update('geckodriver', drivers_folder)
 
 
 def display_version():
