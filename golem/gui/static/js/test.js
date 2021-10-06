@@ -728,7 +728,13 @@ var Test = new function(){
         }
 
         this.updateTestFunctionName = function(valueSpan, inputSpan, input) {
+            let currentName = valueSpan.html();
             let newNameValue = input.val().trim();
+            if(currentName == newNameValue) {
+                inputSpan.hide();
+                valueSpan.show();
+                return
+            }
             let error = Test.Utils.validateTestFunctionName(newNameValue);
             if(error.length) {
                 inputSpan.hide();
