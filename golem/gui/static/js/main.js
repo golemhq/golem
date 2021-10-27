@@ -20,10 +20,23 @@ const Main = new function(){
         // max length for tests, pages, suites and directories
         this.MAXIMUM_FILENAME_LENGTH = 140;
 
-        this.getDateTimeFromTimestamp = function(timestamp){
+        this.getDateTimeFromTimestamp = function(timestamp) {
             var sp = timestamp.split('.');
             var dateTimeString = sp[0]+'/'+sp[1]+'/'+sp[2]+' '+sp[3]+':'+sp[4];
             return dateTimeString
+        }
+
+        this.secondsToReadableString = function(seconds) {
+            let str = '';
+            let min;
+            if(seconds >= 60) {
+                min = Math.floor(seconds/60);
+                str += min + 'm '
+                seconds = seconds % 60
+            }
+            seconds = seconds.toFixed(2)
+            str += seconds + 's'
+            return str
         }
 
         this.toast = function(type, msg, duration){
@@ -367,15 +380,37 @@ const Main = new function(){
             $("#screenshotModal").modal('show');
         }
 
-        this.animateProgressBar = function(container, result, percentage){
+        this.animateProgressBar = function(container, result, percentage, qty){
             setTimeout(function(){
                 let bar = container.find(`div.progress-bar[result-code='${result}']`);
                 bar.css('width', `${percentage}%`);
+                if(qty) {
+                    bar.attr('data-toggle', 'tooltip');
+                    bar.attr('title', `${result}: ${qty}`);
+                    bar.tooltip();
+                }
             }, 100);
         }
 
         this.hasProgressBarForResult = function(container, result){
             return container.find(`div.progress-bar[result-code='${result}']`).length != 0
+        }
+    }
+
+    this.URLS = new function() {
+
+        this.reportDashboard = function(project, execution) {
+            if(project == undefined) {
+                return `/report/`
+            } else if(execution == undefined) {
+                return `/report/${project}/`
+            } else {
+                return `/report/${project}/${execution}/`
+            }
+        }
+
+        this.executionReport = function(project, execution, timestamp) {
+            return `/report/${project}/${execution}/${timestamp}/`
         }
     }
 

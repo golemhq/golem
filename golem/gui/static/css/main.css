@@ -474,8 +474,7 @@ ul.no-bullets {
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
-    background-color: #e2e2e2; 
-    position: relative;
+    background-color: #e2e2e2;
     height: 20px;
     margin-bottom: 0px;
     overflow: hidden;
@@ -496,7 +495,7 @@ ul.no-bullets {
     display:inline-block;
     overflow: hidden;
     line-height: 20px;
-    transition-duration: 0.5s;
+    transition-duration: 0.1s;
 }
 
 .progress-bar {

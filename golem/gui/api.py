@@ -478,6 +478,40 @@ def report_delete_execution_timestamp():
     return jsonify(errors)
 
 
+@api_bp.route('/report/get-reports')
+@auth_required
+def report_get_reports():
+    user = _get_user_api_or_session()
+    user_projects = user.project_list
+    project = request.args['project']
+    execution = request.args['execution']
+    last_days = int(request.args['lastDays'])
+    if project is None or project == 'null':
+        project_list = user_projects
+    else:
+        _verify_permissions(Permissions.REPORTS_ONLY, project)
+        project_list = [project]
+    last_timestamps = report.get_last_execution_timestamps(project_list, execution=execution, last_days=last_days)
+
+    result = []
+
+    for proj, executions in last_timestamps.items():
+        for exec_, timestamps in executions.items():
+            for timestamp in timestamps:
+                execution_data = exec_report.get_execution_data(project=proj, execution=exec_, timestamp=timestamp)
+                result.append({
+                    'project': proj,
+                    'execution': exec_,
+                    'timestamp': timestamp,
+                    'report': execution_data
+                })
+
+    # re-sort
+    result = sorted(result, key=lambda x: x['timestamp'], reverse=True)
+
+    return jsonify(result)
+
+
 @api_bp.route('/report/last-executions')
 @auth_required
 def report_last_executions():

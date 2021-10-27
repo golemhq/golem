@@ -42,6 +42,16 @@ def report_dashboard_suite(project, execution):
     return render_template('report/report_dashboard.html', project=project, execution=execution)
 
 
+# OLD REPORT DASHBOARD PROJECT VIEW
+@report_bp.route("/report-old/")
+@report_bp.route("/report-old/<project>/")
+@report_bp.route("/report-old/<project>/<execution>/")
+@login_required
+@permission_required(Permissions.REPORTS_ONLY)
+def report_dashboard_old(project=None, execution=None):
+    return render_template('report/report_dashboard_old.html', project=project, execution=execution)
+
+
 # REPORT EXECUTION VIEW
 @report_bp.route("/report/<project>/<execution>/<timestamp>/")
 @login_required

@@ -26,15 +26,12 @@ class TestGetLastExecutionTimestamps:
         assert last_exec[project] == {suite_name: [timestamp]}
 
         # multiple executions
-        timestamps = [
-            timestamp,
-            test_utils.run_suite(project, suite_name),
-            test_utils.run_suite(project, suite_name)
-        ]
+        timestamp_first = test_utils.run_suite(project, suite_name)
+        timestamp_second = test_utils.run_suite(project, suite_name)
         last_exec = report.get_last_execution_timestamps([project], suite_name, limit=2)
         assert len(last_exec[project][suite_name]) == 2
-        assert last_exec[project][suite_name][0] == timestamps[1]
-        assert last_exec[project][suite_name][1] == timestamps[2]
+        assert last_exec[project][suite_name][0] == timestamp_second
+        assert last_exec[project][suite_name][1] == timestamp_first
 
 
 class TestDeleteExecution:

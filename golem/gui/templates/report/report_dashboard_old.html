@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}{% if project %}Golem : {{project|capitalize}} : Reports{% else %}Golem : Reports{% endif %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}"/>
+{% endblock %}
+
+{% block content %}
+<div class="all-projects-container">
+	<h3>{% if project %}{{project|replace("_", " ")|capitalize}} - {% endif %}{% if execution %}{{execution|replace("_", " ")|capitalize}} - {% endif %}Reports</h3>
+</div>
+{% endblock %}
+
+{% block footer_declarations %}
+<script>
+	let projectName = {{project|tojson}};
+	let executionName = {{execution|tojson}}
+</script>
+<script src="{{ url_for('static', filename='js/external/chart.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/report_dashboard_old.js') }}"></script>
+{% endblock %}

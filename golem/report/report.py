@@ -1,12 +1,14 @@
 import os
 import shutil
+from datetime import datetime, timedelta
 
 from golem.core import test_directory
 from golem.core.project import Project
 from golem.report.execution_report import execution_report_path
+from golem.core import utils
 
 
-def get_last_execution_timestamps(projects=None, execution=None, limit=5):
+def get_last_execution_timestamps(projects=None, execution=None, limit=None, last_days=None):
     """Get the last n execution timestamps from all the executions of
     a list of projects.
 
@@ -15,6 +17,11 @@ def get_last_execution_timestamps(projects=None, execution=None, limit=5):
 
     Timestamps are in descending order.
     """
+    start_timestamp = None
+    if last_days is not None and last_days != 0:
+        start_datetime = datetime.today() - timedelta(days=last_days)
+        start_timestamp = utils.get_timestamp(start_datetime)
+
     last_timestamps = {}
     # if no projects provided, select every project
     if not projects:
@@ -22,23 +29,25 @@ def get_last_execution_timestamps(projects=None, execution=None, limit=5):
     for project in projects:
         last_timestamps[project] = {}
         report_path = Project(project).report_directory_path
-        executions = []
         # if execution is not provided, select all executions
-        if execution:
-            if os.path.isdir(os.path.join(report_path, execution)):
-                executions = [execution]
+        if execution and os.path.isdir(os.path.join(report_path, execution)):
+            executions = [execution]
         else:
             executions = next(os.walk(report_path))[1]
         for e in executions:
             exec_path = os.path.join(report_path, e)
             timestamps = next(os.walk(exec_path))[1]
-            timestamps = sorted(timestamps)
-            limit = int(limit)
-            timestamps = timestamps[-limit:]
+            timestamps = sorted(timestamps, reverse=True)
+            if limit is not None:
+                limit = int(limit)
+                timestamps = timestamps[:limit]
+            if start_timestamp is not None:
+                timestamps = [t for t in timestamps if t >= start_timestamp]
             if len(timestamps):
                 last_timestamps[project][e] = timestamps
             else:
                 last_timestamps[project][e] = []
+
     return last_timestamps
 
 

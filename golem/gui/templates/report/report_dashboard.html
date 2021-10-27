@@ -4,11 +4,57 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}"/>
+<style>
+	#breadcrumb {
+		font-size: 16px
+	}
+	.progress {
+		min-width: 100px;
+	}
+	td.started {
+		min-width: 125px
+	}
+	td.duration {
+		min-width: 75px
+	}
+	td.menu-buttons {
+		min-width: 65px
+	}
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="all-projects-container">
-	<h3>{% if project %}{{project|replace("_", " ")|capitalize}} - {% endif %}{% if execution %}{{execution|replace("_", " ")|capitalize}} - {% endif %}Reports</h3>
+<div class="col-lg-10 col-lg-offset-1">
+	<h1>Reports</h1>
+	<div>
+		<div id="breadcrumb" style="float: left"></div>
+		<div style="float: right">
+			<select id="lastDaysSelector" class="form-control" onchange="loadTable()">
+			  	<option value="1">Last Day</option>
+				<option value="7">Last 7 Days</option>
+				<option selected value="30">Last 30 Days</option>
+				<option value="60">Last 90 Days</option>
+				<option value="0">All</option>
+			</select>
+		</div>
+	</div>
+
+<table id="reportTable" class="table">
+	<thead>
+		<tr>
+			<th>Execution</th>
+			<th>Browsers</th>
+			<th>Environments</th>
+			<th>Started</th>
+			<th>Duration</th>
+			<th>Tests</th>
+			<th>Result</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody></tbody>
+</table>
+
 </div>
 {% endblock %}
 

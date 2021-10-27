@@ -10,9 +10,11 @@ from datetime import datetime
 from pkg_resources import parse_version
 
 
-def get_timestamp():
+def get_timestamp(date_time=None):
     time_format = "%Y.%m.%d.%H.%M.%S.%f"
-    timestamp = datetime.today().strftime(time_format)
+    if date_time is None:
+        date_time = datetime.today()
+    timestamp = date_time.strftime(time_format)
     # remove last 3 decimal places from microseconds
     timestamp = timestamp[:-3]
     return timestamp
