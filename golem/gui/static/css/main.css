@@ -415,6 +415,11 @@ ul.no-bullets {
     padding-right: 0px;
 }
 
+.no-side-padding {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
 .padding-right-7-5 {
     padding-right: 7.5px;
 }

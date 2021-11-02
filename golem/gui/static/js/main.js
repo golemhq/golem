@@ -388,6 +388,7 @@ const Main = new function(){
                     bar.attr('data-toggle', 'tooltip');
                     bar.attr('title', `${result}: ${qty}`);
                     bar.tooltip();
+                    bar.attr('data-original-title', `${result}: ${qty}`);
                 }
             }, 100);
         }
