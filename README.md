@@ -7,6 +7,8 @@
 Golem is a test framework and a complete tool for browser automation.
 Tests can be written with code in Python, codeless using the web IDE, or both.
 
+![Execution Report Demo](https://raw.githubusercontent.com/golemhq/resources/master/img/demo_report_running_execution.gif)
+
 **Tests can be written with the web app**
 <p align="center">
     <img width="600" src="./images/test-case.png" />
