@@ -287,7 +287,7 @@ class User:
 
     def project_permission(self, project):
         for p, permission in self.projects.items():
-            if p == project:
+            if p == project or '*' in p:
                 return permission
         return None
 
