@@ -4,8 +4,12 @@
 
 ### Changed
 
-- Added JSON as data source, internal data uses a Python code editor, test_data setting is deprecated [#225](https://github.com/golemhq/golem/issues/225)
+- Changes to test data [#225](https://github.com/golemhq/golem/issues/225)
+     * Added JSON as a data source option
+     * "Internal data" uses now a Python code editor
+     * test_data setting key is deprecated, test data type is selected from each test
 - Added 4 test hooks: before_test, before_each, after_each, after_test [#227](https://github.com/golemhq/golem/issues/227)
+     * setup, teardown hooks are now deprecated
 - Reworked the report list view: executions are listed mixed and sorted by date desc
 
 ### Deprecated
