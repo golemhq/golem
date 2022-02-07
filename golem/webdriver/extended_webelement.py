@@ -1,4 +1,5 @@
-# from typing import List # not supported in 3.4
+from typing import List
+import time
 
 from selenium.webdriver.remote.webelement import WebElement as RemoteWebElement
 from selenium.webdriver.firefox.webelement import FirefoxWebElement
@@ -29,20 +30,21 @@ class ExtendedWebElement:
             if not self.is_selected():
                 self.click()
         else:
-            msg = 'Element {} is not checkbox or radiobutton'.format(self.name)
-            raise ValueError(msg)
+            raise ValueError(f'Element {self.name} is not checkbox or radiobutton')
 
     def double_click(self):
         """Double click the element"""
         action_chains = ActionChains(self.parent)
         action_chains.double_click(self).perform()
 
-    def find(self, *args, **kwargs) -> 'ExtendedRemoteWebElement':
+    def find(self, element=None, id=None, name=None, link_text=None,
+             partial_link_text=None, css=None, xpath=None, tag_name=None,
+             timeout=None, wait_displayed=None, highlight=None) -> 'ExtendedRemoteWebElement':
         """Find a WebElement
 
         Search criteria:
-        The first argument must be: an element tuple, a CSS string or
-        a WebElement object.
+        The first argument must be: an element tuple, a CSS string,
+        an XPath string, or a WebElement object.
         Keyword search criteria: id, name, link_text, partial_link_text,
         css, xpath, tag_name.
         Only one search criteria should be provided.
@@ -62,17 +64,17 @@ class ExtendedWebElement:
         :Returns:
           a golem.webdriver.extended_webelement.ExtendedRemoteWebElement
         """
-        if len(args) == 1:
-            kwargs['element'] = args[0]
-        return _find(self, **kwargs)
+        return _find(self, element, id, name, link_text, partial_link_text,
+                     css, xpath, tag_name, timeout, wait_displayed, highlight)
 
-    #  -> List['ExtendedRemoteWebElement']
-    def find_all(self, *args, **kwargs):
+    def find_all(self, element=None, id=None, name=None, link_text=None,
+                 partial_link_text=None, css=None, xpath=None,
+                 tag_name=None) -> List['ExtendedRemoteWebElement']:
         """Find all WebElements that match the search criteria.
 
         Search criteria:
-        The first argument must be: an element tuple, a CSS string or
-        a WebElement object.
+        The first argument must be: an element tuple, a CSS string, or
+        an XPath string.
         Keyword search criteria: id, name, link_text, partial_link_text,
         css, xpath, tag_name.
         Only one search criteria should be provided.
@@ -85,9 +87,8 @@ class ExtendedWebElement:
         :Returns:
             a list of ExtendedRemoteWebElement
         """
-        if len(args) == 1:
-            kwargs['element'] = args[0]
-        return _find_all(self, **kwargs)
+        return _find_all(self, element, id, name, link_text, partial_link_text, css,
+                         xpath, tag_name)
 
     def focus(self):
         """Give focus to element"""
@@ -102,6 +103,18 @@ class ExtendedWebElement:
         script = 'return arguments[0] == document.activeElement'
         return self.parent.execute_script(script, self)
 
+    def highlight(self):
+        """Highlight element"""
+        try:
+            self.parent.execute_script(HIGHLIGHT_ELEMENT_SCRIPT, self)
+        except Exception as e:
+            pass
+
+    @property
+    def inner_html(self):
+        """"Element innerHTML attribute"""
+        return self.get_attribute('innerHTML')
+
     def javascript_click(self):
         """Click element using Javascript"""
         self.parent.execute_script('arguments[0].click();', self)
@@ -110,6 +123,11 @@ class ExtendedWebElement:
         """Mouse over element"""
         action_chains = ActionChains(self.parent)
         action_chains.move_to_element(self).perform()
+
+    @property
+    def outer_html(self):
+        """"Element outerHTML attribute"""
+        return self.get_attribute('outerHTML')
 
     def press_key(self, key):
         """Press a key on element
@@ -123,17 +141,35 @@ class ExtendedWebElement:
             key_attr = getattr(Keys, key)
             self.send_keys(key_attr)
         else:
-            defined_keys = [name for name in dir(Keys) if
-                            not name.startswith('_')]
-            error_msg = ('Key {} is invalid\n'
+            defined_keys = [name for name in dir(Keys) if not name.startswith('_')]
+            error_msg = (f'Key {key} is invalid\n'
                          'valid keys are:\n'
-                         '{}'.format(key, ','.join(defined_keys)))
+                         f'{",".join(defined_keys)}')
             raise ValueError(error_msg)
 
     @property
     def select(self):
         """Return a Select object"""
         return Select(self)
+
+    def send_keys_with_delay(self, value, delay=0.1):
+        """Send keys to element one by one with a delay between keys.
+
+        :Args:
+         - value: a string to type
+         - delay: time between keys (in seconds)
+
+        :Raises:
+         - ValueError: if delay is not a positive int or float
+        """
+        if not isinstance(delay, int) and not isinstance(delay, float):
+            raise ValueError('delay must be int or float')
+        elif delay < 0:
+            raise ValueError('delay must be a positive number')
+        else:
+            for c in value:
+                self.send_keys(c)
+                time.sleep(delay)
 
     def uncheck(self):
         """Uncheck element if element is checkbox.
@@ -145,7 +181,7 @@ class ExtendedWebElement:
             if self.is_selected():
                 self.click()
         else:
-            raise ValueError('Element {} is not checkbox'.format(self.name))
+            raise ValueError(f'Element {self.name} is not checkbox')
 
     @property
     def value(self):
@@ -159,8 +195,7 @@ class ExtendedWebElement:
           The element
         """
         wait = WebDriverWait(self.parent, timeout)
-        message = ('Timeout waiting for element {} to be displayed'
-                   .format(self.name))
+        message = f'Timeout waiting for element {self.name} to be displayed'
         wait.until(ec.visibility_of(self), message=message)
         return self
 
@@ -171,7 +206,7 @@ class ExtendedWebElement:
           The element
         """
         wait = WebDriverWait(self.parent, timeout)
-        message = 'Timeout waiting for element {} to be enabled'.format(self.name)
+        message = f'Timeout waiting for element {self.name} to be enabled'
         wait.until(gec.element_to_be_enabled(self), message=message)
         return self
 
@@ -182,8 +217,7 @@ class ExtendedWebElement:
           The element
         """
         wait = WebDriverWait(self.parent, timeout)
-        message = ('Timeout waiting for element {} to have attribute {}'
-                   .format(self.name, attribute))
+        message = f'Timeout waiting for element {self.name} to have attribute {attribute}'
         wait.until(gec.element_to_have_attribute(self, attribute), message=message)
         return self
 
@@ -194,8 +228,7 @@ class ExtendedWebElement:
           The element
         """
         wait = WebDriverWait(self.parent, timeout)
-        message = ('Timeout waiting for element {} to not have attribute {}'
-                   .format(self.name, attribute))
+        message = f'Timeout waiting for element {self.name} to not have attribute {attribute}'
         wait.until_not(gec.element_to_have_attribute(self, attribute),
                        message=message)
         return self
@@ -207,8 +240,7 @@ class ExtendedWebElement:
           The element
         """
         wait = WebDriverWait(self.parent, timeout)
-        message = ('Timeout waiting for element {} to be not displayed'
-                   .format(self.name))
+        message = f'Timeout waiting for element {self.name} to be not displayed'
         wait.until_not(ec.visibility_of(self), message=message)
         return self
 
@@ -219,7 +251,7 @@ class ExtendedWebElement:
           The element
         """
         wait = WebDriverWait(self.parent, timeout)
-        message = 'Timeout waiting for element {} to be not enabled'.format(self.name)
+        message = f'Timeout waiting for element {self.name} to be not enabled'
         wait.until_not(gec.element_to_be_enabled(self), message=message)
         return self
 
@@ -230,8 +262,7 @@ class ExtendedWebElement:
           The element
         """
         wait = WebDriverWait(self.parent, timeout)
-        message = ('Timeout waiting for element {} text to be \'{}\''
-                   .format(self.name, text))
+        message = f"Timeout waiting for element {self.name} text to be '{text}'"
         wait.until(gec.element_text_to_be(self, text), message=message)
         return self
 
@@ -242,8 +273,7 @@ class ExtendedWebElement:
           The element
         """
         wait = WebDriverWait(self.parent, timeout)
-        message = ('Timeout waiting for element {} text to contain \'{}\''
-                   .format(self.name, text))
+        message = f"Timeout waiting for element {self.name} text to contain '{text}'"
         wait.until(gec.element_text_to_contain(self, text), message=message)
         return self
 
@@ -254,8 +284,7 @@ class ExtendedWebElement:
           The element
         """
         wait = WebDriverWait(self.parent, timeout)
-        message = ('Timeout waiting for element {} text not to be \'{}\''
-                   .format(self.name, text))
+        message = f"Timeout waiting for element {self.name} text not to be '{text}'"
         wait.until_not(gec.element_text_to_be(self, text), message=message)
         return self
 
@@ -266,8 +295,7 @@ class ExtendedWebElement:
           The element
         """
         wait = WebDriverWait(self.parent, timeout)
-        message = ('Timeout waiting for element {} text to not contain \'{}\''
-                   .format(self.name, text))
+        message = f"Timeout waiting for element {self.name} text to not contain '{text}'"
         wait.until_not(gec.element_text_to_contain(self, text),
                        message=message)
         return self
@@ -301,3 +329,62 @@ def extend_webelement(web_element) -> ExtendedRemoteWebElement:
         web_element.__class__ = ExtendedRemoteWebElement
     return web_element
 
+
+HIGHLIGHT_ELEMENT_SCRIPT = """
+	let boundingRect = arguments[0].getBoundingClientRect();
+	boundingRect.left = boundingRect.left + window.scrollX;
+	boundingRect.top = boundingRect.top + window.scrollY;
+	if(isNaN(boundingRect.width)) {
+		boundingRect.width = 0;
+	}
+	if(isNaN(boundingRect.height)) {
+		boundingRect.height = 0;
+	}
+	
+	let borders = {
+		top: document.createElement('div'),
+		left: document.createElement('div'),
+		right: document.createElement('div'),
+		bottom: document.createElement('div'),
+	}
+
+	Object.keys(borders).forEach(border => {
+		borders[border].style.position = 'absolute';
+		borders[border].style.backgroundColor = 'yellow';
+	});
+
+	borders.top.style.left = boundingRect.left - 5 + 'px';
+	borders.top.style.top = boundingRect.top - 5 + 'px';
+	borders.top.style.width = boundingRect.width + 10 + 'px';
+	borders.top.style.height = '4px';
+
+	borders.left.style.left = boundingRect.left - 5 + 'px';
+	borders.left.style.top = boundingRect.top - 5 + 'px';
+	borders.left.style.height = boundingRect.height + 10 + 'px';
+	borders.left.style.width = '4px';
+
+	borders.right.style.left = boundingRect.left + boundingRect.width + 1 + 'px';
+	borders.right.style.top = boundingRect.top - 5 + 'px';
+	borders.right.style.height = boundingRect.height + 10 + 'px';
+	borders.right.style.width = '4px';
+
+	borders.bottom.style.left = boundingRect.left - 5 + 'px';
+	borders.bottom.style.top = boundingRect.top + boundingRect.height + 1 + 'px';
+	borders.bottom.style.width = boundingRect.width + 10 + 'px';
+	borders.bottom.style.height = '4px';
+
+	let zIndex = parseInt(arguments[0].style.zIndex);
+	if(!Number.isNaN(zIndex)) {
+		Object.keys(borders).forEach(border => borders[border].style.zIndex = zIndex + 1);
+	}
+	Object.keys(borders).forEach(border => document.body.appendChild(borders[border]));
+	
+	setTimeout(() => {
+		Object.keys(borders).forEach(border => borders[border].style.backgroundColor = 'transparent');
+	}, 300);
+	setTimeout(() => {
+		Object.keys(borders).forEach(border => borders[border].style.backgroundColor = 'yellow');
+	}, 600);
+	setTimeout(() => {
+		Object.keys(borders).forEach(border => borders[border].remove());
+	}, 900);"""

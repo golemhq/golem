@@ -6,14 +6,15 @@ import random
 from golem.gui import gui_utils
 from golem import browser, execution
 from golem.core import settings_manager
-from golem.test_runner import execution_runner, execution_logger
+from golem.execution_runner import execution_runner
+from golem.test_runner import test_logger
 
 
 class TestGetBrowser:
 
     def test_driver_path_is_not_defined(self):
         execution.settings = settings_manager.assign_settings_default_values({})
-        execution.logger = execution_logger.get_logger()
+        execution.logger = test_logger.get_logger()
         default_browsers = gui_utils.get_supported_browsers_suggestions()
         drivers = [
             ('chromedriver_path', 'chrome'),
@@ -25,15 +26,15 @@ class TestGetBrowser:
         ]
         for setting_path, browser_name in drivers:
             execution.browser_definition = execution_runner.define_browsers(
-                [browser_name], [], default_browsers)[0]
+                [browser_name], [], default_browsers, [])[0]
             with pytest.raises(Exception) as excinfo:
                 browser.open_browser()
-                expected = 'Exception: {} setting is not defined'.format(setting_path)
+                expected = 'Exception: {setting_path} setting is not defined'
                 assert expected in str(excinfo.value)
 
     def test_executable_not_present(self):
         execution.settings = settings_manager.assign_settings_default_values({})
-        execution.logger = execution_logger.get_logger()
+        execution.logger = test_logger.get_logger()
         default_browsers = gui_utils.get_supported_browsers_suggestions()
         drivers = [
             ('chromedriver_path', './drivers/chromedriver*', 'chrome'),
@@ -45,9 +46,9 @@ class TestGetBrowser:
         ]
         for setting_key, setting_path, browser_name in drivers:
             execution.browser_definition = execution_runner.define_browsers(
-                [browser_name], [], default_browsers)[0]
+                [browser_name], [], default_browsers, [])[0]
             execution.settings[setting_key] = setting_path
             with pytest.raises(Exception) as excinfo:
                 browser.open_browser()
-                expected = 'No executable file found using path {}'.format(setting_path)
+                expected = f'No executable file found using path {setting_path}'
                 assert expected in str(excinfo.value)

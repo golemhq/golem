@@ -4,17 +4,29 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/suite.css') }}">
-{% endblock %} 
+{% endblock %}
 
 {% block content %}
 <div>
     <div class="col-md-8 col-md-offset-2" id="dataContainerContainer">
-        <div class="col-xs-6 header-col">
-            <h3 id="suiteName">{{suite}}</h3>
+        <div class="header-col" style="width: calc(100% - 270px)">
+            <h3 id="filenameContainer">
+                <span id="fileName" class="element-name" onclick="file.startInlineNameEdition()">
+                    {{suite}}
+                </span>
+                <span id="filenameInput" style="display: none">
+                    <input type="text">
+                </span>
+            </h3>
         </div>
-        <div class="col-xs-6 text-right header-col" style="padding-top: 20px">
-            <button id="runTest" class="btn btn-default btn-sm" onclick="runSuite()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Suite</button>
-            <button id="save" class="btn btn-default btn-sm" onclick="saveTestSuite();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+        <div class="header-col header-col-right">
+            {% if g.user.project_weight(project) >= 30 %}
+            <button id="runTest" class="btn btn-default btn-sm" onclick="Suite.run()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Suite</button>
+            {% endif %}
+            <a id="loadCodeButton" class="btn btn-default btn-sm" href="code/"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Code<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></a>
+            {% if g.user.project_weight(project) >= 30 %}
+            <button id="save" class="btn btn-default btn-sm" onclick="Suite.save();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+            {% endif %}
         </div>
         <div class="clearfix"></div>
         <h4>Settings</h4>
@@ -22,51 +34,68 @@
         <div>
             <div class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Browsers</div>
             <div class="form-group col-xs-10" style="">
-                <input type="text" class="form-control" id="browsers" value="{{ browsers if browsers else ''}}" placeholder="list of browsers">
+                <input type="text" class="form-control" id="browsers" value="{{ ', '.join(browsers) + ', ' if browsers else ''}}" placeholder="browsers">
             </div>
         </div>
         <div>
             <div class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Environments</div>
             <div class="form-group col-xs-10" style="">
-                <input type="text" class="form-control" id="environments" value="{{ environments if environments else ''}}" placeholder="list of environments">
+                <input type="text" class="form-control" id="environments" value="{{ ', '.join(environments) + ', ' if environments else ''}}" placeholder="environments">
             </div> 
         </div>
         <div>
-            <div for="workers" class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Workers</div>
+            <div class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Tags</div>
+            <div class="form-group col-xs-10" style="">
+                <input type="text" class="form-control" id="tags" value="{{ ', '.join(tags) + ', ' if tags else ''}}" placeholder="tags">
+            </div>
+        </div>
+        <div>
+            <div for="processes" class="col-sm-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Processes</div>
             <div class="form-group col-sm-3">
-                <input type="number" class="form-control" id="workers" value="{{worker_amount}}" placeholder="Amount of workers">
+                <input type="number" class="form-control" id="processes" value="{{processes}}" placeholder="processes">
             </div>
         </div>
         </form>
         <div class="clearfix"></div> 
-        <br>       
-        <ul id="suiteTests" class="tree" style="padding-left: 15px">
+        <br>
+        <li id="suiteTests" class="tree" data-type="folder" full-name="">
             <input type="checkbox" id="allTestCasesCheckbox" class="select-testcase-checkbox" style="margin-top: 0px !important;">
-            <h4> Test Cases <small id="testCount"></small></h4>
-            <ul id="testCasesTree">
+            <h4> Tests <small id="testCount"></small></h4>
+            <ul id="treeRoot">
                  {%- for elem in all_test_cases recursive %}
-                    <li>
-                        {%- if elem.type == 'directory' -%}
+                    {%- if elem.type == 'directory' -%}
+                        <li data-type="folder" full-name="{{elem.dot_path}}">
                             <input type="checkbox" name="checkbox" class="select-testcase-checkbox">
                             <a href="#" class="branch-name">{{ elem.name }}</a>
                             <ul>{{ loop(elem.sub_elements) }}</ul>
-                        {%- else %}
-                            <label full-name="{{elem.dot_path}}"><input type="checkbox" name="checkbox" class="select-testcase-checkbox test-checkbox"><span class="node-name">{{ elem.name }}</span></label>
-                        {%- endif %}
-                    </li>
+                        </li>
+                    {%- else %}
+                        <li data-type="test" full-name="{{elem.dot_path}}">
+                            <label full-name="{{elem.dot_path}}">
+                                <input type="checkbox" name="checkbox" class="select-testcase-checkbox test-checkbox">
+                                <span class="node-name">{{ elem.name }}</span>
+                            </label>
+                        </li>
+                    {%- endif %}
                 {%- endfor %}
             </ul>
-        </ul>
-        <div class="clearfix"></div>
+        </li>
     </div>
 </div>
 
 <script src="{{ url_for('static', filename='js/external/jquery.autocomplete.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/external/treeview.js') }}"></script>
+<script src="{{ url_for('static', filename='js/file.js') }}"></script>
 <script src="{{ url_for('static', filename='js/suite.js') }}"></script>
+{% endblock %}
+
+{% block footer_declarations %}
 <script>
-    var project = "{{project}}";
-    var suite = "{{suite}}";
-    var selectedTests = {{selected_tests|tojson}};
+    let suiteName = "{{suite}}";
+    let selectedTests = {{selected_tests|tojson}};
+
+    const file = new File('suite', Global.project, '', suiteName);
+    const suite = Suite;
+    suite.initialize(file, selectedTests);
 </script>
 {% endblock %}

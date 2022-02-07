@@ -203,18 +203,19 @@ from the current file_detector, then the class is instantiated with args and kwa
 instantiation.
 * kwargs - Keyword arguments, passed the same way as args.
 
-#### **find**(*args, **kwargs) <small>[Golem]</small>
+#### **find**(element=None, id=None, name=None, link_text=None, partial_link_text=None, css=None, xpath=None, tag_name=None, timeout=None, wait_displayed=None, highlight=None) <small>[Golem]</small>
 
 Find a WebElement
 
 Search criteria:
-* The first argument must be: an element tuple, a CSS string or a WebElement object.
+* The first argument must be: an element tuple, a CSS string, an XPath string, or a WebElement object.
 * Keyword search criteria: id, name, link_text, partial_link_text, css, xpath, tag_name.
 * Only one search criteria should be provided.
 
 Other args:
 * timeout: timeout (in seconds) to wait for element to be present. by default it uses the *search_timeout* setting value
 * wait_displayed: wait for element to be displayed (visible). By default uses the *wait_displayed* setting value
+* highlight: highlights element on the page when found
 
 Usage:
 ```python
@@ -230,12 +231,12 @@ A golem.webdriver.extended_webelement.ExtendedRemoteWebElement
 
 Described in more detail [here](../finding-elements.html#find).
 
-#### **find_all**(*args, **kwargs) <small>[Golem]</small>
+#### **find_all**(element=None, id=None, name=None, link_text=None, partial_link_text=None, css=None, xpath=None, tag_name=None) <small>[Golem]</small>
 
 Find all WebElements that match the search criteria.
 
 Search criteria:
-* The first argument must be: an element tuple, a CSS string or a WebElement object.
+* The first argument must be: an element tuple, a CSS string, or an XPath string.
 * Keyword search criteria: id, name, link_text, partial_link_text, css, xpath, tag_name
 * Only one search criteria should be provided.
 

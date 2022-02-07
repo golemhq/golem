@@ -1,46 +1,39 @@
-var environmentsEditor = null;
+let environmentsEditor = null;
 
 
-$(document).ready(function() {      
-   environmentsEditor = CodeMirror($("#environmentsContainer")[0], {
-      value: environmentData,
-      mode: "application/ld+json",
-      lineNumbers: true,
-      styleActiveLine: true,
-      matchBrackets: true,
-      autoCloseBrackets: true,
-      lineWrapping: true
+$(document).ready(function() {
+    environmentsEditor = CodeMirror($("#environmentsContainer")[0], {
+        value: environmentData,
+        mode: "application/ld+json",
+        lineNumbers: true,
+        styleActiveLine: true,
+        matchBrackets: true,
+        autoCloseBrackets: true,
+        lineWrapping: true
     });
+
+    if(Global.user.projectWeight < Main.PermissionWeightsEnum.admin){
+        environmentsEditor.setOption('readOnly', 'nocursor')
+    }
 
     // set unsaved changes watcher
     watchForUnsavedChanges();
 });
 
 
-function saveEnvironments(){
-    var environments = environmentsEditor.getValue();
-
-    $.ajax({
-        url: "/save_environments/",
-        data: JSON.stringify({
-                "project": project,
-                "environmentData": environments
-            }),
-        dataType: 'json',
-        contentType: 'application/json; charset=utf-8',
-        type: 'POST',
-        success: function(error) {
-            if(error.length == 0){
-                Main.Utils.toast('success', "Environments saved", 2000);
-                environmentsEditor.markClean();
-            }
-            else{
-                Main.Utils.toast('error', error, 2000);
-            }
-        },
-        error: function() {
+function saveEnvironments() {
+    let environments = environmentsEditor.getValue();
+    xhr.put('/api/project/environments/save', {
+        'project': Global.project,
+        'environmentData': environments
+    }, result => {
+        if(result.error.length) {
+            Main.Utils.toast('error', result.error, 2000);
+        } else {
+            Main.Utils.toast('success', "Environments saved", 2000);
+            environmentsEditor.markClean();
         }
-    });
+    })
 }
 
 

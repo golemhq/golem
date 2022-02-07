@@ -23,17 +23,18 @@ Clicks the element.
 #### **double_click**() <small>[Golem]</small>
 Double click the element
 
-#### **find**(*args, **kwargs) <small>[Golem]</small>
+#### **find**(element=None, id=None, name=None, link_text=None, partial_link_text=None, css=None, xpath=None, tag_name=None, timeout=None, wait_displayed=None, highlight=None) <small>[Golem]</small>
 Find a WebElement
 
 Search criteria:
-* The first argument must be: an element tuple, a CSS string or a WebElement object.
+* The first argument must be: an element tuple, a CSS string, an XPath string, or a WebElement object.
 * Keyword search criteria: id, name, link_text, partial_link_text, css, xpath, tag_name.
 * Only one search criteria should be provided.
 
 Other args:
 * timeout: timeout (in seconds) to wait for element to be present. By default it uses the search_timeout setting value.
 * wait_displayed: wait for element to be displayed (visible). By default uses the wait_displayed setting value.
+* highlight: highlights element on the page when found
 
 Usage:
 ```python
@@ -45,12 +46,12 @@ element.find(xpath='//div/input', timeout=5, wait_displayed=True)
 
 Returns: a golem.webdriver.extended_webelement.ExtendedRemoteWebElement
 
-#### **find_all**(*args, **kwargs) <small>[Golem]</small>
+#### **find_all**(element=None, id=None, name=None, link_text=None, partial_link_text=None, css=None, xpath=None, tag_name=None) <small>[Golem]</small>
 
 Find all WebElements that match the search criteria.
 
 Search criteria:
-* The first argument must be: an element tuple, a CSS string or a WebElement object.
+* The first argument must be: an element tuple, a CSS string, or an XPath string.
 * Keyword search criteria: id, name, link_text, partial_link_text, css, xpath, tag_name.
 * Only one search criteria should be provided.
 
@@ -131,7 +132,7 @@ Finds a list of elements within this element’s children by ID. Will return a l
 
 Use [find_all](#find-all-args-kwargs-small-golem-small) instead.
 
-#### **find_elements_by_link_text**(link_text) <small>[]</small>
+#### **find_elements_by_link_text**(link_text) <small>[Selenium]</small>
 
 Finds a list of elements within this element’s children by visible link text.
 
@@ -217,6 +218,10 @@ if element1 == element2:
     print("These 2 are equal")
 ```
 
+#### **inner_html** <small>[Golem]</small>
+
+Element innerHTML attribute
+
 #### **is_displayed**() <small>[Selenium]</small>
 
 Whether the element is visible to a user.
@@ -250,6 +255,10 @@ Returns the top lefthand corner location on the screen, or None if the element i
 #### **mouse_over**() <small>[Golem]</small>
 
 Mouse over element
+
+#### **outer_html** <small>[Golem]</small>
+
+Element outerHTML attribute
 
 #### **parent** <small>[Selenium]</small>
 
@@ -317,6 +326,17 @@ file_input.send_keys("path/to/profilepic.gif")
 # in os.path to return the actual path to support cross OS testing.
 # file_input.send_keys(os.path.abspath("path/to/profilepic.gif"))
 ```
+
+#### **send_keys_with_delay**(value, delay=0.1) <small>[Golem]</small>
+
+Send keys to element one by one with a delay between keys.
+
+Args:
+ - value: a string to type
+ - delay: time between keys (in seconds)
+
+Raises:
+ - ValueError: if delay is not a positive int or float
 
 #### **size** <small>[Selenium]</small>
 

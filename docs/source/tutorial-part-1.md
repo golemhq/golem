@@ -11,30 +11,23 @@ A **Test Directory** needs to be created first. This directory contains the init
 To create a Test Directory, open a console wherever you want the new directory to be and execute this command:
 
 ```
-golem-admin createdirectory testdir
+golem-admin createdirectory <test_dir_name>
 ```
 
 This will create a **testdir** folder that will be used for all subsequent projects.
 
 
-## Download Webdriver Executables
+## Download Webdriver
 
-Each browser requires its own Webdriver executable. Golem uses the webdriver-manager tool to download these automatically.
+Each browser requires its own Webdriver executable.
+Golem uses the [webdriver-manager](https://github.com/golemhq/webdriver-manager) tool to download these automatically.
 
 ```
 cd <test_directory>
 webdriver-manager update
-``` 
+```
 
-The executables can be downloaded manually from these locations:
-
-* Chrome: <https://sites.google.com/a/chromium.org/chromedriver/downloads>
-* Firefox: <https://github.com/mozilla/geckodriver/releases>
-* IE: <http://selenium-release.storage.googleapis.com/index.html>
-* Edge: <https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/>
-* Opera: <https://github.com/operasoftware/operachromiumdriver/releases>
-
-By default, the executables are downloaded into the *drivers* folder inside the Test Directory.
+The Webdriver executables are downloaded into the *drivers* folder inside the Test Directory.
 
 The settings.json file contains a key for each browser that should point to the Webdriver file for that browser.
 For example:
@@ -46,7 +39,7 @@ For example:
 }
 ```
 
-Notice the '\*' wildcard at the end of the path. It is used to match the highest version available, in the case there's more than one present.
+The '\*' wildcard at the end of the path is used to match the highest version available, in the case there's more than one present.
 
 This doesn't need to be modified unless the Webdriver files are located elsewhere.
 
@@ -64,13 +57,11 @@ golem gui
 
 The Web Module can be accessed at [http://localhost:5000/](http://localhost:5000/)
 
-By default, the following user is available: username: **admin** / password: **admin**
+The following superuser is available at the start: username: **admin** / password: **admin**
 
 
 
 ## Create a New Project
-
-The tests are grouped in one or more projects. Each project, for example, can represent a module of a larger application or a different application altogether.  
 
 A new **project** can be created by using the Web Module or by the following command:
 

@@ -2,7 +2,6 @@
 import sys
 import os
 
-from golem.core import test_execution
 from golem import gui
 
 from werkzeug import _reloader
@@ -11,17 +10,14 @@ from werkzeug import _reloader
 ORIGINAL_GET_ARGS = None
 
 
-def run_gui(port):
+def run_gui(host=None, port=5000, debug=False):
     # Patch Werkzeug._reloader._get_args_for_reloading()
     # The Flask development server reloader does not work when
     # started from the Golem standalone (PyInstaller) in Linux
     # TODO
     patch_werkzeug_get_args_for_reloading_wrapper()
-    host = '0.0.0.0'
-    gui.root_path = test_execution.root_path
-    # Note, some features won't work if the golem gui is not
-    # started with debug = True
-    gui.app.run(debug=True, host=host, port=port)
+    app = gui.create_app()
+    app.run(host=host, port=port, debug=debug)
 
 
 def patch_werkzeug_get_args_for_reloading_wrapper():

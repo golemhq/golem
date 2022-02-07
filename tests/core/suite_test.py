@@ -1,7 +1,192 @@
 import os
-import types
 
-from golem.core import suite, test_case
+from golem.core import suite
+from golem.core.suite import Suite
+from golem.core.project import Project
+
+
+class TestCreateSuite:
+
+    def test_create_suite(self, project_session, test_utils):
+        _, project = project_session.activate()
+        suite_name = test_utils.random_string()
+        errors = suite.create_suite(project, suite_name)
+        assert errors == []
+        assert suite_name in Project(project).suites()
+        # verify new suite content
+        with open(Suite(project, suite_name).path) as f:
+            content = f.read()
+            expected = ('\n'
+                        'browsers = []\n\n'
+                        'environments = []\n\n'
+                        'processes = 1\n\n'
+                        'tests = []\n')
+            assert content == expected
+
+    def test_create_suite_with_parents(self, project_session, test_utils):
+        _, project = project_session.activate()
+        parents = [test_utils.random_string(), test_utils.random_string()]
+        suite_name = f'{parents[0]}.{parents[1]}.{test_utils.random_string()}'
+        errors = suite.create_suite(project, suite_name)
+        assert errors == []
+        assert os.path.isfile(Suite(project, suite_name).path)
+        # verify that each parent dir has __init__.py file
+        init_path = os.path.join(Project(project).suite_directory_path, parents[0], '__init__.py')
+        assert os.path.isfile(init_path)
+        init_path = os.path.join(Project(project).suite_directory_path, parents[0], parents[1], '__init__.py')
+        assert os.path.isfile(init_path)
+
+    def test_create_suite_already_exists(self, project_session, test_utils):
+        _, project = project_session.activate()
+        suite_name = test_utils.create_random_suite(project)
+        errors = suite.create_suite(project, suite_name)
+        assert errors == ['A suite with that name already exists']
+
+    def test_create_suite_invalid_name(self, project_session):
+        _, project = project_session.activate()
+        errors = suite.create_suite(project, 'invalid-name')
+        assert errors == ['Only letters, numbers and underscores are allowed']
+        errors = suite.create_suite(project, 'suite.')
+        assert errors == ['File name cannot be empty']
+        errors = suite.create_suite(project, '.suite')
+        assert errors == ['Directory name cannot be empty']
+
+
+class TestRenameSuite:
+
+    def test_rename_suite(self, project_session, test_utils):
+        _, project = project_session.activate()
+        suite_name = test_utils.create_random_suite(project)
+        new_suite_name = test_utils.random_string()
+        suite.rename_suite(project, suite_name, new_suite_name)
+        suites = Project(project).suites()
+        assert suite_name not in suites
+        assert new_suite_name in suites
+
+    def test_rename_suite_to_new_directory(self, project_session, test_utils):
+        _, project = project_session.activate()
+        suite_name = test_utils.create_random_suite(project)
+        random_dir = test_utils.random_string()
+        new_suite_name = f'{random_dir}.{test_utils.random_string()}'
+        suite.rename_suite(project, suite_name, new_suite_name)
+        suites = Project(project).suites()
+        assert suite_name not in suites
+        assert new_suite_name in suites
+        init_path = os.path.join(Project(project).suite_directory_path, random_dir, '__init__.py')
+        assert os.path.isfile(init_path)
+
+
+class TestDuplicateSuite:
+
+    def test_duplicate_suite(self, project_session, test_utils):
+        _, project = project_session.activate()
+        suite_name = test_utils.create_random_suite(project)
+        new_suite_name = test_utils.random_string()
+        errors = suite.duplicate_suite(project, suite_name, new_suite_name)
+        assert errors == []
+        suites = Project(project).suites()
+        assert suite_name in suites
+        assert new_suite_name in suites
+
+    def test_duplicate_suite_same_name(self, project_session, test_utils):
+        _, project = project_session.activate()
+        suite_name = test_utils.create_random_suite(project)
+        errors = suite.duplicate_suite(project, suite_name, suite_name)
+        assert errors == ['New suite name cannot be the same as the original']
+
+    def test_duplicate_suite_name_already_exists(self, project_session, test_utils):
+        _, project = project_session.activate()
+        suite_name = test_utils.create_random_suite(project)
+        suite_name_two = test_utils.create_random_suite(project)
+        errors = suite.duplicate_suite(project, suite_name, suite_name_two)
+        assert errors == ['A suite with that name already exists']
+
+    def test_duplicate_suite_invalid_name(self, project_session, test_utils):
+        _, project = project_session.activate()
+        suite_name = test_utils.create_random_suite(project)
+        new_suite_name = 'new-name'
+        errors = suite.duplicate_suite(project, suite_name, new_suite_name)
+        assert errors == ['Only letters, numbers and underscores are allowed']
+
+
+class TestEditSuite:
+
+    def test_edit_suite(self, project_session, test_utils):
+        _, project = project_session.activate()
+        suite_name = test_utils.create_random_suite(project)
+        tests = [
+            'test01',
+            'test02'
+        ]
+        browsers = [
+            'browser01',
+            'browser02',
+        ]
+        processes = 2
+        environments = [
+            'env01',
+            'env02'
+        ]
+        suite.edit_suite(project, suite_name, tests, processes, browsers, environments, [])
+        expected = (
+            "\n"
+            "\n"
+            "browsers = [\n"
+            "    'browser01',\n"
+            "    'browser02'\n"
+            "]\n"
+            "\n"
+            "environments = [\n"
+            "    'env01',\n"
+            "    'env02'\n"
+            "]\n"
+            "\n"
+            "processes = 2\n"
+            "\n"
+            "tests = [\n"
+            "    'test01',\n"
+            "    'test02'\n"
+            "]\n"
+        )
+        with open(Suite(project, suite_name).path) as f:
+            assert f.read() == expected
+
+    def test_edit_suite_empty(self, project_session, test_utils):
+        _, project = project_session.activate()
+        suite_name = test_utils.create_random_suite(project)
+        tests = []
+        browsers = []
+        processes = 2
+        environments = []
+        suite.edit_suite(project, suite_name, tests, processes, browsers, environments, [])
+        expected = (
+            "\n"
+            "\n"
+            "browsers = []\n"
+            "\n"
+            "environments = []\n"
+            "\n"
+            "processes = 2\n"
+            "\n"
+            "tests = []\n"
+        )
+        with open(Suite(project, suite_name).path) as f:
+            assert f.read() == expected
+
+
+class TestDeleteSuite:
+
+    def test_delete_suite(self, project_session, test_utils):
+        _, project = project_session.activate()
+        suite_name = test_utils.create_random_suite(project)
+        errors = suite.delete_suite(project, suite_name)
+        assert errors == []
+        assert suite_name not in Project(project).suites()
+
+    def test_delete_suite_not_exist(self, project_session):
+        _, project = project_session.activate()
+        errors = suite.delete_suite(project, 'not-exist')
+        assert errors == ['Suite not-exist does not exist']
 
 
 class TestFormatListItems:
@@ -25,217 +210,66 @@ class TestFormatListItems:
         assert output == expected
 
 
-class TestSaveSuite:
+class TestSuiteProcesses:
 
-    def test_save_suite(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
-        suite_name = 'test_save_suite_0001'
-        suite.new_suite(testdir, project, [], suite_name)
-        test_cases = [
-            'test01',
-            'test02'
-        ]
-        browsers = [
-            'browser01',
-            'browser02',
-        ]
-        workers = 2
-        environments = [
-            'env01',
-            'env02'
-        ]
-        suite.save_suite(testdir, project, suite_name, test_cases,
-                         workers, browsers, environments)
-        expected = (
-            "\n"
-            "\n"
-            "browsers = [\n"
-            "    'browser01',\n"
-            "    'browser02'\n"
-            "]\n"
-            "\n"
-            "environments = [\n"
-            "    'env01',\n"
-            "    'env02'\n"
-            "]\n"
-            "\n"
-            "workers = 2\n"
-            "\n"
-            "tests = [\n"
-            "    'test01',\n"
-            "    'test02'\n"
-            "]\n"
-        )
-        path = os.path.join(project_session.path, 'suites', suite_name + '.py')
-        with open(path) as suite_file:
-            content = suite_file.read()
-            assert content == expected
-
-    def test_save_suite_empty(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
-        suite_name = 'test_save_suite_0002'
-        suite.new_suite(testdir, project, [], suite_name)
-        test_cases = []
-        browsers = []
-        workers = 2
-        environments = []
-        suite.save_suite(testdir, project, suite_name, test_cases,
-                         workers, browsers, environments)
-        expected = (
-            "\n"
-            "\n"
-            "browsers = []\n"
-            "\n"
-            "environments = []\n"
-            "\n"
-            "workers = 2\n"
-            "\n"
-            "tests = []\n"
-        )
-        path = os.path.join(project_session.path, 'suites', suite_name + '.py')
-        with open(path) as suite_file:
-            content = suite_file.read()
-            assert content == expected
+    def test_suite_processes(self, project_session, test_utils):
+        _, project = project_session.activate()
+        suite_name = test_utils.create_random_suite(project)
+        assert Suite(project, suite_name).processes == 1
+        processes = 2
+        suite.edit_suite(project, suite_name, [], processes, [], [], [])
+        assert Suite(project, suite_name).processes == processes
 
 
-class TestNewSuite:
+class TestSuiteEnvironments:
 
-    def test_new_suite(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
-        suite_name = 'test_save_suite_0003'
-        errors = suite.new_suite(testdir, project, [], suite_name)
-        path = os.path.join(project_session.path, 'suites', suite_name + '.py')
-        assert errors == []
-        assert os.path.isfile(path)
-        # verify new suite content
-        with open(path) as suite_file:
-            content = suite_file.read()
-            expected = ('\n'
-                        'browsers = []\n\n'
-                        'environments = []\n\n'
-                        'workers = 1\n\n'
-                        'tests = []\n')
-            assert content == expected
-
-    def test_new_suite_with_parents(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
-        suite_name = 'test_save_suite_004'
-        parents = ['asd01', 'asd02']
-        errors = suite.new_suite(testdir, project, parents, suite_name)
-        path = os.path.join(project_session.path, 'suites',
-                            os.sep.join(parents), suite_name + '.py')
-        assert errors == []
-        assert os.path.isfile(path)
-        # verify that each parent dir has __init__.py file
-        init_path = os.path.join(project_session.path, 'suites', 'asd01', '__init__.py')
-        assert os.path.isfile(init_path)
-        init_path = os.path.join(project_session.path, 'suites', 'asd01', 'asd02', '__init__.py')
-        assert os.path.isfile(init_path)
-
-    def test_new_suite_already_exists(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
-        suite_name = 'test_save_suite_0005'
-        suite.new_suite(testdir, project, [], suite_name)
-        errors = suite.new_suite(testdir, project, [], suite_name)
-        assert errors == ['a suite with that name already exists']
-
-    def test_new_suite_with_parents_already_exist(self, project_session):
-        testdir = project_session.testdir
-        project = project_session.name
-        suite_name1 = 'test_save_suite_0006'
-        suite_name2 = 'test_save_suite_0007'
-        parents = ['asf01']
-        suite.new_suite(testdir, project, parents, suite_name1)
-        errors = suite.new_suite(testdir, project, parents, suite_name2)
-        path = os.path.join(project_session.path, 'suites',
-                            os.sep.join(parents), suite_name2 + '.py')
-        assert errors == []
-        assert os.path.isfile(path)
-
-
-class TestGetSuiteAmountOfWorkers:
-
-    def test_get_suite_amount_of_workers(self, project_function):
-        testdir = project_function.testdir
-        project = project_function.name
-        suite_name = 'test_suite_workers_001'
-        suite.new_suite(testdir, project, [], suite_name)
-        worker_amount = 2
-        suite.save_suite(testdir, project, suite_name, [], worker_amount, [], [])
-        workers = suite.get_suite_amount_of_workers(testdir, project, suite_name)
-        assert workers == worker_amount
-
-
-class TestGetSuiteEnvironments:
-
-    def test_get_suite_environments(self, project_function):
-        testdir = project_function.testdir
-        project = project_function.name
-        suite_name = 'test_suite_002'
-        suite.new_suite(testdir, project, [], suite_name)
+    def test_suite_environments(self, project_session, test_utils):
+        _, project = project_session.activate()
+        suite_name = test_utils.create_random_suite(project)
+        assert Suite(project, suite_name).environments == []
         environments = ['env1', 'env2']
-        suite.save_suite(testdir, project, suite_name, [], 1, [], environments)
-        result = suite.get_suite_environments(testdir, project, suite_name)
-        assert result == environments
+        suite.edit_suite(project, suite_name, [], 1, [], environments, [])
+        assert Suite(project, suite_name).environments == environments
 
 
-class TestGetSuiteTestCases:
+class TestSuiteBrowsers:
 
-    def test_get_suite_test_cases(self, project_function):
-        testdir = project_function.testdir
-        project = project_function.name
-        suite_name = 'test_suite_003'
-        suite.new_suite(testdir, project, [], suite_name)
-        tests = ['test_name_01', 'test_name_02']
-        suite.save_suite(testdir, project, suite_name, tests, 1, [], [])
-        result = suite.get_suite_test_cases(testdir, project, suite_name)
-        assert result == tests
-
-    def test_get_suite_test_cases_get_all(self, project_function):
-        testdir = project_function.testdir
-        project = project_function.name
-        test_case.new_test_case(testdir, project, [], 'test_name_01')
-        test_case.new_test_case(testdir, project, ['a', 'b'], 'test_name_02')
-        suite_name = 'test_suite_004'
-        suite.new_suite(testdir, project, [], suite_name)
-        tests = ['*']
-        suite.save_suite(testdir, project, suite_name, tests, 1, [], [])
-        result = suite.get_suite_test_cases(testdir, project, suite_name)
-        expected = ['test_name_01', 'a.b.test_name_02']
-        assert result == expected
-
-
-class TestGetSuiteBrowsers:
-
-    def test_get_suite_browsers(self, project_function):
-        testdir = project_function.testdir
-        project = project_function.name
-        suite_name = 'test_suite_005'
-        suite.new_suite(testdir, project, [], suite_name)
+    def test_suite_browsers(self, project_session, test_utils):
+        _, project = project_session.activate()
+        suite_name = test_utils.create_random_suite(project)
+        assert Suite(project, suite_name).browsers == []
         browsers = ['browser1', 'browser2']
-        suite.save_suite(testdir, project, suite_name, [], 1, browsers, [])
-        result = suite.get_suite_browsers(testdir, project, suite_name)
-        assert result == browsers
+        suite.edit_suite(project, suite_name, [], 1, browsers, [], [])
+        assert Suite(project, suite_name).browsers == browsers
 
 
-class TestGetSuiteModule:
+class TestSuiteTests:
 
-    def test_get_suite_module(self, project_function):
-        testdir = project_function.testdir
-        project = project_function.name
-        suite_name = 'test_suite_006'
-        suite.new_suite(testdir, project, [], suite_name)
-        module = suite.get_suite_module(testdir, project, suite_name)
-        assert isinstance(module, types.ModuleType)
+    def test_suite_tests(self, project_function, test_utils):
+        _, project = project_function.activate()
+        suite_name = test_utils.create_random_suite(project)
+        test_utils.create_test(project, 'test1')
+        test_utils.create_test(project, 'test2')
+        tests = ['test1', 'test2']
+        suite.edit_suite(project, suite_name, tests, 1, [], [], [])
+        assert Suite(project, suite_name).tests == tests
 
-    def test_get_suite_module_does_not_exist(self, project_function):
-        testdir = project_function.testdir
-        project = project_function.name
-        suite_name = 'test_suite_007'
-        module = suite.get_suite_module(testdir, project, suite_name)
-        assert module is None
+        test_utils.create_test(project, 'dir.test3')
+        test_utils.create_test(project, 'dir.subdir.test4')
+        tests = ['test1', 'test2', 'dir.test3', 'dir.subdir.test4']
+        suite.edit_suite(project, suite_name, tests, 1, [], [], [])
+        assert Suite(project, suite_name).tests == tests
+
+        tests = ['test1', 'test2', 'dir.*']
+        suite.edit_suite(project, suite_name, tests, 1, [], [], [])
+        expected = ['test1', 'test2', 'dir.test3', 'dir.subdir.test4']
+        assert Suite(project, suite_name).tests == expected
+
+    def test_suite_tests_asterisk(self, project_function, test_utils):
+        _, project = project_function.activate()
+        test_utils.create_test(project, 'test01')
+        test_utils.create_test(project, 'a.b.test02')
+        suite_name = test_utils.create_random_suite(project)
+        tests = ['*']
+        suite.edit_suite(project, suite_name, tests, 1, [], [], [])
+        assert Suite(project, suite_name).tests == ['test01', 'a.b.test02']

@@ -9,7 +9,9 @@ from subprocess import Popen, PIPE, STDOUT
 import pytest
 
 from golem.cli import commands
-from golem.core import test_execution, settings_manager, suite, test_case
+from golem.core import settings_manager, suite, test, session, page, utils
+from golem.report.execution_report import get_execution_data
+from golem.report.execution_report import execution_report_path
 
 
 # FIXTURES
@@ -43,18 +45,18 @@ class TestDirectory:
 
     def __init__(self, basedir):
         self.basedir = basedir
-        self.name = TestUtils.random_string(4, 'testdir_')
+        self.name = TestUtils.random_numeric_string(6, 'testdir_')
         self.path = os.path.join(self.basedir, self.name)
         self.settings = None
-        os.chdir(self.basedir)
-        commands.createdirectory_command(self.name)
+        session.testdir = self.path
+        commands.createdirectory_command(self.path, download_drivers=False)
 
     def activate(self):
-        if not self.settings:
-            self.settings = settings_manager.get_global_settings(self.path)
-        test_execution.root_path = self.path
-        test_execution.settings = self.settings
-        return self
+        session.testdir = self.path
+        if self.settings is None:
+            self.settings = settings_manager.get_global_settings()
+        session.settings = self.settings
+        return self.path
 
     def remove(self):
         os.chdir(self.basedir)
@@ -94,19 +96,21 @@ class Project:
     def __init__(self, testdir_fixture):
         self.testdir_fixture = testdir_fixture
         self.testdir = testdir_fixture.path
-        self.name = TestUtils.random_string(4, 'project_')
+        self.name = TestUtils.random_numeric_string(6, 'project_')
         self.path = os.path.join(testdir_fixture.path, 'projects', self.name)
         self.settings = None
-        os.chdir(self.testdir)
-        test_execution.root_path = self.testdir
+        session.testdir = self.testdir
         commands.createproject_command(self.name)
 
+    def values(self):
+        return self.testdir, self.name
+
     def activate(self):
-        if not self.settings:
-            self.settings = settings_manager.get_project_settings(self.testdir, self.name)
-        test_execution.root_path = self.testdir
-        test_execution.settings = self.settings
-        return self
+        session.testdir = self.testdir
+        if self.settings is None:
+            self.settings = settings_manager.get_project_settings(self.name)
+        session.settings = self.settings
+        return self.values()
 
     def remove(self):
         shutil.rmtree(self.path, ignore_errors=True)
@@ -116,6 +120,17 @@ class Project:
 @pytest.fixture(scope="session")
 def project_session(testdir_session):
     """A project with scope session"""
+    project = Project(testdir_session)
+    yield project
+    project.remove()
+
+
+@pytest.mark.usefixtures("testdir_session")
+@pytest.fixture(scope="module")
+def project_module(testdir_session):
+    """A project with scope module inside
+    a test directory with scope session.
+    """
     project = Project(testdir_session)
     yield project
     project.remove()
@@ -165,19 +180,32 @@ class TestUtils:
 
     @staticmethod
     def create_empty_file(path, filename):
-        filepath = os.path.join(path, filename)
-        os.makedirs(path, exist_ok=True)
-        open(filepath, 'w+').close()
+        return TestUtils.create_file(path, filename, content='')
 
     @staticmethod
-    def random_string(length, prefix=''):
+    def create_file(path, filename, content=''):
+        filepath = os.path.join(path, filename)
+        os.makedirs(path, exist_ok=True)
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(content)
+        return filepath
+
+    @staticmethod
+    def random_string(length=10, prefix=''):
         random_str = (''.join(random.choice(string.ascii_lowercase)
                       for _ in range(length)))
         return prefix + random_str
 
     @staticmethod
-    def random_numeric_string(length):
-        return ''.join(random.choice(string.digits) for _ in range(length))
+    def random_email():
+        local = TestUtils.random_string(10)
+        domain = TestUtils.random_string(10)
+        return f'{local}@{domain}.com'
+
+    @staticmethod
+    def random_numeric_string(length, prefix=''):
+        random_str = ''.join(random.choice(string.digits) for _ in range(length))
+        return prefix + random_str
 
     @staticmethod
     def run_command(cmd):
@@ -193,28 +221,133 @@ class TestUtils:
     def set_project_setting(testdir, setting, setting_value):
         setting_path = os.path.join(testdir, 'settings.json')
         with open(setting_path, 'w') as f:
-            f.write('{{"{}": "{}"\}}'.format(setting, setting_value))
+            f.write(f'{{"{setting}": "{setting_value}"}}')
 
     @staticmethod
-    def create_test(testdir, project, parents, name, content=None):
+    def create_test(project, name, content=None):
         if content is None:
             content = ('def test(data):\n'
                        '    print("hello")\n')
-        test_case.new_test_case(testdir, project, parents, name)
-        path = os.path.join(testdir, 'projects', project, 'tests',
-                            os.sep.join(parents), name + '.py')
-        with open(path, 'w+') as f:
-            f.write(content)
+        test.create_test(project, name)
+        test.edit_test_code(project, name, content)
+        return test.Test(project, name).path
 
     @staticmethod
-    def create_suite(testdir, project, parents, name, content=None, tests=None):
-        if content is None and tests is not None:
-            content = 'tests = {}'.format(str(tests))
-        suite.new_suite(testdir, project, parents, name)
-        path = os.path.join(testdir, 'projects', project, 'suites',
-                            os.sep.join(parents), name+'.py')
-        with open(path, 'w+') as f:
-            f.write(content)
+    def create_failure_test(project, name):
+        content = ('def test(data):\n'
+                   '    assert False\n')
+        return TestUtils.create_test(project, name, content)
+
+    @staticmethod
+    def create_error_test(project, name):
+        content = ('from golem import actions\n'
+                   'def test(data):\n'
+                   '    actions.error("error message")\n')
+        return TestUtils.create_test(project, name, content)
+
+    @staticmethod
+    def create_code_error_test(project, name):
+        content = ('def test(data):\n'
+                   '    print("oops"\n')
+        return TestUtils.create_test(project, name, content)
+
+    @staticmethod
+    def create_skip_test(project, name):
+        content = ('skip = True\n' 
+                   'def test(data):\n'
+                   '    print("hello")\n')
+        return TestUtils.create_test(project, name, content)
+
+    @staticmethod
+    def create_random_test(project):
+        # TODO replace with create_test(name=None)
+        test_name = TestUtils.random_string(10)
+        test.create_test(project, test_name)
+        return test_name
+
+    @staticmethod
+    def create_suite(project, name=None, content=None, tests=None, processes=1, browsers=None,
+                     environments=None, tags=None):
+        if name is None:
+            name = TestUtils.random_string()
+        browsers = browsers or []
+        environments = environments or []
+        tags = tags or []
+        if content is None:
+            suite.create_suite(project, name)
+            suite.edit_suite(project, name, tests, processes, browsers, environments, tags)
+        else:
+            with open(suite.Suite(project, name).path, 'w+') as f:
+                f.write(content)
+        return name
+
+    @staticmethod
+    def create_page(project, page_name):
+        page.create_page(project, page_name)
+
+    @staticmethod
+    def create_random_suite(project):
+        # TODO replace with create_suite(name=None)
+        suite_name = TestUtils.random_string()
+        suite.create_suite(project, suite_name)
+        return suite_name
+
+    @staticmethod
+    def create_random_page(project, code=None):
+        page_name = TestUtils.random_string(10)
+        page.create_page(project, page_name)
+        if code is not None:
+            page.edit_page_code(project, page_name, code)
+        return page_name
+
+    @staticmethod
+    def _run_command(project_name, suite_name, timestamp=None):
+        if not timestamp:
+            timestamp = utils.get_timestamp()
+        commands.run_command(project_name, suite_name, timestamp=timestamp)
+        return timestamp
+
+    @staticmethod
+    def run_test(project_name, test_name, timestamp=None):
+        return TestUtils._run_command(project_name, test_name, timestamp)
+
+    @staticmethod
+    def run_suite(project_name, suite_name, timestamp=None):
+        return TestUtils._run_command(project_name, suite_name, timestamp)
+
+    @staticmethod
+    def execute_random_suite(project):
+        """Create a random suite for project with one test.
+        Execute the suite and return the execution data
+        """
+        test_name = TestUtils.random_string()
+        tests = [test_name]
+        for t in tests:
+            TestUtils.create_test(project, name=t)
+        suite_name = TestUtils.random_string()
+        TestUtils.create_suite(project, name=suite_name, tests=tests)
+        execution = TestUtils.execute_suite(project, suite_name)
+        execution['tests'] = tests
+        return execution
+
+    @staticmethod
+    def execute_suite(project, suite_name, timestamp=None, ignore_sys_exit=False):
+        if not timestamp:
+            timestamp = utils.get_timestamp()
+        try:
+            timestamp = TestUtils.run_suite(project, suite_name, timestamp)
+        except SystemExit as e:
+            if not ignore_sys_exit:
+                raise e
+        exec_data = get_execution_data(project=project, execution=suite_name, timestamp=timestamp)
+        exec_dir = execution_report_path(project, suite_name, timestamp)
+        return {
+            'exec_dir': exec_dir,
+            'report_path': os.path.join(exec_dir, 'report.json'),
+            'suite_name': suite_name,
+            'timestamp': timestamp,
+            'exec_data': exec_data
+        }
 
 
 def pytest_addoption(parser):

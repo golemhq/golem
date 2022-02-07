@@ -1,0 +1,82 @@
+{% extends "layout.html" %} 
+
+{% block title %}Golem : {{project|capitalize}} : {{full_test_case_name}}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/codemirror.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/code-editor-common.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_code.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_common.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/addon/hint/simple-hint.css') }}">
+{% endblock %} 
+
+{% block content %}
+<div class="col-lg-10 col-lg-offset-1">
+    <div>
+        <div class="header-col" style="width: calc(100% - 270px)">
+            <h3 id="filenameContainer">
+                <span id="fileName" class="element-name" onclick="file.startInlineNameEdition()">
+                    {{full_test_case_name}}
+                </span>
+                <span id="filenameInput" style="display: none">
+                    <input type="text">
+                </span>
+            </h3>
+        </div>
+        <div class="header-col header-col-right">
+            {% if g.user.project_weight(project) >= 30 %}
+            <div class="btn-group" role="group" aria-label="...">
+              <button id="runTest" class="btn btn-default btn-sm" onclick="testCode.runTest()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Test</button>
+              <button id="openRunTestConfig" class="btn btn-default btn-sm" onclick="Main.TestRunner.openConfigModal(testCode.file.project, testCode.file.fullName)" style="padding-left: 7px; padding-right: 7px;"><span class="caret"></span></button>
+            </div>
+            {% endif %}
+            <a id="loadGuiButton" class="btn btn-default btn-sm" href="/project/{{project}}/test/{{full_test_case_name}}/"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Preview</a>
+            {% if g.user.project_weight(project) >= 30 %}
+            <button id="save" class="btn btn-default btn-sm" onclick="testCode.save()"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+            {% endif %}
+        </div>
+    </div>
+    <div class="clearfix"></div>
+    <div id="error-container" class="error-container" style="display: none;">
+        <pre style="color: red"></pre>
+    </div>
+    <div id="codeEditorContainer"></div>
+    <div id="dataContainerContainer" class="col-sm-12 light-gray-block">
+        <div class="btn-group" id="dataSourceSelector">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" style="margin-top: 10px">
+                Add data source <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" style="position: static;">
+                <li><a href="javascript:void(0)" id="addCsvDataSourceOption" onclick="TestCommon.DataSource.addDataSourceCsv()">CSV</a></li>
+                <li><a href="javascript:void(0)" id="addJsonDataSourceOption" onclick="TestCommon.DataSource.addDataSourceJson()">JSON</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/external/code_mirror/codemirror.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/python.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/addon/hint/python-hint.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/addon/hint/simple-hint.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/addon/edit/matchbrackets.js') }}"></script>
+<script src="{{ url_for('static', filename='js/file.js') }}"></script>
+<script src="{{ url_for('static', filename='js/test_code.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/jquery.autocomplete.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/test_common.js') }}"></script>
+{% endblock %}
+
+{% block footer_declarations %}
+<script>
+    let testCaseName = "{{test_case_name}}";
+    let fullTestCaseName = "{{full_test_case_name}}";
+    let testCaseCode = {{test_case_contents|tojson}};
+    let codeError = {{error|tojson}};
+    let csvData = {{csv_data|tojson}}
+    let jsonData = {{json_data|tojson}}
+
+    const file = new File('test', Global.project, testCaseName, fullTestCaseName, true);
+    const testCode = TestCode;
+    testCode.initialize(file, testCaseCode, codeError);
+    TestCommon.DataSource.loadData(csvData, jsonData, '');
+</script>
+{% endblock %}

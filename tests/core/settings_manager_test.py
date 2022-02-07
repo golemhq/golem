@@ -11,7 +11,7 @@ DEFAULT_EMPTY = {
     'screenshot_on_error': True,
     'screenshot_on_step': False,
     'screenshot_on_end': False,
-    'test_data': 'csv',
+    'highlight_elements': False,
     'wait_hook': None,
     'default_browser': 'chrome',
     'chromedriver_path': None,
@@ -21,14 +21,16 @@ DEFAULT_EMPTY = {
     'operadriver_path': None,
     'remote_url': None,
     'remote_browsers': {},
-    'console_log_level': 'INFO',
+    'implicit_actions_import': True,
+    'implicit_page_import':  True,
+    'cli_log_level': 'INFO',
     'log_all_events': True,
     'start_maximized': True,
     'screenshots': {}
 }
 
 DEFAULT_PREDEFINED = {
-    'console_log_level': 'INFO',
+    'cli_log_level': 'INFO',
     'default_browser': 'chrome',
     'chromedriver_path': './drivers/chromedriver*',
     'edgedriver_path': './drivers/edgedriver*',
@@ -37,45 +39,45 @@ DEFAULT_PREDEFINED = {
     'operadriver_path': './drivers/operadriver*',
     'search_timeout': 20,
     'wait_displayed': False,
+    'highlight_elements': False,
     'log_all_events': True,
     'remote_browsers': {},
     'remote_url': 'http://localhost:4444/wd/hub',
     'screenshot_on_end': False,
     'screenshot_on_error': True,
     'screenshot_on_step': False,
-    'test_data': 'csv',
+    'implicit_actions_import': True,
+    'implicit_page_import': True,
     'wait_hook': None,
     'start_maximized': True,
     'screenshots': {}
 }
 
+
 class TestCreateGlobalSettingsFile:
 
     def test_create_global_settings_file(self, testdir_class):
-        settings_path = os.path.join(testdir_class.path, 'settings.json')
-        os.remove(settings_path)
-        settings_manager.create_global_settings_file(testdir_class.path)
-        with open(settings_path) as settings_file:
-            actual = settings_file.read()
-            assert actual == settings_manager.SETTINGS_FILE_CONTENT
+        testdir = testdir_class.activate()
+        os.remove(settings_manager.settings_path())
+        settings_manager.create_global_settings_file(testdir)
+        with open(settings_manager.settings_path()) as f:
+            assert f.read() == settings_manager.SETTINGS_FILE_CONTENT
     
 
 class TestCreateProjectSettingsFile:
 
     def test_create_project_settings_file(self, project_class):
-        testdir = project_class.testdir
-        project = project_class.name
-        settings_path = os.path.join(project_class.path, 'settings.json')
-        os.remove(settings_path)
-        settings_manager.create_project_settings_file(testdir, project)
-        with open(settings_path) as settings_file:
-            actual = settings_file.read()
-            assert actual == settings_manager.REDUCED_SETTINGS_FILE_CONTENT
+        _, project = project_class.activate()
+        os.remove(settings_manager.project_settings_path(project))
+        settings_manager.create_project_settings_file(project)
+        with open(settings_manager.project_settings_path(project)) as f:
+            assert f.read() == settings_manager.REDUCED_SETTINGS_FILE_CONTENT
 
 
 class TestReadJsonWithComments:
 
     def test__read_json_with_comments(self, testdir_class):
+        testdir_class.activate()
         file_content = ('{\n'
                         '// a commented line\n'
                         '"search_timeout": 10,\n'
@@ -107,7 +109,6 @@ class TestAssignSettingsDefaultValues:
             'screenshot_on_error': None,
             'screenshot_on_step': None,
             'screenshot_on_end': None,
-            'test_data': None,
             'wait_hook': None,
             'default_browser': None,
             'chromedriver_path': None,
@@ -117,7 +118,7 @@ class TestAssignSettingsDefaultValues:
             'operadriver_path': None,
             'remote_url': None,
             'remote_browsers': None,
-            'console_log_level': None,
+            'cli_log_level': None,
             'log_all_events': None,
             'start_maximized': None,
             'screenshots': None
@@ -132,7 +133,6 @@ class TestAssignSettingsDefaultValues:
             'screenshot_on_error': '',
             'screenshot_on_step': '',
             'screenshot_on_end': '',
-            'test_data': '',
             'wait_hook': '',
             'default_browser': '',
             'chromedriver_path': '',
@@ -142,7 +142,7 @@ class TestAssignSettingsDefaultValues:
             'operadriver_path': '',
             'remote_url': '',
             'remote_browsers': '',
-            'console_log_level': '',
+            'cli_log_level': '',
             'log_all_events': '',
             'start_maximized': '',
             'screenshots': ''
@@ -154,14 +154,16 @@ class TestAssignSettingsDefaultValues:
 class TestGetGlobalSettings:
 
     def test_get_global_settings_default(self, testdir_function):
-        global_settings = settings_manager.get_global_settings(testdir_function.path)
+        testdir_function.activate()
+        global_settings = settings_manager.get_global_settings()
         assert global_settings == DEFAULT_PREDEFINED
 
 
 class TestGetGlobalSettingsAsString:
 
     def test_get_global_settings_as_string(self, testdir_session):
-        global_settings = settings_manager.get_global_settings_as_string(testdir_session.path)
+        testdir_session.activate()
+        global_settings = settings_manager.get_global_settings_as_string()
         expected = settings_manager.SETTINGS_FILE_CONTENT
         assert global_settings == expected
 
@@ -169,9 +171,8 @@ class TestGetGlobalSettingsAsString:
 class TestGetProjectSettings:
 
     def test_get_project_settings_default(self, project_function_clean):
-        testdir = project_function_clean.testdir
-        project = project_function_clean.name
-        project_settings = settings_manager.get_project_settings(testdir, project)
+        _, project = project_function_clean.activate()
+        project_settings = settings_manager.get_project_settings(project)
         assert project_settings == DEFAULT_PREDEFINED
 
     # TODO: test project override global settings
@@ -180,8 +181,8 @@ class TestGetProjectSettings:
 class TestGetProjectSettingsAsString:
 
     def test_get_project_settings_as_string(self, project_session):
-        project_settings = settings_manager.get_project_settings_as_string(
-            project_session.testdir, project_session.name)
+        _, project = project_session.activate()
+        project_settings = settings_manager.get_project_settings_as_string(project)
         expected = settings_manager.REDUCED_SETTINGS_FILE_CONTENT
         assert project_settings == expected
 
@@ -189,26 +190,26 @@ class TestGetProjectSettingsAsString:
 class TestSaveGlobalSettings:
 
     def test_save_global_settings(self, testdir_class):
+        testdir_class.activate()
         input_settings = ('// test\n'
                           '{\n'
                           '"test": "test"\n'
                           '}')
-        settings_manager.save_global_settings(testdir_class.path, input_settings)
-        actual = settings_manager.get_global_settings_as_string(testdir_class.path)
+        settings_manager.save_global_settings(input_settings)
+        actual = settings_manager.get_global_settings_as_string()
         assert actual == input_settings
 
 
 class TestSaveProjectSettings:
 
     def test_save_project_settings(self, project_class):
-        testdir = project_class.testdir
-        project = project_class.name
+        _, project = project_class.activate()
         input_settings = ('// test\n'
                           '{\n'
                           '"test": "test"\n'
                           '}')
-        settings_manager.save_project_settings(testdir, project, input_settings)
-        actual = settings_manager.get_project_settings_as_string(testdir, project)
+        settings_manager.save_project_settings(project, input_settings)
+        actual = settings_manager.get_project_settings_as_string(project)
         assert actual == input_settings
 
 

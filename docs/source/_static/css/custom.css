@@ -27,3 +27,19 @@ p.note {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
 }
+
+#permissionTable tr {
+    background-color: white;
+}
+
+#permissionTable td, #permissionTable th {
+    padding: 5px;
+}
+
+#permissionTable td {
+    text-align: center;
+}
+
+.align-left {
+    text-align: left !important;
+}

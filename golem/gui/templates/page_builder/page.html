@@ -1,0 +1,133 @@
+{% extends "layout.html" %}
+
+{% block title %}Golem : {{project|capitalize}} : {{page_name}}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/page_object.css') }}">
+{% endblock %}
+
+{% block content %}
+<div>
+    <div class="col-lg-10 col-lg-offset-1 col-md-12">
+        <div class="header-col" style="width: calc(100% - 160px)">
+            <h3 id="filenameContainer">
+                <span id="fileName" class="element-name" onclick="file.startInlineNameEdition()">
+                    {{page_name}}
+                </span>
+                <span id="filenameInput" style="display: none">
+                    <input type="text">
+                </span>
+            </h3>
+        </div>
+        <div class="header-col header-col-right">
+            <button id="loadCodeButton" class="btn btn-default btn-sm" onclick="page.loadCodeView()"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Code<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></button>
+            {% if g.user.project_weight(project) >= 30 %}
+            <button id="save" class="btn btn-default btn-sm" onclick="page.save();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+            {% endif %}
+        </div>
+        <div class="clearfix"></div>
+        <h4>Elements</h4>
+        <div class="col-md-12" style="margin-bottom: 10px">
+            <div class="col-xs-3 no-pad-left padding-right-5">
+                <strong>Name</strong>
+            </div>
+            <div class="col-xs-3 padding-left-5 padding-right-5">
+                <strong>Selector</strong>
+            </div>
+            <div class="col-xs-3 padding-left-5 padding-right-5">
+                <strong>Value</strong>
+            </div>
+            <div class="col-xs-3 padding-left-5 no-pad-right">
+                <strong>Display Name</strong>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+        <div>
+            <div id="elements">
+                {% for element in page_object_data.elements %}
+                <div class="element col-md-12 clearfix">
+                    <div style="width: calc(100% - 34px)">
+                        <div class="col-xs-3 no-pad-left padding-right-5">
+                            <input type="text" class="form-control element-name" value="{{element.name}}" placeholder="name">
+                        </div>
+                        <div class="col-xs-3 padding-left-5 padding-right-5">
+                            <input type="text" class="form-control element-selector" value="{{element.selector}}" placeholder="selector">
+                        </div>
+                        <div class="col-xs-3 padding-left-5 padding-right-5">
+                            <input type="text" class="form-control element-value" value="{{element.value}}" placeholder="value">
+                        </div>
+                        <div class="col-xs-3 padding-left-5 no-pad-right">
+                            <input type="text" class="form-control element-display-name" value="{{element.display_name}}" placeholder="display name">
+                        </div>
+                    </div>
+                    <div class="step-remove-icon">
+                        <a href="javascript:void(0)" onclick="page.deleteElement(this);">
+                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if not page_object_data.elements %}
+                <div class="element col-md-12 clearfix">
+                    <div style="width: calc(100% - 34px)">
+                        <div class="col-xs-3 no-pad-left padding-right-5">
+                            <input type="text" class="form-control element-name" value="" placeholder="name">
+                        </div>
+                        <div class="col-xs-3 padding-left-5 padding-right-5">
+                            <input type="text" class="form-control element-selector" value="" placeholder="selector">
+                        </div>
+                        <div class="col-xs-3 padding-left-5 padding-right-5">
+                            <input type="text" class="form-control element-value" value="" placeholder="value">
+                        </div>
+                        <div class="col-xs-3 padding-left-5 no-pad-right">
+                            <input type="text" class="form-control element-display-name" value="" placeholder="display name">
+                        </div>
+                    </div>
+                    <div class="step-remove-icon">
+                        <a href="javascript:void(0)" onclick="page.deleteElement(this);">
+                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="clearfix"></div>
+            <button class="btn btn-default btn-sm" style="margin-left: 15px;" onclick="page.addPageObjectInput();"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Element</button>
+        </div>
+        <div class="clearfix"></div>
+        <h4 style="margin-top: 20px">Functions</h4>
+        <div id="functionContainer">
+            <div id="functions">
+                {% for function in page_object_data.functions %}
+                <div class="function col-md-12">
+                    <div class="input-group" data-toggle="collapse" data-target="#{{function.name}}" aria-expanded="false" aria-controls="{{function.name}}">
+                        <input type="text" class="form-control no-border-radius" value="{{function.name}}" disabled>
+                        <input type="hidden" class="func-code" value="{{function.code}}">
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="collapse" id="{{function.name}}">
+                        <pre class="no-border-radius"><code class="language-html" data-lang="html">{{function.code}}</code></pre>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% for line in page_object_data.import_lines %}
+            <input type="hidden" class="import-line" value="{{line}}">
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/external/jquery.autocomplete.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/file.js') }}"></script>
+<script src="{{ url_for('static', filename='js/page.js') }}"></script>
+{% endblock %}
+
+{% block footer_declarations %}
+<script>
+    let pageObjectName = "{{page_name}}";
+
+    const file = new File('page', Global.project, '', pageObjectName);
+    const page = Page;
+    page.initialize(file);
+</script>
+{% endblock %}

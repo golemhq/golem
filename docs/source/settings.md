@@ -15,7 +15,7 @@ Default time to wait looking for an element until it is present. Default is 20 s
 
 ### wait_displayed
 
-Wait for elements to be present and displayed. Default is False
+Wait for elements to be present and displayed. Default is False.
 
 ### screenshot_on_error
 
@@ -29,13 +29,9 @@ Take a screenshot on every step. Default is False.
 
 Take a screenshot after 'test' function ends. Default is False.
 
-### test_data
+### highlight_elements
 
-The location to store test data. Options are: 'infile' and 'csv'. Default is 'csv.'. 
-
-With 'test_data' = 'infile'  data is stored inside the test file as a list of dictionaries. 
-
-With 'test_data' = 'csv' data is stored in a csv file in the same folder of the test and with the same name, e.g.: /tests/test1.py -> /tests/test1.csv
+Highlight elements on the screen when found. Default is False
 
 ### wait_hook
 
@@ -98,6 +94,17 @@ Example: settings.json
 }
 ```
 
+
+### implicit_actions_import
+Import golem.actions module implicitly to the tests.
+Modifies test saving behavior when using the GUI test builder.
+Default is true.
+
+### implicit_page_import
+Import pages implicitly to the test from a list of strings.
+When true, imported pages are saved as a list of strings. When false, import statements are used instead.
+Default is true.
+
 ### screenshots
 
 Modify screenshot format, size, and quality before saving to disk.
@@ -123,9 +130,10 @@ Example:
 }
 ```
 
-### console_log_level
+### cli_log_level
 
-Default is 'INFO'
+command line log level.
+Options are: DEBUG, INFO, WARNING, ERROR, CRITICAL. Default is INFO.
 
 ### log_all_events
 

@@ -1,0 +1,42 @@
+{% extends "layout.html" %} 
+
+{% block title %}Golem : Users{% endblock %}
+
+{% block head %}
+<style>
+    .project-permission-label {
+        display: inline-block;
+        margin-right: 3px;
+        margin-left: 0px;
+        margin-bottom: 2px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="col-lg-8 col-lg-offset-2">
+    <div class="header-col">
+        <h3>Users</h3>
+    </div>
+    <div>
+        <table id="userTable" class="table table-hover table-condensed">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Superuser</th>
+                    <th>Projects</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div id="usersTableLoadingIconContainer" class="text-center" style="font-size: 20px; width: 100%">
+            <i id="usersTableLoadingIcon" class="fa fa-cog fa-spin"></i>
+        </div>
+        <a id="createUser" class="btn btn-default btn-sm" href="/users/new/">Create User</a>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/users.js') }}"></script>
+{% endblock %}

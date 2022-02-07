@@ -1,5 +1,3 @@
-"""This module defines the exceptions used by the test cases"""
-
 
 class IncorrectSelectorType(Exception):
     pass

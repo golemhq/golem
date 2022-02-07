@@ -1,83 +1,102 @@
 {% extends "layout.html" %}
 
-{% block title %}Golem : {{project|capitalize}} : {{test_case_data.name}}{% endblock %}
+{% block title %}Golem : {{project|capitalize}} : {{test_file}}{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}"/
+<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}"/>
 {% endblock %}
 
 {% block content %}
 <div class="col-md-10 col-md-offset-1">
-	<h2>Test: {{test_case_data.name|replace("_", " ")}} <small><a href="/project/{{project}}/test/{{test_case}}/"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></a></small></h2>
+	<h2>{{test_file}}
+		<small>
+			<a href="/project/{{project}}/test/{{test_file}}/"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></a>
+			<a href="/project/{{project}}/test/{{test_file}}/code/">
+				<span><i class="glyphicon glyphicon-chevron-left" style="-webkit-text-stroke: 0.5px white;"></i><i class="glyphicon glyphicon-chevron-right" style="margin-left: -8px; -webkit-text-stroke: 0.5px white;"></i></span>
+			</a>
+		</small>
+	</h2>
+	{% for test in test_data.set.report %}
     <div class="col-md-12 test-report-box font-17" id="testDetails" style="padding: 15px 30px">
-		<h3 class="no-margin-top">Details</h3>
+		<h3 class="no-margin-top">{{test.test}}</h3>
 		<div class="row">
-			<div class="col-md-2 col-xs-3">Description</div>
-			<div class="col-md-10 col-xs-9">{{test_case_data.description}}</div>
-			<div class="clearfix"></div>
-			{% if test_case_data.module %}
-			<div class="col-md-2 col-xs-3">Module</div>
-			<div class="col-md-10 col-xs-9">{{test_case_data.module}}</div>
-			{% endif %}
+<!--			<div class="col-md-2 col-xs-3">Description</div>-->
+<!--			<div class="col-md-10 col-xs-9">{{test_data.description}}</div>-->
+<!--			<div class="clearfix"></div>-->
+<!--			{% if test_data.module %}-->
+<!--			<div class="col-md-2 col-xs-3">Module</div>-->
+<!--			<div class="col-md-10 col-xs-9">{{test_data.module}}</div>-->
+<!--			{% endif %}-->
 			<div class="col-md-2 col-xs-3">Result</div>
-			<div class="col-md-10 col-xs-9" data="test-result">{{test_case_data.result}}</div>
-			{% if test_case_data.url %}
-			<div class="col-md-2 col-xs-3">URL</div>
-			<div class="col-md-10 col-xs-9">{{test_case_data.url}}</div>
-			{% endif %}
+			<div class="col-md-10 col-xs-9" data="test-result">{{test.result}}</div>
+<!--			{% if test_data.url %}-->
+<!--			<div class="col-md-2 col-xs-3">URL</div>-->
+<!--			<div class="col-md-10 col-xs-9">{{test_data.url}}</div>-->
+<!--			{% endif %}-->
 			<div class="col-md-2 col-xs-3">Browser</div>
-			<div class="col-md-10 col-xs-9">{{test_case_data.browser}}</div>
+			<div class="col-md-10 col-xs-9">{{test.browser}}</div>
+
 			<!-- environment -->
-			{% if test_case_data.environment %}
+			{% if test_data.environment %}
 			<div class="col-md-2 col-xs-3">Environment</div>
-			<div class="col-md-10 col-xs-9">{{test_case_data.environment}}</div>
+			<div class="col-md-10 col-xs-9">{{test.environment}}</div>
 			<div class="clearfix"></div>
 			{% endif %}
-			<div class="col-md-2 col-xs-3">Start Time</div>
-			<div class="col-md-10 col-xs-9">{{test_case_data.start_date_time}}</div>
+
+<!--			<div class="col-md-2 col-xs-3">Start Time</div>-->
+<!--			<div class="col-md-10 col-xs-9">{{test.start_date_time}}</div>-->
+			<div class="clearfix"></div>
+
 			<div class="col-md-2 col-xs-3">Elapsed Time</div>
-			<div class="col-md-10 col-xs-9">{{test_case_data.test_elapsed_time}} seconds</div>
+			<div class="col-md-10 col-xs-9">{{test.elapsed_time}} seconds</div>
 			<div class="clearfix"></div>
-			{% if test_case_data.short_error %}
+
+			{% if test_data.short_error %}
 				<div class="col-md-2 col-xs-3">Error</div>
-				<div class="col-md-10 col-xs-9" style="word-wrap: break-word;">{{test_case_data.short_error}}</div>
+				<div class="col-md-10 col-xs-9" style="word-wrap: break-word;">{{test.short_error}}</div>
 			{% endif %}
 			<div class="clearfix"></div>
+
 			<div class="col-md-2 col-xs-3">Test Data</div>
-			<div class="col-md-10 col-xs-9">{{test_case_data.data}}</div>
+			<div class="col-md-10 col-xs-9">{{test.data}}</div>
+
+
+
+			<div class="col-md-12 test-report-box font-17" id="steps" style="padding: 15px 30px">
+				<h4>Steps</h4>
+				{% for step in test.steps %}
+					<div class="step">
+						<span>{{loop.index}}.</span>
+						<span>{{step.message}}</span>
+						{% if step.error %}
+						<span>- {{step.error.message}}</span>
+						{% endif %}
+						{% if step.screenshot %}
+						<span class="cursor-pointer" data-toggle="collapse" data-target="#{{step.screenshot | replace('.', '')}}" aria-expanded="false" aria-controls="{{step.screenshot | replace('.', '')}}"><span class="glyphicon glyphicon-picture" aria-hidden="true"></span></span>
+						<div class="collapse text-center" id="{{step.screenshot | replace('.', '')}}">
+							<img class="step-screenshot cursor-pointer"
+								 src="/report/screenshot/{{project}}/{{execution}}/{{timestamp}}/{{test_file}}/{% if set_name %}{{set_name}}{% else %}default{%endif%}/{{test.test}}/{{step.screenshot}}/" onclick="Main.ReportUtils.expandImg(event);">
+						</div>
+						{% endif %}
+					</div>
+				{% endfor %}
+			</div>
+
 		</div>
 	</div>
-
-	<div class="col-md-12 test-report-box font-17" id="steps" style="padding: 15px 30px">
-		<h3 class="no-margin-top">Steps</h3>
-		{% for step in test_case_data.steps %}
-			<div class="step">
-				<span>{{loop.index}}.</span>
-				<span>{{step.message}}</span>
-				{% if step.error %}
-				<span>- {{step.error.message}}</span>
-				{% endif %}
-				{% if step.screenshot %}
-				<span class="cursor-pointer" data-toggle="collapse" data-target="#{{step.screenshot | replace('.', '')}}" aria-expanded="false" aria-controls="{{step.screenshot | replace('.', '')}}"><span class="glyphicon glyphicon-picture" aria-hidden="true"></span></span>
-				<div class="collapse text-center" id="{{step.screenshot | replace('.', '')}}">
-					<img class="step-screenshot cursor-pointer" src="/report/screenshot/{{project}}/{{suite}}/{{execution}}/{{test_case}}/{{test_set}}/{{step.screenshot}}/" onclick="Main.ReportUtils.expandImg(event);">
-				</div>
-				{% endif %}
-			</div>
-		{% endfor %}
-	</div>
+	{% endfor %}
 
 	<div class="col-md-12 test-report-box font-17" id="log" style="padding: 15px 30px">
 		<h3 class="no-margin-top">Log <small><a class="btn btn-default btn-xs" onclick="setLogLevel('debug')">DEBUG</a> <a class="btn btn-default btn-xs" onclick="setLogLevel('info')">INFO</a></small></h3>
-		<div id="debugLogLines" style="font-family: monospace; font-size: 14px; display: none">
-			{% for line in test_case_data.debug_log %}
+		<div id="debugLogLines" class="test-report-log" style="display: none">
+			{% for line in test_data.set.log_debug %}
 				<div class="step">
 					<span>{{line}}</span>
 				</div>
 			{% endfor %}
 		</div>
-		<div id="infoLogLines" style="font-family: monospace; font-size: 14px;">
-			{% for line in test_case_data.info_log %}
+		<div id="infoLogLines" class="test-report-log">
+			{% for line in test_data.set.log_info %}
 				<div class="step">
 					<span>{{line}}</span>
 				</div>
@@ -89,10 +108,9 @@
 
 {% block footer_declarations %}
 <script type="text/javascript">
-	var project = '{{project}}';
-	var suite = '{{suite}}';
-	var execution = '{{execution}}';
-	var testCase = '{{test_case}}';
+	let execution = '{{execution}}';
+	let timestamp = '{{timestamp}}';
+	let testFile = '{{test_file}}';
 </script>
 <script src="{{ url_for('static', filename='js/report_test.js') }}"></script>
 {% endblock %}

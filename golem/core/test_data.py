@@ -1,174 +1,190 @@
 """Methods for dealing with test data files
 
-Data files have csv extensions and are stored in the same
+Data files have csv or json extensions and are stored in the same
 directory as the test.
-
-DEPRECATED: Previously data files were stored in /data/ folder
-and this module still has support of this for backwards compatibility
 """
+import ast
 import csv
+import json
 import os
+import traceback
 
+from golem.core import test as test_module
 from golem.core import utils
 
 
-def save_external_test_data_file(root_path, project, full_test_case_name,
-                                 test_data):
-    """Save data to external file (csv).
+def csv_file_path(project, test_name):
+    test = test_module.Test(project, test_name)
+    return os.path.join(test.dirname, f'{test.stem_name}.csv')
 
-    full_test_case_name must be a relative dot path
+
+def save_csv_test_data(project, test_name, test_data):
+    """Save data to csv file.
     test_data must be a list of dictionaries
-
-    Temporarily this will save to /data/<test_name>.csv if this already
-    exists. Otherwise, the file will be stored in the same folder
-    as the test
-    # TODO 
     """
-    tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-
-    data_file_path_data_folder = os.path.join(root_path, 'projects', project,
-                                              'data', os.sep.join(parents),
-                                              '{}.csv'.format(tc_name))
-    data_path_tests_folder = os.path.join(root_path, 'projects', project,
-                                          'tests', os.sep.join(parents))
-    data_file_path_tests_folder = os.path.join(data_path_tests_folder,
-                                               '{}.csv'.format(tc_name))
-    # if csv file exists in /data/ use this file
-    # remove csv file from /tests/ folder if it exists
-    if os.path.isfile(data_file_path_data_folder):
-        with open(data_file_path_data_folder, 'w') as data_file:
-            if test_data:
-                writer = csv.DictWriter(data_file, fieldnames=test_data[0].keys(),
-                                        lineterminator='\n')
-                writer.writeheader()
-                for row in test_data:
-                    writer.writerow(row)
-            else:
-                data_file.write('')
-        # remove csv from /tests/ folder if it exists
-        if os.path.isfile(data_file_path_tests_folder):
-            os.remove(data_file_path_tests_folder)
-        # TODO deprecate /data/ folder
-        print(('Warning: data files defined in the /data/ folder will soon '
-               'be deprecated. Test data files should be placed in the same folder '
-               'as the test file.'))
+    if test_data:
+        with open(csv_file_path(project, test_name), 'w', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=test_data[0].keys(), lineterminator='\n')
+            writer.writeheader()
+            for row in test_data:
+                writer.writerow(row)
     else:
-        # else, update or create a csv file in /tests/ folder
-        if os.path.isfile(data_file_path_tests_folder) or test_data:
-            # update data file only if it already exists or there's data
-            os.makedirs(data_path_tests_folder, exist_ok=True)
-            with open(data_file_path_tests_folder, 'w') as data_file:
-                if test_data:
-                    writer = csv.DictWriter(data_file, fieldnames=test_data[0].keys(),
-                                            lineterminator='\n')
-                    writer.writeheader()
-                    for row in test_data:
-                        writer.writerow(row)
-                else:
-                    data_file.write('')
+        remove_csv_if_present(project, test_name)
 
 
-def get_external_test_data(workspace, project, full_test_case_name):
-    """Get data from file (csv)."""
+def get_csv_test_data(project, test_name):
+    """Get data from csv file as a list of dicts"""
     data_list = []
-    test, parents = utils.separate_file_from_parents(full_test_case_name)
-    data_file_path_data_folder = os.path.join(workspace, 'projects', project,
-                                              'data', os.sep.join(parents),
-                                              '{}.csv'.format(test))
-    data_file_path_test_folder = os.path.join(workspace, 'projects', project,
-                                              'tests', os.sep.join(parents),
-                                              '{}.csv'.format(test))
-    # check if csv file exists in /data/ folder
-    if os.path.isfile(data_file_path_data_folder):
-        with open(data_file_path_data_folder, 'r') as csv_file:
-            dict_reader = csv.DictReader(csv_file)
-            for data_set in dict_reader:
-                data_list.append(dict(data_set))
-        # TODO deprecate /data/ folder
-        print(('Warning: data files defined in the /data/ folder will soon '
-               'be deprecated. Test data files should be placed in the same folder '
-               'as the test file.'))               
-    # check if csv file exists in /tests/ folder
-    elif os.path.isfile(data_file_path_test_folder):
-        with open(data_file_path_test_folder, 'r', encoding='utf8') as csv_file:
-            dict_reader = csv.DictReader(csv_file)
+    csv_path = csv_file_path(project, test_name)
+    if os.path.isfile(csv_path):
+        with open(csv_path, 'r', encoding='utf-8') as f:
+            dict_reader = csv.DictReader(f)
             for data_set in dict_reader:
                 data_list.append(dict(data_set))
     return data_list
 
 
-def get_internal_test_data(workspace, project, full_test_case_name,
-                           repr_strings=False):
+def remove_csv_if_present(project, test_name):
+    """Remove csv data file from tests/ folder"""
+    csv_path = csv_file_path(project, test_name)
+    if os.path.isfile(csv_path):
+        os.remove(csv_path)
+
+
+def json_file_path(project, test_name):
+    test = test_module.Test(project, test_name)
+    return os.path.join(test.dirname, f'{test.stem_name}.json')
+
+
+def save_json_test_data(project, test_name, json_data_str):
+    """Save data to json file. Data is not saved if json is not valid."""
+    if json_data_str and not utils.json_parse_error(json_data_str):
+        with open(json_file_path(project, test_name), 'w', encoding='utf-8') as f:
+            f.write(json_data_str)
+
+
+def get_json_test_data(project, test_name):
+    """Get data from json file.
+    If json data is not of type dict or list of dicts it is ignored.
+    """
+    json_data = None
+    json_path = json_file_path(project, test_name)
+    if os.path.isfile(json_path):
+        try:
+            with open(json_path, encoding='utf-8') as f:
+                json_data = json.load(f)
+        except json.JSONDecodeError:
+            pass
+    if type(json_data) is dict:
+        return [json_data]
+    if type(json_data) is list:
+        if all(type(x) is dict for x in json_data):
+            return json_data
+    return []
+
+
+def get_json_test_data_as_string(project, test_name):
+    """Get data from json file as string"""
+    json_data = ''
+    json_path = json_file_path(project, test_name)
+    if os.path.isfile(json_path):
+        with open(json_path, encoding='utf-8') as f:
+            json_data = f.read()
+    return json_data
+
+
+def remove_json_data_if_present(project, test_name):
+    """Remove json data file from tests/ folder"""
+    json_path = json_file_path(project, test_name)
+    if os.path.isfile(json_path):
+        os.remove(json_path)
+
+
+def validate_internal_data(internal_data_str):
+    """Validate that internal data string of Python code
+    does not contain SyntaxError
+    """
+    try:
+        ast.parse(internal_data_str, filename='')
+    except SyntaxError:
+        return [traceback.format_exc(limit=0)]
+    return []
+
+
+def get_internal_test_data_as_string(project, full_test_case_name):
     """Get test data defined inside the test itself."""
-    # check if test has data variable defined
-    data_list = []
-    tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    path = os.path.join(workspace, 'projects', project, 'tests',
-                        os.sep.join(parents), '{}.py'.format(tc_name))
-    test_module, _ = utils.import_module(path)
+    data_str = ''
+    tm = test_module.Test(project, full_test_case_name).module
+    if hasattr(tm, 'data'):
+        data_variable = getattr(tm, 'data')
+        data_str = format_internal_data_var(data_variable)
+    return data_str
 
-    if hasattr(test_module, 'data'):
-        msg_not_list_not_dict = ('Warning: infile test data must be a dictionary '
-                                 'or a list of dictionaries\nCurrent value is:\n{}\n')
-        data_variable = getattr(test_module, 'data')
-        if type(data_variable) == dict:
-            data_list.append(data_variable)
-        elif type(data_variable) == list:
-            if all(isinstance(item, dict) for item in data_variable):
-                data_list = data_variable
+
+def format_internal_data_var(data_var):
+    """Convert data_var to a properly formatted Python code string"""
+    def _format_dict(d, indent):
+        dict_str = indent + '{\n'
+        for key, value in d.items():
+            if type(value) == str:
+                v = repr(value)
             else:
-                print(msg_not_list_not_dict.format(data_variable))
-        else:
-            print(msg_not_list_not_dict.format(data_variable))
-    if repr_strings:
-        # replace string values for their repr values
-        data_list_clean = []
-        for data_dict in data_list:
-            d = {}
-            for k, v in data_dict.items():
-                if type(v) == str:
-                    d[k] = repr(v)
-                else:
-                    d[k] = v
-            data_list_clean.append(d)
-        data_list = data_list_clean
-    return data_list
+                v = str(value)
+            dict_str += indent + '    ' + repr(key) + ': ' + v + ',\n'
+        dict_str += indent + '}'
+        return dict_str
 
-
-def get_test_data(workspace, project, full_test_case_name, repr_strings=False):
-    """Get test data.
-
-    The order of priority is:
-    1. data defined in a csv file in /data/ folder,
-    same directory structure as the test. Soon to be deprecated. # TODO
-    2. data defined in a csv file in /tests/ folder, same folder as the test
-    3. data defined in the test itself
-
-    Returns a list of dictionaries"""
-    data_list = []
-    external_data = get_external_test_data(workspace, project, full_test_case_name)
-    if external_data:
-        data_list = external_data
+    if type(data_var) is list:
+        data_str = '[\n'
+        for e in data_var:
+            data_str += _format_dict(e, indent='    ') + ',\n'
+        data_str += ']\n'
+    elif type(data_var) is dict:
+        data_str = _format_dict(data_var, indent='')
     else:
-        internal_data = get_internal_test_data(workspace, project, full_test_case_name,
-                                               repr_strings=repr_strings)
-        if internal_data:
-            data_list = internal_data
-    if not data_list:
-        data_list.append({})
-    return data_list
+        data_str = repr(data_var)
+    data_str = 'data = ' + data_str
+    return data_str
 
 
-def remove_csv_if_exists(root_path, project, full_test_case_name):
-    """Remove csv data file from /data/ folder and from /tests/ folder"""
-    tc_name, parents = utils.separate_file_from_parents(full_test_case_name)
-    data_file_path_data_folder = os.path.join(root_path, 'projects', project,
-                                              'data', os.sep.join(parents),
-                                              '{}.csv'.format(tc_name))
-    data_file_path_tests_folder = os.path.join(root_path, 'projects', project,
-                                               'tests', os.sep.join(parents),
-                                               '{}.csv'.format(tc_name))
-    if os.path.isfile(data_file_path_data_folder):
-        os.remove(data_file_path_data_folder)
-    if os.path.isfile(data_file_path_tests_folder):
-        os.remove(data_file_path_tests_folder)
+def get_internal_test_data(project, test_name):
+    """Get test data defined inside the test itself.
+    data var is ignored unless it's a dictionary or a
+    list of dictionaries
+    """
+    test = test_module.Test(project, test_name)
+    if hasattr(test.module, 'data'):
+        data_var = getattr(test.module, 'data')
+        if type(data_var) is dict:
+            return [data_var]
+        if type(data_var) is list:
+            if all(type(x) is dict for x in data_var):
+                return data_var
+    return []
+
+
+def get_test_data(project, test_name):
+    """Get csv data as list of dicts; json & internal data as string"""
+    return {
+        'csv': get_csv_test_data(project, test_name),
+        'json': get_json_test_data_as_string(project, test_name),
+        'internal': get_internal_test_data_as_string(project, test_name)
+    }
+
+
+def get_parsed_test_data(project, test_name):
+    """Get test data for test execution.
+    If more than one data source exist only one will be used.
+    For Json or internal data, it must be of type dictionary or list
+    of dictionaries otherwise it is ignored.
+    """
+    csv_data = get_csv_test_data(project, test_name)
+    if csv_data:
+        return csv_data
+    json_data = get_json_test_data(project, test_name)
+    if json_data:
+        return json_data
+    internal_data = get_internal_test_data(project, test_name)
+    if internal_data:
+        return internal_data
+    return [{}]

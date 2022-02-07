@@ -1,0 +1,162 @@
+{% extends "layout.html" %} 
+
+{% block title %}Golem : {{project|capitalize}} : {{full_test_case_name}}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/codemirror.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/test_case.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/test_case_common.css') }}">
+{% endblock %} 
+
+{% block content %}
+<div class="col-lg-10 col-lg-offset-1">
+    <div>
+        <div class="header-col" style="width: calc(100% - 270px)">
+            <h3 id="filenameContainer">
+                <span id="fileName" class="element-name" onclick="file.startInlineNameEdition()">
+                    {{full_test_case_name}}
+                </span>
+                <span id="filenameInput" style="display: none">
+                    <input type="text">
+                </span>
+            </h3>
+        </div>
+        <div class="header-col header-col-right">
+            {% if g.user.project_weight(project) >= 30 %}
+            <div class="btn-group" role="group" aria-label="...">
+              <button id="runTest" class="btn btn-default btn-sm" onclick="Test.runTest()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Test</button>
+              <button id="openRunTestConfig" class="btn btn-default btn-sm" onclick="Main.TestRunner.openConfigModal(Test.file.project, Test.file.fullName)" style="padding-left: 7px; padding-right: 7px;"><span class="caret"></span></button>
+            </div>
+            {% endif %}
+            <a id="loadCodeButton" class="btn btn-default btn-sm" href="code/"><span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>Code<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></a>
+            {% if g.user.project_weight(project) >= 30 %}
+            <button id="save" class="btn btn-default btn-sm" onclick="Test.save({runAfter: false});"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+            {% endif %}
+        </div>
+    </div>
+    <div class="clearfix"></div>
+    <div id="descriptionPageObjectsContainer" style="display: table; width: 100%;">
+        <div class="col-sm-6 same-heigth-col gray-1-background" id="descriptionContainer" style="border: 1px solid #e0e0e0;  border-top-left-radius: 3px; ">
+            <h4>Description</h4>
+            <textarea id="description" class="form-control" rows="2">{{test_components.description }}</textarea>
+            <div class="clearfix" style="margin-bottom: 5px"></div>
+            <div class="form-horizontal">
+                <div class="col-xs-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Tags</div>
+                <div class="col-xs-10" style="padding-right: 0px; padding-left: 0px;">
+                    <input type="text" class="form-control" id="tags" value="{{ ', '.join(test_components.tags) + ', ' if test_components.tags else '' }}">
+                </div>
+            </div>
+            <div class="clearfix" style="margin-bottom: 5px"></div>
+            <div class="form-horizontal" style="height: 34px">
+                <div class="col-xs-2 control-label no-padding-left" style="text-align: left; font-weight: bold">Skip</div>
+                <div class="col-xs-1" style="padding-right: 0px; padding-left: 0px;">
+                    <div class="checkbox">
+                        <input type="checkbox" id="skipCheckbox" style="margin-left: 0px" onchange="Test.Utils.onSkipCheckboxChange()" {% if test_components.skip %}checked{% endif %}>
+                    </div>
+                </div>
+                <div class="col-xs-9" style="padding-right: 0px; padding-left: 0px;">
+                    <input type="text" class="form-control" id="skipReason" {% if not test_components.skip %}style="display: none"{% endif %}
+                           value="{% if test_components.skip is string %}{{test_components.skip}}{% endif %}" placeholder="Skip message (optional)">
+                </div>
+            </div>
+
+        </div>
+        <div class="col-sm-6 same-heigth-col gray-1-background" id="pageObjectsContainerContainer" style="border-top: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; border-top-right-radius: 3px;">
+            <h4>Pages</h4>
+            <div id="pageObjectsContainer">
+                <div id="pageObjects">
+                    {% for page in test_components.pages %}
+                    <div class="input-group page">
+                        <input type="text" disabled class="form-control page-name" value="{{page}}">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" type="button" onclick="Test.loadPageInModal(this)"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></button>
+                            <button class="btn btn-default" type="button" onclick="Test.Utils.openPageInNewWindow(this)"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></button>
+                            <button class="btn btn-default" type="button" onclick="Test.deletePageObject(this)"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div>
+                    <button id="newPageButton" class="btn btn-default" style="float: right;" onclick="Test.displayNewPagePrompt();"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> New Page</button>
+                    <div style="overflow: hidden; padding-right: .5em;">
+                        <input type="text" style="width: 100%;" class="form-control page-objects-input page-objects-autocomplete" placeholder="import page">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+    <div class="col-sm-12 gray-1-background" id="stepsContainerContainer" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
+
+        <div class="btn-group" id="hookSelector">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" style="margin-top: 10px">
+                Add Test Hook <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a href="javascript:void(0)" id="addTestHookBeforeTest" hook-name="before_test" onclick="Test.Hooks.addHook('before_test')">before_test</a></li>
+                <li><a href="javascript:void(0)" id="addTestHookBeforeEach" hook-name="before_each" onclick="Test.Hooks.addHook('before_each')">before_each</a></li>
+                <li><a href="javascript:void(0)" id="addTestHookAfterEach" hook-name="after_each" onclick="Test.Hooks.addHook('after_each')">after_each</a></li>
+                <li><a href="javascript:void(0)" id="addTestHookAfterTest" hook-name="after_test" onclick="Test.Hooks.addHook('after_test')">after_test</a></li>
+            </ul>
+        </div>
+
+        <div id="testHooks"></div>
+
+        <!-- tests -->
+        <div id="testFunctions" style="margin-bottom: 10px"></div>
+        <button class="btn btn-default add-step" onclick="Test.addNewTestFunction();">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Test</button>
+
+    </div>
+    <div class="clearfix"></div>
+    <div class="col-sm-12 gray-1-background" id="dataContainerContainer" style="border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; border-bottom-left-radius: 3px; border-bottom-right-radius: 3px;">
+        <div class="btn-group" id="dataSourceSelector">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" style="margin-top: 10px">
+                Add Data Source <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" style="position: static;">
+                <li><a href="javascript:void(0)" id="addCsvDataSourceOption" onclick="TestCommon.DataSource.addDataSourceCsv()">CSV</a></li>
+                <li><a href="javascript:void(0)" id="addJsonDataSourceOption" onclick="TestCommon.DataSource.addDataSourceJson()">JSON</a></li>
+                <li><a href="javascript:void(0)" id="addInternalDataSourceOption" onclick="TestCommon.DataSource.addDataSourceInternal()">internal</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- page modal -->
+<div class="modal fade" id="pageModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" style>
+    <div class="modal-content">
+      <div class="modal-header" style="padding-top: 10px; padding-bottom: 5px; height: 41px;">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <iframe id="pageModalIframe"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/external/code_mirror/codemirror.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/python.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/sortable.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/jquery.autocomplete.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/file.js') }}"></script>
+<script src="{{ url_for('static', filename='js/test.js') }}"></script>
+<script src="{{ url_for('static', filename='js/test_common.js') }}"></script>
+{% endblock %}
+
+{% block footer_declarations %}
+<script>
+    let testCaseName = "{{test_case_name}}";
+    let fullTestCaseName = "{{full_test_case_name}}";
+    let importedPages = {{test_components.pages|tojson}};
+    let testHooks = {{test_components.test_hooks|tojson}}
+    let test_functions = {{test_components.test_functions|tojson}}
+    let testData = {{test_data|tojson}}
+
+    const file = new File('test', Global.project, testCaseName, fullTestCaseName);
+    const test = Test;
+    test.initialize(file, importedPages, testHooks, test_functions);
+    TestCommon.DataSource.loadData(testData.csv, testData.json, testData.internal);
+</script>
+{% endblock %}

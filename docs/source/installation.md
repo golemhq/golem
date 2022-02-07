@@ -5,7 +5,7 @@ Installation
 
 ### Python
 
-Golem requires Python 3.4 or higher.
+Golem requires Python 3.6 or higher.
 
 **Windows**:
 

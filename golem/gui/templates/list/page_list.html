@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %}Golem : {{project|capitalize}} : Pages{% endblock %}
+
+{% block head %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/list_common.css') }}">
+{% endblock %} 
+
+{% block content %}
+<div class="row" style="padding-right: 15px; padding-left: 15px">
+	<div class="col-md-10 col-md-offset-1">
+		<h3>{{project|capitalize|replace("_", " ")}} - Pages</h3>
+        <br>
+		<div id="fileExporerContainer" class="col-md-12 box-container gray-border-3">
+			<div id="breadcrumb"></div>
+			<ul id="rootFolderContent" class="tree folder-content"></ul>
+			<div id="bottomMenu"></div>
+		</div>
+	</div>
+</div>
+<script src="{{ url_for('static', filename='js/list/list_common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/list/page_list.js') }}"></script>
+{% endblock %}

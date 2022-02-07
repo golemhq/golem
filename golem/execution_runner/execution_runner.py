@@ -1,0 +1,479 @@
+import multiprocessing
+import os
+import sys
+import time
+import traceback
+import uuid
+from types import SimpleNamespace
+
+from golem.core import session
+from golem.core import utils
+from golem.core import test_data
+from golem.core import environment_manager
+from golem.core import settings_manager
+from golem.core import secrets_manager
+from golem.core import suite as suite_module
+from golem.core import tags_manager
+from golem.core.test import Test
+from golem.core.project import Project
+from golem.gui import gui_utils
+from golem.execution_runner.multiprocess_executor import multiprocess_executor
+
+from golem.test_runner.test_runner import run_test
+from golem.report import execution_report as exec_report
+from golem.report import junit_report
+from golem.report import html_report
+from golem.report import cli_report
+from golem.report import test_report
+
+
+def define_browsers(browsers, remote_browsers, default_browsers, custom_browsers):
+    """Generate the definitions for the browsers.
+
+    A defined browser contains the following attributes:
+      'name':         real name
+      'capabilities': capabilities defined by remote_browsers setting
+    """
+    browsers_definition = []
+    for browser in browsers:
+        if browser in remote_browsers:
+            browsers_definition.append({
+                'name': browser,
+                'capabilities': remote_browsers[browser]
+            })
+        elif browser in default_browsers:
+            browsers_definition.append({
+                'name': browser,
+                'capabilities': {}
+            })
+        elif browser in custom_browsers:
+            browsers_definition.append({
+                'name': browser,
+                'capabilities': {}
+            })
+        else:
+            msg = [f'Error: the browser {browser} is not defined\n',
+                   'available options are:\n',
+                   '\n'.join(default_browsers),
+                   '\n'.join(remote_browsers)]
+            raise Exception(''.join(msg))
+    return browsers_definition
+
+
+def initialize_reports_for_test_files(project_name, test_sets):
+    """Initialize test file json report with status `pending`.
+    This enables live reporting.
+    test_sets are all the combinations of test files, environments,
+    browsers and test sets.
+    TODO this could be run in the background meanwhile the execution
+    continues to reduce startup time
+    """
+    test_functions_cache = {}
+
+    for s in test_sets:
+        test_file_reportdir = test_report.create_test_file_report_dir(s.reportdir,
+                                                                      s.name, s.set_name)
+        if s.name not in test_functions_cache:
+            test_file = Test(project_name, s.name)
+            # When there is an error reading the test file (eg. SyntaxError)
+            # the list of test functions is not available
+            try:
+                test_functions_cache[s.name] = test_file.test_function_list
+            except:
+                pass
+
+        # If the test functions are not available this test file report
+        # will not be initialized
+        if s.name in test_functions_cache:
+            test_report.initialize_test_file_report(s.name, test_functions_cache[s.name],
+                                                    s.set_name, test_file_reportdir, s.env,
+                                                    s.browser['name'])
+
+
+class ExecutionRunner:
+    """Executes tests or suites.
+
+    Three points of entry:
+      run_test
+      run_suite
+      run_directory
+    """
+
+    def __init__(self, project_name, browsers=None, processes=1, environments=None,
+                 interactive=False, timestamp=None, reports=None, report_folder=None,
+                 report_name=None, tags=None, test_functions=None):
+        if reports is None:
+            reports = []
+        if tags is None:
+            tags = []
+        self.project = Project(project_name)
+        self.cli_args = SimpleNamespace(browsers=browsers, processes=processes,
+                                        envs=environments, tags=tags)
+        self.interactive = interactive
+        self.timestamp = timestamp
+        self.reports = reports
+        self.report_folder = report_folder
+        self.report_name = report_name
+        self.report = {}
+        self.tests = []
+        self.is_suite = False
+        self.suite_name = None
+        self.test_name = None
+        self.execution_name = None
+        self.selected_browsers = None
+        self.start_time = None
+        self.test_functions = test_functions
+        self.suite = SimpleNamespace(processes=None, browsers=None, envs=None,
+                                     before=None, after=None, tags=None)
+        has_failed_tests = self._create_execution_has_failed_tests_flag()
+        self.execution = SimpleNamespace(processes=1, browsers=[], envs=[],
+                                         tests=[], reportdir=None, tags=[],
+                                         has_failed_tests=has_failed_tests)
+
+    @staticmethod
+    def _create_execution_has_failed_tests_flag():
+        """Multiprocessing safe flag to track if any test has failed or
+        errored during the execution
+
+        Returns a multiprocessing.managers.ValueProxy
+        """
+        return multiprocessing.Manager().Value('error', False)
+
+    def _select_environments(self, project_envs):
+        """Define the environments to use for the test.
+
+        The test can have a list of environments set from 2 places:
+          - using the -e|--environments CLI argument
+          - suite `environments` variable
+
+        If both of these are empty try using the first env if there
+        are any envs defined for the project. Otherwise just return ['']
+        meaning: no envs will be used.
+        """
+        if self.cli_args.envs:
+            # use the environments passed through command line
+            envs = self.cli_args.envs
+        elif self.suite.envs:
+            # use the environments defined in the suite
+            envs = self.suite.envs
+        elif project_envs:
+            # if there are available envs, use the first by default
+            envs = [sorted(project_envs)[0]]
+        else:
+            envs = []
+        return envs
+
+    def _create_execution_directory(self):
+        """Generate the execution report directory"""
+        return exec_report.create_execution_directory(
+            self.project.name, self.execution_name, self.timestamp)
+
+    def _define_execution_list(self):
+        """Generate the execution list
+
+        Generates a list with the required combinations
+        for each of the following elements:
+          - tests
+          - data sets
+          - environments
+          - browsers
+        """
+        execution_list = []
+        envs = self.execution.envs or [None]
+        envs_data = environment_manager.get_environment_data(self.project.name)
+        secrets = secrets_manager.get_secrets(self.project.name)
+
+        for test in self.tests:
+            data_sets = test_data.get_parsed_test_data(self.project.name, test)
+
+            if len(data_sets) > 1 or len(envs) > 1 or len(self.execution.browsers) > 1:
+                # If the test file contain multiple data sets, envs or browsers
+                # then each set will have a unique id (set_name)
+                multiple_data_sets = True
+            else:
+                # otherwise it's just one set with set_name = ''
+                multiple_data_sets = False
+
+            for data_set in data_sets:
+                for env in envs:
+                    data_set_env = dict(data_set)
+                    if env in envs_data:
+                        # add env_data to data_set
+                        data_set_env['env'] = envs_data[env]
+                        data_set_env['env']['name'] = env
+                    for browser in self.execution.browsers:
+
+                        if multiple_data_sets:
+                            set_name = str(uuid.uuid4())[:6]
+                        else:
+                            set_name = ''
+
+                        testdef = SimpleNamespace(name=test, data_set=data_set_env,
+                                                  secrets=secrets, browser=browser,
+                                                  reportdir=self.execution.reportdir,
+                                                  env=env, set_name=set_name)
+                        execution_list.append(testdef)
+        return execution_list
+
+    def _print_number_of_tests_found(self):
+        """Print number of tests and test sets to console"""
+        test_number = len(self.tests)
+        set_number = len(self.execution.tests)
+        if test_number > 0:
+            msg = f'Tests found: {test_number}'
+            if test_number != set_number:
+                msg = f'{msg} ({set_number} sets)'
+            print(msg)
+
+    def _filter_tests_by_tags(self):
+        tests = []
+        try:
+            tests = tags_manager.filter_tests_by_tags(self.project.name, self.tests,
+                                                      self.execution.tags)
+        except tags_manager.InvalidTagExpression as e:
+            print(f'{e.__class__.__name__}: {e}')
+            self.execution.has_failed_tests.value = True
+        else:
+            if len(tests) == 0:
+                print("No tests found with tag(s): {}".format(', '.join(self.execution.tags)))
+        return tests
+
+    def _get_elapsed_time(self, start_time):
+        elapsed_time = 0
+        if start_time:
+            elapsed_time = round(time.time() - self.start_time, 2)
+        return elapsed_time
+
+    def run_test(self, test):
+        """Run a single test.
+        `test` can be a path to a Python file or an import path.
+        Both relative to the tests folder.
+        Example:
+            test = 'folder/test.py'
+            test = 'folder.test'
+        """
+        if test.endswith('.py'):
+            filename, _ = os.path.splitext(test)
+            test = '.'.join(os.path.normpath(filename).split(os.sep))
+        self.tests = [test]
+        self.test_name = test
+        self.suite_name = test
+        self.execution_name = test
+        self._prepare()
+
+    def run_suite(self, suite):
+        """Run a suite.
+        `suite` can be a path to a Python file or an import path.
+        Both relative to the suites folder.
+        Example:
+            test = 'folder/suite.py'
+            test = 'folder.suite'
+        """
+        # TODO
+        if suite.endswith('.py'):
+            filename, _ = os.path.splitext(suite)
+            suite = '.'.join(os.path.normpath(filename).split(os.sep))
+
+        suite_obj = suite_module.Suite(self.project.name, suite)
+
+        self.tests = suite_obj.tests
+        if len(self.tests) == 0:
+            print(f'No tests found for suite {suite}')
+
+        self.suite.processes = suite_obj.processes
+        self.suite.browsers = suite_obj.browsers
+        self.suite.envs = suite_obj.environments
+        self.suite.tags = suite_obj.tags
+        module = suite_obj.get_module()
+        self.suite.before = getattr(module, 'before', None)
+        self.suite.after = getattr(module, 'after', None)
+        self.suite_name = suite
+        self.execution_name = suite
+        self.is_suite = True
+        self._prepare()
+
+    def run_directory(self, directory):
+        """Run every test inside a directory.
+        `directory` has to be a relative path from the tests folder.
+        To run every test in tests folder use: directory=''
+        """
+        self.tests = self.project.tests(directory=directory)
+        if len(self.tests) == 0:
+            print(f'No tests were found in {os.path.join("tests", directory)}')
+        self.is_suite = True
+        if directory == '':
+            suite_name = 'all'
+        else:
+            suite_name = '.'.join(os.path.normpath(directory).split(os.sep))
+        self.suite_name = suite_name
+        self.execution_name = suite_name
+        self._prepare()
+
+    def _prepare(self):
+        # Generate timestamp if needed.
+        # A timestamp is passed when the test is executed from the GUI.
+        # The gui uses this timestamp to fetch the test execution status later on.
+        # Otherwise, a new timestamp should be generated at this point.
+        if not self.timestamp:
+            self.timestamp = utils.get_timestamp()
+
+        # create the execution report directory
+        # The directory takes this structure:
+        #   reports/<execution_name>/<timestamp>/
+        self.execution.reportdir = self._create_execution_directory()
+
+        # Filter tests by tags
+        self.execution.tags = self.cli_args.tags or self.suite.tags or []
+        if self.execution.tags:
+            self.tests = self._filter_tests_by_tags()
+
+        if not self.tests:
+            self._finalize()
+        else:
+            # get amount of processes (parallel executions), default is 1
+            if self.cli_args.processes > 1:
+                # the processes arg passed through cli has higher priority
+                self.execution.processes = self.cli_args.processes
+            elif self.suite.processes:
+                self.execution.processes = self.suite.processes
+
+            # select the browsers to use in this execution
+            # the order of precedence is:
+            # 1. browsers defined by CLI
+            # 2. browsers defined inside a suite
+            # 3. 'default_browser' setting key
+            # 4. default default is 'chrome'
+            self.selected_browsers = utils.choose_browser_by_precedence(
+                cli_browsers=self.cli_args.browsers,
+                suite_browsers=self.suite.browsers,
+                settings_default_browser=session.settings['default_browser'])
+
+            # Define the attributes for each browser.
+            # A browser name can be predefined ('chrome, 'chrome-headless', 'firefox', etc)
+            # or it can be defined by the user with the 'remote_browsers' setting.
+            # Remote browsers have extra details such as capabilities
+            #
+            # Each defined browser must have the following attributes:
+            # 'name': real name,
+            # 'capabilities': full capabilities defined in the remote_browsers setting
+            remote_browsers = settings_manager.get_remote_browsers(session.settings)
+            default_browsers = gui_utils.get_supported_browsers_suggestions()
+            custom_browsers = self.project.custom_browsers()
+            self.execution.browsers = define_browsers(self.selected_browsers, remote_browsers,
+                                                      default_browsers, custom_browsers)
+            # The user can define environments in the environments.json file.
+            # The suite/test can be executed in one or more of these environments.
+            # Which environments will be used is defined by this order of preference:
+            # 1. envs passed by CLI
+            # 2. envs defined inside the suite
+            # 3. The first env defined for the project
+            # 4. no envs at all
+            #
+            # Note, in the case of 4, the test might fail if it tries
+            # to use env variables
+            project_envs = environment_manager.get_envs(self.project.name)
+            self.execution.envs = self._select_environments(project_envs)
+            invalid_envs = [e for e in self.execution.envs if e not in project_envs]
+            if invalid_envs:
+                print('ERROR: the following environments do not exist for project '
+                      f'{self.project.name}: {", ".join(invalid_envs)}')
+                self.execution.has_failed_tests.value = True
+                self._finalize()
+                return
+
+            # Generate the execution list
+            # Each test must be executed for each:
+            # * data set
+            # * environment
+            # * browser
+            # The result is a list that contains all the requested combinations
+            self.execution.tests = self._define_execution_list()
+
+            # Initialize reports with status 'pending'
+            initialize_reports_for_test_files(self.project.name, self.execution.tests)
+
+            self._print_number_of_tests_found()
+
+            try:
+                self._execute()
+            except KeyboardInterrupt:
+                self.execution.has_failed_tests.value = True
+                self._finalize()
+
+    def _execute(self):
+        self.start_time = time.time()
+        suite_error = False
+
+        # run suite `before` function
+        if self.suite.before:
+            try:
+                self.suite.before.__call__()
+            except:
+                print('ERROR: suite before function failed')
+                print(traceback.format_exc())
+
+        if not suite_error:
+            if self.interactive and self.execution.processes != 1:
+                print('WARNING: to run in debug mode, processes must equal one')
+
+            if self.execution.processes == 1:
+                # run tests serially
+                for test in self.execution.tests:
+                    run_test(session.testdir, self.project.name, test.name, test.data_set, test.secrets,
+                             test.browser, test.env, session.settings, test.reportdir, test.set_name,
+                             self.test_functions, self.execution.has_failed_tests,
+                             self.execution.tags, self.is_suite)
+            else:
+                # run tests using multiprocessing
+                multiprocess_executor(self.project.name, self.execution.tests,
+                                      self.execution.has_failed_tests, self.test_functions,
+                                      self.execution.processes, self.execution.tags, self.is_suite)
+
+        # run suite `after` function
+        if self.suite.after:
+            try:
+                self.suite.after.__call__()
+            except:
+                print('ERROR: suite before function failed')
+                print(traceback.format_exc())
+
+        self._finalize()
+
+    def _finalize(self):
+        elapsed_time = self._get_elapsed_time(self.start_time)
+
+        # generate report.json
+        self.report = exec_report.generate_execution_report(self.execution.reportdir,
+                                                            elapsed_time,
+                                                            self.execution.browsers,
+                                                            self.execution.processes,
+                                                            self.execution.envs,
+                                                            self.execution.tags,
+                                                            session.settings['remote_url'])
+
+        cli_report.report_to_cli(self.report)
+        cli_report.print_totals(self.report)
+
+        # generate requested reports
+        report_name = self.report_name or 'report'
+        report_folder = self.report_folder or self.execution.reportdir
+        if 'junit' in self.reports:
+            junit_report.generate_junit_report(self.project.name, self.execution_name,
+                                               self.timestamp, self.report_folder,
+                                               report_name)
+        if 'json' in self.reports and (self.report_folder or self.report_name):
+            exec_report.save_execution_json_report(self.report, report_folder, report_name)
+        if 'html' in self.reports:
+            html_report.generate_html_report(self.project.name, self.suite_name,
+                                             self.timestamp, self.report_folder,
+                                             report_name)
+        if 'html-no-images' in self.reports:
+            if 'html' in self.reports:
+                report_name = report_name + '-no-images'
+            html_report.generate_html_report(self.project.name, self.suite_name, self.timestamp,
+                                             self.report_folder, report_name,
+                                             no_images=True)
+
+        # exit to the console with exit status code 1 in case a test fails
+        if self.execution.has_failed_tests.value:
+            sys.exit(1)

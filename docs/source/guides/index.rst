@@ -5,6 +5,8 @@ Guides
    :maxdepth: 1
    :glob:
 
+   run-from-jenkins
+   using-multiple-browsers
    standalone-executable
 
 

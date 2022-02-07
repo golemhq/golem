@@ -1,4 +1,4 @@
-# from typing import List # not supported in 3.4
+from typing import List
 
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
@@ -37,7 +37,7 @@ class GolemExtendedDriver:
         If element is already checked this is ignored.
 
         :Args:
-         - element: an element tuple, a CSS string or a WebElement object
+         - element: an element tuple, a CSS string, an XPath string or a WebElement object
         """
         element = self.find(element)
         element.check()
@@ -50,8 +50,8 @@ class GolemExtendedDriver:
          - index: index of the window to close from window_handles
         """
         if index > len(self.window_handles) - 1:
-            raise ValueError('Cannot close window {}, current amount is {}'
-                             .format(index, len(self.window_handles)))
+            raise ValueError(f'Cannot close window {index}, current amount is '
+                             f'{len(self.window_handles)}')
         else:
             handle_to_close = self.window_handles[index]
             self.close_window_switch_back(handle_to_close)
@@ -65,7 +65,7 @@ class GolemExtendedDriver:
             handle_to_close = self.window_handles[index]
             self.close_window_switch_back(handle_to_close)
         else:
-            msg = 'a window with partial title \'{}\' was not found'.format(partial_title)
+            msg = f'a window with partial title \'{partial_title}\' was not found'
             raise ValueError(msg)
 
     def close_window_by_partial_url(self, partial_url):
@@ -77,7 +77,7 @@ class GolemExtendedDriver:
             handle_to_close = self.window_handles[index]
             self.close_window_switch_back(handle_to_close)
         else:
-            msg = 'a window with partial URL \'{}\' was not found'.format(partial_url)
+            msg = f"a window with partial URL '{partial_url}' was not found"
             raise ValueError(msg)
 
     def close_window_by_title(self, title):
@@ -87,7 +87,7 @@ class GolemExtendedDriver:
             handle_to_close = self.window_handles[titles.index(title)]
             self.close_window_switch_back(handle_to_close)
         else:
-            raise ValueError('a window with title \'{}\' was not found'.format(title))
+            raise ValueError(f"a window with title '{title}' was not found")
 
     def close_window_by_url(self, url):
         """Close window/tab by URL"""
@@ -96,7 +96,7 @@ class GolemExtendedDriver:
             handle_to_close = self.window_handles[urls.index(url)]
             self.close_window_switch_back(handle_to_close)
         else:
-            raise ValueError('a window with URL \'{}\' was not found'.format(url))
+            raise ValueError(f"a window with URL '{url}' was not found")
 
     def close_window_switch_back(self, close_handle):
         """Close a window/tab by handle and switch back to current handle.
@@ -133,7 +133,7 @@ class GolemExtendedDriver:
         If element is not present return False
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         """
         try:
             element = self.find(element, timeout=0)
@@ -147,12 +147,14 @@ class GolemExtendedDriver:
     #     target_element = self.find(target)
     #     actionChains.drag_and_drop(source_element, target_element).perform()
 
-    def find(self, *args, **kwargs) -> ExtendedRemoteWebElement:
+    def find(self, element=None, id=None, name=None, link_text=None,
+             partial_link_text=None, css=None, xpath=None, tag_name=None,
+             timeout=None, wait_displayed=None, highlight=None) -> ExtendedRemoteWebElement:
         """Find a WebElement
 
         Search criteria:
-        The first argument must be: an element tuple, a CSS string or
-        a WebElement object.
+        The first argument must be: an element tuple, a CSS string,
+        an XPath string, or a WebElement object.
         Keyword search criteria: id, name, link_text, partial_link_text,
         css, xpath, tag_name.
         Only one search criteria should be provided.
@@ -172,20 +174,17 @@ class GolemExtendedDriver:
         :Returns:
           a golem.webdriver.extended_webelement.ExtendedRemoteWebElement
         """
-        if len(args) == 1:
-            kwargs['element'] = args[0]
-        return common._find(self, **kwargs)
+        return common._find(self, element, id, name, link_text, partial_link_text, css,
+                            xpath, tag_name, timeout, wait_displayed, highlight)
 
-    # should use type annotation:
-    # from typing import List
-    ##  -> List[ExtendedRemoteWebElement]
-    # typing not supported in 3.4
-    def find_all(self, *args, **kwargs):
+    def find_all(self, element=None, id=None, name=None, link_text=None,
+                 partial_link_text=None, css=None, xpath=None,
+                 tag_name=None) -> List[ExtendedRemoteWebElement]:
         """Find all WebElements that match the search criteria.
 
         Search criteria:
-        The first argument must be: an element tuple, a CSS string or
-        a WebElement object.
+        The first argument must be: an element tuple, a CSS string, or
+        an XPath string.
         Keyword search criteria: id, name, link_text, partial_link_text,
         css, xpath, tag_name.
         Only one search criteria should be provided.
@@ -198,9 +197,8 @@ class GolemExtendedDriver:
         :Returns:
             a list of ExtendedRemoteWebElement
         """
-        if len(args) == 1:
-            kwargs['element'] = args[0]
-        return common._find_all(self, **kwargs)
+        return common._find_all(self, element, id, name, link_text, partial_link_text,
+                                css, xpath, tag_name)
 
     def get_window_index(self):
         """Get the index of the current window/tab"""
@@ -272,7 +270,7 @@ class GolemExtendedDriver:
             self.switch_to.window(handle)
             if partial_title in self.title:
                 return
-        raise Exception('Window with partial title \'{}\' was not found'.format(partial_title))
+        raise Exception(f"Window with partial title '{partial_title}' was not found")
 
     def switch_to_window_by_partial_url(self, partial_url):
         """Switch to window/tab by partial URL"""
@@ -280,7 +278,7 @@ class GolemExtendedDriver:
             self.switch_to.window(handle)
             if partial_url in self.current_url:
                 return
-        raise Exception('Window with partial URL \'{}\' was not found'.format(partial_url))
+        raise Exception(f"Window with partial URL '{partial_url}' was not found")
 
     def switch_to_window_by_title(self, title):
         """Switch to window/tab by title"""
@@ -288,7 +286,7 @@ class GolemExtendedDriver:
             self.switch_to.window(handle)
             if self.title == title:
                 return
-        raise Exception('Window with title \'{}\' was not found'.format(title))
+        raise Exception(f"Window with title '{title}' was not found")
 
     def switch_to_window_by_url(self, url):
         """Switch to window/tab by URL"""
@@ -296,14 +294,14 @@ class GolemExtendedDriver:
             self.switch_to.window(handle)
             if self.current_url == url:
                 return
-        raise Exception('Window with URL \'{}\' was not found'.format(url))
+        raise Exception(f"Window with URL '{url}' was not found")
 
     def uncheck_element(self, element):
         """Uncheck a checkbox element.
         If element is already unchecked this is ignored.
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         """
         element = self.find(element)
         element.uncheck()
@@ -322,21 +320,20 @@ class GolemExtendedDriver:
         """Wait for element to be present and displayed
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - timeout: time to wait (in seconds)
         """
         try:
             element = self.find(element, timeout=timeout, wait_displayed=True)
         except ElementNotDisplayed:
-            message = ('timeout waiting for element {} to be displayed'
-                       .format(element))
+            message = f'timeout waiting for element {element} to be displayed'
             raise TimeoutException(message)
 
     def wait_for_element_enabled(self, element, timeout):
         """Wait for element to be enabled
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - timeout: time to wait (in seconds)
         """
         element = self.find(element, timeout=0)
@@ -346,7 +343,7 @@ class GolemExtendedDriver:
         """Wait for element to have attribute
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - attribute: attribute name
         - timeout: time to wait (in seconds)
 
@@ -360,7 +357,7 @@ class GolemExtendedDriver:
         """Wait for element to not have attribute
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - attribute: attribute name
         - timeout: time to wait (in seconds)
 
@@ -376,7 +373,7 @@ class GolemExtendedDriver:
         When element is not present this will raise ElementNotFound.
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - timeout: time to wait (in seconds)
         """
         try:
@@ -389,7 +386,7 @@ class GolemExtendedDriver:
         """Wait for element to be not enabled
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - timeout: time to wait (in seconds)
         """
         element = self.find(element, timeout=0)
@@ -399,7 +396,7 @@ class GolemExtendedDriver:
         """Wait for element not present in the DOM
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - timeout: time to wait (in seconds)
         """
         found_element = None
@@ -409,29 +406,27 @@ class GolemExtendedDriver:
             pass
         if found_element:
             wait = WebDriverWait(self, timeout)
-            message = ('Timeout waiting for element {} to not be present'
-                       .format(found_element.name))
+            message = f'Timeout waiting for element {found_element.name} to not be present'
             wait.until(ec.staleness_of(found_element), message=message)
 
     def wait_for_element_present(self, element, timeout):
         """Wait for element present in the DOM
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - timeout: time to wait (in seconds)
         """
         try:
             self.find(element, timeout=timeout, wait_displayed=False)
         except ElementNotFound:
-            message = ('timeout waiting for element {} to be present'
-                       .format(element))
+            message = f'timeout waiting for element {element} to be present'
             raise TimeoutException(message)
 
     def wait_for_element_text(self, element, text, timeout):
         """Wait for element text to match given text
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - text: expected element text to be
         - timeout: time to wait (in seconds)
         """
@@ -442,7 +437,7 @@ class GolemExtendedDriver:
         """Wait for element to contain text
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - text: expected element to be contained by element
         - timeout: time to wait (in seconds)
         """
@@ -453,7 +448,7 @@ class GolemExtendedDriver:
         """Wait for element text to not match given text
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - text: expected text to not be element's text
         - timeout: time to wait (in seconds)
         """
@@ -464,7 +459,7 @@ class GolemExtendedDriver:
         """Wait for element to not contain text
 
         :Args:
-        - element: an element tuple, a CSS string or a WebElement object
+        - element: an element tuple, a CSS string, an XPath string or a WebElement object
         - text: expected text to not be contained in element
         - timeout: time to wait (in seconds)
         """
@@ -479,7 +474,7 @@ class GolemExtendedDriver:
         - timeout: time to wait (in seconds)
         """
         wait = WebDriverWait(self, timeout)
-        message = "Timeout waiting for page to contain '{}'".format(text)
+        message = f"Timeout waiting for page to contain '{text}'"
         wait.until(gec.text_to_be_present_in_page(text), message=message)
 
     def wait_for_page_not_contains_text(self, text, timeout):
@@ -490,7 +485,7 @@ class GolemExtendedDriver:
         - timeout: time to wait (in seconds)
         """
         wait = WebDriverWait(self, timeout)
-        message = "Timeout waiting for page to not contain '{}'".format(text)
+        message = f"Timeout waiting for page to not contain '{text}'"
         wait.until_not(gec.text_to_be_present_in_page(text), message=message)
 
     def wait_for_title(self, title, timeout):
@@ -501,7 +496,7 @@ class GolemExtendedDriver:
         - timeout: time to wait (in seconds)
         """
         wait = WebDriverWait(self, timeout)
-        message = 'Timeout waiting for title to be \'{}\''.format(title)
+        message = f"Timeout waiting for title to be '{title}'"
         wait.until(ec.title_is(title), message=message)
 
     def wait_for_title_contains(self, partial_title, timeout):
@@ -512,7 +507,7 @@ class GolemExtendedDriver:
         - timeout: time to wait (in seconds)
         """
         wait = WebDriverWait(self, timeout)
-        message = 'Timeout waiting for title to contain \'{}\''.format(partial_title)
+        message = f"Timeout waiting for title to contain '{partial_title}'"
         wait.until(ec.title_contains(partial_title), message=message)
 
     def wait_for_title_is_not(self, title, timeout):
@@ -523,7 +518,7 @@ class GolemExtendedDriver:
         - timeout: time to wait (in seconds)
         """
         wait = WebDriverWait(self, timeout)
-        message = 'Timeout waiting for title to not be \'{}\''.format(title)
+        message = f"Timeout waiting for title to not be '{title}'"
         wait.until_not(ec.title_is(title), message=message)
 
     def wait_for_title_not_contains(self, partial_title, timeout):
@@ -534,29 +529,29 @@ class GolemExtendedDriver:
         - timeout: time to wait (in seconds)
         """
         wait = WebDriverWait(self, timeout)
-        message = 'Timeout waiting for title to not contain \'{}\''.format(partial_title)
+        message = f"Timeout waiting for title to not contain '{partial_title}'"
         wait.until_not(ec.title_contains(partial_title), message=message)
 
     def wait_for_window_present_by_partial_title(self, partial_title, timeout):
         """Wait for window/tab present by partial title"""
         wait = WebDriverWait(self, timeout)
-        message = 'Timeout waiting for window present by partial title \'{}\''.format(partial_title)
+        message = f"Timeout waiting for window present by partial title '{partial_title}'"
         wait.until(gec.window_present_by_partial_title(partial_title), message=message)
 
     def wait_for_window_present_by_partial_url(self, partial_url, timeout):
         """Wait for window/tab present by partial url"""
         wait = WebDriverWait(self, timeout)
-        message = 'Timeout waiting for window present by partial url \'{}\''.format(partial_url)
+        message = f"Timeout waiting for window present by partial url '{partial_url}'"
         wait.until(gec.window_present_by_partial_url(partial_url), message=message)
 
     def wait_for_window_present_by_title(self, title, timeout):
         """Wait for window/tab present by title"""
         wait = WebDriverWait(self, timeout)
-        message = 'Timeout waiting for window present by title \'{}\''.format(title)
+        message = f"Timeout waiting for window present by title '{title}'"
         wait.until(gec.window_present_by_title(title), message=message)
 
     def wait_for_window_present_by_url(self, url, timeout):
         """Wait for window/tab present by url"""
         wait = WebDriverWait(self, timeout)
-        message = 'Timeout waiting for window present by url \'{}\''.format(url)
+        message = f"Timeout waiting for window present by url '{url}'"
         wait.until(gec.window_present_by_url(url), message=message)

@@ -17,10 +17,26 @@ const Main = new function(){
 
     this.Utils = new function(){
 
-        this.getDateTimeFromTimestamp = function(timestamp){
+        // max length for tests, pages, suites and directories
+        this.MAXIMUM_FILENAME_LENGTH = 140;
+
+        this.getDateTimeFromTimestamp = function(timestamp) {
             var sp = timestamp.split('.');
             var dateTimeString = sp[0]+'/'+sp[1]+'/'+sp[2]+' '+sp[3]+':'+sp[4];
             return dateTimeString
+        }
+
+        this.secondsToReadableString = function(seconds) {
+            let str = '';
+            let min;
+            if(seconds >= 60) {
+                min = Math.floor(seconds/60);
+                str += min + 'm '
+                seconds = seconds % 60
+            }
+            seconds = seconds.toFixed(2)
+            str += seconds + 's'
+            return str
         }
 
         this.toast = function(type, msg, duration){
@@ -43,6 +59,12 @@ const Main = new function(){
                 ulContent += "<li>"+errors[e]+"</li>";
             }
             $("#errorList").html(ulContent);
+            if(errors.length > 1){
+                $("#errorModal .modal-title").html('Errors')
+            }
+            else{
+                $("#errorModal .modal-title").html('Error')
+            }
             $("#errorModal").modal("show");
             window.setTimeout(function(){
                 $("#errorModal .dismiss-modal").focus();
@@ -58,19 +80,27 @@ const Main = new function(){
         // var callback = function(){
         //     myCustomFunction(param1, param2);
         // }
-        this.displayConfirmModal = function(title, message, callback){
+        this.displayConfirmModal = function(title, message, callback, asyncEnableButton){
+            asyncEnableButton = asyncEnableButton || false;
             $("#confirmModal .modal-title").html(title);
             $("#confirmModal .modal-body").html(message);
-            $("#confirmModal button.confirm").click(function(){
+            let btn = $("#confirmModal #confirmModalConfirmButton");
+            btn.unbind('click');
+            btn.click(function(){
                 $("#confirmModal .modal-title").html('');
                 $("#confirmModal .modal-body").html('');
-                $("#confirmModal button.confirm").unbind('click');
                 $("#confirmModal").modal("hide");
                 callback();
             })
+
+            if(asyncEnableButton){
+                btn.button('loading');
+                setTimeout(function(){ btn.button('reset') }, 2000, btn)
+            }
+
             $("#confirmModal").modal("show");
             $('#confirmModal').on('shown.bs.modal', function () {
-                $("#confirmModal button.confirm").focus();
+                btn.focus();
             });
         }
 
@@ -83,10 +113,12 @@ const Main = new function(){
         // var callback = function(){
         //     myCustomFunction(param1, param2);
         // }
-        this.displayPromptModal = function(title, description, inputValue, inputPlaceholder, callback){
+        this.displayPromptModal = function(title, description, inputValue, inputPlaceholder, callback, validationCallback){
             $("#promptModal .modal-title").html(title);
             $("#promptModal .modal-body .description").html(description);
             $("#promptModal .modal-body input").val(inputValue);
+            $("#promptModal .modal-body input").attr('placeholder', inputPlaceholder);
+            $("#promptModal .error-msg").html('');
 
             $("#promptModal").modal("show");
             $('#promptModal').on('shown.bs.modal', function () {
@@ -95,12 +127,25 @@ const Main = new function(){
 
             var sendValue = function(){
                 var sentValue = $("#promptModalInput").val();
-                callback(sentValue);
-                $("#promptModal").modal("hide");
-                $("#prompSaveButton").unbind('click');
+                if(validationCallback){
+                    let error = validationCallback(sentValue);
+                    if(error.length) {
+                        $("#promptModal .error-msg").html(error);
+                    } else {
+                        callback(sentValue);
+                        $("#promptModal").modal("hide");
+                        $("#prompSaveButton").unbind('click');
+                    }
+                } else {
+                    callback(sentValue);
+                    $("#promptModal").modal("hide");
+                    $("#prompSaveButton").unbind('click');
+                }
             }
 
-            $("#promptModal button.confirm").click(function(){
+            let btn = $("#promptModal button.confirm");
+            btn.unbind('click');
+            btn.click(function(){
                 sendValue();
             })
         }
@@ -139,9 +184,23 @@ const Main = new function(){
                 $("#selectPromptSelect").unbind('change');
                 $("#selectPromptModal button.confirm").unbind('click');
             }
-            $("#selectPromptModal button.confirm").click(function(){
+            let btn = $("#selectPromptModal button.confirm");
+            btn.unbind('click');
+            btn.click(function(){
                 confirm();
             })
+        }
+
+        this.startGenericInlineName = function(inputSpan, valueSpan, currentValue, saveCallback) {
+            let input = inputSpan.find('input');
+            input.val(currentValue);
+            inputSpan.show();
+            valueSpan.hide();
+            input.focus();
+            input.unbind('blur');
+            input.unbind('keyup');
+            input.on('blur', (e) => saveCallback());
+            input.on('keyup', (e) => {if(e.keyCode == '13') e.target.blur()});
         }
 
         this.guid = function()  {
@@ -201,6 +260,12 @@ const Main = new function(){
             container.prepend(bar);
         }
 
+        // convert a comma separated string into an array
+        this.csvToArray = function(csvString){
+            let items = csvString.split(',').map(item => item.trim());
+            return items.filter(item => item.length > 0)
+        }
+
         // incomplete, not used
         this.MultiselectComponent = new function(){
 
@@ -221,6 +286,53 @@ const Main = new function(){
                 })
             }
         }
+
+        // validate a filename or directory name.
+        // a dot path is valid: 'dir1.dir2.filename1'
+        this.validateFilename = function(fullFilename, isDir){
+
+            function _validateName(name, isDir){
+                let errors = [];
+                if(name.length > Main.Utils.MAXIMUM_FILENAME_LENGTH){
+                    if(isDir)
+                        errors.push(`Directory name cannot exceed ${Main.Utils.MAXIMUM_FILENAME_LENGTH} characters`)
+                    else
+                        errors.push(`Filename cannot exceed ${Main.Utils.MAXIMUM_FILENAME_LENGTH} characters`)
+                }
+                else if(name.length == 0){
+                    // new filename or directory is empty, e.g.: 'dir01.'
+                    if(isDir)
+                        errors.push('New directory cannot be empty')
+                    else
+                        errors.push('New filename cannot be empty')
+                }
+                else if(/\W/.test(name)){
+                    errors.push('Only letters, numbers and underscores are allowed');
+                }
+                return errors
+            }
+
+            isDir = typeof(isDir) != 'undefined' ? isDir : false;
+            let errors = [];
+            let split = fullFilename.split('.');
+            let lastNode = split.pop();
+            split.forEach(function(node){
+                if(node.length == 0){
+                    // directory is empty, e.g.: '.test_name' or 'dir..test_name'
+                    errors.push('Directory name cannot be empty')
+                }
+                else{
+                    errors = errors.concat(_validateName(node, true))
+                }
+            })
+            errors = errors.concat(_validateName(lastNode, isDir));
+            return errors
+        }
+
+        // This does not work when the object contains arrays
+        this.shallowObjectCompare = (obj1, obj2) =>
+            Object.keys(obj1).length === Object.keys(obj2).length &&
+            Object.keys(obj1).every(key => obj2.hasOwnProperty(key) && obj1[key] === obj2[key]);
     }
 
 
@@ -268,15 +380,38 @@ const Main = new function(){
             $("#screenshotModal").modal('show');
         }
 
-        this.animateProgressBar = function(container, result, percentage){
+        this.animateProgressBar = function(container, result, percentage, qty){
             setTimeout(function(){
                 let bar = container.find(`div.progress-bar[result-code='${result}']`);
                 bar.css('width', `${percentage}%`);
+                if(qty) {
+                    bar.attr('data-toggle', 'tooltip');
+                    bar.attr('title', `${result}: ${qty}`);
+                    bar.tooltip();
+                    bar.attr('data-original-title', `${result}: ${qty}`);
+                }
             }, 100);
         }
 
         this.hasProgressBarForResult = function(container, result){
             return container.find(`div.progress-bar[result-code='${result}']`).length != 0
+        }
+    }
+
+    this.URLS = new function() {
+
+        this.reportDashboard = function(project, execution) {
+            if(project == undefined) {
+                return `/report/`
+            } else if(execution == undefined) {
+                return `/report/${project}/`
+            } else {
+                return `/report/${project}/${execution}/`
+            }
+        }
+
+        this.executionReport = function(project, execution, timestamp) {
+            return `/report/${project}/${execution}/${timestamp}/`
         }
     }
 
@@ -289,16 +424,19 @@ const Main = new function(){
         this.supportedBrowsers = [];
         this.projectEnvironments = [];
         this.browsers = '';
-        this.environments = '';
+        this.environments = [];
         this.processes = 1;
+        this.testFunctions = [];
 
         this.openConfigModal = async function(project, testName){
+            Main.TestRunner._clearInfoBars();
             Main.TestRunner.project = project;
             Main.TestRunner.testName = testName;
             await Main.TestRunner._getDefaultBrowser()
             if($("#runTestBrowsers").val().length == 0){
                 $("#runTestBrowsers").val(Main.TestRunner.defaultBrowser+', ');
             }
+            Main.TestRunner._startTestFunctionAutocomplete();
             Main.TestRunner._startBrowsersAutocomplete();
             await Main.TestRunner._getProjectEnvironments();
             Main.TestRunner._startEnvironmentsAutocomplete();
@@ -308,37 +446,48 @@ const Main = new function(){
         this.runTest = async function(project, testName){
             Main.TestRunner.project = project;
             Main.TestRunner.testName = testName;
+            Main.TestRunner.testFunctions = [];  // empty array indicates run all test functions
             let projectEnvironments = await Main.TestRunner._getProjectEnvironments();
             if(projectEnvironments.length > 1 && Main.TestRunner.environments.length == 0){
                  Main.TestRunner.openConfigModal(project, testName);
-                 $("#runTestConfigModal .info-bar-container").html('');
-                 Main.Utils.infoBar($("#runTestConfigModal .info-bar-container"), 'Select at least one environment')
+                 Main.TestRunner._clearInfoBars();
+                 Main.TestRunner.addInfoBar('Select at least one environment');
+            } else {
+                Main.TestRunner._doRunTestCase()
             }
-            else{ Main.TestRunner._doRunTestCase() }
         };
 
         this.runTestFromConfigModal = async function(){
-            let error = '';
-            Main.TestRunner.browsers = $("#runTestBrowsers").val();
-            Main.TestRunner.environments = $("#runTestEnvironments").val();
-            let processes = parseInt($("#runTestWorkers").val());
+            let errors = [];
+            // test functions
+            let testFunctions = Main.Utils.csvToArray($("#runTestFunctions").val());
+            Main.TestRunner.testFunctions = [...new Set(testFunctions)];  // remove duplicates
+            // browsers
+            Main.TestRunner.browsers = Main.Utils.csvToArray($("#runTestBrowsers").val());
+            // environments
             await Main.TestRunner._getProjectEnvironments();
-            if(isNaN(processes)){
-                error = 'Workers must be an integer'
+            Main.TestRunner.environments = Main.Utils.csvToArray($("#runTestEnvironments").val());
+            if(Main.TestRunner.projectEnvironments.length > 1 && Main.TestRunner.environments.length == 0){
+                errors.push('Select at least one environment')
             }
-            else if(Main.TestRunner.processes < 1){
-                error = 'Workers must be at least one'
+            Main.TestRunner.environments.forEach(function(env){
+                if(!Main.TestRunner.projectEnvironments.includes(env)){
+                    errors.push(`Environment <strong>${env}</strong> does not exist for project ${Main.TestRunner.project}`)
+                }
+            });
+            // processes
+            Main.TestRunner.processes = parseInt($("#runTestProcesses").val());
+            if(isNaN(Main.TestRunner.processes)){
+                errors.push('Processes must be an integer')
+            } else if(Main.TestRunner.processes < 1){
+                errors.push('Processes must be at least one')
             }
-            else if(Main.TestRunner.projectEnvironments.length > 1 && Main.TestRunner.environments.length == 0){
-                error = 'Select at least one environment'
-            }
-            Main.TestRunner.processes = processes;
-            if(error.length > 0){
+
+            if(errors.length > 0){
                 Main.TestRunner.openConfigModal(Main.TestRunner.project, Main.TestRunner.testName);
-                $("#runTestConfigModal .info-bar-container").html('');
-                Main.Utils.infoBar($("#runTestConfigModal .info-bar-container"), error);
-            }
-            else{
+                Main.TestRunner._clearInfoBars();
+                errors.forEach( error => Main.TestRunner.addInfoBar(error) );
+            } else {
                 Main.TestRunner._doRunTestCase();
             }
         };
@@ -349,34 +498,17 @@ const Main = new function(){
 
         this._doRunTestCase = function(){
             Main.Utils.toast('info', 'Running test ' + Main.TestRunner.testName, 3000);
-            // This is beautiful :O
-            // var csvToArray = csvstr => csvstr.length == 0 ? [] : csvstr.split(',').map(item => item.trim());
-            var csvToArray = function(csvString){
-                if(csvString.length == 0){
-                    return []
-                }
-                else{
-                    let items =csvString.split(',').map(item => item.trim());
-                    return items.filter(item => item.length > 0)
-                }
-            }
 
-            $.ajax({
-                url: "/run_test_case/",
-                data: JSON.stringify({
-                     "project": Main.TestRunner.project,
-                     "testName": Main.TestRunner.testName,
-                     "browsers": csvToArray(Main.TestRunner.browsers),
-                     "environments": csvToArray(Main.TestRunner.environments),
-                     "processes": Main.TestRunner.processes
-                 }),
-                dataType: 'json',
-                contentType: 'application/json; charset=utf-8',
-                type: 'POST',
-                success: function(timestamp) {
-                    Main.TestRunner._openResultModal(timestamp);
-                 }
-             });
+            xhr.post('/api/test/run', {
+                project: Main.TestRunner.project,
+                testName: Main.TestRunner.testName,
+                testFunctions: Main.TestRunner.testFunctions,
+                browsers: Main.TestRunner.browsers,
+                environments: Main.TestRunner.environments,
+                processes: Main.TestRunner.processes
+            }, timestamp => {
+                Main.TestRunner._openResultModal(timestamp);
+            })
         }
 
         this._openResultModal = function(timestamp){
@@ -385,7 +517,7 @@ const Main = new function(){
             $("#testRunModal #testRunModalTabNav").html('');
             $("#testRunModalTabNav").hide();
             $("#testRunModal #TestRunModalTabContainer").html('');
-            $("#testRunModal #testRunModalLoadingIcon").show()
+            $("#testRunModal #testRunModalLoadingIcon").show();
             $("#testResults").html('');
             $("#testResultLogs").html('');
             $("#testRunModal").modal("show");
@@ -393,36 +525,29 @@ const Main = new function(){
             Main.TestRunner._checkAndRecheckStatus(checkDelay, timestamp);
         }
 
-        this._checkAndRecheckStatus = function(checkDelay, timestamp){
-            $.ajax({
-                url: "/check_test_case_run_result/",
-                data: {
-                     "project": Main.TestRunner.project,
-                     "testCaseName": Main.TestRunner.testName,
-                     "timestamp": timestamp
-                },
-                dataType: 'json',
-                type: 'POST',
-                success: function(result) {
-                    for (const [setName, values] of Object.entries(result.sets)){
-                        Main.TestRunner._updateSet(setName, values, timestamp)
-                    }
-                    checkDelay += 100;
-                    if(result.is_finished){
-                        $("#testRunModal #testRunModalLoadingIcon").hide()
-                    }
-                    else{
-                         setTimeout(function(){
-                            Main.TestRunner._checkAndRecheckStatus(checkDelay, timestamp);
-                        }, checkDelay, Main.TestRunner.project, Main.TestRunner.testName, timestamp);
-                    }
+        this._checkAndRecheckStatus = function(checkDelay, timestamp) {
+            xhr.get('/api/report/test/status', {
+                project: Main.TestRunner.project,
+                test: Main.TestRunner.testName,
+                timestamp: timestamp
+            }, result => {
+                for (const [setName, values] of Object.entries(result.sets)) {
+                    Main.TestRunner._updateSet(setName, values, timestamp)
                 }
-            });
+                checkDelay += 100;
+                if(result.has_finished) {
+                    $("#testRunModal #testRunModalLoadingIcon").hide()
+                } else {
+                    setTimeout(function() {
+                        Main.TestRunner._checkAndRecheckStatus(checkDelay, timestamp);
+                    }, checkDelay, Main.TestRunner.project, Main.TestRunner.testName, timestamp);
+                }
+            })
         }
 
         this._getDefaultBrowser = async function(){
             if(Main.TestRunner.defaultBrowser == undefined){
-                await $.get('/get_default_browser/', function(defaultBrowser){
+                await $.get('/api/golem/default-browser', function(defaultBrowser){
                       Main.TestRunner.defaultBrowser = defaultBrowser;
                 });
             }
@@ -431,8 +556,8 @@ const Main = new function(){
 
         this._startBrowsersAutocomplete = async function(){
             if(Main.TestRunner.supportedBrowsers.length == 0){
-                await $.get('/get_supported_browsers/', {'project': Main.TestRunner.project}, function(supportedBrowsers){
-                      Main.TestRunner.supportedBrowsers = JSON.parse(supportedBrowsers);
+                await $.get('/api/project/supported-browsers', {'project': Main.TestRunner.project}, function(supportedBrowsers){
+                      Main.TestRunner.supportedBrowsers = supportedBrowsers;
                 });
             }
             $('#runTestBrowsers').autocomplete({
@@ -446,10 +571,29 @@ const Main = new function(){
             });
         }
 
+        this._startTestFunctionAutocomplete = async function(){
+            let testFunctions = [];
+            try {
+                // This will fail if this is not run from the Test Builder
+                testFunctions = Test.getAllTestFunctionNames();
+            } catch (e) {
+                console.error('Test functions cannot be obtained')
+            }
+            $('#runTestFunctions').autocomplete({
+                lookup: testFunctions,
+                minChars: 0,
+                delimiter: ', ',
+                triggerSelectOnValidInput: false,
+                onSelect: function (suggestion) {
+                    $('#runTestFunctions').val($('#runTestFunctions').val()+', ');
+                }
+            });
+        }
+
         this._getProjectEnvironments = async function(){
             if(Main.TestRunner.projectEnvironments.length == 0){
-                await $.get('/get_environments/', {'project': Main.TestRunner.project}, function(environments){
-                      Main.TestRunner.projectEnvironments = JSON.parse(environments);
+                await $.get('/api/project/environments', {'project': Main.TestRunner.project}, function(environments){
+                      Main.TestRunner.projectEnvironments = environments//JSON.parse(environments);
                 });
             }
             return Main.TestRunner.projectEnvironments
@@ -487,21 +631,56 @@ const Main = new function(){
             }
         }
 
-        this._loadSetReport = function(setName, report, timestamp){
-            let reportContainer = $("<div class='report-result'></div>");
-            let resultIcon = Main.Utils.getResultIcon(report.result);
-            reportContainer.append(`<div class="test-result"><strong>Result:</strong> ${report.result} ${resultIcon}</div>`);
-            reportContainer.append('<div><strong>Errors:</strong></div>');
-            if(report.errors.length > 0){
-                let errorsList = $("<ol class='error-list' style='margin-left: 20px'></ol>");
-                report.errors.forEach(function(error){
-                    errorsList.append(`<li>${error.message}</li>`);
+        this._updateSet = function(setName, testFileReport, timestamp){
+            Main.TestRunner._addTabIfDoesNotExist(setName);
+            let tab = $(`.test-run-tab-content[set-name='${setName}']`);
+            // update log
+            if(testFileReport.log_info != null) {
+                testFileReport.log_info.forEach(function(line){
+                    let displayedLinesStrings = [];
+                    tab.find('.test-result-logs div.log-line').each(function(){
+                          displayedLinesStrings.push($(this).html())
+                     });
+                    if(!displayedLinesStrings.includes(line)){
+                        tab.find('.test-result-logs').append("<div class='log-line'>"+line+"</div>");
+                        $('.modal-body').scrollTop($('.modal-body')[0].scrollHeight);
+                    }
                 });
-                reportContainer.append(errorsList);
-            };
-            reportContainer.append(`<div><strong>Elapsed Time:</strong> ${report.test_elapsed_time}</div>`);
-            reportContainer.append(`<div><strong>Browser:<strong> ${report.browser}</div>`);
-            reportContainer.append(`<div><strong>Steps:</strong></div>`);
+            }
+            // update test file functions if this test file set has finished
+            // a test file set is finished when there is no test function
+            // with result pending or running
+            let somePending = testFileReport.report.some(testFunction => testFunction.result == Main.ResultsEnum.pending.code);
+            let someRunning = testFileReport.report.some(testFunction => testFunction.result == Main.ResultsEnum.running.code);
+
+            if(!somePending && !someRunning){
+                let tabNav = $(`.test-run-tab[set-name='${setName}']`);
+                if(tabNav.attr('running') == 'true'){
+                    tabNav.removeAttr('running');
+                    tabNav.find('i').remove();
+                    testFileReport.report.forEach((r) => {
+                        Main.TestRunner._loadOrUpdateTestFunctionReport(tab, setName, r, timestamp);
+                    })
+                }
+            }
+        }
+
+        this._loadOrUpdateTestFunctionReport = function(tab, setName, report, timestamp){
+            let testFunctionReport = $(`
+                <div class='report-result' test-function-name='${report.test}'>
+                    <h4>${report.test}</h4>
+                </div>`);
+            tab.append(testFunctionReport);
+
+            let resultIcon = Main.Utils.getResultIcon(report.result);
+            testFunctionReport.append(`<div class="test-result"><strong style='display: inline-block; width: 120px'>Result:</strong> <span>${report.result} ${resultIcon}</span></div>`);
+
+            testFunctionReport.append(`<div><strong style='display: inline-block; width: 120px'>Browser:</strong> ${report.browser}</div>`);
+            if(report.environment) {
+                testFunctionReport.append(`<div><strong style='display: inline-block; width: 120px'>Environment:</strong> ${report.environment}</div>`);
+            }
+            testFunctionReport.append(`<div><strong style='display: inline-block; width: 120px'>Elapsed Time:</strong> ${report.elapsed_time}</div>`);
+            testFunctionReport.append(`<div><strong style='display: inline-block; width: 120px'>Steps:</strong></div>`);
             if(report.steps.length > 0){
                 let stepsList = $("<ol class='step-list' style='margin-left: 20px'></ol>");
                 report.steps.forEach(function(step){
@@ -511,7 +690,7 @@ const Main = new function(){
                     }
                     if(step.screenshot){
                         let guid = Main.Utils.guid();
-                        let screenshotUrl = `/test/screenshot/${Main.TestRunner.project}/${Main.TestRunner.testName}/${timestamp}/${setName}/${step.screenshot}/`;
+                        let screenshotUrl = `/report/screenshot/${Main.TestRunner.project}/${Main.TestRunner.testName}/${timestamp}/${Main.TestRunner.testName}/${setName}/${report.test}/${step.screenshot}/`;
                         let screenshotIcon = `
                             <span class="cursor-pointer glyphicon glyphicon-picture" aria-hidden="true"
                                 data-toggle="collapse" data-target="#${guid}"
@@ -524,35 +703,26 @@ const Main = new function(){
                     }
                     stepsList.append(stepContent);
                 });
-                reportContainer.append(stepsList)
+                testFunctionReport.append(stepsList)
             }
-            $(`.test-run-tab-content[set-name='${setName}']>.test-results`).html(reportContainer.html());
+            testFunctionReport.append(`<div><strong style='display: inline-block; width: 120px'>Errors:</strong></div>`);
+            if(report.errors.length > 0){
+                let errorsList = $("<ol class='error-list' style='margin-left: 20px'></ol>");
+                report.errors.forEach(function(error){
+                    errorsList.append(`<li>${error.message}</li>`);
+                });
+                testFunctionReport.append(errorsList);
+            };
+            testFunctionReport.append(`<br>`);
             $('.modal-body').scrollTop($('.modal-body')[0].scrollHeight);
         }
 
-        this._updateSet = function(setName, values, timestamp){
-            Main.TestRunner._addTabIfDoesNotExist(setName);
-            let tab = $(`.test-run-tab-content[set-name='${setName}']`);
-            values.log.forEach(function(line){
-                let displayedLinesStrings = [];
-                tab.find('.test-result-logs div.log-line').each(function(){
-                      displayedLinesStrings.push($(this).html())
-                 });
-                if(!displayedLinesStrings.includes(line)){
-                    tab.find('.test-result-logs').append("<div class='log-line'>"+line+"</div>");
-                    $('.modal-body').scrollTop($('.modal-body')[0].scrollHeight);
-                }
-            });
-            // If this test set has finished
-            if(values.report != null){
-                let tabNav = $(`.test-run-tab[set-name='${setName}']`);
-                if(tabNav.attr('running') == 'true'){
-                    tabNav.removeAttr('running');
-                    tabNav.find('i').remove();
-                    tabNav.find('a').append(Main.Utils.getResultIcon(values.report.result));
-                    Main.TestRunner._loadSetReport(setName, values.report, timestamp);
-                }
-            }
+        this.addInfoBar = function(msg){
+            Main.Utils.infoBar($("#runTestConfigModal .info-bar-container"), msg)
+        }
+
+        this._clearInfoBars = function(){
+            $("#runTestConfigModal .info-bar-container").html('');
         }
     }
 
@@ -585,10 +755,62 @@ const Main = new function(){
         'skipped': {
             code: 'skipped',
             color: '#ced4da'
-        },
-        'not run': {
-            code: 'skipped',
-            color: '#868e96'
         }
+    }
+
+    this.PermissionWeightsEnum = {
+        superuser: 50,
+        admin: 40,
+        standard: 30,
+        readOnly: 20,
+        reportsOnly: 10
+    }
+
+    this.FILE_TYPES = {
+        test: 'test',
+        page: 'page',
+        suite: 'suite'
+    }
+}
+
+const xhr = new function() {
+
+    this.get = function(url, params, success, error) {
+        error = error || (error => console.error('Error:', error));
+        if(Object.keys(params).length) {
+            url = new URL(url, location.origin);
+            url.search = new URLSearchParams(params).toString();
+        }
+        fetch(url, {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'}
+        })
+        .then(res => res.json())
+        .then(result => success(result))
+        .catch(e => error(e))
+    }
+
+    this._request = function(method, url, body, success, error) {
+        error = error || (error => console.error('Error:', error));
+        fetch(url, {
+            method: method,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        })
+        .then(res => res.json())
+        .then(result => success(result))
+        .catch(e => error(e))
+    }
+
+    this.post = function(url, body, success, error) {
+        xhr._request('POST', url, body, success, error)
+    }
+
+    this.put = function(url, body, success, error) {
+        xhr._request('PUT', url, body, success, error)
+    }
+
+    this.delete = function(url, body, success, error) {
+        xhr._request('DELETE', url, body, success, error)
     }
 }

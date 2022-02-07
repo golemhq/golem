@@ -1,282 +1,155 @@
 
-$(document).ready(function() {
-	let limit;
-	if(projects == []) limit = 5;
-	else if(suiteName == "") limit = 10
-	else limit = 50;
-	$.ajax({
-		url: "/report/get_last_executions/",
-		data: JSON.stringify({
-            "projects": projects,
-            "suite": suiteName,
-            "limit": limit
-        }),
-        contentType: 'application/json; charset=utf-8',
-        type: 'POST',
-		success: function( data ) {	
-	  		for(project in data.projects){
-	  			ReportDashboardMain.loadProject(project, data.projects[project]);
-	  		}
-	  	}
-	});
-});
+let project = null;
+let execution = null;
 
+$(document).ready(function() {
+    project = projectName;
+    execution = executionName;
+    fillInBreadcrumb(project, execution);
+    if(project == null) {
+        $('#reportTable thead tr').prepend('<th>Project</th>')
+    }
+    loadTable();
+})
+
+function loadTable() {
+    let lastDays = getLastDaysValue();
+    xhr.get('/api/report/get-reports', {project, execution, lastDays}, data => {
+        $('#reportTable tbody').html('');
+        for(report in data) {
+            ReportDashboardMain.loadReport(data[report]);
+        }
+    })
+}
 
 const ReportDashboardMain = new function(){
 
-    this.charts = {}
+    this.loadReport = function(report) {
+        let executionName = report.execution;
+        if(executionName == 'all') {
+            executionName = 'all tests'
+        }
+        let reportRow = $(`
+            <tr project="${report.project}" execution="${report.execution}" timestamp="${report.timestamp}">
+                <td><a class="link-without-underline"
+                    href="${Main.URLS.reportDashboard(report.project, report.execution)}">${executionName}</a></td>
+                <td class="browsers">${report.report.params.browsers.map(b => b.name).join(', ')}</td>
+                <td class="environments">${report.report.params.environments.join(', ')}</td>
+                <td class="started">${Main.Utils.getDateTimeFromTimestamp(report.timestamp)}</td>
+                <td class="duration">${Main.Utils.secondsToReadableString(report.report.net_elapsed_time)}</td>
+                <td>${report.report.total_tests}</td>
+                <td><div class="progress"></div></td>
+                <td class="menu-buttons">
+                    <a class="link-without-underline" href="${Main.URLS.executionReport(report.project, report.execution, report.timestamp)}">
+                        <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>
+                    </a>
+                    <i class="glyphicon glyphicon-trash cursor-pointer" style="display: none;"
+                        onclick="event.stopPropagation(); ReportDashboardMain.deleteExecutionTimestampConfirm(this)"></i>
+                    <i class="fa fa-cog fa-spin spinner" style="display: none;"></i>
+                    <i class="glyphicon glyphicon-pause cursor-pointer" style="display: none;"></i>
+                </td>
+	        </tr>`);
 
-    this.loadProject = function(project, projectData){
-        let projectContainer;
-        if(suiteName || projects.length == 1)
-            projectContainer = ReportDashboard.generateProjectContainerSingleSuite(project);
-        else
-            projectContainer = ReportDashboard.generateProjectContainer(project);
-        if(Object.keys(projectData).length == 0){
-            projectContainer.append('<p>There are no executions for this project</p>')
+        if(project == null) {
+            reportRow.prepend(`<td><a class="link-without-underline"
+                    href="${Main.URLS.reportDashboard(report.project)}">${report.project}</a></td>`)
         }
-        for(suite in projectData){
-            let suiteContainer;
-            if(suiteName)
-                suiteContainer = ReportDashboard.generateExecutionsContainerSingleSuite(project, suite);
-            else
-                suiteContainer = ReportDashboard.generateExecutionsContainer(project, suite);
-            // fill in last executions table
-            let index = 1;
-            let executions = []
-            for(e in projectData[suite]){
-                let execution = projectData[suite][e];
-                let dateTime = Main.Utils.getDateTimeFromTimestamp(execution);
-                executions.push(execution)
-                let row = ReportDashboard.generateExecutionsTableRow({
-                    project: project,
-                    suite: suite,
-                    execution: execution,
-                    index: index.toString(),
-                    dateTime: dateTime,
-                    environment: ''
-                });
-                ReportDashboardMain.loadChartAndBars(project, suite, execution, row);
-                suiteContainer.find("tbody").append(row);
-                index += 1;
-            }
-            projectContainer.append(suiteContainer);
-            // create chart for suite
-            let ctx = suiteContainer.find('canvas')[0].getContext('2d');
-            let chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: executions,
-                    datasets: []
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            stacked: true,
-                            ticks: {
-                                beginAtZero: true
-                            }
-                        }],
-                         xAxes: [{
-                            display: false
-                        }]
-                    },
-                    elements: {
-                        line: {
-                            tension: 0, // disables bezier curves
-                        }
-                    },
-                    tooltips: {
-                        callbacks: {
-                            title: function(tooltipItems, data) {
-                               return Main.Utils.getDateTimeFromTimestamp(data.labels[tooltipItems[0].index]);
-                             }
-                        }
-                    },
-                    maintainAspectRatio: false,
-                }
-            });
-            ReportDashboardMain.charts[project+suite] = chart;
-        }
-        $(".all-projects-container").append(projectContainer);
+
+        $('#reportTable tbody').append(reportRow)
+
+        this.updateRow(reportRow, report.project, report.execution, report.timestamp, report.report)
     }
 
-    this.loadChartAndBars = function(project, suite, execution, row){
-         $.ajax({
-            url: "/report/get_execution_data/",
-            data: {
-                project: project,
-                suite: suite,
-                execution: execution
-            },
-            dataType: 'json',
-            type: 'GET',
-            success: function( executionData ) {
+    this.updateRow = function(row, project, execution, timestamp, report) {
 
-                let results = Object.keys(executionData.totals_by_result).sort()
-                let container = row.find('td.result>div.progress');
-                results.forEach(function(result){
-                    if(!Main.ReportUtils.hasProgressBarForResult(container, result)){
-                        Main.ReportUtils.createProgressBars(container, [result])
-                    }
-                    let percentage = executionData.totals_by_result[result] * 100 / executionData.total_tests;
-                    Main.ReportUtils.animateProgressBar(container, result, percentage);
-                });
-                if(!('pending' in executionData.totals_by_result)){
-                    Main.ReportUtils.animateProgressBar(container, 'pending', 0);
+        let _updateRow = function(row, report) {
+            let results = Object.keys(report.totals_by_result).sort();
+            let container = row.find('div.progress');
+            results.forEach(result => {
+                if(!Main.ReportUtils.hasProgressBarForResult(container, result)) {
+                    Main.ReportUtils.createProgressBars(container, [result])
                 }
-                ReportDashboardMain.updateChart({
-                    project: project,
-                    suite: suite,
-                    label: execution,
-                    totalsByResult: executionData.totals_by_result
-                });
-                if(executionData.has_finished){
-                    row.find('.spinner').hide();
+                let percentage = report.totals_by_result[result] * 100 / report.total_tests;
+                Main.ReportUtils.animateProgressBar(container, result, percentage, report.totals_by_result[result]);
+            });
+            if(!('pending' in report.totals_by_result)) {
+                Main.ReportUtils.animateProgressBar(container, 'pending', 0);
+            }
+
+            if(report.has_finished) {
+                row.find('.browsers').html(report.params.browsers.map(b => b.name).join(', '));
+                row.find('.environments').html(report.params.environments.join(', '));
+                row.find('.duration').html(Main.Utils.secondsToReadableString(report.net_elapsed_time));
+                row.find('.spinner').hide();
+//                row.find('.glyphicon-pause').hide();
+                if(Global.user.projectWeight >= Main.PermissionWeightsEnum.admin) {
+                    row.find('.glyphicon-trash').show()
                 }
-                else{
-                    row.find('.spinner').show();
-                    window.setTimeout(function(){
-                        ReportDashboardMain.loadChartAndBars(project, suite, execution, row);
-                    }, 2000, project, suite, execution, row)
+            } else {
+                // If an execution has taken more than 24 hs show the delete button
+                // If Golem crashed during an execution and the report was not
+                // generated, the execution will remain in a "running" state forever
+                // TODO
+                let dateStr = Main.Utils.getDateTimeFromTimestamp(timestamp);
+                let unixTimestamp = Date.parse(dateStr);
+                let elapsedHours = (Date.now() - unixTimestamp) / 1000 / 60 / 60;
+                if(elapsedHours > 24) {
+                    row.find('.glyphicon-trash').show()
                 }
+//                row.find('.glyphicon-pause').show();
+                row.find('.spinner').show();
+                setTimeout(ReportDashboardMain.updateRow, 3000, row, project, execution, timestamp)
+            }
+        }
+
+        if(report == undefined) {
+            xhr.get('/api/report/execution', {project, execution, timestamp}, report => {
+                _updateRow(row, report)
+            })
+        } else {
+            _updateRow(row, report)
+        }
+    }
+
+    this.deleteExecutionTimestampConfirm = function(elem) {
+        let row = $(elem).closest('tr');
+        let project = row.attr('project');
+        let execution = row.attr('execution');
+        let timestamp = row.attr('timestamp');
+        let message = `<span style="word-break: break-all">Are you sure you want to delete this execution? This action cannot be undone.</span>`;
+        let callback = function() {
+            ReportDashboardMain.deleteExecutionTimestamp(row, project, execution, timestamp);
+        }
+        Main.Utils.displayConfirmModal('Delete', message, callback);
+    }
+
+    this.deleteExecutionTimestamp = function(row, project, execution, timestamp){
+        xhr.delete('/api/report/execution/timestamp', {project, execution, timestamp}, errors => {
+            if(errors.length) {
+                errors.forEach(error => Main.Utils.toast('error', error, 3000));
+            } else {
+                row.remove();
+                Main.Utils.toast('info', 'Execution deleted', 2000)
             }
         });
-    }
-
-    this.updateChart = function(data){
-        let chart = ReportDashboardMain.charts[data.project+data.suite];
-        let indexOfLabel = chart.data.labels.indexOf(data.label);
-
-        for(result in data.totalsByResult){
-            let dataSetIndex = chart.data.datasets.map(function(o) { return o.label; }).indexOf(result);
-            // Add data set if it´s not already present
-            if(dataSetIndex === -1){
-                let color =  Main.ReportUtils.getResultColor(result);
-                // because not all executions have values for all
-                // results, this causes steps in the chart lines.
-                // Initialize the values for this dataset to 0
-                let defaultData = [];
-                chart.data.labels.forEach(() => defaultData.push(0));
-                let dataSet = {
-                    label: result,
-                    backgroundColor: color,
-                    borderColor: color,
-                    data: defaultData,
-                }
-               chart.data.datasets.push(dataSet);
-            }
-            let indexOfDatasetLabel = chart.data.datasets.map(function(o) { return o.label; }).indexOf(result);
-            chart.data.datasets[indexOfDatasetLabel].data[indexOfLabel] = data.totalsByResult[result];
-
-            if(!('pending' in data.totalsByResult)){
-                // when suite finishes, set pending to 0
-                indexOfDatasetLabel = chart.data.datasets.map(function(o) { return o.label; }).indexOf('pending');
-                let pendingDataset = chart.data.datasets[indexOfDatasetLabel];
-                if(pendingDataset != undefined){
-                    pendingDataset.data[indexOfLabel] = 0;
-                }
-            }
-        };
-        chart.update();
+        return false
     }
 }
 
+function fillInBreadcrumb(project, execution) {
+    if(project != null) {
+        if(execution == null) {
+            $("#breadcrumb").html(
+                `<a class="link-without-underline" href="/report/">All Projects</a> > ${project}`)
+        }
+        if(execution != null) {
+            $("#breadcrumb").html(
+                `<a class="link-without-underline" href="/report/">All Projects</a> >
+                <a class="link-without-underline" href="/report/${project}/">${project}</a> > ${execution}`)
+        }
+    }
+}
 
-const ReportDashboard = new function(){
-
-    this.generateProjectContainer = function(projectName){
-        let projectContainer = " \
-            <div class='col-md-12 project-container' id='"+projectName+"'> \
-                <h3 class='no-margin-top'> \
-                    <a href='/report/project/"+projectName+"/' class='link-without-decoration'>"+projectName.replace('_',' ')+"</a> \
-                </h3> \
-            </div>";
-        return $(projectContainer)
-    };
-
-    this.generateProjectContainerSingleSuite = function(projectName){
-        let projectContainer = " \
-            <div class='col-md-12 project-container' id='"+projectName.replace('_',' ')+"'></div>";
-        return $(projectContainer)
-    };
-
-    this.generateExecutionsContainer = function(projectName, suiteName){
-        let executionsContainer = "\
-            <div class='suite-container' id='"+suiteName+"'> \
-                <div class='widget widget-table'> \
-                    <div class='widget-header'> \
-                        <h3><i class='fa fa-table'></i><span class='suite-name'> \
-                            <a href='/report/project/"+projectName+"/suite/"+suiteName+"/' \
-                                class='link-without-decoration'><strong>"+suiteName+"</strong></a> \
-                        </span></h3> \
-                    </div> \
-                    <div class='flex-row'>\
-                        <div class='widget-content table-content col-sm-7'> \
-                            <div class='table-responsive last-execution-table'> \
-                                <table class='table no-margin-bottom'> \
-                                    <thead> \
-                                        <tr> \
-                                            <th>#</th> \
-                                            <th>Date & Time</th> \
-                                            <th>Environment</th> \
-                                            <th>Result &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</th> \
-                                            <th></th> \
-                                        </tr> \
-                                    </thead> \
-                                    <tbody></tbody> \
-                                </table> \
-                            </div> \
-                        </div> \
-                        <div class='col-sm-5 table-content chart-container'> \
-                            <div class='chart-inner-container'>\
-                                <canvas></canvas>\
-                            </div>\
-                        </div> \
-                    </div>\
-                </div> \
-            </div>";
-        return $(executionsContainer)
-    };
-
-    this.generateExecutionsContainerSingleSuite = function(projectName, suiteName){
-        let executionsContainer = "\
-            <div class='suite-container' id='"+suiteName+"'> \
-                <div class='widget widget-table'> \
-                    <div style='height: 218px; padding: 10px'> \
-                        <canvas></canvas>\
-                    </div> \
-                    <div class='widget-content table-content'> \
-                        <div class='table-responsive last-execution-table'> \
-                            <table class='table no-margin-bottom'> \
-                                <thead> \
-                                    <tr> \
-                                        <th>#</th> \
-                                        <th>Date & Time</th> \
-                                        <th>Environment</th> \
-                                        <th>Result &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp</th> \
-                                        <th></th> \
-                                    </tr> \
-                                </thead> \
-                                <tbody></tbody> \
-                            </table> \
-                        </div> \
-                    </div> \
-                </div> \
-            </div>";
-        return $(executionsContainer)
-    };
-
-    this.generateExecutionsTableRow = function(data){
-        let suiteReportUrl = `document.location.href='/report/project/${data.project}/suite/${data.suite}/${data.execution}'`;
-        let row = `
-            <tr class="cursor-pointer" onclick="${suiteReportUrl}">
-                <td class="index">${data.index}</td>
-                <td class="date">${data.dateTime}</td>
-                <td class="environment">${data.environment}</td>
-                <td class="result"><div class="progress"></div></td>
-                <td class="spinner-container"><i class="fa fa-cog fa-spin spinner" style="display: none"></td>
-            </tr>`;
-        return $(row);
-    };
+function getLastDaysValue() {
+    return $("#lastDaysSelector").val()
 }

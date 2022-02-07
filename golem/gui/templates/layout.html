@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{% endblock %}</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/icons/favicon-32x32.png') }} ">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/icons/favicon-16x16.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='img/icons/favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/toastr/toastr.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome/font-awesome.min.css') }}">
@@ -29,84 +32,58 @@
             <div class="sidebar-header">
                 <a href="/"><h3>Golem</h3><strong>G</strong></a>
             </div>
+            {% if g.user.is_authenticated %}
             <ul class="list-unstyled components">
-                {% if project%}
-                <li>
-                    <a href="/project/{{project}}/suites/">
-                        <i class="glyphicon glyphicon-tasks"></i>
-                        Suites
-                    </a>
-                </li>
-                <li>
-                    <a href="/project/{{project}}/tests/">
-                        <i class="fa fa-file-code-o" aria-hidden="true"></i>
-                        Tests
-                    </a>
-                </li>
-                <li>
-                    <a href="/project/{{project}}/pages/">
-                        <i class="fa fa-book" aria-hidden="true"></i>
-                        Pages
-                    </a>
-                </li>
-                <li>
-                    <a href="/report/project/{{project}}/">
-                        <i class="fa fa-bar-chart" aria-hidden="true"></i>
-                        Reports
-                    </a>
-                </li>
-                <li>
-                    <a href="/project/{{project}}/settings/">
-                        <i class="fa fa-cogs" aria-hidden="true"></i>
-                        Settings
-                    </a>
-                </li>
-                <li>
-                    <a href="/project/{{project}}/environments/">
-                        <i class="fa fa-sitemap" aria-hidden="true"></i>
-                        Environments
-                    </a>
-                </li>
+                <div class="dropdown project-dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="projectSelectDropdown" data-toggle="dropdown"
+                          aria-haspopup="true" aria-expanded="true">{% if project %}{{project}}{% else %}Project{% endif %}<span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="projectSelectDropdown">
+                        {% for p in get_user_projects() %}
+                        <li><a href="/project/{{p}}/">{{p}}</a></li>
+                        {% endfor %}
+                  </ul>
+                </div>
+            </ul>
+            <ul class="list-unstyled components">
+                {% if project %}
+                    {% if g.user.project_permission(project) != 'reports-only' %}
+                    <li><a href="/project/{{project}}/suites/"><i class="glyphicon glyphicon-tasks"></i>Suites</a></li>
+                    <li><a href="/project/{{project}}/tests/"><i class="fa fa-file-code-o" aria-hidden="true"></i>Tests</a></li>
+                    <li><a href="/project/{{project}}/pages/"><i class="fa fa-book" aria-hidden="true"></i>Pages</a></li>
+                    <li><a href="/project/{{project}}/settings/"><i class="fa fa-cogs" aria-hidden="true"></i>Settings</a></li>
+                    <li><a href="/project/{{project}}/environments/"><i class="fa fa-sitemap" aria-hidden="true"></i>Environments</a></li>
+                    {% endif %}
+                <li><a href="/report/{{project}}/"><i class="fa fa-bar-chart" aria-hidden="true"></i>Reports</a></li>
                 {% else %}
-                <li>
-                    <a href="/report/">
-                        <i class="fa fa-bar-chart" aria-hidden="true"></i>
-                        Reports
-                    </a>
-                </li>
-                <li>
-                    <a href="/settings/">
-                        <i class="fa fa-cogs" aria-hidden="true"></i>
-                        Settings
-                    </a>
-                </li>
+                <li><a href="/report/"><i class="fa fa-bar-chart" aria-hidden="true"></i>Reports</a></li>
                 {% endif %}
             </ul>
-
+            {% if g.user.is_superuser %}
+            <ul class="list-unstyled components">
+                <li><a href="/settings/"><i class="fa fa-cogs" aria-hidden="true"></i>Global Settings</a></li>
+                <li><a href="/drivers/"><i class="fa fa-puzzle-piece" aria-hidden="true"></i>Drivers</a></li>
+                <li><a href="/users/"><i class="fa fa-users" aria-hidden="true"></i>Users</a></li>
+            </ul>
+            {% endif %}
+            {% endif %}
             <ul class="list-unstyled components">
                 {% if g.user.is_authenticated %}
                 <li>
                     <a href="#pageSubmenu" id="userMenu" data-toggle="collapse" aria-expanded="false">
-                        <i class="fa fa-user-circle-o" aria-hidden="true"></i>
-                        {{ g.user.username }}
+                        <i class="fa fa-user-circle-o" aria-hidden="true"></i>{{ g.user.username }}
                     </a>
                     <ul class="collapse list-unstyled" id="pageSubmenu">
+                        <li><a href="/user/">Profile</a></li>
                         <li><a href="/logout/">Log out</a></li>
                     </ul>
                 </li>
                 {% else %}
-                <li>
-                    <a href="/login/">
-                        <i class="glyphicon glyphicon-send"></i>
-                        Log in
-                    </a>
-                </li>
+                <li><a href="/login/"><i class="glyphicon glyphicon-send"></i>Log in</a></li>
                 {% endif %}
             </ul>
             <ul class="list-unstyled">
-                <li>
-                    <a href="#" id="sidebarCollapse" class="collapse-sidebar"><i class="glyphicon" aria-hidden="true"></i></a>
-                </li>
+                <li><a href="#" id="sidebarCollapse" class="collapse-sidebar"><i class="glyphicon" aria-hidden="true"></i></a></li>
             </ul>
             <div id="sidebarVersion">
                 <span>{{config.GOLEM_VERSION}}</span>
@@ -128,15 +105,15 @@
 <div class="modal fade" id="errorModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header" style="border-bottom: none">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Error</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding:5px">
                 <ul id="errorList">
                 </ul>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" style="border-top: none">
                 <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Continue</button>
             </div>
         </div>
@@ -154,8 +131,8 @@
             <div class="modal-body">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">No</button>
-                <button type="button" class="btn btn-primary confirm">Delete</button>
+                <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary confirm" id="confirmModalConfirmButton">Delete</button>
             </div>
         </div>
     </div>
@@ -173,7 +150,8 @@
                 <div class='description'></div>
                 <br>
                 <input type="text" class="form-control" id="promptModalInput" onkeyup="if(event.keyCode==13){$('#prompSaveButton').click()}">
-
+                <br>
+                <div class="error-msg"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default dismiss-modal" data-dismiss="modal">Cancel</button>
@@ -232,6 +210,10 @@
             <div class="modal-body row">
                 <div class="info-bar-container"></div>
                 <div class="col-sm-8 col-sm-offset-2">
+                    <label for="runTestFunctions">Tests</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="runTestFunctions" placeholder="Tests">
+                    </div>
                     <label for="runTestBrowsers">Browsers</label>
                     <div class="input-group">
                         <input type="text" class="form-control" id="runTestBrowsers" placeholder="browsers">
@@ -240,9 +222,9 @@
                     <div class="input-group">
                          <input type="text" class="form-control" id="runTestEnvironments" placeholder="environments">
                     </div>
-                    <label for="runTestWorkers">Workers</label>
+                    <label for="runTestProcesses">Processes</label>
                     <div class="input-group">
-                        <input type="number" class="form-control" id="runTestWorkers" aria-describedby="runTestWorkersAddon" value="1" placeholder="Workers">
+                        <input type="number" class="form-control" id="runTestProcesses" aria-describedby="runTestProcessesAddon" value="1" placeholder="Processes">
                     </div>
                     <br>
                     <div class="text-right">
@@ -282,7 +264,14 @@
 <script src="{{ url_for('static', filename='js/external/toastr.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
-  var username = "{{g.user.username}}";
+    const Global = {
+        'project': '{{project}}',
+        'user': {
+            'username': '{{g.user.username}}',
+            'isSuperuser': '{{g.user.is_superuser}}',
+            'projectWeight': {% if g.user.is_authenticated %}{{g.user.project_weight(project)}}{%else%}0{%endif%}
+        }
+    }
 </script>
 {% block footer_declarations %}{% endblock %}
 </body>

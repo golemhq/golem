@@ -10,7 +10,7 @@ from golem.core.exceptions import (IncorrectSelectorType,
 
 
 def _find_webelement(root, selector_type, selector_value, element_name,
-                     timeout=0, wait_displayed=False):
+                     timeout=0, wait_displayed=False, highlight=False):
     """Finds a web element."""
     webelement = None
     remaining_time = lambda: timeout - (time.time() - start_time)
@@ -32,7 +32,7 @@ def _find_webelement(root, selector_type, selector_value, element_name,
             elif selector_type == 'tag_name':
                 webelement = root.find_element_by_tag_name(selector_value)
             else:
-                msg = 'Selector {} is not a valid option'.format(selector_type)
+                msg = f'Selector {selector_type} is not a valid option'
                 raise IncorrectSelectorType(msg)
             execution.logger.debug('Element found')
         except:
@@ -43,8 +43,8 @@ def _find_webelement(root, selector_type, selector_value, element_name,
                 execution.logger.debug('Element not found yet, remaining time: {:.2f}'
                                        .format(remaining_time()))
     if webelement is None:
-        raise ElementNotFound('Element {0} not found using selector {1}:\'{2}\''
-                              .format(element_name, selector_type, selector_value))
+        raise ElementNotFound(f'Element {element_name} not found using selector '
+                              f'{selector_type}:\'{selector_value}\'')
     else:
         if wait_displayed:
             while not webelement.is_displayed() and remaining_time() > 0:
@@ -52,22 +52,22 @@ def _find_webelement(root, selector_type, selector_value, element_name,
                 time.sleep(0.5)
 
             if not webelement.is_displayed():
-                msg = ('Timeout waiting for element {0} to be displayed, '
-                       'using selector {1}:\'{2}\''
-                       .format(element_name, selector_type, selector_value))
+                msg = (f'Timeout waiting for element {element_name} to be displayed, '
+                       f'using selector {selector_type}:\'{selector_value}\'')
                 raise ElementNotDisplayed(msg)
         return webelement
 
 
-def _find(self, element=None, id=None, name=None,
-          link_text=None, partial_link_text=None, css=None,
-          xpath=None, tag_name=None, timeout=None, wait_displayed=None):
+def _find(self, element=None, id=None, name=None, link_text=None, partial_link_text=None,
+          css=None, xpath=None, tag_name=None, timeout=None, wait_displayed=None,
+          highlight=None):
     """Find a webelement.
 
     `element` can be:
       a web element
       a tuple with format (<selector_type>, <selector_value>, [<display_nane>])
       a css selector string
+      an XPath selector string
     """
     # TODO: avoid circular import
     from golem.webdriver.extended_webelement import extend_webelement, ExtendedWebElement
@@ -83,6 +83,9 @@ def _find(self, element=None, id=None, name=None,
     if wait_displayed is None:
         wait_displayed = execution.settings['wait_displayed']
 
+    if highlight is None:
+        highlight = execution.settings['highlight_elements']
+
     if isinstance(element, WebElement) or isinstance(element, ExtendedWebElement):
         webelement = element
     elif isinstance(element, tuple):
@@ -90,9 +93,14 @@ def _find(self, element=None, id=None, name=None,
         selector_value = element[1]
         element_name = element[2] if len(element) == 3 else element[1]
     elif isinstance(element, str):
-        selector_type = 'css'
-        selector_value = element
-        element_name = element
+        if _str_is_xpath_selector(element):
+            selector_type = 'xpath'
+            selector_value = element
+            element_name = element
+        else:
+            selector_type = 'css'
+            selector_value = element
+            element_name = element
     elif id:
         selector_type = 'id'
         selector_value = element_name = id
@@ -118,13 +126,18 @@ def _find(self, element=None, id=None, name=None,
         raise IncorrectSelectorType('Selector is not a valid option')
     
     if not webelement:
-        webelement = _find_webelement(self, selector_type, selector_value,
-                                      element_name, timeout, wait_displayed)
+        webelement = _find_webelement(self, selector_type, selector_value, element_name,
+                                      timeout, wait_displayed, highlight)
         webelement.selector_type = selector_type
         webelement.selector_value = selector_value
         webelement.name = element_name
 
-    return extend_webelement(webelement)
+    webelement = extend_webelement(webelement)
+    # highlight element
+    if highlight:
+        webelement.highlight()
+
+    return webelement
 
 
 def _find_all(self, element=None, id=None, name=None, link_text=None,
@@ -134,6 +147,7 @@ def _find_all(self, element=None, id=None, name=None, link_text=None,
     `element` can be:
       a tuple with format (<selector_type>, <selector_value>, [<display_nane>])
       a css selector string
+      an XPath selector string
     """
     # TODO: avoid circular import
     from golem.webdriver.extended_webelement import extend_webelement
@@ -158,9 +172,12 @@ def _find_all(self, element=None, id=None, name=None, link_text=None,
         elif selector_type == 'tag_name':
             tag_name = selector_value
         else:
-            raise Exception('Incorrect element {}'.format(element))
+            raise Exception(f'Incorrect element {element}')
     elif isinstance(element, str):
-        css = element
+        if _str_is_xpath_selector(element):
+            xpath = element
+        else:
+            css = element
 
     if id:
         selector_type = 'id'
@@ -208,3 +225,11 @@ def _find_all(self, element=None, id=None, name=None, link_text=None,
         extended_webelements.append(extend_webelement(elem))
 
     return extended_webelements
+
+
+def _str_is_xpath_selector(selector):
+    options = ['/', './', '(', '../', '..', '*/']
+    for option in options:
+        if selector.startswith(option):
+            return True
+    return False

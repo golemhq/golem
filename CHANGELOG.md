@@ -1,5 +1,149 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Changes to test data [#225](https://github.com/golemhq/golem/issues/225)
+     * Added JSON as a data source option
+     * "Internal data" uses now a Python code editor
+     * test_data setting key is deprecated, test data type is selected from each test
+- Added 4 test hooks: before_test, before_each, after_each, after_test [#227](https://github.com/golemhq/golem/issues/227)
+     * setup, teardown hooks are now deprecated
+- Reworked the report list view: executions are listed mixed and sorted by date desc
+
+### Deprecated
+
+- Python 3.5
+
+## [0.10.1] - 2021-07-30
+
+### Added
+
+- Improved CLI reporter
+- Add autocomplete suggestions for test code editor [#214](https://github.com/golemhq/golem/issues/214) :: Sunil-Rathore
+- Highlight element when found, toggled by setting, action of find method [#220](https://github.com/golemhq/golem/pull/220)
+- feature: [Custom Browser Boot Up](https://golem-framework.readthedocs.io/en/latest/browsers.html#custom-browser-boot-up) [#222](https://github.com/golemhq/golem/pull/222)
+
+### Changed
+
+- find(), find_all() now accept XPath as first positional parameter
+- browser.open_browser now accepts browser_name, capabilities and remote_url
+
+## [0.10.0] - 2021-06-10
+
+### Changed
+
+- Multi-test file: A test file can have more than one test function [#201](https://github.com/golemhq/golem/issues/201)
+- The report format changed, older reports won't work with this version
+
+## [0.9.2] - 2021-04-15
+
+### Added
+
+- Suite code view
+
+- Download ChromeDriver in 'golem-admin createdirectory' command
+
+## [0.9.1] - 2020-08-03
+
+### Added
+
+- Rename/Delete folders; improved file list navigation [#179](https://github.com/golemhq/golem/issues/179)
+
+- Remove executions from report dashboard
+
+- Skip flag to test [#146](https://github.com/golemhq/golem/issues/146)
+
+- Actions: log, random_str, random_int, random_float
+
+- *--cli-log-level* arg to golem run command
+
+- Document golem.execution module
+
+### Fixed
+
+- [#112](https://github.com/golemhq/golem/issues/112)
+
+- [#186](https://github.com/golemhq/golem/issues/186) :: ignaciocabeza
+
+- [#169](https://github.com/golemhq/golem/issues/169)
+
+### Deprecated
+
+- console_log_level setting, renamed to: cli_log_level
+
+## [0.9.0] - 2019-06-30
+
+### Added
+
+- createsuperuser command
+
+- User management page, user profile page
+
+- Implicit/explicit actions import [#136](https://github.com/golemhq/golem/issues/136)
+     
+     * Actions can now be imported explicitly.
+     * New setting key: *implicit_actions_import*, default is true.
+
+- Implicit/explicit page import [#137](https://github.com/golemhq/golem/issues/137)
+     
+     * Pages can now be imported explicitly.
+     * New setting key: *implicit_page_import*, default is true.
+
+### Removed
+
+- createuser command
+
+### Changed
+
+- A file named **.golem** must exist in the test directory. Migrate steps: 
+    
+    1. Create a file named **.golem** in the test directory root with the following content:
+    
+    ```
+    [gui]
+    secret_key = your_secret_key_string
+    ```
+
+- Passwords are now hashed. Migrate steps:
+   
+   1. Delete old **users.json** file
+   2. Create a super user using the ```golem createsuperuser``` command
+   3. Non superusers must be created using the */users/* page
+
+- *admin* user role changed to *superuser*
+    
+    User roles are: superuser, admin, standard, read-only, reports-only
+
+- Improved test step parser [#168](https://github.com/golemhq/golem/issues/168)
+    
+    * Non function calls are shown as code blocks (using a code editor)
+    * Added **code_block** action to insert new code blocks
+
+- golem.execution.workspace -> golem.execution.testdir
+
+## [0.8.0] - 2019-04-10
+
+### Changed
+
+- **-t, \-\-threads** argument changed to **-p, \-\-processes**
+
+### Deprecated
+
+Python 3.4
+
+### Added
+
+- Filter tests by tags :: r-roos, Luciano Renzi
+    * New argument for *golem run* command: ```-t, --tags```
+    * Add and edit tags using the UI
+    * Accept *tag expressions* for complex comparisons 
+    * Docs: [Filter Tests by Tags](https://golem-framework.readthedocs.io/en/latest/running-tests.html#filter-tests-by-tags)
+- New args to ```golem gui``` command: --host (default 127.0.0.1), -d|--debug (default False)
+- New actions: assert_element_value, assert_element_value_is_not, verify_element_value, verify_element_value_is_not, send_keys_with_delay
+- New WebElement methods: inner_html, outer_html, send_keys_with_delay
+
 ## [0.7.0] - 2019-01-21
 
 ### Added

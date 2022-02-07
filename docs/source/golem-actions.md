@@ -1,8 +1,10 @@
 Golem Actions
 ==================================================
 
-Golem comes with a list of predefined actions that cover most of the scenarios for tests.
-They are self-documenting, meaning, they store the steps, logs and screenshots in the execution report.
+Golem has a list of predefined actions that cover most of the scenarios for tests.
+These are self-documenting, meaning, they store the steps, logs and screenshots in the execution report.
+
+Location: golem.**actions**
 
 **A note on assertions and verifications:**
 
@@ -12,6 +14,19 @@ They will stop the test when they fail (jump to teardown) and the test will end 
 Actions that start with 'verify_' are soft assertions.
 When a verify_ action fails it stores an error but the test continues with the next statement.
 The test will end with result: error.
+
+## Contents
+
+- [Alerts](#alerts)
+- [API](#api)
+- [Browser](#browser)
+- [Cookies](#cookies)
+- [Element](#element)
+- [Frames](#frames)
+- [Select](#select)
+- [Window](#window)
+- [Windows/Tabs](#windows-tabs)
+- [General](#general-actions)
 
 
 ## Alerts
@@ -52,14 +67,6 @@ Send text to an alert
 
 Send text to a prompt alert and accept it. If there is no prompt alert present this will fail.
 
-### verify_alert_is_not_present()
-
-DEPRECATED, use verify_alert_not_present
-
-### verify_alert_is_present()
-
-DEPRECATED, use verify_alert_present
-
 ### verify_alert_not_present()
 
 Verify an alert is not present. This applies to alerts, confirms and prompts.
@@ -96,7 +103,7 @@ Returns the response.
 Example:
 ```
 http_get('http://google.com/')
-assert_equals(data.last_response.status_code, 200)
+assert data.last_response.status_code == 200
 ```
 
 ### http_post(url, headers={}, data={}, verify_ssl_cert=True)
@@ -117,10 +124,6 @@ Verify response status code
 Activates a browser to use in subsequent actions.
 When opening more than one browser (not windows or tabs) for a single test, the new browser can be assigned to an ID.
 Default browser ID is 'main'.
-
-### close()
-
-DEPRECATED, use close_browser or close_window instead.
 
 ### close_browser()
 
@@ -143,11 +146,11 @@ size = {
 
 ### maximize_window()
 
-### open_browser(browser_id=None)
+### open_browser(browser_name=None, capabilities=None, remote_url=None, browser_id=None)
 
 Open a new browser.
-browser_id is optional and only used to manage more than one browser for the same test.
-Default browser ID is 'main'.
+
+See [open_browser](golem_public_api/browser.html#open-browser-browser-name-none-capabilities-none-remote-url-none-browser-id-none)
 
 ### set_window_size(width, height)
 
@@ -199,10 +202,6 @@ Returns the cookie if found, None if not.
 ### get_cookies()
 
 Returns a list of dictionaries, corresponding to cookies present in the current session.
-
-### verify_cookie_exists(name)
-
-DEPRECATED, use verify_cookie_present instead.
 
 ### verify_cookie_present(name)
 
@@ -287,14 +286,18 @@ Assert the text of the element is not *text*
 
 Assert element does not contain *text*
 
+### assert_element_value(element, value)
+
+Assert element value
+
+### assert_element_value_is_not(element, value)
+
+Assert element value is not *value*
+
 ### check_element(element)
 
 Check an element (checkbox or radiobutton).
 If element is already checked this is is ignored.
-
-### clear(element)
-
-DEPRECATED, use clear_element instead
 
 ### clear_element(element)
 
@@ -325,13 +328,13 @@ Get the element text
 
 Get the element value attribute
 
+### highlight_element(element)
+
+Highlight element on the page
+
 ### javascript_click(element)
 
 Click an element using Javascript
-
-### mouse_hover(element)
-
-DEPRECATED, use mouse_over instead
 
 ### mouse_over(element)
 
@@ -356,6 +359,11 @@ Send keys to element. Text is hidden from logs and report (masked by asterisks).
 ### send_keys(element, text)
 
 Send text to element
+
+### send_keys_with_delay(element, text, delay=0.1)
+
+Send keys to element one by one with a delay between keys.
+Delay must be a positive int or float.
 
 ### submit_form(element)
 
@@ -437,41 +445,13 @@ Verify the text of the element is not *text*
 
 Verify element does not contain text
 
-### verify_exists(element)
+### verify_element_value(element, value)
 
-DEPRECATED, use verify_element_present
+Verify element value
 
-### verify_is_enabled(element)
+### verify_element_value_is_not(element, value)
 
-DEPRECATED, use verify_element_enabled
-
-### verify_is_not_enabled(element)
-
-DEPRECATED, use verify_element_not_enabled
-
-### verify_is_not_selected(element)
-
-DEPRECATED, use verify_element_not_checked
-
-### verify_is_not_visible(element)
-
-DEPRECATED, use verify_element_not_displayed
-
-### verify_is_selected(element)
-
-DEPRECATED, use verify_element_checked
-
-### verify_is_visible(element)
-
-DEPRECATED, use verify_element_displayed
-
-### verify_not_exists(element)
-
-DEPRECATED, use verify_element_not_present
-
-### verify_text_in_element(element, text)
-
-DEPRECATED, use verify_element_text or verify_element_text_contains
+Verify element value is not *value*
 
 ### wait_for_element_displayed(element, timeout=30)
 
@@ -499,18 +479,10 @@ When element is not present this will raise ElementNotFound.
 
 Wait for element to be not enabled
 
-### wait_for_element_not_exist(element, timeout=20)
-
-DEPRECATED, use wait_for_element_not_present
-
 ### wait_for_element_not_present(element, timeout=30)
 
 Wait for element to stop being present in the DOM.
 If element is already not present, this will be ignored.
-
-### wait_for_element_not_visible(element, timeout=20)
-
-DEPRECATED, use wait_for_element_not_displayed
 
 ### wait_for_element_present(element, timeout=30)
 
@@ -531,10 +503,6 @@ Wait for element text to not match given text
 ### wait_for_element_text_not_contains(element, text, timeout=30)
 
 Wait for element text to not contain given text
-
-### wait_for_element_visible(element, timeout=20)
-
-DEPRECATED, use wait_for_element_displayed
 
 ## Frames
 
@@ -559,18 +527,6 @@ Assert the option selected in a \<select\> by the option text
 ### assert_selected_option_by_value(element, text)
 
 Assert the option selected in a \<select\> by the option value
-
-### select_by_index(element, text)
-
-DEPRECATED, use select_option_by_index instead
-
-### select_by_text(element, text)
-
-DEPRECATED, use select_option_by_text instead
-
-### select_by_value(element, value)
-
-DEPRECATED, use select_option_by_value instead
 
 ### select_option_by_index(element, text)
 
@@ -601,10 +557,6 @@ select_option_by_index('#countrySelect', 0)
 select_option_by_text('#countrySelect', 'Canada')
 select_option_by_value('#countrySelect', 'CA')
 ```
-
-### verify_selected_option(element, text)
-
-DEPRECATED, use verify_selected_option_by_text or verify_selected_option_by_value
 
 ### verify_selected_option_by_text(element, text)
 
@@ -713,10 +665,6 @@ Verify the given text is present anywhere in the page (in the entire DOM)
 ### verify_page_not_contains_text(text)
 
 Verify the given text is present anywhere in the page (in the entire DOM)
-
-### verify_text(text)
-
-DEPRECATED, use verify_page_contains_text
 
 ### verify_title(title)
 
@@ -914,31 +862,6 @@ Wait for window/tab present by url
 
 ## General Actions
 
-### assert_contains(element, value)
-
-DEPRECATED. Assert that the element contains the value
-
-### assert_equals(actual, expected)
-
-DEPRECATED. Assert that the actual value equals the expected value
-
-### assert_false(condition)
-
-DEPRECATED. Assert that the condition is false
-
-### assert_true(condition)
-
-DEPRECATED. Assert that the condition is true
-
-### capture(message='')
-
-DEPRECATED, use take_screenshot instead.
-Take a screenshot of the browser, the message is optional
-
-### debug()
-
-DEPRECATED, use interactive_mode instead.
-
 ### error(message='')
 
 Add an error to the test. The test will continue.
@@ -965,14 +888,38 @@ Starts an interactive console at this point of the test.
 The test should be run with the '-i' flag, otherwise this action will be ignored.
 See [Interactive Mode](interactive-mode.html) for more details.
 
-### random(args)
+### log(message, level='INFO')
 
-Generate a random string. Options:
+Log a message. Valid log levels are: DEBUG, INFO, WARNING, ERROR and CRITICAL.
 
-* 'c' generate a random lowercase letter
-* 'd' generate a random digit
 
-For example: random('cccddd') => 'aeg147'
+### random_float(min=1.0, max=100.0, decimals=None)
+
+Generate a random float between min and max.
+*Decimals* is the maximum amount of decimal places the generated float should have.
+
+### random_int(min=1, max=100)
+
+Generate a random integer between min and max
+
+### random_str(length=10, sample=None, prefix='', suffix='')
+
+Generate a random string.
+*Sample* should be a string or a list of strings/characters to
+choose from. The default sample is lowercase ascii letters.
+A few presets can be used:
+ - 'LOWERCASE': lower case ascii letters
+ - 'UPPERCASE': uppercase ascii letters
+ - 'DIGITS': digit characters
+ - 'SPECIAL': Special characters
+
+Example:
+
+```random_str(sample=['LOWERCASE', '!@#$%']) -> 'am$y%eg$ug'```
+
+prefix: A string to be prepended to the generated string
+
+suffix: A string to be appended to the generated string
 
 ### set_browser_capability(capability_key, capability_value)
 
@@ -981,7 +928,7 @@ This must be called before the browser is started.
 
 ### set_search_timeout(timeout)
 
-Set the search timeout value. Timeout must be either int or float.
+Set the search timeout value (in seconds). Timeout must be either int or float.
 
 ### set_trace()
 

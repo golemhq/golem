@@ -4,6 +4,8 @@ import argparse
 def get_parser():
     parser = argparse.ArgumentParser(prog='golem', add_help=False)
     parser.add_argument('-h', '--help', nargs='?', const=True, default=False)
+    parser.add_argument('--golem-dir', type=str)
+    parser.add_argument('-v', '--version', action='store_true', default=False)
     subparsers = parser.add_subparsers(dest='command')
 
     # run
@@ -11,30 +13,29 @@ def get_parser():
     parser_run = subparsers.add_parser('run', add_help=False)
     parser_run.add_argument('project', nargs='?', default='')
     parser_run.add_argument('test_query', nargs='?', default='')
-    parser_run.add_argument('-b', '--browsers', action='store',
-                            nargs='*', default=[], type=str)
-    parser_run.add_argument('-t', '--threads', action='store', nargs='?',
-                            default=1, type=int)
-    parser_run.add_argument('-e', '--environments', action='store',
-                            nargs='+', default=[], type=str)
+    parser_run.add_argument('-b', '--browsers', nargs='*', default=[], type=str)
+    parser_run.add_argument('-p', '--processes', nargs='?', default=1, type=int)
+    parser_run.add_argument('-e', '--environments', nargs='+', default=[], type=str)
+    parser_run.add_argument('--test-functions', nargs='*', default=[], type=str)
+    parser_run.add_argument('-t', '--tags', nargs='*', default=[], type=str)
     parser_run.add_argument('-i', '--interactive', action='store_true', default=False)
-    parser_run.add_argument('-r', '--report', action='store', nargs='+',
-                            choices=report_choices, default=[], type=str)
-    parser_run.add_argument('--report-folder', action='store', nargs='?', type=str)
-    parser_run.add_argument('--report-name', action='store', nargs='?', type=str)
-    parser_run.add_argument('--timestamp', action='store', nargs='?', type=str)
+    parser_run.add_argument('-r', '--report', nargs='+', choices=report_choices,
+                            default=[], type=str)
+    parser_run.add_argument('--report-folder', nargs='?', type=str)
+    parser_run.add_argument('--report-name', nargs='?', type=str)
+    parser_run.add_argument('--timestamp', nargs='?', type=str)
+    parser_run.add_argument('-l', '--cli-log-level')
     parser_run.add_argument('-h', '--help', action='store_true')
 
     # gui
     parser_gui = subparsers.add_parser('gui', add_help=False)
-
-    parser_gui.add_argument('-p', '--port', action='store',
-                            nargs='?', default=5000, type=int)
+    parser_gui.add_argument('--host', action='store', nargs='?', default=None)
+    parser_gui.add_argument('-p', '--port', action='store', nargs='?', default=5000, type=int)
+    parser_gui.add_argument('-d', '--debug', action='store_true', default=False)
     parser_gui.add_argument('-h', '--help', action='store_true')
 
     # createproject
-    parser_createproject = subparsers.add_parser('createproject',
-                                                 add_help=False)
+    parser_createproject = subparsers.add_parser('createproject', add_help=False)
     parser_createproject.add_argument('project')
     parser_createproject.add_argument('-h', '--help', action='store_true')
 
@@ -50,14 +51,16 @@ def get_parser():
     parser_createsuite.add_argument('suite')
     parser_createsuite.add_argument('-h', '--help', action='store_true')
 
-    # createuser
-    parser_createuser = subparsers.add_parser('createuser', add_help=False)
-    parser_createuser.add_argument('username')
-    parser_createuser.add_argument('password')
-    parser_createuser.add_argument('-a', '--admin', action='store_true', default=False)
-    parser_createuser.add_argument('-p', '--projects', nargs='+', default=[])
-    parser_createuser.add_argument('-r', '--reports', nargs='+', default=[])
-    parser_createuser.add_argument('-h', '--help', action='store_true')
+    # createsuperuser
+    subparsers.add_parser('createuser', add_help=False)
+
+    # createsuperuser
+    parser_createsuperuser = subparsers.add_parser('createsuperuser', add_help=False)
+    parser_createsuperuser.add_argument('-u', '--username')
+    parser_createsuperuser.add_argument('-e', '--email')
+    parser_createsuperuser.add_argument('-p', '--password')
+    parser_createsuperuser.add_argument('-n', '--noinput', action='store_true', default=False)
+    parser_createsuperuser.add_argument('-h', '--help', action='store_true')
 
     return parser
 

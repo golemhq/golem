@@ -1,0 +1,56 @@
+{% extends "layout.html" %} 
+
+{% block title %}Golem : {{project|capitalize}} : {{suite_name}}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='js/external/code_mirror/codemirror.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/code-editor-common.css') }}">
+{% endblock %} 
+
+{% block content %}
+<div class="col-lg-10 col-lg-offset-1 col-md-12">
+    <div class="header-col" style="width: calc(100% - 270px)">
+        <h3 id="filenameContainer">
+                <span id="fileName" class="element-name" onclick="file.startInlineNameEdition()">
+                    {{suite_name}}
+                </span>
+                <span id="filenameInput" style="display: none">
+                    <input type="text">
+                </span>
+            </h3>
+    </div>
+        <div class="header-col header-col-right">
+            {% if g.user.project_weight(project) >= 30 %}
+            <button id="runTest" class="btn btn-default btn-sm" onclick="suiteCode.run()"><span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Run Suite</button>
+            {% endif %}
+            <button id="loadGuiButton" class="btn btn-default btn-sm" onclick="suiteCode.loadGuiView()"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Preview</button>
+            {% if g.user.project_weight(project) >= 30 %}
+            <button id="save" class="btn btn-default btn-sm" onclick="suiteCode.save();"><span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save</button>
+            {% endif %}
+        </div>
+    <div class="clearfix"></div>
+    <div>
+        <div id="error-container" class="error-container" style="display: none;">
+            <pre style="color: red"></pre>
+        </div>
+        <div id="codeEditorContainer"></div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/external/code_mirror/codemirror.js') }}"></script>
+<script src="{{ url_for('static', filename='js/external/code_mirror/python.js') }}"></script>
+<script src="{{ url_for('static', filename='js/file.js') }}"></script>
+<script src="{{ url_for('static', filename='js/suite_code.js') }}"></script>
+{% endblock %}
+
+{% block footer_declarations %}
+<script>
+    let suiteName = "{{suite_name}}";
+    let code = {{code|tojson}};
+    let codeError = {{error|tojson}};
+
+    const file = new File('suite', Global.project, '', suiteName, true);
+    const suiteCode = SuiteCode;
+    suiteCode.initialize(file, code, codeError);
+</script>
+{% endblock %}

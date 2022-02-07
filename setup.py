@@ -32,9 +32,10 @@ setup(
     license='MIT',
     classifiers=[
         'Development Status :: 4 - Beta',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Natural Language :: English',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
@@ -47,9 +48,10 @@ setup(
     setup_requires=['setuptools-pep8'],
     install_requires=['Flask>=0.12.2',
                       'Flask-login>=0.4.0',
-                      'selenium>=3.6.0',
+                      'selenium>=3.6.0, <4.0.0a1',
                       'requests>=2.18.4',
-                      'py-webdriver-manager'
+                      'py-webdriver-manager',
+                      'colorama'
                       ],
     tests_require=['pytest'],
     entry_points={

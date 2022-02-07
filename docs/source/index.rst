@@ -45,6 +45,7 @@ Contents
    tutorial-part-2
    browsers
    finding-elements
+   waiting-for-elements
    golem-actions
    tests
    pages
@@ -54,8 +55,9 @@ Contents
    report
    settings
    golem-test-framework
-   interactive-mode
+   gui
    command-line-interface
+   interactive-mode
    golem_public_api/index
    guides/index
 

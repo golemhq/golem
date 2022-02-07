@@ -21,6 +21,29 @@ body.modal-open {
 	margin-bottom: 20px;	
 }
 
+
+#testFunctions {
+    clear: both
+}
+
+.test-function {
+    overflow: auto
+}
+
+.testFunctionNameContainer {
+    clear: both
+}
+
+.testFunctionNameContainer h4 {
+    display: inline-block;
+    float: left;
+}
+
+.steps {
+    overflow: auto;
+    clear: both
+}
+
 .step-input-container {
 	padding-left: 0px;
 	padding-right: 10px;
@@ -45,7 +68,7 @@ body.modal-open {
 	width: 16px;
 }
 
-.step-remove-icon a {
+.step-remove-icon a{
 	color: black;
 }
 
@@ -154,4 +177,49 @@ body.modal-open {
 
 .not-exist {
 	box-shadow: inset 0px 0px 4px 1px #d9534f;
+}
+
+.action-description {
+    display: none;
+    position: absolute;
+    left: 100%;
+    margin-top: -24px;
+    margin-left: 3px;
+    border-radius: 3px;
+    width: 300px;
+    background: white;
+    min-height: 50px;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.autocomplete-selected .action-description {
+    display: block
+}
+
+.code-block {
+    border: 1px solid #ccc;
+    display: inline-block;
+    width: calc(100% - 50px);
+    border-radius: 3px;
+}
+
+.code-block .CodeMirror {
+    height: auto;
+    border-radius: 3px;
+}
+
+.code-block .CodeMirror-scroll {
+    min-height: 50px
+}
+
+.CodeMirror-lines {
+  padding: 6px 0; /* Vertical padding around content */
+}
+.CodeMirror pre {
+  padding: 0 6px; /* Horizontal padding of content */
+}
+
+.step[step-type='code-block'] {
+	margin-bottom: 1px;
 }
