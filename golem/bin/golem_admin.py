@@ -3,7 +3,9 @@ contains the projects and all the required fields for Golem to
 work.
 """
 from golem.cli import argument_parser, commands, messages
-
+import csv
+import string
+import random
 
 def main():
     parser = argument_parser.get_admin_parser()

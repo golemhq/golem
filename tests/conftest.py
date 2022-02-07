@@ -2,6 +2,7 @@ import os
 import shutil
 import random
 import string
+import csv
 from types import SimpleNamespace
 from subprocess import Popen, PIPE, STDOUT
 
